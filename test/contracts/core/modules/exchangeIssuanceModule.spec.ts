@@ -21,8 +21,7 @@ import {
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
-  TransferProxyContract,
-  VaultContract
+  TransferProxyContract
 } from '@utils/contracts';
 import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
@@ -32,7 +31,6 @@ import { LogExchangeIssue, LogExchangeRedeem } from '@utils/contract_logs/exchan
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 
@@ -58,13 +56,11 @@ contract('ExchangeIssuanceModule', accounts => {
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
   let exchangeIssuanceModule: ExchangeIssuanceModuleContract;
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(contractDeployer, contractDeployer);
   const erc20Wrapper = new ERC20Wrapper(contractDeployer);
-  const exchangeWrapper = new ExchangeWrapper(contractDeployer);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -79,17 +75,10 @@ contract('ExchangeIssuanceModule', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    exchangeIssuanceModule = await coreWrapper.deployExchangeIssuanceModuleAsync(
-      core,
-      vault
-    );
-    await coreWrapper.addModuleAsync(core, exchangeIssuanceModule.address);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
+    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
+    exchangeIssuanceModule = await coreWrapper.getDeployedExchangeIssuanceModuleAsync();
   });
 
   afterEach(async () => {
@@ -123,19 +112,6 @@ contract('ExchangeIssuanceModule', accounts => {
     let kyberConversionRatePower: BigNumber;
 
     beforeEach(async () => {
-      await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
-        core,
-        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
-        SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
-        SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
-        transferProxy
-      );
-      await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
-        core,
-        SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
-        transferProxy
-      );
-
       const firstComponent = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
       const secondComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
       sendToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
@@ -545,19 +521,6 @@ contract('ExchangeIssuanceModule', accounts => {
 
     beforeEach(async () => {
       subjectCaller = exchangeIssuanceCaller;
-
-      await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
-        core,
-        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
-        SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
-        SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
-        transferProxy
-      );
-      await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
-        core,
-        SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
-        transferProxy
-      );
 
       const firstComponent = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
       const secondComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);

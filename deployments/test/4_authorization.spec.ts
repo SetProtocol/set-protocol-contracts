@@ -6,11 +6,9 @@ import { getNetworkConstant, getContractAddress } from '../utils/output-helper';
 import { getWeb3Instance } from '../utils/blockchain';
 
 import { Core } from '../../artifacts/ts/Core';
-import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModule';
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
-import { PayableExchangeIssuance } from '../../artifacts/ts/PayableExchangeIssuance';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
@@ -78,7 +76,6 @@ describe('Deployment: Authorization', () => {
       const timelock = await vaultContract.methods.timeLockPeriod().call();
       expect(parseInt(timelock)).toEqual(expectedTimeLockPeriod);
     });
-
   });
 
   describe('Authorized Vault addresses', () => {
@@ -152,7 +149,6 @@ describe('Deployment: Authorization', () => {
       const rebalancingSetTokenFactoryAddress = await getContractAddress(RebalancingSetTokenFactory.contractName);
       expect(factories).toContain(rebalancingSetTokenFactoryAddress);
     });
-
   });
 
   describe('Modules in Core', () => {
@@ -187,7 +183,6 @@ describe('Deployment: Authorization', () => {
       );
       expect(modules).toContain(rebalanceTokenIssuanceModuleAddress);
     });
-
   });
 
   describe('Exchanges in Core', () => {
@@ -237,5 +232,4 @@ describe('Deployment: Authorization', () => {
 
     });
   });
-
 });

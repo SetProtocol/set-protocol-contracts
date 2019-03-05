@@ -51,9 +51,8 @@ contract('CoreFactory', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    core = await coreWrapper.deployCoreAndDependenciesAsync();
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.addFactoryAsync(core, setTokenFactory);
+    core = await coreWrapper.getDeployedCoreAsync();
+    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
   });
 
   afterEach(async () => {

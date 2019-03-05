@@ -25,14 +25,13 @@ import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const Core = artifacts.require('Core');
-const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const blockchain = new Blockchain(web3);
 const { ZERO } = SetUtils.CONSTANTS;
 
@@ -52,7 +51,6 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
   const coreWrapper = new CoreWrapper(contractDeployer, contractDeployer);
   const erc20Wrapper = new ERC20Wrapper(contractDeployer);
-  const exchangeWrapper = new ExchangeWrapper(contractDeployer);
   const libraryMockWrapper = new LibraryMockWrapper(contractDeployer);
 
   before(async () => {
@@ -66,14 +64,13 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+    vault = await coreWrapper.getDeployedVaultAsync();
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
+    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
+
     exchangeIssuanceLibraryMock = await libraryMockWrapper.deployExchangeIssuanceLibraryAsync();
     await coreWrapper.addModuleAsync(core, exchangeIssuanceLibraryMock.address);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
     const firstComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
 
@@ -89,19 +86,6 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
       componentAddresses,
       componentUnits,
       naturalUnit,
-    );
-
-    await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
-      core,
-      SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
-      SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
-      SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
-      transferProxy
-    );
-    await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
-      core,
-      SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
-      transferProxy
     );
   });
 

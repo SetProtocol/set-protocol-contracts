@@ -47,6 +47,7 @@ contract('ZeroStartLinearAuctionPriceCurve', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
+
     const usesStartPrice = false;
     auctionCurve = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
       DEFAULT_AUCTION_PRICE_DENOMINATOR,

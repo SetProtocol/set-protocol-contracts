@@ -10,14 +10,11 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  ExchangeIssuanceModuleContract,
   PayableExchangeIssuanceContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
-  TransferProxyContract,
-  VaultContract,
   WethMockContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
@@ -29,7 +26,6 @@ import {
 } from '@utils/constants';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 
@@ -50,13 +46,9 @@ contract('PayableExchangeIssuance::Scenarios', accounts => {
     ownerAccount,
     tokenPurchaser,
     zeroExOrderMaker,
-    whitelist,
   ] = accounts;
 
   let core: CoreContract;
-  let exchangeIssuanceModule: ExchangeIssuanceModuleContract;
-  let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let payableExchangeIssuance: PayableExchangeIssuanceContract;
@@ -64,7 +56,6 @@ contract('PayableExchangeIssuance::Scenarios', accounts => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const exchangeWrapper = new ExchangeWrapper(ownerAccount);
   const rebalancingWrapper = new RebalancingWrapper(
     ownerAccount,
     coreWrapper,
@@ -76,36 +67,12 @@ contract('PayableExchangeIssuance::Scenarios', accounts => {
     ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(PayableExchangeIssuance.abi);
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+    core = await coreWrapper.getDeployedCoreAsync();
+    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
+    rebalancingSetTokenFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
 
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-
-    rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address, whitelist);
-    await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
-
-    exchangeIssuanceModule = await coreWrapper.deployExchangeIssuanceModuleAsync(core, vault);
-    await coreWrapper.addModuleAsync(core, exchangeIssuanceModule.address);
-
-    weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
-
-    payableExchangeIssuance = await coreWrapper.deployPayableExchangeIssuanceAsync(
-      core.address,
-      transferProxy.address,
-      exchangeIssuanceModule.address,
-      weth.address,
-    );
-
-    await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
-      core,
-      SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
-      SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
-      SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
-      transferProxy
-    );
+    weth = await erc20Wrapper.getDeployedWETHAsync();
+    payableExchangeIssuance = await coreWrapper.getDeployedPayableExchangeIssuanceModuleAsync();
   });
 
   after(async () => {
@@ -220,20 +187,20 @@ contract('PayableExchangeIssuance::Scenarios', accounts => {
 
       // Create 0x order for the component, using weth(4) paymentToken as default
       zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
-        NULL_ADDRESS,                                     // senderAddress
-        zeroExOrderMaker,                                 // makerAddress
-        NULL_ADDRESS,                                     // takerAddress
-        ZERO,                                             // makerFee
-        ZERO,                                             // takerFee
-        exchangeIssueReceiveTokenAmounts[0],              // makerAssetAmount
-        exchangeIssueSendTokenAmounts[0],                 // takerAssetAmount
+        NULL_ADDRESS,                                   // senderAddress
+        zeroExOrderMaker,                               // makerAddress
+        NULL_ADDRESS,                                   // takerAddress
+        ZERO,                                           // makerFee
+        ZERO,                                           // takerFee
+        exchangeIssueReceiveTokenAmounts[0],            // makerAssetAmount
+        exchangeIssueSendTokenAmounts[0],               // takerAssetAmount
         exchangeIssueReceiveTokens[0],               	  // makerAssetAddress
-        exchangeIssueSendTokens[0],                       // takerAssetAddress
-        SetUtils.generateSalt(),                          // salt
-        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
-        NULL_ADDRESS,                                     // feeRecipientAddress
-        SetTestUtils.generateTimestamp(10000),            // expirationTimeSeconds
-        exchangeIssueSendTokenAmounts[0],                 // amount of zeroExOrder to fill
+        exchangeIssueSendTokens[0],                     // takerAssetAddress
+        SetUtils.generateSalt(),                        // salt
+        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,          // exchangeAddress
+        NULL_ADDRESS,                                   // feeRecipientAddress
+        SetTestUtils.generateTimestamp(10000),          // expirationTimeSeconds
+        exchangeIssueSendTokenAmounts[0],               // amount of zeroExOrder to fill
       );
 
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);

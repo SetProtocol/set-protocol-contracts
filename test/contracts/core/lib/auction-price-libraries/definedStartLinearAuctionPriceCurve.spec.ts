@@ -47,11 +47,8 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
-    const usesStartPrice = true;
-    auctionCurve = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
-      DEFAULT_AUCTION_PRICE_DENOMINATOR,
-      usesStartPrice
-    );
+
+    auctionCurve = await rebalancingWrapper.getDeployedLinearAuctionPriceCurveAsync();
   });
 
   afterEach(async () => {

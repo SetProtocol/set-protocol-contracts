@@ -18,7 +18,6 @@ import {
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
-  VaultContract,
   WethMockContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
@@ -36,7 +35,6 @@ import {
 } from '@utils/constants';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 
@@ -58,13 +56,11 @@ contract('PayableExchangeIssuance', accounts => {
     ownerAccount,
     tokenPurchaser,
     zeroExOrderMaker,
-    whitelist,
   ] = accounts;
 
   let core: CoreContract;
   let exchangeIssuanceModule: ExchangeIssuanceModuleContract;
   let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let payableExchangeIssuance: PayableExchangeIssuanceContract;
@@ -72,7 +68,6 @@ contract('PayableExchangeIssuance', accounts => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const exchangeWrapper = new ExchangeWrapper(ownerAccount);
   const rebalancingWrapper = new RebalancingWrapper(
     ownerAccount,
     coreWrapper,
@@ -83,37 +78,6 @@ contract('PayableExchangeIssuance', accounts => {
   before(async () => {
     ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(PayableExchangeIssuance.abi);
-
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-
-    rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address, whitelist);
-    await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
-
-    exchangeIssuanceModule = await coreWrapper.deployExchangeIssuanceModuleAsync(core, vault);
-    await coreWrapper.addModuleAsync(core, exchangeIssuanceModule.address);
-
-    weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
-
-    payableExchangeIssuance = await coreWrapper.deployPayableExchangeIssuanceAsync(
-      core.address,
-      transferProxy.address,
-      exchangeIssuanceModule.address,
-      weth.address,
-    );
-
-    await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
-      core,
-      SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
-      SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
-      SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
-      transferProxy
-    );
   });
 
   after(async () => {
@@ -123,6 +87,15 @@ contract('PayableExchangeIssuance', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
+
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
+    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
+    rebalancingSetTokenFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
+    exchangeIssuanceModule = await coreWrapper.getDeployedExchangeIssuanceModuleAsync();
+
+    weth = await erc20Wrapper.getDeployedWETHAsync();
+    payableExchangeIssuance = await coreWrapper.getDeployedPayableExchangeIssuanceModuleAsync();
   });
 
   afterEach(async () => {
@@ -130,14 +103,26 @@ contract('PayableExchangeIssuance', accounts => {
   });
 
   describe('#constructor', async () => {
-    const subjectCaller: Address = ownerAccount;
+    let subjectCoreAddress: Address;
+    let subjectTransferProxyAddress: Address;
+    let subjectExchangeIssueModuleAddress: Address;
+    let subjectWETHAddress: Address;
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      subjectCoreAddress = core.address;
+      subjectTransferProxyAddress = transferProxy.address;
+      subjectExchangeIssueModuleAddress = exchangeIssuanceModule.address;
+      subjectWETHAddress = weth.address;
+      subjectCaller = ownerAccount;
+    });
 
     async function subject(): Promise<PayableExchangeIssuanceContract> {
       return await coreWrapper.deployPayableExchangeIssuanceAsync(
-        core.address,
-        transferProxy.address,
-        exchangeIssuanceModule.address,
-        weth.address,
+        subjectCoreAddress,
+        subjectTransferProxyAddress,
+        subjectExchangeIssueModuleAddress,
+        subjectWETHAddress,
         subjectCaller,
       );
     }
@@ -285,11 +270,7 @@ contract('PayableExchangeIssuance', accounts => {
         subjectRebalancingSetAddress,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
-        {
-          from: subjectCaller,
-          gas: DEFAULT_GAS,
-          value: subjectEther.toString(),
-        },
+        { from: subjectCaller, gas: DEFAULT_GAS, value: subjectEther.toString() },
       );
     }
 
@@ -455,10 +436,7 @@ contract('PayableExchangeIssuance', accounts => {
 
       // Deposit weth
       await weth.deposit.sendTransactionAsync(
-        {
-          from: zeroExOrderMaker,
-          value: exchangeRedeemReceiveTokenAmounts[0].toString(),
-        }
+        { from: zeroExOrderMaker, value: exchangeRedeemReceiveTokenAmounts[0].toString() }
       );
 
       // Create 0x order for the component
@@ -524,10 +502,7 @@ contract('PayableExchangeIssuance', accounts => {
         subjectRebalancingSetQuantity,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
-        {
-          from: subjectCaller,
-          gas: DEFAULT_GAS,
-        },
+        { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
 

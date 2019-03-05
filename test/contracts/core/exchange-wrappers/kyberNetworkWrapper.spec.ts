@@ -12,7 +12,6 @@ import {
   KyberNetworkWrapperContract,
   StandardTokenMockContract,
   TransferProxyContract,
-  VaultContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
 import { ExchangeData } from '@utils/orders';
@@ -48,23 +47,17 @@ contract('KyberNetworkWrapper', accounts => {
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
 
   let kyberNetworkWrapper: KyberNetworkWrapperContract;
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
     await coreWrapper.addModuleAsync(core, issuanceOrderModuleAccount);
 
-    kyberNetworkWrapper = await exchangeWrapper.deployKyberNetworkWrapper(
-      core.address,
-      SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
-      transferProxy
-    );
+    kyberNetworkWrapper = await exchangeWrapper.getDeployedKyberNetworkWrapper();
   });
 
   afterEach(async () => {

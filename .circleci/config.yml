@@ -21,6 +21,9 @@ jobs:
       - run:
           name: Transpile Contracts
           command: yarn prepare-test
+      - run:
+          name: Set Up Environment Variables
+          command: cp .env.default .env
       - save_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
           paths:
@@ -39,19 +42,22 @@ jobs:
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
       - run:
-            name: Test RPC
-            command: yarn chain
-            background: true
+          name: Test RPC
+          command: yarn chain
+          background: true
       - run:
-            name: Truffle Test
-            command: |
-              mkdir /tmp/test-results
-              TEST_FILES="$(circleci tests glob "./transpiled/test/**/*.spec.js" | circleci tests split --split-by=timings)"
-              yarn test-continuous ${TEST_FILES}
-      - store_test_results:
-          path: /tmp/test-results
+          name: Deploy Contracts to TestRPC
+          command: yarn deploy-continuous
+      - run:
+          name: Truffle Test
+          command: |
+            TEST_FILES="$(circleci tests glob "./transpiled/test/**/*.spec.js" | circleci tests split --split-by=timings)"
+            yarn test-continuous ${TEST_FILES}
       - store_artifacts:
-          path: /tmp/test-results
+          path: test-results.xml
+          prefix: tests
+      - store_test_results:
+          path: test-results.xml
 
   coverage:
     docker:
@@ -65,6 +71,13 @@ jobs:
           command: docker pull ethereum/solc:0.5.4
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Test RPC
+          command: yarn chain
+          background: true
+      - run:
+          name: Deploy Contracts to TestRPC
+          command: yarn deploy-continuous
       - run:
           name: Coverage
           command: yarn clean-chain && yarn coverage-continuous && cat coverage/lcov.info | ./node_modules/.bin/coveralls
@@ -82,14 +95,11 @@ jobs:
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
       - run:
-          name: Set Up Environment Variables
-          command: cp .env.default .env
+          name: Test RPC
+          command: yarn chain
+          background: true
       - run:
-            name: Test RPC
-            command: yarn chain
-            background: true
-      - run:
-          name: Test Deployment
+          name: Deploy Contracts to TestRPC and Test
           command: yarn deploy
 
 workflows:

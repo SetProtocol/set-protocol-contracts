@@ -46,7 +46,7 @@ contract('CoreOperationState', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    core = await coreWrapper.deployCoreAndDependenciesAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
   });
 
   afterEach(async () => {

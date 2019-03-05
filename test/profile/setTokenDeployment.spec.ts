@@ -34,7 +34,7 @@ contract('Deployment', accounts => {
     let core: CoreContract;
     let factory: SetTokenFactoryContract;
 
-    const subjectComponentsInSetToDeploy: number[] = [1, 2, 3, 5, 10, 25, 50, 75];
+    const subjectComponentsInSetToDeploy: number[] = [1, 2, 3, 5, 10, 25, 50];
 
     let subjectFactoryAddress: Address;
     let subjectComponents: Address[];
@@ -48,9 +48,8 @@ contract('Deployment', accounts => {
     beforeEach(async () => {
       await blockchain.saveSnapshotAsync();
 
-      core = await coreWrapper.deployCoreAndDependenciesAsync();
-      factory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-      await coreWrapper.addFactoryAsync(core, factory);
+      core = await coreWrapper.getDeployedCoreAsync();
+      factory = await coreWrapper.getDeployedSetTokenFactoryAsync();
     });
 
     afterEach(async () => {

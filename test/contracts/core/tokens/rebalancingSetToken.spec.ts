@@ -102,14 +102,14 @@ contract('RebalancingSetToken', accounts => {
   beforeEach(async () => {
     blockchain.saveSnapshotAsync();
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    vault = await coreWrapper.getDeployedVaultAsync();
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
     rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(coreMock, vault);
     await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModule.address);
 
     factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
-    rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
+    rebalancingComponentWhiteList = await coreWrapper.getDeployedWhiteList();
     rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,

@@ -72,7 +72,6 @@ describe('Deployment: Modules', () => {
       const retrievedVaultAddress = await exchangeIssuanceContract.methods.vault().call();
       expect(retrievedVaultAddress).toEqual(vaultAddress);
     });
-
   });
 
   describe('Rebalancing Auction Module', () => {
@@ -104,7 +103,6 @@ describe('Deployment: Modules', () => {
       const retrievedVaultAddress = await rebalanceAuctionModule.methods.vault().call();
       expect(retrievedVaultAddress).toEqual(vaultAddress);
     });
-
   });
 
   describe('Rebalancing Token Issuance Module', () => {
@@ -137,7 +135,6 @@ describe('Deployment: Modules', () => {
       const retrievedVaultAddress = await rebalanceTokenIssuanceModule.methods.vault().call();
       expect(retrievedVaultAddress).toEqual(vaultAddress);
     });
-
   });
 
   describe('Kyber Wrapper', () => {
@@ -176,7 +173,6 @@ describe('Deployment: Modules', () => {
       const retrievedTransferProxyAddress = await kyberWrapper.methods.setTransferProxy().call();
       expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
-
   });
 
   describe('Zero Ex Exchange', () => {
@@ -229,7 +225,6 @@ describe('Deployment: Modules', () => {
       const retrievedTransferProxyAddress = await zeroExWrapper.methods.setTransferProxy().call();
       expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
-
   });
 
   describe('Payable Exchange', () => {

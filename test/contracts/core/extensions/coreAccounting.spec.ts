@@ -11,7 +11,6 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract
@@ -46,7 +45,6 @@ contract('CoreAccounting', accounts => {
   let mockTokens: StandardTokenMockContract[] = [];
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
@@ -62,11 +60,9 @@ contract('CoreAccounting', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    vault = await coreWrapper.getDeployedVaultAsync();
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
   });
 
   afterEach(async () => {

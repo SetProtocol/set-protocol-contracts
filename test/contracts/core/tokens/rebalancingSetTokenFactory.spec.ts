@@ -11,13 +11,10 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
-  TransferProxyContract,
-  VaultContract,
   WhiteListContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
@@ -53,10 +50,7 @@ contract('RebalancingSetTokenFactory', accounts => {
   ] = accounts;
 
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
-  let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
   let core: CoreContract;
-  let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let setToken: SetTokenContract;
   let setTokenFactory: SetTokenFactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
@@ -76,14 +70,8 @@ contract('RebalancingSetTokenFactory', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(core, vault);
-    await coreWrapper.addModuleAsync(core, rebalanceAuctionModule.address);
-
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.addFactoryAsync(core, setTokenFactory);
+    core = await coreWrapper.getDeployedCoreAsync();
+    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
 
     const components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
     const componentAddresses = _.map(components, token => token.address);
@@ -97,7 +85,7 @@ contract('RebalancingSetTokenFactory', accounts => {
       naturalUnit,
     );
 
-    rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
+    rebalancingComponentWhiteList = await coreWrapper.getDeployedWhiteList();
   });
 
   afterEach(async () => {
@@ -208,11 +196,7 @@ contract('RebalancingSetTokenFactory', accounts => {
     let callDataRebalanceInterval: BigNumber;
 
     beforeEach(async () => {
-      rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
-        core.address,
-        rebalancingComponentWhiteList.address
-      );
-      await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
+      rebalancingSetTokenFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
 
       subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];
@@ -328,11 +312,7 @@ contract('RebalancingSetTokenFactory', accounts => {
     let subjectCallData: Bytes;
 
     beforeEach(async () => {
-      rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
-        core.address,
-        rebalancingComponentWhiteList.address
-      );
-      await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
+      rebalancingSetTokenFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
 
       subjectCaller = notCoreAccount;
       subjectComponents = [setToken.address];

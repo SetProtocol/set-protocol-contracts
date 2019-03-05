@@ -29,6 +29,9 @@ import {
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 import { getWeb3 } from '../web3Helper';
+import { getContractAddress } from '../../deployments/utils/output-helper';
+import { TX_DEFAULTS } from '../../deployments/utils/blockchain';
+
 
 const web3 = getWeb3();
 
@@ -68,6 +71,68 @@ export class CoreWrapper {
   constructor(tokenOwnerAddress: Address, contractOwnerAddress: Address) {
     this._tokenOwnerAddress = tokenOwnerAddress;
     this._contractOwnerAddress = contractOwnerAddress;
+  }
+
+  /* ============ Deployed Contracts ============ */
+
+  public async getDeployedTransferProxyAsync(): Promise<TransferProxyContract> {
+    const address = await getContractAddress(TransferProxy.contractName);
+
+    return await TransferProxyContract.at(address, web3, TX_DEFAULTS);
+  }
+
+  public async getDeployedVaultAsync(): Promise<VaultContract> {
+    const address = await getContractAddress(Vault.contractName);
+
+    return await VaultContract.at(address, web3, TX_DEFAULTS);
+  }
+
+  public async getDeployedSetTokenFactoryAsync(): Promise<SetTokenFactoryContract> {
+    const address = await getContractAddress(SetTokenFactory.contractName);
+
+    return await SetTokenFactoryContract.at(address, web3, TX_DEFAULTS);
+  }
+
+  public async getDeployedRebalancingSetTokenFactoryAsync(): Promise<RebalancingSetTokenFactoryContract> {
+    const address = await getContractAddress(RebalancingSetTokenFactory.contractName);
+
+    return await RebalancingSetTokenFactoryContract.at(address, web3, TX_DEFAULTS);
+  }
+
+  public async getDeployedCoreAsync(): Promise<CoreContract> {
+    const address = await getContractAddress(Core.contractName);
+
+    return await CoreContract.at(address, web3, TX_DEFAULTS);
+  }
+
+  public async getDeployedExchangeIssuanceModuleAsync(): Promise<ExchangeIssuanceModuleContract> {
+    const address = await getContractAddress(ExchangeIssuanceModule.contractName);
+
+    return await ExchangeIssuanceModuleContract.at(address, web3, TX_DEFAULTS);
+  }
+
+  public async getDeployedRebalancingTokenIssuanceModuleAsync(): Promise<RebalancingTokenIssuanceModuleContract> {
+    const address = await getContractAddress(RebalancingTokenIssuanceModule.contractName);
+
+    return await RebalancingTokenIssuanceModuleContract.at(address, web3, TX_DEFAULTS);
+  }
+
+  public async getDeployedWhiteList(): Promise<WhiteListContract> {
+    const address = await getContractAddress(WhiteList.contractName);
+
+    return await WhiteListContract.at(address, web3, TX_DEFAULTS);
+  }
+
+  public async getDeployedRebalanceAuctionModuleAsync(): Promise<RebalanceAuctionModuleContract> {
+    const address = await getContractAddress(RebalanceAuctionModule.contractName);
+
+    return await RebalanceAuctionModuleContract.at(address, web3, TX_DEFAULTS);
+  }
+
+  public async getDeployedPayableExchangeIssuanceModuleAsync(): Promise<PayableExchangeIssuanceContract> {
+    const address = await getContractAddress(PayableExchangeIssuance.contractName);
+
+    return await PayableExchangeIssuanceContract.at(address, web3, TX_DEFAULTS);
   }
 
   /* ============ Deployment ============ */
@@ -174,26 +239,11 @@ export class CoreWrapper {
     const truffleRebalancingHelperLibrary = await RebalancingHelperLibrary.new(
       { from: this._tokenOwnerAddress },
     );
-    await StandardProposeLibrary.link(
-      'RebalancingHelperLibrary',
-      truffleRebalancingHelperLibrary.address
-    );
-    await StandardStartRebalanceLibrary.link(
-      'RebalancingHelperLibrary',
-      truffleRebalancingHelperLibrary.address
-    );
-    await StandardPlaceBidLibrary.link(
-      'RebalancingHelperLibrary',
-      truffleRebalancingHelperLibrary.address
-    );
-    await StandardSettleRebalanceLibrary.link(
-      'RebalancingHelperLibrary',
-      truffleRebalancingHelperLibrary.address
-    );
-    await StandardFailAuctionLibrary.link(
-      'RebalancingHelperLibrary',
-      truffleRebalancingHelperLibrary.address
-    );
+    await StandardProposeLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await StandardStartRebalanceLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await StandardPlaceBidLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await StandardSettleRebalanceLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await StandardFailAuctionLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
 
     const truffleStandardProposeLibrary = await StandardProposeLibrary.new(
       { from: this._tokenOwnerAddress },
@@ -211,30 +261,12 @@ export class CoreWrapper {
       { from: this._tokenOwnerAddress },
     );
 
-    await contract.link(
-      'RebalancingHelperLibrary',
-      truffleRebalancingHelperLibrary.address
-    );
-    await contract.link(
-      'StandardProposeLibrary',
-      truffleStandardProposeLibrary.address
-    );
-    await contract.link(
-      'StandardStartRebalanceLibrary',
-      truffleStandardStartRebalanceLibrary.address
-    );
-    await contract.link(
-      'StandardPlaceBidLibrary',
-      truffleStandardPlaceBidLibrary.address
-    );
-    await contract.link(
-      'StandardSettleRebalanceLibrary',
-      truffleStandardSettleRebalanceLibrary.address
-    );
-    await contract.link(
-      'StandardFailAuctionLibrary',
-      truffleStandardFailAuctionLibrary.address
-    );
+    await contract.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await contract.link('StandardProposeLibrary', truffleStandardProposeLibrary.address);
+    await contract.link('StandardStartRebalanceLibrary', truffleStandardStartRebalanceLibrary.address);
+    await contract.link('StandardPlaceBidLibrary', truffleStandardPlaceBidLibrary.address);
+    await contract.link('StandardSettleRebalanceLibrary', truffleStandardSettleRebalanceLibrary.address);
+    await contract.link('StandardFailAuctionLibrary', truffleStandardFailAuctionLibrary.address);
   }
 
   public async deploySetTokenAsync(

@@ -49,6 +49,8 @@ contract('Vault', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
+
+    vault = await coreWrapper.getDeployedVaultAsync();
   });
 
   afterEach(async () => {
@@ -63,7 +65,6 @@ contract('Vault', accounts => {
     const ownerExistingBalanceInVault: BigNumber = DEPLOYED_TOKEN_QUANTITY;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
 
       mockToken = await erc20Wrapper.deployTokenAsync(vault.address);
@@ -197,7 +198,6 @@ contract('Vault', accounts => {
     let subjectAmountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorized);
     });
 
@@ -240,7 +240,6 @@ contract('Vault', accounts => {
     let subjectCaller: Address = authorizedAccount;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
       await coreWrapper.incrementAccountBalanceAsync(
         vault,
@@ -304,7 +303,6 @@ contract('Vault', accounts => {
     const amountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
 
       token = await erc20Wrapper.deployTokenAsync(ownerAccount);
@@ -381,7 +379,6 @@ contract('Vault', accounts => {
     let subjectAmountsToWithdraw: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorized);
 
       mockToken = await erc20Wrapper.deployTokenAsync(vault.address);
@@ -505,7 +502,6 @@ contract('Vault', accounts => {
     let subjectAmountsToIncrement: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorized);
     });
 
@@ -615,7 +611,6 @@ contract('Vault', accounts => {
     let subjectAmountsToDecrement: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorized);
 
       await coreWrapper.incrementAccountBalanceAsync(
@@ -733,7 +728,6 @@ contract('Vault', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
       subjectTokenAddresses = [NULL_ADDRESS, randomTokenAddress];
 
@@ -915,7 +909,6 @@ contract('Vault', accounts => {
     let subjectTokenAddress: Address;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
 
       mockToken = await erc20Wrapper.deployTokenAsync(vault.address);

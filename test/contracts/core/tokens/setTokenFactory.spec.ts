@@ -13,8 +13,6 @@ import {
   StandardTokenMockContract,
   SetTokenFactoryContract,
   SetTokenContract,
-  TransferProxyContract,
-  VaultContract,
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
@@ -41,8 +39,6 @@ contract('SetTokenFactory', accounts => {
     notSetTokenCreatedByCore,
   ] = accounts;
 
-  let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
   let core: CoreContract;
   let setTokenFactory: SetTokenFactoryContract;
 
@@ -62,12 +58,8 @@ contract('SetTokenFactory', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.addFactoryAsync(core, setTokenFactory);
+    core = await coreWrapper.getDeployedCoreAsync();
+    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
   });
 
   afterEach(async () => {

@@ -74,11 +74,10 @@ contract('CoreModuleInteraction', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    vault = await coreWrapper.getDeployedVaultAsync();
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
+    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
     await coreWrapper.addModuleAsync(core, moduleAccount);
   });
 
@@ -89,7 +88,7 @@ contract('CoreModuleInteraction', accounts => {
   describe('#depositModule', async () => {
     const tokenOwner: Address = ownerAccount;
     let mockToken: StandardTokenMockContract;
-    
+
     let subjectTokenAddress: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
@@ -172,7 +171,7 @@ contract('CoreModuleInteraction', accounts => {
     beforeEach(async () => {
       mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
       subjectTokens = _.map(mockTokens, token => token.address);
-      
+
       const approvePromises = _.map(mockTokens, token =>
         token.approve.sendTransactionAsync(
           transferProxy.address,
@@ -391,7 +390,7 @@ contract('CoreModuleInteraction', accounts => {
 
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
-      subjectToken = mockToken.address
+      subjectToken = mockToken.address;
       await mockToken.approve.sendTransactionAsync(
         transferProxy.address,
         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,

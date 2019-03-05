@@ -55,6 +55,8 @@ contract('SetToken', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
+
+    factory = await coreWrapper.getDeployedSetTokenFactoryAsync();
   });
 
   afterEach(async () => {
@@ -71,7 +73,6 @@ contract('SetToken', accounts => {
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(componentCount, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
 
       subjectComponentAddresses = _.map(components, token => token.address);
       subjectComponentUnits = _.map(components, () => ether(_.random(1, 4)));

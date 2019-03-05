@@ -62,6 +62,8 @@ contract('TransferProxy', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
+
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
   });
 
   afterEach(async () => {
@@ -76,7 +78,6 @@ contract('TransferProxy', accounts => {
     let tokenAddress: Address;
 
     beforeEach(async () => {
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
       await coreWrapper.addAuthorizationAsync(transferProxy, authorizedContract);
       mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
       await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
@@ -226,7 +227,6 @@ contract('TransferProxy', accounts => {
     let subjectTokens: ERC20DetailedContract[];
 
     beforeEach(async () => {
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
       await coreWrapper.addAuthorizationAsync(transferProxy, authorizedContract);
       mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
       mockToken2 = await erc20Wrapper.deployTokenAsync(ownerAccount);

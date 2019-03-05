@@ -10,8 +10,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   SetTokenFactoryContract,
-  TransferProxyContract,
-  VaultContract
+  TransferProxyContract
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { ZERO } from '@utils/constants';
@@ -47,10 +46,9 @@ contract('Issuance', accounts => {
   describe('Issue', async () => {
     let core: CoreContract;
     let transferProxy: TransferProxyContract;
-    let vault: VaultContract;
     let setTokenFactory: SetTokenFactoryContract;
 
-    const subjectComponentsInSetToIssue: number[] = [1, 2, 3, 5, 10, 25, 50, 75];
+    const subjectComponentsInSetToIssue: number[] = [1, 2, 3, 5, 10, 25, 50];
 
     let subjectQuantityToIssue: BigNumber;
     let subjectSetToIssue: Address;
@@ -60,12 +58,9 @@ contract('Issuance', accounts => {
     beforeEach(async () => {
       await blockchain.saveSnapshotAsync();
 
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      vault = await coreWrapper.deployVaultAsync();
-      core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-
-      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+      transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+      core = await coreWrapper.getDeployedCoreAsync();
+      setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
     });
 
     afterEach(async () => {

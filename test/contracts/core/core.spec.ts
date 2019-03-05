@@ -50,8 +50,8 @@ contract('Core', accounts => {
     const subjectCaller: Address = ownerAccount;
 
     beforeEach(async () => {
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      vault = await coreWrapper.deployVaultAsync();
+      transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+      vault = await coreWrapper.getDeployedVaultAsync();
     });
 
     async function subject(): Promise<CoreContract> {

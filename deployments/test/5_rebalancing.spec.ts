@@ -14,7 +14,6 @@ import { calculateInitialSetUnits, calculateETHDaiInitialSetUnits } from '../uti
 import { getWeb3Instance } from '../utils/blockchain';
 
 import { BTCETHRebalancingManager } from '../../artifacts/ts/BTCETHRebalancingManager';
-import { Core } from '../../artifacts/ts/Core';
 import { ETHDaiRebalancingManager } from '../../artifacts/ts/ETHDaiRebalancingManager';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
@@ -312,7 +311,6 @@ describe('Deployment: Rebalancing', () => {
       const linearAuctionPriceLibrary = await getContractAddress(LinearAuctionPriceCurve.contractName);
       const receivedLinearAuctionPriceAddress = await rebalancingManagerContract.methods.auctionLibrary().call();
       expect(receivedLinearAuctionPriceAddress).toContain(linearAuctionPriceLibrary);
-
     });
 
     it('rebalancing manager has correct Dai multiplier', async () => {

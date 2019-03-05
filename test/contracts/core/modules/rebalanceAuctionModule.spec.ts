@@ -90,8 +90,8 @@ contract('RebalanceAuctionModule', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
+    vault = await coreWrapper.getDeployedVaultAsync();
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
     rebalanceAuctionModuleMock = await coreWrapper.deployRebalanceAuctionModuleMockAsync(coreMock, vault);
     await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModuleMock.address);

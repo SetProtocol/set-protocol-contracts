@@ -17,7 +17,6 @@ import {
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
-  VaultContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
@@ -47,12 +46,10 @@ contract('RebalancingTokenIssuanceModule', accounts => {
   const [
     ownerAccount,
     functionCaller,
-    whitelist,
   ] = accounts;
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let rebalancingTokenIssuanceModule: RebalancingTokenIssuanceModuleContract;
@@ -69,24 +66,6 @@ contract('RebalancingTokenIssuanceModule', accounts => {
   before(async () => {
     ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(RebalancingTokenIssuanceModule.abi);
-
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-
-    rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address, whitelist);
-    await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
-
-    rebalancingTokenIssuanceModule = await coreWrapper.deployRebalancingTokenIssuanceModuleAsync(
-      core,
-      vault
-    );
-    await coreWrapper.addModuleAsync(core, rebalancingTokenIssuanceModule.address);
-
   });
 
   after(async () => {
@@ -96,6 +75,14 @@ contract('RebalancingTokenIssuanceModule', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
+
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
+
+    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
+    rebalancingSetTokenFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
+
+    rebalancingTokenIssuanceModule = await coreWrapper.getDeployedRebalancingTokenIssuanceModuleAsync();
   });
 
   afterEach(async () => {
@@ -169,6 +156,7 @@ contract('RebalancingTokenIssuanceModule', accounts => {
         functionCaller,
         rebalancingSetToken.address,
         subjectRedeemQuantity,
+        { from: ownerAccount }
       );
     });
 
@@ -177,10 +165,7 @@ contract('RebalancingTokenIssuanceModule', accounts => {
         subjectRebalancingSetAddress,
         subjectRedeemQuantity,
         subjectComponentsToExclude,
-        {
-          from: subjectCaller,
-          gas: DEFAULT_GAS,
-        },
+        { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
 

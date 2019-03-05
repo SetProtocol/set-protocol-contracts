@@ -30,6 +30,8 @@ import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 
 import { Blockchain } from '../blockchain';
 import { getWeb3 } from '../web3Helper';
+import { getContractAddress } from '../../deployments/utils/output-helper';
+import { TX_DEFAULTS } from '../../deployments/utils/blockchain';
 
 import { CoreWrapper } from './coreWrapper';
 import { ERC20Wrapper } from './erc20Wrapper';
@@ -70,6 +72,16 @@ export class RebalancingWrapper {
     this._erc20Wrapper = erc20Wrapper;
     this._blockchain = blockchain;
   }
+
+  /* ============ Deployed Contracts ============ */
+
+  public async getDeployedLinearAuctionPriceCurveAsync(): Promise<LinearAuctionPriceCurveContract> {
+    const address = await getContractAddress(LinearAuctionPriceCurve.contractName);
+
+    return await LinearAuctionPriceCurveContract.at(address, web3, TX_DEFAULTS);
+  }
+
+  /* ============ Deployment ============ */
 
   public async deployRebalancingSetTokenAsync(
     factory: Address,

@@ -11,7 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   BTCETHRebalancingManagerContract,
-  CoreMockContract,
+  CoreContract,
   ConstantAuctionPriceCurveContract,
   MedianContract,
   SetTokenContract,
@@ -21,7 +21,6 @@ import {
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
-  VaultContract,
   WhiteListContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
@@ -44,7 +43,7 @@ import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const CoreMock = artifacts.require('CoreMock');
+const Core = artifacts.require('Core');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
 const { expect } = chai;
@@ -60,9 +59,8 @@ contract('BTCETHRebalancingManager', accounts => {
 
   let rebalancingSetToken: RebalancingSetTokenContract;
 
-  let coreMock: CoreMockContract;
+  let core: CoreContract;
   let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
   let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
@@ -85,13 +83,13 @@ contract('BTCETHRebalancingManager', accounts => {
   const oracleWrapper = new OracleWrapper(deployerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(CoreMock.abi);
+    ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(RebalancingSetToken.abi);
     ABIDecoder.addABI(BTCETHRebalancingManager.abi);
   });
 
   after(async () => {
-    ABIDecoder.removeABI(CoreMock.abi);
+    ABIDecoder.removeABI(Core.abi);
     ABIDecoder.removeABI(RebalancingSetToken.abi);
     ABIDecoder.removeABI(BTCETHRebalancingManager.abi);
   });
@@ -99,18 +97,14 @@ contract('BTCETHRebalancingManager', accounts => {
   beforeEach(async () => {
     blockchain.saveSnapshotAsync();
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
-    rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(coreMock, vault);
-    await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModule.address);
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
+    rebalanceAuctionModule = await coreWrapper.getDeployedRebalanceAuctionModuleAsync();
 
-    factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
-    rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
-    rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
-      coreMock.address,
-      rebalancingComponentWhiteList.address,
-    );
+    factory = await coreWrapper.getDeployedSetTokenFactoryAsync();
+    rebalancingComponentWhiteList = await coreWrapper.getDeployedWhiteList();
+    rebalancingFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
+
     constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(
       DEFAULT_AUCTION_PRICE_NUMERATOR,
       DEFAULT_AUCTION_PRICE_DENOMINATOR,
@@ -131,9 +125,6 @@ contract('BTCETHRebalancingManager', accounts => {
       [wrappedBTC.address, wrappedETH.address],
       rebalancingComponentWhiteList
     );
-
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
-    await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
   });
 
   afterEach(async () => {
@@ -155,7 +146,7 @@ contract('BTCETHRebalancingManager', accounts => {
     let subjectUpperAllocationBound: BigNumber;
 
     beforeEach(async () => {
-      subjectCoreAddress = coreMock.address;
+      subjectCoreAddress = core.address;
       subjectBtcPriceFeedAddress = btcMedianizer.address;
       subjectEthPriceFeedAddress = ethMedianizer.address;
       subjectBtcAddress = wrappedBTC.address;
@@ -312,8 +303,9 @@ contract('BTCETHRebalancingManager', accounts => {
     beforeEach(async () => {
       lowerAllocationBound = new BigNumber(48);
       upperAllocationBound = new BigNumber(52);
+
       btcethRebalancingManager = await rebalancingWrapper.deployBTCETHRebalancingManagerAsync(
-        coreMock.address,
+        core.address,
         btcMedianizer.address,
         ethMedianizer.address,
         wrappedBTC.address,
@@ -326,7 +318,7 @@ contract('BTCETHRebalancingManager', accounts => {
       );
 
       initialAllocationToken = await coreWrapper.createSetTokenAsync(
-        coreMock,
+        core,
         factory.address,
         [wrappedBTC.address, wrappedETH.address],
         [new BigNumber(1).mul(btcMultiplier), ethUnit.mul(ethMultiplier)],
@@ -335,7 +327,7 @@ contract('BTCETHRebalancingManager', accounts => {
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
       rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
-        coreMock,
+        core,
         rebalancingFactory.address,
         btcethRebalancingManager.address,
         initialAllocationToken.address,
@@ -347,7 +339,7 @@ contract('BTCETHRebalancingManager', accounts => {
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
 
       await rebalancingWrapper.addPriceLibraryAsync(
-        coreMock,
+        core,
         constantAuctionPriceCurve,
       );
 
@@ -364,22 +356,27 @@ contract('BTCETHRebalancingManager', accounts => {
       );
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(
+      await core.issue.sendTransactionAsync(
         initialAllocationToken.address,
         ether(9),
-        {from: deployerAccount, gas: DEFAULT_GAS},
+        { from: deployerAccount, gas: DEFAULT_GAS },
       );
       await erc20Wrapper.approveTransfersAsync([initialAllocationToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7), { gas: DEFAULT_GAS });
+      await core.issue.sendTransactionAsync(
+        rebalancingSetToken.address,
+        ether(7),
+        { from: deployerAccount, gas: DEFAULT_GAS }
+      );
     });
 
     async function subject(): Promise<string> {
       await blockchain.increaseTimeAsync(subjectTimeFastForward);
+
       return btcethRebalancingManager.propose.sendTransactionAsync(
         subjectRebalancingSetToken,
-        { from: subjectCaller, gas: DEFAULT_GAS}
+        { from: subjectCaller, gas: DEFAULT_GAS }
       );
     }
 
@@ -694,8 +691,10 @@ contract('BTCETHRebalancingManager', accounts => {
 
       beforeEach(async () => {
         await blockchain.increaseTimeAsync(subjectTimeFastForward);
+
         await btcethRebalancingManager.propose.sendTransactionAsync(
           subjectRebalancingSetToken,
+          { from: otherAccount, gas: DEFAULT_GAS }
         );
 
         timeJump = new BigNumber(1000);
@@ -712,6 +711,7 @@ contract('BTCETHRebalancingManager', accounts => {
         await blockchain.increaseTimeAsync(subjectTimeFastForward);
         await btcethRebalancingManager.propose.sendTransactionAsync(
           subjectRebalancingSetToken,
+          { from: otherAccount, gas: DEFAULT_GAS }
         );
 
         // Transition to rebalance
@@ -728,15 +728,16 @@ contract('BTCETHRebalancingManager', accounts => {
 
     describe('when proposeNewRebalance is called from Drawdown State', async () => {
       beforeEach(async () => {
+
         // propose rebalance
         await blockchain.increaseTimeAsync(subjectTimeFastForward);
         await btcethRebalancingManager.propose.sendTransactionAsync(
           subjectRebalancingSetToken,
+          { from: otherAccount, gas: DEFAULT_GAS }
         );
 
         // Transition to rebalance
         await blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
-
         await rebalancingSetToken.startRebalance.sendTransactionAsync(
           { from: otherAccount, gas: DEFAULT_GAS }
         );
@@ -748,11 +749,12 @@ contract('BTCETHRebalancingManager', accounts => {
         const minimumBid = biddingParameters[0];
         await rebalanceAuctionModule.bid.sendTransactionAsync(
           rebalancingSetToken.address,
-          minimumBid
+          minimumBid,
+          { from: deployerAccount, gas: DEFAULT_GAS }
         );
 
         await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
-          { from: otherAccount, gas: DEFAULT_GAS}
+          { from: otherAccount, gas: DEFAULT_GAS }
         );
       });
 

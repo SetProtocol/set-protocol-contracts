@@ -11,7 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   BTCETHRebalancingManagerContract,
-  CoreMockContract,
+  CoreContract,
   LinearAuctionPriceCurveContract,
   MedianContract,
   RebalanceAuctionModuleContract,
@@ -22,11 +22,9 @@ import {
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
-  WhiteListContract,
   WethMockContract,
 } from '@utils/contracts';
 import {
-  DEFAULT_AUCTION_PRICE_DENOMINATOR,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from '@utils/constants';
 import { Blockchain } from '@utils/blockchain';
@@ -40,7 +38,7 @@ import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const CoreMock = artifacts.require('CoreMock');
+const Core = artifacts.require('Core');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const { expect } = chai;
@@ -58,12 +56,11 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
 
   let rebalancingSetToken: RebalancingSetTokenContract;
 
-  let coreMock: CoreMockContract;
+  let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let factory: SetTokenFactoryContract;
-  let rebalancingComponentWhiteList: WhiteListContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
   let linearAuctionPriceCurve: LinearAuctionPriceCurveContract;
   let btcethRebalancingManager: BTCETHRebalancingManagerContract;
@@ -159,13 +156,13 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   const MAX_SLIPPAGE = new BigNumber(0.015); // 1 Percent Slippage
 
   before(async () => {
-    ABIDecoder.addABI(CoreMock.abi);
+    ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(RebalanceAuctionModule.abi);
     ABIDecoder.addABI(RebalancingSetToken.abi);
   });
 
   after(async () => {
-    ABIDecoder.removeABI(CoreMock.abi);
+    ABIDecoder.removeABI(Core.abi);
     ABIDecoder.removeABI(RebalanceAuctionModule.abi);
     ABIDecoder.removeABI(RebalancingSetToken.abi);
   });
@@ -173,40 +170,28 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
-    rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(coreMock, vault);
-    await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModule.address);
+    vault = await coreWrapper.getDeployedVaultAsync();
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
+    rebalanceAuctionModule = await coreWrapper.getDeployedRebalanceAuctionModuleAsync();
 
-    factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
-    rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
-    rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
-      coreMock.address,
-      rebalancingComponentWhiteList.address,
-    );
-    linearAuctionPriceCurve = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
-      DEFAULT_AUCTION_PRICE_DENOMINATOR,
-      true,
-    );
+    factory = await coreWrapper.getDeployedSetTokenFactoryAsync();
+    rebalancingFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
+
+    linearAuctionPriceCurve = await rebalancingWrapper.getDeployedLinearAuctionPriceCurveAsync();
 
     btcMedianizer = await oracleWrapper.deployMedianizerAsync();
     await oracleWrapper.addPriceFeedOwnerToMedianizer(btcMedianizer, deployerAccount);
     ethMedianizer = await oracleWrapper.deployMedianizerAsync();
     await oracleWrapper.addPriceFeedOwnerToMedianizer(ethMedianizer, deployerAccount);
 
-    wrappedBTC = await erc20Wrapper.deployTokenAsync(deployerAccount, 8);
-    wrappedETH = await erc20Wrapper.deployWrappedEtherAsync(deployerAccount);
-
-    await coreWrapper.addTokensToWhiteList(
-      [wrappedBTC.address, wrappedETH.address],
-      rebalancingComponentWhiteList
-    );
+    wrappedBTC = await erc20Wrapper.getDeployedWrappedBTCAsync();
+    wrappedETH = await erc20Wrapper.getDeployedWETHAsync();
 
     const btcMultiplier = new BigNumber(1);
     const ethMultiplier = new BigNumber(1);
     btcethRebalancingManager = await rebalancingWrapper.deployBTCETHRebalancingManagerAsync(
-      coreMock.address,
+      core.address,
       btcMedianizer.address,
       ethMedianizer.address,
       wrappedBTC.address,
@@ -218,11 +203,8 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       [new BigNumber(48), new BigNumber(52)],
     );
 
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
-    await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
-
     baseBtcEthSet = await coreWrapper.createSetTokenAsync(
-      coreMock,
+      core,
       factory.address,
       [wrappedBTC.address, wrappedETH.address],
       [INITIAL_BTC_UNIT, INITIAL_ETH_UNIT],
@@ -236,7 +218,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
     );
 
     rebalancingSetToken = await rebalancingWrapper.createRebalancingTokenAsync(
-      coreMock,
+      core,
       rebalancingFactory.address,
       [baseBtcEthSet.address],
       [REBALANCING_SET_UNIT_SHARES],
@@ -257,7 +239,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
     );
 
     await rebalancingWrapper.addPriceLibraryAsync(
-      coreMock,
+      core,
       linearAuctionPriceCurve,
     );
 
@@ -269,31 +251,32 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
     await wrappedETH.approve.sendTransactionAsync(
       transferProxy.address,
       UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+      { from: deployerAccount }
     );
 
     // Mint WETH
     await wrappedETH.deposit.sendTransactionAsync(
-      {
-        from: deployerAccount,
-        value: REQUIRED_WETH.toString(),
-      }
+      { from: deployerAccount, value: REQUIRED_WETH.toString() }
     );
 
     // Issue Rebalancing Set to the the deployer
-    await coreMock.issue.sendTransactionAsync(
+    await core.issue.sendTransactionAsync(
       baseBtcEthSet.address,
       BTC_ETH_ISSUE_QUANTITY,
+      { from: deployerAccount }
     );
 
     await baseBtcEthSet.approve.sendTransactionAsync(
       transferProxy.address,
       UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+      { from: deployerAccount }
     );
 
     // Issue Rebalancing Set to the the deployer
-    await coreMock.issue.sendTransactionAsync(
+    await core.issue.sendTransactionAsync(
       rebalancingSetToken.address,
       REBALANCING_SET_ISSUE_QUANTITY,
+      { from: deployerAccount }
     );
 
     await oracleWrapper.updateMedianizerPriceAsync(
@@ -314,11 +297,14 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
     // Call propose from Rebalance Manager
     await btcethRebalancingManager.propose.sendTransactionAsync(
       rebalancingSetToken.address,
+      { from: deployerAccount }
     );
 
     await web3Utils.increaseTime(PROPOSAL_PERIOD.plus(1).toNumber());
 
-    await rebalancingSetToken.startRebalance.sendTransactionAsync();
+    await rebalancingSetToken.startRebalance.sendTransactionAsync(
+      { from: deployerAccount }
+    );
 
     // Move time to X after Fair Value
     await web3Utils.increaseTime(SECONDS_TO_FAIR_VALUE.plus(BID_ONE_TIME_AFTER_FAIR_VALUE).plus(1).toNumber());
@@ -332,25 +318,17 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
 
     // Mint WETH
     await wrappedETH.deposit.sendTransactionAsync(
-      {
-        from: bidderOneAccount,
-        value: BID_ONE_MAX_INFLOW_ETH.toString(),
-      }
+      { from: bidderOneAccount, value: BID_ONE_MAX_INFLOW_ETH.toString() }
     );
 
     await rebalanceAuctionModule.bid.sendTransactionAsync(
       rebalancingSetToken.address,
       BID_ONE_QUANTITY,
-      {
-        from: bidderOneAccount,
-      }
+      { from: bidderOneAccount }
     );
 
     // Move time to X after Fair Value
-    await web3Utils.increaseTime(BID_TWO_TIME_AFTER_FAIR_VALUE
-                                  .minus(BID_ONE_TIME_AFTER_FAIR_VALUE)
-                                  .toNumber()
-    );
+    await web3Utils.increaseTime(BID_TWO_TIME_AFTER_FAIR_VALUE.minus(BID_ONE_TIME_AFTER_FAIR_VALUE).toNumber());
 
     // Perform Bid 2
     await wrappedETH.approve.sendTransactionAsync(
@@ -361,18 +339,13 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
 
     // Mint WETH
     await wrappedETH.deposit.sendTransactionAsync(
-      {
-        from: bidderTwoAccount,
-        value: BID_TWO_MAX_INFLOW_ETH.toString(),
-      }
+      { from: bidderTwoAccount, value: BID_TWO_MAX_INFLOW_ETH.toString() }
     );
 
     await rebalanceAuctionModule.bid.sendTransactionAsync(
       rebalancingSetToken.address,
       BID_TWO_QUANTITY,
-      {
-        from: bidderTwoAccount,
-      }
+      { from: bidderTwoAccount }
     );
   });
 
@@ -413,7 +386,6 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       const slippage = new BigNumber(1).minus(percentOfPreRebalanceValue);
 
       expect(slippage).to.bignumber.be.lessThan(MAX_SLIPPAGE);
-
     });
 
     it('should be in the right rebalance state', async () => {
@@ -457,7 +429,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
 
       const btcVaultBalance = await vault.getOwnerBalance.callAsync(wrappedBTC.address, bidderOneAccount);
 
-      await coreMock.withdraw.sendTransactionAsync(wrappedBTC.address, btcVaultBalance, { from: bidderOneAccount });
+      await core.withdraw.sendTransactionAsync(wrappedBTC.address, btcVaultBalance, { from: bidderOneAccount });
 
       const postBidBitcoinBalance = await wrappedBTC.balanceOf.callAsync(bidderOneAccount);
 
@@ -490,7 +462,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
 
       const btcVaultBalance = await vault.getOwnerBalance.callAsync(wrappedBTC.address, bidderTwoAccount);
 
-      await coreMock.withdraw.sendTransactionAsync(wrappedBTC.address, btcVaultBalance, { from: bidderTwoAccount });
+      await core.withdraw.sendTransactionAsync(wrappedBTC.address, btcVaultBalance, { from: bidderTwoAccount });
 
       const postBidBitcoinBalance = await wrappedBTC.balanceOf.callAsync(bidderTwoAccount);
 

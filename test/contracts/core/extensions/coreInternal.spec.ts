@@ -26,16 +26,15 @@ import {
   CoreContract,
   SetTokenContract,
   SetTokenFactoryContract,
-  TransferProxyContract,
-  VaultContract,
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { STANDARD_NATURAL_UNIT, DEFAULT_AUCTION_PRICE_DENOMINATOR } from '@utils/constants';
+import { STANDARD_NATURAL_UNIT } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 
 BigNumberSetup.configure();
@@ -46,25 +45,23 @@ const { expect } = chai;
 const setTestUtils = new SetTestUtils(web3);
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
- const { NULL_ADDRESS } = SetUtils.CONSTANTS;
+const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
 contract('CoreInternal', accounts => {
   const [
     ownerAccount,
     otherAccount,
-    zeroExWrapperAddress,
     moduleAccount,
   ] = accounts;
 
   let core: CoreContract;
   let priceLibrary: LinearAuctionPriceCurveContract;
-  let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const exchangeWrapper = new ExchangeWrapper(ownerAccount);
   const rebalancingWrapper = new RebalancingWrapper(ownerAccount, coreWrapper, erc20Wrapper, blockchain);
 
   before(async () => {
@@ -78,7 +75,7 @@ contract('CoreInternal', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    core = await coreWrapper.deployCoreAndDependenciesAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
   });
 
   afterEach(async () => {
@@ -90,7 +87,7 @@ contract('CoreInternal', accounts => {
     let subjectFactoryAddress: Address;
 
     beforeEach(async () => {
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+      setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
 
       subjectFactoryAddress = setTokenFactory.address;
       subjectCaller = ownerAccount;
@@ -111,11 +108,16 @@ contract('CoreInternal', accounts => {
     });
 
     it('adds factory address to factories array', async () => {
+      const currentFactories = await core.factories.callAsync();
+      const currentFactoriesCount = currentFactories.length;
+
       await subject();
 
-      const approvedFactories = await core.factories.callAsync();
-      expect(approvedFactories).to.include(subjectFactoryAddress);
-      expect(approvedFactories.length).to.equal(1);
+      const factories = await core.factories.callAsync();
+      expect(factories).to.include(subjectFactoryAddress);
+
+      const expectApprovedFactoriesCount = currentFactoriesCount + 1;
+      expect(factories.length).to.equal(expectApprovedFactoriesCount);
     });
 
     it('emits a FactoryAdded event', async () => {
@@ -146,7 +148,7 @@ contract('CoreInternal', accounts => {
     let subjectFactoryAddress: Address;
 
     beforeEach(async () => {
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+      setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
 
       subjectFactoryAddress = setTokenFactory.address;
       subjectCaller = ownerAccount;
@@ -172,11 +174,16 @@ contract('CoreInternal', accounts => {
     });
 
     it('removes factory address from factories array', async () => {
+      const currentApprovedFactories = await core.factories.callAsync();
+      const currentFactoriesCount = currentApprovedFactories.length;
+
       await subject();
 
-      const approvedFactories = await core.factories.callAsync();
-      expect(approvedFactories).to.not.include(subjectFactoryAddress);
-      expect(approvedFactories.length).to.equal(0);
+      const factories = await core.factories.callAsync();
+      expect(factories).to.include(subjectFactoryAddress);
+
+      const expectApprovedFactoriesCount = currentFactoriesCount - 1;
+      expect(factories.length).to.equal(expectApprovedFactoriesCount);
     });
 
     it('emits a FactoryRemoved event', async () => {
@@ -236,11 +243,16 @@ contract('CoreInternal', accounts => {
     });
 
     it('adds module address to modules array', async () => {
+      const currentApprovedModules = await core.modules.callAsync();
+      const currentApprovedModulesCount = currentApprovedModules.length;
+
       await subject();
 
-      const approvedModules = await core.modules.callAsync();
-      expect(approvedModules).to.include(subjectModuleAddress);
-      expect(approvedModules.length).to.equal(1);
+      const modules = await core.modules.callAsync();
+      expect(modules).to.include(subjectModuleAddress);
+
+      const expectModulesCount = currentApprovedModulesCount + 1;
+      expect(modules.length).to.equal(expectModulesCount);
     });
 
     it('emits a ModuleAdded event', async () => {
@@ -295,11 +307,16 @@ contract('CoreInternal', accounts => {
     });
 
     it('removes module address from modules array', async () => {
+      const currentApprovedModules = await core.modules.callAsync();
+      const currentApprovedModuleCount = currentApprovedModules.length;
+
       await subject();
 
-      const approvedModules = await core.modules.callAsync();
-      expect(approvedModules).to.not.include(subjectModuleAddress);
-      expect(approvedModules.length).to.equal(0);
+      const modules = await core.modules.callAsync();
+      expect(modules).to.not.include(subjectModuleAddress);
+
+      const expectModulesCount = currentApprovedModuleCount - 1;
+      expect(modules.length).to.equal(expectModulesCount);
     });
 
     it('emits a ModuleRemoved event', async () => {
@@ -336,14 +353,24 @@ contract('CoreInternal', accounts => {
   });
 
   describe('#addExchange', async () => {
-    let subjectCaller: Address;
     let subjectExchangeId: BigNumber;
     let subjectExchangeAddress: Address;
+    let subjectCaller: Address;
 
     beforeEach(async () => {
+      const exchangeId = new BigNumber(SetUtils.EXCHANGES.ZERO_EX);
+
+      // Remove existing ZeroExExchangeWrapper first
+      const zeroExExchangeWrapper = await exchangeWrapper.getDeployedZeroExExchangeWrapper();
+      await core.removeExchange.sendTransactionAsync(
+        exchangeId,
+        zeroExExchangeWrapper.address,
+        { from: ownerAccount },
+      );
+
+      subjectExchangeId = exchangeId;
+      subjectExchangeAddress = zeroExExchangeWrapper.address;
       subjectCaller = ownerAccount;
-      subjectExchangeId = new BigNumber(SetUtils.EXCHANGES.ZERO_EX);
-      subjectExchangeAddress = zeroExWrapperAddress;
     });
 
     async function subject(): Promise<string> {
@@ -362,11 +389,16 @@ contract('CoreInternal', accounts => {
     });
 
     it('adds exchange address to exchanges array', async () => {
+      const currentApprovedExchanges = await core.exchanges.callAsync();
+      const currentApprovedExchangesCount = currentApprovedExchanges.length;
+
       await subject();
 
-      const approvedExchanges = await core.exchanges.callAsync();
-      expect(approvedExchanges).to.include(subjectExchangeAddress);
-      expect(approvedExchanges.length).to.equal(1);
+      const exchanges = await core.exchanges.callAsync();
+      expect(exchanges).to.include(subjectExchangeAddress);
+
+      const expectApprovedExchangesCount = currentApprovedExchangesCount + 1;
+      expect(exchanges.length).to.equal(expectApprovedExchangesCount);
     });
 
     it('emits a ExchangeAdded event', async () => {
@@ -415,15 +447,11 @@ contract('CoreInternal', accounts => {
     let subjectExchangeAddress: Address;
 
     beforeEach(async () => {
+      const zeroExExchangeWrapper = await exchangeWrapper.getDeployedZeroExExchangeWrapper();
+
       subjectCaller = ownerAccount;
       subjectExchangeId = new BigNumber(SetUtils.EXCHANGES.ZERO_EX);
-      subjectExchangeAddress = zeroExWrapperAddress;
-
-      await core.addExchange.sendTransactionAsync(
-        subjectExchangeId,
-        subjectExchangeAddress,
-        { from: subjectCaller },
-      );
+      subjectExchangeAddress = zeroExExchangeWrapper.address;
     });
 
     async function subject(): Promise<string> {
@@ -442,11 +470,16 @@ contract('CoreInternal', accounts => {
     });
 
     it('removes exchange address from exchanges array', async () => {
+      const previousExchanges = await core.exchanges.callAsync();
+      const previousExchangesCount = previousExchanges.length;
+
       await subject();
 
-      const approvedExchanges = await core.exchanges.callAsync();
-      expect(approvedExchanges).to.not.include(subjectExchangeAddress);
-      expect(approvedExchanges.length).to.equal(0);
+      const exchanges = await core.exchanges.callAsync();
+      expect(exchanges).to.not.include(subjectExchangeAddress);
+
+      const expectedExchangeCount = previousExchangesCount - 1;
+      expect(exchanges.length).to.equal(expectedExchangeCount);
     });
 
     it('emits a ExchangeRemoved event', async () => {
@@ -494,17 +527,13 @@ contract('CoreInternal', accounts => {
   });
 
   describe('#disableSet', async () => {
-    let setToken: SetTokenContract;
-    let subjectCaller: Address;
     let subjectSet: Address;
+    let subjectCaller: Address;
+
+    let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-
-      subjectCaller = ownerAccount;
+      const setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
 
       const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
       const componentAddresses = _.map(components, token => token.address);
@@ -520,6 +549,7 @@ contract('CoreInternal', accounts => {
       );
 
       subjectSet = setToken.address;
+      subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<string> {
@@ -544,11 +574,16 @@ contract('CoreInternal', accounts => {
     });
 
     it('removes set address to setTokens array', async () => {
+      const currentSets = await core.setTokens.callAsync();
+      const currentSetsCount = currentSets.length;
+
       await subject();
 
-      const approvedSetTokens = await core.setTokens.callAsync();
-      expect(approvedSetTokens).to.not.include(setToken.address);
-      expect(approvedSetTokens.length).to.equal(0);
+      const sets = await core.setTokens.callAsync();
+      expect(sets).to.not.include(setToken.address);
+
+      const expectedSetsCount = currentSetsCount - 1;
+      expect(sets.length).to.equal(expectedSetsCount);
     });
 
     it('emits a SetDisabled event', async () => {
@@ -585,17 +620,13 @@ contract('CoreInternal', accounts => {
   });
 
   describe('#reenableSet', async () => {
-    let setToken: SetTokenContract;
-    let subjectCaller: Address;
     let subjectSet: Address;
+    let subjectCaller: Address;
+
+    let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-
-      subjectCaller = ownerAccount;
+      const setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
 
       const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
       const componentAddresses = _.map(components, token => token.address);
@@ -610,12 +641,13 @@ contract('CoreInternal', accounts => {
         STANDARD_NATURAL_UNIT,
       );
 
-      subjectSet = setToken.address;
-
       await core.disableSet.sendTransactionAsync(
-        subjectSet,
-        { from: subjectCaller },
+        setToken.address,
+        { from: ownerAccount },
       );
+
+      subjectSet = setToken.address;
+      subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<string> {
@@ -640,11 +672,16 @@ contract('CoreInternal', accounts => {
     });
 
     it('adds set address to setTokens array', async () => {
+      const currentSetTokens = await core.setTokens.callAsync();
+      const currentSetTokensCount = currentSetTokens.length;
+
       await subject();
 
-      const approvedSetTokens = await core.setTokens.callAsync();
-      expect(approvedSetTokens).to.include(setToken.address);
-      expect(approvedSetTokens.length).to.equal(1);
+      const sets = await core.setTokens.callAsync();
+      expect(sets).to.include(setToken.address);
+
+      const expectedSetTokenCount = currentSetTokensCount + 1;
+      expect(sets.length).to.equal(expectedSetTokenCount);
     });
 
     it('emits a SetReenabled event', async () => {
@@ -681,18 +718,19 @@ contract('CoreInternal', accounts => {
   });
 
   describe('#addPriceLibrary', async () => {
-    let subjectCaller: Address;
     let subjectPriceLibrary: Address;
+    let subjectCaller: Address;
 
     beforeEach(async () => {
-      const usesStartPrice = false;
-      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
-        DEFAULT_AUCTION_PRICE_DENOMINATOR,
-        usesStartPrice
+      priceLibrary = await rebalancingWrapper.getDeployedLinearAuctionPriceCurveAsync();
+
+      await core.removePriceLibrary.sendTransactionAsync(
+        priceLibrary.address,
+        { from: ownerAccount },
       );
 
-      subjectCaller = ownerAccount;
       subjectPriceLibrary = priceLibrary.address;
+      subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<string> {
@@ -710,11 +748,16 @@ contract('CoreInternal', accounts => {
     });
 
     it('adds price library address to priceLibraries array', async () => {
+      const currentPriceLibraries = await core.priceLibraries.callAsync();
+      const currentPriceLibrariesCount = currentPriceLibraries.length;
+
       await subject();
 
-      const approvedPriceLibraries = await core.priceLibraries.callAsync();
-      expect(approvedPriceLibraries).to.include(subjectPriceLibrary);
-      expect(approvedPriceLibraries.length).to.equal(1);
+      const priceLibraries = await core.priceLibraries.callAsync();
+      expect(priceLibraries).to.include(subjectPriceLibrary);
+
+      const expectedPriceLibraryCount = currentPriceLibrariesCount + 1;
+      expect(priceLibraries.length).to.equal(expectedPriceLibraryCount);
     });
 
     it('emits a PriceLibraryAdded event', async () => {
@@ -741,23 +784,14 @@ contract('CoreInternal', accounts => {
   });
 
   describe('#removePriceLibrary', async () => {
-    let subjectCaller: Address;
     let subjectPriceLibrary: Address;
+    let subjectCaller: Address;
 
     beforeEach(async () => {
-      const usesStartPrice = false;
-      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
-        DEFAULT_AUCTION_PRICE_DENOMINATOR,
-        usesStartPrice
-      );
+      priceLibrary = await rebalancingWrapper.getDeployedLinearAuctionPriceCurveAsync();
 
-      subjectCaller = ownerAccount;
       subjectPriceLibrary = priceLibrary.address;
-
-      await core.addPriceLibrary.sendTransactionAsync(
-        subjectPriceLibrary,
-        { from: subjectCaller },
-      );
+      subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<string> {
@@ -775,11 +809,16 @@ contract('CoreInternal', accounts => {
     });
 
     it('removes price library address from priceLibraries array', async () => {
+      const currentPriceLibraries = await core.priceLibraries.callAsync();
+      const currentPriceLibrariesCount = currentPriceLibraries.length;
+
       await subject();
 
-      const approvedPriceLibraries = await core.priceLibraries.callAsync();
-      expect(approvedPriceLibraries).to.not.include(subjectPriceLibrary);
-      expect(approvedPriceLibraries.length).to.equal(0);
+      const priceLibraries = await core.priceLibraries.callAsync();
+      expect(priceLibraries).to.not.include(subjectPriceLibrary);
+
+      const expectedPriceLibraryCount = currentPriceLibrariesCount - 1;
+      expect(priceLibraries.length).to.equal(expectedPriceLibraryCount);
     });
 
     it('emits a PriceLibraryRemoved event', async () => {

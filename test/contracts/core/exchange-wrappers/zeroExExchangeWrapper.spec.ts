@@ -13,7 +13,6 @@ import {
   CoreContract,
   StandardTokenMockContract,
   TransferProxyContract,
-  VaultContract,
   ZeroExExchangeWrapperContract
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
@@ -55,7 +54,6 @@ contract('ZeroExExchangeWrapper', accounts => {
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
 
   let zeroExExchangeWrapper: ZeroExExchangeWrapperContract;
 
@@ -66,18 +64,11 @@ contract('ZeroExExchangeWrapper', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
-    await coreWrapper.addModuleAsync(core, moduleAccount);
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
+    await coreWrapper.addModuleAsync(core, moduleAccount, zrxTokenOwnerAccount);
 
-    zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
-      core.address,
-      SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
-      SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
-      SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
-      transferProxy,
-    );
+    zeroExExchangeWrapper = await exchangeWrapper.getDeployedZeroExExchangeWrapper();
 
     // ZRX token is already deployed to zrxTokenOwnerAccount via the test snapshot
     zrxToken = erc20Wrapper.zrxToken();

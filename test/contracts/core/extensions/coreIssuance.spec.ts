@@ -54,9 +54,9 @@ contract('CoreIssuance', accounts => {
     managerAccount,
   ] = accounts;
 
-  let core: CoreContract;
-  let transferProxy: TransferProxyContract;
   let vault: VaultContract;
+  let transferProxy: TransferProxyContract;
+  let core: CoreContract;
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
@@ -79,11 +79,10 @@ contract('CoreIssuance', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    vault = await coreWrapper.getDeployedVaultAsync();
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
+    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
   });
 
   afterEach(async () => {
@@ -367,12 +366,7 @@ contract('CoreIssuance', accounts => {
     let rebalancingSetToken: RebalancingSetTokenContract;
 
     beforeEach(async () => {
-      const rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
-      rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
-        core.address,
-        rebalancingComponentWhiteList.address
-      );
-      await coreWrapper.addFactoryAsync(core, rebalancingTokenFactory);
+      rebalancingTokenFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
 
       const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         core,
@@ -882,12 +876,7 @@ contract('CoreIssuance', accounts => {
     let rebalancingToken: RebalancingSetTokenContract;
 
     beforeEach(async () => {
-      const rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
-      rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
-        core.address,
-        rebalancingComponentWhiteList.address
-      );
-      await coreWrapper.addFactoryAsync(core, rebalancingTokenFactory);
+      rebalancingTokenFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
 
       const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         core,

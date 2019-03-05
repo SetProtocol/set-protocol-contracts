@@ -8,5 +8,5 @@ rm -f deployments/outputs.ts
 
 filename=outputs
 filename_base=$(basename $filename .json)
-echo -e "export const $filename_base = " > "deployments/$filename_base.ts"
-cat "deployments/$filename_base.json" >> "deployments/$filename_base.ts"
+echo -e "export const $filename_base = " > "artifacts/$filename_base.ts"
+cat "deployments/$filename_base.json" >> "artifacts/$filename_base.ts"

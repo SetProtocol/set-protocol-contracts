@@ -9,25 +9,40 @@ export default {
   WBTC: {
     PRICE: new BigNumber(3711),
     FULL_TOKEN_UNITS: new BigNumber(10 ** 8),
-    MULTIPLIER: new BigNumber(1),
   },
   DEFAULT_WBTC_UNIT: new BigNumber(1),
 
   WETH: {
     FULL_TOKEN_UNITS: new BigNumber(10 ** 18),
     PRICE: new BigNumber(128),
-    MULTIPLIER: new BigNumber(1),
   },
-  WETH_DOMINANT_REBALANCING_NATURAL_UNIT: new BigNumber(10 ** 12),
+  DEFAULT_COLLATERAL_NATURAL_UNIT: new BigNumber(10 ** 12), 
+  WETH_DOMINANT_COLLATERAL_NATURAL_UNIT: new BigNumber(10 ** 12),
 
   DAI: {
     FULL_TOKEN_UNITS: new BigNumber(10 ** 18),
     PRICE: new BigNumber(1),
-    MULTIPLIER: new BigNumber(1),
   },
 
-  PRICE_PRECISION: new BigNumber(100),
-  DEFAULT_REBALANCING_NATURAL_UNIT: new BigNumber(10 ** 10),
+  BTCDAI_BTD: {
+    PRICE_PRECISION: new BigNumber(100),
+    DAI_MULTIPLIER: new BigNumber(1),
+    WBTC_MULTIPLIER: new BigNumber(1),
+  },
+
+  ETHDAI_BTD: {
+    PRICE_PRECISION: new BigNumber(100),
+    DAI_MULTIPLIER: new BigNumber(1),
+    WETH_MULTIPLIER: new BigNumber(1),
+  },
+
+  BITETH: {
+    PRICE_PRECISION: new BigNumber(100),
+    WBTC_MULTIPLIER: new BigNumber(1),
+    WETH_MULTIPLIER: new BigNumber(1),
+  },
+
+  DEFAULT_REBALANCING_NATURAL_UNIT: new BigNumber(10 ** 6),
   REBALANCING_SET_USD_PRICE: new BigNumber(100),
   DEFAULT_AUCTION_PRICE_NUMERATOR: 1374,
   DEFAULT_AUCTION_PRICE_DENOMINATOR: 1000,

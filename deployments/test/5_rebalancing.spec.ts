@@ -14,7 +14,6 @@ import { calculateInitialSetUnits, calculateETHDaiInitialSetUnits } from '../uti
 import { getWeb3Instance } from '../utils/blockchain';
 
 import { BTCETHRebalancingManager } from '../../artifacts/ts/BTCETHRebalancingManager';
-import { Core } from '../../artifacts/ts/Core';
 import { ETHDaiRebalancingManager } from '../../artifacts/ts/ETHDaiRebalancingManager';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';

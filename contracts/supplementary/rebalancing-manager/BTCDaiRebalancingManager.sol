@@ -219,7 +219,7 @@ contract BTCDaiRebalancingManager {
      * Check there has been a sufficient change in allocation as defined by maximumUpperThreshold
      * and minimumLowerThreshold and return USD value of currentSet.
      *
-     * @param  _btcPrice              The 18 decimal value of one full BTC
+     * @param  _btcPrice              The 18 decimal dollar value of one full BTC
      * @param  _currentSetAddress     The address of the Rebalancing Set Token's currentSet
      * @return                        The currentSet's USD value (in cents)
      */
@@ -271,7 +271,7 @@ contract BTCDaiRebalancingManager {
      * Determine units and naturalUnit of nextSet to propose, calculate auction parameters, and
      * create nextSet
      *
-     * @param  _btcPrice                    The 18 decimal value of one full BTC
+     * @param  _btcPrice                    The 18 decimal dollar value of one full BTC
      * @param  _currentSetDollarAmount      The USD value of the Rebalancing Set Token's currentSet
      * @return address                      The address of nextSet
      * @return uint256                      The auctionStartPrice for rebalance auction
@@ -350,7 +350,7 @@ contract BTCDaiRebalancingManager {
             units[0] = daiUnits.mul(daiMultiplier).mul(PRICE_PRECISION);
             units[1] = btcMultiplier.mul(PRICE_PRECISION);          
         } else {
-            // Calculate dai units as (daiPrice/btcPrice)*100. 100 is used to add 
+            // Calculate btc units as (daiPrice/btcPrice)*100. 100 is used to add 
             // precision.
             uint256 btcDaiPrice = DAI_PRICE.mul(PRICE_PRECISION).div(_btcPrice);
 

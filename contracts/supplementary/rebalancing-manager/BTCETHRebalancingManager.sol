@@ -378,14 +378,6 @@ contract BTCETHRebalancingManager {
             units[0] = btcMultiplier;
             units[1] = ethUnits.mul(ethMultiplier);
             naturalUnit = 10**10;
-
-            // Calculate the nextSet dollar value (in cents)
-            nextSetDollarAmount = calculateSetTokenPriceUSD(
-                _btcPrice,
-                _ethPrice,
-                naturalUnit,
-                units
-            );
         } else {
             // Calculate btc units as (ethPrice/btcPrice)*100. 100 is used to add
             // precision. The increase in unit amounts is offset by increasing the
@@ -397,15 +389,15 @@ contract BTCETHRebalancingManager {
             units[0] = ethBtcPrice.mul(btcMultiplier);
             units[1] = PRICE_PRECISION.mul(DECIMAL_DIFF_MULTIPLIER).mul(ethMultiplier);
             naturalUnit = 10**12;
-
-            // Calculate the nextSet dollar value (in cents)
-            nextSetDollarAmount = calculateSetTokenPriceUSD(
-                _btcPrice,
-                _ethPrice,
-                naturalUnit,
-                units
-            );
         }
+
+        // Calculate the nextSet dollar value (in cents)
+        nextSetDollarAmount = calculateSetTokenPriceUSD(
+            _btcPrice,
+            _ethPrice,
+            naturalUnit,
+            units
+        );
 
         return (naturalUnit, nextSetDollarAmount, units);
     }

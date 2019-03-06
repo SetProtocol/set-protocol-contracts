@@ -347,14 +347,7 @@ contract ETHDaiRebalancingManager {
 
             // Create unit array and define natural unit
             units[0] = daiUnits.mul(daiMultiplier);
-            units[1] = ethMultiplier.mul(PRICE_PRECISION);
-
-            // Calculate the nextSet dollar value (in cents)
-            nextSetDollarAmount = calculateSetTokenPriceUSD(
-                _ethPrice,
-                nextSetNaturalUnit,
-                units
-            );           
+            units[1] = ethMultiplier.mul(PRICE_PRECISION);          
         } else {
             // Calculate dai units as (daiPrice/ethPrice)*100. 100 is used to add 
             // precision.
@@ -362,15 +355,15 @@ contract ETHDaiRebalancingManager {
 
             // Create unit array and define natural unit
             units[0] = daiMultiplier.mul(PRICE_PRECISION); 
-            units[1] = ethDaiPrice.mul(ethMultiplier);
-
-            // Calculate the nextSet dollar value (in cents)
-            nextSetDollarAmount = calculateSetTokenPriceUSD(
-                _ethPrice,
-                nextSetNaturalUnit,
-                units
-            );          
+            units[1] = ethDaiPrice.mul(ethMultiplier);         
         }
+
+        // Calculate the nextSet dollar value (in cents)
+        nextSetDollarAmount = calculateSetTokenPriceUSD(
+            _ethPrice,
+            nextSetNaturalUnit,
+            units
+        ); 
 
         return (nextSetNaturalUnit, nextSetDollarAmount, units);
     }

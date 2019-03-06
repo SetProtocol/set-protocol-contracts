@@ -27,12 +27,12 @@ import { RebalancingHelperLibrary } from "../../core/lib/RebalancingHelperLibrar
 
 
 /**
- * @title BTCETHRebalancingManager
+ * @title BTCDaiRebalancingManager
  * @author Set Protocol
  *
- * Contract used to manage a BTCETH Rebalancing Set Token
+ * Contract used to manage a BTCDai Rebalancing Set Token
  */
-contract BTCETHRebalancingManager {
+contract BTCDaiRebalancingManager {
 
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
@@ -41,29 +41,30 @@ contract BTCETHRebalancingManager {
 
     uint256 constant PRICE_PRECISION = 100;
     uint256 constant AUCTION_LIB_PRICE_DIVISOR = 1000;
+    // Equal to $1 
+    uint256 constant DAI_PRICE = 10**18;
+    uint256 constant DAI_DECIMALS = 18;
     uint256 constant BTC_DECIMALS = 8;
-    uint256 constant ETH_DECIMALS = 18;
-    uint256 constant SET_TOKEN_DECIMALS = 18;
     uint256 constant DECIMAL_DIFF_MULTIPLIER = 10**10;
+    uint256 constant SET_TOKEN_DECIMALS = 18;
     uint256 constant THIRTY_MINUTES_IN_SECONDS = 1800;
     uint256 constant VALUE_TO_CENTS_CONVERSION = 10**16;
 
 
     /* ============ State Variables ============ */
 
+    address public daiAddress;
     address public btcAddress;
-    address public ethAddress;
     address public setTokenFactory;
 
     address public btcPriceFeed;
-    address public ethPriceFeed;
 
     address public coreAddress;
 
     address public auctionLibrary;
     uint256 public auctionTimeToPivot;
+    uint256 public daiMultiplier;
     uint256 public btcMultiplier;
-    uint256 public ethMultiplier;
 
     uint256 public maximumLowerThreshold;
     uint256 public minimumUpperThreshold;
@@ -71,8 +72,7 @@ contract BTCETHRebalancingManager {
     /* ============ Events ============ */
 
     event LogManagerProposal(
-        uint256 btcPrice,
-        uint256 ethPrice
+        uint256 btcPrice
     );
 
     /* ============ Constructor ============ */
@@ -81,28 +81,27 @@ contract BTCETHRebalancingManager {
      * Rebalancing Token Manager constructor.
      * The multipliers are used to calculate the allocation of the set token. Allocation
      * is determined by a simple equation:
-     *      btcAllocation = btcMultiplier/(btcMultiplier + ethMultiplier)
+     *      daiAllocation = daiMultiplier/(daiMultiplier + btcMultiplier)
      * Furthermore the total USD cost of any new Set Token allocation can be found from the
      * following equation:
-     *      SetTokenUSDPrice = (btcMultiplier + ethMultiplier)*max(ethPrice, btcPrice)
+     *      SetTokenUSDPrice = (daiMultiplier + btcMultiplier)*max(btcPrice, daiPrice)
      *
      * @param  _coreAddress             The address of the Core contract
-     * @param  _btcPriceFeedAddress     The address of BTC medianizer
-     * @param  _ethPriceFeedAddress     The address of ETH medianizer
-     * @param  _btcAddress              The address of the wrapped BTC contract
-     * @param  _ethAddress              The address of the wrapped ETH contract
+     * @param  _btcPriceFeedAddress     The address of btc medianizer
+     * @param  _daiAddress              The address of the Dai contract
+     * @param  _btcAddress              The address of the wrapped btc contract
      * @param  _setTokenFactory         The address of the SetTokenFactory
      * @param  _auctionLibrary          The address of auction price curve to use in rebalance
      * @param  _auctionTimeToPivot      The amount of time until pivot reached in rebalance
-     * @param  _btcMultiplier           With _ethMultiplier, the ratio amount of wbtc to include
-     * @param  _ethMultiplier           With _btcMultiplier, the ratio amount of weth to include
+     * @param  _multipliers             Token multipliers used to determine allocation
+     * @param  _allocationBounds        Bounds to stop proposal if not enough deviation from expected allocation
+     *                                  set to be [lowerBound, upperBound]
      */
     constructor(
         address _coreAddress,
         address _btcPriceFeedAddress,
-        address _ethPriceFeedAddress,
+        address _daiAddress,
         address _btcAddress,
-        address _ethAddress,
         address _setTokenFactory,
         address _auctionLibrary,
         uint256 _auctionTimeToPivot,
@@ -115,20 +114,19 @@ contract BTCETHRebalancingManager {
             _allocationBounds[1] >= _allocationBounds[0],
             "RebalancingTokenManager.constructor: Upper allocation bound must be greater than lower."
         );
-
+        
         coreAddress = _coreAddress;
 
         btcPriceFeed = _btcPriceFeedAddress;
-        ethPriceFeed = _ethPriceFeedAddress;
 
+        daiAddress = _daiAddress;
         btcAddress = _btcAddress;
-        ethAddress = _ethAddress;
         setTokenFactory = _setTokenFactory;
 
         auctionLibrary = _auctionLibrary;
         auctionTimeToPivot = _auctionTimeToPivot;
-        btcMultiplier = _multipliers[0];
-        ethMultiplier = _multipliers[1];
+        daiMultiplier = _multipliers[0];
+        btcMultiplier = _multipliers[1];
 
         maximumLowerThreshold = _allocationBounds[0];
         minimumUpperThreshold = _allocationBounds[1];
@@ -165,34 +163,24 @@ contract BTCETHRebalancingManager {
         );
 
         // Get price data
-        uint256 btcPrice;
-        uint256 ethPrice;
-        (
-            btcPrice,
-            ethPrice
-        ) = queryPriceData();
+        uint256 btcPrice = queryPriceData();
 
         // Require that allocation has changed sufficiently enough to justify rebalance
         uint256 currentSetDollarAmount = checkSufficientAllocationChange(
             btcPrice,
-            ethPrice,
             rebalancingSetInterface.currentSet()
         );
-
+        
         // Create new Set Token that collateralizes Rebalancing Set Token
-        address nextSetAddress;
-        uint256 auctionStartPrice;
-        uint256 auctionPivotPrice;
         (
-            nextSetAddress,
-            auctionStartPrice,
-            auctionPivotPrice
+            address nextSetAddress,
+            uint256 auctionStartPrice,
+            uint256 auctionPivotPrice
         ) = createNewAllocationSetToken(
             btcPrice,
-            ethPrice,
             currentSetDollarAmount
         );
-
+        
         // Propose new allocation to Rebalancing Set Token
         rebalancingSetInterface.propose(
             nextSetAddress,
@@ -203,44 +191,40 @@ contract BTCETHRebalancingManager {
         );
 
         emit LogManagerProposal(
-            btcPrice,
-            ethPrice
+            btcPrice
         );
     }
 
     /* ============ Internal ============ */
     /*
-     * Query price feeds for wbtc and weth, return as uint256
+     * Query price feed for wbtc, return as uint256
      *
+     * @return          BTC price
      */
     function queryPriceData()
         private
         view
-        returns (uint256, uint256)
+        returns (uint256)
     {
-        // Get prices from oracles
+        // Get price from oracles
         bytes32 btcPriceBytes = IMedian(btcPriceFeed).read();
-        bytes32 ethPriceBytes = IMedian(ethPriceFeed).read();
 
         // Cast bytes32 prices to uint256
         uint256 btcPrice = uint256(btcPriceBytes);
-        uint256 ethPrice = uint256(ethPriceBytes);
 
-        return (btcPrice, ethPrice);
+        return (btcPrice);
     }
 
     /*
-     * Check there has been a sufficient change in allocation (greater than 2%) and return
-     * USD value of currentSet.
+     * Check there has been a sufficient change in allocation as defined by maximumUpperThreshold
+     * and minimumLowerThreshold and return USD value of currentSet.
      *
-     * @param  _btcPrice              The 18 decimal value of one full BTC
-     * @param  _ethPrice              The 18 decimal value of one full ETH
+     * @param  _btcPrice              The 18 decimal dollar value of one full BTC
      * @param  _currentSetAddress     The address of the Rebalancing Set Token's currentSet
      * @return                        The currentSet's USD value (in cents)
      */
     function checkSufficientAllocationChange(
         uint256 _btcPrice,
-        uint256 _ethPrice,
         address _currentSetAddress
     )
         private
@@ -254,29 +238,29 @@ contract BTCETHRebalancingManager {
         uint256 currentSetNaturalUnit = currentSetTokenInterface.naturalUnit();
         uint256[] memory currentSetUnits = currentSetTokenInterface.getUnits();
 
+        // Calculate dai dollar value in currentSet (in cents)
+        uint256 daiDollarAmount = calculateTokenAllocationAmountUSD(
+            DAI_PRICE,
+            currentSetNaturalUnit,
+            currentSetUnits[0],
+            DAI_DECIMALS
+        );
+
         // Calculate wbtc dollar value in currentSet (in cents)
         uint256 btcDollarAmount = calculateTokenAllocationAmountUSD(
             _btcPrice,
             currentSetNaturalUnit,
-            currentSetUnits[0],
+            currentSetUnits[1],
             BTC_DECIMALS
         );
 
-        // Calculate weth dollar value in currentSet (in cents)
-        uint256 ethDollarAmount = calculateTokenAllocationAmountUSD(
-            _ethPrice,
-            currentSetNaturalUnit,
-            currentSetUnits[1],
-            ETH_DECIMALS
-        );
-
         // Total dollar value of currentSet (in cents)
-        uint256 currentSetDollarAmount = btcDollarAmount.add(ethDollarAmount);
+        uint256 currentSetDollarAmount = daiDollarAmount.add(btcDollarAmount);
 
-        // Require that the allocation has changed more than 2% in order for a rebalance to be called
+        // Require that the allocation has changed enough to trigger buy or sell
         require(
-            btcDollarAmount.mul(100).div(currentSetDollarAmount) >= minimumUpperThreshold ||
-            btcDollarAmount.mul(100).div(currentSetDollarAmount) < maximumLowerThreshold,
+            daiDollarAmount.mul(100).div(currentSetDollarAmount) >= minimumUpperThreshold ||
+            daiDollarAmount.mul(100).div(currentSetDollarAmount) < maximumLowerThreshold,
             "RebalancingTokenManager.proposeNewRebalance: Allocation must be further away from 50 percent"
         );
 
@@ -287,8 +271,7 @@ contract BTCETHRebalancingManager {
      * Determine units and naturalUnit of nextSet to propose, calculate auction parameters, and
      * create nextSet
      *
-     * @param  _btcPrice                    The 18 decimal value of one full BTC
-     * @param  _ethPrice                    The 18 decimal value of one full ETH
+     * @param  _btcPrice                    The 18 decimal dollar value of one full BTC
      * @param  _currentSetDollarAmount      The USD value of the Rebalancing Set Token's currentSet
      * @return address                      The address of nextSet
      * @return uint256                      The auctionStartPrice for rebalance auction
@@ -296,41 +279,34 @@ contract BTCETHRebalancingManager {
      */
     function createNewAllocationSetToken(
         uint256 _btcPrice,
-        uint256 _ethPrice,
         uint256 _currentSetDollarAmount
     )
         private
         returns (address, uint256, uint256)
     {
         // Calculate the nextSet units and naturalUnit, determine dollar value of nextSet
-        uint256 nextSetNaturalUnit;
-        uint256 nextSetDollarAmount;
-        uint256[] memory nextSetUnits;
         (
-            nextSetNaturalUnit,
-            nextSetDollarAmount,
-            nextSetUnits
+            uint256 nextSetNaturalUnit,
+            uint256 nextSetDollarAmount,
+            uint256[] memory nextSetUnits
         ) = calculateNextSetUnits(
-            _btcPrice,
-            _ethPrice
+            _btcPrice
         );
 
         // Calculate the auctionStartPrice and auctionPivotPrice of rebalance auction using dollar value
         // of both the current and nextSet
-        uint256 auctionStartPrice;
-        uint256 auctionPivotPrice;
         (
-            auctionStartPrice,
-            auctionPivotPrice
+            uint256 auctionStartPrice,
+            uint256 auctionPivotPrice
         ) = calculateAuctionPriceParameters(
             _currentSetDollarAmount,
             nextSetDollarAmount
         );
-
+        
         // Create static components array
         address[] memory nextSetComponents = new address[](2);
-        nextSetComponents[0] = btcAddress;
-        nextSetComponents[1] = ethAddress;
+        nextSetComponents[0] = daiAddress;
+        nextSetComponents[1] = btcAddress;
 
         // Create the nextSetToken contract that collateralized the Rebalancing Set Token once rebalance
         // is finished
@@ -339,8 +315,8 @@ contract BTCETHRebalancingManager {
             nextSetComponents,
             nextSetUnits,
             nextSetNaturalUnit,
-            bytes32("BTCETH"),
-            bytes32("BTCETH"),
+            bytes32("DAIBTC"),
+            bytes32("DAIBTC"),
             ""
         );
 
@@ -351,55 +327,46 @@ contract BTCETHRebalancingManager {
      * Determine units and naturalUnit of nextSet to propose
      *
      * @param  _btcPrice          The 18 decimal value of one full BTC
-     * @param  _ethPrice          The 18 decimal value of one full ETH
      * @return uint256            The naturalUnit of nextSet
      * @return uint256            The dollar value of nextSet
      * @return uint256[]          The units of nextSet
      */
     function calculateNextSetUnits(
-        uint256 _btcPrice,
-        uint256 _ethPrice
+        uint256 _btcPrice
     )
         private
-        view
         returns (uint256, uint256, uint256[] memory)
     {
         // Initialize set token parameters
-        uint256 naturalUnit;
         uint256[] memory units = new uint256[](2);
         uint256 nextSetDollarAmount;
+        uint256 nextSetNaturalUnit = DECIMAL_DIFF_MULTIPLIER.mul(PRICE_PRECISION);
 
-        if (_btcPrice >= _ethPrice) {
-            // Calculate ethereum units, determined by the following equation:
-            // (btcPrice/ethPrice)*(10**(ethDecimal-btcDecimal))
-            uint256 ethUnits = _btcPrice.mul(DECIMAL_DIFF_MULTIPLIER).div(_ethPrice);
+        if (_btcPrice >= DAI_PRICE) {
+            // Dai units is equal the USD Bitcoin price
+            uint256 daiUnits = _btcPrice.mul(DECIMAL_DIFF_MULTIPLIER).div(DAI_PRICE);
 
             // Create unit array and define natural unit
-            units[0] = btcMultiplier;
-            units[1] = ethUnits.mul(ethMultiplier);
-            naturalUnit = 10**10;
+            units[0] = daiUnits.mul(daiMultiplier).mul(PRICE_PRECISION);
+            units[1] = btcMultiplier.mul(PRICE_PRECISION);          
         } else {
-            // Calculate btc units as (ethPrice/btcPrice)*100. 100 is used to add
-            // precision. The increase in unit amounts is offset by increasing the
-            // naturalUnit by two orders of magnitude so that issuance cost is still
-            // roughly the same
-            uint256 ethBtcPrice = _ethPrice.mul(PRICE_PRECISION).div(_btcPrice);
+            // Calculate btc units as (daiPrice/btcPrice)*100. 100 is used to add 
+            // precision.
+            uint256 btcDaiPrice = DAI_PRICE.mul(PRICE_PRECISION).div(_btcPrice);
 
             // Create unit array and define natural unit
-            units[0] = ethBtcPrice.mul(btcMultiplier);
-            units[1] = PRICE_PRECISION.mul(DECIMAL_DIFF_MULTIPLIER).mul(ethMultiplier);
-            naturalUnit = 10**12;
+            units[0] = daiMultiplier.mul(DECIMAL_DIFF_MULTIPLIER).mul(PRICE_PRECISION); 
+            units[1] = btcDaiPrice.mul(btcMultiplier);        
         }
 
         // Calculate the nextSet dollar value (in cents)
         nextSetDollarAmount = calculateSetTokenPriceUSD(
             _btcPrice,
-            _ethPrice,
-            naturalUnit,
+            nextSetNaturalUnit,
             units
-        );
+        ); 
 
-        return (naturalUnit, nextSetDollarAmount, units);
+        return (nextSetNaturalUnit, nextSetDollarAmount, units);
     }
 
     /*
@@ -442,39 +409,37 @@ contract BTCETHRebalancingManager {
      * Get USD value of one set
      *
      * @param  _btcPrice            The 18 decimal value of one full BTC
-     * @param  _ethPrice            The 18 decimal value of one full ETH
      * @param  _naturalUnit         The naturalUnit of the set being valued
      * @param  _units               The units of the set being valued
      * @return uint256              The USD value of the set (in cents)
      */
     function calculateSetTokenPriceUSD(
         uint256 _btcPrice,
-        uint256 _ethPrice,
         uint256 _naturalUnit,
         uint256[] memory _units
     )
         private
-        pure
+        view
         returns (uint256)
     {
+        // Calculate daiDollarAmount of one Set Token (in cents) 
+        uint256 daiDollarAmount = calculateTokenAllocationAmountUSD(
+            DAI_PRICE,
+            _naturalUnit,
+            _units[0],
+            DAI_DECIMALS
+        );
+
         // Calculate btcDollarAmount of one Set Token (in cents)
         uint256 btcDollarAmount = calculateTokenAllocationAmountUSD(
             _btcPrice,
             _naturalUnit,
-            _units[0],
+            _units[1],
             BTC_DECIMALS
         );
 
-        // Calculate ethDollarAmount of one Set Token (in cents)
-        uint256 ethDollarAmount = calculateTokenAllocationAmountUSD(
-            _ethPrice,
-            _naturalUnit,
-            _units[1],
-            ETH_DECIMALS
-        );
-
         // Return sum of two components USD value (in cents)
-        return btcDollarAmount.add(ethDollarAmount);
+        return daiDollarAmount.add(btcDollarAmount);        
     }
 
     /*
@@ -493,14 +458,14 @@ contract BTCETHRebalancingManager {
         uint256 _tokenDecimals
     )
         private
-        pure
+        view
         returns (uint256)
     {
         // Calculate the amount of component base units are in one full set token
         uint256 componentUnitsInFullToken = _unit
             .mul(10**SET_TOKEN_DECIMALS)
             .div(_naturalUnit);
-
+        
         // Return value of component token in one full set token, divide by 10**16 to turn tokenPrice into cents
         return _tokenPrice
             .mul(componentUnitsInFullToken)

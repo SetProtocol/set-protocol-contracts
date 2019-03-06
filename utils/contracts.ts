@@ -1,6 +1,7 @@
 import { AuthorizableContract } from '../types/generated/authorizable';
 import { BadTokenMockContract } from '../types/generated/bad_token_mock';
 import { BaseContract } from '../types/base_contract';
+import { BTCDaiRebalancingManagerContract } from '../types/generated/b_t_c_dai_rebalancing_manager';
 import { BTCETHRebalancingManagerContract } from '../types/generated/b_t_c_e_t_h_rebalancing_manager';
 import { Bytes32MockContract } from '../types/generated/bytes32_mock';
 import { CommonMathMockContract } from '../types/generated/common_math_mock';
@@ -54,6 +55,7 @@ export {
   AuthorizableContract,
   BadTokenMockContract,
   BaseContract,
+  BTCDaiRebalancingManagerContract,
   BTCETHRebalancingManagerContract,
   Bytes32MockContract,
   CommonMathMockContract,

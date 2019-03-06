@@ -3,6 +3,7 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 
 import {
+  BTCDaiRebalancingManagerContract,
   BTCETHRebalancingManagerContract,
   ConstantAuctionPriceCurveContract,
   CoreContract,
@@ -35,6 +36,7 @@ import { CoreWrapper } from './coreWrapper';
 import { ERC20Wrapper } from './erc20Wrapper';
 
 const web3 = getWeb3();
+const BTCDaiRebalancingManager = artifacts.require('BTCDaiRebalancingManager');
 const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const ETHDaiRebalancingManager = artifacts.require('ETHDaiRebalancingManager');
@@ -714,22 +716,54 @@ export class RebalancingWrapper {
     );
   }
 
+  public async deployBTCDaiRebalancingManagerAsync(
+    coreAddress: Address,
+    btcPriceFeedAddress: Address,
+    daiAddress: Address,
+    btcAddress: Address,
+    setTokenFactoryAddress: Address,
+    auctionLibrary: Address,
+    auctionTimeToPivot: BigNumber = new BigNumber(100000),
+    multiplers: BigNumber[],
+    allocationBounds: BigNumber[],
+    from: Address = this._tokenOwnerAddress
+  ): Promise<BTCDaiRebalancingManagerContract> {
+    const truffleRebalacingTokenManager = await BTCDaiRebalancingManager.new(
+      coreAddress,
+      btcPriceFeedAddress,
+      daiAddress,
+      btcAddress,
+      setTokenFactoryAddress,
+      auctionLibrary,
+      auctionTimeToPivot,
+      multiplers,
+      allocationBounds,
+      { from },
+    );
+
+    return new BTCDaiRebalancingManagerContract(
+      new web3.eth.Contract(truffleRebalacingTokenManager.abi, truffleRebalacingTokenManager.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
   public getExpectedGeneralNextSetParameters(
     tokenOnePrice: BigNumber,
     tokenTwoPrice: BigNumber,
     tokenOneMultiplier: BigNumber,
     tokenTwoMultiplier: BigNumber,
     decimalDifference: BigNumber,
+    pricePrecision: BigNumber
   ): any {
     let units: BigNumber[];
-    const PRICE_PRECISION = new BigNumber(100);
-    const naturalUnit: BigNumber = PRICE_PRECISION.mul(decimalDifference);
+
+    const naturalUnit: BigNumber = pricePrecision.mul(decimalDifference);
     if (tokenTwoPrice.greaterThanOrEqualTo(tokenOnePrice)) {
-      const tokenOneUnits = tokenTwoPrice.mul(decimalDifference).mul(PRICE_PRECISION).div(tokenOnePrice).round(0, 3);
-      units = [tokenOneMultiplier.mul(tokenOneUnits), tokenTwoMultiplier.mul(PRICE_PRECISION)];
+      const tokenOneUnits = tokenTwoPrice.mul(decimalDifference).mul(pricePrecision).div(tokenOnePrice).round(0, 3);
+      units = [tokenOneMultiplier.mul(tokenOneUnits), tokenTwoMultiplier.mul(pricePrecision)];
     } else {
-      const tokenTwoUnits = tokenOnePrice.mul(PRICE_PRECISION).div(tokenTwoPrice).round(0, 3);
-      units = [PRICE_PRECISION.mul(decimalDifference).mul(tokenOneMultiplier), tokenTwoUnits];
+      const tokenTwoUnits = tokenOnePrice.mul(pricePrecision).div(tokenTwoPrice).round(0, 3);
+      units = [pricePrecision.mul(decimalDifference).mul(tokenOneMultiplier), tokenTwoUnits.mul(tokenTwoMultiplier)];
     }
 
     return {
@@ -745,6 +779,7 @@ export class RebalancingWrapper {
     tokenTwoMultiplier: BigNumber,
     tokenOneDecimals: BigNumber,
     tokenTwoDecimals: BigNumber,
+    pricePrecision: BigNumber,
     auctionTimeToPivot: BigNumber,
     currentSetToken: SetTokenContract,
   ): Promise<any> {
@@ -755,7 +790,8 @@ export class RebalancingWrapper {
       tokenTwoPrice,
       tokenOneMultiplier,
       tokenTwoMultiplier,
-      tokenTwoDecimals.div(tokenOneDecimals),
+      tokenOneDecimals.div(tokenTwoDecimals),
+      pricePrecision,
     );
 
     const currentSetNaturalUnit = await currentSetToken.naturalUnit.callAsync();

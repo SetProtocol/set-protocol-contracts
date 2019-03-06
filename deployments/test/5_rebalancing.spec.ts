@@ -311,7 +311,6 @@ describe('Deployment: Rebalancing', () => {
       const linearAuctionPriceLibrary = await getContractAddress(LinearAuctionPriceCurve.contractName);
       const receivedLinearAuctionPriceAddress = await rebalancingManagerContract.methods.auctionLibrary().call();
       expect(receivedLinearAuctionPriceAddress).toContain(linearAuctionPriceLibrary);
-
     });
 
     it('rebalancing manager has correct Dai multiplier', async () => {

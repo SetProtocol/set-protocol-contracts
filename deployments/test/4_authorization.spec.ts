@@ -76,7 +76,6 @@ describe('Deployment: Authorization', () => {
       const timelock = await vaultContract.methods.timeLockPeriod().call();
       expect(parseInt(timelock)).toEqual(expectedTimeLockPeriod);
     });
-
   });
 
   describe('Authorized Vault addresses', () => {
@@ -150,7 +149,6 @@ describe('Deployment: Authorization', () => {
       const rebalancingSetTokenFactoryAddress = await getContractAddress(RebalancingSetTokenFactory.contractName);
       expect(factories).toContain(rebalancingSetTokenFactoryAddress);
     });
-
   });
 
   describe('Modules in Core', () => {
@@ -185,7 +183,6 @@ describe('Deployment: Authorization', () => {
       );
       expect(modules).toContain(rebalanceTokenIssuanceModuleAddress);
     });
-
   });
 
   describe('Exchanges in Core', () => {
@@ -232,8 +229,6 @@ describe('Deployment: Authorization', () => {
       }
       const linearAuctionPriceCurveAddress = await getContractAddress(LinearAuctionPriceCurve.contractName);
       expect(priceLibraries).toContain(linearAuctionPriceCurveAddress);
-
     });
   });
-
 });

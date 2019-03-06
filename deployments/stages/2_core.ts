@@ -15,13 +15,14 @@ import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain'
 import BigNumber from 'bignumber.js';
 
 import {
-  VaultContract,
-  TransferProxyContract,
   CoreContract,
-  SetTokenFactoryContract,
-  WhiteListContract,
   RebalancingSetTokenFactoryContract,
-  StandardTokenMockContract
+  SetTokenFactoryContract,
+  StandardTokenMockContract,
+  TransferProxyContract,
+  VaultContract,
+  WethMockContract,
+  WhiteListContract,
 } from '../../utils/contracts';
 
 import { Core } from '../../artifacts/ts/Core';
@@ -37,6 +38,7 @@ import { StandardSettleRebalanceLibrary } from '../../artifacts/ts/StandardSettl
 import { StandardStartRebalanceLibrary } from '../../artifacts/ts/StandardStartRebalanceLibrary';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
+import { WethMock } from '../../artifacts/ts/WethMock';
 import { WhiteList } from '../../artifacts/ts/WhiteList';
 
 import dependencies from '../dependencies';
@@ -68,7 +70,7 @@ export class CoreStage implements DeploymentStageInterface {
     }
 
     if (!dependencies.WETH[networkId]) {
-      await this.deployDummyToken(DEPENDENCY.WETH, 18);
+      await this.deployDummyWETH(DEPENDENCY.WETH);
     }
 
     if (!dependencies.WETH[networkId]) {
@@ -258,4 +260,22 @@ export class CoreStage implements DeploymentStageInterface {
     return await StandardTokenMockContract.at(address, this._web3, TX_DEFAULTS);
   }
 
+  private async deployDummyWETH(name: string): Promise<WethMockContract> {
+    let address = await getContractAddress(name);
+
+    if (address) {
+      return await WethMockContract.at(address, this._web3, TX_DEFAULTS);
+    }
+
+    const data = new this._web3.eth.Contract(WethMock.abi).deploy({
+      data: WethMock.bytecode,
+      arguments: [
+        this._web3.eth.accounts.privateKeyToAccount(this._privateKey).address,
+        new BigNumber(10000).pow(18).toString(),
+      ],
+    }).encodeABI();
+
+    address = await deployContract(data, this._web3, name);
+    return await WethMockContract.at(address, this._web3, TX_DEFAULTS);
+  }
 }

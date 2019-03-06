@@ -53,7 +53,6 @@ describe('Deployment: Core', () => {
       const code = await getContractCode(TransferProxy.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
-
   });
 
   describe('Core', () => {
@@ -86,7 +85,6 @@ describe('Deployment: Core', () => {
       const vaultAddress = await getContractAddress(Vault.contractName);
       expect(coreState.vault).toEqual(vaultAddress);
     });
-
   });
 
   describe('Set Token Factory', () => {
@@ -112,7 +110,6 @@ describe('Deployment: Core', () => {
       const retrievedCoreAddress = await setTokenFactoryContract.methods.core().call();
       expect(coreAddress).toEqual(retrievedCoreAddress);
     });
-
   });
 
   describe('White List', () => {
@@ -145,7 +142,6 @@ describe('Deployment: Core', () => {
       expect(whitelistAddresses).toContain(daiAddress);
       expect(whitelistAddresses.length).toEqual(3);
     });
-
   });
 
   describe('Set Rebalancing Token Factory', () => {
@@ -215,7 +211,5 @@ describe('Deployment: Core', () => {
       const maximumTimeToPivot = await networkConstants.maximumRebalanceTimeToPivot[networkName];
       expect(parseInt(retrievedMaximumTimeToPivot)).toEqual(maximumTimeToPivot);
     });
-
   });
-
 });

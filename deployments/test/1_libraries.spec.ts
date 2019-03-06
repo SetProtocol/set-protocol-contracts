@@ -39,7 +39,6 @@ describe('Deployment: Libraries', () => {
       const code = await getContractCode(ERC20Wrapper.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
-
   });
 
   describe('ExchangeIssuanceLibrary', () => {
@@ -53,7 +52,6 @@ describe('Deployment: Libraries', () => {
       const code = await getContractCode(ExchangeIssuanceLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
-
   });
 
   describe('CoreIssuanceLibrary', () => {
@@ -62,7 +60,6 @@ describe('Deployment: Libraries', () => {
       const code = await getContractCode(CoreIssuanceLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
-
   });
 
   describe('Rebalancing Libraries', () => {
@@ -109,6 +106,5 @@ describe('Deployment: Libraries', () => {
       const code = await getContractCode(StandardFailAuctionLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
-
   });
 });

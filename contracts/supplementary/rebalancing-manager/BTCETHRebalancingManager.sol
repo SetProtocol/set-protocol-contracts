@@ -49,7 +49,7 @@ contract BTCETHRebalancingManager {
     uint256 constant VALUE_TO_CENTS_CONVERSION = 10**16;
 
 
-    /* ============ State Variabales ============ */
+    /* ============ State Variables ============ */
 
     address public btcAddress;
     address public ethAddress;
@@ -87,8 +87,8 @@ contract BTCETHRebalancingManager {
      *      SetTokenUSDPrice = (btcMultiplier + ethMultiplier)*max(ethPrice, btcPrice)
      *
      * @param  _coreAddress             The address of the Core contract
-     * @param  _btcPriceFeedAddress     The address of BTC medianize
-     * @param  _ethPriceFeedAddress     The address of ETH medianize
+     * @param  _btcPriceFeedAddress     The address of BTC medianizer
+     * @param  _ethPriceFeedAddress     The address of ETH medianizer
      * @param  _btcAddress              The address of the wrapped BTC contract
      * @param  _ethAddress              The address of the wrapped ETH contract
      * @param  _setTokenFactory         The address of the SetTokenFactory

@@ -51,7 +51,7 @@ contract BTCDaiRebalancingManager {
     uint256 constant VALUE_TO_CENTS_CONVERSION = 10**16;
 
 
-    /* ============ State Variabales ============ */
+    /* ============ State Variables ============ */
 
     address public daiAddress;
     address public btcAddress;
@@ -87,7 +87,7 @@ contract BTCDaiRebalancingManager {
      *      SetTokenUSDPrice = (daiMultiplier + btcMultiplier)*max(btcPrice, daiPrice)
      *
      * @param  _coreAddress             The address of the Core contract
-     * @param  _btcPriceFeedAddress     The address of btc medianize
+     * @param  _btcPriceFeedAddress     The address of btc medianizer
      * @param  _daiAddress              The address of the Dai contract
      * @param  _btcAddress              The address of the wrapped btc contract
      * @param  _setTokenFactory         The address of the SetTokenFactory

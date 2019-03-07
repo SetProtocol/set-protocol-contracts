@@ -17,7 +17,6 @@ import {
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
-  VaultContract,
   WethMockContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
@@ -48,12 +47,10 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
   const [
     ownerAccount,
     functionCaller,
-    whitelist,
   ] = accounts;
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let rebalancingTokenIssuanceModule: RebalancingTokenIssuanceModuleContract;
@@ -72,24 +69,13 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
     ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(RebalancingTokenIssuanceModule.abi);
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+    transferProxy = await coreWrapper.getDeployedTransferProxyAsync();
+    core = await coreWrapper.getDeployedCoreAsync();
+    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
+    rebalancingSetTokenFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
+    rebalancingTokenIssuanceModule = await coreWrapper.getDeployedRebalancingTokenIssuanceModuleAsync();
 
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-
-    rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address, whitelist);
-    await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
-
-    rebalancingTokenIssuanceModule = await coreWrapper.deployRebalancingTokenIssuanceModuleAsync(
-      core,
-      vault
-    );
-    await coreWrapper.addModuleAsync(core, rebalancingTokenIssuanceModule.address);
-
-    wrappedEther = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
+    wrappedEther = await erc20Wrapper.getDeployedWETHAsync();
   });
 
   after(async () => {
@@ -118,9 +104,8 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
     const WETH_DECIMALS: number = 18;
 
     const BTC_COMPONENT_UNITS = new BigNumber(1);
-    const WETH_COMPONENT_UNITS = BTC_USD_PRICE
-                                  .div(ETH_USD_PRICE)
-                                  .mul(new BigNumber(10).pow(WETH_DECIMALS - BTC_DECIMALS));
+    const WETH_COMPONENT_UNITS = BTC_USD_PRICE.div(ETH_USD_PRICE)
+                                              .mul(new BigNumber(10).pow(WETH_DECIMALS - BTC_DECIMALS));
 
     let bitcoinEtherSetIssueQuantity: BigNumber;
 
@@ -140,6 +125,7 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
       await wrappedEther.approve.sendTransactionAsync(
         transferProxy.address,
         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        { from: ownerAccount }
       );
 
       // Create the Set with BTC and WETH in realistic quantities
@@ -169,9 +155,8 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
       subjectRebalancingSetAddress = rebalancingSetToken.address;
 
       subjectRedeemQuantity = new BigNumber(10 ** 18);
-      bitcoinEtherSetIssueQuantity = subjectRedeemQuantity
-                                      .mul(rebalancingUnitShares)
-                                      .div(DEFAULT_REBALANCING_NATURAL_UNIT);
+      bitcoinEtherSetIssueQuantity = subjectRedeemQuantity.mul(rebalancingUnitShares)
+                                                          .div(DEFAULT_REBALANCING_NATURAL_UNIT);
 
       await coreWrapper.issueSetTokenAsync(
         core,
@@ -184,6 +169,7 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
         functionCaller,
         rebalancingSetToken.address,
         subjectRedeemQuantity,
+        { from: ownerAccount }
       );
     });
 
@@ -192,10 +178,7 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
         subjectRebalancingSetAddress,
         subjectRedeemQuantity,
         subjectComponentsToExclude,
-        {
-          from: subjectCaller,
-          gas: DEFAULT_GAS,
-        },
+        { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
 
@@ -219,9 +202,8 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
     it('attributes WBTC to the caller', async () => {
       await subject();
 
-      const expectedWrappedBitcoinBalance = bitcoinEtherSetIssueQuantity
-                                            .mul(BTC_COMPONENT_UNITS)
-                                            .div(bitcoinEtherNaturalUnit);
+      const expectedWrappedBitcoinBalance = bitcoinEtherSetIssueQuantity.mul(BTC_COMPONENT_UNITS)
+                                                                        .div(bitcoinEtherNaturalUnit);
 
       const wrappedBitcoinBalance = await wrappedBitcoin.balanceOf.callAsync(subjectCaller);
       expect(wrappedBitcoinBalance).to.bignumber.equal(expectedWrappedBitcoinBalance);
@@ -230,9 +212,8 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
     it('attributes WETH to the caller', async () => {
       await subject();
 
-      const expectedWrappedEtherBalance = bitcoinEtherSetIssueQuantity
-                                            .mul(WETH_COMPONENT_UNITS)
-                                            .div(bitcoinEtherNaturalUnit);
+      const expectedWrappedEtherBalance = bitcoinEtherSetIssueQuantity.mul(WETH_COMPONENT_UNITS)
+                                                                      .div(bitcoinEtherNaturalUnit);
 
       const wrappedEtherBalance = await wrappedEther.balanceOf.callAsync(subjectCaller);
       expect(wrappedEtherBalance).to.bignumber.equal(expectedWrappedEtherBalance);

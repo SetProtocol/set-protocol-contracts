@@ -71,6 +71,31 @@ export default {
     staging: 50,
     development: 50,
   },
+  btcDaiProposalPeriod: {
+    production: constants.ONE_DAY_IN_SECONDS,
+    staging: constants.THIRTY_MINUTES_IN_SECONDS,
+    development: constants.ONE_DAY_IN_SECONDS,
+  },
+  btcDaiRebalanceInterval: {
+    production: constants.THIRTY_DAYS_IN_SECONDS,
+    staging: constants.THIRTY_MINUTES_IN_SECONDS,
+    development: constants.ONE_DAY_IN_SECONDS,
+  },
+  btcDaiRebalanceManagerAuctionTimeToPivot: {
+    production: constants.ONE_DAY_IN_SECONDS,
+    staging: constants.ONE_HOUR_IN_SECONDS,
+    development: constants.ONE_DAY_IN_SECONDS,
+  },
+  btcDaiRebalanceManagerAllocationUpperBound: {
+    production: 60,
+    staging: 50,
+    development: 50,
+  },
+  btcDaiRebalanceManagerAllocationLowerBound: {
+    production: 40,
+    staging: 50,
+    development: 50,
+  },
   timeLockPeriod: {
     production: 0,
     staging: 0,

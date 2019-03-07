@@ -66,9 +66,6 @@ contract RebalancingSetToken is
     IVault private vaultInstance;
     IWhiteList private componentWhiteListInstance;
 
-    // All rebalancingSetTokens have same natural unit, still allows for
-    // small amounts to be issued and attempts to reduce slippage as much
-    // as possible.
     uint256 public naturalUnit;
     address public manager;
     RebalancingHelperLibrary.State public rebalanceState;

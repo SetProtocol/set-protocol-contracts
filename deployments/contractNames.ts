@@ -3,6 +3,8 @@ export const DEPLOYED_TOKEN = {
   BitEthRebalancingSetToken: 'BitEthRebalancingSetToken',
   ETHDaiInitialCollateralSet: 'ETHDaiInitialCollateralSet',
   ETHDaiRebalancingSetToken: 'ETHDaiRebalancingSetToken',
+  BTCDaiInitialCollateralSet: 'BTCDaiInitialCollateralSet',
+  BTCDaiRebalancingSetToken: 'BTCDaiRebalancingSetToken',
 };
 
 export const DEPENDENCY = {

@@ -1,30 +1,31 @@
 import constants from '../constants';
 import BigNumber from 'bignumber.js';
 
-export function calculateInitialSetUnits() {
+export function calculateInitialSetUnits(
+  btcMultiplier,
+  ethMultiplier,
+  pricePrecision,
+) {
   let units = [];
   let naturalUnit: BigNumber = new BigNumber(0);
 
-  const WBTC_PRICE = constants.WBTC.PRICE;
-  const WBTC_MULTIPLIER = constants.BITETH.WBTC_MULTIPLIER;
-  const WETH_MULTIPLIER = constants.BITETH.WETH_MULTIPLIER;
-  const WETH_PRICE = constants.WETH.PRICE;
+  const BTC_PRICE = constants.WBTC.PRICE;
+  const ETH_PRICE = constants.WETH.PRICE;
   const DECIMAL_DIFFERENCE_MULTIPLIER = constants.WETH.FULL_TOKEN_UNITS.div(constants.WBTC.FULL_TOKEN_UNITS);
-  const PRICE_PRECISION = constants.BITETH.PRICE_PRECISION;
 
-  if (WBTC_PRICE.greaterThanOrEqualTo(WETH_PRICE)) {
-    const ethUnits = WBTC_PRICE.mul(DECIMAL_DIFFERENCE_MULTIPLIER).div(WETH_PRICE).round(0, 3);
+  if (BTC_PRICE.greaterThanOrEqualTo(ETH_PRICE)) {
+    const ethUnits = BTC_PRICE.mul(DECIMAL_DIFFERENCE_MULTIPLIER).div(ETH_PRICE).round(0, 3);
     units = [
-      constants.DEFAULT_WBTC_UNIT.mul(WBTC_MULTIPLIER).toNumber(),
-      ethUnits.mul(WETH_MULTIPLIER).toNumber(),
+      constants.DEFAULT_WBTC_UNIT.mul(btcMultiplier).toNumber(),
+      ethUnits.mul(ethMultiplier).toNumber(),
     ];
     naturalUnit = constants.DEFAULT_COLLATERAL_NATURAL_UNIT;
   } else {
-    const btcUnits = WETH_PRICE.mul(PRICE_PRECISION).div(WBTC_PRICE).round(0, 3);
-    const ethUnits = PRICE_PRECISION.mul(DECIMAL_DIFFERENCE_MULTIPLIER);
+    const btcUnits = ETH_PRICE.mul(pricePrecision).div(BTC_PRICE).round(0, 3);
+    const ethUnits = pricePrecision.mul(DECIMAL_DIFFERENCE_MULTIPLIER);
     units = [
-      btcUnits.mul(WBTC_MULTIPLIER).toNumber(),
-      ethUnits.mul(WETH_MULTIPLIER).toNumber(),
+      btcUnits.mul(btcMultiplier).toNumber(),
+      ethUnits.mul(ethMultiplier).toNumber(),
     ];
     naturalUnit = constants.WETH_DOMINANT_COLLATERAL_NATURAL_UNIT;
   }
@@ -95,4 +96,21 @@ export function calculateGeneralInitialSetUnits(
     units,
     naturalUnit,
   };
+}
+
+export function calculateAllocationBounds(
+  checkedTokenMultiplier,
+  otherTokenMultiplier,
+  lowerBound,
+  upperBound,
+): string[] {
+  const allocationLowerBound = checkedTokenMultiplier
+                                   .div(checkedTokenMultiplier.add(otherTokenMultiplier))
+                                   .mul(new BigNumber(100))
+                                   .sub(lowerBound);
+  const allocationUpperBound = checkedTokenMultiplier
+                                   .div(checkedTokenMultiplier.add(otherTokenMultiplier))
+                                   .mul(new BigNumber(100))
+                                   .add(upperBound);
+  return [allocationLowerBound.toString(), allocationUpperBound.toString()];
 }

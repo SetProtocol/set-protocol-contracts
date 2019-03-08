@@ -24,24 +24,6 @@ export default {
     PRICE: new BigNumber(1),
   },
 
-  BTCDAI_BTD: {
-    PRICE_PRECISION: new BigNumber(100),
-    DAI_MULTIPLIER: new BigNumber(1),
-    WBTC_MULTIPLIER: new BigNumber(1),
-  },
-
-  ETHDAI_BTD: {
-    PRICE_PRECISION: new BigNumber(100),
-    DAI_MULTIPLIER: new BigNumber(1),
-    WETH_MULTIPLIER: new BigNumber(1),
-  },
-
-  BITETH: {
-    PRICE_PRECISION: new BigNumber(100),
-    WBTC_MULTIPLIER: new BigNumber(1),
-    WETH_MULTIPLIER: new BigNumber(1),
-  },
-
   DEFAULT_REBALANCING_NATURAL_UNIT: new BigNumber(10 ** 6),
   REBALANCING_SET_USD_PRICE: new BigNumber(100),
   DEFAULT_AUCTION_PRICE_NUMERATOR: 1374,

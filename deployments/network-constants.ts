@@ -37,14 +37,14 @@ export default {
     development: constants.ONE_DAY_IN_SECONDS,
   },
   bitEthRebalanceManagerAllocationUpperBound: {
-    production: 52,
-    staging: 50,
-    development: 50,
+    production: 2,
+    staging: 0,
+    development: 0,
   },
   bitEthRebalanceManagerAllocationLowerBound: {
-    production: 48,
-    staging: 50,
-    development: 50,
+    production: 2,
+    staging: 0,
+    development: 0,
   },
   ethDaiProposalPeriod: {
     production: constants.ONE_DAY_IN_SECONDS,
@@ -62,14 +62,14 @@ export default {
     development: constants.ONE_DAY_IN_SECONDS,
   },
   ethDaiRebalanceManagerAllocationUpperBound: {
-    production: 60,
-    staging: 50,
-    development: 50,
+    production: 10,
+    staging: 0,
+    development: 0,
   },
   ethDaiRebalanceManagerAllocationLowerBound: {
-    production: 40,
-    staging: 50,
-    development: 50,
+    production: 10,
+    staging: 0,
+    development: 0,
   },
   btcDaiProposalPeriod: {
     production: constants.ONE_DAY_IN_SECONDS,
@@ -87,14 +87,14 @@ export default {
     development: constants.ONE_DAY_IN_SECONDS,
   },
   btcDaiRebalanceManagerAllocationUpperBound: {
-    production: 60,
-    staging: 50,
-    development: 50,
+    production: 10,
+    staging: 0,
+    development: 0,
   },
   btcDaiRebalanceManagerAllocationLowerBound: {
-    production: 40,
-    staging: 50,
-    development: 50,
+    production: 10,
+    staging: 0,
+    development: 0,
   },
   timeLockPeriod: {
     production: 0,

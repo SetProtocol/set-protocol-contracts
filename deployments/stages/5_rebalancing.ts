@@ -104,8 +104,8 @@ export class RebalancingStage implements DeploymentStageInterface {
     const allocationBounds = calculateAllocationBounds(
       setParams.WBTC_MULTIPLIER,
       setParams.WETH_MULTIPLIER,
-      networkConstants.bitEthRebalanceManagerAllocationLowerBound[this._networkConstant],
-      networkConstants.bitEthRebalanceManagerAllocationUpperBound[this._networkConstant],
+      setParams.ALLOCATION_LOWER_BOUND[this._networkConstant],
+      setParams.ALLOCATION_UPPER_BOUND[this._networkConstant],
     );
 
     const data = new this._web3.eth.Contract(BTCETHRebalancingManager.abi).deploy({
@@ -118,7 +118,7 @@ export class RebalancingStage implements DeploymentStageInterface {
         wethAddress,
         setTokenFactoryAddress,
         linearAuctionCurveAddress,
-        networkConstants.bitEthRebalanceManagerAuctionTimeToPivot[this._networkConstant],
+        setParams.AUCTION_TIME_TO_PIVOT[this._networkConstant],
         [
           setParams.WBTC_MULTIPLIER.toString(),
           setParams.WETH_MULTIPLIER.toString()
@@ -199,8 +199,8 @@ export class RebalancingStage implements DeploymentStageInterface {
     const rebalancingSetSymbol = SetProtocolUtils.stringToBytes(setParams.SET_SYMBOL);
     const rebalancingSetCallData = SetProtocolUtils.generateRebalancingSetTokenCallData(
       rebalancingManagerAddress,
-      networkConstants.bitEthProposalPeriod[this._networkConstant],
-      networkConstants.bitEthRebalanceInterval[this._networkConstant]
+      setParams.PROPOSAL_PERIOD[this._networkConstant],
+      setParams.REBALANCE_INTERVAL[this._networkConstant]
     );
 
     const data = await this._coreContract.createSet.getABIEncodedTransactionData(
@@ -240,8 +240,8 @@ export class RebalancingStage implements DeploymentStageInterface {
     const allocationBounds = calculateAllocationBounds(
       DEPLOYED_SETS_INFO.ETHDAI_BTD.DAI_MULTIPLIER,
       DEPLOYED_SETS_INFO.ETHDAI_BTD.WETH_MULTIPLIER,
-      networkConstants.ethDaiRebalanceManagerAllocationLowerBound[this._networkConstant],
-      networkConstants.ethDaiRebalanceManagerAllocationUpperBound[this._networkConstant],
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.ALLOCATION_LOWER_BOUND[this._networkConstant],
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.ALLOCATION_UPPER_BOUND[this._networkConstant],
     );
 
     const data = new this._web3.eth.Contract(ETHDaiRebalancingManager.abi).deploy({
@@ -253,7 +253,7 @@ export class RebalancingStage implements DeploymentStageInterface {
         wethAddress,
         setTokenFactoryAddress,
         linearAuctionCurveAddress,
-        networkConstants.ethDaiRebalanceManagerAuctionTimeToPivot[this._networkConstant],
+        DEPLOYED_SETS_INFO.ETHDAI_BTD.AUCTION_TIME_TO_PIVOT[this._networkConstant],
         [
           DEPLOYED_SETS_INFO.ETHDAI_BTD.DAI_MULTIPLIER.toString(),
           DEPLOYED_SETS_INFO.ETHDAI_BTD.WETH_MULTIPLIER.toString()
@@ -342,8 +342,8 @@ export class RebalancingStage implements DeploymentStageInterface {
     const rebalancingSetSymbol = SetProtocolUtils.stringToBytes(DEPLOYED_SETS_INFO.ETHDAI_BTD.SET_SYMBOL);
     const rebalancingSetCallData = SetProtocolUtils.generateRebalancingSetTokenCallData(
       rebalancingManagerAddress,
-      networkConstants.ethDaiProposalPeriod[this._networkConstant],
-      networkConstants.ethDaiRebalanceInterval[this._networkConstant]
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.PROPOSAL_PERIOD[this._networkConstant],
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.REBALANCE_INTERVAL[this._networkConstant]
     );
 
     const data = await this._coreContract.createSet.getABIEncodedTransactionData(
@@ -384,8 +384,8 @@ export class RebalancingStage implements DeploymentStageInterface {
     const allocationBounds = calculateAllocationBounds(
       DEPLOYED_SETS_INFO.BTCDAI_BTD.DAI_MULTIPLIER,
       DEPLOYED_SETS_INFO.BTCDAI_BTD.WBTC_MULTIPLIER,
-      networkConstants.btcDaiRebalanceManagerAllocationLowerBound[this._networkConstant],
-      networkConstants.btcDaiRebalanceManagerAllocationUpperBound[this._networkConstant],
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.ALLOCATION_LOWER_BOUND[this._networkConstant],
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.ALLOCATION_UPPER_BOUND[this._networkConstant],
     );
 
     const data = new this._web3.eth.Contract(BTCDaiRebalancingManager.abi).deploy({
@@ -397,7 +397,7 @@ export class RebalancingStage implements DeploymentStageInterface {
         wbtcAddress,
         setTokenFactoryAddress,
         linearAuctionCurveAddress,
-        networkConstants.btcDaiRebalanceManagerAuctionTimeToPivot[this._networkConstant],
+        DEPLOYED_SETS_INFO.BTCDAI_BTD.AUCTION_TIME_TO_PIVOT[this._networkConstant],
         [
           DEPLOYED_SETS_INFO.BTCDAI_BTD.DAI_MULTIPLIER.toString(),
           DEPLOYED_SETS_INFO.BTCDAI_BTD.WBTC_MULTIPLIER.toString()
@@ -486,8 +486,8 @@ export class RebalancingStage implements DeploymentStageInterface {
     const rebalancingSetSymbol = SetProtocolUtils.stringToBytes(DEPLOYED_SETS_INFO.BTCDAI_BTD.SET_SYMBOL);
     const rebalancingSetCallData = SetProtocolUtils.generateRebalancingSetTokenCallData(
       rebalancingManagerAddress,
-      networkConstants.btcDaiProposalPeriod[this._networkConstant],
-      networkConstants.btcDaiRebalanceInterval[this._networkConstant]
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.PROPOSAL_PERIOD[this._networkConstant],
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.REBALANCE_INTERVAL[this._networkConstant]
     );
 
     const data = await this._coreContract.createSet.getABIEncodedTransactionData(

@@ -64,8 +64,8 @@ describe('Deployment: Rebalancing', () => {
       expectedAllocationBounds = calculateAllocationBounds(
         setParams.WBTC_MULTIPLIER,
         setParams.WETH_MULTIPLIER,
-        networkConstants.bitEthRebalanceManagerAllocationLowerBound[networkName],
-        networkConstants.bitEthRebalanceManagerAllocationUpperBound[networkName],
+        setParams.ALLOCATION_LOWER_BOUND[networkName],
+        setParams.ALLOCATION_UPPER_BOUND[networkName],
       );
     });
 
@@ -108,7 +108,12 @@ describe('Deployment: Rebalancing', () => {
       const linearAuctionPriceLibrary = await getContractAddress(LinearAuctionPriceCurve.contractName);
       const receivedLinearAuctionPriceAddress = await rebalancingManagerContract.methods.auctionLibrary().call();
       expect(receivedLinearAuctionPriceAddress).toContain(linearAuctionPriceLibrary);
+    });
 
+    it('rebalancing manager has correct auctionTimeToPivot', async () => {
+      const receivedAuctionTimeToPivot = await rebalancingManagerContract.methods.auctionTimeToPivot().call();
+      const auctionTimeToPivot = setParams.AUCTION_TIME_TO_PIVOT[networkName].toString();
+      expect(receivedAuctionTimeToPivot.toString()).toEqual(auctionTimeToPivot);
     });
 
     it('rebalancing manager has correct wBTC multiplier', async () => {
@@ -240,7 +245,7 @@ describe('Deployment: Rebalancing', () => {
 
     it('rebalanced set should have the correct proposal period', async () => {
       const receivedProposalPeriod = await bitEthRebalancingSetToken.methods.proposalPeriod().call();
-      expect(receivedProposalPeriod.toString()).toEqual(networkConstants.bitEthProposalPeriod[networkName].toString());
+      expect(receivedProposalPeriod.toString()).toEqual(setParams.PROPOSAL_PERIOD[networkName].toString());
     });
 
     it('rebalanced set should have the correct rebalance interval', async () => {
@@ -248,7 +253,7 @@ describe('Deployment: Rebalancing', () => {
       expect(
         receivedRebalanceInterval.toString()
       ).toEqual(
-        networkConstants.bitEthRebalanceInterval[networkName].toString()
+        setParams.REBALANCE_INTERVAL[networkName].toString()
       );
     });
 
@@ -295,8 +300,8 @@ describe('Deployment: Rebalancing', () => {
       expectedAllocationBounds = calculateAllocationBounds(
         setParams.WBTC_MULTIPLIER,
         setParams.WETH_MULTIPLIER,
-        networkConstants.bitEthRebalanceManagerAllocationLowerBound[networkName],
-        networkConstants.bitEthRebalanceManagerAllocationUpperBound[networkName],
+        setParams.ALLOCATION_LOWER_BOUND[networkName],
+        setParams.ALLOCATION_UPPER_BOUND[networkName],
       );
     });
 
@@ -339,6 +344,12 @@ describe('Deployment: Rebalancing', () => {
       const linearAuctionPriceLibrary = await getContractAddress(LinearAuctionPriceCurve.contractName);
       const receivedLinearAuctionPriceAddress = await rebalancingManagerContract.methods.auctionLibrary().call();
       expect(receivedLinearAuctionPriceAddress).toContain(linearAuctionPriceLibrary);
+    });
+
+    it('rebalancing manager has correct auctionTimeToPivot', async () => {
+      const receivedAuctionTimeToPivot = await rebalancingManagerContract.methods.auctionTimeToPivot().call();
+      const auctionTimeToPivot = setParams.AUCTION_TIME_TO_PIVOT[networkName].toString();
+      expect(receivedAuctionTimeToPivot.toString()).toEqual(auctionTimeToPivot);
     });
 
     it('rebalancing manager has correct wBTC multiplier', async () => {
@@ -470,7 +481,7 @@ describe('Deployment: Rebalancing', () => {
 
     it('rebalanced set should have the correct proposal period', async () => {
       const receivedProposalPeriod = await bitEthRebalancingSetToken.methods.proposalPeriod().call();
-      expect(receivedProposalPeriod.toString()).toEqual(networkConstants.bitEthProposalPeriod[networkName].toString());
+      expect(receivedProposalPeriod.toString()).toEqual(setParams.PROPOSAL_PERIOD[networkName].toString());
     });
 
     it('rebalanced set should have the correct rebalance interval', async () => {
@@ -478,7 +489,7 @@ describe('Deployment: Rebalancing', () => {
       expect(
         receivedRebalanceInterval.toString()
       ).toEqual(
-        networkConstants.bitEthRebalanceInterval[networkName].toString()
+        setParams.REBALANCE_INTERVAL[networkName].toString()
       );
     });
 
@@ -524,8 +535,8 @@ describe('Deployment: Rebalancing', () => {
       expectedAllocationBounds = calculateAllocationBounds(
         setParams.DAI_MULTIPLIER,
         setParams.WETH_MULTIPLIER,
-        networkConstants.ethDaiRebalanceManagerAllocationLowerBound[networkName],
-        networkConstants.ethDaiRebalanceManagerAllocationUpperBound[networkName],
+        setParams.ALLOCATION_LOWER_BOUND[networkName],
+        setParams.ALLOCATION_UPPER_BOUND[networkName],
       );
     });
 
@@ -562,6 +573,12 @@ describe('Deployment: Rebalancing', () => {
       const linearAuctionPriceLibrary = await getContractAddress(LinearAuctionPriceCurve.contractName);
       const receivedLinearAuctionPriceAddress = await rebalancingManagerContract.methods.auctionLibrary().call();
       expect(receivedLinearAuctionPriceAddress).toContain(linearAuctionPriceLibrary);
+    });
+
+    it('rebalancing manager has correct auctionTimeToPivot', async () => {
+      const receivedAuctionTimeToPivot = await rebalancingManagerContract.methods.auctionTimeToPivot().call();
+      const auctionTimeToPivot = setParams.AUCTION_TIME_TO_PIVOT[networkName].toString();
+      expect(receivedAuctionTimeToPivot.toString()).toEqual(auctionTimeToPivot);
     });
 
     it('rebalancing manager has correct Dai multiplier', async () => {
@@ -697,7 +714,7 @@ describe('Deployment: Rebalancing', () => {
 
     it('rebalanced set should have the correct proposal period', async () => {
       const receivedProposalPeriod = await ethDaiRebalancingSetToken.methods.proposalPeriod().call();
-      expect(receivedProposalPeriod.toString()).toEqual(networkConstants.ethDaiProposalPeriod[networkName].toString());
+      expect(receivedProposalPeriod.toString()).toEqual(setParams.PROPOSAL_PERIOD[networkName].toString());
     });
 
     it('rebalanced set should have the correct rebalance interval', async () => {
@@ -705,7 +722,7 @@ describe('Deployment: Rebalancing', () => {
       expect(
         receivedRebalanceInterval.toString()
       ).toEqual(
-        networkConstants.ethDaiRebalanceInterval[networkName].toString()
+        setParams.REBALANCE_INTERVAL[networkName].toString()
       );
     });
 
@@ -753,8 +770,8 @@ describe('Deployment: Rebalancing', () => {
       expectedAllocationBounds = calculateAllocationBounds(
         setParams.DAI_MULTIPLIER,
         setParams.WBTC_MULTIPLIER,
-        networkConstants.btcDaiRebalanceManagerAllocationLowerBound[networkName],
-        networkConstants.btcDaiRebalanceManagerAllocationUpperBound[networkName],
+        setParams.ALLOCATION_LOWER_BOUND[networkName],
+        setParams.ALLOCATION_UPPER_BOUND[networkName],
       );
     });
 
@@ -795,7 +812,7 @@ describe('Deployment: Rebalancing', () => {
 
     it('rebalancing manager has correct auctionTimeToPivot', async () => {
       const receivedAuctionTimeToPivot = await rebalancingManagerContract.methods.auctionTimeToPivot().call();
-      const auctionTimeToPivot = networkConstants.btcDaiRebalanceManagerAuctionTimeToPivot[networkName].toString();
+      const auctionTimeToPivot = setParams.AUCTION_TIME_TO_PIVOT[networkName].toString();
       expect(receivedAuctionTimeToPivot.toString()).toEqual(auctionTimeToPivot);
     });
 
@@ -932,7 +949,7 @@ describe('Deployment: Rebalancing', () => {
 
     it('rebalanced set should have the correct proposal period', async () => {
       const receivedProposalPeriod = await btcDaiRebalancingSetToken.methods.proposalPeriod().call();
-      expect(receivedProposalPeriod.toString()).toEqual(networkConstants.btcDaiProposalPeriod[networkName].toString());
+      expect(receivedProposalPeriod.toString()).toEqual(setParams.PROPOSAL_PERIOD[networkName].toString());
     });
 
     it('rebalanced set should have the correct rebalance interval', async () => {
@@ -940,7 +957,7 @@ describe('Deployment: Rebalancing', () => {
       expect(
         receivedRebalanceInterval.toString()
       ).toEqual(
-        networkConstants.btcDaiRebalanceInterval[networkName].toString()
+        setParams.REBALANCE_INTERVAL[networkName].toString()
       );
     });
 

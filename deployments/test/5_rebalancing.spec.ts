@@ -23,7 +23,7 @@ import { SetToken } from '../../artifacts/ts/SetToken';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 import { WhiteList } from '../../artifacts/ts/WhiteList';
 
-import { DEPLOYED_SETS_INFO } from '../contractNames';
+import { DEPLOYED_SETS_INFO } from '../deployedContractParameters';
 import dependencies from '../dependencies';
 import constants from '../constants';
 import networkConstants from '../network-constants';

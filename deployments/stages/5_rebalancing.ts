@@ -31,7 +31,7 @@ import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCu
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 
-import { DEPLOYED_SETS_INFO, DEPENDENCY } from '../contractNames';
+import { DEPLOYED_SETS_INFO, DEPENDENCY } from '../deployedContractParameters';
 import networkConstants from '../network-constants';
 import constants from '../constants';
 

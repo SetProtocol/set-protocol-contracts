@@ -1,8 +1,8 @@
 # To make it really easy to work with the outputs file from the manager, 
 # this script converts the JSON file into a typescript file
 
-# Remove old transpiled outputs from the deployments/ directory
-rm -f deployments/outputs.ts
+# Remove old transpiled outputs from the artifacts/ directory
+rm -f artifacts/outputs.ts
 
 # Output a TS file from the generated JSON file
 

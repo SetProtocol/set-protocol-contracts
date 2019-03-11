@@ -378,6 +378,7 @@ contract('Vault', accounts => {
     let subjectTokenAddresses: Address[] = undefined;
     const authorized: Address = authorizedAccount;
     let subjectCaller: Address = authorizedAccount;
+    let subjectToAccount: Address;
     let subjectAmountsToWithdraw: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
 
     beforeEach(async () => {
@@ -404,6 +405,8 @@ contract('Vault', accounts => {
         subjectAmountsToWithdraw[1],
         authorizedAccount,
       );
+
+      subjectToAccount = otherAccount;
     });
 
     afterEach(async () => {
@@ -414,7 +417,7 @@ contract('Vault', accounts => {
     async function subject(): Promise<string> {
       return vault.batchWithdrawTo.sendTransactionAsync(
         subjectTokenAddresses,
-        ownerAccount,
+        subjectToAccount,
         subjectAmountsToWithdraw,
         { from: subjectCaller },
       );
@@ -430,8 +433,8 @@ contract('Vault', accounts => {
     it('should increment the balance of the user by the correct amount', async () => {
       await subject();
 
-      await assertTokenBalanceAsync(mockToken, ZERO, subjectCaller);
-      await assertTokenBalanceAsync(mockToken2, ZERO, subjectCaller);
+      await assertTokenBalanceAsync(mockToken, DEPLOYED_TOKEN_QUANTITY, subjectToAccount);
+      await assertTokenBalanceAsync(mockToken2, DEPLOYED_TOKEN_QUANTITY, subjectToAccount);
     });
 
     describe('when the quantities are zero', async () => {
@@ -443,7 +446,7 @@ contract('Vault', accounts => {
         const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
-          otherAccount
+          subjectToAccount
         );
 
         await subject();
@@ -451,7 +454,7 @@ contract('Vault', accounts => {
         const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
-          otherAccount
+          subjectToAccount
         );
         expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(oldReceiverBalances));
       });
@@ -502,9 +505,12 @@ contract('Vault', accounts => {
     let subjectTokenAddresses: Address[] = [NULL_ADDRESS, randomTokenAddress];
     const authorized: Address = authorizedAccount;
     let subjectCaller: Address = authorizedAccount;
+    let subjectOwner: Address;
     let subjectAmountsToIncrement: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
 
     beforeEach(async () => {
+      subjectOwner = ownerAccount;
+
       vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorized);
     });
@@ -518,7 +524,7 @@ contract('Vault', accounts => {
     async function subject(): Promise<string> {
       return vault.batchIncrementTokenOwner.sendTransactionAsync(
         subjectTokenAddresses,
-        ownerAccount,
+        subjectOwner,
         subjectAmountsToIncrement,
         { from: subjectCaller },
       );
@@ -528,7 +534,7 @@ contract('Vault', accounts => {
       const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
-        ownerAccount
+        subjectOwner
       );
 
       await subject();
@@ -536,7 +542,7 @@ contract('Vault', accounts => {
       const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
-        ownerAccount
+        subjectOwner
       );
       const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
         balance.add(subjectAmountsToIncrement[index])
@@ -553,7 +559,7 @@ contract('Vault', accounts => {
         const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
-          otherAccount
+          subjectOwner
         );
 
         await subject();
@@ -561,7 +567,7 @@ contract('Vault', accounts => {
         const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
-          otherAccount
+          subjectOwner
         );
         expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(oldReceiverBalances));
       });
@@ -612,15 +618,18 @@ contract('Vault', accounts => {
     let subjectTokenAddresses: Address[] = [NULL_ADDRESS, randomTokenAddress];
     const authorized: Address = authorizedAccount;
     let subjectCaller: Address = authorizedAccount;
+    let subjectOwner: Address;
     let subjectAmountsToDecrement: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
 
     beforeEach(async () => {
+      subjectOwner = ownerAccount;
+
       vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorized);
 
       await coreWrapper.incrementAccountBalanceAsync(
         vault,
-        ownerAccount,
+        subjectOwner,
         subjectTokenAddresses[0],
         subjectAmountsToDecrement[0],
         authorizedAccount,
@@ -628,7 +637,7 @@ contract('Vault', accounts => {
 
       await coreWrapper.incrementAccountBalanceAsync(
         vault,
-        ownerAccount,
+        subjectOwner,
         subjectTokenAddresses[1],
         subjectAmountsToDecrement[1],
         authorizedAccount,
@@ -644,7 +653,7 @@ contract('Vault', accounts => {
     async function subject(): Promise<string> {
       return vault.batchDecrementTokenOwner.sendTransactionAsync(
         subjectTokenAddresses,
-        ownerAccount,
+        subjectOwner,
         subjectAmountsToDecrement,
         { from: subjectCaller },
       );
@@ -654,7 +663,7 @@ contract('Vault', accounts => {
       const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
-        ownerAccount
+        subjectOwner
       );
 
       await subject();
@@ -662,7 +671,7 @@ contract('Vault', accounts => {
       const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
-        ownerAccount
+        subjectOwner
       );
       const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
         balance.sub(subjectAmountsToDecrement[index])
@@ -679,7 +688,7 @@ contract('Vault', accounts => {
         const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
-          otherAccount
+          subjectOwner
         );
 
         await subject();
@@ -687,7 +696,7 @@ contract('Vault', accounts => {
         const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
-          otherAccount
+          subjectOwner
         );
         expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(oldReceiverBalances));
       });
@@ -778,7 +787,7 @@ contract('Vault', accounts => {
       const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
-        ownerAccount
+        subjectFromAddress
       );
 
       await subject();
@@ -786,7 +795,7 @@ contract('Vault', accounts => {
       const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
-        ownerAccount
+        subjectFromAddress
       );
       const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
         balance.sub(subjectAmountsToTransfer[index])
@@ -798,7 +807,7 @@ contract('Vault', accounts => {
       const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
-        otherAccount
+        subjectToAddress
       );
 
       await subject();
@@ -806,7 +815,7 @@ contract('Vault', accounts => {
       const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
-        otherAccount
+        subjectToAddress
       );
       const expectedReceiverBalances = _.map(oldReceiverBalances, (balance, index) =>
         balance.add(subjectAmountsToTransfer[index])
@@ -827,7 +836,7 @@ contract('Vault', accounts => {
         const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
-          ownerAccount
+          subjectFromAddress
         );
 
         await subject();
@@ -835,7 +844,7 @@ contract('Vault', accounts => {
         const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
-          ownerAccount
+          subjectFromAddress
         );
         expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(oldSenderBalances));
       });
@@ -844,7 +853,7 @@ contract('Vault', accounts => {
         const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
-          otherAccount
+          subjectToAddress
         );
 
         await subject();
@@ -852,7 +861,7 @@ contract('Vault', accounts => {
         const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
-          otherAccount
+          subjectToAddress
         );
         expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(oldReceiverBalances));
       });
@@ -926,6 +935,8 @@ contract('Vault', accounts => {
         balance,
         authorizedAccount,
       );
+
+      subjectTokenAddress = mockToken.address;
     });
 
     afterEach(async () => {
@@ -934,11 +945,8 @@ contract('Vault', accounts => {
     });
 
     async function subject(): Promise<BigNumber> {
-      // Initialize tokenAddress to deployed token's address unless subjectTokenAddress is overwritten in test cases
-      const tokenAddress = subjectTokenAddress || mockToken.address;
-
       return vault.getOwnerBalance.callAsync(
-        tokenAddress,
+        subjectTokenAddress,
         ownerAccount,
         { from: subjectCaller },
       );

@@ -76,92 +76,93 @@ contract('CoreAccounting', accounts => {
   describe('#deposit', async () => {
     const tokenOwner: Address = ownerAccount;
     const approver: Address = ownerAccount;
-    let amountToDeposit: BigNumber;
-    let depositor: Address;
+    let subjectToken: StandardTokenMockContract;
+    let subjectQuantity: BigNumber;
+    let subjectCaller: Address;
 
     beforeEach(async () => {
-      mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
-      await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
+      subjectToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
+      await erc20Wrapper.approveTransferAsync(subjectToken, transferProxy.address, approver);
 
-      amountToDeposit = DEPLOYED_TOKEN_QUANTITY;
-      depositor = ownerAccount;
+      subjectQuantity = DEPLOYED_TOKEN_QUANTITY;
+      subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<string> {
       return core.deposit.sendTransactionAsync(
-        mockToken.address,
-        amountToDeposit,
-        { from: depositor, gas: DEFAULT_GAS },
+        subjectToken.address,
+        subjectQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
 
     it('transfers the correct amount of tokens from the caller', async () => {
-      const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
+      const existingOwnerTokenBalance = await subjectToken.balanceOf.callAsync(subjectCaller);
 
       await subject();
 
-      const newOwnerBalance = existingOwnerTokenBalance.sub(amountToDeposit);
-      await assertTokenBalanceAsync(mockToken, newOwnerBalance, ownerAccount);
+      const newOwnerBalance = existingOwnerTokenBalance.sub(subjectQuantity);
+      await assertTokenBalanceAsync(subjectToken, newOwnerBalance, subjectCaller);
     });
 
     it('transfers the correct amount of tokens to the vault', async () => {
-      const existingVaultTokenBalance = await mockToken.balanceOf.callAsync(vault.address);
+      const existingVaultTokenBalance = await subjectToken.balanceOf.callAsync(vault.address);
 
       await subject();
 
-      const newVaultBalance = existingVaultTokenBalance.add(amountToDeposit);
-      await assertTokenBalanceAsync(mockToken, newVaultBalance, vault.address);
+      const newVaultBalance = existingVaultTokenBalance.add(subjectQuantity);
+      await assertTokenBalanceAsync(subjectToken, newVaultBalance, vault.address);
     });
 
     it('increments the vault balance of the token of the owner by the correct amount', async () => {
-      const existingOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
+      const existingOwnerVaultBalance = await vault.balances.callAsync(subjectToken.address, subjectCaller);
 
       await subject();
 
-      const newOwnerBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
-      expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(amountToDeposit));
+      const newOwnerBalance = await vault.balances.callAsync(subjectToken.address, subjectCaller);
+      expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(subjectQuantity));
     });
 
     describe('when the amount is not the full balance of the token for the owner', async () => {
       beforeEach(async () => {
-        amountToDeposit = DEPLOYED_TOKEN_QUANTITY.div(2);
+        subjectQuantity = DEPLOYED_TOKEN_QUANTITY.div(2);
       });
 
       it('should transfer the correct amount from the vault to the withdrawer', async () => {
-        const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
-        const existingVaultTokenBalance = await mockToken.balanceOf.callAsync(vault.address);
-        const existingOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
+        const existingOwnerTokenBalance = await subjectToken.balanceOf.callAsync(subjectCaller);
+        const existingVaultTokenBalance = await subjectToken.balanceOf.callAsync(vault.address);
+        const existingOwnerVaultBalance = await vault.balances.callAsync(subjectToken.address, subjectCaller);
 
         await subject();
 
-        const newOwnerBalance = existingOwnerTokenBalance.sub(amountToDeposit);
-        await assertTokenBalanceAsync(mockToken, newOwnerBalance, ownerAccount);
+        const newOwnerBalance = existingOwnerTokenBalance.sub(subjectQuantity);
+        await assertTokenBalanceAsync(subjectToken, newOwnerBalance, subjectCaller);
 
-        const newVaultBalance = existingVaultTokenBalance.add(amountToDeposit);
-        await assertTokenBalanceAsync(mockToken, newVaultBalance, vault.address);
+        const newVaultBalance = existingVaultTokenBalance.add(subjectQuantity);
+        await assertTokenBalanceAsync(subjectToken, newVaultBalance, vault.address);
 
-        const newOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
-        expect(newOwnerVaultBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(amountToDeposit));
+        const newOwnerVaultBalance = await vault.balances.callAsync(subjectToken.address, subjectCaller);
+        expect(newOwnerVaultBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(subjectQuantity));
       });
     });
 
     describe('when the quantity is 0', async () => {
       beforeEach(async () => {
-        amountToDeposit = ZERO;
+        subjectQuantity = ZERO;
       });
 
       it('should should not update the users balance', async () => {
-        const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
+        const existingOwnerTokenBalance = await subjectToken.balanceOf.callAsync(subjectCaller);
 
         await subject();
 
-        await assertTokenBalanceAsync(mockToken, existingOwnerTokenBalance, ownerAccount);
+        await assertTokenBalanceAsync(subjectToken, existingOwnerTokenBalance, subjectCaller);
       });
     });
 
     describe('when the depositor does not have the correct balance', async () => {
       beforeEach(async () => {
-        depositor = otherAccount;
+        subjectCaller = otherAccount;
       });
 
       it('should revert', async () => {
@@ -188,20 +189,23 @@ contract('CoreAccounting', accounts => {
     const approver: Address = ownerAccount;
     const ownerBalanceInVault: BigNumber = DEPLOYED_TOKEN_QUANTITY;
 
+    let subjectQuantity: BigNumber;
+    let subjectCaller: Address;
+
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
       await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
       await coreWrapper.depositFromUser(core, mockToken.address, ownerBalanceInVault);
-    });
 
-    let amountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;
-    let withdrawer: Address = ownerAccount;
+      subjectQuantity = DEPLOYED_TOKEN_QUANTITY;
+      subjectCaller = ownerAccount;
+    });
 
     async function subject(): Promise<string> {
       return core.withdraw.sendTransactionAsync(
         mockToken.address,
-        amountToWithdraw,
-        { from: withdrawer },
+        subjectQuantity,
+        { from: subjectCaller },
       );
     }
 
@@ -210,7 +214,7 @@ contract('CoreAccounting', accounts => {
 
       await subject();
 
-      const newOwnerBalance = existingOwnerTokenBalance.add(amountToWithdraw);
+      const newOwnerBalance = existingOwnerTokenBalance.add(subjectQuantity);
       await assertTokenBalanceAsync(mockToken, newOwnerBalance, ownerAccount);
     });
 
@@ -219,7 +223,7 @@ contract('CoreAccounting', accounts => {
 
       await subject();
 
-      const newVaultBalance = existingVaultTokenBalance.sub(amountToWithdraw);
+      const newVaultBalance = existingVaultTokenBalance.sub(subjectQuantity);
       await assertTokenBalanceAsync(mockToken, newVaultBalance, vault.address);
     });
 
@@ -229,35 +233,35 @@ contract('CoreAccounting', accounts => {
       await subject();
 
       const newOwnerBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
-      expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(amountToWithdraw));
+      expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(subjectQuantity));
     });
 
     describe('when the amount is not the full balance of the token for the owner', async () => {
       beforeEach(async () => {
-        amountToWithdraw = DEPLOYED_TOKEN_QUANTITY.div(2);
+        subjectQuantity = DEPLOYED_TOKEN_QUANTITY.div(2);
       });
 
-      it('should transfer the correct amount from the vault to the withdrawer', async () => {
+      it('should transfer the correct amount from the vault to the subjectCaller', async () => {
         const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
         const existingVaultTokenBalance = await mockToken.balanceOf.callAsync(vault.address);
         const existingOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
 
         await subject();
 
-        const newOwnerBalance = existingOwnerTokenBalance.add(amountToWithdraw);
+        const newOwnerBalance = existingOwnerTokenBalance.add(subjectQuantity);
         await assertTokenBalanceAsync(mockToken, newOwnerBalance, ownerAccount);
 
-        const newVaultBalance = existingVaultTokenBalance.sub(amountToWithdraw);
+        const newVaultBalance = existingVaultTokenBalance.sub(subjectQuantity);
         await assertTokenBalanceAsync(mockToken, newVaultBalance, vault.address);
 
         const newOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
-        expect(newOwnerVaultBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(amountToWithdraw));
+        expect(newOwnerVaultBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(subjectQuantity));
       });
     });
 
-    describe('when the withdrawer does not have the correct balance', async () => {
+    describe('when the subjectCaller does not have the correct balance', async () => {
       beforeEach(async () => {
-        withdrawer = otherAccount;
+        subjectCaller = otherAccount;
       });
 
       it('should revert', async () => {
@@ -267,7 +271,7 @@ contract('CoreAccounting', accounts => {
 
     describe('when the withdraw amount is zero', async () => {
       beforeEach(async () => {
-        amountToWithdraw = ZERO;
+        subjectQuantity = ZERO;
       });
 
       it('no transfer should occur', async () => {
@@ -281,7 +285,7 @@ contract('CoreAccounting', accounts => {
           }
         });
 
-        expect(transferAddresses).to.not.include(withdrawer);
+        expect(transferAddresses).to.not.include(subjectCaller);
       });
     });
   });
@@ -687,7 +691,7 @@ contract('CoreAccounting', accounts => {
       expect(expectedVaultTokenBalance).to.be.bignumber.equal(newOwnerVaultBalance);
     });
 
-    describe('when the sender does not have the correct balance', async () => {
+    describe('when the sender does not sufficient token balance', async () => {
       beforeEach(async () => {
         subjectAmountToTransfer = DEPLOYED_TOKEN_QUANTITY;
       });

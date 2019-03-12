@@ -49,7 +49,7 @@ import { VaultContract } from '../types/generated/vault';
 import { WethMockContract } from '../types/generated/weth_mock';
 import { WhiteListContract } from '../types/generated/white_list';
 import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
-import { ZeroExOrderDataHandlerMockContract } from '../types/generated/zero_ex_order_data_handler_mock';
+import { ZeroExOrderLibraryMockContract } from '../types/generated/zero_ex_order_library_mock';
 
 export {
   AuthorizableContract,
@@ -103,5 +103,5 @@ export {
   WethMockContract,
   WhiteListContract,
   ZeroExExchangeWrapperContract,
-  ZeroExOrderDataHandlerMockContract,
+  ZeroExOrderLibraryMockContract,
 };

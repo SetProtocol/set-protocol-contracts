@@ -488,7 +488,7 @@ contract('ExchangeIssuanceModule', accounts => {
       });
     });
 
-    describe('when a required component is not a member of the setAddress', async () => {
+    describe('when a receive token is not a member of the Set', async () => {
       before(async () => {
         const notComponent = notExchangeIssueCaller;
         exchangeIssueReceiveTokens = [notComponent, notComponent];
@@ -510,6 +510,21 @@ contract('ExchangeIssuanceModule', accounts => {
 
       after(async () => {
         exchangeIssueReceiveTokenAmounts = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+
+    describe('when the send token amounts is 0', async () => {
+      before(async () => {
+        exchangeIssueSendTokenAmounts = [ZERO, ZERO];
+      });
+
+      after(async () => {
+        exchangeIssueSendTokenAmounts = undefined;
       });
 
       it('should revert', async () => {

@@ -27,7 +27,7 @@ import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 
 
 /**
- * @title Core Rebalance Auction
+ * @title RebalanceAuctionModule
  * @author Set Protocol
  *
  * The CoreBidding extension exposes a bid endpoint for use in the RebalancingSetToken

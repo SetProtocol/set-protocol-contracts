@@ -24,7 +24,7 @@ import { TimeLockUpgrade } from "../../lib/TimeLockUpgrade.sol";
 
 
 /**
- * @title Core Internal
+ * @title CoreInternal
  * @author Set Protocol
  *
  * The CoreInternal contract contains methods to alter state of variables that track

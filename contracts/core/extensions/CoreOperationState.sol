@@ -22,7 +22,7 @@ import { CoreState } from "../lib/CoreState.sol";
 
 
 /**
- * @title Core Operation State
+ * @title CoreOperationState
  * @author Set Protocol
  *
  * The CoreOperationState contract contains methods to alter state of variables that track

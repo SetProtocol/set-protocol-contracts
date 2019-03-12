@@ -4,7 +4,7 @@ import {
   CommonMathMockContract,
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryMockContract,
-  ZeroExOrderDataHandlerMockContract
+  ZeroExOrderLibraryMockContract
 } from '../contracts';
 import {
   getWeb3,
@@ -15,7 +15,7 @@ const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const Bytes32Mock = artifacts.require('Bytes32Mock');
 const CommonMathMock = artifacts.require('CommonMathMock');
 const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
-const ZeroExOrderDataHandlerMock = artifacts.require('ZeroExOrderDataHandlerMock');
+const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
 
 
 export class LibraryMockWrapper {
@@ -79,14 +79,14 @@ export class LibraryMockWrapper {
     );
   }
 
-  public async deployZeroExOrderDataHandlerLibraryAsync(
+  public async deployZeroExOrderLibraryAsync(
     from: Address = this._contractOwnerAddress
-  ): Promise<ZeroExOrderDataHandlerMockContract> {
-    const zeroExExchangeWrapperInstance = await ZeroExOrderDataHandlerMock.new(
+  ): Promise<ZeroExOrderLibraryMockContract> {
+    const zeroExExchangeWrapperInstance = await ZeroExOrderLibraryMock.new(
       { from },
     );
 
-    return new ZeroExOrderDataHandlerMockContract(
+    return new ZeroExOrderLibraryMockContract(
       new web3.eth.Contract(zeroExExchangeWrapperInstance.abi, zeroExExchangeWrapperInstance.address),
       { from },
     );

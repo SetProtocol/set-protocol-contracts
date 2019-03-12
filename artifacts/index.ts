@@ -78,7 +78,7 @@ export {
   WethMockContract,
   WhiteListContract,
   ZeroExExchangeWrapperContract,
-  ZeroExOrderDataHandlerMockContract,
+  ZeroExOrderLibraryMockContract,
 } from "../utils/contracts";
 
 // Export contract artifacts

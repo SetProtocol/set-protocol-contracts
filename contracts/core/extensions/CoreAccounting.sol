@@ -24,7 +24,7 @@ import { CoreState } from "../lib/CoreState.sol";
 
 
 /**
- * @title Core Accounting
+ * @title CoreAccounting
  * @author Set Protocol
  *
  * The CoreAccounting contract interfaces with the vault and transfer proxies for

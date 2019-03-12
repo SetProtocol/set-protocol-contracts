@@ -18,7 +18,7 @@ pragma solidity 0.5.4;
 
 
 /**
- * @title WETH Interface
+ * @title IWETH
  * @author Set Protocol
  *
  * Interface for Wrapped Ether. This interface allows for interaction for wrapped ether's deposit and withdrawal

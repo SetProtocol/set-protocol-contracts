@@ -11,7 +11,7 @@ import { WhiteList } from '../../artifacts/ts/WhiteList';
 import { Vault } from '../../artifacts/ts/Vault';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 
-import { DEPENDENCY } from '../contractNames';
+import { DEPENDENCY } from '../deployedContractParameters';
 import networkConstants from '../network-constants';
 import {
   getNetworkConstant,

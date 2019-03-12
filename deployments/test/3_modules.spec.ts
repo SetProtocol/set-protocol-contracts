@@ -22,7 +22,7 @@ import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper'
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
 
-import { DEPENDENCY } from '../contractNames';
+import { DEPENDENCY } from '../deployedContractParameters';
 import dependencies from '../dependencies';
 import constants from '../constants';
 

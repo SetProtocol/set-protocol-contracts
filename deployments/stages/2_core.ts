@@ -8,7 +8,7 @@ import {
   findDependency
 } from '../utils/output-helper';
 
-import { DEPENDENCY } from '../contractNames';
+import { DEPENDENCY } from '../deployedContractParameters';
 
 import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 

@@ -1,8 +1,9 @@
 import { SetProtocolUtils, SetProtocolTestUtils } from 'set-protocol-utils';
+import BigNumber from 'bignumber.js';
 
 import * as ABIDecoder from 'abi-decoder';
 
-import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
+import { DeployedSetInfo, DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
 import {
   getNetworkConstant,
@@ -30,14 +31,15 @@ import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCu
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 
-import { DEPLOYED_TOKEN, DEPENDENCY } from '../contractNames';
+import { DEPLOYED_SETS_INFO, DEPENDENCY } from '../deployedContractParameters';
 import networkConstants from '../network-constants';
 import constants from '../constants';
 
 import {
+  calculateAllocationBounds,
+  calculateGeneralInitialSetUnits,
   calculateInitialSetUnits,
   calculateRebalancingSetUnitShares,
-  calculateGeneralInitialSetUnits,
 } from '../utils/rebalancing';
 
 export class RebalancingStage implements DeploymentStageInterface {
@@ -65,10 +67,15 @@ export class RebalancingStage implements DeploymentStageInterface {
 
     this._coreContract = await CoreContract.at(coreAddress, this._web3, {from: deployerAccount.address});
 
+    // Deploy BitEth 75/25
+    await this.deployBitEthRebalancingManager(DEPLOYED_SETS_INFO.BITETH_BTC_DOMINANT);
+    await this.deployBitEthInitialCollateralizedSet(DEPLOYED_SETS_INFO.BITETH_BTC_DOMINANT);
+    await this.deployBitEthRebalancingSetToken(DEPLOYED_SETS_INFO.BITETH_BTC_DOMINANT);
 
-    await this.deployBitEthRebalancingManager();
-    await this.deployBitEthInitialCollateralizedSet();
-    await this.deployBitEthRebalancingSetToken();
+    // Deploy BitEth 25/75
+    await this.deployBitEthRebalancingManager(DEPLOYED_SETS_INFO.BITETH_ETH_DOMINANT);
+    await this.deployBitEthInitialCollateralizedSet(DEPLOYED_SETS_INFO.BITETH_ETH_DOMINANT);
+    await this.deployBitEthRebalancingSetToken(DEPLOYED_SETS_INFO.BITETH_ETH_DOMINANT);
 
     await this.deployETHDaiRebalancingManager();
     await this.deployETHDaiInitialCollateralizedSet();
@@ -79,8 +86,8 @@ export class RebalancingStage implements DeploymentStageInterface {
     await this.deployBTCDaiRebalancingSetToken();
   }
 
-  async deployBitEthRebalancingManager(): Promise<BTCETHRebalancingManagerContract> {
-    const name = BTCETHRebalancingManager.contractName;
+  async deployBitEthRebalancingManager(setParams: DeployedSetInfo): Promise<BTCETHRebalancingManagerContract> {
+    const name = setParams.MANAGER_NAME;
     let address = await getContractAddress(name);
 
     if (address) {
@@ -94,6 +101,12 @@ export class RebalancingStage implements DeploymentStageInterface {
     const wethMedianizerAddress = await findDependency(DEPENDENCY.WETH_MEDIANIZER);
     const wbtcAddress = await findDependency(DEPENDENCY.WBTC);
     const wethAddress = await findDependency(DEPENDENCY.WETH);
+    const allocationBounds = calculateAllocationBounds(
+      setParams.WBTC_MULTIPLIER,
+      setParams.WETH_MULTIPLIER,
+      setParams.ALLOCATION_LOWER_BOUND[this._networkConstant],
+      setParams.ALLOCATION_UPPER_BOUND[this._networkConstant],
+    );
 
     const data = new this._web3.eth.Contract(BTCETHRebalancingManager.abi).deploy({
       data: BTCETHRebalancingManager.bytecode,
@@ -105,14 +118,12 @@ export class RebalancingStage implements DeploymentStageInterface {
         wethAddress,
         setTokenFactoryAddress,
         linearAuctionCurveAddress,
-        networkConstants.bitEthRebalanceManagerAuctionTimeToPivot[this._networkConstant],
+        setParams.AUCTION_TIME_TO_PIVOT[this._networkConstant],
         [
-          constants.BITETH.WBTC_MULTIPLIER.toString(),
-          constants.BITETH.WETH_MULTIPLIER.toString()],
-        [
-          networkConstants.bitEthRebalanceManagerAllocationLowerBound[this._networkConstant],
-          networkConstants.bitEthRebalanceManagerAllocationUpperBound[this._networkConstant],
+          setParams.WBTC_MULTIPLIER.toString(),
+          setParams.WETH_MULTIPLIER.toString()
         ],
+        allocationBounds
       ],
     }).encodeABI();
 
@@ -120,8 +131,8 @@ export class RebalancingStage implements DeploymentStageInterface {
     return await BTCETHRebalancingManagerContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  async deployBitEthInitialCollateralizedSet(): Promise<SetTokenContract> {
-    const name = DEPLOYED_TOKEN.BitEthInitialCollateralSet;
+  async deployBitEthInitialCollateralizedSet(setParams: DeployedSetInfo): Promise<SetTokenContract> {
+    const name = setParams.COLLATERAL_NAME;
     let address = await getContractAddress(name);
 
     if (address) {
@@ -132,8 +143,12 @@ export class RebalancingStage implements DeploymentStageInterface {
     const wbtcAddress = await findDependency(DEPENDENCY.WBTC);
     const wethAddress = await findDependency(DEPENDENCY.WETH);
 
-    const initialSetParams = calculateInitialSetUnits();
-    const initialSetName = SetProtocolUtils.stringToBytes('BTCETH');
+    const initialSetParams = calculateInitialSetUnits(
+      setParams.WBTC_MULTIPLIER,
+      setParams.WETH_MULTIPLIER,
+      setParams.PRICE_PRECISION,
+    );
+    const initialSetName = SetProtocolUtils.stringToBytes(setParams.COLLATERAL_NAME);
     const initialSymbol = SetProtocolUtils.stringToBytes('BTCETH');
 
     const data = await this._coreContract.createSet.getABIEncodedTransactionData(
@@ -155,19 +170,23 @@ export class RebalancingStage implements DeploymentStageInterface {
     return await SetTokenContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  async deployBitEthRebalancingSetToken(): Promise<RebalancingSetTokenContract> {
-    const name = DEPLOYED_TOKEN.BitEthRebalancingSetToken;
+  async deployBitEthRebalancingSetToken(setParams: DeployedSetInfo): Promise<RebalancingSetTokenContract> {
+    const name = setParams.SET_NAME;
     let address = await getContractAddress(name);
 
     if (address) {
       return await RebalancingSetTokenContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const initialSetToken = await getContractAddress(DEPLOYED_TOKEN.BitEthInitialCollateralSet);
+    const initialSetToken = await getContractAddress(setParams.COLLATERAL_NAME);
     const rebalancingSetFactoryAddress = await getContractAddress(RebalancingSetTokenFactory.contractName);
-    const rebalancingManagerAddress = await getContractAddress(BTCETHRebalancingManager.contractName);
+    const rebalancingManagerAddress = await getContractAddress(setParams.MANAGER_NAME);
 
-    const initialSetParams = calculateInitialSetUnits();
+    const initialSetParams = calculateInitialSetUnits(
+      setParams.WBTC_MULTIPLIER,
+      setParams.WETH_MULTIPLIER,
+      setParams.PRICE_PRECISION,
+    );
     const rebalancingSetUnitShares = calculateRebalancingSetUnitShares(
       initialSetParams['units'],
       initialSetParams['naturalUnit'],
@@ -176,12 +195,12 @@ export class RebalancingStage implements DeploymentStageInterface {
     );
 
     const rebalancingSetNaturalUnit = constants.DEFAULT_REBALANCING_NATURAL_UNIT;
-    const rebalancingSetName = SetProtocolUtils.stringToBytes('BitEth Set');
-    const rebalancingSetSymbol = SetProtocolUtils.stringToBytes('BTCETH');
+    const rebalancingSetName = SetProtocolUtils.stringToBytes(setParams.SET_NAME);
+    const rebalancingSetSymbol = SetProtocolUtils.stringToBytes(setParams.SET_SYMBOL);
     const rebalancingSetCallData = SetProtocolUtils.generateRebalancingSetTokenCallData(
       rebalancingManagerAddress,
-      networkConstants.bitEthProposalPeriod[this._networkConstant],
-      networkConstants.bitEthRebalanceInterval[this._networkConstant]
+      setParams.PROPOSAL_PERIOD[this._networkConstant],
+      setParams.REBALANCE_INTERVAL[this._networkConstant]
     );
 
     const data = await this._coreContract.createSet.getABIEncodedTransactionData(
@@ -205,7 +224,7 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployETHDaiRebalancingManager(): Promise<ETHDaiRebalancingManagerContract> {
-    const name = ETHDaiRebalancingManager.contractName;
+    const name = DEPLOYED_SETS_INFO.ETHDAI_BTD.MANAGER_NAME;
     let address = await getContractAddress(name);
 
     if (address) {
@@ -218,6 +237,12 @@ export class RebalancingStage implements DeploymentStageInterface {
     const wethMedianizerAddress = await findDependency(DEPENDENCY.WETH_MEDIANIZER);
     const daiAddress = await findDependency(DEPENDENCY.DAI);
     const wethAddress = await findDependency(DEPENDENCY.WETH);
+    const allocationBounds = calculateAllocationBounds(
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.DAI_MULTIPLIER,
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.WETH_MULTIPLIER,
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.ALLOCATION_LOWER_BOUND[this._networkConstant],
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.ALLOCATION_UPPER_BOUND[this._networkConstant],
+    );
 
     const data = new this._web3.eth.Contract(ETHDaiRebalancingManager.abi).deploy({
       data: ETHDaiRebalancingManager.bytecode,
@@ -228,14 +253,12 @@ export class RebalancingStage implements DeploymentStageInterface {
         wethAddress,
         setTokenFactoryAddress,
         linearAuctionCurveAddress,
-        networkConstants.ethDaiRebalanceManagerAuctionTimeToPivot[this._networkConstant],
+        DEPLOYED_SETS_INFO.ETHDAI_BTD.AUCTION_TIME_TO_PIVOT[this._networkConstant],
         [
-          constants.ETHDAI_BTD.DAI_MULTIPLIER.toString(),
-          constants.ETHDAI_BTD.WETH_MULTIPLIER.toString()],
-        [
-          networkConstants.ethDaiRebalanceManagerAllocationLowerBound[this._networkConstant],
-          networkConstants.ethDaiRebalanceManagerAllocationUpperBound[this._networkConstant],
+          DEPLOYED_SETS_INFO.ETHDAI_BTD.DAI_MULTIPLIER.toString(),
+          DEPLOYED_SETS_INFO.ETHDAI_BTD.WETH_MULTIPLIER.toString()
         ],
+        allocationBounds
       ],
     }).encodeABI();
 
@@ -244,7 +267,7 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployETHDaiInitialCollateralizedSet(): Promise<SetTokenContract> {
-    const name = DEPLOYED_TOKEN.ETHDaiInitialCollateralSet;
+    const name = DEPLOYED_SETS_INFO.ETHDAI_BTD.COLLATERAL_NAME;
     let address = await getContractAddress(name);
 
     if (address) {
@@ -258,13 +281,13 @@ export class RebalancingStage implements DeploymentStageInterface {
     const initialSetParams = calculateGeneralInitialSetUnits(
       constants.DAI.PRICE,
       constants.WETH.PRICE,
-      constants.ETHDAI_BTD.DAI_MULTIPLIER,
-      constants.ETHDAI_BTD.WETH_MULTIPLIER,
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.DAI_MULTIPLIER,
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.WETH_MULTIPLIER,
       constants.DAI.FULL_TOKEN_UNITS,
       constants.WETH.FULL_TOKEN_UNITS,
-      constants.ETHDAI_BTD.PRICE_PRECISION,
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.PRICE_PRECISION,
     );
-    const initialSetName = SetProtocolUtils.stringToBytes('ETHDAI');
+    const initialSetName = SetProtocolUtils.stringToBytes(DEPLOYED_SETS_INFO.ETHDAI_BTD.COLLATERAL_NAME);
     const initialSymbol = SetProtocolUtils.stringToBytes('ETHDAI');
 
     const data = await this._coreContract.createSet.getABIEncodedTransactionData(
@@ -287,25 +310,25 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployETHDaiRebalancingSetToken(): Promise<RebalancingSetTokenContract> {
-    const name = DEPLOYED_TOKEN.ETHDaiRebalancingSetToken;
+    const name = DEPLOYED_SETS_INFO.ETHDAI_BTD.SET_NAME;
     let address = await getContractAddress(name);
 
     if (address) {
       return await RebalancingSetTokenContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const initialSetToken = await getContractAddress(DEPLOYED_TOKEN.ETHDaiInitialCollateralSet);
+    const initialSetToken = await getContractAddress(DEPLOYED_SETS_INFO.ETHDAI_BTD.COLLATERAL_NAME);
     const rebalancingSetFactoryAddress = await getContractAddress(RebalancingSetTokenFactory.contractName);
     const rebalancingManagerAddress = await getContractAddress(ETHDaiRebalancingManager.contractName);
 
     const initialSetParams = calculateGeneralInitialSetUnits(
       constants.DAI.PRICE,
       constants.WETH.PRICE,
-      constants.ETHDAI_BTD.DAI_MULTIPLIER,
-      constants.ETHDAI_BTD.WETH_MULTIPLIER,
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.DAI_MULTIPLIER,
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.WETH_MULTIPLIER,
       constants.DAI.FULL_TOKEN_UNITS,
       constants.WETH.FULL_TOKEN_UNITS,
-      constants.ETHDAI_BTD.PRICE_PRECISION,
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.PRICE_PRECISION,
     );
     const rebalancingSetUnitShares = calculateRebalancingSetUnitShares(
       initialSetParams['units'],
@@ -315,12 +338,12 @@ export class RebalancingStage implements DeploymentStageInterface {
     );
 
     const rebalancingSetNaturalUnit = constants.DEFAULT_REBALANCING_NATURAL_UNIT;
-    const rebalancingSetName = SetProtocolUtils.stringToBytes('BTD ETHDai Set');
-    const rebalancingSetSymbol = SetProtocolUtils.stringToBytes('ETHDai');
+    const rebalancingSetName = SetProtocolUtils.stringToBytes(DEPLOYED_SETS_INFO.ETHDAI_BTD.SET_NAME);
+    const rebalancingSetSymbol = SetProtocolUtils.stringToBytes(DEPLOYED_SETS_INFO.ETHDAI_BTD.SET_SYMBOL);
     const rebalancingSetCallData = SetProtocolUtils.generateRebalancingSetTokenCallData(
       rebalancingManagerAddress,
-      networkConstants.ethDaiProposalPeriod[this._networkConstant],
-      networkConstants.ethDaiRebalanceInterval[this._networkConstant]
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.PROPOSAL_PERIOD[this._networkConstant],
+      DEPLOYED_SETS_INFO.ETHDAI_BTD.REBALANCE_INTERVAL[this._networkConstant]
     );
 
     const data = await this._coreContract.createSet.getABIEncodedTransactionData(
@@ -345,7 +368,7 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployBTCDaiRebalancingManager(): Promise<BTCDaiRebalancingManagerContract> {
-    const name = BTCDaiRebalancingManager.contractName;
+    const name = DEPLOYED_SETS_INFO.BTCDAI_BTD.MANAGER_NAME;
     let address = await getContractAddress(name);
 
     if (address) {
@@ -358,6 +381,12 @@ export class RebalancingStage implements DeploymentStageInterface {
     const wbtcMedianizerAddress = await findDependency(DEPENDENCY.WBTC_MEDIANIZER);
     const daiAddress = await findDependency(DEPENDENCY.DAI);
     const wbtcAddress = await findDependency(DEPENDENCY.WBTC);
+    const allocationBounds = calculateAllocationBounds(
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.DAI_MULTIPLIER,
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.WBTC_MULTIPLIER,
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.ALLOCATION_LOWER_BOUND[this._networkConstant],
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.ALLOCATION_UPPER_BOUND[this._networkConstant],
+    );
 
     const data = new this._web3.eth.Contract(BTCDaiRebalancingManager.abi).deploy({
       data: BTCDaiRebalancingManager.bytecode,
@@ -368,14 +397,12 @@ export class RebalancingStage implements DeploymentStageInterface {
         wbtcAddress,
         setTokenFactoryAddress,
         linearAuctionCurveAddress,
-        networkConstants.btcDaiRebalanceManagerAuctionTimeToPivot[this._networkConstant],
+        DEPLOYED_SETS_INFO.BTCDAI_BTD.AUCTION_TIME_TO_PIVOT[this._networkConstant],
         [
-          constants.BTCDAI_BTD.DAI_MULTIPLIER.toString(),
-          constants.BTCDAI_BTD.WBTC_MULTIPLIER.toString()],
-        [
-          networkConstants.btcDaiRebalanceManagerAllocationLowerBound[this._networkConstant],
-          networkConstants.btcDaiRebalanceManagerAllocationUpperBound[this._networkConstant],
+          DEPLOYED_SETS_INFO.BTCDAI_BTD.DAI_MULTIPLIER.toString(),
+          DEPLOYED_SETS_INFO.BTCDAI_BTD.WBTC_MULTIPLIER.toString()
         ],
+        allocationBounds,
       ],
     }).encodeABI();
 
@@ -384,7 +411,7 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployBTCDaiInitialCollateralizedSet(): Promise<SetTokenContract> {
-    const name = DEPLOYED_TOKEN.BTCDaiInitialCollateralSet;
+    const name = DEPLOYED_SETS_INFO.BTCDAI_BTD.COLLATERAL_NAME;
     let address = await getContractAddress(name);
 
     if (address) {
@@ -398,13 +425,13 @@ export class RebalancingStage implements DeploymentStageInterface {
     const initialSetParams = calculateGeneralInitialSetUnits(
       constants.DAI.PRICE,
       constants.WBTC.PRICE,
-      constants.BTCDAI_BTD.DAI_MULTIPLIER,
-      constants.BTCDAI_BTD.WBTC_MULTIPLIER,
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.DAI_MULTIPLIER,
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.WBTC_MULTIPLIER,
       constants.DAI.FULL_TOKEN_UNITS,
       constants.WBTC.FULL_TOKEN_UNITS,
-      constants.BTCDAI_BTD.PRICE_PRECISION,
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.PRICE_PRECISION,
     );
-    const initialSetName = SetProtocolUtils.stringToBytes('BTCDAI');
+    const initialSetName = SetProtocolUtils.stringToBytes(DEPLOYED_SETS_INFO.BTCDAI_BTD.COLLATERAL_NAME);
     const initialSymbol = SetProtocolUtils.stringToBytes('BTCDAI');
 
     const data = await this._coreContract.createSet.getABIEncodedTransactionData(
@@ -427,25 +454,25 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployBTCDaiRebalancingSetToken(): Promise<RebalancingSetTokenContract> {
-    const name = DEPLOYED_TOKEN.BTCDaiRebalancingSetToken;
+    const name = DEPLOYED_SETS_INFO.BTCDAI_BTD.SET_NAME
     let address = await getContractAddress(name);
 
     if (address) {
       return await RebalancingSetTokenContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const initialSetToken = await getContractAddress(DEPLOYED_TOKEN.BTCDaiInitialCollateralSet);
+    const initialSetToken = await getContractAddress(DEPLOYED_SETS_INFO.BTCDAI_BTD.COLLATERAL_NAME);
     const rebalancingSetFactoryAddress = await getContractAddress(RebalancingSetTokenFactory.contractName);
     const rebalancingManagerAddress = await getContractAddress(BTCDaiRebalancingManager.contractName);
 
     const initialSetParams = calculateGeneralInitialSetUnits(
       constants.DAI.PRICE,
       constants.WBTC.PRICE,
-      constants.BTCDAI_BTD.DAI_MULTIPLIER,
-      constants.BTCDAI_BTD.WBTC_MULTIPLIER,
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.DAI_MULTIPLIER,
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.WBTC_MULTIPLIER,
       constants.DAI.FULL_TOKEN_UNITS,
       constants.WBTC.FULL_TOKEN_UNITS,
-      constants.BTCDAI_BTD.PRICE_PRECISION,
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.PRICE_PRECISION,
     );
     const rebalancingSetUnitShares = calculateRebalancingSetUnitShares(
       initialSetParams['units'],
@@ -455,12 +482,12 @@ export class RebalancingStage implements DeploymentStageInterface {
     );
 
     const rebalancingSetNaturalUnit = constants.DEFAULT_REBALANCING_NATURAL_UNIT;
-    const rebalancingSetName = SetProtocolUtils.stringToBytes('BTD BTCDai Set');
-    const rebalancingSetSymbol = SetProtocolUtils.stringToBytes('BTCDai');
+    const rebalancingSetName = SetProtocolUtils.stringToBytes(DEPLOYED_SETS_INFO.BTCDAI_BTD.SET_NAME);
+    const rebalancingSetSymbol = SetProtocolUtils.stringToBytes(DEPLOYED_SETS_INFO.BTCDAI_BTD.SET_SYMBOL);
     const rebalancingSetCallData = SetProtocolUtils.generateRebalancingSetTokenCallData(
       rebalancingManagerAddress,
-      networkConstants.btcDaiProposalPeriod[this._networkConstant],
-      networkConstants.btcDaiRebalanceInterval[this._networkConstant]
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.PROPOSAL_PERIOD[this._networkConstant],
+      DEPLOYED_SETS_INFO.BTCDAI_BTD.REBALANCE_INTERVAL[this._networkConstant]
     );
 
     const data = await this._coreContract.createSet.getABIEncodedTransactionData(

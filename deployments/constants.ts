@@ -16,7 +16,7 @@ export default {
     FULL_TOKEN_UNITS: new BigNumber(10 ** 18),
     PRICE: new BigNumber(128),
   },
-  DEFAULT_COLLATERAL_NATURAL_UNIT: new BigNumber(10 ** 12), 
+  DEFAULT_COLLATERAL_NATURAL_UNIT: new BigNumber(10 ** 10), 
   WETH_DOMINANT_COLLATERAL_NATURAL_UNIT: new BigNumber(10 ** 12),
 
   DAI: {

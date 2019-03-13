@@ -26,7 +26,7 @@ import { ISetToken } from "../interfaces/ISetToken.sol";
 
 
 /**
- * @title Core Issuance
+ * @title CoreIssuance
  * @author Set Protocol
  *
  * The CoreIssuance contract contains function related to issuing and redeeming Sets.

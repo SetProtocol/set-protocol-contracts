@@ -89,7 +89,7 @@ contract('CoreModuleInteraction', accounts => {
   describe('#depositModule', async () => {
     const tokenOwner: Address = ownerAccount;
     let mockToken: StandardTokenMockContract;
-    
+
     let subjectTokenAddress: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
@@ -159,6 +159,16 @@ contract('CoreModuleInteraction', accounts => {
       );
       expect(newOwnerVaultBalance).to.bignumber.equal(expectedNewOwnerVaultBalance);
     });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#batchDepositModule', async () => {
@@ -172,7 +182,7 @@ contract('CoreModuleInteraction', accounts => {
     beforeEach(async () => {
       mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
       subjectTokens = _.map(mockTokens, token => token.address);
-      
+
       const approvePromises = _.map(mockTokens, token =>
         token.approve.sendTransactionAsync(
           transferProxy.address,
@@ -391,7 +401,7 @@ contract('CoreModuleInteraction', accounts => {
 
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
-      subjectToken = mockToken.address
+      subjectToken = mockToken.address;
       await mockToken.approve.sendTransactionAsync(
         transferProxy.address,
         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -459,6 +469,16 @@ contract('CoreModuleInteraction', accounts => {
         ownerAccount,
       );
       expect(newOwnerVaultBalance).to.bignumber.equal(expectedNewOwnerVaultBalance);
+    });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
     });
   });
 

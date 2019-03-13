@@ -648,6 +648,49 @@ contract('CoreIssuance', accounts => {
       const callerVaultBalance = await vault.getOwnerBalance.callAsync(setToken.address, subjectCaller);
       expect(callerVaultBalance).to.be.bignumber.eql(subjectQuantityToIssue.add(existingBalance));
     });
+
+    describe('when the set was not created through core', async () => {
+      beforeEach(async () => {
+        subjectSetToIssue = NULL_ADDRESS;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the user does not have enough of a set', async () => {
+      beforeEach(async () => {
+        subjectQuantityToIssue = ether(3);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the quantity is not a multiple of the natural unit of the set', async () => {
+      beforeEach(async () => {
+        subjectQuantityToIssue = ether(1.5);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the protocol is not in operational state', async () => {
+      beforeEach(async () => {
+        await coreWrapper.setOperationStateAsync(
+          core,
+          ONE,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#issueTo', async () => {
@@ -732,6 +775,49 @@ contract('CoreIssuance', accounts => {
       await subject();
 
       await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), subjectRecipient);
+    });
+
+    describe('when the set was not created through core', async () => {
+      beforeEach(async () => {
+        subjectSetToIssue = NULL_ADDRESS;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the user does not have enough of a set', async () => {
+      beforeEach(async () => {
+        subjectQuantityToIssue = ether(3);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the quantity is not a multiple of the natural unit of the set', async () => {
+      beforeEach(async () => {
+        subjectQuantityToIssue = ether(1.5);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the protocol is not in operational state', async () => {
+      beforeEach(async () => {
+        await coreWrapper.setOperationStateAsync(
+          core,
+          ONE,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
     });
   });
 
@@ -1371,6 +1457,36 @@ contract('CoreIssuance', accounts => {
       const newVaultBalances =
         await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectRecipient);
       expect(newVaultBalances).to.eql(expectedVaultBalances);
+    });
+
+    describe('when the set was not created through core', async () => {
+      beforeEach(async () => {
+        subjectSetToRedeem = NULL_ADDRESS;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the user does not have enough of a set', async () => {
+      beforeEach(async () => {
+        subjectQuantityToRedeem = ether(3);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the quantity is not a multiple of the natural unit of the set', async () => {
+      beforeEach(async () => {
+        subjectQuantityToRedeem = ether(1.5);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
     });
   });
 });

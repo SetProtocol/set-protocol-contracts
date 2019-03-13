@@ -19,7 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
+import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { KyberNetworkProxyInterface } from "../../external/KyberNetwork/KyberNetworkProxyInterface.sol";
@@ -148,7 +148,7 @@ contract KyberNetworkWrapper {
 
             // Ensure the issuance order maker token is allowed to be transferred by 
             // KyberNetworkProxy as the source token
-            ERC20.ensureAllowance(
+            ERC20Wrapper.ensureAllowance(
                 trade.sourceToken,
                 address(this),
                 kyberNetworkProxy,
@@ -200,7 +200,7 @@ contract KyberNetworkWrapper {
         );
 
         // Ensure the destination token is allowed to be transferred by Set TransferProxy
-        ERC20.ensureAllowance(
+        ERC20Wrapper.ensureAllowance(
             _trade.destinationToken,
             address(this),
             setTransferProxy,
@@ -264,9 +264,9 @@ contract KyberNetworkWrapper {
     {
         for (uint256 i = 0; i < _sendTokens.length; i++) {
             // Transfer any unused or remainder send token back to the caller
-            uint256 remainderSendToken = ERC20.balanceOf(_sendTokens[i], address(this));
+            uint256 remainderSendToken = ERC20Wrapper.balanceOf(_sendTokens[i], address(this));
             if (remainderSendToken > 0) {
-                ERC20.transfer(
+                ERC20Wrapper.transfer(
                     _sendTokens[i],
                     _caller,
                     remainderSendToken

@@ -20,14 +20,14 @@ pragma experimental "ABIEncoderV2";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../../lib/CommonMath.sol";
-import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
+import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IExchange as ZeroExExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { LibFillResults as ZeroExFillResults } from "../../external/0x/Exchange/libs/LibFillResults.sol";
 import { LibOrder as ZeroExOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
-import { ZeroExOrderDataHandler as OrderHandler } from "./lib/ZeroExOrderDataHandler.sol";
+import { ZeroExOrderLibrary } from "./lib/ZeroExOrderLibrary.sol";
 
 
 /**
@@ -75,7 +75,7 @@ contract ZeroExExchangeWrapper {
         setTransferProxy = _setTransferProxy;
 
         // Approve transfer of 0x token from this wrapper in the event of zeroExOrder relayer fees
-        ERC20.approve(
+        ERC20Wrapper.approve(
             _zeroExToken,
             _zeroExProxy,
             CommonMath.maxUInt256()
@@ -107,35 +107,25 @@ contract ZeroExExchangeWrapper {
         address[] memory receiveTokens = new address[](_exchangeData.orderCount);
         uint256[] memory receiveTokenAmounts = new uint256[](_exchangeData.orderCount);
 
-        OrderHandler.ZeroExOrderInformation memory orderInformation;
-        uint256 orderBodyStart;
-
         uint256 scannedBytes = 0;
         for (uint256 i = 0; i < _exchangeData.orderCount; i++) {
+            ZeroExOrderLibrary.ZeroExOrderInformation memory orderInformation;
+            uint256 orderBodyStart;
+
             // Parse order i's information
             (orderInformation, orderBodyStart) = parseOrderInformation(
                 _ordersData,
                 scannedBytes
             );
 
-            // Ensure the taker token is allowed to be transferred by ZeroEx Proxy
-            ERC20.ensureAllowance(
-                orderInformation.takerToken,
-                address(this),
-                zeroExProxy,
-                orderInformation.order.takerAssetAmount
-            );
-
             // Fill the order via the 0x exchange
             (receiveTokens[i], receiveTokenAmounts[i]) = fillZeroExOrder(
                 _exchangeData.caller,
-                orderInformation.makerToken,
-                orderInformation.header,
-                orderInformation.order
+                orderInformation
             );
 
             // Ensure the received token can be transfered via the Set transfer proxy
-            ERC20.ensureAllowance(
+            ERC20Wrapper.ensureAllowance(
                 receiveTokens[i],
                 address(this),
                 setTransferProxy,
@@ -158,29 +148,36 @@ contract ZeroExExchangeWrapper {
      * Parses and executes 0x order from orders data bytes
      *
      * @param  _caller                  Address of user issuing or redeeming using 0x orders
-     * @param  _makerTokenAddress       Address of the zero Ex maker token
-     * @param  _header                  Order header information
-     * @param  _order                   Parsed 0x Order
+     * @param  _orderInformation        Object with parsed 0x order, signature, header, and maker/taker tokens
      * @return address                  Address of set component (0x makerToken) in 0x order
      * @return uint256                  Amount of 0x order makerTokenAmount received
      */
     function fillZeroExOrder(
         address _caller,
-        address _makerTokenAddress,
-        OrderHandler.OrderHeader memory _header,
-        ZeroExOrder.Order memory _order
+        ZeroExOrderLibrary.ZeroExOrderInformation memory _orderInformation
     )
         private
         returns (address, uint256)
     {
+        ZeroExOrder.Order memory order = _orderInformation.order;
+        ZeroExOrderLibrary.OrderHeader memory header = _orderInformation.header;
+
+        // Ensure the taker token is allowed to be transferred by ZeroEx Proxy
+        ERC20Wrapper.ensureAllowance(
+            _orderInformation.takerToken,
+            address(this),
+            zeroExProxy,
+            order.takerAssetAmount
+        );
+
         // Calculate actual fill amount
-        uint256 zeroExFillAmount = _header.fillAmount;
+        uint256 zeroExFillAmount = header.fillAmount;
 
         // Tranfer ZRX fee from taker if applicable
-        if (_order.takerFee > 0) {
+        if (order.takerFee > 0) {
             transferRelayerFee(
-                _order.takerFee,
-                _order.takerAssetAmount,
+                order.takerFee,
+                order.takerAssetAmount,
                 _caller,
                 zeroExFillAmount
             );
@@ -188,13 +185,13 @@ contract ZeroExExchangeWrapper {
 
         // Fill 0x order via their Exchange contract
         ZeroExFillResults.FillResults memory fillResults = ZeroExExchange(zeroExExchange).fillOrKillOrder(
-            _order,
+            order,
             zeroExFillAmount,
-            _header.signature
+            header.signature
         );
 
         return (
-            _makerTokenAddress,
+            _orderInformation.makerToken,
             fillResults.makerAssetFilledAmount
         );
     }
@@ -223,7 +220,7 @@ contract ZeroExExchangeWrapper {
         );
 
         // Transfer ZRX from the caller to this wrapper
-        ERC20.transferFrom(
+        ERC20Wrapper.transferFrom(
             zeroExToken,
             _caller,
             address(this),
@@ -236,7 +233,7 @@ contract ZeroExExchangeWrapper {
      *
      * @param  _ordersData              Arbitrary bytes data for any information to pass to the exchange
      * @param  _offset                  Where to start the parsing of the _ordersData bytestring
-     * @return ZeroExOrderInformation   Object with parsed 0x order, signature, and header
+     * @return ZeroExOrderInformation   Object with parsed 0x order, signature, header, and maker/taker tokens
      * @return uint256                  Tracks how many bytes in _ordersData have been parsed
      */
     function parseOrderInformation(
@@ -245,10 +242,10 @@ contract ZeroExExchangeWrapper {
     )
         private
         pure
-        returns (OrderHandler.ZeroExOrderInformation memory, uint256)
+        returns (ZeroExOrderLibrary.ZeroExOrderInformation memory, uint256)
     {
         // Parse header of current wrapper order
-        OrderHandler.OrderHeader memory header = OrderHandler.parseOrderHeader(
+        ZeroExOrderLibrary.OrderHeader memory header = ZeroExOrderLibrary.parseOrderHeader(
             _ordersData,
             _offset
         );
@@ -263,11 +260,11 @@ contract ZeroExExchangeWrapper {
         );
 
         // Parse 0x order of current wrapper order
-        ZeroExOrder.Order memory order = OrderHandler.parseZeroExOrder(_ordersData, orderBodyStart);
-        address makerToken = OrderHandler.parseMakerTokenFromZeroExOrder(_ordersData, orderBodyStart);
-        address takerToken = OrderHandler.parseTakerTokenFromZeroExOrder(_ordersData, orderBodyStart);
+        ZeroExOrder.Order memory order = ZeroExOrderLibrary.parseZeroExOrder(_ordersData, orderBodyStart);
+        address makerToken = ZeroExOrderLibrary.parseMakerTokenFromZeroExOrder(_ordersData, orderBodyStart);
+        address takerToken = ZeroExOrderLibrary.parseTakerTokenFromZeroExOrder(_ordersData, orderBodyStart);
 
-        OrderHandler.ZeroExOrderInformation memory orderInformation = OrderHandler.ZeroExOrderInformation({
+        ZeroExOrderLibrary.ZeroExOrderInformation memory orderInformation = ZeroExOrderLibrary.ZeroExOrderInformation({
             header: header,
             order: order,
             makerToken: makerToken,

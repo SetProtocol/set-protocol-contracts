@@ -21,7 +21,7 @@ import { ISetFactory } from "../interfaces/ISetFactory.sol";
 
 
 /**
- * @title Core Factory
+ * @title CoreFactory
  * @author Set Protocol
  *
  * The CoreFactory contract contains Set Token creation operations

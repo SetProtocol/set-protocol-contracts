@@ -24,7 +24,7 @@ import { LibOrder } from "../../../external/0x/Exchange/libs/LibOrder.sol";
 
 
 /**
- * @title ZeroExOrderDataHandler
+ * @title ZeroExOrderLibrary
  * @author Set Protocol
  *
  * This library contains functions and structs to assist with parsing 0x wrapper order data
@@ -41,7 +41,7 @@ import { LibOrder } from "../../../external/0x/Exchange/libs/LibOrder.sol";
  * | Body    | signature             | 64                  | signatureLength | Signature in bytes            |
  * |         | order                 | 64+signatureLength  | 384             | ZeroEx Order                  |
  */
-library ZeroExOrderDataHandler {
+library ZeroExOrderLibrary {
     using LibBytes for bytes;
     using SafeMath for uint256;
 

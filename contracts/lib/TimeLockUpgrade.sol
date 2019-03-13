@@ -21,7 +21,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 /**
- * @title TimeLock Upgrade
+ * @title TimeLockUpgrade
  * @author Set Protocol
  *
  * The TimeLockUpgrade contract contains a modifier for handling minimum time period updates

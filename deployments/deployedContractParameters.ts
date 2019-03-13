@@ -147,7 +147,7 @@ export const DEPLOYED_SETS_INFO = {
     PRICE_PRECISION: new BigNumber(100),
     WBTC_MULTIPLIER: new BigNumber(1),
     WETH_MULTIPLIER: new BigNumber(3),
-    MANAGER_NAME: 'BTCETH2575SplitRebalancingManager',
+    MANAGER_NAME: 'BTCETH2575RebalancingManager',
     COLLATERAL_NAME: 'BitEth2575CollateralSet',
     SET_NAME: 'BitEth2575RebalancingSetToken',
     SET_SYMBOL: 'BTCETH2575',

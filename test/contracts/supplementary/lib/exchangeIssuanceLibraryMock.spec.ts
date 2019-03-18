@@ -239,12 +239,8 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
     });
 
     describe('when required balances does not exceed current vault balance', async () => {
-      before(async () => {
+      beforeEach(async () => {
         subjectReceiveTokenAmounts = [new BigNumber(1000)];
-      });
-
-      after(async () => {
-       subjectReceiveTokenAmounts = undefined;
       });
 
       it('should revert', async () => {
@@ -281,17 +277,10 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
     });
 
     describe('when send tokens is empty', async () => {
-      before(async () => {
+      beforeEach(async () => {
         subjectSendTokenExchanges = [];
         subjectSendTokens = [];
         subjectSendTokenAmounts = [];
-      });
-
-      after(async () => {
-
-        subjectSendTokenExchanges = undefined;
-        subjectSendTokens = undefined;
-        subjectSendTokenAmounts = undefined;
       });
 
       it('should revert', async () => {
@@ -300,12 +289,8 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
     });
 
     describe('when send quantities quantities is zero', async () => {
-      before(async () => {
+      beforeEach(async () => {
         subjectSendTokenAmounts = [ZERO];
-      });
-
-      after(async () => {
-       subjectSendTokenAmounts = undefined;
       });
 
       it('should revert', async () => {

@@ -39,6 +39,19 @@ contract ExchangeIssuanceLibraryMock {
         );
     }
 
+    function testValidateReceiveTokens(
+        address[] memory _receiveTokens,
+        uint256[] memory _receiveTokenAmounts
+    )
+        public
+        view 
+    {
+        ExchangeIssuanceLibrary.validateReceiveTokens(
+            _receiveTokens,
+            _receiveTokenAmounts
+        );
+    }
+
     function testValidateSendTokenParams(
         address _core,
         uint8[] memory _sendTokenExchangeIds,

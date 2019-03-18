@@ -16,6 +16,8 @@
 
 pragma solidity 0.5.4;
 
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 import { ICore } from "../../interfaces/ICore.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IVault } from "../../interfaces/IVault.sol";
@@ -28,6 +30,7 @@ import { IVault } from "../../interfaces/IVault.sol";
  * The ExchangeIssuanceLibrary contains functions for validating exchange order data
  */
 library ExchangeIssuanceLibrary {
+    using SafeMath for uint256;
 
     // ============ Structs ============
 
@@ -62,7 +65,7 @@ library ExchangeIssuanceLibrary {
 
         // Make sure Issue quantity is multiple of the Set natural unit
         require(
-            _quantity % ISetToken(_set).naturalUnit() == 0,
+            _quantity.mod(ISetToken(_set).naturalUnit()) == 0,
             "ExchangeIssuanceLibrary.validateQuantity: Quantity must be multiple of natural unit"
         );
     }

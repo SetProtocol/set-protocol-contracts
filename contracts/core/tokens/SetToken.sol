@@ -22,6 +22,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 import { Bytes32 } from "../../lib/Bytes32.sol";
+import { CommonMath } from "../../lib/CommonMath.sol";
 import { ISetFactory } from "../interfaces/ISetFactory.sol";
 
 
@@ -153,7 +154,7 @@ contract SetToken is
 
         // This is the minimum natural unit possible for a Set with these components.
         require(
-            _naturalUnit >= uint256(10) ** (uint256(18).sub(minDecimals)),
+            _naturalUnit >= CommonMath.safePower(10, uint256(18).sub(minDecimals)),
             "SetToken.constructor: Invalid natural unit"
         );
 

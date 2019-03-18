@@ -1,5 +1,4 @@
 import { SetProtocolUtils, SetProtocolTestUtils } from 'set-protocol-utils';
-import BigNumber from 'bignumber.js';
 
 import * as ABIDecoder from 'abi-decoder';
 
@@ -32,7 +31,6 @@ import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTok
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 
 import { DEPLOYED_SETS_INFO, DEPENDENCY } from '../deployedContractParameters';
-import networkConstants from '../network-constants';
 import constants from '../constants';
 
 import {
@@ -121,9 +119,9 @@ export class RebalancingStage implements DeploymentStageInterface {
         setParams.AUCTION_TIME_TO_PIVOT[this._networkConstant],
         [
           setParams.WBTC_MULTIPLIER.toString(),
-          setParams.WETH_MULTIPLIER.toString()
+          setParams.WETH_MULTIPLIER.toString(),
         ],
-        allocationBounds
+        allocationBounds,
       ],
     }).encodeABI();
 
@@ -256,9 +254,9 @@ export class RebalancingStage implements DeploymentStageInterface {
         DEPLOYED_SETS_INFO.ETHDAI_BTD.AUCTION_TIME_TO_PIVOT[this._networkConstant],
         [
           DEPLOYED_SETS_INFO.ETHDAI_BTD.DAI_MULTIPLIER.toString(),
-          DEPLOYED_SETS_INFO.ETHDAI_BTD.WETH_MULTIPLIER.toString()
+          DEPLOYED_SETS_INFO.ETHDAI_BTD.WETH_MULTIPLIER.toString(),
         ],
-        allocationBounds
+        allocationBounds,
       ],
     }).encodeABI();
 
@@ -400,7 +398,7 @@ export class RebalancingStage implements DeploymentStageInterface {
         DEPLOYED_SETS_INFO.BTCDAI_BTD.AUCTION_TIME_TO_PIVOT[this._networkConstant],
         [
           DEPLOYED_SETS_INFO.BTCDAI_BTD.DAI_MULTIPLIER.toString(),
-          DEPLOYED_SETS_INFO.BTCDAI_BTD.WBTC_MULTIPLIER.toString()
+          DEPLOYED_SETS_INFO.BTCDAI_BTD.WBTC_MULTIPLIER.toString(),
         ],
         allocationBounds,
       ],
@@ -454,7 +452,7 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployBTCDaiRebalancingSetToken(): Promise<RebalancingSetTokenContract> {
-    const name = DEPLOYED_SETS_INFO.BTCDAI_BTD.SET_NAME
+    const name = DEPLOYED_SETS_INFO.BTCDAI_BTD.SET_NAME;
     let address = await getContractAddress(name);
 
     if (address) {

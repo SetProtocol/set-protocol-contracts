@@ -20,6 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { IVault } from "../interfaces/IVault.sol";
+import { CommonMath } from "../../lib/CommonMath.sol";
 
 
 /**
@@ -113,7 +114,7 @@ library CoreIssuanceLibrary {
         // Loop through and decrement vault balances for the set, withdrawing if requested
         for (uint256 i = 0; i < componentCount; i++) {
             // Calculate bit index of current component
-            uint256 componentBitIndex = 2 ** i;
+            uint256 componentBitIndex = CommonMath.safePower(2, i);
 
             // Transfer to user unless component index is included in _toExclude
             if ((_toExclude & componentBitIndex) != 0) {

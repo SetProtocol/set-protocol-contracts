@@ -8,6 +8,7 @@ import { CommonMathMockContract } from '../types/generated/common_math_mock';
 import { ConstantAuctionPriceCurveContract } from '../types/generated/constant_auction_price_curve';
 import { CoreContract } from '../types/generated/core';
 import { CoreIssuanceLibraryContract } from '../types/generated/core_issuance_library';
+import { CoreIssuanceLibraryMockContract } from '../types/generated/core_issuance_library_mock';
 import { CoreMockContract } from '../types/generated/core_mock';
 import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 import { ERC20WrapperContract } from '../types/generated/erc20_wrapper';
@@ -62,6 +63,7 @@ export {
   ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreIssuanceLibraryContract,
+  CoreIssuanceLibraryMockContract,
   CoreMockContract,
   ERC20DetailedContract,
   ERC20WrapperContract,

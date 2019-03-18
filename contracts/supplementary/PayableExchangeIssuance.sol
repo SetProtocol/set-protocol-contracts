@@ -63,15 +63,15 @@ contract PayableExchangeIssuance is
     /* ============ Events ============ */
 
     event LogPayableExchangeIssue(
-        address setAddress,
+        address rebalancingSetAddress,
         address indexed callerAddress,
         uint256 etherQuantity
     );
 
     event LogPayableExchangeRedeem(
-        address setAddress,
+        address rebalancingSetAddress,
         address indexed callerAddress,
-        uint256 etherQuantity
+        uint256 rebalancingSetQuantity
     );
 
     /* ============ Constructor ============ */
@@ -251,7 +251,7 @@ contract PayableExchangeIssuance is
         emit LogPayableExchangeRedeem(
             _rebalancingSetAddress,
             msg.sender,
-            wethBalance
+            _rebalancingSetQuantity
         );
     }
 
@@ -293,7 +293,7 @@ contract PayableExchangeIssuance is
 
     /**
      * Given the issue quantity of the base Set, calculates the maximum quantity of rebalancing Set
-     * issuable.
+     * issuable. Quantity should already be a multiple of the natural unit.
      *
      * @param _rebalancingSetAddress    The address of the rebalancing Set
      * @param _baseSetIssueQuantity     The quantity issued of the base Set

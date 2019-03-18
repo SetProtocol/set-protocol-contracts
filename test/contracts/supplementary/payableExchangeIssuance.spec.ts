@@ -570,7 +570,7 @@ contract('PayableExchangeIssuance', accounts => {
       const expectedLogs = LogPayableExchangeRedeem(
         subjectRebalancingSetAddress,
         subjectCaller,
-        subjectEther,
+        subjectRebalancingSetQuantity,
         payableExchangeIssuance.address
       );
 

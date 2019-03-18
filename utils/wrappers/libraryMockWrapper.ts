@@ -2,6 +2,7 @@ import { Address } from 'set-protocol-utils';
 import {
   Bytes32MockContract,
   CommonMathMockContract,
+  CoreIssuanceLibraryMockContract,
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryMockContract,
   ZeroExOrderLibraryMockContract
@@ -11,6 +12,8 @@ import {
 } from '../web3Helper';
 
 const web3 = getWeb3();
+const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
+const CoreIssuanceLibraryMock = artifacts.require('CoreIssuanceLibraryMock');
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const Bytes32Mock = artifacts.require('Bytes32Mock');
 const CommonMathMock = artifacts.require('CommonMathMock');
@@ -49,6 +52,25 @@ export class LibraryMockWrapper {
 
     return new CommonMathMockContract(
       new web3.eth.Contract(truffleCommonMathLibrary.abi, truffleCommonMathLibrary.address),
+      { from },
+    );
+  }
+
+  public async deployCoreIssuanceLibraryAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<CoreIssuanceLibraryMockContract> {
+    const truffleCoreIssuanceLibrary = await CoreIssuanceLibrary.new(
+      { from: this._contractOwnerAddress },
+    );
+
+    await CoreIssuanceLibraryMock.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
+
+    const truffleCoreIssuanceLibraryMock = await CoreIssuanceLibraryMock.new(
+      { from },
+    );
+
+    return new CoreIssuanceLibraryMockContract(
+      new web3.eth.Contract(truffleCoreIssuanceLibraryMock.abi, truffleCoreIssuanceLibraryMock.address),
       { from },
     );
   }

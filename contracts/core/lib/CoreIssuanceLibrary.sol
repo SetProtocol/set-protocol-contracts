@@ -147,11 +147,16 @@ library CoreIssuanceLibrary {
         pure
         returns (uint256[] memory)
     {
+        require(
+            _quantity.mod(_naturalUnit) == 0,
+            "CoreIssuanceLibrary: Quantity must be a multiple of nat unit"
+        );
+
         uint256[] memory tokenValues = new uint256[](_componentUnits.length);
 
         // Transfer the underlying tokens to the corresponding token balances
         for (uint256 i = 0; i < _componentUnits.length; i++) {
-            tokenValues[i] = _quantity.mul(_componentUnits[i]).div(_naturalUnit);
+            tokenValues[i] = _quantity.div(_naturalUnit).mul(_componentUnits[i]);
         }
 
         return tokenValues;

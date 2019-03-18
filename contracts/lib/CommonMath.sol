@@ -46,7 +46,8 @@ library CommonMath {
         pure
         returns (uint256)
     {
-        require(a >= 0);
+        require(a > 0);
+
         uint256 result = 1;
         for (uint256 i = 0; i < pow; i++){
             uint256 previousResult = result;

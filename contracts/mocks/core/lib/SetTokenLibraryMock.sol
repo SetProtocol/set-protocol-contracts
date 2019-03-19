@@ -21,4 +21,37 @@ contract SetTokenLibraryMock {
             _tokens
         );
     }
+
+    function testIsMultipleOfSetNaturalUnit(
+        address _set,
+        uint256 _quantity
+    )
+        external
+        view
+    {
+        SetTokenLibrary.isMultipleOfSetNaturalUnit(
+            _set,
+            _quantity
+        );
+    }
+
+    function testGetSetDetails(
+        address _set
+    )
+        public
+        view
+        returns (
+            uint256, /* naturalUnit */
+            address[] memory, /* components */
+            uint256[] memory /* units */
+        )
+    {
+        SetTokenLibrary.SetDetails memory setToken = SetTokenLibrary.getSetDetails(_set);
+
+        return (
+            setToken.naturalUnit,
+            setToken.components,
+            setToken.units
+        );
+    }
 }

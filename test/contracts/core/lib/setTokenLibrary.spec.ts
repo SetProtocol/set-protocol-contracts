@@ -1,6 +1,7 @@
 require('module-alias/register');
 
 import * as _ from 'lodash';
+import * as chai from 'chai';
 import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
@@ -28,6 +29,7 @@ import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
+const { expect } = chai;
 const Core = artifacts.require('Core');
 const blockchain = new Blockchain(web3);
 
@@ -121,6 +123,109 @@ const [
       it('should revert', async () => {
         await expectRevertError(subject());
       });
+    });
+  });
+
+  describe('#testIsMultipleOfSetNaturalUnit', async () => {
+    let subjectSet: Address;
+    let subjectQuantity: BigNumber;
+
+    let setToken: SetTokenContract;
+    let naturalUnit: BigNumber;
+
+    beforeEach(async () => {
+      const firstComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+      const secondComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+      const componentTokens = [firstComponent, secondComponent];
+      const setComponentUnit = ether(4);
+      const componentAddresses = componentTokens.map(token => token.address);
+      const componentUnits = componentTokens.map(token => setComponentUnit);
+      naturalUnit = ether(2);
+
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+      );
+
+      subjectSet = setToken.address;
+      subjectQuantity = naturalUnit.mul(2);
+    });
+
+    async function subject(): Promise<any> {
+      return setTokenLibraryMock.testIsMultipleOfSetNaturalUnit.callAsync(
+        subjectSet,
+        subjectQuantity,
+      );
+    }
+
+    it('should not revert', async () => {
+      await subject();
+    });
+
+    describe('when the inputted quantity is not a multiple of the natural unit', async () => {
+      beforeEach(async () => {
+        subjectQuantity = ether(3);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#testGetSetDetails', async () => {
+    let subjectSet: Address;
+
+    let setToken: SetTokenContract;
+    let naturalUnit: BigNumber;
+    let componentAddresses: Address[];
+    let componentUnits: BigNumber[];
+
+    beforeEach(async () => {
+      const firstComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+      const secondComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+      const componentTokens = [firstComponent, secondComponent];
+      const setComponentUnit = ether(4);
+      componentAddresses = componentTokens.map(token => token.address);
+      componentUnits = componentTokens.map(token => setComponentUnit);
+      naturalUnit = ether(2);
+
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+      );
+
+      subjectSet = setToken.address;
+    });
+
+    async function subject(): Promise<any> {
+      return setTokenLibraryMock.testGetSetDetails.callAsync(
+        subjectSet,
+      );
+    }
+
+    it('should retrieve the correct natural unit', async () => {
+      const [naturalUnit] = await subject();
+
+      expect(naturalUnit).to.bignumber.equal(naturalUnit);
+    });
+
+    it('should retrieve the correct components', async () => {
+      const [, components] = await subject();
+
+      expect(JSON.stringify(components)).to.equal(JSON.stringify(componentAddresses));
+    });
+
+    it('should retrieve the correct components', async () => {
+      const [, , units] = await subject();
+
+      expect(JSON.stringify(units)).to.equal(JSON.stringify(componentUnits));
     });
   });
 });

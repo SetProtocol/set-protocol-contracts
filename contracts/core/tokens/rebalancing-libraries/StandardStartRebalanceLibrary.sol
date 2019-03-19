@@ -26,6 +26,7 @@ import { ICore } from "../../interfaces/ICore.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
+import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 /**
  * @title StandardStartRebalanceLibrary
@@ -46,15 +47,6 @@ library StandardStartRebalanceLibrary {
         uint256[] combinedCurrentUnits;
         uint256[] combinedNextSetUnits;
         address[] combinedTokenArray;
-    }
-
-    struct SetsDetails {
-        uint256 currentSetNaturalUnit;
-        uint256 nextSetNaturalUnit;
-        uint256[] currentSetUnits;
-        uint256[] nextSetUnits;
-        address[] currentSetComponents;
-        address[] nextSetComponents;
     }
 
     /* ============ Internal Functions ============ */
@@ -137,24 +129,21 @@ library StandardStartRebalanceLibrary {
         address _auctionLibrary
     )
         public
-        view
         returns (BiddingParameters memory)
     {
         // Get set details for currentSet and nextSet (units, components, natural units)
-        SetsDetails memory setsDetails = getUnderlyingSetsDetails(
-            _currentSet,
-            _nextSet
-        );
+        SetTokenLibrary.SetDetails memory currentSet = SetTokenLibrary.getSetDetails(_currentSet);
+        SetTokenLibrary.SetDetails memory nextSet = SetTokenLibrary.getSetDetails(_nextSet);
 
         // Create combinedTokenArray
-        address[] memory combinedTokenArray = setsDetails.currentSetComponents.union(
-            setsDetails.nextSetComponents
+        address[] memory combinedTokenArray = currentSet.components.union(
+            nextSet.components
         );
 
         // Calcualate minimumBid
         uint256 minimumBid = calculateMinimumBid(
-            setsDetails.currentSetNaturalUnit,
-            setsDetails.nextSetNaturalUnit,
+            currentSet.naturalUnit,
+            nextSet.naturalUnit,
             _auctionLibrary
         );
 
@@ -166,7 +155,8 @@ library StandardStartRebalanceLibrary {
             combinedCurrentUnits,
             combinedNextSetUnits
         ) = calculateCombinedUnitArrays(
-            setsDetails,
+            currentSet,
+            nextSet,
             minimumBid,
             _auctionLibrary,
             combinedTokenArray
@@ -179,35 +169,6 @@ library StandardStartRebalanceLibrary {
             combinedCurrentUnits: combinedCurrentUnits,
             combinedNextSetUnits: combinedNextSetUnits,
             combinedTokenArray: combinedTokenArray
-        });
-    }
-
-    /**
-     * Create struct that holds set details for currentSet and nextSet (units, components, natural units).
-     *
-     * @param _currentSet    Address of currentSet
-     * @param _nextSet       Address of nextSet
-     * @return               Struct that holds set details for currentSet and nextSet
-     */
-    function getUnderlyingSetsDetails(
-        address _currentSet,
-        address _nextSet
-    )
-        public
-        view
-        returns (SetsDetails memory)
-    {
-        // Create set token interfaces
-        ISetToken currentSetInstance = ISetToken(_currentSet);
-        ISetToken nextSetInstance = ISetToken(_nextSet);
-
-        return SetsDetails({
-            currentSetNaturalUnit: currentSetInstance.naturalUnit(),
-            nextSetNaturalUnit: nextSetInstance.naturalUnit(),
-            currentSetUnits: currentSetInstance.getUnits(),
-            nextSetUnits: nextSetInstance.getUnits(),
-            currentSetComponents: currentSetInstance.getComponents(),
-            nextSetComponents: nextSetInstance.getComponents()
         });
     }
 
@@ -242,20 +203,21 @@ library StandardStartRebalanceLibrary {
      * Calcualate unit difference between both sets relative to the largest natural
      * unit of the two sets.
      *
-     * @param _setsDetails              Information on currentSet and nextSet
+     * @param _currentSet               Information on currentSet
+     * @param _nextSet                  Information on nextSet
      * @param _minimumBid               Minimum bid amount
      * @param _auctionLibrary           Address of auction library being used in rebalance
      * @param _combinedTokenArray       Array of component tokens involved in rebalance
      * @return                          Unit inflow/outflow arrays for current and next Set
      */
     function calculateCombinedUnitArrays(
-        SetsDetails memory _setsDetails,
+        SetTokenLibrary.SetDetails memory _currentSet,
+        SetTokenLibrary.SetDetails memory _nextSet,
         uint256 _minimumBid,
         address _auctionLibrary,
         address[] memory _combinedTokenArray
     )
         public
-        view
         returns (uint256[] memory, uint256[] memory)
     {
         // Create memory version of combinedNextSetUnits and combinedCurrentUnits to only make one
@@ -264,37 +226,58 @@ library StandardStartRebalanceLibrary {
         uint256[] memory memoryCombinedNextSetUnits = new uint256[](_combinedTokenArray.length);
 
         for (uint256 i = 0; i < _combinedTokenArray.length; i++) {
-            // Check if component in arrays and get index if it is
-            uint256 indexCurrent;
-            bool isInCurrent;
-            (indexCurrent, isInCurrent) = _setsDetails.currentSetComponents.indexOf(_combinedTokenArray[i]);
+            memoryCombinedCurrentUnits[i] = calculateCombinedUnit(
+                _currentSet,
+                _minimumBid,
+                _auctionLibrary,
+                _combinedTokenArray[i]
+            );
 
-            uint256 indexRebalance;
-            bool isInNext;
-            (indexRebalance, isInNext) = _setsDetails.nextSetComponents.indexOf(_combinedTokenArray[i]);
-
-            // Compute and push unit amounts of token in currentSet
-            if (isInCurrent) {
-                memoryCombinedCurrentUnits[i] = RebalancingHelperLibrary.computeTransferValue(
-                    _setsDetails.currentSetUnits[indexCurrent],
-                    _setsDetails.currentSetNaturalUnit,
-                    _minimumBid,
-                    _auctionLibrary
-                );
-            }
-
-            // Compute and push unit amounts of token in nextSet
-            if (isInNext) {
-                memoryCombinedNextSetUnits[i] = RebalancingHelperLibrary.computeTransferValue(
-                    _setsDetails.nextSetUnits[indexRebalance],
-                    _setsDetails.nextSetNaturalUnit,
-                    _minimumBid,
-                    _auctionLibrary
-                );
-            }
+            memoryCombinedNextSetUnits[i] = calculateCombinedUnit(
+                _nextSet,
+                _minimumBid,
+                _auctionLibrary,
+                _combinedTokenArray[i]
+            );
         }
 
         return (memoryCombinedCurrentUnits, memoryCombinedNextSetUnits);
+    }
+
+    /**
+     * Calculations the unit amount of Token to include in the the combined Set units.
+     *
+     * @param _setToken                 Information on the SetToken
+     * @param _minimumBid               Minimum bid amount
+     * @param _auctionLibrary           Address of auction library being used in rebalance
+     * @param _currentComponent         Current component in iteration
+     * @return                          Unit inflow/outflow
+     */
+    function calculateCombinedUnit(
+        SetTokenLibrary.SetDetails memory _setToken,
+        uint256 _minimumBid,
+        address _auctionLibrary,
+        address _currentComponent
+    )
+        private
+        returns (uint256)
+    {
+        // Check if component in arrays and get index if it is
+        uint256 indexCurrent;
+        bool isComponent;
+        (indexCurrent, isComponent) = _setToken.components.indexOf(_currentComponent);
+
+        // Compute unit amounts of token in Set
+        if (isComponent) {
+            return RebalancingHelperLibrary.computeTransferValue(
+                _setToken.units[indexCurrent],
+                _setToken.naturalUnit,
+                _minimumBid,
+                _auctionLibrary
+            );
+        }
+
+        return 0;
     }
 
     /**

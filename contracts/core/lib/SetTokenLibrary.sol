@@ -54,6 +54,12 @@ library SetTokenLibrary {
         }
     }
 
+    /**
+     * Validates that passed in quantity is a multiple of the natural unit of the Set.
+     *
+     * @param _set                      Address of the Set
+     * @param _quantity                   Quantity to validate
+     */
     function isMultipleOfSetNaturalUnit(
         address _set,
         uint256 _quantity
@@ -63,10 +69,16 @@ library SetTokenLibrary {
     {
         require(
             _quantity.mod(ISetToken(_set).naturalUnit()) == 0,
-            "Invalid quantity"
+            "SetTokenLibrary.isMultipleOfSetNaturalUnit: Quantity is not a multiple of nat unit"
         );
     }
 
+    /**
+     * Retrieves the Set's natural unit, components, and units.
+     *
+     * @param _set                      Address of the Set
+     * @return SetDetails               Struct containing the natural unit, components, and units
+     */
     function getSetDetails(
         address _set
     )

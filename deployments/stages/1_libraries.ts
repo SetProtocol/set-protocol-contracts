@@ -8,6 +8,7 @@ import {
   ERC20WrapperContract,
   ExchangeIssuanceLibraryContract,
   RebalancingHelperLibraryContract,
+  SetTokenLibraryContract,
   StandardFailAuctionLibraryContract,
   StandardPlaceBidLibraryContract,
   StandardProposeLibraryContract,
@@ -19,6 +20,7 @@ import { CoreIssuanceLibrary } from '../../artifacts/ts/CoreIssuanceLibrary';
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { ExchangeIssuanceLibrary } from '../../artifacts/ts/ExchangeIssuanceLibrary';
 import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
+import { SetTokenLibrary } from '../../artifacts/ts/SetTokenLibrary';
 import { StandardFailAuctionLibrary } from '../../artifacts/ts/StandardFailAuctionLibrary';
 import { StandardPlaceBidLibrary } from '../../artifacts/ts/StandardPlaceBidLibrary';
 import { StandardProposeLibrary } from '../../artifacts/ts/StandardProposeLibrary';
@@ -38,6 +40,7 @@ export class LibrariesStage implements DeploymentStageInterface {
     await this.deployCoreIssuanceLibrary();
     await this.deployExchangeIssuanceLibrary();
     await this.deployRebalancingHelperLibrary();
+    await this.deploySetTokenLibrary();
 
     await this.deployStandardProposeLibrary();
     await this.deployStandardSettleRebalanceLibrary();
@@ -93,6 +96,18 @@ export class LibrariesStage implements DeploymentStageInterface {
 
     address = await deployContract(RebalancingHelperLibrary.bytecode, this._web3, name);
     return await RebalancingHelperLibraryContract.at(address, this._web3, TX_DEFAULTS);
+  }
+
+  private async deploySetTokenLibrary(): Promise<SetTokenLibraryContract> {
+    const name = SetTokenLibrary.contractName;
+    let address = await getContractAddress(name);
+
+    if (address) {
+      return await SetTokenLibraryContract.at(address, this._web3, TX_DEFAULTS);
+    }
+
+    address = await deployContract(SetTokenLibrary.bytecode, this._web3, name);
+    return await SetTokenLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deployStandardProposeLibrary(): Promise<StandardProposeLibraryContract> {

@@ -22,6 +22,7 @@ import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCu
 import { PayableExchangeIssuance } from '../../artifacts/ts/PayableExchangeIssuance';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
 import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
+import { SetTokenLibrary } from '../../artifacts/ts/SetTokenLibrary';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
 import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper';
@@ -65,9 +66,15 @@ export class ModulesStage implements DeploymentStageInterface {
 
     const coreAddress = await getContractAddress(Core.contractName);
     const vaultAddress = await getContractAddress(Vault.contractName);
+    const setTokenLibraryAddress = await getContractAddress(SetTokenLibrary.contractName);
+
+    const originalByteCode = ExchangeIssuanceModule.bytecode;
+    const linkedByteCode = linkLibraries([
+      { name: SetTokenLibrary.contractName, address: setTokenLibraryAddress },
+    ], originalByteCode);
 
     const data = new this._web3.eth.Contract(ExchangeIssuanceModule.abi).deploy({
-      data: ExchangeIssuanceModule.bytecode,
+      data: linkedByteCode,
       arguments: [
         coreAddress,
         vaultAddress,

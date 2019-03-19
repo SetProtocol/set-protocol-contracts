@@ -37,7 +37,7 @@ export async function deployContract(bytecode, web3, contractName): Promise<stri
     console.log('Please provide a valid web3 instance');
   }
 
-  if (!web3) {
+  if (!bytecode) {
     console.log('Please provide bytecode/data');
   }
 

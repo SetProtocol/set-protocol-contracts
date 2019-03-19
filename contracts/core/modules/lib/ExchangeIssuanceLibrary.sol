@@ -18,6 +18,7 @@ pragma solidity 0.5.4;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IVault } from "../../interfaces/IVault.sol";
@@ -31,6 +32,7 @@ import { IVault } from "../../interfaces/IVault.sol";
  */
 library ExchangeIssuanceLibrary {
     using SafeMath for uint256;
+    using AddressArrayUtils for address[];
 
     // ============ Structs ============
 
@@ -71,7 +73,8 @@ library ExchangeIssuanceLibrary {
     }
 
     /**
-     * Validates that the required Components and amounts are valid components and positive
+     * Validates that the required Components and amounts are valid components and positive.
+     * Duplicate receive token values are not allowed
      *
      * @param _receiveTokens           The addresses of components required for issuance
      * @param _receiveTokenAmounts     The quantities of components required for issuance
@@ -89,6 +92,12 @@ library ExchangeIssuanceLibrary {
         require(
             receiveTokensCount > 0,
             "ExchangeIssuanceLibrary.validateReceiveTokens: Receive tokens must not be empty"
+        );
+
+        // Ensure the receive tokens has no duplicates
+        require(
+            !_receiveTokens.hasDuplicate(),
+            "ExchangeIssuanceLibrary.validateReceiveTokens: Receive tokens must not have duplicates"
         );
 
         // Make sure required components and required component amounts are equal length
@@ -141,7 +150,8 @@ library ExchangeIssuanceLibrary {
     }
 
     /**
-     * Validates that the send tokens inputs are valid
+     * Validates that the send tokens inputs are valid. Since tokens are sent to various exchanges,
+     * duplicate send tokens are valid
      *
      * @param _core                         The address of Core
      * @param _sendTokenExchangeIds         List of exchange wrapper enumerations corresponding to 
@@ -158,6 +168,11 @@ library ExchangeIssuanceLibrary {
         internal
         view
     {
+        require(
+            _sendTokens.length > 0,
+            "ExchangeIssuanceLibrary.validateSendTokenParams: Send token inputs must not be empty"
+        );
+
         require(
             _sendTokenExchangeIds.length == _sendTokens.length && 
             _sendTokens.length == _sendTokenAmounts.length,

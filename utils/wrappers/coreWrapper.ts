@@ -48,6 +48,7 @@ const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory
 const RebalancingTokenIssuanceModule = artifacts.require('RebalancingTokenIssuanceModule');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
+const SetTokenLibrary = artifacts.require('SetTokenLibrary');
 const StandardFailAuctionLibrary = artifacts.require('StandardFailAuctionLibrary');
 const StandardPlaceBidLibrary = artifacts.require('StandardPlaceBidLibrary');
 const StandardProposeLibrary = artifacts.require('StandardProposeLibrary');
@@ -230,6 +231,16 @@ export class CoreWrapper {
       new web3.eth.Contract(truffleTokenFactory.abi, truffleTokenFactory.address),
       { from, gas: DEFAULT_GAS },
     );
+  }
+
+  public async linkSetTokenLibraryAsync(
+    contract: any,
+  ): Promise<void> {
+    const truffleSetTokenLibrary = await SetTokenLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
+
+    await contract.link('SetTokenLibrary', truffleSetTokenLibrary.address);
   }
 
   public async linkRebalancingLibrariesAsync(
@@ -435,6 +446,8 @@ export class CoreWrapper {
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<ExchangeIssuanceModuleContract> {
+    await this.linkSetTokenLibraryAsync(ExchangeIssuanceModule);
+
     const truffleExchangeIssuanceModule = await ExchangeIssuanceModule.new(
       core.address,
       vault.address,

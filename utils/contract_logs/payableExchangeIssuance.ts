@@ -2,7 +2,7 @@ import { Address, Log } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 export function LogPayableExchangeIssue(
-  setAddress: Address,
+  rebalancingSetAddress: Address,
   callerAddress: Address,
   etherQuantity: BigNumber,
   contractAddress: Address,
@@ -11,7 +11,7 @@ export function LogPayableExchangeIssue(
     event: 'LogPayableExchangeIssue',
     address: contractAddress,
     args: {
-      setAddress,
+      rebalancingSetAddress,
       callerAddress,
       etherQuantity,
     },
@@ -19,18 +19,18 @@ export function LogPayableExchangeIssue(
 }
 
 export function LogPayableExchangeRedeem(
-  setAddress: Address,
+  rebalancingSetAddress: Address,
   callerAddress: Address,
-  etherQuantity: BigNumber,
+  rebalancingSetQuantity: BigNumber,
   contractAddress: Address,
 ): Log[] {
   return [{
     event: 'LogPayableExchangeRedeem',
     address: contractAddress,
     args: {
-      setAddress,
+      rebalancingSetAddress,
       callerAddress,
-      etherQuantity,
+      rebalancingSetQuantity,
     },
   }];
 }

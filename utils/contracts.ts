@@ -8,6 +8,7 @@ import { CommonMathMockContract } from '../types/generated/common_math_mock';
 import { ConstantAuctionPriceCurveContract } from '../types/generated/constant_auction_price_curve';
 import { CoreContract } from '../types/generated/core';
 import { CoreIssuanceLibraryContract } from '../types/generated/core_issuance_library';
+import { CoreIssuanceLibraryMockContract } from '../types/generated/core_issuance_library_mock';
 import { CoreMockContract } from '../types/generated/core_mock';
 import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 import { ERC20WrapperContract } from '../types/generated/erc20_wrapper';
@@ -34,6 +35,8 @@ import { RebalancingSetTokenFactoryContract } from '../types/generated/rebalanci
 import { RebalancingTokenIssuanceModuleContract } from '../types/generated/rebalancing_token_issuance_module';
 import { SetTokenContract } from '../types/generated/set_token';
 import { SetTokenFactoryContract } from '../types/generated/set_token_factory';
+import { SetTokenLibraryContract } from '../types/generated/set_token_library';
+import { SetTokenLibraryMockContract } from '../types/generated/set_token_library_mock';
 import { StandardFailAuctionLibraryContract } from '../types/generated/standard_fail_auction_library';
 import { StandardPlaceBidLibraryContract } from '../types/generated/standard_place_bid_library';
 import { StandardProposeLibraryContract } from '../types/generated/standard_propose_library';
@@ -62,6 +65,7 @@ export {
   ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreIssuanceLibraryContract,
+  CoreIssuanceLibraryMockContract,
   CoreMockContract,
   ERC20DetailedContract,
   ERC20WrapperContract,
@@ -88,6 +92,8 @@ export {
   RebalancingTokenIssuanceModuleContract,
   SetTokenContract,
   SetTokenFactoryContract,
+  SetTokenLibraryContract,
+  SetTokenLibraryMockContract,
   StandardFailAuctionLibraryContract,
   StandardPlaceBidLibraryContract,
   StandardProposeLibraryContract,

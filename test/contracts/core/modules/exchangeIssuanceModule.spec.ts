@@ -489,10 +489,10 @@ contract('ExchangeIssuanceModule', accounts => {
     });
 
     describe('when a receive token is not a member of the Set', async () => {
-      beforeEach(async () => {
-        const notComponent = notExchangeIssueCaller;
-        const notComponent2 = zeroExOrderMaker;
-        exchangeIssueReceiveTokens = [notComponent, notComponent2];
+      before(async () => {
+        const notComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
+        const notComponent2 = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
+        exchangeIssueReceiveTokens = [notComponent.address, notComponent2.address];
       });
 
       after(async () => {

@@ -146,7 +146,7 @@ contract KyberNetworkWrapper {
                 i.mul(KYBER_TRADE_LENGTH)
             );
 
-            // Ensure the issuance order maker token is allowed to be transferred by 
+            // Ensure the caller's source token is allowed to be transferred by 
             // KyberNetworkProxy as the source token
             ERC20Wrapper.ensureAllowance(
                 trade.sourceToken,

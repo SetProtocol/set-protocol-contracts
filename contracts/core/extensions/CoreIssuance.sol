@@ -66,7 +66,7 @@ contract CoreIssuance is
     }
 
     /**
-     * Converts user's components into Set Token's held directly in Vault
+     * Converts user's components into Set Tokens owned by the user and stored in Vault
      *
      * @param _set          Address of the Set
      * @param _quantity     Number of tokens to redeem
@@ -110,7 +110,7 @@ contract CoreIssuance is
     }
 
     /**
-     * Exchange Set tokens for underlying components
+     * Exchange Set tokens for underlying components to the user held in the Vault.
      *
      * @param  _set          Address of the Set to redeem
      * @param  _quantity     Number of tokens to redeem
@@ -187,7 +187,8 @@ contract CoreIssuance is
     }
 
     /**
-     * Convert Set tokens held in the vault into underlying components in vault
+     * Convert the caller's Set tokens held in the vault into underlying components to the user
+     * held in the Vault.
      *
      * @param _set          Address of the Set
      * @param _quantity     Number of tokens to redeem
@@ -216,7 +217,7 @@ contract CoreIssuance is
 
     /**
      * Redeem Set token and return components to specified recipient. The components
-     * are left in the vault
+     * are left in the vault after redemption in the recipient's name.
      *
      * @param _recipient    Recipient of Set being issued
      * @param _set          Address of the Set
@@ -269,7 +270,7 @@ contract CoreIssuance is
 
         SetTokenLibrary.SetDetails memory setToken = SetTokenLibrary.getSetDetails(_set);
 
-        // Calculate component quantities to issue
+        // Calculate component quantities required to issue
         uint256[] memory requiredComponentQuantities = CoreIssuanceLibrary.calculateRequiredComponentQuantities(
             setToken.units,
             setToken.naturalUnit,
@@ -365,7 +366,7 @@ contract CoreIssuance is
     )
         internal
     {
-        uint256[] memory componentTransferValues = redeemAndDecrementVault(
+        uint256[] memory componentQuantities = redeemAndDecrementVault(
             _set,
             _burnAddress,
             _quantity
@@ -376,7 +377,7 @@ contract CoreIssuance is
         state.vaultInstance.batchIncrementTokenOwner(
             components,
             _incrementAddress,
-            componentTransferValues
+            componentQuantities
         );
     }
 
@@ -384,10 +385,10 @@ contract CoreIssuance is
      * Private method that validates inputs, redeems Set, and decrements
      * the components in the vault
      *
-     * @param _set               Address of the Set to redeem
-     * @param _burnAddress       Address to burn tokens from
-     * @param _quantity          Number of tokens to redeem     
-     * @return componentTransferValues       Transfer value of components
+     * @param _set                  Address of the Set to redeem
+     * @param _burnAddress          Address to burn tokens from
+     * @param _quantity             Number of tokens to redeem     
+     * @return componentQuantities  Transfer value of components
      */
     function redeemAndDecrementVault(
         address _set,

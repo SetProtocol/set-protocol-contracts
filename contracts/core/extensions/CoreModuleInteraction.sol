@@ -22,14 +22,14 @@ import { CoreState } from "../lib/CoreState.sol";
 import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 
+
 /**
  * @title CoreModularInteraction
  * @author Set Protocol
  *
- * Extension used to expose internal accounting functions to module
+ * Extension used to expose internal accounting and issuance functions, vault, and proxy functions
+ * to modules.
  */
-
-
 contract CoreModuleInteraction is
     ICoreAccounting,
     ICoreIssuance,

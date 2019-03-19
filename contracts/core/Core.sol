@@ -21,7 +21,6 @@ import { CoreAdmin } from "./extensions/CoreAdmin.sol";
 import { CoreFactory } from "./extensions/CoreFactory.sol";
 import { CoreIssuance } from "./extensions/CoreIssuance.sol";
 import { CoreModuleInteraction } from "./extensions/CoreModuleInteraction.sol";
-import { CoreState } from "./lib/CoreState.sol";
 import { ITransferProxy } from "./interfaces/ITransferProxy.sol";
 import { IVault } from "./interfaces/IVault.sol";
 
@@ -31,7 +30,8 @@ import { IVault } from "./interfaces/IVault.sol";
  * @author Set Protocol
  *
  * The Core contract acts as a coordinator handling issuing, redeeming, and
- * creating Sets, as well as all collateral flows throughout the system.
+ * creating Sets, as well as all collateral flows throughout the system. Core
+ * is also responsible for tracking state and exposing methods to modules
  */
  /* solium-disable-next-line no-empty-blocks */
 contract Core is

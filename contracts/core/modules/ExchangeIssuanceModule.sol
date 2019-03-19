@@ -31,7 +31,7 @@ import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
  * @title ExchangeIssuanceModule
  * @author Set Protocol
  *
- * The ExchangeIssuanceModule facilitates the exchangeIssue function which allows
+ * The ExchangeIssuanceModule facilitates the exchangeIssue and exchangeRedeem functions which allows
  * the issuance and redemption Sets using exchange orders
  */
 contract ExchangeIssuanceModule is
@@ -235,7 +235,7 @@ contract ExchangeIssuanceModule is
         private
     {
         for (uint256 i = 0; i < _sendTokens.length; i++) {
-            // Get exchange wraooer address from state mapping based on enumeration
+            // Get exchange wrapper address from state mapping based on enumeration
             address exchangeWrapper = coreInstance.exchangeIds(_sendTokenExchangeIds[i]);
 
             // Transfer send tokens to the appropriate exchange wrapper

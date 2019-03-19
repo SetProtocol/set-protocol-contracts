@@ -34,6 +34,7 @@ import { TX_DEFAULTS } from '../../deployments/utils/blockchain';
 
 const web3 = getWeb3();
 
+const ArrayValidations = artifacts.require('ArrayValidations');
 const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
 const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
@@ -192,6 +193,8 @@ export class CoreWrapper {
     coreAddress: Address,
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenFactoryContract> {
+    await this.linkArrayValidationsAsync(SetTokenFactory);
+
     const truffleSetTokenFactory = await SetTokenFactory.new(
       coreAddress,
       { from },
@@ -280,6 +283,16 @@ export class CoreWrapper {
     await contract.link('StandardFailAuctionLibrary', truffleStandardFailAuctionLibrary.address);
   }
 
+  public async linkArrayValidationsAsync(
+    contract: any,
+  ): Promise<void> {
+    const truffleArrayValidations = await ArrayValidations.new(
+      { from: this._tokenOwnerAddress },
+    );
+
+    await contract.link('ArrayValidations', truffleArrayValidations.address);
+  }
+
   public async deploySetTokenAsync(
     factory: Address,
     componentAddresses: Address[],
@@ -317,8 +330,9 @@ export class CoreWrapper {
     const truffleCoreIssuanceLibrary = await CoreIssuanceLibrary.new(
       { from: this._tokenOwnerAddress },
     );
-
     await Core.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
+
+    await this.linkArrayValidationsAsync(Core);
 
     const truffleCore = await Core.new(
       transferProxy.address,
@@ -340,8 +354,10 @@ export class CoreWrapper {
     const truffleCoreIssuanceLibrary = await CoreIssuanceLibrary.new(
       { from: this._tokenOwnerAddress },
     );
-
     await Core.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
+
+    await this.linkArrayValidationsAsync(Core);
+
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
@@ -362,8 +378,9 @@ export class CoreWrapper {
     const truffleCoreIssuanceLibrary = await CoreIssuanceLibrary.new(
       { from: this._tokenOwnerAddress },
     );
-
     await CoreMock.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
+
+    await this.linkArrayValidationsAsync(Core);
 
     const truffleCore = await CoreMock.new(
       transferProxy.address,

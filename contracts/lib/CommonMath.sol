@@ -51,8 +51,9 @@ library CommonMath {
         uint256 result = 1;
         for (uint256 i = 0; i < pow; i++){
             uint256 previousResult = result;
+
+            // Using safemath multiplication prevents overflows
             result = previousResult.mul(a);
-            require(result.div(a) >= previousResult);
         }
 
         return result;

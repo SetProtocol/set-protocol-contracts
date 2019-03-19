@@ -18,6 +18,12 @@ pragma solidity 0.5.4;
 
 
 library CommonValidationsLibrary {
+
+    /**
+     * Ensures that an address array is not empty.
+     *
+     * @param  _addressArray       Address array input
+     */    
     function validateNonEmpty(
         address[] calldata _addressArray
     )
@@ -30,6 +36,12 @@ library CommonValidationsLibrary {
         ); 
     }
 
+    /**
+     * Ensures that an address array and uint256 array are equal length
+     *
+     * @param  _addressArray       Address array input
+     * @param  _uint256Array       Uint256 array input
+     */    
     function validateEqualLength(
         address[] calldata _addressArray,
         uint256[] calldata _uint256Array

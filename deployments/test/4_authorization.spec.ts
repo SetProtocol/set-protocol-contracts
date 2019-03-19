@@ -206,7 +206,7 @@ describe('Deployment: Authorization', () => {
 
     it('core contains kyber network exchange wrapper', async () => {
       const kyberNetworkAddress = await getContractAddress(KyberNetworkWrapper.contractName);
-      expect(kyberNetworkAddress).toContain(kyberNetworkAddress);
+      expect(exchanges).toContain(kyberNetworkAddress);
     });
   });
 

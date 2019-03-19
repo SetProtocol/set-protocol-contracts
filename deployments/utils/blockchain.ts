@@ -23,7 +23,7 @@ export function getInfuraKey(): string {
 
 export let TX_DEFAULTS = {
   gas: 6700000, // 6.7M
-  gasPrice: 10000000000, // 10 gWei
+  gasPrice: 4000000000, // 4 gWei
 };
 
 export async function deployContract(bytecode, web3, contractName): Promise<string> {

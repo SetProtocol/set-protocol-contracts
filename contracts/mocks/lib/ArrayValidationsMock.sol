@@ -4,19 +4,19 @@ import { ArrayValidations } from "../../lib/ArrayValidations.sol";
 
 contract ArrayValidationsMock {
     function testValidateNonEmpty(
-        address[] memory _arr1
+        address[] calldata _arr1
     )
-        public
+        external
         pure
     {
         ArrayValidations.validateNonEmpty(_arr1);
     }
 
     function testValidateEqualLength(
-        address[] memory _addressArray,
-        uint256[] memory _uint256Array
+        address[] calldata _addressArray,
+        uint256[] calldata _uint256Array
     )
-        public
+        external
         pure
     {
         ArrayValidations.validateEqualLength(_addressArray, _uint256Array);

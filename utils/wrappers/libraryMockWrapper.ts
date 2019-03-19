@@ -5,6 +5,7 @@ import {
   CoreIssuanceLibraryMockContract,
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryMockContract,
+  SetTokenLibraryMockContract,
   ZeroExOrderLibraryMockContract
 } from '../contracts';
 import {
@@ -18,6 +19,8 @@ const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const Bytes32Mock = artifacts.require('Bytes32Mock');
 const CommonMathMock = artifacts.require('CommonMathMock');
 const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
+const SetTokenLibrary = artifacts.require('SetTokenLibrary');
+const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
 const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
 
 
@@ -97,6 +100,25 @@ export class LibraryMockWrapper {
 
     return new ERC20WrapperMockContract(
       new web3.eth.Contract(erc20WrapperMockContract.abi, erc20WrapperMockContract.address),
+      { from },
+    );
+  }
+
+  public async deploySetTokenLibraryAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<SetTokenLibraryMockContract> {
+    const truffleSetTokenLibrary = await SetTokenLibrary.new(
+      { from: this._contractOwnerAddress },
+    );
+
+    await SetTokenLibraryMock.link('SetTokenLibrary', truffleSetTokenLibrary.address);
+
+    const setTokenLibraryMockContract = await SetTokenLibraryMock.new(
+      { from },
+    );
+
+    return new SetTokenLibraryMockContract(
+      new web3.eth.Contract(setTokenLibraryMockContract.abi, setTokenLibraryMockContract.address),
       { from },
     );
   }

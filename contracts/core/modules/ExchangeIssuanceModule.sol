@@ -24,6 +24,7 @@ import { ExchangeExecution } from "./lib/ExchangeExecution.sol";
 import { ExchangeIssuanceLibrary } from "./lib/ExchangeIssuanceLibrary.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
+import { SetTokenLibrary } from "./lib/SetTokenLibrary.sol";
 
 
 /**
@@ -96,7 +97,7 @@ contract ExchangeIssuanceModule is
         validateExchangeIssuanceParams(_exchangeIssuanceParams);
 
         // Validate that all receiveTokens are components of the SEt
-        validateTokensAreComponents(
+        SetTokenLibrary.validateTokensAreComponents(
             _exchangeIssuanceParams.setAddress,
             _exchangeIssuanceParams.receiveTokens
         );
@@ -146,7 +147,7 @@ contract ExchangeIssuanceModule is
         validateExchangeIssuanceParams(_exchangeIssuanceParams);
 
         // Validate that all sendTokens are components of the Set
-        validateTokensAreComponents(
+        SetTokenLibrary.validateTokensAreComponents(
             _exchangeIssuanceParams.setAddress,
             _exchangeIssuanceParams.sendTokens
         );

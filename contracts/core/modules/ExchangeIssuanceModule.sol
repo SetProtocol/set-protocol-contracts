@@ -24,7 +24,7 @@ import { ExchangeExecution } from "./lib/ExchangeExecution.sol";
 import { ExchangeIssuanceLibrary } from "./lib/ExchangeIssuanceLibrary.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
-import { SetTokenLibrary } from "./lib/SetTokenLibrary.sol";
+import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
 
 
 /**

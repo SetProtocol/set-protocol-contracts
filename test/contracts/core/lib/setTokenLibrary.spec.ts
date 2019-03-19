@@ -74,7 +74,7 @@ const [
     await blockchain.revertAsync();
   });
 
-  describe('#testValidateReceiveTokens', async () => {
+  describe('#testValidateTokensAreComponents', async () => {
     let subjectSet: Address;
     let subjectTokens: Address[];
 
@@ -113,7 +113,7 @@ const [
       await subject();
     });
 
-    describe('when the quantity is not a multiple of the natural unit', async () => {
+    describe('when the inputted token is not a component', async () => {
       beforeEach(async () => {
         subjectTokens = [nonComponentAddress];
       });

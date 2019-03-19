@@ -81,8 +81,6 @@ export class ModulesStage implements DeploymentStageInterface {
       ],
     }).encodeABI();
 
-    console.log("What is data?", data);
-
     address = await deployContract(data, this._web3, name);
     return await ExchangeIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
   }

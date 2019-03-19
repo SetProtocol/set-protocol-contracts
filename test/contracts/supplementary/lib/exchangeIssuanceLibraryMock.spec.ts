@@ -138,6 +138,16 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the quantity is not a multiple of the natural unit', async () => {
+      beforeEach(async () => {
+        subjectQuantity = ether(3);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#testValidateReceiveTokens', async () => {
@@ -160,7 +170,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
       await subject();
     });
 
-    describe('when send tokens has a duplicate', async () => {
+    describe('when receive tokens has a duplicate', async () => {
       beforeEach(async () => {
         subjectReceiveTokens = [otherAccount, otherAccount];
         subjectReceiveTokenAmounts = [new BigNumber(1), new BigNumber(1)];
@@ -171,7 +181,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
       });
     });
 
-    describe('when send tokens is empty', async () => {
+    describe('when receive tokens is empty', async () => {
       beforeEach(async () => {
         subjectReceiveTokens = [];
         subjectReceiveTokenAmounts = [];
@@ -182,7 +192,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
       });
     });
 
-    describe('when send quantities quantities is zero', async () => {
+    describe('when receive quantities quantities is zero', async () => {
       beforeEach(async () => {
         subjectReceiveTokenAmounts = [ZERO];
       });
@@ -288,7 +298,37 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
       });
     });
 
-    describe('when send quantities quantities is zero', async () => {
+    describe('when send token amounts is uneven', async () => {
+      beforeEach(async () => {
+        subjectSendTokenAmounts = [new BigNumber(1), new BigNumber(2)];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when send token exchange ids length is uneven', async () => {
+      beforeEach(async () => {
+        subjectSendTokenExchanges = [new BigNumber(1), new BigNumber(2)];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when send token exchange id is invalid', async () => {
+      beforeEach(async () => {
+        subjectSendTokenExchanges = [new BigNumber(4)];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when send token quantities is zero', async () => {
       beforeEach(async () => {
         subjectSendTokenAmounts = [ZERO];
       });

@@ -23,8 +23,6 @@ const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 
-
-
 contract('Authorizable', accounts => {
   const [
     ownerAccount,

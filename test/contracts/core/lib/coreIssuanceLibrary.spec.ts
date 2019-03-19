@@ -51,7 +51,7 @@ contract('CoreIssuanceLibraryMock', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#testValidateReceiveTokens', async () => {
+  describe('#testCalculateTransferValues', async () => {
     let subjectComponentUnits: BigNumber[];
     let subjectNaturalUnit: BigNumber;
     let subjectQuantity: BigNumber;

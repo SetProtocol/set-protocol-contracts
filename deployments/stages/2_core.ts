@@ -25,6 +25,7 @@ import {
   WhiteListContract,
 } from '../../utils/contracts';
 
+import { ArrayValidations } from '../../artifacts/ts/ArrayValidations';
 import { Core } from '../../artifacts/ts/Core';
 import { CoreIssuanceLibrary } from '../../artifacts/ts/CoreIssuanceLibrary';
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
@@ -133,9 +134,11 @@ export class CoreStage implements DeploymentStageInterface {
     const originalByteCode = Core.bytecode;
 
     const coreIssuanceLibrary = await getContractAddress(CoreIssuanceLibrary.contractName);
+    const arrayValidations = await getContractAddress(ArrayValidations.contractName);
     const linkedByteCode = linkLibraries([
       { name: ERC20Wrapper.contractName, address: this._erc20WrapperAddress },
       { name: CoreIssuanceLibrary.contractName, address: coreIssuanceLibrary },
+      { name: ArrayValidations.contractName, address: arrayValidations },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(Core.abi).deploy({
@@ -160,8 +163,14 @@ export class CoreStage implements DeploymentStageInterface {
 
     const coreAddress = await getContractAddress(Core.contractName);
 
+    const originalByteCode = SetTokenFactory.bytecode;
+    const arrayValidations = await getContractAddress(ArrayValidations.contractName);
+    const linkedByteCode = linkLibraries([
+      { name: ArrayValidations.contractName, address: arrayValidations },
+    ], originalByteCode);
+
     const data = new this._web3.eth.Contract(SetTokenFactory.abi).deploy({
-      data: SetTokenFactory.bytecode,
+      data: linkedByteCode,
       arguments: [coreAddress],
     }).encodeABI();
 

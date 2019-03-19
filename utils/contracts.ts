@@ -1,4 +1,5 @@
 import { AuthorizableContract } from '../types/generated/authorizable';
+import { ArrayValidationsContract } from '../types/generated/array_validations';
 import { ArrayValidationsMockContract } from '../types/generated/array_validations_mock';
 import { BadTokenMockContract } from '../types/generated/bad_token_mock';
 import { BaseContract } from '../types/base_contract';
@@ -57,6 +58,7 @@ import { ZeroExOrderLibraryMockContract } from '../types/generated/zero_ex_order
 
 export {
   AuthorizableContract,
+  ArrayValidationsContract,
   ArrayValidationsMockContract,
   BadTokenMockContract,
   BaseContract,

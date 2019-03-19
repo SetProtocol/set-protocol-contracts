@@ -302,6 +302,8 @@ export class CoreWrapper {
     symbol: string = 'SET',
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenContract> {
+    await this.linkArrayValidationsAsync(SetToken);
+
     // Creates but does not register the Set with Core as enabled
     const truffleSetToken = await SetToken.new(
       factory,
@@ -380,7 +382,7 @@ export class CoreWrapper {
     );
     await CoreMock.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
 
-    await this.linkArrayValidationsAsync(Core);
+    await this.linkArrayValidationsAsync(CoreMock);
 
     const truffleCore = await CoreMock.new(
       transferProxy.address,

@@ -32,7 +32,7 @@ library SetTokenLibrary {
      */
     function validateTokensAreComponents(
         address _set,
-        address[] memory _tokens
+        address[] calldata _tokens
     )
         external
         view

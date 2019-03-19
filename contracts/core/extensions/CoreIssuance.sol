@@ -259,7 +259,7 @@ contract CoreIssuance is
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Invalid Set"
+            "Core: Invalid Set"
         );
 
         // Declare interface variables
@@ -407,7 +407,7 @@ contract CoreIssuance is
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Invalid Set"
+            "Core: Invalid Set"
         );
 
         ISetToken setToken = ISetToken(_set);

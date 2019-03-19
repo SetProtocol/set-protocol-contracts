@@ -19,9 +19,9 @@ pragma solidity 0.5.4;
 
 library ArrayValidations {
     function validateNonEmpty(
-        address[] memory _addressArray
+        address[] calldata _addressArray
     )
-        internal
+        external
         pure
     {
         require(
@@ -31,10 +31,10 @@ library ArrayValidations {
     }
 
     function validateEqualLength(
-        address[] memory _addressArray,
-        uint256[] memory _uint256Array
+        address[] calldata _addressArray,
+        uint256[] calldata _uint256Array
     )
-        internal
+        external
         pure
     {
         require(

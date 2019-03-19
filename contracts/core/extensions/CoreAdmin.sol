@@ -118,7 +118,7 @@ contract CoreAdmin is
     {
         require(
             state.validFactories[_factory],
-            "Invalid Factory"
+            "Core: Invalid Factory"
         );
 
         state.factories = state.factories.remove(_factory);

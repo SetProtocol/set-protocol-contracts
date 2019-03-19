@@ -19,13 +19,9 @@ pragma experimental "ABIEncoderV2";
 
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
-import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
-import { Bytes32Library } from "../../lib/Bytes32Library.sol";
 import { CommonMath } from "../../lib/CommonMath.sol";
-import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
@@ -50,8 +46,6 @@ contract RebalancingSetToken is
     ERC20Detailed
 {
     using SafeMath for uint256;
-    using Bytes32Library for bytes32;
-    using AddressArrayUtils for address[];
 
     /* ============ State Variables ============ */
 

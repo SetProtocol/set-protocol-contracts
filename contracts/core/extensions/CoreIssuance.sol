@@ -270,7 +270,7 @@ contract CoreIssuance is
         SetTokenLibrary.SetDetails memory setToken = SetTokenLibrary.getSetDetails(_set);
 
         // Calculate component quantities to issue
-        uint256[] memory requiredComponentQuantities = CoreIssuanceLibrary.calculateTransferValues(
+        uint256[] memory requiredComponentQuantities = CoreIssuanceLibrary.calculateRequiredComponentQuantities(
             setToken.units,
             setToken.naturalUnit,
             _quantity
@@ -415,7 +415,7 @@ contract CoreIssuance is
         SetTokenLibrary.SetDetails memory setToken = SetTokenLibrary.getSetDetails(_set);
 
         // Calculate component quantities to redeem
-        uint256[] memory componentQuantities = CoreIssuanceLibrary.calculateTransferValues(
+        uint256[] memory componentQuantities = CoreIssuanceLibrary.calculateRequiredComponentQuantities(
             setToken.units,
             setToken.naturalUnit,
             _quantity

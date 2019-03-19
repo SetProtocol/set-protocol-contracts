@@ -138,7 +138,7 @@ library CoreIssuanceLibrary {
      * @param _quantity         The number of tokens being redeem
      * @return uint256[]        Transfer value in base units of the Set
      */
-    function calculateTransferValues(
+    function calculateRequiredComponentQuantities(
         uint256[] calldata _componentUnits,
         uint256 _naturalUnit,
         uint256 _quantity

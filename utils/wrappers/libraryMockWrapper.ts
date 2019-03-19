@@ -36,7 +36,7 @@ export class LibraryMockWrapper {
 
   /* ============ Deployment ============ */
 
-  public async deployCommonValidationsLibraryLibraryAsync(
+  public async deployCommonValidationsLibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<CommonValidationsLibraryMockContract> {
     const truffleCommonValidationsLibrary = await CommonValidationsLibrary.new(

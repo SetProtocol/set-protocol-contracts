@@ -34,7 +34,7 @@ library SetTokenLibrary {
         address _set,
         address[] memory _tokens
     )
-        public
+        external
         view
     {
         for (uint256 i = 0; i < _tokens.length; i++) {

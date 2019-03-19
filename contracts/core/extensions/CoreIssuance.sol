@@ -267,7 +267,7 @@ contract CoreIssuance is
 
         // Validate quantity is multiple of natural unit
         require(
-            _quantity % setToken.naturalUnit() == 0,
+            _quantity.mod(setToken.naturalUnit()) == 0,
             "Core: Invalid quantity"
         );
 
@@ -417,7 +417,7 @@ contract CoreIssuance is
 
         // Validate quantity is multiple of natural unit
         require(
-            _quantity % naturalUnit == 0,
+            _quantity.mod(naturalUnit) == 0,
             "Core: Invalid quantity"
         );
 

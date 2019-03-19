@@ -36,6 +36,30 @@ library CommonMath {
     }
 
     /**
+    * @dev Performs the power on a specified value, reverts on overflow.
+    */
+    function safePower(
+        uint256 a,
+        uint256 pow
+    )
+        internal
+        pure
+        returns (uint256)
+    {
+        require(a > 0);
+
+        uint256 result = 1;
+        for (uint256 i = 0; i < pow; i++){
+            uint256 previousResult = result;
+
+            // Using safemath multiplication prevents overflows
+            result = previousResult.mul(a);
+        }
+
+        return result;
+    }
+
+    /**
      * Checks for rounding errors and returns value of potential partial amounts of a principal
      *
      * @param  _principal       Number fractional amount is derived from

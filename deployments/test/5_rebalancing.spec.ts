@@ -10,7 +10,11 @@ import {
   getNetworkConstant
 } from '../utils/output-helper';
 
-import { calculateInitialSetUnits, calculateGeneralInitialSetUnits, calculateAllocationBounds } from '../utils/rebalancing';
+import {
+  calculateInitialSetUnits,
+  calculateGeneralInitialSetUnits,
+  calculateAllocationBounds,
+} from '../utils/rebalancing';
 import { getWeb3Instance } from '../utils/blockchain';
 
 import { BTCDaiRebalancingManager } from '../../artifacts/ts/BTCDaiRebalancingManager';
@@ -26,7 +30,6 @@ import { WhiteList } from '../../artifacts/ts/WhiteList';
 import { DEPLOYED_SETS_INFO } from '../deployedContractParameters';
 import dependencies from '../dependencies';
 import constants from '../constants';
-import networkConstants from '../network-constants';
 
 describe('Deployment: Rebalancing', () => {
 

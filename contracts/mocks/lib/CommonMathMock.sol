@@ -13,6 +13,17 @@ contract CommonMathMock {
         return CommonMath.maxUInt256();
     }
 
+    function testSafePower(
+        uint256 a,
+        uint256 pow
+    )
+        external
+        pure
+        returns (uint256 result)
+    {
+        return CommonMath.safePower(a, pow);
+    }
+
      function testGetPartialAmount(
         uint256 _principal,
         uint256 _numerator,

@@ -122,7 +122,7 @@ contract RebalancingTokenIssuanceModule is
         );
 
         require(
-            baseSetBalance % baseSetNaturalUnit == 0,
+            baseSetBalance.mod(baseSetNaturalUnit) == 0,
             "RebalancingTokenIssuanceModule.getBaseSetRedeemQuantity: Base Redemption must be multiple of natural unit"
         );
 

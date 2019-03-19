@@ -134,8 +134,9 @@ library StandardProposeLibrary {
         uint256 currentNaturalUnit = ISetToken(_proposeParameters.currentSet).naturalUnit();
         uint256 nextSetNaturalUnit = ISetToken(_nextSet).naturalUnit();
         require(
-            Math.max(currentNaturalUnit, nextSetNaturalUnit) %
-            Math.min(currentNaturalUnit, nextSetNaturalUnit) == 0,
+            Math.max(currentNaturalUnit, nextSetNaturalUnit).mod(
+                Math.min(currentNaturalUnit, nextSetNaturalUnit)
+            ) == 0,
             "RebalancingSetToken.propose: Invalid proposed Set natural unit"
         );
 

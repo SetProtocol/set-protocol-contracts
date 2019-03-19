@@ -24,12 +24,12 @@ contract('CommonMathMock', accounts => {
 
   let commonMathLibrary: CommonMathMockContract;
 
+  beforeEach(async () => {
+    commonMathLibrary = await libraryMockWrapper.deployCommonMathLibraryAsync();
+  });
+
   describe('#testMaxUInt256', async () => {
     const caller: Address = ownerAccount;
-
-    beforeEach(async () => {
-      commonMathLibrary = await libraryMockWrapper.deployCommonMathLibraryAsync();
-    });
 
     async function subject(): Promise<BigNumber> {
       return commonMathLibrary.testMaxUInt256.callAsync(
@@ -43,6 +43,70 @@ contract('CommonMathMock', accounts => {
       const expectedMaxUInt256 =
         new BigNumber('1.15792089237316195423570985008687907853269984665640564039457584007913129639935e+77');
       expect(maxUInt256).to.be.bignumber.equal(expectedMaxUInt256);
+    });
+  });
+
+  describe('#testSafePower', async () => {
+    let subjectBase: BigNumber;
+    let subjectPower: BigNumber;
+    const caller: Address = ownerAccount;
+
+    beforeEach(async () => {
+      subjectBase = new BigNumber(2);
+      subjectPower = new BigNumber(5);
+    });
+
+    async function subject(): Promise<BigNumber> {
+      return commonMathLibrary.testSafePower.callAsync(
+        subjectBase,
+        subjectPower,
+        { from: caller },
+      );
+    }
+
+    it('returns the correct value', async () => {
+      const result = await subject();
+
+      const expectedResult =
+        new BigNumber(subjectBase).pow(subjectPower.toNumber());
+      expect(result).to.be.bignumber.equal(expectedResult);
+    });
+
+    describe('when the the base is 1', async () => {
+      beforeEach(async () => {
+        subjectBase = new BigNumber(1);
+        subjectPower = new BigNumber(5);
+      });
+
+      it('returns the correct value', async () => {
+        const result = await subject();
+
+        const expectedResult =
+          new BigNumber(subjectBase).pow(subjectPower.toNumber());
+        expect(result).to.be.bignumber.equal(expectedResult);
+      });
+    });
+
+    describe('when the values overflow', async () => {
+      beforeEach(async () => {
+        subjectBase = new BigNumber(10000);
+        subjectPower = new BigNumber(10).pow(99);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the the base is 0', async () => {
+      beforeEach(async () => {
+        subjectBase = new BigNumber(0);
+        subjectPower = new BigNumber(5);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
     });
   });
 

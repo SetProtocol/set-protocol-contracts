@@ -18,6 +18,7 @@ pragma solidity 0.5.4;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { CommonMath } from "../../../lib/CommonMath.sol";
 import { ExchangeHeaderLibrary } from "../../lib/ExchangeHeaderLibrary.sol";
 import { ExchangeIssuanceLibrary } from "./ExchangeIssuanceLibrary.sol";
 import { ExchangeWrapperLibrary } from "../../lib/ExchangeWrapperLibrary.sol";
@@ -70,7 +71,7 @@ contract ExchangeExecution is
             );
 
             // Verify exchange has not already been called
-            uint256 exchangeBitIndex = 2 ** header.exchange;
+            uint256 exchangeBitIndex = CommonMath.safePower(2, header.exchange);
             require(
                 (calledExchanges & exchangeBitIndex) == 0,
                 "ExchangeExecution.executeExchangeOrders: Exchange already called"

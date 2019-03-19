@@ -67,7 +67,7 @@ library StandardPlaceBidLibrary {
 
         // Make sure that bid amount is multiple of minimum bid amount
         require(
-            _quantity % _biddingParameters.minimumBid == 0,
+            _quantity.mod(_biddingParameters.minimumBid) == 0,
             "RebalancingSetToken.placeBid: Must bid multiple of minimum bid"
         );
 

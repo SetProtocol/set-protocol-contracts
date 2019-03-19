@@ -335,6 +335,7 @@ export class CoreWrapper {
     await Core.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
 
     await this.linkArrayValidationsAsync(Core);
+    await this.linkSetTokenLibraryAsync(Core);
 
     const truffleCore = await Core.new(
       transferProxy.address,
@@ -359,6 +360,7 @@ export class CoreWrapper {
     await Core.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
 
     await this.linkArrayValidationsAsync(Core);
+    await this.linkSetTokenLibraryAsync(Core);
 
     const truffleCore = await Core.new(
       transferProxy.address,
@@ -383,6 +385,7 @@ export class CoreWrapper {
     await CoreMock.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
 
     await this.linkArrayValidationsAsync(CoreMock);
+    await this.linkSetTokenLibraryAsync(CoreMock);
 
     const truffleCore = await CoreMock.new(
       transferProxy.address,

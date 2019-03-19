@@ -32,6 +32,7 @@ import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
+import { SetTokenLibrary } from '../../artifacts/ts/SetTokenLibrary';
 import { StandardFailAuctionLibrary } from '../../artifacts/ts/StandardFailAuctionLibrary';
 import { StandardPlaceBidLibrary } from '../../artifacts/ts/StandardPlaceBidLibrary';
 import { StandardProposeLibrary } from '../../artifacts/ts/StandardProposeLibrary';
@@ -135,10 +136,12 @@ export class CoreStage implements DeploymentStageInterface {
 
     const coreIssuanceLibrary = await getContractAddress(CoreIssuanceLibrary.contractName);
     const arrayValidations = await getContractAddress(ArrayValidations.contractName);
+    const setTokenLibrary = await getContractAddress(SetTokenLibrary.contractName);
     const linkedByteCode = linkLibraries([
       { name: ERC20Wrapper.contractName, address: this._erc20WrapperAddress },
       { name: CoreIssuanceLibrary.contractName, address: coreIssuanceLibrary },
       { name: ArrayValidations.contractName, address: arrayValidations },
+      { name: SetTokenLibrary.contractName, address: setTokenLibrary },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(Core.abi).deploy({

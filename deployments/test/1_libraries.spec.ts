@@ -24,17 +24,6 @@ describe('Deployment: Libraries', () => {
   });
 
   describe('ERC20Wrapper', () => {
-
-    /**
-     * Deployed the ERC20Wrapper then check it got linked with the following contracts
-     * - Vault
-     * - TransferProxy
-     * - TakerWalletWrapper
-     * - KyberNetworkWrapper
-     * - ZeroExExchangeWrapper
-     * - PayableExchangeIssuance
-     */
-
     it('finds a valid library at the address', async () => {
       const code = await getContractCode(ERC20Wrapper.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
@@ -42,12 +31,6 @@ describe('Deployment: Libraries', () => {
   });
 
   describe('ExchangeIssuanceLibrary', () => {
-
-    /**
-     * Deployed the ExchangeIssuanceLibrary then check it got linked with the following contracts:
-     * - PayableExchangeIssuance
-     */
-
     it('finds a valid library at the address', async () => {
       const code = await getContractCode(ExchangeIssuanceLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
@@ -63,25 +46,11 @@ describe('Deployment: Libraries', () => {
   });
 
   describe('Rebalancing Libraries', () => {
-
-    /**
-     * Deployed the RebalancingHelperLibrary
-     */
-
     it('finds a valid RebalancingHelperLibrary at the address', async () => {
       const code = await getContractCode(RebalancingHelperLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
-
-     /**
-      * Deployed the following libraries and have been linked to RebalancingHelperLibrary:
-      * - StandardProposeLibrary
-      * - StandardStartRebalanceLibrary
-      * - StandardPlaceBidLibrary
-      * - StandardSettleRebalanceLibrary
-      * - StandardFailAuctionLibrary
-      */
-
+    
     it('finds a valid StandardProposeLibrary at the address', async () => {
       const code = await getContractCode(StandardProposeLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);

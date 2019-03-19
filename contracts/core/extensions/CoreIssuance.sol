@@ -15,6 +15,7 @@
 */
 
 pragma solidity 0.5.4;
+pragma experimental "ABIEncoderV2";
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -23,6 +24,7 @@ import { CoreOperationState } from "./CoreOperationState.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { CoreIssuanceLibrary } from "../lib/CoreIssuanceLibrary.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
+import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
 
 
 /**
@@ -262,24 +264,15 @@ contract CoreIssuance is
             "Invalid Set"
         );
 
-        // Declare interface variables
-        ISetToken setToken = ISetToken(_set);
-
         // Validate quantity is multiple of natural unit
-        require(
-            _quantity.mod(setToken.naturalUnit()) == 0,
-            "Invalid quantity"
-        );
+        SetTokenLibrary.isMultipleOfSetNaturalUnit(_set, _quantity);
 
-        // Fetch set token properties
-        uint256 naturalUnit = setToken.naturalUnit();
-        address[] memory components = setToken.getComponents();
-        uint256[] memory units = setToken.getUnits();
+        SetTokenLibrary.SetDetails memory setToken = SetTokenLibrary.getSetDetails(_set);
 
         // Calculate component quantities to issue
         uint256[] memory requiredComponentQuantities = CoreIssuanceLibrary.calculateTransferValues(
-            units,
-            naturalUnit,
+            setToken.units,
+            setToken.naturalUnit,
             _quantity
         );
 
@@ -290,7 +283,7 @@ contract CoreIssuance is
             decrementTokenOwnerValues,
             depositValues
         ) = CoreIssuanceLibrary.calculateDepositAndDecrementQuantities(
-            components,
+            setToken.components,
             requiredComponentQuantities,
             _componentOwner,
             state.vault
@@ -298,14 +291,14 @@ contract CoreIssuance is
 
         // Decrement components used for issuance in vault
         state.vaultInstance.batchDecrementTokenOwner(
-            components,
+            setToken.components,
             _componentOwner,
             decrementTokenOwnerValues
         );
 
         // Deposit tokens used for issuance into vault
         state.transferProxyInstance.batchTransfer(
-            components,
+            setToken.components,
             depositValues,
             _componentOwner,
             state.vault
@@ -313,13 +306,13 @@ contract CoreIssuance is
 
         // Increment the vault balance of the set token for the components
         state.vaultInstance.batchIncrementTokenOwner(
-            components,
+            setToken.components,
             _set,
             requiredComponentQuantities
         );
 
         // Issue set token
-        setToken.mint(
+        ISetToken(_set).mint(
             _setRecipient,
             _quantity
         );
@@ -410,33 +403,27 @@ contract CoreIssuance is
             "Invalid Set"
         );
 
-        ISetToken setToken = ISetToken(_set);
-        address[] memory components = setToken.getComponents();
-        uint256[] memory units = setToken.getUnits();
-        uint256 naturalUnit = setToken.naturalUnit();
-
         // Validate quantity is multiple of natural unit
-        require(
-            _quantity.mod(naturalUnit) == 0,
-            "Invalid quantity"
-        );
+        SetTokenLibrary.isMultipleOfSetNaturalUnit(_set, _quantity);
 
         // Burn the Set token (thereby decrementing the Set balance)
-        setToken.burn(
+        ISetToken(_set).burn(
             _burnAddress,
             _quantity
         );
 
+        SetTokenLibrary.SetDetails memory setToken = SetTokenLibrary.getSetDetails(_set);
+
         // Calculate component quantities to redeem
         uint256[] memory componentQuantities = CoreIssuanceLibrary.calculateTransferValues(
-            units,
-            naturalUnit,
+            setToken.units,
+            setToken.naturalUnit,
             _quantity
         );
 
         // Decrement components from Set's possession
         state.vaultInstance.batchDecrementTokenOwner(
-            components,
+            setToken.components,
             _set,
             componentQuantities
         );

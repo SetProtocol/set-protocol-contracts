@@ -34,7 +34,7 @@ import { TX_DEFAULTS } from '../../deployments/utils/blockchain';
 
 const web3 = getWeb3();
 
-const ArrayValidations = artifacts.require('ArrayValidations');
+const CommonValidationsLibrary = artifacts.require('CommonValidationsLibrary');
 const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
 const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
@@ -193,7 +193,7 @@ export class CoreWrapper {
     coreAddress: Address,
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenFactoryContract> {
-    await this.linkArrayValidationsAsync(SetTokenFactory);
+    await this.linkCommonValidationsLibraryAsync(SetTokenFactory);
 
     const truffleSetTokenFactory = await SetTokenFactory.new(
       coreAddress,
@@ -283,14 +283,14 @@ export class CoreWrapper {
     await contract.link('StandardFailAuctionLibrary', truffleStandardFailAuctionLibrary.address);
   }
 
-  public async linkArrayValidationsAsync(
+  public async linkCommonValidationsLibraryAsync(
     contract: any,
   ): Promise<void> {
-    const truffleArrayValidations = await ArrayValidations.new(
+    const truffleCommonValidationsLibrary = await CommonValidationsLibrary.new(
       { from: this._tokenOwnerAddress },
     );
 
-    await contract.link('ArrayValidations', truffleArrayValidations.address);
+    await contract.link('CommonValidationsLibrary', truffleCommonValidationsLibrary.address);
   }
 
   public async deploySetTokenAsync(
@@ -302,7 +302,7 @@ export class CoreWrapper {
     symbol: string = 'SET',
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenContract> {
-    await this.linkArrayValidationsAsync(SetToken);
+    await this.linkCommonValidationsLibraryAsync(SetToken);
 
     // Creates but does not register the Set with Core as enabled
     const truffleSetToken = await SetToken.new(
@@ -334,7 +334,7 @@ export class CoreWrapper {
     );
     await Core.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
 
-    await this.linkArrayValidationsAsync(Core);
+    await this.linkCommonValidationsLibraryAsync(Core);
     await this.linkSetTokenLibraryAsync(Core);
 
     const truffleCore = await Core.new(
@@ -359,7 +359,7 @@ export class CoreWrapper {
     );
     await Core.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
 
-    await this.linkArrayValidationsAsync(Core);
+    await this.linkCommonValidationsLibraryAsync(Core);
     await this.linkSetTokenLibraryAsync(Core);
 
     const truffleCore = await Core.new(
@@ -384,7 +384,7 @@ export class CoreWrapper {
     );
     await CoreMock.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
 
-    await this.linkArrayValidationsAsync(CoreMock);
+    await this.linkCommonValidationsLibraryAsync(CoreMock);
     await this.linkSetTokenLibraryAsync(CoreMock);
 
     const truffleCore = await CoreMock.new(

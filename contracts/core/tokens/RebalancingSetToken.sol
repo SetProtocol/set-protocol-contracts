@@ -23,7 +23,7 @@ import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
-import { Bytes32 } from "../../lib/Bytes32.sol";
+import { Bytes32Library } from "../../lib/Bytes32Library.sol";
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ICore } from "../interfaces/ICore.sol";
@@ -50,7 +50,7 @@ contract RebalancingSetToken is
     ERC20Detailed
 {
     using SafeMath for uint256;
-    using Bytes32 for bytes32;
+    using Bytes32Library for bytes32;
     using AddressArrayUtils for address[];
 
     /* ============ State Variables ============ */

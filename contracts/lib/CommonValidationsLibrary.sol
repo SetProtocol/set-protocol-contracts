@@ -17,7 +17,7 @@
 pragma solidity 0.5.4;
 
 
-library ArrayValidations {
+library CommonValidationsLibrary {
     function validateNonEmpty(
         address[] calldata _addressArray
     )

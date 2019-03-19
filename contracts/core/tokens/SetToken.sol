@@ -21,8 +21,7 @@ import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
-import { ArrayValidations } from "../../lib/ArrayValidations.sol";
-import { Bytes32 } from "../../lib/Bytes32.sol";
+import { CommonValidationsLibrary } from "../../lib/CommonValidationsLibrary.sol";
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { ISetFactory } from "../interfaces/ISetFactory.sol";
 
@@ -90,10 +89,10 @@ contract SetToken is
         );
 
         // Confirm an empty _components array is not passed
-        ArrayValidations.validateNonEmpty(_components);
+        CommonValidationsLibrary.validateNonEmpty(_components);
 
         // Confirm there is one quantity for every token address
-        ArrayValidations.validateEqualLength(_components, _units);
+        CommonValidationsLibrary.validateEqualLength(_components, _units);
 
         // NOTE: It will be the onus of developers to check whether the addressExists
         // are in fact ERC20 addresses

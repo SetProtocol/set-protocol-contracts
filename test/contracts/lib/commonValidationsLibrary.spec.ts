@@ -1,14 +1,11 @@
 require('module-alias/register');
 
-import * as chai from 'chai';
 import { Address } from 'set-protocol-utils';
-import * as setProtocolUtils from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
-import { ArrayValidationsMockContract } from '@utils/contracts';
-import { getWeb3 } from '@utils/web3Helper';
+import { CommonValidationsLibraryMockContract } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 
 import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
@@ -16,17 +13,17 @@ import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 
-contract('ArrayValidation', accounts => {
+contract('CommonValidationsLibrary', accounts => {
   const [
     ownerAccount,
     otherAccount,
   ] = accounts;
   const libraryMockWrapper = new LibraryMockWrapper(ownerAccount);
 
-  let arrayValidationsMockLibrary: ArrayValidationsMockContract;
+  let commonValidationsMockLibrary: CommonValidationsLibraryMockContract;
 
   beforeEach(async () => {
-    arrayValidationsMockLibrary = await libraryMockWrapper.deployArrayValidationsLibraryAsync();
+    commonValidationsMockLibrary = await libraryMockWrapper.deployCommonValidationsLibraryAsync();
   });
 
   describe('#testValidateNonEmpty', async () => {
@@ -37,7 +34,7 @@ contract('ArrayValidation', accounts => {
     });
 
     async function subject(): Promise<void> {
-      return arrayValidationsMockLibrary.testValidateNonEmpty.callAsync(
+      return commonValidationsMockLibrary.testValidateNonEmpty.callAsync(
         subjectArray,
         { from: ownerAccount }
       );
@@ -68,7 +65,7 @@ contract('ArrayValidation', accounts => {
     });
 
     async function subject(): Promise<void> {
-      return arrayValidationsMockLibrary.testValidateEqualLength.callAsync(
+      return commonValidationsMockLibrary.testValidateEqualLength.callAsync(
         subjectAddressArray,
         subjectBigNumberArray,
         { from: ownerAccount }

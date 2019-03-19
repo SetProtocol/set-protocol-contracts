@@ -6,7 +6,7 @@ import * as setProtocolUtils from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
-import { Bytes32MockContract } from '@utils/contracts';
+import { Bytes32LibraryMockContract } from '@utils/contracts';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
@@ -22,7 +22,7 @@ contract('Bytes32Mock', accounts => {
   const [ownerAccount] = accounts;
   const libraryMockWrapper = new LibraryMockWrapper(ownerAccount);
 
-  let bytes32Library: Bytes32MockContract;
+  let bytes32Library: Bytes32LibraryMockContract;
 
   describe('#testBytes32ToBytes', async () => {
     let subjectString: string;

@@ -17,7 +17,7 @@
 pragma solidity 0.5.4;
 
 
-library Bytes32 {
+library Bytes32Library {
     function bytes32ToBytes(bytes32 data)
         internal
         pure

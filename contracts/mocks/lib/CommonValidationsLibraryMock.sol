@@ -1,15 +1,15 @@
 pragma solidity 0.5.4;
 
-import { ArrayValidations } from "../../lib/ArrayValidations.sol";
+import { CommonValidationsLibrary } from "../../lib/CommonValidationsLibrary.sol";
 
-contract ArrayValidationsMock {
+contract CommonValidationsLibraryMock {
     function testValidateNonEmpty(
         address[] calldata _arr1
     )
         external
         pure
     {
-        ArrayValidations.validateNonEmpty(_arr1);
+        CommonValidationsLibrary.validateNonEmpty(_arr1);
     }
 
     function testValidateEqualLength(
@@ -19,6 +19,6 @@ contract ArrayValidationsMock {
         external
         pure
     {
-        ArrayValidations.validateEqualLength(_addressArray, _uint256Array);
+        CommonValidationsLibrary.validateEqualLength(_addressArray, _uint256Array);
     }
 }

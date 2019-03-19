@@ -1,7 +1,7 @@
 import { Address } from 'set-protocol-utils';
 import {
-  ArrayValidationsMockContract,
-  Bytes32MockContract,
+  CommonValidationsLibraryMockContract,
+  Bytes32LibraryMockContract,
   CommonMathMockContract,
   CoreIssuanceLibraryMockContract,
   ERC20WrapperMockContract,
@@ -17,9 +17,9 @@ const web3 = getWeb3();
 const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreIssuanceLibraryMock = artifacts.require('CoreIssuanceLibraryMock');
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
-const ArrayValidations = artifacts.require('ArrayValidations');
-const ArrayValidationsMock = artifacts.require('ArrayValidationsMock');
-const Bytes32Mock = artifacts.require('Bytes32Mock');
+const CommonValidationsLibrary = artifacts.require('CommonValidationsLibrary');
+const CommonValidationsLibraryMock = artifacts.require('CommonValidationsLibraryMock');
+const Bytes32LibraryMock = artifacts.require('Bytes32LibraryMock');
 const CommonMathMock = artifacts.require('CommonMathMock');
 const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
@@ -36,33 +36,33 @@ export class LibraryMockWrapper {
 
   /* ============ Deployment ============ */
 
-  public async deployArrayValidationsLibraryAsync(
+  public async deployCommonValidationsLibraryLibraryAsync(
     from: Address = this._contractOwnerAddress
-  ): Promise<ArrayValidationsMockContract> {
-    const truffleArrayValidations = await ArrayValidations.new(
+  ): Promise<CommonValidationsLibraryMockContract> {
+    const truffleCommonValidationsLibrary = await CommonValidationsLibrary.new(
       { from: this._contractOwnerAddress },
     );
 
-    await ArrayValidationsMock.link('ArrayValidations', truffleArrayValidations.address);
+    await CommonValidationsLibraryMock.link('CommonValidationsLibrary', truffleCommonValidationsLibrary.address);
 
-    const arrayValidationsMockContract = await ArrayValidationsMock.new(
+    const commonValidationsMockContract = await CommonValidationsLibraryMock.new(
       { from },
     );
 
-    return new ArrayValidationsMockContract(
-      new web3.eth.Contract(arrayValidationsMockContract.abi, arrayValidationsMockContract.address),
+    return new CommonValidationsLibraryMockContract(
+      new web3.eth.Contract(commonValidationsMockContract.abi, commonValidationsMockContract.address),
       { from },
     );
   }
 
   public async deployBytes32LibraryAsync(
     from: Address = this._contractOwnerAddress
-  ): Promise<Bytes32MockContract> {
-    const bytes32MockContract = await Bytes32Mock.new(
+  ): Promise<Bytes32LibraryMockContract> {
+    const bytes32MockContract = await Bytes32LibraryMock.new(
       { from },
     );
 
-    return new Bytes32MockContract(
+    return new Bytes32LibraryMockContract(
       new web3.eth.Contract(bytes32MockContract.abi, bytes32MockContract.address),
       { from },
     );

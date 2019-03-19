@@ -76,61 +76,61 @@ export class CoreWrapper {
 
   /* ============ Deployed Contracts ============ */
 
-   public async getDeployedTransferProxyAsync(): Promise<TransferProxyContract> {
+  public async getDeployedTransferProxyAsync(): Promise<TransferProxyContract> {
     const address = await getContractAddress(TransferProxy.contractName);
 
      return await TransferProxyContract.at(address, web3, TX_DEFAULTS);
   }
 
-   public async getDeployedVaultAsync(): Promise<VaultContract> {
+  public async getDeployedVaultAsync(): Promise<VaultContract> {
     const address = await getContractAddress(Vault.contractName);
 
      return await VaultContract.at(address, web3, TX_DEFAULTS);
   }
 
-   public async getDeployedSetTokenFactoryAsync(): Promise<SetTokenFactoryContract> {
+  public async getDeployedSetTokenFactoryAsync(): Promise<SetTokenFactoryContract> {
     const address = await getContractAddress(SetTokenFactory.contractName);
 
      return await SetTokenFactoryContract.at(address, web3, TX_DEFAULTS);
   }
 
-   public async getDeployedRebalancingSetTokenFactoryAsync(): Promise<RebalancingSetTokenFactoryContract> {
+  public async getDeployedRebalancingSetTokenFactoryAsync(): Promise<RebalancingSetTokenFactoryContract> {
     const address = await getContractAddress(RebalancingSetTokenFactory.contractName);
 
      return await RebalancingSetTokenFactoryContract.at(address, web3, TX_DEFAULTS);
   }
 
-   public async getDeployedCoreAsync(): Promise<CoreContract> {
+  public async getDeployedCoreAsync(): Promise<CoreContract> {
     const address = await getContractAddress(Core.contractName);
 
      return await CoreContract.at(address, web3, TX_DEFAULTS);
   }
 
-   public async getDeployedExchangeIssuanceModuleAsync(): Promise<ExchangeIssuanceModuleContract> {
+  public async getDeployedExchangeIssuanceModuleAsync(): Promise<ExchangeIssuanceModuleContract> {
     const address = await getContractAddress(ExchangeIssuanceModule.contractName);
 
      return await ExchangeIssuanceModuleContract.at(address, web3, TX_DEFAULTS);
   }
 
-   public async getDeployedRebalancingTokenIssuanceModuleAsync(): Promise<RebalancingTokenIssuanceModuleContract> {
+  public async getDeployedRebalancingTokenIssuanceModuleAsync(): Promise<RebalancingTokenIssuanceModuleContract> {
     const address = await getContractAddress(RebalancingTokenIssuanceModule.contractName);
 
      return await RebalancingTokenIssuanceModuleContract.at(address, web3, TX_DEFAULTS);
   }
 
-   public async getDeployedWhiteList(): Promise<WhiteListContract> {
+  public async getDeployedWhiteList(): Promise<WhiteListContract> {
     const address = await getContractAddress(WhiteList.contractName);
 
      return await WhiteListContract.at(address, web3, TX_DEFAULTS);
   }
 
-   public async getDeployedRebalanceAuctionModuleAsync(): Promise<RebalanceAuctionModuleContract> {
+  public async getDeployedRebalanceAuctionModuleAsync(): Promise<RebalanceAuctionModuleContract> {
     const address = await getContractAddress(RebalanceAuctionModule.contractName);
 
      return await RebalanceAuctionModuleContract.at(address, web3, TX_DEFAULTS);
   }
 
-   public async getDeployedPayableExchangeIssuanceModuleAsync(): Promise<PayableExchangeIssuanceContract> {
+  public async getDeployedPayableExchangeIssuanceModuleAsync(): Promise<PayableExchangeIssuanceContract> {
     const address = await getContractAddress(PayableExchangeIssuance.contractName);
 
      return await PayableExchangeIssuanceContract.at(address, web3, TX_DEFAULTS);

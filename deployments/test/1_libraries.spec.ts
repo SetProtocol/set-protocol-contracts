@@ -50,7 +50,7 @@ describe('Deployment: Libraries', () => {
       const code = await getContractCode(RebalancingHelperLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
-    
+
     it('finds a valid StandardProposeLibrary at the address', async () => {
       const code = await getContractCode(StandardProposeLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);

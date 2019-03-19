@@ -17,8 +17,8 @@
 pragma solidity 0.5.4;
 
 import { CoreAccounting } from "./extensions/CoreAccounting.sol";
+import { CoreAdmin } from "./extensions/CoreAdmin.sol";
 import { CoreFactory } from "./extensions/CoreFactory.sol";
-import { CoreInternal } from "./extensions/CoreInternal.sol";
 import { CoreIssuance } from "./extensions/CoreIssuance.sol";
 import { CoreModuleInteraction } from "./extensions/CoreModuleInteraction.sol";
 import { CoreState } from "./lib/CoreState.sol";
@@ -35,11 +35,11 @@ import { IVault } from "./interfaces/IVault.sol";
  */
  /* solium-disable-next-line no-empty-blocks */
 contract Core is
-    CoreModuleInteraction,
     CoreAccounting,
-    CoreInternal,
+    CoreAdmin,
     CoreFactory,
-    CoreIssuance
+    CoreIssuance,
+    CoreModuleInteraction
 {
     /**
      * Constructor function for Core

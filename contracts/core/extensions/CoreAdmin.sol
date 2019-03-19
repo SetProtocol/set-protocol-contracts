@@ -24,13 +24,13 @@ import { TimeLockUpgrade } from "../../lib/TimeLockUpgrade.sol";
 
 
 /**
- * @title CoreInternal
+ * @title CoreAdmin
  * @author Set Protocol
  *
- * The CoreInternal contract contains methods to alter state of variables that track
+ * The CoreAdmin contract contains methods to alter state of variables that track
  * Core dependency addresses.
  */
-contract CoreInternal is
+contract CoreAdmin is
     Ownable,
     CoreState,
     TimeLockUpgrade

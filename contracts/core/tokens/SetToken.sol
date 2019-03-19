@@ -21,6 +21,7 @@ import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
+import { ArrayValidations } from "../../lib/ArrayValidations.sol";
 import { Bytes32 } from "../../lib/Bytes32.sol";
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { ISetFactory } from "../interfaces/ISetFactory.sol";
@@ -80,7 +81,6 @@ contract SetToken is
         )
     {
         // Storing count and unit counts to local variable to save on invocation
-        uint256 componentCount = _components.length;
         uint256 unitCount = _units.length;
 
         // Require naturalUnit passed is greater than 0
@@ -90,22 +90,10 @@ contract SetToken is
         );
 
         // Confirm an empty _components array is not passed
-        require(
-            componentCount > 0,
-            "SetToken.constructor: Empty components array"
-        );
-
-        // Confirm an empty _quantities array is not passed
-        require(
-            unitCount > 0,
-            "SetToken.constructor: Empty units array"
-        );
+        ArrayValidations.validateNonEmpty(_components);
 
         // Confirm there is one quantity for every token address
-        require(
-            componentCount == unitCount,
-            "SetToken.constructor: Components and units lengths mismatch"
-        );
+        ArrayValidations.validateEqualLength(_components, _units);
 
         // NOTE: It will be the onus of developers to check whether the addressExists
         // are in fact ERC20 addresses

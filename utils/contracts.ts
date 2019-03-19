@@ -1,4 +1,5 @@
 import { AuthorizableContract } from '../types/generated/authorizable';
+import { ArrayValidationsMockContract } from '../types/generated/array_validations_mock';
 import { BadTokenMockContract } from '../types/generated/bad_token_mock';
 import { BaseContract } from '../types/base_contract';
 import { BTCDaiRebalancingManagerContract } from '../types/generated/b_t_c_dai_rebalancing_manager';
@@ -56,6 +57,7 @@ import { ZeroExOrderLibraryMockContract } from '../types/generated/zero_ex_order
 
 export {
   AuthorizableContract,
+  ArrayValidationsMockContract,
   BadTokenMockContract,
   BaseContract,
   BTCDaiRebalancingManagerContract,

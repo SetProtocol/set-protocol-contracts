@@ -2,7 +2,6 @@ require('module-alias/register');
 
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
-import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
 import * as setProtocolUtils from 'set-protocol-utils';
 
@@ -183,95 +182,6 @@ contract('Authorizable', accounts => {
     describe('when the passed address is not authorized', async () => {
       beforeEach(async () => {
         addressToRemove = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
-  describe('#removeAuthorizedAddressAtindexToRemove', async () => {
-    let caller: Address = ownerAccount;
-    let addressToRemove: Address = authorizedAccount;
-    let indexToRemove: BigNumber = new BigNumber(2);
-
-    beforeEach(async () => {
-      authorizableContract = await coreWrapper.deployAuthorizableAsync();
-
-      const authAccountArray: Address[] = [authAccount1, authAccount2, authorizedAccount];
-      for (const account of authAccountArray) {
-        await coreWrapper.addAuthorizationAsync(authorizableContract, account);
-      }
-    });
-
-    afterEach(async () => {
-      caller = ownerAccount;
-      addressToRemove = authorizedAccount;
-      indexToRemove = new BigNumber(2);
-    });
-
-    async function subject(): Promise<string> {
-      return authorizableContract.removeAuthorizedAddressAtIndex.sendTransactionAsync(
-        addressToRemove,
-        indexToRemove,
-        { from: caller },
-      );
-    }
-
-    it('removes address from authorized mapping', async () => {
-      await subject();
-
-      const storedAuthAddress = await authorizableContract.authorized.callAsync(
-        addressToRemove,
-      );
-
-      expect(storedAuthAddress).to.eql(false);
-    });
-
-    it('removes address from authorities array', async () => {
-      await subject();
-
-      const newAuthoritiesArray = await authorizableContract.getAuthorizedAddresses.callAsync();
-      expect(newAuthoritiesArray).to.not.include(addressToRemove);
-    });
-
-    it('emits correct AuthorizedAddressRemoved log', async () => {
-      const txHash = await subject();
-
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-      const expectedLogs = getExpectedRemoveAuthorizedLog(
-        addressToRemove,
-        caller,
-        authorizableContract.address,
-      );
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-    });
-
-    describe('when the caller is not the owner of the contract', async () => {
-      beforeEach(async () => {
-        caller = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the passed indexToRemove is not in array', async () => {
-      beforeEach(async () => {
-        indexToRemove = new BigNumber(3);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the passed indexToRemove does not match target address', async () => {
-      beforeEach(async () => {
-        indexToRemove = new BigNumber(1);
       });
 
       it('should revert', async () => {

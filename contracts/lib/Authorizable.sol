@@ -119,51 +119,9 @@ contract Authorizable is
         );
 
         // Delete address from authorized mapping
-        delete authorized[_authTarget];
+        authorized[_authTarget] = false;
 
         authorities = authorities.remove(_authTarget);
-
-        // Emit AuthorizedAddressRemoved event.
-        emit AuthorizedAddressRemoved(
-            _authTarget,
-            msg.sender
-        );
-    }
-
-    /**
-     * More efficiently remove authorized address from contract. Can only be set by owner.
-     *
-     * @param  _authTarget   The address to be de-permissioned
-     * @param _index           The index of the _authTarget address in authorities
-     */
-
-    function removeAuthorizedAddressAtIndex(
-        address _authTarget,
-        uint256 _index
-    )
-        external
-        onlyOwner
-    {
-        // Require index is less than length of authorities
-        require(
-            _index < authorities.length,
-            "Authorizable.removeAuthorizedAddressAtIndex: Invalid index"
-        );
-
-        // Require address at index of authorities matches target address
-        require(
-            authorities[_index] == _authTarget,
-            "Authorizable.removeAuthorizedAddressAtIndex: Address mismatch"
-        );
-
-        // Delete address from authorized mapping
-        delete authorized[_authTarget];
-
-        // Replace address at index with address at end of array
-        authorities[_index] = authorities[authorities.length.sub(1)];
-
-        // Remove last address from array
-        authorities.length = authorities.length.sub(1);
 
         // Emit AuthorizedAddressRemoved event.
         emit AuthorizedAddressRemoved(

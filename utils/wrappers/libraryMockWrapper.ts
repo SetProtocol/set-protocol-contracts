@@ -1,5 +1,6 @@
 import { Address } from 'set-protocol-utils';
 import {
+  ArrayValidationsMockContract,
   Bytes32MockContract,
   CommonMathMockContract,
   CoreIssuanceLibraryMockContract,
@@ -16,6 +17,8 @@ const web3 = getWeb3();
 const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreIssuanceLibraryMock = artifacts.require('CoreIssuanceLibraryMock');
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
+const ArrayValidations = artifacts.require('ArrayValidations');
+const ArrayValidationsMock = artifacts.require('ArrayValidationsMock');
 const Bytes32Mock = artifacts.require('Bytes32Mock');
 const CommonMathMock = artifacts.require('CommonMathMock');
 const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
@@ -32,6 +35,25 @@ export class LibraryMockWrapper {
   }
 
   /* ============ Deployment ============ */
+
+  public async deployArrayValidationsLibraryAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<ArrayValidationsMockContract> {
+    const truffleArrayValidations = await ArrayValidations.new(
+      { from: this._contractOwnerAddress },
+    );
+
+    await ArrayValidationsMock.link('ArrayValidations', truffleArrayValidations.address);
+
+    const arrayValidationsMockContract = await ArrayValidationsMock.new(
+      { from },
+    );
+
+    return new ArrayValidationsMockContract(
+      new web3.eth.Contract(arrayValidationsMockContract.abi, arrayValidationsMockContract.address),
+      { from },
+    );
+  }
 
   public async deployBytes32LibraryAsync(
     from: Address = this._contractOwnerAddress

@@ -504,7 +504,7 @@ export class CoreWrapper {
     );
   }
 
-  /* ============ CoreInternal Extension ============ */
+  /* ============ CoreAdmin Extension ============ */
 
   public async addFactoryAsync(
     core: CoreLikeContract,

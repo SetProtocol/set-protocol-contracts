@@ -49,7 +49,7 @@ const Core = artifacts.require('Core');
  const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
-contract('CoreInternal', accounts => {
+contract('CoreAdmin', accounts => {
   const [
     ownerAccount,
     otherAccount,

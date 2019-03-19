@@ -259,7 +259,7 @@ contract CoreIssuance is
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Core: Invalid Set"
+            "Invalid Set"
         );
 
         // Declare interface variables
@@ -268,7 +268,7 @@ contract CoreIssuance is
         // Validate quantity is multiple of natural unit
         require(
             _quantity.mod(setToken.naturalUnit()) == 0,
-            "Core: Invalid quantity"
+            "Invalid quantity"
         );
 
         // Fetch set token properties
@@ -407,7 +407,7 @@ contract CoreIssuance is
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Core: Invalid Set"
+            "Invalid Set"
         );
 
         ISetToken setToken = ISetToken(_set);
@@ -418,7 +418,7 @@ contract CoreIssuance is
         // Validate quantity is multiple of natural unit
         require(
             _quantity.mod(naturalUnit) == 0,
-            "Core: Invalid quantity"
+            "Invalid quantity"
         );
 
         // Burn the Set token (thereby decrementing the Set balance)

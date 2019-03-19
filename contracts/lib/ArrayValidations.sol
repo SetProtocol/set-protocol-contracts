@@ -16,25 +16,16 @@
 
 pragma solidity 0.5.4;
 
-import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
 
 library ArrayValidations {
-    using SafeMath for uint256;
-
-    /**
-     * Calculates and returns the maximum value for a uint256
-     *
-     * @return  The maximum value for uint256
-     */
     function validateNonEmpty(
-        address[] memory _arr1
+        address[] memory _addressArray
     )
-        public
+        internal
         pure
     {
         require(
-            _arr1.length > 0,
+            _addressArray.length > 0,
             "Address array length must be > 0"
         ); 
     }
@@ -43,7 +34,7 @@ library ArrayValidations {
         address[] memory _addressArray,
         uint256[] memory _uint256Array
     )
-        public
+        internal
         pure
     {
         require(

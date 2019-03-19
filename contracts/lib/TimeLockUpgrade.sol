@@ -81,7 +81,7 @@ contract TimeLockUpgrade is
 
         require(
             block.timestamp >= registrationTime.add(timeLockPeriod),
-            "TimeLockUpgrade.timeLockUpgrade: Upgrade requires time lock period to have elapsed."
+            "TimeLockUpgrade: Time lock period must have elapsed."
         );
 
         // Reset the timestamp to 0

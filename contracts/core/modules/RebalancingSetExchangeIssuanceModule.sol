@@ -29,6 +29,7 @@ import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IWETH } from "../../lib/IWETH.sol";
+import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 
 
 /**
@@ -39,15 +40,12 @@ import { IWETH } from "../../lib/IWETH.sol";
  * issue a rebalancing Set
  */
 contract RebalancingSetExchangeIssuanceModule is
+    ModuleCoreState,
     ReentrancyGuard
 {
     using SafeMath for uint256;
 
     /* ============ State Variables ============ */
-
-    // Address and instance of Core contract
-    address public core;
-    ICore private coreInstance;
 
     // Address and instance of Transfer Proxy contract
     address public transferProxy;
@@ -83,19 +81,21 @@ contract RebalancingSetExchangeIssuanceModule is
      * @param _transferProxy            The address of the TransferProxy
      * @param _exchangeIssuanceModule   The address of ExchangeIssuanceModule
      * @param _wrappedEther             The address of wrapped ether
+     * @param _vault                    The address of Vault
      */
     constructor(
         address _core,
         address _transferProxy,
         address _exchangeIssuanceModule,
-        address _wrappedEther
+        address _wrappedEther,
+        address _vault
     )
         public
+        ModuleCoreState(
+            _core,
+            _vault
+        )
     {
-        // Commit the address and instance of Core to state variables
-        core = _core;
-        coreInstance = ICore(_core);
-
         // Commit the address and instance of Transfer Proxy to state variables
         transferProxy = _transferProxy;
 
@@ -249,6 +249,9 @@ contract RebalancingSetExchangeIssuanceModule is
         // Send eth to user
         msg.sender.transfer(wethBalance);
 
+        // Non-exchanged components are returned to the user
+        returnExcessBaseSetComponents(_exchangeIssuanceParams.setAddress);
+
         emit LogPayableExchangeRedeem(
             _rebalancingSetAddress,
             msg.sender,
@@ -366,5 +369,27 @@ contract RebalancingSetExchangeIssuanceModule is
             impliedBaseSetQuantity == _exchangeIssuanceParams.quantity,
             "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Base Set quantities must match"
         );
+    }
+    /**
+     * Withdraw any non-exchanged components to the user
+     *
+     * @param  _setAddress   Address of the Base Set
+     */
+    function returnExcessBaseSetComponents(
+        address _setAddress
+    )
+        private
+    {
+        address[] memory baseSetComponents = ISetToken(_setAddress).getComponents();
+        for (uint256 i = 0; i < baseSetComponents.length; i++) {
+            uint256 withdrawQuantity = ERC20Wrapper.balanceOf(baseSetComponents[i], address(this));
+            if (withdrawQuantity > 0) {
+                ERC20Wrapper.transfer(
+                    baseSetComponents[i],
+                    msg.sender,
+                    withdrawQuantity
+                );
+            }
+        }         
     }
 }

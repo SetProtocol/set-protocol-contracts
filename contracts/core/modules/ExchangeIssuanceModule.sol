@@ -152,7 +152,7 @@ contract ExchangeIssuanceModule is
             _exchangeIssuanceParams.sendTokens
         );
 
-        // Redeem Set into the vault, attributed to this contract
+        // Redeem Set into the vault, attributing components to this contract
         coreInstance.redeemModule(
             msg.sender,
             address(this),
@@ -177,6 +177,9 @@ contract ExchangeIssuanceModule is
             _exchangeIssuanceParams.receiveTokens,
             _exchangeIssuanceParams.receiveTokenAmounts
         );
+
+        // Withdraw non-exchanged components to the user
+        withdrawRemainingComponentsToUser(_exchangeIssuanceParams.setAddress);
 
         emit LogExchangeRedeem(
             _exchangeIssuanceParams.setAddress,
@@ -276,5 +279,27 @@ contract ExchangeIssuanceModule is
                 _sendTokenAmounts[i]
             );
         }
+    }
+
+    function withdrawRemainingComponentsToUser(
+        address _setAddress
+    )
+        private
+    {
+        address[] memory baseSetComponents = ISetToken(_setAddress).getComponents();
+        uint256[] memory baseSetWithdrawQuantities = new uint256[](baseSetComponents.length);
+        for (uint256 i = 0; i < baseSetComponents.length; i++) {
+            uint256 withdrawQuantity = vaultInstance.getOwnerBalance(baseSetComponents[i], address(this));
+            
+            baseSetWithdrawQuantities[i] = withdrawQuantity;
+        }
+
+        // Return the unexchanged components to the user
+        coreInstance.batchWithdrawModule(
+            address(this),
+            msg.sender,
+            baseSetComponents,
+            baseSetWithdrawQuantities
+        );            
     }
 }

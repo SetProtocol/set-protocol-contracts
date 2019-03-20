@@ -504,6 +504,7 @@ export class CoreWrapper {
     transferProxy: Address,
     exchangeIssuanceModule: Address,
     wrappedEther: Address,
+    vault: Address,
     from: Address = this._contractOwnerAddress
   ): Promise<RebalancingSetExchangeIssuanceModuleContract> {
     const erc20WrapperLibrary = await ERC20Wrapper.new(
@@ -517,6 +518,7 @@ export class CoreWrapper {
       transferProxy,
       exchangeIssuanceModule,
       wrappedEther,
+      vault,
       { from },
     );
 

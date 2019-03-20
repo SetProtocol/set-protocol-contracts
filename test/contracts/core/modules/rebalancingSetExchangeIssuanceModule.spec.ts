@@ -103,6 +103,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       transferProxy.address,
       exchangeIssuanceModule.address,
       weth.address,
+      vault.address,
     );
     await coreWrapper.addModuleAsync(core, rebalancingSetExchangeIssuanceModule.address);
 
@@ -380,6 +381,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let customExchangeRedeemQuantity: BigNumber;
 
     let baseSetComponent: StandardTokenMockContract;
+    let nonExchangedWethQuantity: BigNumber;
+
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
     let rebalancingSetToken: RebalancingSetTokenContract;
@@ -403,9 +406,9 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       // Create component token
       baseSetComponent = await erc20Wrapper.deployTokenAsync(tokenPurchaser);
 
-      // Create the Set (1 component)
-      const componentAddresses = [baseSetComponent.address];
-      const componentUnits = [new BigNumber(10 ** 10)];
+      // Create the Set (2 component where one is WETH)
+      const componentAddresses = [baseSetComponent.address, weth.address];
+      const componentUnits = [new BigNumber(10 ** 10), new BigNumber(10 ** 10)];
       baseSetNaturalUnit = new BigNumber(10 ** 9);
       baseSetToken = await coreWrapper.createSetTokenAsync(
         core,
@@ -430,10 +433,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       exchangeRedeemSetAddress = baseSetToken.address;
       exchangeRedeemQuantity = customExchangeRedeemQuantity || new BigNumber(10 ** 10);
       exchangeRedeemSendTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
-      exchangeRedeemSendTokens = componentAddresses;
-      exchangeRedeemSendTokenAmounts = componentUnits.map(
-        unit => unit.mul(exchangeRedeemQuantity).div(baseSetNaturalUnit)
-      );
+      exchangeRedeemSendTokens = [componentAddresses[0]];
+      exchangeRedeemSendTokenAmounts = [componentUnits[0].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit)];
       exchangeRedeemReceiveTokens = [weth.address];
       exchangeRedeemReceiveTokenAmounts = [etherQuantityToReceive];
 
@@ -486,6 +487,20 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         tokenPurchaser
       );
 
+      nonExchangedWethQuantity = componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
+
+      // Approve Weth to the transferProxy
+      await weth.approve.sendTransactionAsync(
+        transferProxy.address,
+        nonExchangedWethQuantity,
+        { from: tokenPurchaser, gas: DEFAULT_GAS }
+      );
+
+      // Generate wrapped Ether for the caller
+      await weth.deposit.sendTransactionAsync(
+        { from: tokenPurchaser, value: nonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
+      );
+
       // Issue the Base Set to the vault
       await core.issueInVault.sendTransactionAsync(
         baseSetToken.address,
@@ -534,13 +549,16 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       expect(expectedRBSetTokenBalance).to.bignumber.equal(currentRBSetTokenBalance);
     });
 
-    it('should increment the users eth balance by the correct quantity', async () => {
+    it.only('should increment the users eth balance by the correct quantity', async () => {
       const previousEthBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
 
       const txHash = await subject();
       const totalGasInEth = await getGasUsageInEth(txHash);
 
-      const expectedEthBalance = previousEthBalance.add(etherQuantityToReceive).sub(totalGasInEth);
+      const expectedEthBalance = previousEthBalance
+                                   .add(etherQuantityToReceive)
+                                   .add(nonExchangedWethQuantity)
+                                   .sub(totalGasInEth);
       const currentEthBalance =  await web3.eth.getBalance(subjectCaller);
 
       expect(currentEthBalance).to.bignumber.equal(expectedEthBalance);

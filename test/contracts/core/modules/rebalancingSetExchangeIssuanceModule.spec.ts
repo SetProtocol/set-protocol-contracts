@@ -452,15 +452,12 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       await weth.approve.sendTransactionAsync(
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
         exchangeRedeemReceiveTokenAmounts[0],
-        { from: zeroExOrderMaker }
+        { from: zeroExOrderMaker, gas: DEFAULT_GAS }
       );
 
       // Deposit weth
       await weth.deposit.sendTransactionAsync(
-        {
-          from: zeroExOrderMaker,
-          value: exchangeRedeemReceiveTokenAmounts[0].toString(),
-        }
+        { from: zeroExOrderMaker, value: exchangeRedeemReceiveTokenAmounts[0].toString(), gas: DEFAULT_GAS }
       );
 
       // Create 0x order for the component
@@ -498,14 +495,14 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       await core.issueInVault.sendTransactionAsync(
         baseSetToken.address,
         exchangeRedeemQuantity,
-        { from: subjectCaller }
+        { from: subjectCaller, gas: DEFAULT_GAS }
       );
 
       // Issue the Rebalancing Set
       await core.issue.sendTransactionAsync(
         subjectRebalancingSetAddress,
         subjectRebalancingSetQuantity,
-        { from: subjectCaller }
+        { from: subjectCaller, gas: DEFAULT_GAS }
       );
     });
 
@@ -519,10 +516,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         subjectRebalancingSetQuantity,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
-        {
-          from: subjectCaller,
-          gas: DEFAULT_GAS,
-        },
+        { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
 

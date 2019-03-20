@@ -624,8 +624,8 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
-          { gas: DEFAULT_GAS },
+        await rebalancingWrapper.endFailedRebalanceAsync(
+          rebalancingSetToken
         );
       });
 
@@ -762,8 +762,8 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
-          { gas: DEFAULT_GAS },
+        await rebalancingWrapper.endFailedRebalanceAsync(
+          rebalancingSetToken
         );
       });
 
@@ -919,8 +919,8 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
-          { gas: DEFAULT_GAS },
+        await rebalancingWrapper.endFailedRebalanceAsync(
+          rebalancingSetToken
         );
       });
 
@@ -1402,8 +1402,8 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
-          { gas: DEFAULT_GAS },
+        await rebalancingWrapper.endFailedRebalanceAsync(
+          rebalancingSetToken
         );
       });
 
@@ -1709,8 +1709,8 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
-          { gas: DEFAULT_GAS },
+        await rebalancingWrapper.endFailedRebalanceAsync(
+          rebalancingSetToken
         );
       });
 
@@ -2075,8 +2075,8 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
-          { gas: DEFAULT_GAS },
+        await rebalancingWrapper.endFailedRebalanceAsync(
+          rebalancingSetToken
         );
       });
 

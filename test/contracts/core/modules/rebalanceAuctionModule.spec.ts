@@ -1015,8 +1015,8 @@ contract('RebalanceAuctionModule', accounts => {
           false
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
-          { gas: DEFAULT_GAS },
+        await rebalancingWrapper.endFailedRebalanceAsync(
+          rebalancingSetToken
         );
       });
 
@@ -1213,8 +1213,8 @@ contract('RebalanceAuctionModule', accounts => {
           false
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
-          { gas: DEFAULT_GAS },
+        await rebalancingWrapper.endFailedRebalanceAsync(
+          rebalancingSetToken
         );
       });
 

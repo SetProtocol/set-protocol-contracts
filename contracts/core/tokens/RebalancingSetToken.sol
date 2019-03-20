@@ -296,6 +296,7 @@ contract RebalancingSetToken is
         currentSet = nextSet;
         lastRebalanceTimestamp = block.timestamp;
         rebalanceState = RebalancingHelperLibrary.State.Default;
+        clearAuctionState();
     }
 
     /*
@@ -367,6 +368,7 @@ contract RebalancingSetToken is
 
         // Reset lastRebalanceTimestamp to now
         lastRebalanceTimestamp = block.timestamp;
+        clearAuctionState();
     }
 
     /*
@@ -618,5 +620,18 @@ contract RebalancingSetToken is
         returns (uint256[] memory)
     {
         return biddingParameters.combinedNextSetUnits;
+    }
+
+    /* ============ Getter Functions ============ */
+
+    function clearAuctionState()
+        internal
+    {
+        nextSet = address(0);
+        auctionLibrary = address(0);
+        startingCurrentSetAmount = 0;
+
+        delete biddingParameters;
+        delete auctionParameters;
     }
 }

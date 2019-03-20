@@ -1892,6 +1892,63 @@ contract('RebalancingSetToken', accounts => {
         const newUnitShares = await rebalancingSetToken.unitShares.callAsync();
         expect(newUnitShares).to.be.bignumber.equal(settlementAmounts['unitShares']);
       });
+
+      it('clears the nextSet variable', async () => {
+        await subject();
+
+        const nextSet = await rebalancingSetToken.nextSet.callAsync();
+        const expectedNextSet = 0;
+
+        expect(nextSet).to.be.bignumber.equal(expectedNextSet);
+      });
+
+      it('clears the auctionLibrary variable', async () => {
+        await subject();
+
+        const auctionLibrary = await rebalancingSetToken.auctionLibrary.callAsync();
+        const expectedAuctionLibrary = 0;
+
+        expect(auctionLibrary).to.be.bignumber.equal(expectedAuctionLibrary);
+      });
+
+      it('clears the startingCurrentSetAmount variable', async () => {
+        await subject();
+
+        const startingCurrentSetAmount = await rebalancingSetToken.startingCurrentSetAmount.callAsync();
+        const expectedstartingCurrentSetAmount = 0;
+
+        expect(startingCurrentSetAmount).to.be.bignumber.equal(expectedstartingCurrentSetAmount);
+      });
+
+      it('clears the auctionParameters struct', async () => {
+        await subject();
+
+        const auctionParameters = await rebalancingSetToken.getAuctionParameters.callAsync();
+        const expectedAuctionParameters = [new BigNumber(0), new BigNumber(0), new BigNumber(0), new BigNumber(0)];
+
+        expect(auctionParameters).to.deep.equal(expectedAuctionParameters);
+      });
+
+      it('clears the biddingParameters struct', async () => {
+        await subject();
+
+        const biddingParameters = await rebalancingSetToken.getBiddingParameters.callAsync();
+        const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+        const combinedCurrentUnits = await rebalancingSetToken.getCombinedCurrentUnits.callAsync();
+        const combinedNextSetUnits = await rebalancingSetToken.getCombinedNextSetUnits.callAsync();
+
+        const expectedMinimumBid = 0;
+        const expectedRemainingCurrentSets = 0;
+        const expectedCombinedTokenArray = [];
+        const expectedCombinedCurrentUnits = [];
+        const expectedCombinedNextSetUnits = [];
+
+        expect(biddingParameters[0]).to.be.bignumber.equal(expectedMinimumBid);
+        expect(biddingParameters[1]).to.be.bignumber.equal(expectedRemainingCurrentSets);
+        expect(combinedTokenArray).to.deep.equal(expectedCombinedTokenArray);
+        expect(combinedCurrentUnits).to.deep.equal(expectedCombinedCurrentUnits);
+        expect(combinedNextSetUnits).to.deep.equal(expectedCombinedNextSetUnits);
+      });
     });
 
     describe('when settleRebalance is called and there are more than minimumBid amount of sets left', async () => {
@@ -2141,6 +2198,63 @@ contract('RebalancingSetToken', accounts => {
           const newLastRebalanceTimestamp = await rebalancingSetToken.lastRebalanceTimestamp.callAsync();
           expect(newLastRebalanceTimestamp).to.be.bignumber.equal(blockData.timestamp);
         });
+
+        it('clears the nextSet variable', async () => {
+          await subject();
+
+          const nextSet = await rebalancingSetToken.nextSet.callAsync();
+          const expectedNextSet = 0;
+
+          expect(nextSet).to.be.bignumber.equal(expectedNextSet);
+        });
+
+        it('clears the auctionLibrary variable', async () => {
+          await subject();
+
+          const auctionLibrary = await rebalancingSetToken.auctionLibrary.callAsync();
+          const expectedAuctionLibrary = 0;
+
+          expect(auctionLibrary).to.be.bignumber.equal(expectedAuctionLibrary);
+        });
+
+        it('clears the startingCurrentSetAmount variable', async () => {
+          await subject();
+
+          const startingCurrentSetAmount = await rebalancingSetToken.startingCurrentSetAmount.callAsync();
+          const expectedstartingCurrentSetAmount = 0;
+
+          expect(startingCurrentSetAmount).to.be.bignumber.equal(expectedstartingCurrentSetAmount);
+        });
+
+        it('clears the auctionParameters struct', async () => {
+          await subject();
+
+          const auctionParameters = await rebalancingSetToken.getAuctionParameters.callAsync();
+          const expectedAuctionParameters = [new BigNumber(0), new BigNumber(0), new BigNumber(0), new BigNumber(0)];
+
+          expect(auctionParameters).to.deep.equal(expectedAuctionParameters);
+        });
+
+        it('clears the biddingParameters struct', async () => {
+          await subject();
+
+          const biddingParameters = await rebalancingSetToken.getBiddingParameters.callAsync();
+          const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+          const combinedCurrentUnits = await rebalancingSetToken.getCombinedCurrentUnits.callAsync();
+          const combinedNextSetUnits = await rebalancingSetToken.getCombinedNextSetUnits.callAsync();
+
+          const expectedMinimumBid = 0;
+          const expectedRemainingCurrentSets = 0;
+          const expectedCombinedTokenArray = [];
+          const expectedCombinedCurrentUnits = [];
+          const expectedCombinedNextSetUnits = [];
+
+          expect(biddingParameters[0]).to.be.bignumber.equal(expectedMinimumBid);
+          expect(biddingParameters[1]).to.be.bignumber.equal(expectedRemainingCurrentSets);
+          expect(combinedTokenArray).to.deep.equal(expectedCombinedTokenArray);
+          expect(combinedCurrentUnits).to.deep.equal(expectedCombinedCurrentUnits);
+          expect(combinedNextSetUnits).to.deep.equal(expectedCombinedNextSetUnits);
+        });
       });
 
       describe('and bids have been placed', async () => {
@@ -2161,6 +2275,63 @@ contract('RebalancingSetToken', accounts => {
 
           const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
           expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DRAWDOWN);
+        });
+
+        it('clears the nextSet variable', async () => {
+          await subject();
+
+          const nextSet = await rebalancingSetToken.nextSet.callAsync();
+          const expectedNextSet = 0;
+
+          expect(nextSet).to.be.bignumber.equal(expectedNextSet);
+        });
+
+        it('clears the auctionLibrary variable', async () => {
+          await subject();
+
+          const auctionLibrary = await rebalancingSetToken.auctionLibrary.callAsync();
+          const expectedAuctionLibrary = 0;
+
+          expect(auctionLibrary).to.be.bignumber.equal(expectedAuctionLibrary);
+        });
+
+        it('clears the startingCurrentSetAmount variable', async () => {
+          await subject();
+
+          const startingCurrentSetAmount = await rebalancingSetToken.startingCurrentSetAmount.callAsync();
+          const expectedstartingCurrentSetAmount = 0;
+
+          expect(startingCurrentSetAmount).to.be.bignumber.equal(expectedstartingCurrentSetAmount);
+        });
+
+        it('clears the auctionParameters struct', async () => {
+          await subject();
+
+          const auctionParameters = await rebalancingSetToken.getAuctionParameters.callAsync();
+          const expectedAuctionParameters = [new BigNumber(0), new BigNumber(0), new BigNumber(0), new BigNumber(0)];
+
+          expect(auctionParameters).to.deep.equal(expectedAuctionParameters);
+        });
+
+        it('clears the biddingParameters struct', async () => {
+          await subject();
+
+          const biddingParameters = await rebalancingSetToken.getBiddingParameters.callAsync();
+          const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+          const combinedCurrentUnits = await rebalancingSetToken.getCombinedCurrentUnits.callAsync();
+          const combinedNextSetUnits = await rebalancingSetToken.getCombinedNextSetUnits.callAsync();
+
+          const expectedMinimumBid = 0;
+          const expectedRemainingCurrentSets = 0;
+          const expectedCombinedTokenArray = [];
+          const expectedCombinedCurrentUnits = [];
+          const expectedCombinedNextSetUnits = [];
+
+          expect(biddingParameters[0]).to.be.bignumber.equal(expectedMinimumBid);
+          expect(biddingParameters[1]).to.be.bignumber.equal(expectedRemainingCurrentSets);
+          expect(combinedTokenArray).to.deep.equal(expectedCombinedTokenArray);
+          expect(combinedCurrentUnits).to.deep.equal(expectedCombinedCurrentUnits);
+          expect(combinedNextSetUnits).to.deep.equal(expectedCombinedNextSetUnits);
         });
       });
 

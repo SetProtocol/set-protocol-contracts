@@ -624,7 +624,9 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
+          { gas: DEFAULT_GAS },
+        );
       });
 
       it('should revert', async () => {
@@ -760,7 +762,9 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
+          { gas: DEFAULT_GAS },
+        );
       });
 
       it('updates the totalSupply_ correctly', async () => {
@@ -915,7 +919,9 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
+          { gas: DEFAULT_GAS },
+        );
       });
 
       it('should revert', async () => {
@@ -1396,7 +1402,9 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
+          { gas: DEFAULT_GAS },
+        );
       });
 
       it('should revert', async () => {
@@ -1701,7 +1709,9 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
+          { gas: DEFAULT_GAS },
+        );
       });
 
       it('should revert', async () => {
@@ -2065,7 +2075,9 @@ contract('RebalancingSetToken', accounts => {
           bidQuantity,
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
+          { gas: DEFAULT_GAS },
+        );
       });
 
       it('should revert', async () => {

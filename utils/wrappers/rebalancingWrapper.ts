@@ -435,16 +435,16 @@ export class RebalancingWrapper {
     const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
     const minimumBid = new BigNumber(biddingParameters[0]);
     const coefficient = minimumBid.div(priceDivisor);
-    const effectiveQuantity = quantity.mul(priceDivisor).div(priceNumerator);
+    const effectiveQuantity = quantity.div(priceNumerator);
 
     for (let i = 0; i < combinedCurrentUnits.length; i++) {
       const flow = combinedRebalanceUnits[i].mul(priceDivisor).sub(combinedCurrentUnits[i].mul(priceNumerator));
       if (flow.greaterThan(0)) {
-        inflowArray.push(effectiveQuantity.mul(flow).div(coefficient).round(0, 3).div(priceDivisor).round(0, 3));
+        inflowArray.push(effectiveQuantity.mul(flow).div(coefficient).round(0, 3));
         outflowArray.push(new BigNumber(0));
       } else {
         outflowArray.push(
-          flow.mul(new BigNumber(-1)).mul(effectiveQuantity).div(coefficient).round(0, 3).div(priceDivisor).round(0, 3)
+          flow.mul(new BigNumber(-1)).mul(effectiveQuantity).div(coefficient).round(0, 3)
         );
         inflowArray.push(new BigNumber(0));
       }

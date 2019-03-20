@@ -304,6 +304,16 @@ contract('RebalanceAuctionModule', accounts => {
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
       });
 
+      describe('but quantity is zero', async () => {
+        beforeEach(async () => {
+          subjectQuantity = new BigNumber(0);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
       describe('but quantity is more than remainingCurrentSets', async () => {
         beforeEach(async () => {
           subjectQuantity = rebalancingSetTokenQuantityToIssue.add(minBid);
@@ -329,6 +339,16 @@ contract('RebalanceAuctionModule', accounts => {
           const newBiddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
           const newRemainingSets = new BigNumber(newBiddingParameters[1]);
           expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
+        });
+
+        describe('but quantity is zero', async () => {
+          beforeEach(async () => {
+            subjectQuantity = new BigNumber(0);
+          });
+
+          it('should revert', async () => {
+            await expectRevertError(subject());
+          });
         });
       });
 
@@ -621,6 +641,16 @@ contract('RebalanceAuctionModule', accounts => {
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
       });
 
+      describe('but quantity is zero', async () => {
+        beforeEach(async () => {
+          subjectQuantity = new BigNumber(0);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
       describe('but quantity is more than remainingCurrentSets', async () => {
         beforeEach(async () => {
           subjectQuantity = rebalancingSetTokenQuantityToIssue.add(minBid);
@@ -646,6 +676,16 @@ contract('RebalanceAuctionModule', accounts => {
           const newBiddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
           const newRemainingSets = new BigNumber(newBiddingParameters[1]);
           expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
+        });
+
+        describe('but quantity is zero', async () => {
+          beforeEach(async () => {
+            subjectQuantity = new BigNumber(0);
+          });
+
+          it('should revert', async () => {
+            await expectRevertError(subject());
+          });
         });
       });
 
@@ -1234,6 +1274,7 @@ contract('RebalanceAuctionModule', accounts => {
   describe('#calculateExecutionQuantity', async () => {
     let subjectCaller: Address;
     let subjectQuantity: BigNumber;
+    let subjectAllowPartialFill: boolean;
 
     let nextSetToken: SetTokenContract;
     let currentSetToken: SetTokenContract;
@@ -1274,12 +1315,14 @@ contract('RebalanceAuctionModule', accounts => {
 
       subjectCaller = bidderAccount;
       subjectQuantity = ether(1);
+      subjectAllowPartialFill = true;
     });
 
     async function subject(): Promise<BigNumber> {
       return rebalanceAuctionModuleMock.calculateExecutionQuantityExternal.callAsync(
         rebalancingSetToken.address,
         subjectQuantity,
+        subjectAllowPartialFill,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }

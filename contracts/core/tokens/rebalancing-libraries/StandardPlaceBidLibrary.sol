@@ -59,6 +59,12 @@ library StandardPlaceBidLibrary {
             "RebalancingSetToken.placeBid: Sender must be approved module"
         );
 
+        // Make sure that bid amount is greater than zero
+        require(
+            _quantity > 0,
+            "RebalancingSetToken.placeBid: Must bid multiple of minimum bid"
+        );
+
         // Make sure that bid amount is multiple of minimum bid amount
         require(
             _quantity.mod(_biddingParameters.minimumBid) == 0,

@@ -73,6 +73,8 @@ contract RebalanceAuctionModule is
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance
+     * @param  _allowPartialFill       Set to true if want to partially fill bid when quantity
+                                       is greater than currentRemainingSets
      */
     function bid(
         address _rebalancingSetToken,
@@ -83,16 +85,11 @@ contract RebalanceAuctionModule is
         nonReentrant
     {
         // If user allows partial fills calculate partial fill (if necessary)
-        uint256 executionQuantity;
-        if (_allowPartialFill) {
-            // Get execution quantity in event bid quantity exceeds remainingCurrentSets
-            executionQuantity = calculateExecutionQuantity(
-                _rebalancingSetToken,
-                _quantity
-            );        
-        } else {
-            executionQuantity = _quantity;
-        }
+        uint256 executionQuantity = calculateExecutionQuantity(
+            _rebalancingSetToken,
+            _quantity,
+            _allowPartialFill
+        );
 
         // Place bid and retrieve token inflows and outflows
         address[] memory tokenArray;
@@ -136,6 +133,8 @@ contract RebalanceAuctionModule is
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance
+     * @param  _allowPartialFill       Set to true if want to partially fill bid when quantity
+                                       is greater than currentRemainingSets
      */
     function bidAndWithdraw(
         address _rebalancingSetToken,
@@ -146,16 +145,11 @@ contract RebalanceAuctionModule is
         nonReentrant
     {
         // If user allows partial fills calculate partial fill (if necessary)
-        uint256 executionQuantity;
-        if (_allowPartialFill) {
-            // Get execution quantity in event bid quantity exceeds remainingCurrentSets
-            executionQuantity = calculateExecutionQuantity(
-                _rebalancingSetToken,
-                _quantity
-            );        
-        } else {
-            executionQuantity = _quantity;
-        }
+        uint256 executionQuantity = calculateExecutionQuantity(
+            _rebalancingSetToken,
+            _quantity,
+            _allowPartialFill
+        );
 
         // Place bid and retrieve token inflows and outflows
         address[] memory tokenArray;
@@ -261,7 +255,8 @@ contract RebalanceAuctionModule is
      */
     function calculateExecutionQuantity(
         address _rebalancingSetToken,
-        uint256 _quantity
+        uint256 _quantity,
+        bool _allowPartialFill
     )
         internal
         returns (uint256)
@@ -271,14 +266,13 @@ contract RebalanceAuctionModule is
         uint256 minimumBid = biddingParameters[0];
         uint256 remainingCurrentSets = biddingParameters[1];
 
-        // If quantity is greater than remainingCurrentSets round amount to nearest multiple of
-        // minimumBid that is less than remainingCurrentSets
-        if (_quantity <= remainingCurrentSets) {
-            return _quantity;
-        } else {
-            // Find amount that is nearest multiple of minimumBid less than remainingCurrentSets
+        if (_allowPartialFill && _quantity > remainingCurrentSets) {     
+            // If quantity is greater than remainingCurrentSets round amount to nearest multiple of
+            // minimumBid that is less than remainingCurrentSets
             uint256 executionQuantity = remainingCurrentSets.div(minimumBid).mul(minimumBid);
             return executionQuantity;
+        } else {
+            return _quantity;
         }
     }
 

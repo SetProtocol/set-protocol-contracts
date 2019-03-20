@@ -30,14 +30,16 @@ contract RebalanceAuctionModuleMock is
 
     function calculateExecutionQuantityExternal(
         address _rebalancingSetToken,
-        uint256 _quantity
+        uint256 _quantity,
+        bool _allowPartialFill
     )
         external
         returns (uint256)
     {
         return calculateExecutionQuantity(
             _rebalancingSetToken,
-            _quantity
+            _quantity,
+            _allowPartialFill
         );
     }
 }

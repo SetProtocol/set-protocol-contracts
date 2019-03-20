@@ -1,7 +1,6 @@
 pragma solidity 0.5.4;
 
 import { Core } from "../../core/Core.sol";
-import { IRebalancingSetToken } from "../../core/interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";
 
 // Mock contract implementation of Core with extra functions for testing
@@ -29,10 +28,7 @@ contract CoreMock is Core {
     )
         external
     {
-        ISetToken setToken = ISetToken(_set);
-
-        // Issue set token
-        setToken.mint(
+        ISetToken(_set).mint(
             _issuer,
             _quantity
         );
@@ -53,10 +49,7 @@ contract CoreMock is Core {
     )
         external
     {
-        ISetToken setToken = ISetToken(_set);
-
-        // Issue set token
-        setToken.burn(
+        ISetToken(_set).burn(
             _from,
             _quantity
         );

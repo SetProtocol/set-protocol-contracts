@@ -25,12 +25,14 @@ import {
   WhiteListContract,
 } from '../../utils/contracts';
 
+import { CommonValidationsLibrary } from '../../artifacts/ts/CommonValidationsLibrary';
 import { Core } from '../../artifacts/ts/Core';
 import { CoreIssuanceLibrary } from '../../artifacts/ts/CoreIssuanceLibrary';
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
+import { SetTokenLibrary } from '../../artifacts/ts/SetTokenLibrary';
 import { StandardFailAuctionLibrary } from '../../artifacts/ts/StandardFailAuctionLibrary';
 import { StandardPlaceBidLibrary } from '../../artifacts/ts/StandardPlaceBidLibrary';
 import { StandardProposeLibrary } from '../../artifacts/ts/StandardProposeLibrary';
@@ -133,9 +135,13 @@ export class CoreStage implements DeploymentStageInterface {
     const originalByteCode = Core.bytecode;
 
     const coreIssuanceLibrary = await getContractAddress(CoreIssuanceLibrary.contractName);
+    const commonValidations = await getContractAddress(CommonValidationsLibrary.contractName);
+    const setTokenLibrary = await getContractAddress(SetTokenLibrary.contractName);
     const linkedByteCode = linkLibraries([
       { name: ERC20Wrapper.contractName, address: this._erc20WrapperAddress },
       { name: CoreIssuanceLibrary.contractName, address: coreIssuanceLibrary },
+      { name: CommonValidationsLibrary.contractName, address: commonValidations },
+      { name: SetTokenLibrary.contractName, address: setTokenLibrary },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(Core.abi).deploy({
@@ -160,8 +166,14 @@ export class CoreStage implements DeploymentStageInterface {
 
     const coreAddress = await getContractAddress(Core.contractName);
 
+    const originalByteCode = SetTokenFactory.bytecode;
+    const commonValidations = await getContractAddress(CommonValidationsLibrary.contractName);
+    const linkedByteCode = linkLibraries([
+      { name: CommonValidationsLibrary.contractName, address: commonValidations },
+    ], originalByteCode);
+
     const data = new this._web3.eth.Contract(SetTokenFactory.abi).deploy({
-      data: SetTokenFactory.bytecode,
+      data: linkedByteCode,
       arguments: [coreAddress],
     }).encodeABI();
 

@@ -179,10 +179,12 @@ library ExchangeIssuanceLibrary {
             "ExchangeIssuanceLibrary.validateSendTokenParams: Send token inputs must be of the same length"
         );
 
+        ICore core = ICore(_core);
+
         for (uint256 i = 0; i < _sendTokenExchangeIds.length; i++) {
             // Make sure all exchanges are valid
             require(
-                ICore(_core).exchangeIds(_sendTokenExchangeIds[i]) != address(0),
+                core.exchangeIds(_sendTokenExchangeIds[i]) != address(0),
                 "ExchangeIssuanceLibrary.validateSendTokenParams: Must be valid exchange"
             );
 

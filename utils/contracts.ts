@@ -1,9 +1,11 @@
 import { AuthorizableContract } from '../types/generated/authorizable';
+import { CommonValidationsLibraryContract } from '../types/generated/common_validations_library';
+import { CommonValidationsLibraryMockContract } from '../types/generated/common_validations_library_mock';
 import { BadTokenMockContract } from '../types/generated/bad_token_mock';
 import { BaseContract } from '../types/base_contract';
 import { BTCDaiRebalancingManagerContract } from '../types/generated/b_t_c_dai_rebalancing_manager';
 import { BTCETHRebalancingManagerContract } from '../types/generated/b_t_c_e_t_h_rebalancing_manager';
-import { Bytes32MockContract } from '../types/generated/bytes32_mock';
+import { Bytes32LibraryMockContract } from '../types/generated/bytes32_library_mock';
 import { CommonMathMockContract } from '../types/generated/common_math_mock';
 import { ConstantAuctionPriceCurveContract } from '../types/generated/constant_auction_price_curve';
 import { CoreContract } from '../types/generated/core';
@@ -56,11 +58,13 @@ import { ZeroExOrderLibraryMockContract } from '../types/generated/zero_ex_order
 
 export {
   AuthorizableContract,
+  CommonValidationsLibraryContract,
+  CommonValidationsLibraryMockContract,
   BadTokenMockContract,
   BaseContract,
   BTCDaiRebalancingManagerContract,
   BTCETHRebalancingManagerContract,
-  Bytes32MockContract,
+  Bytes32LibraryMockContract,
   CommonMathMockContract,
   ConstantAuctionPriceCurveContract,
   CoreContract,

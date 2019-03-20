@@ -24,13 +24,13 @@ import { TimeLockUpgrade } from "../../lib/TimeLockUpgrade.sol";
 
 
 /**
- * @title CoreInternal
+ * @title CoreAdmin
  * @author Set Protocol
  *
- * The CoreInternal contract contains methods to alter state of variables that track
+ * The CoreAdmin contract contains methods to alter state of variables that track
  * Core dependency addresses.
  */
-contract CoreInternal is
+contract CoreAdmin is
     Ownable,
     CoreState,
     TimeLockUpgrade
@@ -118,7 +118,7 @@ contract CoreInternal is
     {
         require(
             state.validFactories[_factory],
-            "Core: Invalid Factory"
+            "Invalid Factory"
         );
 
         state.factories = state.factories.remove(_factory);
@@ -147,7 +147,7 @@ contract CoreInternal is
     {
         require(
             state.exchangeIds[_exchangeId] == address(0),
-            "Core: Invalid Id"
+            "Invalid Id"
         );
 
         state.exchangeIds[_exchangeId] = _exchange;
@@ -176,12 +176,12 @@ contract CoreInternal is
     {
         require(
             state.exchangeIds[_exchangeId] != address(0),
-            "Core: Invalid exchange"
+            "Invalid exchange"
         );
 
         require(
             state.exchangeIds[_exchangeId] == _exchange,
-            "Core: ExchangeId != exchange"
+            "ExchangeId != exchange"
         );
 
         state.exchanges = state.exchanges.remove(_exchange);
@@ -229,7 +229,7 @@ contract CoreInternal is
     {
         require(
             state.validModules[_module],
-            "Core: Invalid Module"
+            "Invalid Module"
         );
 
         state.modules = state.modules.remove(_module);
@@ -255,7 +255,7 @@ contract CoreInternal is
     {
         require(
             state.validSets[_set],
-            "Core: Invalid Set"
+            "Invalid Set"
         );
 
         state.setTokens = state.setTokens.remove(_set);
@@ -283,7 +283,7 @@ contract CoreInternal is
     {
         require(
             state.disabledSets[_set],
-            "Core: Invalid Set"
+            "Invalid Set"
         );
 
         state.setTokens = state.setTokens.append(_set);
@@ -333,7 +333,7 @@ contract CoreInternal is
     {
         require(
             state.validPriceLibraries[_priceLibrary],
-            "Core: Invalid Lib"
+            "Invalid Lib"
         );
 
         state.priceLibraries = state.priceLibraries.remove(_priceLibrary);

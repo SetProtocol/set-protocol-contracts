@@ -131,14 +131,15 @@ library CoreIssuanceLibrary {
     }
 
     /**
-     * Calculate the transfer values components given quantity of Set
+     * Calculate the required component quantities required for issuance or rdemption for a given 
+     * quantity of Set Tokens
      *
      * @param _componentUnits   The units of the component token
      * @param _naturalUnit      The natural unit of the Set token
      * @param _quantity         The number of tokens being redeem
-     * @return uint256[]        Transfer value in base units of the Set
+     * @return uint256[]        Required quantities in base units of components
      */
-    function calculateTransferValues(
+    function calculateRequiredComponentQuantities(
         uint256[] calldata _componentUnits,
         uint256 _naturalUnit,
         uint256 _quantity

@@ -182,6 +182,7 @@ contract PayableExchangeIssuance is
             rebalancingSetIssueQuantity
         );
 
+        // Send excess base Set and ether to the user
         returnExcessFunds(baseSetAddress);
 
         emit LogPayableExchangeIssue(

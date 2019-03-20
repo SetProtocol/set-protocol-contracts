@@ -4,6 +4,7 @@ import { getContractAddress } from '../utils/output-helper';
 import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 
 import {
+  CommonValidationsLibraryContract,
   CoreIssuanceLibraryContract,
   ERC20WrapperContract,
   ExchangeIssuanceLibraryContract,
@@ -16,6 +17,7 @@ import {
   StandardStartRebalanceLibraryContract,
 } from '../../utils/contracts';
 
+import { CommonValidationsLibrary } from '../../artifacts/ts/CommonValidationsLibrary';
 import { CoreIssuanceLibrary } from '../../artifacts/ts/CoreIssuanceLibrary';
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { ExchangeIssuanceLibrary } from '../../artifacts/ts/ExchangeIssuanceLibrary';
@@ -36,6 +38,7 @@ export class LibrariesStage implements DeploymentStageInterface {
 
     this._web3 = web3;
 
+    await this.deployCommonValidationsLibrary();
     await this.deployERC20Wrapper();
     await this.deployCoreIssuanceLibrary();
     await this.deployExchangeIssuanceLibrary();
@@ -48,6 +51,18 @@ export class LibrariesStage implements DeploymentStageInterface {
     await this.deployStandardStartRebalanceLibrary();
     await this.deployStandardPlaceBidLibrary();
     await this.deployStandardFailAuctionLibrary();
+  }
+
+  private async deployCommonValidationsLibrary(): Promise<CommonValidationsLibraryContract> {
+    const name = CommonValidationsLibrary.contractName;
+    let address = await getContractAddress(name);
+
+    if (address) {
+      return await CommonValidationsLibraryContract.at(address, this._web3, TX_DEFAULTS);
+    }
+
+    address = await deployContract(CommonValidationsLibrary.bytecode, this._web3, name);
+    return await CommonValidationsLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deployERC20Wrapper(): Promise<ERC20WrapperContract> {
@@ -181,5 +196,4 @@ export class LibrariesStage implements DeploymentStageInterface {
     address = await deployContract(StandardFailAuctionLibrary.bytecode, this._web3, name);
     return await StandardFailAuctionLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
-
 }

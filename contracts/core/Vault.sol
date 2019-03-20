@@ -163,7 +163,7 @@ contract Vault is
         // Require that user has enough unassociated tokens to withdraw tokens or issue Set
         require(
             balances[_token][_from] >= _quantity,
-            "Vault.transferBalanceInternal: Insufficient token balance"
+            "Vault.transferBalance: Insufficient token balance"
         );
 
         // Decrement balances state variable subtracting _quantity to user's token amount
@@ -178,12 +178,12 @@ contract Vault is
      * called by authorized core contracts.
      *
      * @param  _tokens          The addresses of the ERC20 tokens
-     * @param  _owner           The address of the token owner
+     * @param  _to              The address of the recipient
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchWithdrawTo(
         address[] calldata _tokens,
-        address _owner,
+        address _to,
         uint256[] calldata _quantities
     )
         external
@@ -208,7 +208,7 @@ contract Vault is
             if (_quantities[i] > 0) {
                 withdrawTo(
                     _tokens[i],
-                    _owner,
+                    _to,
                     _quantities[i]
                 );
             }

@@ -25,6 +25,7 @@ import { ICore } from "../../interfaces/ICore.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
+import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 
 /**
@@ -35,15 +36,6 @@ import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol
  */
 library StandardSettleRebalanceLibrary {
     using SafeMath for uint256;
-
-    /* ============ Structs ============ */
-
-    struct SetDetails {
-        uint256 setNaturalUnit;
-        uint256[] setUnits;
-        address[] setComponents;
-    }
-
     /* ============ Internal Functions ============ */
 
     /**
@@ -133,10 +125,10 @@ library StandardSettleRebalanceLibrary {
         returns (uint256, uint256)
     {
         // Collect data necessary to compute issueAmounts
-        SetDetails memory setDetails = getUnderlyingSetDetails(_nextSet);
+        SetTokenLibrary.SetDetails memory nextSetToken = SetTokenLibrary.getSetDetails(_nextSet);
         uint256 maxIssueAmount = calculateMaxIssueAmount(
             _vaultAddress,
-            setDetails
+            nextSetToken
         );
 
         // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding
@@ -145,7 +137,7 @@ library StandardSettleRebalanceLibrary {
         // Issue amount of Sets that is closest multiple of nextNaturalUnit to the maxIssueAmount
         // Since the initial division will round down to the nearest whole number when we multiply
         // by that same number we will return the closest multiple less than the maxIssueAmount
-        uint256 issueAmount = maxIssueAmount.div(setDetails.setNaturalUnit).mul(setDetails.setNaturalUnit);
+        uint256 issueAmount = maxIssueAmount.div(nextSetToken.naturalUnit).mul(nextSetToken.naturalUnit);
 
         // Divide final issueAmount by naturalUnitsOutstanding to get newUnitShares
         uint256 newUnitShares = issueAmount.div(naturalUnitsOutstanding);
@@ -153,39 +145,16 @@ library StandardSettleRebalanceLibrary {
     }
 
     /**
-     * Create struct that holds set details for currentSet and nextSet (units, components, natural units).
-     *
-     * @param _setAddress    Address of set to get details from
-     * @return               Struct that holds set details for currentSet and nextSet
-     */
-    function getUnderlyingSetDetails(
-        address _setAddress
-    )
-        public
-        view
-        returns (SetDetails memory)
-    {
-        // Create set token interfaces
-        ISetToken setInstance = ISetToken(_setAddress);
-
-        return SetDetails({
-            setNaturalUnit: setInstance.naturalUnit(),
-            setUnits: setInstance.getUnits(),
-            setComponents: setInstance.getComponents()
-        });
-    }
-
-    /**
      * Get the maximum possible issue amount of nextSet based on number of components owned by rebalancing
      * set token.
      *
      * @param _vaultAddress     Vault address
-     * @param _setDetails       nextSet details
+     * @param _setToken         nextSet details
      * @return uint256          maxIssueAmount
      */
     function calculateMaxIssueAmount(
         address _vaultAddress,
-        SetDetails memory _setDetails
+        SetTokenLibrary.SetDetails memory _setToken
     )
         public
         view
@@ -194,16 +163,16 @@ library StandardSettleRebalanceLibrary {
         uint256 maxIssueAmount = CommonMath.maxUInt256();
         IVault vaultInstance = IVault(_vaultAddress);
 
-        for (uint256 i = 0; i < _setDetails.setComponents.length; i++) {
+        for (uint256 i = 0; i < _setToken.components.length; i++) {
             // Get amount of components in vault owned by rebalancingSetToken
             uint256 componentAmount = vaultInstance.getOwnerBalance(
-                _setDetails.setComponents[i],
+                _setToken.components[i],
                 address(this)
             );
 
             // Calculate amount of Sets that can be issued from those components, if less than amount for other
             // components then set that as maxIssueAmount
-            uint256 componentIssueAmount = componentAmount.div(_setDetails.setUnits[i]).mul(_setDetails.setNaturalUnit);
+            uint256 componentIssueAmount = componentAmount.div(_setToken.units[i]).mul(_setToken.naturalUnit);
             if (componentIssueAmount < maxIssueAmount) {
                 maxIssueAmount = componentIssueAmount;
             }

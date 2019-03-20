@@ -27,7 +27,7 @@ import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
  * @author Set Protocol
  *
  * The transferProxy contract is responsible for moving tokens through the system to
- * assist with issuance and filling issuance orders.
+ * assist with issuance and usage from modules.
  */
 
 contract TransferProxy is
@@ -39,7 +39,7 @@ contract TransferProxy is
 
     /**
      * Transfers tokens from an address (that has set allowance on the proxy).
-     * Can only be called by authorized core contracts.
+     * Can only be called by Core.
      *
      * @param  _token          The address of the ERC20 token
      * @param  _quantity       The number of tokens to transfer
@@ -86,7 +86,7 @@ contract TransferProxy is
 
     /**
      * Transfers tokens from an address (that has set allowance on the proxy).
-     * Can only be called by authorized core contracts.
+     * Can only be called by Core.
      *
      * @param  _tokens         The addresses of the ERC20 token
      * @param  _quantities     The numbers of tokens to transfer

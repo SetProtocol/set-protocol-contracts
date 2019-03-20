@@ -51,7 +51,7 @@ contract('CoreIssuanceLibraryMock', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#testCalculateTransferValues', async () => {
+  describe('#testCalculateRequiredComponentQuantities', async () => {
     let subjectComponentUnits: BigNumber[];
     let subjectNaturalUnit: BigNumber;
     let subjectQuantity: BigNumber;
@@ -63,7 +63,7 @@ contract('CoreIssuanceLibraryMock', accounts => {
     });
 
     async function subject(): Promise<any> {
-      return coreIssuanceLibraryMock.testCalculateTransferValues.callAsync(
+      return coreIssuanceLibraryMock.testCalculateRequiredComponentQuantities.callAsync(
         subjectComponentUnits,
         subjectNaturalUnit,
         subjectQuantity

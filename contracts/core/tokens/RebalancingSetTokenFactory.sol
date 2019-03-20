@@ -16,7 +16,7 @@
 
 pragma solidity 0.5.4;
 
-import { Bytes32 } from "../../lib/Bytes32.sol";
+import { Bytes32Library } from "../../lib/Bytes32Library.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { RebalancingSetToken } from "./RebalancingSetToken.sol";
@@ -33,7 +33,7 @@ import { IWhiteList } from "../interfaces/IWhiteList.sol";
  */
 contract RebalancingSetTokenFactory {
     using LibBytes for bytes;
-    using Bytes32 for bytes32;
+    using Bytes32Library for bytes32;
 
     /* ============ State Variables ============ */
 

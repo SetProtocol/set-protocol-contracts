@@ -19,6 +19,7 @@ pragma solidity 0.5.4;
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { CommonValidationsLibrary } from "../../lib/CommonValidationsLibrary.sol";
 import { CoreOperationState } from "./CoreOperationState.sol";
 import { CoreState } from "../lib/CoreState.sol";
 
@@ -197,16 +198,10 @@ contract CoreAccounting is
         whenOperational
     {
         // Confirm an empty _tokens or quantity array is not passed
-        require(
-            _tokens.length > 0 && _quantities.length > 0,
-            "Core: Inputs len > 0"
-        );
+        CommonValidationsLibrary.validateNonEmpty(_tokens);
 
         // Confirm there is one quantity for every token address
-        require(
-            _tokens.length == _quantities.length,
-            "Core: Input lens !="
-        );
+        CommonValidationsLibrary.validateEqualLength(_tokens, _quantities);
 
         state.transferProxyInstance.batchTransfer(
             _tokens,
@@ -240,16 +235,10 @@ contract CoreAccounting is
         internal
     {
         // Confirm an empty _tokens or quantity array is not passed
-        require(
-            _tokens.length > 0 && _quantities.length > 0,
-            "Core: Inputs len > 0"
-        );
+        CommonValidationsLibrary.validateNonEmpty(_tokens);
 
         // Confirm there is one quantity for every token address
-        require(
-            _tokens.length == _quantities.length,
-            "Core: Input lens !="
-        );
+        CommonValidationsLibrary.validateEqualLength(_tokens, _quantities);
 
         // Call Vault contract to deattribute withdrawn tokens from user
         state.vaultInstance.batchDecrementTokenOwner(

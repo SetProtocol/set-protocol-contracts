@@ -21,7 +21,7 @@ import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
-import { Bytes32 } from "../../lib/Bytes32.sol";
+import { CommonValidationsLibrary } from "../../lib/CommonValidationsLibrary.sol";
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { ISetFactory } from "../interfaces/ISetFactory.sol";
 
@@ -30,7 +30,7 @@ import { ISetFactory } from "../interfaces/ISetFactory.sol";
  * @title SetToken
  * @author Set Protocol
  *
- * Implementation of the basic {Set} token.
+ * Implementation of the basic Set token.
  */
 contract SetToken is
     ERC20,
@@ -53,13 +53,13 @@ contract SetToken is
     /* ============ Constructor ============ */
 
     /**
-     * Constructor function for {Set} token
+     * Constructor function for Set token
      *
      * As looping operations are expensive, checking for duplicates will be on the onus of the application developer
      *
      * @param _factory          The factory used to create the Set Token
      * @param _components       A list of component address which you want to include
-     * @param _units            A list of quantities in gWei of each component (corresponds to the {Set} of _components)
+     * @param _units            A list of quantities of each component (corresponds to the Set of _components)
      * @param _naturalUnit      The minimum multiple of Sets that can be issued or redeemed
      * @param _name             The Set's name
      * @param _symbol           The Set's symbol
@@ -80,7 +80,6 @@ contract SetToken is
         )
     {
         // Storing count and unit counts to local variable to save on invocation
-        uint256 componentCount = _components.length;
         uint256 unitCount = _units.length;
 
         // Require naturalUnit passed is greater than 0
@@ -90,22 +89,10 @@ contract SetToken is
         );
 
         // Confirm an empty _components array is not passed
-        require(
-            componentCount > 0,
-            "SetToken.constructor: Empty components array"
-        );
-
-        // Confirm an empty _quantities array is not passed
-        require(
-            unitCount > 0,
-            "SetToken.constructor: Empty units array"
-        );
+        CommonValidationsLibrary.validateNonEmpty(_components);
 
         // Confirm there is one quantity for every token address
-        require(
-            componentCount == unitCount,
-            "SetToken.constructor: Components and units lengths mismatch"
-        );
+        CommonValidationsLibrary.validateEqualLength(_components, _units);
 
         // NOTE: It will be the onus of developers to check whether the addressExists
         // are in fact ERC20 addresses

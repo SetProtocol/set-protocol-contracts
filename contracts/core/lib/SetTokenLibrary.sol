@@ -15,6 +15,7 @@
 */
 
 pragma solidity 0.5.4;
+pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -23,6 +24,12 @@ import { ISetToken} from "../interfaces/ISetToken.sol";
 
 library SetTokenLibrary {
     using SafeMath for uint256;
+
+    struct SetDetails {
+        uint256 naturalUnit;
+        address[] components;
+        uint256[] units;
+    }
 
     /**
      * Validates that passed in tokens are all components of the Set
@@ -45,6 +52,53 @@ library SetTokenLibrary {
             );
 
         }
+    }
+
+    /**
+     * Validates that passed in quantity is a multiple of the natural unit of the Set.
+     *
+     * @param _set                      Address of the Set
+     * @param _quantity                   Quantity to validate
+     */
+    function isMultipleOfSetNaturalUnit(
+        address _set,
+        uint256 _quantity
+    )
+        external
+        view
+    {
+        require(
+            _quantity.mod(ISetToken(_set).naturalUnit()) == 0,
+            "SetTokenLibrary.isMultipleOfSetNaturalUnit: Quantity is not a multiple of nat unit"
+        );
+    }
+
+    /**
+     * Retrieves the Set's natural unit, components, and units.
+     *
+     * @param _set                      Address of the Set
+     * @return SetDetails               Struct containing the natural unit, components, and units
+     */
+    function getSetDetails(
+        address _set
+    )
+        internal
+        view
+        returns (SetDetails memory)
+    {
+        // Declare interface variables
+        ISetToken setToken = ISetToken(_set);
+
+        // Fetch set token properties
+        uint256 naturalUnit = setToken.naturalUnit();
+        address[] memory components = setToken.getComponents();
+        uint256[] memory units = setToken.getUnits();
+
+        return SetDetails({
+            naturalUnit: naturalUnit,
+            components: components,
+            units: units
+        });
     }
 }
 

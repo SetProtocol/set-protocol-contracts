@@ -17,7 +17,13 @@
 pragma solidity 0.5.4;
 
 
-library Bytes32 {
+library Bytes32Library {
+    /**
+     * Converts a bytes32 data structure into a bytes array.
+     *
+     * @param  data       Piece of data encoded as bytes32
+     * @return bytes          
+     */
     function bytes32ToBytes(bytes32 data)
         internal
         pure
@@ -36,12 +42,18 @@ library Bytes32 {
         return result;
     }
 
-    function bytes32ToString(bytes32 test)
+    /**
+     * Converts a piece of data encoded as bytes32 into a string.
+     *
+     * @param  data       Piece of data encoded as bytes32
+     * @return string          
+     */
+    function bytes32ToString(bytes32 data)
         internal
         pure
         returns (string memory)
     {
-        bytes memory intermediate = bytes32ToBytes(test);
+        bytes memory intermediate = bytes32ToBytes(data);
         return string(abi.encodePacked(intermediate));
     }
 }

@@ -162,7 +162,8 @@ contract('PayableExchangeIssuanceModule', accounts => {
     it('should contain the correct address of the exchangeIssuanceModule', async () => {
       const payableExchangeIssuanceModuleContract = await subject();
 
-      const exchangeIssuanceModuleAddress = await payableExchangeIssuanceModuleContract.exchangeIssuanceModule.callAsync();
+      const exchangeIssuanceModuleAddress = await payableExchangeIssuanceModuleContract
+      .exchangeIssuanceModule.callAsync();
 
       expect(exchangeIssuanceModuleAddress).to.equal(exchangeIssuanceModule.address);
     });
@@ -506,13 +507,6 @@ contract('PayableExchangeIssuanceModule', accounts => {
         subjectRebalancingSetQuantity,
         { from: subjectCaller }
       );
-
-      // Approve base component to PayableExchangeIssuanceModule contract
-      // await erc20Wrapper.approveTransfersAsync(
-      //   [rebalancingSetToken],
-      //   payableExchangeIssuanceModule.address,
-      //   subjectCaller
-      // );
     });
 
     afterEach(async () => {
@@ -532,7 +526,7 @@ contract('PayableExchangeIssuanceModule', accounts => {
       );
     }
 
-    it('redeems the rebalancing Set', async () => {
+    it.only('redeems the rebalancing Set', async () => {
       const previousRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
       const expectedRBSetTokenBalance = previousRBSetTokenBalance.sub(subjectRebalancingSetQuantity);
 

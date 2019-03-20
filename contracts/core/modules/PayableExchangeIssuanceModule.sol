@@ -217,6 +217,7 @@ contract PayableExchangeIssuanceModule is
             _exchangeIssuanceParams
         );
 
+        // Redeem rebalancing Set from the user to this contract in the vault
         coreInstance.redeemModule(
             msg.sender,
             address(this),
@@ -224,12 +225,12 @@ contract PayableExchangeIssuanceModule is
             _rebalancingSetQuantity
         );
 
-        // Redeem rebalancing Set
+        // Withdraw components to this contract.
         coreInstance.withdrawModule(
             address(this),
             address(this),
-            _rebalancingSetAddress,
-            _rebalancingSetQuantity
+            _exchangeIssuanceParams.setAddress,
+            _exchangeIssuanceParams.quantity
         );
 
         // Exchange redeem Base Set

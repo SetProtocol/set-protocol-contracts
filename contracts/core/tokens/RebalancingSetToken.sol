@@ -384,7 +384,7 @@ contract RebalancingSetToken is
         view
         returns (uint256[] memory, uint256[] memory)
     {
-        return RebalancingHelperLibrary.getBidPrice(
+        return StandardPlaceBidLibrary.getBidPrice(
             _quantity,
             auctionLibrary,
             biddingParameters,

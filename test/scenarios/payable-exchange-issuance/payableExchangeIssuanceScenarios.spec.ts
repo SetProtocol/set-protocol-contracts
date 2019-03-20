@@ -10,7 +10,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  PayableExchangeIssuanceContract,
+  RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
@@ -35,13 +35,13 @@ const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
-const PayableExchangeIssuance = artifacts.require('PayableExchangeIssuance');
+const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
 
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setUtils = new SetUtils(web3);
 const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 
-contract('PayableExchangeIssuance::Scenarios', accounts => {
+contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
   const [
     ownerAccount,
     tokenPurchaser,
@@ -51,7 +51,7 @@ contract('PayableExchangeIssuance::Scenarios', accounts => {
   let core: CoreContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let payableExchangeIssuance: PayableExchangeIssuanceContract;
+  let payableExchangeIssuance: RebalancingSetExchangeIssuanceModuleContract;
   let weth: WethMockContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
@@ -65,19 +65,20 @@ contract('PayableExchangeIssuance::Scenarios', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(PayableExchangeIssuance.abi);
+    ABIDecoder.addABI(RebalancingSetExchangeIssuanceModule.abi);
 
     core = await coreWrapper.getDeployedCoreAsync();
     setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
     rebalancingSetTokenFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
 
     weth = await erc20Wrapper.getDeployedWETHAsync();
-    payableExchangeIssuance = await coreWrapper.getDeployedPayableExchangeIssuanceModuleAsync();
+    payableExchangeIssuance = await coreWrapper.getDeployedRebalancingSetExchangeIssuanceModuleAsync();
+    await coreWrapper.addModuleAsync(core, payableExchangeIssuance.address);
   });
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(PayableExchangeIssuance.abi);
+    ABIDecoder.removeABI(RebalancingSetExchangeIssuanceModule.abi);
   });
 
   beforeEach(async () => {
@@ -153,10 +154,9 @@ contract('PayableExchangeIssuance::Scenarios', accounts => {
       );
 
       bitcoinEtherIssueQuantity = new BigNumber(135000000000000);
-      subjectEther = bitcoinEtherIssueQuantity
-                      .mul(WETH_COMPONENT_UNITS)
-                      .div(bitcoinEtherNaturalUnit)
-                      .mul(2);
+      subjectEther = bitcoinEtherIssueQuantity.mul(WETH_COMPONENT_UNITS)
+                                              .div(bitcoinEtherNaturalUnit)
+                                              .mul(2);
 
       // Generate exchange issue data
       exchangeIssueSetAddress = bitcoinEtherSet.address;
@@ -213,11 +213,7 @@ contract('PayableExchangeIssuance::Scenarios', accounts => {
         subjectRebalancingSetAddress,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
-        {
-          from: subjectCaller,
-          gas: DEFAULT_GAS,
-          value: subjectEther.toString(),
-        },
+        { from: subjectCaller, gas: DEFAULT_GAS, value: subjectEther.toString() },
       );
     }
 

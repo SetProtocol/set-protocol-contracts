@@ -526,7 +526,7 @@ contract('PayableExchangeIssuanceModule', accounts => {
       );
     }
 
-    it.only('redeems the rebalancing Set', async () => {
+    it('redeems the rebalancing Set', async () => {
       const previousRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
       const expectedRBSetTokenBalance = previousRBSetTokenBalance.sub(subjectRebalancingSetQuantity);
 

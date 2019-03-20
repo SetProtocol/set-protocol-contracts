@@ -77,14 +77,14 @@ contract RebalanceAuctionModule is
     function bid(
         address _rebalancingSetToken,
         uint256 _quantity,
-        bool _executePartialQuantity
+        bool _allowPartialFill
     )
         external
         nonReentrant
     {
         // If user allows partial fills calculate partial fill (if necessary)
         uint256 executionQuantity;
-        if (_executePartialQuantity) {
+        if (_allowPartialFill) {
             // Get execution quantity in event bid quantity exceeds remainingCurrentSets
             executionQuantity = calculateExecutionQuantity(
                 _rebalancingSetToken,
@@ -140,14 +140,14 @@ contract RebalanceAuctionModule is
     function bidAndWithdraw(
         address _rebalancingSetToken,
         uint256 _quantity,
-        bool _executePartialQuantity
+        bool _allowPartialFill
     )
         external
         nonReentrant
     {
         // If user allows partial fills calculate partial fill (if necessary)
         uint256 executionQuantity;
-        if (_executePartialQuantity) {
+        if (_allowPartialFill) {
             // Get execution quantity in event bid quantity exceeds remainingCurrentSets
             executionQuantity = calculateExecutionQuantity(
                 _rebalancingSetToken,

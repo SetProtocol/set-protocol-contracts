@@ -11,6 +11,7 @@ import {
   ETHDaiRebalancingManagerContract,
   LinearAuctionPriceCurveContract,
   SetTokenContract,
+  RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   UpdatableConstantAuctionPriceCurveContract,
   VaultContract,
@@ -412,6 +413,21 @@ export class RebalancingWrapper {
     // Transition to rebalance
     await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
     await rebalancingSetToken.startRebalance.sendTransactionAsync(
+      { from: caller, gas: DEFAULT_GAS }
+    );
+  }
+
+  public async placeBidAsync(
+    rebalanceAuctionModule: RebalanceAuctionModuleContract,
+    rebalancingSetTokenAddress: Address,
+    bidQuantity: BigNumber,
+    allowPartialFill: boolean = false,
+    caller: Address = this._tokenOwnerAddress,
+  ): Promise<void> {
+    await rebalanceAuctionModule.bid.sendTransactionAsync(
+      rebalancingSetTokenAddress,
+      bidQuantity,
+      allowPartialFill,
       { from: caller, gas: DEFAULT_GAS }
     );
   }

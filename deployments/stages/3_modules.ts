@@ -132,8 +132,7 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployRebalancingSetExchangeIssuanceModule():
-    Promise<RebalancingSetExchangeIssuanceModuleContract>
-  {
+    Promise<RebalancingSetExchangeIssuanceModuleContract> {
     const name = RebalancingSetExchangeIssuanceModule.contractName;
     let address = await getContractAddress(name);
 

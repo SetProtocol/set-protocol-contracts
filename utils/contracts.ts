@@ -29,7 +29,7 @@ import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_
 import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 import {
   asdfContract,
-} from '../types/generated/rebalancing_set_exchange_issuance_module';
+} from '../types/generated/asdf';
 import { PriceFeedContract } from '../types/generated/price_feed';
 import { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 import { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';

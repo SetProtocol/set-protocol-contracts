@@ -15,7 +15,7 @@ import { LinearAuctionPriceCurve } from "./ts/LinearAuctionPriceCurve";
 import { Median } from "./ts/Median";
 import { NoDecimalTokenMock } from "./ts/NoDecimalTokenMock";
 import { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
-import { PayableExchangeIssuanceModule } from "./ts/PayableExchangeIssuanceModule";
+import { RebalancingSetExchangeIssuanceModule } from "./ts/RebalancingSetExchangeIssuanceModule";
 import { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
 import { RebalancingHelperLibrary } from "./ts/RebalancingHelperLibrary";
 import { RebalancingSetToken } from "./ts/RebalancingSetToken";
@@ -62,7 +62,7 @@ export {
   MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
-  PayableExchangeIssuanceModuleContract,
+  RebalancingSetExchangeIssuanceModuleContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
@@ -100,7 +100,7 @@ export {
   Median,
   NoDecimalTokenMock,
   NoXferReturnTokenMock,
-  PayableExchangeIssuanceModule,
+  RebalancingSetExchangeIssuanceModule,
   RebalanceAuctionModule,
   RebalancingHelperLibrary,
   RebalancingSetToken,

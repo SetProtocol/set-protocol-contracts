@@ -15,7 +15,7 @@ import { Core } from '../../artifacts/ts/Core';
 import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModule';
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
-import { PayableExchangeIssuance } from '../../artifacts/ts/PayableExchangeIssuance';
+import { PayableExchangeIssuanceModule } from '../../artifacts/ts/PayableExchangeIssuanceModule';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
 import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
 import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper';
@@ -230,7 +230,7 @@ describe('Deployment: Modules', () => {
   describe('Payable Exchange', () => {
 
     /**
-     * Check if the PayableExchangeIssuance has been deployed with:
+     * Check if the PayableExchangeIssuanceModule has been deployed with:
      * - Core
      * - TransferProxy
      * - ExchangeIssuanceModule
@@ -240,12 +240,12 @@ describe('Deployment: Modules', () => {
     let payableExchangeWrapper;
 
     before(async () => {
-      const payableExchangeAddress = await getContractAddress(PayableExchangeIssuance.contractName);
-      payableExchangeWrapper = new web3.eth.Contract(PayableExchangeIssuance.abi, payableExchangeAddress);
+      const payableExchangeAddress = await getContractAddress(PayableExchangeIssuanceModule.contractName);
+      payableExchangeWrapper = new web3.eth.Contract(PayableExchangeIssuanceModule.abi, payableExchangeAddress);
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode(PayableExchangeIssuance.contractName, web3);
+      const code = await getContractCode(PayableExchangeIssuanceModule.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 

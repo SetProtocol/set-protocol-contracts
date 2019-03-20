@@ -27,7 +27,7 @@ import { LinearAuctionPriceCurveContract } from '../types/generated/linear_aucti
 import { MedianContract } from '../types/generated/median';
 import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
-import { PayableExchangeIssuanceContract } from '../types/generated/payable_exchange_issuance';
+import { PayableExchangeIssuanceModuleContract } from '../types/generated/payable_exchange_issuance_module';
 import { PriceFeedContract } from '../types/generated/price_feed';
 import { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 import { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
@@ -86,7 +86,7 @@ export {
   MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
-  PayableExchangeIssuanceContract,
+  PayableExchangeIssuanceModuleContract,
   PriceFeedContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,

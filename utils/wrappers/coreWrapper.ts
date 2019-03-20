@@ -7,7 +7,7 @@ import {
   CoreContract,
   CoreMockContract,
   ExchangeIssuanceModuleContract,
-  PayableExchangeIssuanceContract,
+  PayableExchangeIssuanceModuleContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
@@ -41,7 +41,7 @@ const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreMock = artifacts.require('CoreMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
-const PayableExchangeIssuance = artifacts.require('PayableExchangeIssuance');
+const PayableExchangeIssuanceModule = artifacts.require('PayableExchangeIssuanceModule');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
@@ -130,10 +130,9 @@ export class CoreWrapper {
      return await RebalanceAuctionModuleContract.at(address, web3, TX_DEFAULTS);
   }
 
-  public async getDeployedPayableExchangeIssuanceModuleAsync(): Promise<PayableExchangeIssuanceContract> {
-    const address = await getContractAddress(PayableExchangeIssuance.contractName);
-
-     return await PayableExchangeIssuanceContract.at(address, web3, TX_DEFAULTS);
+  public async getDeployedPayableExchangeIssuanceModuleAsync(): Promise<PayableExchangeIssuanceModuleContract> {
+    const address = await getContractAddress(PayableExchangeIssuanceModule.contractName);
+    return await PayableExchangeIssuanceModuleContract.at(address, web3, TX_DEFAULTS);
   }
 
   /* ============ Deployment ============ */
@@ -499,20 +498,20 @@ export class CoreWrapper {
     );
   }
 
-  public async deployPayableExchangeIssuanceAsync(
+  public async deployPayableExchangeIssuanceModuleAsync(
     core: Address,
     transferProxy: Address,
     exchangeIssuanceModule: Address,
     wrappedEther: Address,
     from: Address = this._contractOwnerAddress
-  ): Promise<PayableExchangeIssuanceContract> {
+  ): Promise<PayableExchangeIssuanceModuleContract> {
     const erc20WrapperLibrary = await ERC20Wrapper.new(
       { from: this._contractOwnerAddress },
     );
 
-    await PayableExchangeIssuance.link('ERC20Wrapper', erc20WrapperLibrary.address);
+    await PayableExchangeIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
 
-    const payableExchangeIssuanceContract = await PayableExchangeIssuance.new(
+    const payableExchangeIssuanceContract = await PayableExchangeIssuanceModule.new(
       core,
       transferProxy,
       exchangeIssuanceModule,
@@ -520,7 +519,7 @@ export class CoreWrapper {
       { from },
     );
 
-    return new PayableExchangeIssuanceContract(
+    return new PayableExchangeIssuanceModuleContract(
       new web3.eth.Contract(payableExchangeIssuanceContract.abi, payableExchangeIssuanceContract.address),
       { from },
     );

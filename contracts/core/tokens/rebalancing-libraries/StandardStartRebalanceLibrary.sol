@@ -120,7 +120,6 @@ library StandardStartRebalanceLibrary {
         address _auctionLibrary
     )
         public
-        view
         returns (RebalancingHelperLibrary.BiddingParameters memory)
     {
         // Get set details for currentSet and nextSet (units, components, natural units)

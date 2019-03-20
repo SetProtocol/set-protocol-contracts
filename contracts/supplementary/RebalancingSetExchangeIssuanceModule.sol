@@ -32,13 +32,13 @@ import { IWETH } from "../lib/IWETH.sol";
 
 
 /**
- * @title PayableExchangeIssuance
+ * @title RebalancingSetExchangeIssuanceModule
  * @author Set Protocol
  *
- * The PayableExchangeIssuance supplementary smart contract allows a user to send Eth and atomically
+ * The RebalancingSetExchangeIssuanceModule supplementary smart contract allows a user to send Eth and atomically
  * issue a rebalancing Set
  */
-contract PayableExchangeIssuance is
+contract RebalancingSetExchangeIssuanceModule is
     ReentrancyGuard
 {
     using SafeMath for uint256;
@@ -77,7 +77,7 @@ contract PayableExchangeIssuance is
     /* ============ Constructor ============ */
 
     /**
-     * Constructor function for PayableExchangeIssuance
+     * Constructor function for RebalancingSetExchangeIssuanceModule
      *
      * @param _core                     The address of Core
      * @param _transferProxy            The address of the TransferProxy
@@ -125,7 +125,7 @@ contract PayableExchangeIssuance is
     {
         require( // coverage-disable-line
             msg.sender == weth,
-            "PayableExchangeIssuance.fallback: Cannot receive ETH directly unless unwrapping WETH"
+            "RebalancingSetExchangeIssuanceModule.fallback: Cannot receive ETH directly unless unwrapping WETH"
         );
     }
 
@@ -239,6 +239,9 @@ contract PayableExchangeIssuance is
             _orderData
         );
 
+        // Loops through base set components and withdrawTo user if postive quantity
+
+
         // Withdraw eth from WETH
         uint256 wethBalance = ERC20Wrapper.balanceOf(
             weth,
@@ -338,13 +341,13 @@ contract PayableExchangeIssuance is
         // Require only 1 receive token
         require(
             _exchangeIssuanceParams.receiveTokens.length == 1,
-            "PayableExchangeIssuance.validateRedeemInputs: Only 1 Receive Token Allowed"
+            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Only 1 Receive Token Allowed"
         );
 
         // Require receive token is weth
         require(
             weth == _exchangeIssuanceParams.receiveTokens[0],
-            "PayableExchangeIssuance.validateRedeemInputs: Receive token must be Weth"
+            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Receive token must be Weth"
         );
 
         ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
@@ -353,7 +356,7 @@ contract PayableExchangeIssuance is
         address baseSet = rebalancingSet.getComponents()[0];
         require(
             baseSet == _exchangeIssuanceParams.setAddress,
-            "PayableExchangeIssuance.validateRedeemInputs: Base Set addresses must match"
+            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Base Set addresses must match"
         );
 
         // Quantity of base Set must be the same as in exchange issuance params
@@ -364,7 +367,7 @@ contract PayableExchangeIssuance is
             .div(rebalancingSetNaturalUnit);
         require(
             impliedBaseSetQuantity == _exchangeIssuanceParams.quantity,
-            "PayableExchangeIssuance.validateRedeemInputs: Base Set quantities must match"
+            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Base Set quantities must match"
         );
     }
 }

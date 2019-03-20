@@ -11,7 +11,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   ExchangeIssuanceModuleContract,
-  PayableExchangeIssuanceContract,
+  RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
@@ -26,7 +26,7 @@ import { ether } from '@utils/units';
 import {
   LogPayableExchangeIssue,
   LogPayableExchangeRedeem,
-} from '@utils/contract_logs/payableExchangeIssuance';
+} from '@utils/contract_logs/rebalancingSetExchangeIssuanceModule';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3, getGasUsageInEth } from '@utils/web3Helper';
 import {
@@ -46,14 +46,14 @@ const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
-const PayableExchangeIssuance = artifacts.require('PayableExchangeIssuance');
+const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
 
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const setUtils = new SetUtils(web3);
 const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 
-contract('PayableExchangeIssuance', accounts => {
+contract('RebalancingSetExchangeIssuanceModule', accounts => {
   const [
     ownerAccount,
     tokenPurchaser,
@@ -67,7 +67,7 @@ contract('PayableExchangeIssuance', accounts => {
   let vault: VaultContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let payableExchangeIssuance: PayableExchangeIssuanceContract;
+  let payableExchangeIssuance: RebalancingSetExchangeIssuanceModuleContract;
   let weth: WethMockContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
@@ -82,7 +82,7 @@ contract('PayableExchangeIssuance', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(PayableExchangeIssuance.abi);
+    ABIDecoder.addABI(RebalancingSetExchangeIssuanceModule.abi);
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
@@ -100,7 +100,7 @@ contract('PayableExchangeIssuance', accounts => {
 
     weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
 
-    payableExchangeIssuance = await coreWrapper.deployPayableExchangeIssuanceAsync(
+    payableExchangeIssuance = await coreWrapper.deployRebalancingSetExchangeIssuanceModuleAsync(
       core.address,
       transferProxy.address,
       exchangeIssuanceModule.address,
@@ -118,7 +118,7 @@ contract('PayableExchangeIssuance', accounts => {
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(PayableExchangeIssuance.abi);
+    ABIDecoder.removeABI(RebalancingSetExchangeIssuanceModule.abi);
   });
 
   beforeEach(async () => {
@@ -132,8 +132,8 @@ contract('PayableExchangeIssuance', accounts => {
   describe('#constructor', async () => {
     const subjectCaller: Address = ownerAccount;
 
-    async function subject(): Promise<PayableExchangeIssuanceContract> {
-      return await coreWrapper.deployPayableExchangeIssuanceAsync(
+    async function subject(): Promise<RebalancingSetExchangeIssuanceModuleContract> {
+      return await coreWrapper.deployRebalancingSetExchangeIssuanceModuleAsync(
         core.address,
         transferProxy.address,
         exchangeIssuanceModule.address,
@@ -506,7 +506,7 @@ contract('PayableExchangeIssuance', accounts => {
         { from: subjectCaller }
       );
 
-      // Approve base component to PayableExchangeIssuance contract
+      // Approve base component to RebalancingSetExchangeIssuanceModule contract
       await erc20Wrapper.approveTransfersAsync(
         [rebalancingSetToken],
         payableExchangeIssuance.address,

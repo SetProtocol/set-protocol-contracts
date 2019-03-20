@@ -128,7 +128,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe.only('#constructor', async () => {
+  describe('#constructor', async () => {
     const subjectCaller: Address = ownerAccount;
 
     async function subject(): Promise<RebalancingSetExchangeIssuanceModuleContract> {
@@ -167,7 +167,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
   });
 
-  describe.only('#issueRebalancingSetWithEther', async () => {
+  describe('#issueRebalancingSetWithEther', async () => {
     let subjectRebalancingSetAddress: Address;
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
     let subjectExchangeOrdersData: Bytes;
@@ -269,9 +269,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         exchangeIssueSendTokenAmounts[0],                 // amount of zeroExOrder to fill
       );
 
-      rebalancingSetQuantityToIssue = exchangeIssueQuantity
-                                        .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
-                                        .div(rebalancingUnitShares);
+      rebalancingSetQuantityToIssue = exchangeIssueQuantity.mul(DEFAULT_REBALANCING_NATURAL_UNIT)
+                                                           .div(rebalancingUnitShares);
 
       subjectRebalancingSetAddress = rebalancingSetToken.address;
       subjectExchangeIssuanceParams = exchangeIssuanceParams;
@@ -371,7 +370,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
   });
 
-  describe.only('#redeemRebalancingSetIntoEther', async () => {
+  describe('#redeemRebalancingSetIntoEther', async () => {
     let subjectRebalancingSetAddress: Address;
     let subjectRebalancingSetQuantity: BigNumber;
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;

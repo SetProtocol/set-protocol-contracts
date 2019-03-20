@@ -11,6 +11,7 @@ import {
   ETHDaiRebalancingManagerContract,
   LinearAuctionPriceCurveContract,
   SetTokenContract,
+  RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   UpdatableConstantAuctionPriceCurveContract,
   VaultContract,
@@ -416,6 +417,21 @@ export class RebalancingWrapper {
     );
   }
 
+  public async placeBidAsync(
+    rebalanceAuctionModule: RebalanceAuctionModuleContract,
+    rebalancingSetTokenAddress: Address,
+    bidQuantity: BigNumber,
+    allowPartialFill: boolean = false,
+    caller: Address = this._tokenOwnerAddress,
+  ): Promise<void> {
+    await rebalanceAuctionModule.bid.sendTransactionAsync(
+      rebalancingSetTokenAddress,
+      bidQuantity,
+      allowPartialFill,
+      { from: caller, gas: DEFAULT_GAS }
+    );
+  }
+
   public async constructInflowOutflowArraysAsync(
     rebalancingSetToken: RebalancingSetTokenContract,
     quantity: BigNumber,
@@ -435,16 +451,16 @@ export class RebalancingWrapper {
     const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
     const minimumBid = new BigNumber(biddingParameters[0]);
     const coefficient = minimumBid.div(priceDivisor);
-    const effectiveQuantity = quantity.mul(priceDivisor).div(priceNumerator);
+    const effectiveQuantity = quantity.div(priceNumerator);
 
     for (let i = 0; i < combinedCurrentUnits.length; i++) {
       const flow = combinedRebalanceUnits[i].mul(priceDivisor).sub(combinedCurrentUnits[i].mul(priceNumerator));
       if (flow.greaterThan(0)) {
-        inflowArray.push(effectiveQuantity.mul(flow).div(coefficient).round(0, 3).div(priceDivisor).round(0, 3));
+        inflowArray.push(effectiveQuantity.mul(flow).div(coefficient).round(0, 3));
         outflowArray.push(new BigNumber(0));
       } else {
         outflowArray.push(
-          flow.mul(effectiveQuantity).div(coefficient).round(0, 3).div(priceDivisor).round(0, 3).mul(new BigNumber(-1))
+          flow.mul(new BigNumber(-1)).mul(effectiveQuantity).div(coefficient).round(0, 3)
         );
         inflowArray.push(new BigNumber(0));
       }

@@ -73,14 +73,24 @@ contract RebalanceAuctionModule is
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance
+     * @param  _allowPartialFill       Set to true if want to partially fill bid when quantity
+                                       is greater than currentRemainingSets
      */
     function bid(
         address _rebalancingSetToken,
-        uint256 _quantity
+        uint256 _quantity,
+        bool _allowPartialFill
     )
         external
         nonReentrant
     {
+        // If user allows partial fills calculate partial fill (if necessary)
+        uint256 executionQuantity = calculateExecutionQuantity(
+            _rebalancingSetToken,
+            _quantity,
+            _allowPartialFill
+        );
+
         // Place bid and retrieve token inflows and outflows
         address[] memory tokenArray;
         uint256[] memory inflowUnitArray;
@@ -89,10 +99,7 @@ contract RebalanceAuctionModule is
             tokenArray,
             inflowUnitArray,
             outflowUnitArray
-        ) = placeBidAndGetTokenFlows(
-            _rebalancingSetToken,
-            _quantity
-        );
+        ) = IRebalancingSetToken(_rebalancingSetToken).placeBid(executionQuantity);
 
         // Retrieve tokens from bidder and deposit in vault for rebalancing set token
         coreInstance.batchDepositModule(
@@ -113,7 +120,7 @@ contract RebalanceAuctionModule is
         // Log bid placed event
         emit BidPlaced(
             msg.sender,
-            _quantity
+            executionQuantity
         );
     }
 
@@ -123,14 +130,24 @@ contract RebalanceAuctionModule is
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance
+     * @param  _allowPartialFill       Set to true if want to partially fill bid when quantity
+                                       is greater than currentRemainingSets
      */
     function bidAndWithdraw(
         address _rebalancingSetToken,
-        uint256 _quantity
+        uint256 _quantity,
+        bool _allowPartialFill
     )
         external
         nonReentrant
     {
+        // If user allows partial fills calculate partial fill (if necessary)
+        uint256 executionQuantity = calculateExecutionQuantity(
+            _rebalancingSetToken,
+            _quantity,
+            _allowPartialFill
+        );
+
         // Place bid and retrieve token inflows and outflows
         address[] memory tokenArray;
         uint256[] memory inflowUnitArray;
@@ -139,10 +156,7 @@ contract RebalanceAuctionModule is
             tokenArray,
             inflowUnitArray,
             outflowUnitArray
-        ) = placeBidAndGetTokenFlows(
-            _rebalancingSetToken,
-            _quantity
-        );
+        ) = IRebalancingSetToken(_rebalancingSetToken).placeBid(executionQuantity);
 
         // Retrieve tokens from bidder and deposit in vault for rebalancing set token
         coreInstance.batchDepositModule(
@@ -163,7 +177,7 @@ contract RebalanceAuctionModule is
         // Log bid placed event
         emit BidPlaced(
             msg.sender,
-            _quantity
+            executionQuantity
         );
     }
 
@@ -224,23 +238,25 @@ contract RebalanceAuctionModule is
         );
     }
 
-    /* ============ Public Functions ============ */
+    /* ============ Internal Functions ============ */
 
     /**
-     * Place bid on Rebalancing Set Token and return token flows.
+     * Get execution quantity in event bid quantity exceeds remainingCurrentSets
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance
-     * @return combinedTokenArray      Array of token addresses invovled in rebalancing
-     * @return inflowUnitArray         Array of amount of tokens inserted into system in bid
-     * @return outflowUnitArray        Array of amount of tokens taken out of system in bid
+     * @param  _allowPartialFill       Set to true if want to partially fill bid when quantity
+                                       is greater than currentRemainingSets
+     * @return executionQuantity       Array of token addresses invovled in rebalancing
      */
-    function placeBidAndGetTokenFlows(
+    function calculateExecutionQuantity(
         address _rebalancingSetToken,
-        uint256 _quantity
+        uint256 _quantity,
+        bool _allowPartialFill
     )
-        private
-        returns (address[] memory, uint256[] memory, uint256[] memory)
+        internal
+        view
+        returns (uint256)
     {
         // Make sure the rebalancingSetToken is tracked by Core
         require(
@@ -248,7 +264,18 @@ contract RebalanceAuctionModule is
             "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
         );
 
-        // Receive addresses of tokens involved and arrays of inflow/outflow associated with each token
-        return IRebalancingSetToken(_rebalancingSetToken).placeBid(_quantity);
+        // Receive bidding parameters of current auction
+        uint256[] memory biddingParameters = IRebalancingSetToken(_rebalancingSetToken).getBiddingParameters();
+        uint256 minimumBid = biddingParameters[0];
+        uint256 remainingCurrentSets = biddingParameters[1];
+
+        if (_allowPartialFill && _quantity > remainingCurrentSets) {     
+            // If quantity is greater than remainingCurrentSets round amount to nearest multiple of
+            // minimumBid that is less than remainingCurrentSets
+            uint256 executionQuantity = remainingCurrentSets.div(minimumBid).mul(minimumBid);
+            return executionQuantity;
+        } else {
+            return _quantity;
+        }
     }
 }

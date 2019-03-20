@@ -81,7 +81,7 @@ contract RebalancingSetToken is
     address public auctionLibrary;
     uint256 public startingCurrentSetAmount;
     RebalancingHelperLibrary.AuctionPriceParameters public auctionParameters;
-    StandardStartRebalanceLibrary.BiddingParameters public biddingParameters;
+    RebalancingHelperLibrary.BiddingParameters public biddingParameters;
 
     /* ============ Events ============ */
 
@@ -312,22 +312,22 @@ contract RebalancingSetToken is
         external
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
+        // Validate bid quantity and module is sender
+        StandardPlaceBidLibrary.validateBidQuantity(
+            _quantity,
+            core,
+            biddingParameters
+        );
+
         // Place bid and get back inflow and outflow arrays
         uint256[] memory inflowUnitArray;
         uint256[] memory outflowUnitArray;
         (
             inflowUnitArray,
             outflowUnitArray
-        ) = StandardPlaceBidLibrary.placeBid(
-            _quantity,
-            auctionLibrary,
-            core,
-            biddingParameters,
-            auctionParameters,
-            uint8(rebalanceState)
-        );
+        ) = getBidPrice(_quantity);
 
-        // Update remaining Set figure to transact
+        // Update remainingCurrentSet figure to account for placed bid
         biddingParameters.remainingCurrentSets = biddingParameters.remainingCurrentSets.sub(_quantity);
 
         return (biddingParameters.combinedTokenArray, inflowUnitArray, outflowUnitArray);
@@ -384,7 +384,7 @@ contract RebalancingSetToken is
         view
         returns (uint256[] memory, uint256[] memory)
     {
-        return RebalancingHelperLibrary.getBidPrice(
+        return StandardPlaceBidLibrary.getBidPrice(
             _quantity,
             auctionLibrary,
             biddingParameters,

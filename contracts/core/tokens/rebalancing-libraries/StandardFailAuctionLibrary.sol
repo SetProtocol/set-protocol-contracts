@@ -25,7 +25,6 @@ import { ICore } from "../../interfaces/ICore.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
-import { StandardStartRebalanceLibrary } from "./StandardStartRebalanceLibrary.sol";
 
 
 /**
@@ -56,7 +55,7 @@ library StandardFailAuctionLibrary {
         address _currentSet,
         address _coreAddress,
         RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters,
-        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters,
+        RebalancingHelperLibrary.BiddingParameters memory _biddingParameters,
         uint8 _rebalanceState
     )
         public

@@ -617,10 +617,11 @@ contract('RebalancingSetToken', accounts => {
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
 
-        const [minimumBid] = await rebalancingSetToken.getBiddingParameters.callAsync();
-        await rebalanceAuctionModule.bid.sendTransactionAsync(
+        const [bidQuantity] = await rebalancingSetToken.getBiddingParameters.callAsync();
+        await rebalancingWrapper.placeBidAsync(
+          rebalanceAuctionModule,
           rebalancingSetToken.address,
-          minimumBid
+          bidQuantity,
         );
 
         await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
@@ -752,10 +753,11 @@ contract('RebalancingSetToken', accounts => {
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
         const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
-        const minimumBid = biddingParameters[0];
-        await rebalanceAuctionModule.bid.sendTransactionAsync(
+        const bidQuantity = biddingParameters[0];
+        await rebalancingWrapper.placeBidAsync(
+          rebalanceAuctionModule,
           rebalancingSetToken.address,
-          minimumBid
+          bidQuantity,
         );
 
         await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
@@ -906,10 +908,11 @@ contract('RebalancingSetToken', accounts => {
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
         const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
-        const minimumBid = biddingParameters[0];
-        await rebalanceAuctionModule.bid.sendTransactionAsync(
+        const bidQuantity = biddingParameters[0];
+        await rebalancingWrapper.placeBidAsync(
+          rebalanceAuctionModule,
           rebalancingSetToken.address,
-          minimumBid
+          bidQuantity,
         );
 
         await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
@@ -1386,10 +1389,11 @@ contract('RebalancingSetToken', accounts => {
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
         const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
-        const minimumBid = biddingParameters[0];
-        await rebalanceAuctionModule.bid.sendTransactionAsync(
+        const bidQuantity = biddingParameters[0];
+        await rebalancingWrapper.placeBidAsync(
+          rebalanceAuctionModule,
           rebalancingSetToken.address,
-          minimumBid
+          bidQuantity,
         );
 
         await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
@@ -1690,10 +1694,11 @@ contract('RebalancingSetToken', accounts => {
         const defaultTimeToPivot = new BigNumber(100000);
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
-        const [minimumBid] = await rebalancingSetToken.getBiddingParameters.callAsync();
-        await rebalanceAuctionModule.bid.sendTransactionAsync(
+        const [bidQuantity] = await rebalancingSetToken.getBiddingParameters.callAsync();
+        await rebalancingWrapper.placeBidAsync(
+          rebalanceAuctionModule,
           rebalancingSetToken.address,
-          minimumBid
+          bidQuantity,
         );
 
         await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
@@ -1798,9 +1803,11 @@ contract('RebalancingSetToken', accounts => {
           managerAccount
         );
 
-        await rebalanceAuctionModule.bid.sendTransactionAsync(
+        const bidQuantity = rebalancingSetQuantityToIssue;
+        await rebalancingWrapper.placeBidAsync(
+          rebalanceAuctionModule,
           rebalancingSetToken.address,
-          rebalancingSetQuantityToIssue
+          bidQuantity,
         );
       });
 
@@ -1926,9 +1933,11 @@ contract('RebalancingSetToken', accounts => {
         const newPrice = new BigNumber(8 * 10 ** 7);
         await constantAuctionPriceCurve.updatePrice.sendTransactionAsync(newPrice);
 
-        await rebalanceAuctionModule.bid.sendTransactionAsync(
+        const bidQuantity = rebalancingSetQuantityToIssue;
+        await rebalancingWrapper.placeBidAsync(
+          rebalanceAuctionModule,
           rebalancingSetToken.address,
-          rebalancingSetQuantityToIssue
+          bidQuantity,
         );
       });
 
@@ -1966,9 +1975,10 @@ contract('RebalancingSetToken', accounts => {
         await constantAuctionPriceCurve.updatePrice.sendTransactionAsync(newPrice);
 
         const bidQuantity = rebalancingSetQuantityToIssue.div(10 ** 10);
-        await rebalanceAuctionModule.bid.sendTransactionAsync(
+        await rebalancingWrapper.placeBidAsync(
+          rebalanceAuctionModule,
           rebalancingSetToken.address,
-          bidQuantity
+          bidQuantity,
         );
       });
 
@@ -1991,10 +2001,11 @@ contract('RebalancingSetToken', accounts => {
         const defaultTimeToPivot = new BigNumber(100000);
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
-        const [minimumBid] = await rebalancingSetToken.biddingParameters.callAsync();
-        await rebalanceAuctionModule.bid.sendTransactionAsync(
+        const [bidQuantity] = await rebalancingSetToken.biddingParameters.callAsync();
+        await rebalancingWrapper.placeBidAsync(
+          rebalanceAuctionModule,
           rebalancingSetToken.address,
-          minimumBid
+          bidQuantity,
         );
 
         await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
@@ -2137,10 +2148,11 @@ contract('RebalancingSetToken', accounts => {
           const defaultTimeToPivot = new BigNumber(100000);
           await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
-          const [minimumBid] = await rebalancingSetToken.biddingParameters.callAsync();
-          await rebalanceAuctionModule.bid.sendTransactionAsync(
+          const [bidQuantity] = await rebalancingSetToken.biddingParameters.callAsync();
+          await rebalancingWrapper.placeBidAsync(
+            rebalanceAuctionModule,
             rebalancingSetToken.address,
-            minimumBid
+            bidQuantity,
           );
         });
 
@@ -2165,9 +2177,11 @@ contract('RebalancingSetToken', accounts => {
           const newPrice = new BigNumber(8 * 10 ** 7);
           await constantAuctionPriceCurve.updatePrice.sendTransactionAsync(newPrice);
 
-          await rebalanceAuctionModule.bid.sendTransactionAsync(
+          const bidQuantity = rebalancingSetQuantityToIssue;
+          await rebalancingWrapper.placeBidAsync(
+            rebalanceAuctionModule,
             rebalancingSetToken.address,
-            rebalancingSetQuantityToIssue
+            bidQuantity,
           );
 
           const defaultTimeToPivot = new BigNumber(100000);
@@ -2202,9 +2216,10 @@ contract('RebalancingSetToken', accounts => {
           await constantAuctionPriceCurve.updatePrice.sendTransactionAsync(newPrice);
 
           const bidQuantity = rebalancingSetQuantityToIssue.div(10 ** 10);
-          await rebalanceAuctionModule.bid.sendTransactionAsync(
+          await rebalancingWrapper.placeBidAsync(
+            rebalanceAuctionModule,
             rebalancingSetToken.address,
-            bidQuantity
+            bidQuantity,
           );
 
           const defaultTimeToPivot = new BigNumber(100000);
@@ -2230,9 +2245,11 @@ contract('RebalancingSetToken', accounts => {
           const defaultTimeToPivot = new BigNumber(100000);
           await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
-          await rebalanceAuctionModule.bid.sendTransactionAsync(
+          const bidQuantity = rebalancingSetQuantityToIssue;
+          await rebalancingWrapper.placeBidAsync(
+            rebalanceAuctionModule,
             rebalancingSetToken.address,
-            rebalancingSetQuantityToIssue
+            bidQuantity,
           );
         });
 

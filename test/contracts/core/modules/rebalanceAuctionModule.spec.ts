@@ -119,11 +119,13 @@ contract('RebalanceAuctionModule', accounts => {
     let subjectRebalancingSetToken: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
+    let subjectExecutePartialQuantity: boolean;
     let proposalPeriod: BigNumber;
 
     let currentSetToken: SetTokenContract;
     let nextSetToken: SetTokenContract;
     let rebalancingSetTokenQuantityToIssue: BigNumber;
+    let minBid: BigNumber;
 
     beforeEach(async () => {
       const naturalUnits = [ether(.001), ether(.0001)];
@@ -159,17 +161,19 @@ contract('RebalanceAuctionModule', accounts => {
       // Determine minimum bid
       const decOne = await currentSetToken.naturalUnit.callAsync();
       const decTwo = await nextSetToken.naturalUnit.callAsync();
-      const minBid = new BigNumber(Math.max(decOne.toNumber(), decTwo.toNumber()) * 1000);
+      minBid = new BigNumber(Math.max(decOne.toNumber(), decTwo.toNumber()) * 1000);
 
       subjectCaller = deployerAccount;
       subjectQuantity = minBid;
       subjectRebalancingSetToken = rebalancingSetToken.address;
+      subjectExecutePartialQuantity = false;
     });
 
     async function subject(): Promise<string> {
       return rebalanceAuctionModuleMock.bid.sendTransactionAsync(
         subjectRebalancingSetToken,
         subjectQuantity,
+        subjectExecutePartialQuantity,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
@@ -271,6 +275,7 @@ contract('RebalanceAuctionModule', accounts => {
         const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
           balance.add(expectedTokenFlows['inflowArray'][index]).sub(expectedTokenFlows['outflowArray'][index])
         );
+
         expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
       });
 
@@ -298,18 +303,167 @@ contract('RebalanceAuctionModule', accounts => {
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
       });
+
+      describe('but quantity is zero', async () => {
+        beforeEach(async () => {
+          subjectQuantity = new BigNumber(0);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('but quantity is more than remainingCurrentSets', async () => {
+        beforeEach(async () => {
+          subjectQuantity = rebalancingSetTokenQuantityToIssue.add(minBid);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('partial fills is true but amount is less than remainingCurrentSets', async () => {
+        beforeEach(async () => {
+          subjectExecutePartialQuantity = true;
+        });
+
+        it('subtracts the correct amount from remainingCurrentSets', async () => {
+          const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+          const currentRemainingSets = new BigNumber(biddingParameters[1]);
+
+          await subject();
+
+          const expectedRemainingSets = currentRemainingSets.sub(subjectQuantity);
+          const newBiddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+          const newRemainingSets = new BigNumber(newBiddingParameters[1]);
+          expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
+        });
+
+        describe('but quantity is zero', async () => {
+          beforeEach(async () => {
+            subjectQuantity = new BigNumber(0);
+          });
+
+          it('should revert', async () => {
+            await expectRevertError(subject());
+          });
+        });
+      });
+
+      describe('and quantity is greater than remainingCurrentSets', async () => {
+        const roundedQuantity = ether(8);
+
+        beforeEach(async () => {
+          subjectQuantity = ether(9);
+          subjectExecutePartialQuantity = true;
+        });
+
+        it('transfers the correct amount of tokens to the bidder in the Vault', async () => {
+          const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+            rebalancingSetToken,
+            roundedQuantity,
+            DEFAULT_AUCTION_PRICE_NUMERATOR
+          );
+          const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+
+          const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+            combinedTokenArray,
+            vault,
+            deployerAccount
+          );
+
+          await subject();
+
+          const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+            combinedTokenArray,
+            vault,
+            deployerAccount
+          );
+          const expectedReceiverBalances = _.map(oldReceiverBalances, (balance, index) =>
+            balance.add(expectedTokenFlows['outflowArray'][index])
+          );
+
+          expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
+        });
+
+        it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
+          const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+            rebalancingSetToken,
+            roundedQuantity,
+            DEFAULT_AUCTION_PRICE_NUMERATOR
+          );
+          const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+
+          const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+            combinedTokenArray,
+            vault,
+            rebalancingSetToken.address
+          );
+
+          await subject();
+
+          const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+            combinedTokenArray,
+            vault,
+            rebalancingSetToken.address
+          );
+          const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
+            balance.add(expectedTokenFlows['inflowArray'][index]).sub(expectedTokenFlows['outflowArray'][index])
+          );
+          expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
+        });
+
+        it('subtracts the correct amount from remainingCurrentSets', async () => {
+          const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+          const currentRemainingSets = new BigNumber(biddingParameters[1]);
+
+          await subject();
+
+          const expectedRemainingSets = currentRemainingSets.sub(roundedQuantity);
+          const newBiddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+          const newRemainingSets = new BigNumber(newBiddingParameters[1]);
+          expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
+        });
+
+        it('emits a placeBid event', async () => {
+          const txHash = await subject();
+          const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+          const expectedLogs = BidPlaced(
+            subjectCaller,
+            roundedQuantity,
+            rebalanceAuctionModuleMock.address,
+          );
+
+          await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+        });
+      });
+
+      describe('but quantity is not multiple of minimum Bid', async () => {
+        beforeEach(async () => {
+          subjectQuantity = minBid.add(1);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
     });
   });
 
   describe('#bidAndWithdraw', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectQuantity: BigNumber;
+    let subjectExecutePartialQuantity: boolean;
     let subjectCaller: Address;
     let proposalPeriod: BigNumber;
 
     let currentSetToken: SetTokenContract;
     let nextSetToken: SetTokenContract;
     let rebalancingSetTokenQuantityToIssue: BigNumber;
+    let minBid: BigNumber;
 
     beforeEach(async () => {
       const naturalUnits = [ether(.001), ether(.0001)];
@@ -345,17 +499,19 @@ contract('RebalanceAuctionModule', accounts => {
       // Determine minimum bid
       const decOne = await currentSetToken.naturalUnit.callAsync();
       const decTwo = await nextSetToken.naturalUnit.callAsync();
-      const minBid = new BigNumber(Math.max(decOne.toNumber(), decTwo.toNumber()) * 1000);
+      minBid = new BigNumber(Math.max(decOne.toNumber(), decTwo.toNumber()) * 1000);
 
       subjectCaller = deployerAccount;
       subjectQuantity = minBid;
       subjectRebalancingSetToken = rebalancingSetToken.address;
+      subjectExecutePartialQuantity = false;
     });
 
     async function subject(): Promise<string> {
       return rebalanceAuctionModuleMock.bidAndWithdraw.sendTransactionAsync(
         subjectRebalancingSetToken,
         subjectQuantity,
+        subjectExecutePartialQuantity,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
@@ -483,6 +639,154 @@ contract('RebalanceAuctionModule', accounts => {
         );
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+
+      describe('but quantity is zero', async () => {
+        beforeEach(async () => {
+          subjectQuantity = new BigNumber(0);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('but quantity is more than remainingCurrentSets', async () => {
+        beforeEach(async () => {
+          subjectQuantity = rebalancingSetTokenQuantityToIssue.add(minBid);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('partial fills is true but amount is less than remainingCurrentSets', async () => {
+        beforeEach(async () => {
+          subjectExecutePartialQuantity = true;
+        });
+
+        it('subtracts the correct amount from remainingCurrentSets', async () => {
+          const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+          const currentRemainingSets = new BigNumber(biddingParameters[1]);
+
+          await subject();
+
+          const expectedRemainingSets = currentRemainingSets.sub(subjectQuantity);
+          const newBiddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+          const newRemainingSets = new BigNumber(newBiddingParameters[1]);
+          expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
+        });
+
+        describe('but quantity is zero', async () => {
+          beforeEach(async () => {
+            subjectQuantity = new BigNumber(0);
+          });
+
+          it('should revert', async () => {
+            await expectRevertError(subject());
+          });
+        });
+      });
+
+      describe('and quantity is greater than remainingCurrentSets', async () => {
+        const roundedQuantity = ether(8);
+
+        beforeEach(async () => {
+          subjectQuantity = ether(9);
+          subjectExecutePartialQuantity = true;
+        });
+
+        it("transfers the correct amount of tokens to the bidder's wallet", async () => {
+          const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+            rebalancingSetToken,
+            roundedQuantity,
+            DEFAULT_AUCTION_PRICE_NUMERATOR
+          );
+
+          const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+          const tokenInstances = await erc20Wrapper.retrieveTokenInstancesAsync(combinedTokenArray);
+
+          const oldReceiverBalances = await erc20Wrapper.getTokenBalances(
+            tokenInstances,
+            subjectCaller
+          );
+
+          await subject();
+
+          const newReceiverBalances = await erc20Wrapper.getTokenBalances(
+            tokenInstances,
+            subjectCaller
+          );
+          const expectedReceiverBalances = _.map(oldReceiverBalances, (balance, index) =>
+            balance.add(expectedTokenFlows['outflowArray'][index]).sub(expectedTokenFlows['inflowArray'][index])
+          );
+
+          expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
+        });
+
+        it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
+          const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+            rebalancingSetToken,
+            roundedQuantity,
+            DEFAULT_AUCTION_PRICE_NUMERATOR
+          );
+          const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+
+          const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+            combinedTokenArray,
+            vault,
+            rebalancingSetToken.address
+          );
+
+          await subject();
+
+          const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+            combinedTokenArray,
+            vault,
+            rebalancingSetToken.address
+          );
+          const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
+            balance.add(expectedTokenFlows['inflowArray'][index]).sub(expectedTokenFlows['outflowArray'][index])
+          );
+
+          expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
+        });
+
+        it('subtracts the correct amount from remainingCurrentSets', async () => {
+          const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+          const currentRemainingSets = new BigNumber(biddingParameters[1]);
+
+          await subject();
+
+          const expectedRemainingSets = currentRemainingSets.sub(roundedQuantity);
+          const newBiddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+          const newRemainingSets = new BigNumber(newBiddingParameters[1]);
+          expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
+        });
+
+        it('emits a placeBid event', async () => {
+          const txHash = await subject();
+          const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+          const expectedLogs = BidPlaced(
+            subjectCaller,
+            roundedQuantity,
+            rebalanceAuctionModuleMock.address,
+          );
+
+          await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+        });
+      });
+
+      describe('but quantity is not multiple of natural unit', async () => {
+        beforeEach(async () => {
+          subjectQuantity = minBid.add(1);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
     });
   });
@@ -675,16 +979,6 @@ contract('RebalanceAuctionModule', accounts => {
         expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
       });
 
-      describe('and quantity is greater than remaining sets', async () => {
-        beforeEach(async () => {
-          subjectQuantity = ether(4);
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
-      });
-
       describe('and quantity is not a multiple of minimumBid', async () => {
         beforeEach(async () => {
           const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
@@ -717,7 +1011,8 @@ contract('RebalanceAuctionModule', accounts => {
         const minimumBid = biddingParameters[0];
         await rebalanceAuctionModuleMock.bid.sendTransactionAsync(
           rebalancingSetToken.address,
-          minimumBid
+          minimumBid,
+          false
         );
 
         await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
@@ -912,7 +1207,8 @@ contract('RebalanceAuctionModule', accounts => {
         minimumBid = biddingParameters[0];
         await rebalanceAuctionModuleMock.bid.sendTransactionAsync(
           rebalancingSetToken.address,
-          minimumBid
+          minimumBid,
+          false
         );
 
         await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
@@ -971,6 +1267,82 @@ contract('RebalanceAuctionModule', accounts => {
         const newTotalSupply = await rebalancingSetToken.totalSupply.callAsync();
         const expectedTotalSupply = setTotalSupply.sub(userBalance);
         expect(newTotalSupply).to.be.bignumber.equal(expectedTotalSupply);
+      });
+    });
+  });
+
+  describe('#calculateExecutionQuantity', async () => {
+    let subjectCaller: Address;
+    let subjectQuantity: BigNumber;
+    let subjectAllowPartialFill: boolean;
+
+    let nextSetToken: SetTokenContract;
+    let currentSetToken: SetTokenContract;
+
+    beforeEach(async () => {
+      const setTokens = await rebalancingWrapper.createSetTokensAsync(
+        coreMock,
+        factory.address,
+        transferProxy.address,
+        2
+      );
+      currentSetToken = setTokens[0];
+      nextSetToken = setTokens[1];
+
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+        coreMock,
+        rebalancingFactory.address,
+        managerAccount,
+        currentSetToken.address,
+        proposalPeriod
+      );
+
+      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7));
+
+      await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        coreMock,
+        rebalancingComponentWhiteList,
+        rebalancingSetToken,
+        nextSetToken,
+        constantAuctionPriceCurve.address,
+        managerAccount
+      );
+
+      subjectCaller = bidderAccount;
+      subjectQuantity = ether(1);
+      subjectAllowPartialFill = true;
+    });
+
+    async function subject(): Promise<BigNumber> {
+      return rebalanceAuctionModuleMock.calculateExecutionQuantityExternal.callAsync(
+        rebalancingSetToken.address,
+        subjectQuantity,
+        subjectAllowPartialFill,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('should return passed quantity', async () => {
+      const executionQuantity = await subject();
+      expect(executionQuantity).to.be.bignumber.equal(subjectQuantity);
+    });
+
+    describe('when quantity passed is greater than remainingCurrentSets', async () => {
+      beforeEach(async () => {
+        subjectQuantity = ether(9);
+      });
+
+      it('should return passed quantity', async () => {
+        const executionQuantity = await subject();
+
+        const biddingParams = await rebalancingSetToken.getBiddingParameters.callAsync();
+        const expectedExecutionQuantity = biddingParams[1];
+        expect(executionQuantity).to.be.bignumber.equal(expectedExecutionQuantity);
       });
     });
   });

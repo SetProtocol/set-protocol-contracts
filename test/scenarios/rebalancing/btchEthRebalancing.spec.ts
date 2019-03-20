@@ -324,6 +324,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
     await rebalanceAuctionModule.bid.sendTransactionAsync(
       rebalancingSetToken.address,
       BID_ONE_QUANTITY,
+      false,
       { from: bidderOneAccount }
     );
 
@@ -345,6 +346,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
     await rebalanceAuctionModule.bid.sendTransactionAsync(
       rebalancingSetToken.address,
       BID_TWO_QUANTITY,
+      false,
       { from: bidderTwoAccount }
     );
   });

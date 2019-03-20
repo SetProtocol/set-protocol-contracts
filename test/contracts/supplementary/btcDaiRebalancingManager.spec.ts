@@ -757,7 +757,8 @@ contract('BTCDaiRebalancingManager', accounts => {
         const minimumBid = biddingParameters[0];
         await rebalanceAuctionModule.bid.sendTransactionAsync(
           rebalancingSetToken.address,
-          minimumBid
+          minimumBid,
+          false
         );
 
         await rebalancingSetToken.endFailedAuction.sendTransactionAsync(

@@ -154,10 +154,9 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
       );
 
       bitcoinEtherIssueQuantity = new BigNumber(135000000000000);
-      subjectEther = bitcoinEtherIssueQuantity
-                      .mul(WETH_COMPONENT_UNITS)
-                      .div(bitcoinEtherNaturalUnit)
-                      .mul(2);
+      subjectEther = bitcoinEtherIssueQuantity.mul(WETH_COMPONENT_UNITS)
+                                              .div(bitcoinEtherNaturalUnit)
+                                              .mul(2);
 
       // Generate exchange issue data
       exchangeIssueSetAddress = bitcoinEtherSet.address;
@@ -214,11 +213,7 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
         subjectRebalancingSetAddress,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
-        {
-          from: subjectCaller,
-          gas: DEFAULT_GAS,
-          value: subjectEther.toString(),
-        },
+        { from: subjectCaller, gas: DEFAULT_GAS, value: subjectEther.toString() },
       );
     }
 

@@ -99,10 +99,7 @@ contract RebalanceAuctionModule is
             tokenArray,
             inflowUnitArray,
             outflowUnitArray
-        ) = placeBidAndGetTokenFlows(
-            _rebalancingSetToken,
-            executionQuantity
-        );
+        ) = IRebalancingSetToken(_rebalancingSetToken).placeBid(executionQuantity);
 
         // Retrieve tokens from bidder and deposit in vault for rebalancing set token
         coreInstance.batchDepositModule(
@@ -159,10 +156,7 @@ contract RebalanceAuctionModule is
             tokenArray,
             inflowUnitArray,
             outflowUnitArray
-        ) = placeBidAndGetTokenFlows(
-            _rebalancingSetToken,
-            executionQuantity
-        );
+        ) = IRebalancingSetToken(_rebalancingSetToken).placeBid(executionQuantity);
 
         // Retrieve tokens from bidder and deposit in vault for rebalancing set token
         coreInstance.batchDepositModule(
@@ -251,6 +245,8 @@ contract RebalanceAuctionModule is
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance
+     * @param  _allowPartialFill       Set to true if want to partially fill bid when quantity
+                                       is greater than currentRemainingSets
      * @return executionQuantity       Array of token addresses invovled in rebalancing
      */
     function calculateExecutionQuantity(
@@ -259,8 +255,15 @@ contract RebalanceAuctionModule is
         bool _allowPartialFill
     )
         internal
+        view
         returns (uint256)
     {
+        // Make sure the rebalancingSetToken is tracked by Core
+        require(
+            coreInstance.validSets(_rebalancingSetToken),
+            "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
+        );
+
         // Receive bidding parameters of current auction
         uint256[] memory biddingParameters = IRebalancingSetToken(_rebalancingSetToken).getBiddingParameters();
         uint256 minimumBid = biddingParameters[0];
@@ -274,33 +277,5 @@ contract RebalanceAuctionModule is
         } else {
             return _quantity;
         }
-    }
-
-    /* ============ Private Functions ============ */
-
-    /**
-     * Place bid on Rebalancing Set Token and return token flows.
-     *
-     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
-     * @param  _quantity               Number of currentSets to rebalance
-     * @return combinedTokenArray      Array of token addresses invovled in rebalancing
-     * @return inflowUnitArray         Array of amount of tokens inserted into system in bid
-     * @return outflowUnitArray        Array of amount of tokens taken out of system in bid
-     */
-    function placeBidAndGetTokenFlows(
-        address _rebalancingSetToken,
-        uint256 _quantity
-    )
-        private
-        returns (address[] memory, uint256[] memory, uint256[] memory)
-    {
-        // Make sure the rebalancingSetToken is tracked by Core
-        require(
-            coreInstance.validSets(_rebalancingSetToken),
-            "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
-        );
-
-        // Receive addresses of tokens involved and arrays of inflow/outflow associated with each token
-        return IRebalancingSetToken(_rebalancingSetToken).placeBid(_quantity);
     }
 }

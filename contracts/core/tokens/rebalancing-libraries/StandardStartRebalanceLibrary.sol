@@ -40,15 +40,6 @@ library StandardStartRebalanceLibrary {
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
 
-    /* ============ Structs ============ */
-    struct BiddingParameters {
-        uint256 minimumBid;
-        uint256 remainingCurrentSets;
-        uint256[] combinedCurrentUnits;
-        uint256[] combinedNextSetUnits;
-        address[] combinedTokenArray;
-    }
-
     /* ============ Internal Functions ============ */
 
     /**
@@ -75,7 +66,7 @@ library StandardStartRebalanceLibrary {
         uint8 _rebalanceState
     )
         public
-        returns (BiddingParameters memory)
+        returns (RebalancingHelperLibrary.BiddingParameters memory)
     {
         // Must be in "Proposal" state before going into "Rebalance" state
         require(
@@ -90,7 +81,7 @@ library StandardStartRebalanceLibrary {
         );
 
         // Create combined array data structures and calculate minimum bid needed for auction
-        BiddingParameters memory biddingParameters = setUpBiddingParameters(
+        RebalancingHelperLibrary.BiddingParameters memory biddingParameters = setUpBiddingParameters(
             _currentSet,
             _nextSet,
             _auctionLibrary
@@ -129,7 +120,8 @@ library StandardStartRebalanceLibrary {
         address _auctionLibrary
     )
         public
-        returns (BiddingParameters memory)
+        view
+        returns (RebalancingHelperLibrary.BiddingParameters memory)
     {
         // Get set details for currentSet and nextSet (units, components, natural units)
         SetTokenLibrary.SetDetails memory currentSet = SetTokenLibrary.getSetDetails(_currentSet);
@@ -163,7 +155,7 @@ library StandardStartRebalanceLibrary {
         );
 
         // Build Bidding Parameters struct and return
-        return BiddingParameters({
+        return RebalancingHelperLibrary.BiddingParameters({
             minimumBid: minimumBid,
             remainingCurrentSets: 0,
             combinedCurrentUnits: combinedCurrentUnits,

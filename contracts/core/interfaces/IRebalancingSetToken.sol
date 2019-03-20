@@ -176,4 +176,15 @@ interface IRebalancingSetToken {
         external
         view
         returns (address[] memory);
+
+    /*
+     * Get biddingParameters for current auction
+     *
+     * @return  biddingParameters
+     */
+    function getBiddingParameters()
+        external
+        view
+        returns (uint256[] memory);
+
 }

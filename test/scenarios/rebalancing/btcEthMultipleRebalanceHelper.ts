@@ -647,6 +647,7 @@ export class BTCETHMultipleRebalanceWrapper {
       await this._rebalanceAuctionModule.bid.sendTransactionAsync(
         this._rebalancingSetToken.address,
         bidAmount,
+        false,
         { from: bid.sender }
       );
       cumulativeTime += timeJump;
@@ -786,6 +787,7 @@ export class BTCETHMultipleRebalanceWrapper {
       const txHashBid = await this._rebalanceAuctionModule.bid.sendTransactionAsync(
         this._rebalancingSetToken.address,
         bidAmount,
+        false,
         { from: lastBidder }
       );
       this._dataLogger.gasProfile.bid = await this._extractGasCostAsync(

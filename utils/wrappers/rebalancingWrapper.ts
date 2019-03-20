@@ -444,7 +444,7 @@ export class RebalancingWrapper {
         outflowArray.push(new BigNumber(0));
       } else {
         outflowArray.push(
-          flow.mul(effectiveQuantity).div(coefficient).round(0, 3).div(priceDivisor).round(0, 3).mul(new BigNumber(-1))
+          flow.mul(new BigNumber(-1)).mul(effectiveQuantity).div(coefficient).round(0, 3).div(priceDivisor).round(0, 3)
         );
         inflowArray.push(new BigNumber(0));
       }

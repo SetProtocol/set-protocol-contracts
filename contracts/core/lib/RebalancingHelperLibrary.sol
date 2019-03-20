@@ -49,6 +49,14 @@ library RebalancingHelperLibrary {
         uint256 auctionPivotPrice;
     }
 
+    struct BiddingParameters {
+        uint256 minimumBid;
+        uint256 remainingCurrentSets;
+        uint256[] combinedCurrentUnits;
+        uint256[] combinedNextSetUnits;
+        address[] combinedTokenArray;
+    }
+
     /**
      * Function to calculate the transfer value of a component given a standardized bid amount
      * (minimumBid/priceDivisor)
@@ -87,7 +95,7 @@ library RebalancingHelperLibrary {
     function getBidPrice(
         uint256 _quantity,
         address _auctionLibrary,
-        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters,
+        BiddingParameters memory _biddingParameters,
         AuctionPriceParameters memory _auctionParameters,
         uint8 _rebalanceState
     )
@@ -134,7 +142,7 @@ library RebalancingHelperLibrary {
         uint256 _unitsMultiplier,
         uint256 _priceNumerator,
         uint256 _priceDivisor,
-        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters
+        BiddingParameters memory _biddingParameters
     )
         public
         pure

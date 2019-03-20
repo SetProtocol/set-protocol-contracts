@@ -27,5 +27,18 @@ contract RebalanceAuctionModuleMock is
             _quantity
         );
     }
+
+    function calculateExecutionQuantityExternal(
+        address _rebalancingSetToken,
+        uint256 _quantity
+    )
+        external
+        returns (uint256)
+    {
+        return calculateExecutionQuantity(
+            _rebalancingSetToken,
+            _quantity
+        );
+    }
 }
 

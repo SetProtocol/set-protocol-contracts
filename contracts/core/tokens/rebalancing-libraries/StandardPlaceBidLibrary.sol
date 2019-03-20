@@ -21,7 +21,6 @@ import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
-import { StandardStartRebalanceLibrary } from "./StandardStartRebalanceLibrary.sol";
 
 
 /**
@@ -39,25 +38,19 @@ library StandardPlaceBidLibrary {
      * Place bid during rebalance auction. Can only be called by Core.
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
-     * @param _auctionLibrary           Auction library used in rebalance
      * @param _coreAddress              Core address
      * @param _biddingParameters        Struct containing relevant data for calculating token flows
-     * @param _auctionParameters        Struct containing auction price curve parameters
-     * @param _rebalanceState           State of rebalancing set token
      * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
      * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
      */
-    function placeBid(
+    function validateBidQuantity(
         uint256 _quantity,
-        address _auctionLibrary,
         address _coreAddress,
-        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters,
-        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters,
-        uint8 _rebalanceState
+        RebalancingHelperLibrary.BiddingParameters memory _biddingParameters
     )
         public
         view
-        returns (uint256[] memory, uint256[] memory)
+        returns (uint256)
     {
         // Make sure sender is a module
         require(
@@ -75,14 +68,6 @@ library StandardPlaceBidLibrary {
         require(
             _quantity <= _biddingParameters.remainingCurrentSets,
             "RebalancingSetToken.placeBid: Bid exceeds remaining current sets"
-        );
-
-        return RebalancingHelperLibrary.getBidPrice(
-            _quantity,
-            _auctionLibrary,
-            _biddingParameters,
-            _auctionParameters,
-            _rebalanceState
         );
     }
 }

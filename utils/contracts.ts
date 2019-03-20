@@ -28,7 +28,7 @@ import { MedianContract } from '../types/generated/median';
 import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 import {
-  RebalancingSetExchangeIssuanceModuleContract,
+  asdfContract,
 } from '../types/generated/rebalancing_set_exchange_issuance_module';
 import { PriceFeedContract } from '../types/generated/price_feed';
 import { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
@@ -88,7 +88,7 @@ export {
   MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
-  RebalancingSetExchangeIssuanceModuleContract,
+  asdfContract,
   PriceFeedContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,

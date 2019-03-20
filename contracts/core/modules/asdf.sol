@@ -32,13 +32,13 @@ import { IWETH } from "../../lib/IWETH.sol";
 
 
 /**
- * @title RebalancingSetExchangeIssuanceModule
+ * @title asdf
  * @author Set Protocol
  *
- * The RebalancingSetExchangeIssuanceModule supplementary smart contract allows a user to send Eth and atomically
+ * The asdf supplementary smart contract allows a user to send Eth and atomically
  * issue a rebalancing Set
  */
-contract RebalancingSetExchangeIssuanceModule is
+contract asdf is
     ReentrancyGuard
 {
     using SafeMath for uint256;
@@ -77,7 +77,7 @@ contract RebalancingSetExchangeIssuanceModule is
     /* ============ Constructor ============ */
 
     /**
-     * Constructor function for RebalancingSetExchangeIssuanceModule
+     * Constructor function for asdf
      *
      * @param _core                     The address of Core
      * @param _transferProxy            The address of the TransferProxy
@@ -125,7 +125,7 @@ contract RebalancingSetExchangeIssuanceModule is
     {
         require( // coverage-disable-line
             msg.sender == weth,
-            "RebalancingSetExchangeIssuanceModule.fallback: Cannot receive ETH directly unless unwrapping WETH"
+            "asdf.fallback: Cannot receive ETH directly unless unwrapping WETH"
         );
     }
 
@@ -338,13 +338,13 @@ contract RebalancingSetExchangeIssuanceModule is
         // Require only 1 receive token
         require(
             _exchangeIssuanceParams.receiveTokens.length == 1,
-            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Only 1 Receive Token Allowed"
+            "asdf.validateRedeemInputs: Only 1 Receive Token Allowed"
         );
 
         // Require receive token is weth
         require(
             weth == _exchangeIssuanceParams.receiveTokens[0],
-            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Receive token must be Weth"
+            "asdf.validateRedeemInputs: Receive token must be Weth"
         );
 
         ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
@@ -353,7 +353,7 @@ contract RebalancingSetExchangeIssuanceModule is
         address baseSet = rebalancingSet.getComponents()[0];
         require(
             baseSet == _exchangeIssuanceParams.setAddress,
-            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Base Set addresses must match"
+            "asdf.validateRedeemInputs: Base Set addresses must match"
         );
 
         // Quantity of base Set must be the same as in exchange issuance params
@@ -364,7 +364,7 @@ contract RebalancingSetExchangeIssuanceModule is
             .div(rebalancingSetNaturalUnit);
         require(
             impliedBaseSetQuantity == _exchangeIssuanceParams.quantity,
-            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Base Set quantities must match"
+            "asdf.validateRedeemInputs: Base Set quantities must match"
         );
     }
 }

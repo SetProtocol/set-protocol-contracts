@@ -16,7 +16,7 @@ import { Core } from '../../artifacts/ts/Core';
 import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModule';
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
-import { RebalancingSetExchangeIssuanceModule } from '../../artifacts/ts/RebalancingSetExchangeIssuanceModule';
+import { asdf } from '../../artifacts/ts/asdf';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
@@ -89,7 +89,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
     await this.registerCoreModules([
       ExchangeIssuanceModule.contractName,
-      RebalancingSetExchangeIssuanceModule.contractName,
+      asdf.contractName,
       RebalanceAuctionModule.contractName,
       RebalancingTokenIssuanceModule.contractName,
     ]);

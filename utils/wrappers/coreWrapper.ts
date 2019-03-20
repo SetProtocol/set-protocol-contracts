@@ -7,7 +7,7 @@ import {
   CoreContract,
   CoreMockContract,
   ExchangeIssuanceModuleContract,
-  RebalancingSetExchangeIssuanceModuleContract,
+  asdfContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
@@ -41,7 +41,7 @@ const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreMock = artifacts.require('CoreMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
-const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
+const asdf = artifacts.require('asdf');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
@@ -130,10 +130,10 @@ export class CoreWrapper {
      return await RebalanceAuctionModuleContract.at(address, web3, TX_DEFAULTS);
   }
 
-  public async getDeployedRebalancingSetExchangeIssuanceModuleAsync():
-    Promise<RebalancingSetExchangeIssuanceModuleContract> {
-    const address = await getContractAddress(RebalancingSetExchangeIssuanceModule.contractName);
-    return await RebalancingSetExchangeIssuanceModuleContract.at(address, web3, TX_DEFAULTS);
+  public async getDeployedasdfAsync():
+    Promise<asdfContract> {
+    const address = await getContractAddress(asdf.contractName);
+    return await asdfContract.at(address, web3, TX_DEFAULTS);
   }
 
   /* ============ Deployment ============ */
@@ -499,20 +499,20 @@ export class CoreWrapper {
     );
   }
 
-  public async deployRebalancingSetExchangeIssuanceModuleAsync(
+  public async deployasdfAsync(
     core: Address,
     transferProxy: Address,
     exchangeIssuanceModule: Address,
     wrappedEther: Address,
     from: Address = this._contractOwnerAddress
-  ): Promise<RebalancingSetExchangeIssuanceModuleContract> {
+  ): Promise<asdfContract> {
     const erc20WrapperLibrary = await ERC20Wrapper.new(
       { from: this._contractOwnerAddress },
     );
 
-    await RebalancingSetExchangeIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+    await asdf.link('ERC20Wrapper', erc20WrapperLibrary.address);
 
-    const payableExchangeIssuanceContract = await RebalancingSetExchangeIssuanceModule.new(
+    const payableExchangeIssuanceContract = await asdf.new(
       core,
       transferProxy,
       exchangeIssuanceModule,
@@ -520,7 +520,7 @@ export class CoreWrapper {
       { from },
     );
 
-    return new RebalancingSetExchangeIssuanceModuleContract(
+    return new asdfContract(
       new web3.eth.Contract(payableExchangeIssuanceContract.abi, payableExchangeIssuanceContract.address),
       { from },
     );

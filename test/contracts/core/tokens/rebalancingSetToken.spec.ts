@@ -2313,7 +2313,9 @@ contract('RebalancingSetToken', accounts => {
           expect(auctionParameters).to.deep.equal(expectedAuctionParameters);
         });
 
-        it('clears the biddingParameters struct', async () => {
+        it('clears the biddingParameters struct except combinedTokenArray', async () => {
+          const expectedCombinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+
           await subject();
 
           const biddingParameters = await rebalancingSetToken.getBiddingParameters.callAsync();
@@ -2323,7 +2325,6 @@ contract('RebalancingSetToken', accounts => {
 
           const expectedMinimumBid = 0;
           const expectedRemainingCurrentSets = 0;
-          const expectedCombinedTokenArray = [];
           const expectedCombinedCurrentUnits = [];
           const expectedCombinedNextSetUnits = [];
 

@@ -630,8 +630,15 @@ contract RebalancingSetToken is
         nextSet = address(0);
         auctionLibrary = address(0);
         startingCurrentSetAmount = 0;
-
-        delete biddingParameters;
         delete auctionParameters;
+
+        if (rebalanceState == RebalancingHelperLibrary.State.Drawdown) {
+            biddingParameters.minimumBid = 0;
+            biddingParameters.remainingCurrentSets = 0;
+            delete biddingParameters.combinedCurrentUnits;
+            delete biddingParameters.combinedNextSetUnits;
+        } else {
+            delete biddingParameters;    
+        }
     }
 }

@@ -10,7 +10,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  PayableExchangeIssuanceModuleContract,
+  RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
@@ -35,13 +35,13 @@ const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
-const PayableExchangeIssuanceModule = artifacts.require('PayableExchangeIssuanceModule');
+const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
 
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setUtils = new SetUtils(web3);
 const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 
-contract('PayableExchangeIssuanceModule::Scenarios', accounts => {
+contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
   const [
     ownerAccount,
     tokenPurchaser,
@@ -51,7 +51,7 @@ contract('PayableExchangeIssuanceModule::Scenarios', accounts => {
   let core: CoreContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let payableExchangeIssuance: PayableExchangeIssuanceModuleContract;
+  let payableExchangeIssuance: RebalancingSetExchangeIssuanceModuleContract;
   let weth: WethMockContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
@@ -65,20 +65,20 @@ contract('PayableExchangeIssuanceModule::Scenarios', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(PayableExchangeIssuanceModule.abi);
+    ABIDecoder.addABI(RebalancingSetExchangeIssuanceModule.abi);
 
     core = await coreWrapper.getDeployedCoreAsync();
     setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
     rebalancingSetTokenFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
 
     weth = await erc20Wrapper.getDeployedWETHAsync();
-    payableExchangeIssuance = await coreWrapper.getDeployedPayableExchangeIssuanceModuleAsync();
+    payableExchangeIssuance = await coreWrapper.getDeployedRebalancingSetExchangeIssuanceModuleAsync();
     await coreWrapper.addModuleAsync(core, payableExchangeIssuance.address);
   });
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(PayableExchangeIssuanceModule.abi);
+    ABIDecoder.removeABI(RebalancingSetExchangeIssuanceModule.abi);
   });
 
   beforeEach(async () => {

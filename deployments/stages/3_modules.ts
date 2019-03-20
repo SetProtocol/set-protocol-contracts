@@ -7,7 +7,7 @@ import {
   ExchangeIssuanceModuleContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
-  PayableExchangeIssuanceModuleContract,
+  RebalancingSetExchangeIssuanceModuleContract,
   RebalanceAuctionModuleContract,
   RebalancingTokenIssuanceModuleContract,
   ZeroExExchangeWrapperContract,
@@ -19,7 +19,7 @@ import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModule';
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
-import { PayableExchangeIssuanceModule } from '../../artifacts/ts/PayableExchangeIssuanceModule';
+import { RebalancingSetExchangeIssuanceModule } from '../../artifacts/ts/RebalancingSetExchangeIssuanceModule';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
 import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
 import { SetTokenLibrary } from '../../artifacts/ts/SetTokenLibrary';
@@ -53,7 +53,7 @@ export class ModulesStage implements DeploymentStageInterface {
 
     await this.deployLinearAuctionPriceCurve();
 
-    await this.deployPayableExchangeIssuanceModule();
+    await this.deployRebalancingSetExchangeIssuanceModule();
   }
 
   private async deployExchangeIssuanceModule(): Promise<ExchangeIssuanceModuleContract> {
@@ -131,12 +131,14 @@ export class ModulesStage implements DeploymentStageInterface {
     return await RebalancingTokenIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployPayableExchangeIssuanceModule(): Promise<PayableExchangeIssuanceModuleContract> {
-    const name = PayableExchangeIssuanceModule.contractName;
+  private async deployRebalancingSetExchangeIssuanceModule():
+    Promise<RebalancingSetExchangeIssuanceModuleContract>
+  {
+    const name = RebalancingSetExchangeIssuanceModule.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
-      return await PayableExchangeIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
+      return await RebalancingSetExchangeIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
     }
 
     const coreAddress = await getContractAddress(Core.contractName);
@@ -145,12 +147,12 @@ export class ModulesStage implements DeploymentStageInterface {
     const erc20WrapperAddress = await getContractAddress(ERC20Wrapper.contractName);
     const wethAddress = await findDependency(DEPENDENCY.WETH);
 
-    const originalByteCode = PayableExchangeIssuanceModule.bytecode;
+    const originalByteCode = RebalancingSetExchangeIssuanceModule.bytecode;
     const linkedByteCode = linkLibraries([
       { name: ERC20Wrapper.contractName, address: erc20WrapperAddress },
     ], originalByteCode);
 
-    const data = new this._web3.eth.Contract(PayableExchangeIssuanceModule.abi).deploy({
+    const data = new this._web3.eth.Contract(RebalancingSetExchangeIssuanceModule.abi).deploy({
       data: linkedByteCode,
       arguments: [
         coreAddress,
@@ -161,7 +163,7 @@ export class ModulesStage implements DeploymentStageInterface {
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
-    return await PayableExchangeIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
+    return await RebalancingSetExchangeIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deployKyberWrapper(): Promise<KyberNetworkWrapperContract> {

@@ -287,11 +287,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         subjectRebalancingSetAddress,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
-        {
-          from: subjectCaller,
-          gas: DEFAULT_GAS,
-          value: subjectEther.toString(),
-        },
+        { from: subjectCaller, gas: DEFAULT_GAS, value: subjectEther.toString() },
       );
     }
 

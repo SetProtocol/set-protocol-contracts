@@ -559,7 +559,7 @@ export class RebalancingWrapper {
 
       if (timeIncrements.lessThan(timeIncrementsToZero)) {
         priceNumerator = auctionPivotPrice;
-        priceDivisor = priceDivisorParam.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
+        priceDivisor = priceDivisorParam.sub(timeIncrements.mul(priceDivisorParam).div(1000).round(0, 3));
       } else {
         priceDivisor = new BigNumber(1);
         priceNumerator = auctionPivotPrice.add(auctionPivotPrice.mul(timeIncrements.sub(1000)));
@@ -595,7 +595,7 @@ export class RebalancingWrapper {
 
       if (timeIncrements.lessThan(timeIncrementsToZero)) {
         priceNumerator = auctionPivotPrice;
-        priceDivisor = priceDivisorParam.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
+        priceDivisor = priceDivisorParam.sub(timeIncrements.mul(priceDivisorParam).div(1000).round(0, 3));
       } else {
         priceDivisor = new BigNumber(1);
         priceNumerator = auctionPivotPrice.add(auctionPivotPrice.mul(timeIncrements.sub(1000)));

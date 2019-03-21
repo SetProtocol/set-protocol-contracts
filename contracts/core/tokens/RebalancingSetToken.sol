@@ -83,6 +83,9 @@ contract RebalancingSetToken is
     RebalancingHelperLibrary.AuctionPriceParameters public auctionParameters;
     RebalancingHelperLibrary.BiddingParameters public biddingParameters;
 
+    // To be used if token put into Drawdown State
+    address[] public failedAuctionWithdrawComponents;
+
     /* ============ Events ============ */
 
     event NewManagerAdded(
@@ -368,6 +371,11 @@ contract RebalancingSetToken is
 
         // Reset lastRebalanceTimestamp to now
         lastRebalanceTimestamp = block.timestamp;
+
+        // Save combined token arrays to failedAuctionWithdrawComponents
+        failedAuctionWithdrawComponents = biddingParameters.combinedTokenArray;
+
+        // Clear auction state
         clearAuctionState();
     }
 
@@ -622,6 +630,19 @@ contract RebalancingSetToken is
         return biddingParameters.combinedNextSetUnits;
     }
 
+    /*
+     * Get failedAuctionWithdrawComponents of Rebalancing Set
+     *
+     * @return  failedAuctionWithdrawComponents
+     */
+    function getFailedAuctionWithdrawComponents()
+        external
+        view
+        returns (address[] memory)
+    {
+        return failedAuctionWithdrawComponents;
+    }
+
     /* ============ Internal Functions ============ */
 
     /*
@@ -634,16 +655,6 @@ contract RebalancingSetToken is
         auctionLibrary = address(0);
         startingCurrentSetAmount = 0;
         delete auctionParameters;
-
-        // If Set in Drawdown then preserve combinedTokenArray to be used in
-        // withdrawFromFailedRebalance, otherwise zero out all biddingParameters
-        if (rebalanceState == RebalancingHelperLibrary.State.Drawdown) {
-            biddingParameters.minimumBid = 0;
-            biddingParameters.remainingCurrentSets = 0;
-            delete biddingParameters.combinedCurrentUnits;
-            delete biddingParameters.combinedNextSetUnits;
-        } else {
-            delete biddingParameters;    
-        }
+        delete biddingParameters;
     }
 }

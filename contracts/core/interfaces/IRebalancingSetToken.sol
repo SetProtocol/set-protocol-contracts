@@ -178,6 +178,16 @@ interface IRebalancingSetToken {
         returns (address[] memory);
 
     /*
+     * Get failedAuctionWithdrawComponents of Rebalancing Set
+     *
+     * @return  failedAuctionWithdrawComponents
+     */
+    function getFailedAuctionWithdrawComponents()
+        external
+        view
+        returns (address[] memory);
+
+    /*
      * Get biddingParameters for current auction
      *
      * @return  biddingParameters

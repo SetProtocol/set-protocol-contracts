@@ -2325,9 +2325,7 @@ contract('RebalancingSetToken', accounts => {
           expect(auctionParameters).to.deep.equal(expectedAuctionParameters);
         });
 
-        it('clears the biddingParameters struct except combinedTokenArray', async () => {
-          const expectedCombinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
-
+        it('clears the biddingParameters struct', async () => {
           await subject();
 
           const biddingParameters = await rebalancingSetToken.getBiddingParameters.callAsync();
@@ -2337,6 +2335,7 @@ contract('RebalancingSetToken', accounts => {
 
           const expectedMinimumBid = 0;
           const expectedRemainingCurrentSets = 0;
+          const expectedCombinedTokenArray = [];
           const expectedCombinedCurrentUnits = [];
           const expectedCombinedNextSetUnits = [];
 
@@ -2345,6 +2344,16 @@ contract('RebalancingSetToken', accounts => {
           expect(combinedTokenArray).to.deep.equal(expectedCombinedTokenArray);
           expect(combinedCurrentUnits).to.deep.equal(expectedCombinedCurrentUnits);
           expect(combinedNextSetUnits).to.deep.equal(expectedCombinedNextSetUnits);
+        });
+
+        it('moves combinedTokenArray to failedAuctionWithdrawComponents', async () => {
+          const expectedWithdrawComponents = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+
+          await subject();
+
+          const withdrawComponents = await rebalancingSetToken.getFailedAuctionWithdrawComponents.callAsync();
+
+          expect(withdrawComponents).to.deep.equal(expectedWithdrawComponents);
         });
       });
 

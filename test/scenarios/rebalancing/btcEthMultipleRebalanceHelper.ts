@@ -741,7 +741,7 @@ export class BTCETHMultipleRebalanceWrapper {
     percentFromFairValue: BigNumber,
     tokenPrices: TokenPrices,
   ): Promise<BigNumber> {
-    const auctionPriceParameters = await this._rebalancingSetToken.getAuctionParameters.callAsync();
+    const auctionPriceParameters = await this._rebalancingSetToken.getAuctionPriceParameters.callAsync();
     const auctionStartPrice = auctionPriceParameters[2];
     const auctionPivotPrice = auctionPriceParameters[3];
 
@@ -752,7 +752,7 @@ export class BTCETHMultipleRebalanceWrapper {
   private async _calculateImpliedBidTimeAsync(
     bidPrice: BigNumber,
   ): Promise<number> {
-    const auctionPriceParameters = await this._rebalancingSetToken.getAuctionParameters.callAsync();
+    const auctionPriceParameters = await this._rebalancingSetToken.getAuctionPriceParameters.callAsync();
     const auctionTimeToPivot = this._rebalanceProgram.initializationParams.auctionTimeToPivot;
     const auctionStartPrice = auctionPriceParameters[2];
     const auctionPivotPrice = auctionPriceParameters[3];
@@ -837,7 +837,7 @@ export class BTCETHMultipleRebalanceWrapper {
       await this._rebalancingSetToken.nextSet.callAsync()
     );
 
-    const auctionPriceParameters = await this._rebalancingSetToken.getAuctionParameters.callAsync();
+    const auctionPriceParameters = await this._rebalancingSetToken.getAuctionPriceParameters.callAsync();
     const auctionStartPrice = auctionPriceParameters[2];
     const auctionPivotPrice = auctionPriceParameters[3];
     this._dataLogger.rebalanceFairValues.push(

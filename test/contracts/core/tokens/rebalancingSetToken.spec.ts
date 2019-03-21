@@ -1140,21 +1140,21 @@ contract('RebalancingSetToken', accounts => {
       it('updates the time to pivot correctly', async () => {
         await subject();
 
-        const [, newAuctionTimeToPivot] = await rebalancingSetToken.getAuctionParameters.callAsync();
+        const [, newAuctionTimeToPivot] = await rebalancingSetToken.getAuctionPriceParameters.callAsync();
         expect(newAuctionTimeToPivot).to.be.bignumber.equal(subjectAuctionTimeToPivot);
       });
 
       it('updates the auction start price correctly', async () => {
         await subject();
 
-        const [, , newAuctionStartPrice] = await rebalancingSetToken.getAuctionParameters.callAsync();
+        const [, , newAuctionStartPrice] = await rebalancingSetToken.getAuctionPriceParameters.callAsync();
         expect(newAuctionStartPrice).to.be.bignumber.equal(subjectAuctionStartPrice);
       });
 
       it('updates the auction pivot price correctly', async () => {
         await subject();
 
-        const [, , , newAuctionPivotPrice] = await rebalancingSetToken.getAuctionParameters.callAsync();
+        const [, , , newAuctionPivotPrice] = await rebalancingSetToken.getAuctionPriceParameters.callAsync();
         expect(newAuctionPivotPrice).to.be.bignumber.equal(subjectAuctionPivotPrice);
       });
 

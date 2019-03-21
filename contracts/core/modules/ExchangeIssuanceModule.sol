@@ -178,7 +178,7 @@ contract ExchangeIssuanceModule is
             _exchangeIssuanceParams.receiveTokenAmounts
         );
 
-        // Withdraw non-exchanged components to the user
+        // Withdraw any remaining non-exchanged components to the user
         withdrawRemainingComponentsToUser(_exchangeIssuanceParams.setAddress);
 
         emit LogExchangeRedeem(
@@ -281,6 +281,12 @@ contract ExchangeIssuanceModule is
         }
     }
 
+    /**
+     * Withdraws any remaining un-exchanged components from the Vault in the posession of this contract
+     * to the caller
+     *
+     * @param  _setAddress   Address of the Base Set
+     */
     function withdrawRemainingComponentsToUser(
         address _setAddress
     )

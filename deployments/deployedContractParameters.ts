@@ -4,7 +4,7 @@ import constants from './constants';
 
 export const DEPLOYED_SETS_INFO = {
   BTCDAI_BTD: {
-    PRICE_PRECISION: new BigNumber(100),
+    PRICE_PRECISION: new BigNumber(1),
     DAI_MULTIPLIER: new BigNumber(1),
     WBTC_MULTIPLIER: new BigNumber(1),
     MANAGER_NAME: 'BTCDaiRebalancingManager',

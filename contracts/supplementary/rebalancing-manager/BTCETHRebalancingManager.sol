@@ -44,10 +44,9 @@ contract BTCETHRebalancingManager {
     uint256 constant BTC_DECIMALS = 8;
     uint256 constant ETH_DECIMALS = 18;
     uint256 constant SET_TOKEN_DECIMALS = 18;
-    uint256 constant DECIMAL_DIFF_MULTIPLIER = 10**10;
+    uint256 constant DECIMAL_DIFF_MULTIPLIER = 10 ** 10;
     uint256 constant THIRTY_MINUTES_IN_SECONDS = 1800;
-    uint256 constant VALUE_TO_CENTS_CONVERSION = 10**16;
-
+    uint256 constant VALUE_TO_CENTS_CONVERSION = 10 ** 16;
 
     /* ============ State Variables ============ */
 
@@ -371,15 +370,15 @@ contract BTCETHRebalancingManager {
 
         if (_btcPrice >= _ethPrice) {
             // Calculate ethereum units, determined by the following equation:
-            // (btcPrice/ethPrice)*(10**(ethDecimal-btcDecimal))
+            // (btcPrice / ethPrice) * (10 ** (ethDecimal - btcDecimal))
             uint256 ethUnits = _btcPrice.mul(DECIMAL_DIFF_MULTIPLIER).div(_ethPrice);
 
             // Create unit array and define natural unit
             units[0] = btcMultiplier;
             units[1] = ethUnits.mul(ethMultiplier);
-            naturalUnit = 10**10;
+            naturalUnit = 10 ** 10;
         } else {
-            // Calculate btc units as (ethPrice/btcPrice)*100. 100 is used to add
+            // Calculate btc units as (ethPrice / btcPrice) * 100. 100 is used to add
             // precision. The increase in unit amounts is offset by increasing the
             // naturalUnit by two orders of magnitude so that issuance cost is still
             // roughly the same
@@ -388,7 +387,7 @@ contract BTCETHRebalancingManager {
             // Create unit array and define natural unit
             units[0] = ethBtcPrice.mul(btcMultiplier);
             units[1] = PRICE_PRECISION.mul(DECIMAL_DIFF_MULTIPLIER).mul(ethMultiplier);
-            naturalUnit = 10**12;
+            naturalUnit = 10 ** 12;
         }
 
         // Calculate the nextSet dollar value (in cents)
@@ -498,13 +497,13 @@ contract BTCETHRebalancingManager {
     {
         // Calculate the amount of component base units are in one full set token
         uint256 componentUnitsInFullToken = _unit
-            .mul(10**SET_TOKEN_DECIMALS)
+            .mul(10 ** SET_TOKEN_DECIMALS)
             .div(_naturalUnit);
 
-        // Return value of component token in one full set token, divide by 10**16 to turn tokenPrice into cents
+        // Return value of component token in one full set token, divide by 10 ** 16 to turn tokenPrice into cents
         return _tokenPrice
             .mul(componentUnitsInFullToken)
-            .div(10**_tokenDecimals)
+            .div(10 ** _tokenDecimals)
             .div(VALUE_TO_CENTS_CONVERSION);
     }
 }

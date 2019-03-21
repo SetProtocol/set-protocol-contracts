@@ -1,5 +1,6 @@
 import { BadTokenMock } from "./ts/BadTokenMock";
 import { BTCETHRebalancingManager } from "./ts/BTCETHRebalancingManager";
+import { CommonValidationsLibrary } from "./ts/CommonValidationsLibrary";
 import { ConstantAuctionPriceCurve } from "./ts/ConstantAuctionPriceCurve";
 import { Core } from "./ts/Core";
 import { CoreIssuanceLibrary } from "./ts/CoreIssuanceLibrary";
@@ -27,6 +28,7 @@ import { RebalancingTokenIssuanceModule } from "./ts/RebalancingTokenIssuanceMod
 import { SettleRebalanceLibrary } from "./ts/SettleRebalanceLibrary";
 import { SetToken } from "./ts/SetToken";
 import { SetTokenFactory } from "./ts/SetTokenFactory";
+import { SetTokenLibrary } from "./ts/SetTokenLibrary";
 import { StandardTokenMock } from "./ts/StandardTokenMock";
 import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
 import { StartRebalanceLibrary } from "./ts/StartRebalanceLibrary";
@@ -47,6 +49,7 @@ export {
   BTCETHRebalancingManagerContract,
   Bytes32LibraryMockContract,
   CommonMathMockContract,
+  CommonValidationsLibraryContract,
   ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreIssuanceLibraryContract,
@@ -69,6 +72,7 @@ export {
   RebalancingTokenIssuanceModuleContract,
   SetTokenContract,
   SetTokenFactoryContract,
+  SetTokenLibraryContract,
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   TimeLockUpgradeContract,
@@ -85,6 +89,7 @@ export {
 export {
   BadTokenMock,
   BTCETHRebalancingManager,
+  CommonValidationsLibrary,
   ConstantAuctionPriceCurve,
   Core,
   CoreIssuanceLibrary,
@@ -112,6 +117,7 @@ export {
   SettleRebalanceLibrary,
   SetToken,
   SetTokenFactory,
+  SetTokenLibrary,
   StandardTokenMock,
   StandardTokenWithFeeMock,
   StartRebalanceLibrary,

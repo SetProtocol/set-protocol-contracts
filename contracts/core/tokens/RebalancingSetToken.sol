@@ -251,7 +251,6 @@ contract RebalancingSetToken is
     /*
      * Initiate rebalance for the rebalancing set if the proposal period has elapsed after
      * a proposal.
-     * Anyone can call this function.
      */
     function startRebalance()
         external

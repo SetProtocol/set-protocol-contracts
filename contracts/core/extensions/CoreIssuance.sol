@@ -41,6 +41,18 @@ contract CoreIssuance is
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
 
+    /* ============ Events ============ */
+
+    event SetIssued(
+        address _setAddress,
+        uint256 _quantity
+    );
+
+    event SetRedeemed(
+        address _setAddress,
+        uint256 _quantity
+    );
+
     /* ============ External Functions ============ */
 
     /**
@@ -317,6 +329,11 @@ contract CoreIssuance is
             _setRecipient,
             _quantity
         );
+
+        emit SetIssued(
+            _set,
+            _quantity
+        );
     }
 
     /**
@@ -378,6 +395,11 @@ contract CoreIssuance is
             components,
             _incrementAddress,
             componentQuantities
+        );
+
+        emit SetRedeemed(
+            _set,
+            _quantity
         );
     }
 

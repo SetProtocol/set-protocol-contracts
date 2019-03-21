@@ -73,7 +73,7 @@ library RebalancingHelperLibrary {
         view
         returns (uint256)
     {
-        uint256 priceDivisor = IAuctionPriceCurve(_auctionLibrary).priceDenominator();
+        uint256 priceDivisor = IAuctionPriceCurve(_auctionLibrary).priceDivisor();
         return _minimumBid.mul(_unit).div(_naturalUnit).div(priceDivisor);
     }
 }

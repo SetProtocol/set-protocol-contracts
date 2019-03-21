@@ -103,7 +103,8 @@ library FailAuctionLibrary {
                 newRebalanceState = uint8(RebalancingHelperLibrary.State.Drawdown);
             }
         } else {
-            // If settleRebalance can be called then endFailedAuction can't be
+            // If settleRebalance can be called then endFailedAuction can't be unless calculatedUnitShares
+            // equals 0
             require(
                 _calculatedUnitShares == 0,
                 "RebalancingSetToken.endFailedAuction: Cannot be called if rebalance is viably completed"

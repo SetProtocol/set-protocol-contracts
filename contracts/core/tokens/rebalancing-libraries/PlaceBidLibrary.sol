@@ -172,11 +172,11 @@ library PlaceBidLibrary {
     /*
      * Calculates token inflow/outflow for single component in combinedTokenArray
      *
-     * @param _currentUnit          Amount of token i in currentSet per standard bid amount
-     * @param _nextSetUnit          Amount of token i in nextSet per standard bid amount
-     * @param _unitsMultiplier      Bid amount normalized to number of standard bid amounts
+     * @param _currentUnit          Amount of token i in currentSet per minimum bid amount
+     * @param _nextSetUnit          Amount of token i in nextSet per minimum bid amount
+     * @param _unitsMultiplier      Bid amount normalized to number of minimum bid amounts
      * @param _priceNumerator       The numerator of the price ratio
-     * @param _priceDenominator     The denominator of the price ratio
+     * @param _priceDivisor         The denominator of the price ratio
      * @return inflowUnit           Amount of token i transferred into the system
      * @return outflowUnit          Amount of token i transferred to the bidder
      */

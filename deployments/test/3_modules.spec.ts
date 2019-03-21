@@ -294,9 +294,9 @@ describe('Deployment: Modules', () => {
       );
     });
 
-    it('deployed with the correct price denominator', async () => {
-      const retrievedPriceDenominator = await linearAuctionPriceCurveContract.methods.priceDenominator().call();
-      expect(parseInt(retrievedPriceDenominator)).toEqual(constants.DEFAULT_AUCTION_PRICE_DENOMINATOR);
+    it('deployed with the correct price divisor', async () => {
+      const retrievedPriceDivisor = await linearAuctionPriceCurveContract.methods.priceDivisor().call();
+      expect(parseInt(retrievedPriceDivisor)).toEqual(constants.DEFAULT_AUCTION_PRICE_DIVISOR);
     });
 
     it('deployed with the uses start price parameter as true', async () => {

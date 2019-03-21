@@ -262,7 +262,7 @@ export class ModulesStage implements DeploymentStageInterface {
     const data = new this._web3.eth.Contract(LinearAuctionPriceCurve.abi).deploy({
       data: LinearAuctionPriceCurve.bytecode,
       arguments: [
-        constants.DEFAULT_AUCTION_PRICE_DENOMINATOR,
+        constants.DEFAULT_AUCTION_PRICE_DIVISOR,
         true,
       ],
     }).encodeABI();

@@ -181,7 +181,7 @@ library StartRebalanceLibrary {
         returns (uint256)
     {
         // Get priceDivisor from auctionLibrary
-        uint256 priceDivisor = IAuctionPriceCurve(_auctionLibrary).priceDenominator();
+        uint256 priceDivisor = IAuctionPriceCurve(_auctionLibrary).priceDivisor();
 
         return Math.max(
             _currentSetNaturalUnit.mul(priceDivisor),

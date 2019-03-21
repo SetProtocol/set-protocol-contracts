@@ -139,11 +139,11 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   const PROPOSAL_PERIOD = new BigNumber(1).mul(SECONDS_PER_DAY);
 
   // Auction Constants
-  const PRICE_DENOMINATOR = new BigNumber(1000);
+  const PRICE_DIVISOR = new BigNumber(1000);
   const TIME_TO_PIVOT = SECONDS_PER_DAY;
 
   // Bid Assumptions
-  const MINIMUM_BID = PRICE_DENOMINATOR.mul(REBALANCING_SET_NATURAL_UNIT);
+  const MINIMUM_BID = PRICE_DIVISOR.mul(REBALANCING_SET_NATURAL_UNIT);
   const SECONDS_TO_FAIR_VALUE = TIME_TO_PIVOT.div(2);
   const BID_ONE_TIME_AFTER_FAIR_VALUE = new BigNumber(900);
   const BID_TWO_TIME_AFTER_FAIR_VALUE = new BigNumber(3600);

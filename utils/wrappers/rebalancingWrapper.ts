@@ -26,7 +26,7 @@ import {
   ONE_DAY_IN_SECONDS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
-  DEFAULT_AUCTION_PRICE_DENOMINATOR,
+  DEFAULT_AUCTION_PRICE_DIVISOR,
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 
@@ -213,12 +213,12 @@ export class RebalancingWrapper {
   /* ============ Price Libraries ============ */
 
   public async deployLinearAuctionPriceCurveAsync(
-    priceDenominator: BigNumber,
+    priceDivisor: BigNumber,
     usesStartPrice: boolean,
     from: Address = this._tokenOwnerAddress
   ): Promise<LinearAuctionPriceCurveContract> {
     const truffleLinearAuctionPriceCurve = await LinearAuctionPriceCurve.new(
-      priceDenominator,
+      priceDivisor,
       usesStartPrice,
       { from },
     );
@@ -231,12 +231,12 @@ export class RebalancingWrapper {
 
   public async deployConstantAuctionPriceCurveAsync(
     priceNumerator: BigNumber,
-    priceDenominator: BigNumber,
+    priceDivisor: BigNumber,
     from: Address = this._tokenOwnerAddress
   ): Promise<ConstantAuctionPriceCurveContract> {
     const truffleConstantAuctionPriceCurve = await ConstantAuctionPriceCurve.new(
       priceNumerator,
-      priceDenominator,
+      priceDivisor,
       { from },
     );
 
@@ -248,12 +248,12 @@ export class RebalancingWrapper {
 
   public async deployUpdatableConstantAuctionPriceCurveAsync(
     priceNumerator: BigNumber,
-    priceDenominator: BigNumber,
+    priceDivisor: BigNumber,
     from: Address = this._tokenOwnerAddress
   ): Promise<UpdatableConstantAuctionPriceCurveContract> {
     const truffleUpdatableConstantAuctionPriceCurve = await UpdatableConstantAuctionPriceCurve.new(
       priceNumerator,
-      priceDenominator,
+      priceDivisor,
       { from },
     );
 
@@ -454,7 +454,7 @@ export class RebalancingWrapper {
     const combinedRebalanceUnits = await rebalancingSetToken.getCombinedNextSetUnits.callAsync();
 
     // Define price
-    const priceDivisor = DEFAULT_AUCTION_PRICE_DENOMINATOR;
+    const priceDivisor = DEFAULT_AUCTION_PRICE_DIVISOR;
 
     // Calculate the inflows and outflow arrays
     const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
@@ -548,26 +548,26 @@ export class RebalancingWrapper {
     priceDivisor: BigNumber,
   ): any {
     let priceNumerator: BigNumber;
-    let priceDenominator: BigNumber;
+    let priceDivisor: BigNumber;
     const timeIncrementsToZero = new BigNumber(1000);
 
     if (elapsedTime.lessThanOrEqualTo(auctionTimeToPivot)) {
       priceNumerator = elapsedTime.mul(auctionPivotPrice).div(auctionTimeToPivot).round(0, 3);
-      priceDenominator = priceDivisor;
+      priceDivisor = priceDivisor;
     } else {
       const timeIncrements = elapsedTime.sub(auctionTimeToPivot).div(30).round(0, 3);
 
       if (timeIncrements.lessThan(timeIncrementsToZero)) {
         priceNumerator = auctionPivotPrice;
-        priceDenominator = priceDivisor.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
+        priceDivisor = priceDivisor.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
       } else {
-        priceDenominator = new BigNumber(1);
+        priceDivisor = new BigNumber(1);
         priceNumerator = auctionPivotPrice.add(auctionPivotPrice.mul(timeIncrements.sub(1000)));
       }
     }
     return {
       priceNumerator,
-      priceDenominator,
+      priceDivisor,
     };
   }
 
@@ -579,7 +579,7 @@ export class RebalancingWrapper {
     priceDivisor: BigNumber,
   ): any {
     let priceNumerator: BigNumber;
-    let priceDenominator: BigNumber;
+    let priceDivisor: BigNumber;
     const timeIncrementsToZero = new BigNumber(1000);
 
     if (elapsedTime.lessThanOrEqualTo(auctionTimeToPivot)) {
@@ -589,21 +589,21 @@ export class RebalancingWrapper {
         ).div(auctionTimeToPivot).round(0, 3)
       );
 
-      priceDenominator = priceDivisor;
+      priceDivisor = priceDivisor;
     } else {
       const timeIncrements = elapsedTime.sub(auctionTimeToPivot).div(30).round(0, 3);
 
       if (timeIncrements.lessThan(timeIncrementsToZero)) {
         priceNumerator = auctionPivotPrice;
-        priceDenominator = priceDivisor.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
+        priceDivisor = priceDivisor.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
       } else {
-        priceDenominator = new BigNumber(1);
+        priceDivisor = new BigNumber(1);
         priceNumerator = auctionPivotPrice.add(auctionPivotPrice.mul(timeIncrements.sub(1000)));
       }
     }
     return {
       priceNumerator,
-      priceDenominator,
+      priceDivisor,
     };
   }
 

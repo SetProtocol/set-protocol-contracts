@@ -43,6 +43,33 @@ library StartRebalanceLibrary {
     /* ============ Internal Functions ============ */
 
     /**
+     * Function used to validate time passed to start a rebalance
+     *
+     * @param _proposalStartTime    Start time of proposal period
+     * @param _proposalPeriod       Required length of proposal period
+     * @param _rebalanceState       State rebalancing set token is in
+     */
+    function validateStartRebalance(
+        uint256 _proposalStartTime,
+        uint256 _proposalPeriod,
+        uint8 _rebalanceState
+    )
+        external
+    {
+        // Must be in "Proposal" state before going into "Rebalance" state
+        require(
+            _rebalanceState == uint8(RebalancingHelperLibrary.State.Proposal),
+            "RebalancingSetToken.validateStartRebalance: State must be Proposal"
+        );
+
+        // Be sure the full proposal period has elapsed
+        require(
+            block.timestamp >= _proposalStartTime.add(_proposalPeriod),
+            "RebalancingSetToken.validateStartRebalance: Proposal period not elapsed"
+        );
+    }
+
+    /**
      * Function used to validate inputs to propose function and initialize biddingParameters struct
      *
      * @param _currentSet           Address of current Set
@@ -50,55 +77,31 @@ library StartRebalanceLibrary {
      * @param _auctionLibrary       Address of auction library being used in rebalance
      * @param _coreAddress          Core address
      * @param _vaultAddress         Vault address
-     * @param _proposalStartTime    Start time of proposal period
-     * @param _proposalPeriod       Required length of proposal period
-     * @param _rebalanceState       State rebalancing set token is in
      * @return                      Struct containing bidding parameters
      */
-    function startRebalance(
+    function redeemCurrentSetAndGetBiddingParameters(
         address _currentSet,
         address _nextSet,
         address _auctionLibrary,
         address _coreAddress,
-        address _vaultAddress,
-        uint256 _proposalStartTime,
-        uint256 _proposalPeriod,
-        uint8 _rebalanceState
+        address _vaultAddress
     )
         public
         returns (RebalancingHelperLibrary.BiddingParameters memory)
     {
-        // Must be in "Proposal" state before going into "Rebalance" state
-        require(
-            _rebalanceState == uint8(RebalancingHelperLibrary.State.Proposal),
-            "RebalancingSetToken.startRebalance: State must be Proposal"
-        );
-
-        // Be sure the full proposal period has elapsed
-        require(
-            block.timestamp >= _proposalStartTime.add(_proposalPeriod),
-            "RebalancingSetToken.startRebalance: Proposal period not elapsed"
+        // Redeem rounded quantity of current Sets and return redeemed amount of Sets
+        uint256 remainingCurrentSets = redeemCurrentSet(
+            _currentSet,
+            _coreAddress,
+            _vaultAddress
         );
 
         // Create combined array data structures and calculate minimum bid needed for auction
         RebalancingHelperLibrary.BiddingParameters memory biddingParameters = setUpBiddingParameters(
             _currentSet,
             _nextSet,
-            _auctionLibrary
-        );
-
-        // Redeem rounded quantity of current Sets and return redeemed amount of Sets
-        biddingParameters.remainingCurrentSets = redeemCurrentSet(
-            _currentSet,
-            _coreAddress,
-            _vaultAddress
-        );
-
-        // Require remainingCurrentSets to be greater than minimumBid otherwise no bidding would
-        // be allowed
-        require(
-            biddingParameters.remainingCurrentSets >= biddingParameters.minimumBid,
-            "RebalancingSetToken.startRebalance: Not enough collateral to rebalance"
+            _auctionLibrary,
+            remainingCurrentSets
         );
 
         return biddingParameters;
@@ -112,12 +115,14 @@ library StartRebalanceLibrary {
      * @param _currentSet           Address of current Set
      * @param _nextSet              Address of next Set
      * @param _auctionLibrary       Address of auction library being used in rebalance
+     * @param _remainingCurrentSets Quantity of Current Sets redeemed
      * @return                      Struct containing bidding parameters
      */
     function setUpBiddingParameters(
         address _currentSet,
         address _nextSet,
-        address _auctionLibrary
+        address _auctionLibrary,
+        uint256 _remainingCurrentSets
     )
         public
         returns (RebalancingHelperLibrary.BiddingParameters memory)
@@ -138,6 +143,13 @@ library StartRebalanceLibrary {
             _auctionLibrary
         );
 
+        // Require remainingCurrentSets to be greater than minimumBid otherwise no bidding would
+        // be allowed
+        require(
+            _remainingCurrentSets >= minimumBid,
+            "RebalancingSetToken.setUpBiddingParameters: Not enough collateral to rebalance"
+        );
+
         // Create memory version of combinedNextSetUnits and combinedCurrentUnits to only make one
         // call to storage once arrays have been created
         uint256[] memory combinedCurrentUnits;
@@ -156,7 +168,7 @@ library StartRebalanceLibrary {
         // Build Bidding Parameters struct and return
         return RebalancingHelperLibrary.BiddingParameters({
             minimumBid: minimumBid,
-            remainingCurrentSets: 0,
+            remainingCurrentSets: _remainingCurrentSets,
             combinedCurrentUnits: combinedCurrentUnits,
             combinedNextSetUnits: combinedNextSetUnits,
             combinedTokenArray: combinedTokenArray
@@ -176,7 +188,7 @@ library StartRebalanceLibrary {
         uint256 _nextSetNaturalUnit,
         address _auctionLibrary
     )
-        public
+        private
         view
         returns (uint256)
     {

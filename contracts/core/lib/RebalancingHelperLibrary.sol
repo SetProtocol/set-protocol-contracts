@@ -17,11 +17,8 @@
 pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
-import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IAuctionPriceCurve } from "./auction-price-libraries/IAuctionPriceCurve.sol";
-import { ICore } from "../interfaces/ICore.sol";
-import { StandardStartRebalanceLibrary } from "../tokens/rebalancing-libraries/StandardStartRebalanceLibrary.sol";
 
 /**
  * @title RebalancingHelperLibrary

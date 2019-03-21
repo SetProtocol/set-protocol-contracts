@@ -6,11 +6,11 @@ import { CoreIssuanceLibrary } from '../../artifacts/ts/CoreIssuanceLibrary';
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { ExchangeIssuanceLibrary } from '../../artifacts/ts/ExchangeIssuanceLibrary';
 import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
-import { StandardFailAuctionLibrary } from '../../artifacts/ts/StandardFailAuctionLibrary';
-import { StandardPlaceBidLibrary } from '../../artifacts/ts/StandardPlaceBidLibrary';
-import { StandardProposeLibrary } from '../../artifacts/ts/StandardProposeLibrary';
-import { StandardSettleRebalanceLibrary } from '../../artifacts/ts/StandardSettleRebalanceLibrary';
-import { StandardStartRebalanceLibrary } from '../../artifacts/ts/StandardStartRebalanceLibrary';
+import { FailAuctionLibrary } from '../../artifacts/ts/FailAuctionLibrary';
+import { PlaceBidLibrary } from '../../artifacts/ts/PlaceBidLibrary';
+import { ProposeLibrary } from '../../artifacts/ts/ProposeLibrary';
+import { SettleRebalanceLibrary } from '../../artifacts/ts/SettleRebalanceLibrary';
+import { StartRebalanceLibrary } from '../../artifacts/ts/StartRebalanceLibrary';
 
 import { getContractCode } from '../utils/output-helper';
 import { getWeb3Instance } from '../utils/blockchain';
@@ -51,28 +51,28 @@ describe('Deployment: Libraries', () => {
       expect(code.length).toBeGreaterThan(3);
     });
 
-    it('finds a valid StandardProposeLibrary at the address', async () => {
-      const code = await getContractCode(StandardProposeLibrary.contractName, web3);
+    it('finds a valid ProposeLibrary at the address', async () => {
+      const code = await getContractCode(ProposeLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
-    it('finds a valid StandardStartRebalanceLibrary at the address', async () => {
-      const code = await getContractCode(StandardStartRebalanceLibrary.contractName, web3);
+    it('finds a valid StartRebalanceLibrary at the address', async () => {
+      const code = await getContractCode(StartRebalanceLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
-    it('finds a valid StandardPlaceBidLibrary at the address', async () => {
-      const code = await getContractCode(StandardPlaceBidLibrary.contractName, web3);
+    it('finds a valid PlaceBidLibrary at the address', async () => {
+      const code = await getContractCode(PlaceBidLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
-    it('finds a valid StandardSettleRebalanceLibrary at the address', async () => {
-      const code = await getContractCode(StandardSettleRebalanceLibrary.contractName, web3);
+    it('finds a valid SettleRebalanceLibrary at the address', async () => {
+      const code = await getContractCode(SettleRebalanceLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
-    it('finds a valid StandardFailAuctionLibrary at the address', async () => {
-      const code = await getContractCode(StandardFailAuctionLibrary.contractName, web3);
+    it('finds a valid FailAuctionLibrary at the address', async () => {
+      const code = await getContractCode(FailAuctionLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
   });

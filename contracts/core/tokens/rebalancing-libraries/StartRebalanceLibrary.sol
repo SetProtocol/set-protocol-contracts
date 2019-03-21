@@ -29,14 +29,14 @@ import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol
 import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 /**
- * @title StandardStartRebalanceLibrary
+ * @title StartRebalanceLibrary
  * @author Set Protocol
  *
  * Default implementation of Rebalancing Set Token startRebalance function
  */
 
 
-library StandardStartRebalanceLibrary {
+library StartRebalanceLibrary {
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
 

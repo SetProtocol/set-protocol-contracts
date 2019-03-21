@@ -28,12 +28,12 @@ import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol
 
 
 /**
- * @title StandardProposeLibrary
+ * @title ProposeLibrary
  * @author Set Protocol
  *
  * Default implementation of Rebalancing Set Token propose function
  */
-library StandardProposeLibrary {
+library ProposeLibrary {
     using SafeMath for uint256;
 
     /* ============ Structs ============ */

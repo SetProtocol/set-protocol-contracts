@@ -28,11 +28,11 @@ import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { IWhiteList } from "../interfaces/IWhiteList.sol";
 import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
-import { StandardFailAuctionLibrary } from "./rebalancing-libraries/StandardFailAuctionLibrary.sol";
-import { StandardPlaceBidLibrary } from "./rebalancing-libraries/StandardPlaceBidLibrary.sol";
-import { StandardProposeLibrary } from "./rebalancing-libraries/StandardProposeLibrary.sol";
-import { StandardSettleRebalanceLibrary } from "./rebalancing-libraries/StandardSettleRebalanceLibrary.sol";
-import { StandardStartRebalanceLibrary } from "./rebalancing-libraries/StandardStartRebalanceLibrary.sol";
+import { FailAuctionLibrary } from "./rebalancing-libraries/FailAuctionLibrary.sol";
+import { PlaceBidLibrary } from "./rebalancing-libraries/PlaceBidLibrary.sol";
+import { ProposeLibrary } from "./rebalancing-libraries/ProposeLibrary.sol";
+import { SettleRebalanceLibrary } from "./rebalancing-libraries/SettleRebalanceLibrary.sol";
+import { StartRebalanceLibrary } from "./rebalancing-libraries/StartRebalanceLibrary.sol";
 
 
 /**
@@ -210,8 +210,8 @@ contract RebalancingSetToken is
         external
     {
         // Create ProposeAuctionParameters
-        StandardProposeLibrary.ProposeAuctionParameters memory proposeParameters =
-            StandardProposeLibrary.ProposeAuctionParameters({
+        ProposeLibrary.ProposeAuctionParameters memory proposeParameters =
+            ProposeLibrary.ProposeAuctionParameters({
                 manager: manager,
                 currentSet: currentSet,
                 coreAddress: core,
@@ -221,7 +221,7 @@ contract RebalancingSetToken is
             });
 
         // Validate proposal inputs and initialize auctionParameters
-        auctionParameters = StandardProposeLibrary.propose(
+        auctionParameters = ProposeLibrary.propose(
             _nextSet,
             _auctionLibrary,
             _auctionTimeToPivot,
@@ -253,7 +253,7 @@ contract RebalancingSetToken is
         external
     {
         // Redeem currentSet and define biddingParameters
-        biddingParameters = StandardStartRebalanceLibrary.startRebalance(
+        biddingParameters = StartRebalanceLibrary.startRebalance(
             currentSet,
             nextSet,
             auctionLibrary,
@@ -281,7 +281,7 @@ contract RebalancingSetToken is
         external
     {
         // Settle the rebalance and mint next Sets
-        unitShares = StandardSettleRebalanceLibrary.settleRebalance(
+        unitShares = SettleRebalanceLibrary.settleRebalance(
             totalSupply(),
             biddingParameters.remainingCurrentSets,
             biddingParameters.minimumBid,
@@ -313,7 +313,7 @@ contract RebalancingSetToken is
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
         // Validate bid quantity and module is sender
-        StandardPlaceBidLibrary.validateBidQuantity(
+        PlaceBidLibrary.validatePlaceBid(
             _quantity,
             core,
             biddingParameters
@@ -345,7 +345,7 @@ contract RebalancingSetToken is
         (
             ,
             calculatedUnitShares
-        ) = StandardSettleRebalanceLibrary.calculateNextSetIssueQuantity(
+        ) = SettleRebalanceLibrary.calculateNextSetIssueQuantity(
             totalSupply(),
             naturalUnit,
             nextSet,
@@ -354,7 +354,7 @@ contract RebalancingSetToken is
 
         // Fail auction and either reset to Default state or kill Rebalancing Set Token and enter Drawdown
         // state
-        uint8 integerRebalanceState = StandardFailAuctionLibrary.endFailedAuction(
+        uint8 integerRebalanceState = FailAuctionLibrary.endFailedAuction(
             startingCurrentSetAmount,
             calculatedUnitShares,
             currentSet,
@@ -384,7 +384,7 @@ contract RebalancingSetToken is
         view
         returns (uint256[] memory, uint256[] memory)
     {
-        return StandardPlaceBidLibrary.getBidPrice(
+        return PlaceBidLibrary.getBidPrice(
             _quantity,
             auctionLibrary,
             biddingParameters,

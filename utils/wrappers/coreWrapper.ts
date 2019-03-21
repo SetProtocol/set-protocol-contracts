@@ -50,11 +50,11 @@ const RebalancingTokenIssuanceModule = artifacts.require('RebalancingTokenIssuan
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
-const StandardFailAuctionLibrary = artifacts.require('StandardFailAuctionLibrary');
-const StandardPlaceBidLibrary = artifacts.require('StandardPlaceBidLibrary');
-const StandardProposeLibrary = artifacts.require('StandardProposeLibrary');
-const StandardSettleRebalanceLibrary = artifacts.require('StandardSettleRebalanceLibrary');
-const StandardStartRebalanceLibrary = artifacts.require('StandardStartRebalanceLibrary');
+const FailAuctionLibrary = artifacts.require('FailAuctionLibrary');
+const PlaceBidLibrary = artifacts.require('PlaceBidLibrary');
+const ProposeLibrary = artifacts.require('ProposeLibrary');
+const SettleRebalanceLibrary = artifacts.require('SettleRebalanceLibrary');
+const StartRebalanceLibrary = artifacts.require('StartRebalanceLibrary');
 const TimeLockUpgradeMock = artifacts.require('TimeLockUpgradeMock');
 const TransferProxy = artifacts.require('TransferProxy');
 const Vault = artifacts.require('Vault');
@@ -253,34 +253,34 @@ export class CoreWrapper {
       { from: this._tokenOwnerAddress },
     );
 
-    await StandardProposeLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
-    await StandardStartRebalanceLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
-    await StandardPlaceBidLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
-    await StandardSettleRebalanceLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
-    await StandardFailAuctionLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await ProposeLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await StartRebalanceLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await PlaceBidLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await SettleRebalanceLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await FailAuctionLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
 
-    const truffleStandardProposeLibrary = await StandardProposeLibrary.new(
+    const truffleProposeLibrary = await ProposeLibrary.new(
       { from: this._tokenOwnerAddress },
     );
-    const truffleStandardStartRebalanceLibrary = await StandardStartRebalanceLibrary.new(
+    const truffleStartRebalanceLibrary = await StartRebalanceLibrary.new(
       { from: this._tokenOwnerAddress },
     );
-    const truffleStandardPlaceBidLibrary = await StandardPlaceBidLibrary.new(
+    const trufflePlaceBidLibrary = await PlaceBidLibrary.new(
       { from: this._tokenOwnerAddress },
     );
-    const truffleStandardSettleRebalanceLibrary = await StandardSettleRebalanceLibrary.new(
+    const truffleSettleRebalanceLibrary = await SettleRebalanceLibrary.new(
       { from: this._tokenOwnerAddress },
     );
-    const truffleStandardFailAuctionLibrary = await StandardFailAuctionLibrary.new(
+    const truffleFailAuctionLibrary = await FailAuctionLibrary.new(
       { from: this._tokenOwnerAddress },
     );
 
     await contract.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
-    await contract.link('StandardProposeLibrary', truffleStandardProposeLibrary.address);
-    await contract.link('StandardStartRebalanceLibrary', truffleStandardStartRebalanceLibrary.address);
-    await contract.link('StandardPlaceBidLibrary', truffleStandardPlaceBidLibrary.address);
-    await contract.link('StandardSettleRebalanceLibrary', truffleStandardSettleRebalanceLibrary.address);
-    await contract.link('StandardFailAuctionLibrary', truffleStandardFailAuctionLibrary.address);
+    await contract.link('ProposeLibrary', truffleProposeLibrary.address);
+    await contract.link('StartRebalanceLibrary', truffleStartRebalanceLibrary.address);
+    await contract.link('PlaceBidLibrary', trufflePlaceBidLibrary.address);
+    await contract.link('SettleRebalanceLibrary', truffleSettleRebalanceLibrary.address);
+    await contract.link('FailAuctionLibrary', truffleFailAuctionLibrary.address);
   }
 
   public async linkCommonValidationsLibraryAsync(

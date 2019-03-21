@@ -41,7 +41,7 @@ contract LinearAuctionPriceCurve {
     /*
      * Declare price denominator (or precision) of price curve
      *
-     * @param  _priceDivisor        The priceDivisor you want this library to always return
+     * @param  _priceDivisor            The priceDivisor you want this library to always return
      * @param  _usesStartPrice          Boolean indicating if provided auctionStartPrice is used (true) or
      *                                  auction starts at 0 (false)
      */

@@ -40,7 +40,7 @@ contract ConstantAuctionPriceCurve {
     /*
      * Declare price you want this library to return when queried
      *
-     * @param  _priceNumerator          The priceNumerator you want this library to always return
+     * @param  _priceNumerator      The priceNumerator you want this library to always return
      * @param  _priceDivisor        The priceDivisor you want this library to always return
      */
     constructor(

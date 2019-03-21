@@ -287,7 +287,7 @@ contract('BTCDaiRebalancingManager', accounts => {
     const DAI_PRICE: BigNumber = new BigNumber(10 ** 18);
     const DAI_DECIMALS: BigNumber = new BigNumber(10 ** 18);
     const BTC_DECIMALS: BigNumber = new BigNumber(10 ** 8);
-    const PRICE_PRECISION: BigNumber = new BigNumber(100);
+    const PRICE_PRECISION: BigNumber = new BigNumber(1);
 
     let initialAllocationToken: SetTokenContract;
 

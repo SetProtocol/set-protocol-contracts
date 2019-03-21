@@ -39,16 +39,17 @@ contract BTCDaiRebalancingManager {
 
     /* ============ Constants ============ */
 
-    uint256 constant PRICE_PRECISION = 100;
+    uint256 constant PRICE_PRECISION = 1;
     uint256 constant AUCTION_LIB_PRICE_DIVISOR = 1000;
+    
     // Equal to $1 
-    uint256 constant DAI_PRICE = 10**18;
+    uint256 constant DAI_PRICE = 10 ** 18;
     uint256 constant DAI_DECIMALS = 18;
     uint256 constant BTC_DECIMALS = 8;
-    uint256 constant DECIMAL_DIFF_MULTIPLIER = 10**10;
+    uint256 constant DECIMAL_DIFF_MULTIPLIER = 10 ** 10;
     uint256 constant SET_TOKEN_DECIMALS = 18;
     uint256 constant THIRTY_MINUTES_IN_SECONDS = 1800;
-    uint256 constant VALUE_TO_CENTS_CONVERSION = 10**16;
+    uint256 constant VALUE_TO_CENTS_CONVERSION = 10 ** 16;
 
 
     /* ============ State Variables ============ */
@@ -463,13 +464,13 @@ contract BTCDaiRebalancingManager {
     {
         // Calculate the amount of component base units are in one full set token
         uint256 componentUnitsInFullToken = _unit
-            .mul(10**SET_TOKEN_DECIMALS)
+            .mul(10 ** SET_TOKEN_DECIMALS)
             .div(_naturalUnit);
         
-        // Return value of component token in one full set token, divide by 10**16 to turn tokenPrice into cents
+        // Return value of component token in one full set token, divide by 10 ** 16 to turn tokenPrice into cents
         return _tokenPrice
             .mul(componentUnitsInFullToken)
-            .div(10**_tokenDecimals)
+            .div(10 ** _tokenDecimals)
             .div(VALUE_TO_CENTS_CONVERSION);
     }
 }

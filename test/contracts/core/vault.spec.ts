@@ -56,10 +56,10 @@ contract('Vault', accounts => {
   });
 
   describe('#withdrawTo', async () => {
-    let subjectAmountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;
-    let subjectCaller: Address = authorizedAccount;
+    let subjectAmountToWithdraw: BigNumber;
+    let subjectCaller: Address;
     let subjectTokenAddress: Address;
-    let subjectReceiver: Address = ownerAccount;
+    let subjectReceiver: Address;
     const ownerExistingBalanceInVault: BigNumber = DEPLOYED_TOKEN_QUANTITY;
 
     beforeEach(async () => {
@@ -74,21 +74,16 @@ contract('Vault', accounts => {
         ownerExistingBalanceInVault,
         authorizedAccount,
       );
-    });
 
-    afterEach(async () => {
       subjectAmountToWithdraw = DEPLOYED_TOKEN_QUANTITY;
-      subjectCaller = authorizedAccount;
       subjectReceiver = ownerAccount;
-      subjectTokenAddress = undefined;
+      subjectTokenAddress = subjectTokenAddress || mockToken.address;
+      subjectCaller = authorizedAccount;
     });
 
     async function subject(): Promise<string> {
-      // Initialize tokenAddress to deployed token's address unless subjectTokenAddress is overwritten in test cases
-      const tokenAddress = subjectTokenAddress || mockToken.address;
-
       return vault.withdrawTo.sendTransactionAsync(
-        tokenAddress,
+        subjectTokenAddress,
         subjectReceiver,
         subjectAmountToWithdraw,
         { from: subjectCaller },
@@ -188,20 +183,33 @@ contract('Vault', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the quantity is 0', async () => {
+      beforeEach(async () => {
+        subjectAmountToWithdraw = ZERO;
+      });
+
+      it('should not change any state', async () => {
+        const previousToBalance = await vault.balances.callAsync(subjectTokenAddress, subjectReceiver);
+
+        await subject();
+
+        const currentToBalance = await vault.balances.callAsync(subjectTokenAddress, subjectReceiver);
+        expect(currentToBalance).to.be.bignumber.equal(previousToBalance);
+      });
+    });
   });
 
   describe('#incrementTokenOwner', async () => {
     const tokenAddress: Address = NULL_ADDRESS;
     const authorized: Address = authorizedAccount;
-    let subjectCaller: Address = authorizedAccount;
-    let subjectAmountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
+    let subjectCaller: Address;
+    let subjectAmountToIncrement: BigNumber;
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorized);
-    });
 
-    afterEach(async () => {
       subjectCaller = authorizedAccount;
       subjectAmountToIncrement = DEPLOYED_TOKEN_QUANTITY;
     });
@@ -229,6 +237,21 @@ contract('Vault', accounts => {
 
       it('should revert', async () => {
         await expectRevertError(subject());
+      });
+    });
+
+    describe('when the quantity is 0', async () => {
+      beforeEach(async () => {
+        subjectAmountToIncrement = ZERO;
+      });
+
+      it('should not change any state', async () => {
+        const previousOwnerBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+
+        await subject();
+
+        const currentOwnerBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+        expect(currentOwnerBalance).to.be.bignumber.equal(previousOwnerBalance);
       });
     });
   });
@@ -291,6 +314,21 @@ contract('Vault', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the quantity is 0', async () => {
+      beforeEach(async () => {
+        subjectAmountToDecrement = ZERO;
+      });
+
+      it('should not change any state', async () => {
+        const previousOwnerBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+
+        await subject();
+
+        const currentOwnerBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+        expect(currentOwnerBalance).to.be.bignumber.equal(previousOwnerBalance);
+      });
+    });
   });
 
   describe('#transferBalance', async () => {
@@ -334,21 +372,21 @@ contract('Vault', accounts => {
     }
 
     it('should decrement the balance of the sender by the correct amount', async () => {
-      const oldSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
+      const oldSenderBalance = await vault.balances.callAsync(subjectTokenAddress, ownerAccount);
 
       await subject();
 
-      const newSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
+      const newSenderBalance = await vault.balances.callAsync(subjectTokenAddress, ownerAccount);
       const expectedSenderBalance = oldSenderBalance.sub(subjectAmountToTransfer);
       expect(newSenderBalance).to.be.bignumber.equal(expectedSenderBalance);
     });
 
     it('should increment the balance of the receiver by the correct amount', async () => {
-      const oldReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
+      const oldReceiverBalance = await vault.balances.callAsync(subjectTokenAddress, otherAccount);
 
       await subject();
 
-      const newReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
+      const newReceiverBalance = await vault.balances.callAsync(subjectTokenAddress, otherAccount);
       const expectedReceiverBalance = oldReceiverBalance.add(subjectAmountToTransfer);
       expect(newReceiverBalance).to.be.bignumber.equal(expectedReceiverBalance);
     });
@@ -370,6 +408,30 @@ contract('Vault', accounts => {
 
       it('should revert', async () => {
         await expectRevertError(subject());
+      });
+    });
+
+    describe('when the quantity is 0', async () => {
+      beforeEach(async () => {
+        subjectAmountToTransfer = ZERO;
+      });
+
+      it('should not change the from accounts balance', async () => {
+        const previousOwnerBalance = await vault.balances.callAsync(subjectTokenAddress, subjectFromAddress);
+
+        await subject();
+
+        const currentOwnerBalance = await vault.balances.callAsync(subjectTokenAddress, subjectFromAddress);
+        expect(currentOwnerBalance).to.be.bignumber.equal(previousOwnerBalance);
+      });
+
+      it('should not change the to accounts balance', async () => {
+        const previousOwnerBalance = await vault.balances.callAsync(subjectTokenAddress, subjectToAddress);
+
+        await subject();
+
+        const currentOwnerBalance = await vault.balances.callAsync(subjectTokenAddress, subjectToAddress);
+        expect(currentOwnerBalance).to.be.bignumber.equal(previousOwnerBalance);
       });
     });
   });

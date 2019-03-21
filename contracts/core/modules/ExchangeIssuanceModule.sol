@@ -296,8 +296,9 @@ contract ExchangeIssuanceModule is
         uint256[] memory baseSetWithdrawQuantities = new uint256[](baseSetComponents.length);
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
             uint256 withdrawQuantity = vaultInstance.getOwnerBalance(baseSetComponents[i], address(this));
-            
-            baseSetWithdrawQuantities[i] = withdrawQuantity;
+            if (withdrawQuantity > 0) {
+                baseSetWithdrawQuantities[i] = withdrawQuantity;    
+            }
         }
 
         // Return the unexchanged components to the user

@@ -10,11 +10,11 @@ import {
   ExchangeIssuanceLibraryContract,
   RebalancingHelperLibraryContract,
   SetTokenLibraryContract,
-  StandardFailAuctionLibraryContract,
-  StandardPlaceBidLibraryContract,
-  StandardProposeLibraryContract,
-  StandardSettleRebalanceLibraryContract,
-  StandardStartRebalanceLibraryContract,
+  FailAuctionLibraryContract,
+  PlaceBidLibraryContract,
+  ProposeLibraryContract,
+  SettleRebalanceLibraryContract,
+  StartRebalanceLibraryContract,
 } from '../../utils/contracts';
 
 import { CommonValidationsLibrary } from '../../artifacts/ts/CommonValidationsLibrary';
@@ -23,11 +23,11 @@ import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { ExchangeIssuanceLibrary } from '../../artifacts/ts/ExchangeIssuanceLibrary';
 import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
 import { SetTokenLibrary } from '../../artifacts/ts/SetTokenLibrary';
-import { StandardFailAuctionLibrary } from '../../artifacts/ts/StandardFailAuctionLibrary';
-import { StandardPlaceBidLibrary } from '../../artifacts/ts/StandardPlaceBidLibrary';
-import { StandardProposeLibrary } from '../../artifacts/ts/StandardProposeLibrary';
-import { StandardSettleRebalanceLibrary } from '../../artifacts/ts/StandardSettleRebalanceLibrary';
-import { StandardStartRebalanceLibrary } from '../../artifacts/ts/StandardStartRebalanceLibrary';
+import { FailAuctionLibrary } from '../../artifacts/ts/FailAuctionLibrary';
+import { PlaceBidLibrary } from '../../artifacts/ts/PlaceBidLibrary';
+import { ProposeLibrary } from '../../artifacts/ts/ProposeLibrary';
+import { SettleRebalanceLibrary } from '../../artifacts/ts/SettleRebalanceLibrary';
+import { StartRebalanceLibrary } from '../../artifacts/ts/StartRebalanceLibrary';
 
 export class LibrariesStage implements DeploymentStageInterface {
 
@@ -45,12 +45,12 @@ export class LibrariesStage implements DeploymentStageInterface {
     await this.deployRebalancingHelperLibrary();
     await this.deploySetTokenLibrary();
 
-    await this.deployStandardProposeLibrary();
-    await this.deployStandardSettleRebalanceLibrary();
+    await this.deployProposeLibrary();
+    await this.deploySettleRebalanceLibrary();
 
-    await this.deployStandardStartRebalanceLibrary();
-    await this.deployStandardPlaceBidLibrary();
-    await this.deployStandardFailAuctionLibrary();
+    await this.deployStartRebalanceLibrary();
+    await this.deployPlaceBidLibrary();
+    await this.deployFailAuctionLibrary();
   }
 
   private async deployCommonValidationsLibrary(): Promise<CommonValidationsLibraryContract> {
@@ -125,75 +125,75 @@ export class LibrariesStage implements DeploymentStageInterface {
     return await SetTokenLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployStandardProposeLibrary(): Promise<StandardProposeLibraryContract> {
-    const name = StandardProposeLibrary.contractName;
+  private async deployProposeLibrary(): Promise<ProposeLibraryContract> {
+    const name = ProposeLibrary.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
-      return await StandardProposeLibraryContract.at(address, this._web3, TX_DEFAULTS);
+      return await ProposeLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(StandardProposeLibrary.bytecode, this._web3, name);
-    return await StandardProposeLibraryContract.at(address, this._web3, TX_DEFAULTS);
+    address = await deployContract(ProposeLibrary.bytecode, this._web3, name);
+    return await ProposeLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployStandardSettleRebalanceLibrary(): Promise<StandardSettleRebalanceLibraryContract> {
-    const name = StandardSettleRebalanceLibrary.contractName;
+  private async deploySettleRebalanceLibrary(): Promise<SettleRebalanceLibraryContract> {
+    const name = SettleRebalanceLibrary.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
-      return await StandardSettleRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
+      return await SettleRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(StandardSettleRebalanceLibrary.bytecode, this._web3, name);
-    return await StandardSettleRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
+    address = await deployContract(SettleRebalanceLibrary.bytecode, this._web3, name);
+    return await SettleRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployStandardStartRebalanceLibrary(): Promise<StandardStartRebalanceLibraryContract> {
-    const name = StandardStartRebalanceLibrary.contractName;
+  private async deployStartRebalanceLibrary(): Promise<StartRebalanceLibraryContract> {
+    const name = StartRebalanceLibrary.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
-      return await StandardStartRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
+      return await StartRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
     const rebalanceHelperLibraryAddress = await getContractAddress(RebalancingHelperLibrary.contractName);
-    const originalByteCode = StandardStartRebalanceLibrary.bytecode;
+    const originalByteCode = StartRebalanceLibrary.bytecode;
     const linkedByteCode = linkLibraries([
       { name: RebalancingHelperLibrary.contractName, address: rebalanceHelperLibraryAddress },
     ], originalByteCode);
 
     address = await deployContract(linkedByteCode, this._web3, name);
-    return await StandardStartRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
+    return await StartRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployStandardPlaceBidLibrary(): Promise<StandardPlaceBidLibraryContract> {
-    const name = StandardPlaceBidLibrary.contractName;
+  private async deployPlaceBidLibrary(): Promise<PlaceBidLibraryContract> {
+    const name = PlaceBidLibrary.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
-      return await StandardPlaceBidLibraryContract.at(address, this._web3, TX_DEFAULTS);
+      return await PlaceBidLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
     const rebalanceHelperLibraryAddress = await getContractAddress(RebalancingHelperLibrary.contractName);
-    const originalByteCode = StandardPlaceBidLibrary.bytecode;
+    const originalByteCode = PlaceBidLibrary.bytecode;
     const linkedByteCode = linkLibraries([
       { name: RebalancingHelperLibrary.contractName, address: rebalanceHelperLibraryAddress },
     ], originalByteCode);
 
     address = await deployContract(linkedByteCode, this._web3, name);
-    return await StandardPlaceBidLibraryContract.at(address, this._web3, TX_DEFAULTS);
+    return await PlaceBidLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployStandardFailAuctionLibrary(): Promise<StandardFailAuctionLibraryContract> {
-    const name = StandardFailAuctionLibrary.contractName;
+  private async deployFailAuctionLibrary(): Promise<FailAuctionLibraryContract> {
+    const name = FailAuctionLibrary.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
-      return await StandardFailAuctionLibraryContract.at(address, this._web3, TX_DEFAULTS);
+      return await FailAuctionLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(StandardFailAuctionLibrary.bytecode, this._web3, name);
-    return await StandardFailAuctionLibraryContract.at(address, this._web3, TX_DEFAULTS);
+    address = await deployContract(FailAuctionLibrary.bytecode, this._web3, name);
+    return await FailAuctionLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 }

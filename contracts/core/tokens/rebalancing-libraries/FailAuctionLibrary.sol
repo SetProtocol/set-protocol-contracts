@@ -28,12 +28,12 @@ import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol
 
 
 /**
- * @title StandardFailAuctionLibrary
+ * @title FailAuctionLibrary
  * @author Set Protocol
  *
  * Default implementation of Rebalancing Set Token endFailedAuction function
  */
-library StandardFailAuctionLibrary {
+library FailAuctionLibrary {
     using SafeMath for uint256;
 
     /**

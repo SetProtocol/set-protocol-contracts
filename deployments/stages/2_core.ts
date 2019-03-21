@@ -33,11 +33,11 @@ import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLi
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 import { SetTokenLibrary } from '../../artifacts/ts/SetTokenLibrary';
-import { StandardFailAuctionLibrary } from '../../artifacts/ts/StandardFailAuctionLibrary';
-import { StandardPlaceBidLibrary } from '../../artifacts/ts/StandardPlaceBidLibrary';
-import { StandardProposeLibrary } from '../../artifacts/ts/StandardProposeLibrary';
-import { StandardSettleRebalanceLibrary } from '../../artifacts/ts/StandardSettleRebalanceLibrary';
-import { StandardStartRebalanceLibrary } from '../../artifacts/ts/StandardStartRebalanceLibrary';
+import { FailAuctionLibrary } from '../../artifacts/ts/FailAuctionLibrary';
+import { PlaceBidLibrary } from '../../artifacts/ts/PlaceBidLibrary';
+import { ProposeLibrary } from '../../artifacts/ts/ProposeLibrary';
+import { SettleRebalanceLibrary } from '../../artifacts/ts/SettleRebalanceLibrary';
+import { StartRebalanceLibrary } from '../../artifacts/ts/StartRebalanceLibrary';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
 import { WethMock } from '../../artifacts/ts/WethMock';
@@ -215,20 +215,20 @@ export class CoreStage implements DeploymentStageInterface {
     const coreAddress = await getContractAddress(Core.contractName);
     const whiteListAddress = await getContractAddress(WhiteList.contractName);
 
-    const standardStartRebalanceLibrary = await getContractAddress(StandardStartRebalanceLibrary.contractName);
-    const standardFailAuctionLibrary = await getContractAddress(StandardFailAuctionLibrary.contractName);
-    const standardProposeLibrary = await getContractAddress(StandardProposeLibrary.contractName);
-    const standardPlaceBidLibrary = await getContractAddress(StandardPlaceBidLibrary.contractName);
-    const standardSettleRebalanceLibrary = await getContractAddress(StandardSettleRebalanceLibrary.contractName);
+    const startRebalanceLibrary = await getContractAddress(StartRebalanceLibrary.contractName);
+    const failAuctionLibrary = await getContractAddress(FailAuctionLibrary.contractName);
+    const proposeLibrary = await getContractAddress(ProposeLibrary.contractName);
+    const placeBidLibrary = await getContractAddress(PlaceBidLibrary.contractName);
+    const settleRebalanceLibrary = await getContractAddress(SettleRebalanceLibrary.contractName);
     const rebalancingHelperLibrary = await getContractAddress(RebalancingHelperLibrary.contractName);
 
     const originalByteCode = RebalancingSetTokenFactory.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: StandardStartRebalanceLibrary.contractName, address: standardStartRebalanceLibrary },
-      { name: StandardFailAuctionLibrary.contractName, address: standardFailAuctionLibrary },
-      { name: StandardProposeLibrary.contractName, address: standardProposeLibrary },
-      { name: StandardPlaceBidLibrary.contractName, address: standardPlaceBidLibrary },
-      { name: StandardSettleRebalanceLibrary.contractName, address: standardSettleRebalanceLibrary },
+      { name: StartRebalanceLibrary.contractName, address: startRebalanceLibrary },
+      { name: FailAuctionLibrary.contractName, address: failAuctionLibrary },
+      { name: ProposeLibrary.contractName, address: proposeLibrary },
+      { name: PlaceBidLibrary.contractName, address: placeBidLibrary },
+      { name: SettleRebalanceLibrary.contractName, address: settleRebalanceLibrary },
       { name: RebalancingHelperLibrary.contractName, address: rebalancingHelperLibrary },
     ], originalByteCode);
 

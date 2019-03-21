@@ -25,12 +25,12 @@ import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol
 
 
 /**
- * @title StandardPlaceBidLibrary
+ * @title PlaceBidLibrary
  * @author Set Protocol
  *
  * Default implementation of Rebalancing Set Token placeBid function
  */
-library StandardPlaceBidLibrary {
+library PlaceBidLibrary {
     using SafeMath for uint256;
 
     /* ============ Internal Functions ============ */
@@ -44,7 +44,7 @@ library StandardPlaceBidLibrary {
      * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
      * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
      */
-    function validateBidQuantity(
+    function validatePlaceBid(
         uint256 _quantity,
         address _coreAddress,
         RebalancingHelperLibrary.BiddingParameters memory _biddingParameters

@@ -1015,7 +1015,9 @@ contract('RebalanceAuctionModule', accounts => {
           false
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+        await rebalancingWrapper.endFailedRebalanceAsync(
+          rebalancingSetToken
+        );
       });
 
       it('should revert', async () => {
@@ -1211,7 +1213,9 @@ contract('RebalanceAuctionModule', accounts => {
           false
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+        await rebalancingWrapper.endFailedRebalanceAsync(
+          rebalancingSetToken
+        );
       });
 
       it('transfers the correct amount of tokens to the bidder in the Vault', async () => {

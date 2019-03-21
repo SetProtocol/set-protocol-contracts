@@ -432,6 +432,15 @@ export class RebalancingWrapper {
     );
   }
 
+  public async endFailedRebalanceAsync(
+    rebalancingSetToken: RebalancingSetTokenContract,
+    caller: Address = this._tokenOwnerAddress,
+  ): Promise<void> {
+    await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
+      { gas: DEFAULT_GAS },
+    );
+  }
+
   public async constructInflowOutflowArraysAsync(
     rebalancingSetToken: RebalancingSetTokenContract,
     quantity: BigNumber,

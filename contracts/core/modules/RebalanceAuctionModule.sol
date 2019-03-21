@@ -203,8 +203,8 @@ contract RebalanceAuctionModule is
             "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
         );
 
-        // Get combinedTokenArray from RebalancingSetToken
-        address[] memory combinedTokenArray = rebalancingSetToken.getCombinedTokenArray();
+        // Get getFailedAuctionWithdrawComponents from RebalancingSetToken
+        address[] memory withdrawComponents = rebalancingSetToken.getFailedAuctionWithdrawComponents();
 
         // Get Rebalancing Set Token's total supply
         uint256 setTotalSupply = rebalancingSetToken.totalSupply();
@@ -213,11 +213,11 @@ contract RebalanceAuctionModule is
         uint256 callerBalance = rebalancingSetToken.balanceOf(msg.sender);
 
         // Get RebalancingSetToken component amounts and calculate caller's portion of each token
-        uint256 transferArrayLength = combinedTokenArray.length;
+        uint256 transferArrayLength = withdrawComponents.length;
         uint256[] memory componentTransferAmount = new uint256[](transferArrayLength);
         for (uint256 i = 0; i < transferArrayLength; i++) {
             uint256 tokenCollateralAmount = vaultInstance.getOwnerBalance(
-                combinedTokenArray[i],
+                withdrawComponents[i],
                 _rebalancingSetToken
             );
             componentTransferAmount[i] = tokenCollateralAmount.mul(callerBalance).div(setTotalSupply);
@@ -231,7 +231,7 @@ contract RebalanceAuctionModule is
 
         // Transfer token amounts to caller in Vault from Rebalancing Set Token
         coreInstance.batchTransferBalanceModule(
-            combinedTokenArray,
+            withdrawComponents,
             _rebalancingSetToken,
             msg.sender,
             componentTransferAmount

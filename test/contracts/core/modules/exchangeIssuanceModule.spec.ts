@@ -539,9 +539,12 @@ contract('ExchangeIssuanceModule', accounts => {
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
     let subjectExchangeOrdersData: Bytes;
 
+    let setComponentUnit: BigNumber;
     let naturalUnit: BigNumber;
     let setToken: SetTokenContract;
     let receiveToken: StandardTokenMockContract;
+
+    let nonExchangedComponent: StandardTokenMockContract;
 
     let totalReceiveToken: BigNumber;
 
@@ -577,10 +580,11 @@ contract('ExchangeIssuanceModule', accounts => {
 
       const firstComponent = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
       const secondComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+      nonExchangedComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
       receiveToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
 
-      const componentTokens = [firstComponent, secondComponent];
-      const setComponentUnit = ether(4);
+      const componentTokens = [firstComponent, secondComponent, nonExchangedComponent];
+      setComponentUnit = ether(4);
       const componentAddresses = componentTokens.map(token => token.address);
       const componentUnits = componentTokens.map(token => setComponentUnit);
       naturalUnit = ether(2);
@@ -605,7 +609,7 @@ contract('ExchangeIssuanceModule', accounts => {
 
       exchangeRedeemSendTokens = exchangeRedeemSendTokens || [firstComponent.address, secondComponent.address];
       exchangeRedeemSendTokenAmounts =
-        exchangeRedeemSendTokenAmounts || _.map(componentUnits, unit => unit
+        exchangeRedeemSendTokenAmounts || _.map(componentUnits.slice(0, 2), unit => unit
           .mul(exchangeRedeemQuantity)
           .div(naturalUnit)
         );
@@ -684,7 +688,7 @@ contract('ExchangeIssuanceModule', accounts => {
       );
 
       await erc20Wrapper.approveTransfersAsync(
-        [firstComponent, secondComponent],
+        [firstComponent, secondComponent, nonExchangedComponent],
         transferProxy.address,
         contractDeployer
       );
@@ -732,6 +736,18 @@ contract('ExchangeIssuanceModule', accounts => {
 
       const expectedNewBalance = existingBalance.add(totalReceiveToken);
       const newBalance = await receiveToken.balanceOf.callAsync(exchangeIssuanceCaller);
+
+      await expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
+    });
+
+    it('returns the correct quantity of non-exchanged tokens', async () => {
+      const existingBalance = await nonExchangedComponent.balanceOf.callAsync(exchangeIssuanceCaller);
+
+      await subject();
+
+      const incrementQuantity = setComponentUnit.mul(exchangeRedeemQuantity).div(naturalUnit);
+      const expectedNewBalance = existingBalance.add(incrementQuantity);
+      const newBalance = await nonExchangedComponent.balanceOf.callAsync(exchangeIssuanceCaller);
 
       await expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });

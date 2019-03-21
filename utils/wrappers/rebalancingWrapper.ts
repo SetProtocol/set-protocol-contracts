@@ -545,7 +545,7 @@ export class RebalancingWrapper {
     elapsedTime: BigNumber,
     auctionTimeToPivot: BigNumber,
     auctionPivotPrice: BigNumber,
-    priceDivisor: BigNumber,
+    priceDivisorParam: BigNumber,
   ): any {
     let priceNumerator: BigNumber;
     let priceDivisor: BigNumber;
@@ -553,13 +553,13 @@ export class RebalancingWrapper {
 
     if (elapsedTime.lessThanOrEqualTo(auctionTimeToPivot)) {
       priceNumerator = elapsedTime.mul(auctionPivotPrice).div(auctionTimeToPivot).round(0, 3);
-      priceDivisor = priceDivisor;
+      priceDivisor = priceDivisorParam;
     } else {
       const timeIncrements = elapsedTime.sub(auctionTimeToPivot).div(30).round(0, 3);
 
       if (timeIncrements.lessThan(timeIncrementsToZero)) {
         priceNumerator = auctionPivotPrice;
-        priceDivisor = priceDivisor.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
+        priceDivisor = priceDivisorParam.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
       } else {
         priceDivisor = new BigNumber(1);
         priceNumerator = auctionPivotPrice.add(auctionPivotPrice.mul(timeIncrements.sub(1000)));
@@ -576,7 +576,7 @@ export class RebalancingWrapper {
     auctionTimeToPivot: BigNumber,
     auctionStartPrice: BigNumber,
     auctionPivotPrice: BigNumber,
-    priceDivisor: BigNumber,
+    priceDivisorParam: BigNumber,
   ): any {
     let priceNumerator: BigNumber;
     let priceDivisor: BigNumber;
@@ -589,13 +589,13 @@ export class RebalancingWrapper {
         ).div(auctionTimeToPivot).round(0, 3)
       );
 
-      priceDivisor = priceDivisor;
+      priceDivisor = priceDivisorParam;
     } else {
       const timeIncrements = elapsedTime.sub(auctionTimeToPivot).div(30).round(0, 3);
 
       if (timeIncrements.lessThan(timeIncrementsToZero)) {
         priceNumerator = auctionPivotPrice;
-        priceDivisor = priceDivisor.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
+        priceDivisor = priceDivisorParam.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
       } else {
         priceDivisor = new BigNumber(1);
         priceNumerator = auctionPivotPrice.add(auctionPivotPrice.mul(timeIncrements.sub(1000)));

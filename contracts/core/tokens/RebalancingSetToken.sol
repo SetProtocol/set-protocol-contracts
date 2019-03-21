@@ -622,8 +622,11 @@ contract RebalancingSetToken is
         return biddingParameters.combinedNextSetUnits;
     }
 
-    /* ============ Getter Functions ============ */
+    /* ============ Internal Functions ============ */
 
+    /*
+     * Reset auction specific state after failed or successful rebalance
+     */
     function clearAuctionState()
         internal
     {
@@ -632,6 +635,8 @@ contract RebalancingSetToken is
         startingCurrentSetAmount = 0;
         delete auctionParameters;
 
+        // If Set in Drawdown then preserve combinedTokenArray to be used in
+        // withdrawFromFailedRebalance, otherwise zero out all biddingParameters
         if (rebalanceState == RebalancingHelperLibrary.State.Drawdown) {
             biddingParameters.minimumBid = 0;
             biddingParameters.remainingCurrentSets = 0;

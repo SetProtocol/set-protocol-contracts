@@ -144,6 +144,7 @@ export class ModulesStage implements DeploymentStageInterface {
     const transferProxyAddress = await getContractAddress(TransferProxy.contractName);
     const exchangeIssuanceAddress = await getContractAddress(ExchangeIssuanceModule.contractName);
     const erc20WrapperAddress = await getContractAddress(ERC20Wrapper.contractName);
+    const vaultAddress = await getContractAddress(Vault.contractName);
     const wethAddress = await findDependency(DEPENDENCY.WETH);
 
     const originalByteCode = RebalancingSetExchangeIssuanceModule.bytecode;
@@ -158,6 +159,7 @@ export class ModulesStage implements DeploymentStageInterface {
         transferProxyAddress,
         exchangeIssuanceAddress,
         wethAddress,
+        vaultAddress,
       ],
     }).encodeABI();
 

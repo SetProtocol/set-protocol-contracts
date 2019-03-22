@@ -1933,7 +1933,7 @@ contract('RebalancingSetToken', accounts => {
       it('clears the auctionParameters struct', async () => {
         await subject();
 
-        const auctionParameters = await rebalancingSetToken.getAuctionParameters.callAsync();
+        const auctionParameters = await rebalancingSetToken.getAuctionPriceParameters.callAsync();
         const expectedAuctionParameters = [new BigNumber(0), new BigNumber(0), new BigNumber(0), new BigNumber(0)];
 
         expect(auctionParameters).to.deep.equal(expectedAuctionParameters);
@@ -2241,7 +2241,7 @@ contract('RebalancingSetToken', accounts => {
         it('clears the auctionParameters struct', async () => {
           await subject();
 
-          const auctionParameters = await rebalancingSetToken.getAuctionParameters.callAsync();
+          const auctionParameters = await rebalancingSetToken.getAuctionPriceParameters.callAsync();
           const expectedAuctionParameters = [new BigNumber(0), new BigNumber(0), new BigNumber(0), new BigNumber(0)];
 
           expect(auctionParameters).to.deep.equal(expectedAuctionParameters);
@@ -2319,7 +2319,7 @@ contract('RebalancingSetToken', accounts => {
         it('clears the auctionParameters struct', async () => {
           await subject();
 
-          const auctionParameters = await rebalancingSetToken.getAuctionParameters.callAsync();
+          const auctionParameters = await rebalancingSetToken.getAuctionPriceParameters.callAsync();
           const expectedAuctionParameters = [new BigNumber(0), new BigNumber(0), new BigNumber(0), new BigNumber(0)];
 
           expect(auctionParameters).to.deep.equal(expectedAuctionParameters);

@@ -8,7 +8,7 @@ import {
   CoreIssuanceLibraryContract,
   ERC20WrapperContract,
   ExchangeIssuanceLibraryContract,
-  RebalancingHelperLibraryContract,
+  RebalancingLibraryContract,
   SetTokenLibraryContract,
   FailAuctionLibraryContract,
   PlaceBidLibraryContract,
@@ -21,7 +21,7 @@ import { CommonValidationsLibrary } from '../../artifacts/ts/CommonValidationsLi
 import { CoreIssuanceLibrary } from '../../artifacts/ts/CoreIssuanceLibrary';
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { ExchangeIssuanceLibrary } from '../../artifacts/ts/ExchangeIssuanceLibrary';
-import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
+import { RebalancingLibrary } from '../../artifacts/ts/RebalancingLibrary';
 import { SetTokenLibrary } from '../../artifacts/ts/SetTokenLibrary';
 import { FailAuctionLibrary } from '../../artifacts/ts/FailAuctionLibrary';
 import { PlaceBidLibrary } from '../../artifacts/ts/PlaceBidLibrary';
@@ -42,7 +42,7 @@ export class LibrariesStage implements DeploymentStageInterface {
     await this.deployERC20Wrapper();
     await this.deployCoreIssuanceLibrary();
     await this.deployExchangeIssuanceLibrary();
-    await this.deployRebalancingHelperLibrary();
+    await this.deployRebalancingLibrary();
     await this.deploySetTokenLibrary();
 
     await this.deployProposeLibrary();
@@ -101,16 +101,16 @@ export class LibrariesStage implements DeploymentStageInterface {
     return await CoreIssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployRebalancingHelperLibrary(): Promise<RebalancingHelperLibraryContract> {
-    const name = RebalancingHelperLibrary.contractName;
+  private async deployRebalancingLibrary(): Promise<RebalancingLibraryContract> {
+    const name = RebalancingLibrary.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
-      return await RebalancingHelperLibraryContract.at(address, this._web3, TX_DEFAULTS);
+      return await RebalancingLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(RebalancingHelperLibrary.bytecode, this._web3, name);
-    return await RebalancingHelperLibraryContract.at(address, this._web3, TX_DEFAULTS);
+    address = await deployContract(RebalancingLibrary.bytecode, this._web3, name);
+    return await RebalancingLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deploySetTokenLibrary(): Promise<SetTokenLibraryContract> {
@@ -157,10 +157,10 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await StartRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const rebalanceHelperLibraryAddress = await getContractAddress(RebalancingHelperLibrary.contractName);
+    const rebalanceHelperLibraryAddress = await getContractAddress(RebalancingLibrary.contractName);
     const originalByteCode = StartRebalanceLibrary.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: RebalancingHelperLibrary.contractName, address: rebalanceHelperLibraryAddress },
+      { name: RebalancingLibrary.contractName, address: rebalanceHelperLibraryAddress },
     ], originalByteCode);
 
     address = await deployContract(linkedByteCode, this._web3, name);
@@ -175,10 +175,10 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await PlaceBidLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const rebalanceHelperLibraryAddress = await getContractAddress(RebalancingHelperLibrary.contractName);
+    const rebalanceHelperLibraryAddress = await getContractAddress(RebalancingLibrary.contractName);
     const originalByteCode = PlaceBidLibrary.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: RebalancingHelperLibrary.contractName, address: rebalanceHelperLibraryAddress },
+      { name: RebalancingLibrary.contractName, address: rebalanceHelperLibraryAddress },
     ], originalByteCode);
 
     address = await deployContract(linkedByteCode, this._web3, name);

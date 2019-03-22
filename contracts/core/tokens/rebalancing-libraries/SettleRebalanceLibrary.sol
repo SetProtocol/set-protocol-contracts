@@ -24,7 +24,7 @@ import { CommonMath } from "../../../lib/CommonMath.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
-import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
+import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 
@@ -66,7 +66,7 @@ library SettleRebalanceLibrary {
     {
         // Must be in Rebalance state to call settlement
         require(
-            _rebalanceState == uint8(RebalancingHelperLibrary.State.Rebalance),
+            _rebalanceState == uint8(RebalancingLibrary.State.Rebalance),
             "RebalancingSetToken.settleRebalance: State must be Rebalance"
         );
 

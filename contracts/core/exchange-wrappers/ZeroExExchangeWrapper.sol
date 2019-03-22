@@ -17,6 +17,8 @@
 pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
+import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../../lib/CommonMath.sol";
@@ -75,8 +77,8 @@ contract ZeroExExchangeWrapper {
         setTransferProxy = _setTransferProxy;
 
         // Approve transfer of 0x token from this wrapper in the event of zeroExOrder relayer fees
-        ERC20Wrapper.approve(
-            _zeroExToken,
+        SafeERC20.safeApprove(
+            IERC20(_zeroExToken),
             _zeroExProxy,
             CommonMath.maxUInt256()
         );
@@ -220,8 +222,8 @@ contract ZeroExExchangeWrapper {
         );
 
         // Transfer ZRX from the caller to this wrapper
-        ERC20Wrapper.transferFrom(
-            zeroExToken,
+        SafeERC20.safeTransferFrom(
+            IERC20(zeroExToken),
             _caller,
             address(this),
             takerFeeToTransfer

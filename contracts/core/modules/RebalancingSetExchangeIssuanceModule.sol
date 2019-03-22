@@ -17,7 +17,9 @@
 pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
+import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
+import { SafeERC20 } from "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../../lib/CommonMath.sol";
@@ -108,8 +110,8 @@ contract RebalancingSetExchangeIssuanceModule is
         wethInstance = IWETH(_wrappedEther);
 
         // Add approvals of Wrapped Ether to the Transfer Proxy
-        ERC20Wrapper.approve(
-            _wrappedEther,
+        SafeERC20.safeApprove(
+            IERC20(_wrappedEther),
             _transferProxy,
             CommonMath.maxUInt256()
         );
@@ -240,10 +242,7 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         // Withdraw eth from WETH
-        uint256 wethBalance = ERC20Wrapper.balanceOf(
-            weth,
-            address(this)
-        );
+        uint256 wethBalance = IERC20(weth).balanceOf(address(this));
         wethInstance.withdraw(wethBalance);
 
         // Send eth to user
@@ -272,23 +271,17 @@ contract RebalancingSetExchangeIssuanceModule is
         private
     {
         // Return any excess base Set to the user
-        uint256 leftoverBaseSet = ERC20Wrapper.balanceOf(
-            _baseSetAddress,
-            address(this)
-        );
+        uint256 leftoverBaseSet = IERC20(_baseSetAddress).balanceOf(address(this));
         if (leftoverBaseSet > 0) {
-            ERC20Wrapper.transfer(
-                _baseSetAddress,
+            SafeERC20.safeTransfer(
+                IERC20(_baseSetAddress),
                 msg.sender,
                 leftoverBaseSet
             );
         }
 
         // unwrap any leftover WETH and send eth back to the user
-        uint256 leftoverEth = ERC20Wrapper.balanceOf(
-            weth,
-            address(this)
-        );
+        uint256 leftoverEth = IERC20(weth).balanceOf(address(this));
         if (leftoverEth > 0) {
             wethInstance.withdraw(leftoverEth);
             msg.sender.transfer(leftoverEth);
@@ -382,10 +375,10 @@ contract RebalancingSetExchangeIssuanceModule is
     {
         address[] memory baseSetComponents = ISetToken(_setAddress).getComponents();
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
-            uint256 withdrawQuantity = ERC20Wrapper.balanceOf(baseSetComponents[i], address(this));
+            uint256 withdrawQuantity = IERC20(baseSetComponents[i]).balanceOf(address(this));
             if (withdrawQuantity > 0) {
-                ERC20Wrapper.transfer(
-                    baseSetComponents[i],
+                SafeERC20.safeTransfer(
+                    IERC20(baseSetComponents[i]),
                     msg.sender,
                     withdrawQuantity
                 );

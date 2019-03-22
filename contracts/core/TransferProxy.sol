@@ -16,6 +16,8 @@
 
 pragma solidity 0.5.4;
 
+import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { Authorizable } from "../lib/Authorizable.sol";
@@ -55,16 +57,15 @@ contract TransferProxy is
         public
         onlyAuthorized
     {
+        IERC20 token = IERC20(_token);
+
         // Retrieve current balance of token for the receiver
-        uint256 existingBalance = ERC20Wrapper.balanceOf(
-            _token,
-            _to
-        );
+        uint256 existingBalance = token.balanceOf(_to);
 
         // Call specified ERC20 contract to transfer tokens (via proxy).
         if (_quantity > 0) {
-            ERC20Wrapper.transferFrom(
-                _token,
+            SafeERC20.safeTransferFrom(
+                token,
                 _from,
                 _to,
                 _quantity
@@ -72,10 +73,7 @@ contract TransferProxy is
         }
 
         // Get new balance of transferred token for receiver
-        uint256 newBalance = ERC20Wrapper.balanceOf(
-            _token,
-            _to
-        );
+        uint256 newBalance = token.balanceOf(_to);
 
         // Verify transfer quantity is reflected in balance
         require(

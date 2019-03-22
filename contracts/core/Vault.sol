@@ -16,7 +16,8 @@
 
 pragma solidity 0.5.4;
 
-
+import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { Authorizable } from "../lib/Authorizable.sol";
@@ -72,31 +73,27 @@ contract Vault is
         onlyAuthorized
     {
         if (_quantity > 0) {
+            IERC20 token = IERC20(_token);
+
             // Retrieve current balance of token for the vault
-            uint256 existingVaultBalance = ERC20Wrapper.balanceOf(
-                _token,
-                address(this)
-            );
+            uint256 existingVaultBalance = token.balanceOf(address(this));
 
             // Call specified ERC20 token contract to transfer tokens from Vault to user
-            ERC20Wrapper.transfer(
-                _token,
+            SafeERC20.safeTransfer(
+                token,
                 _to,
                 _quantity
             );
 
             // Verify transfer quantity is reflected in balance
-            uint256 newVaultBalance = ERC20Wrapper.balanceOf(
-                _token,
-                address(this)
-            );
+            uint256 newVaultBalance = token.balanceOf(address(this));
+
             // Check to make sure current balances are as expected
             require(
                 newVaultBalance == existingVaultBalance.sub(_quantity),
                 "Vault.withdrawTo: Invalid post withdraw balance"
             );            
         }
-
     }
 
     /*

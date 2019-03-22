@@ -19,7 +19,6 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ConstantAuctionPriceCurve } from "./ConstantAuctionPriceCurve.sol";
-import { RebalancingHelperLibrary } from "../../../core/lib/RebalancingHelperLibrary.sol";
 
 /**
  * @title UpdatableConstantAuctionPriceCurve

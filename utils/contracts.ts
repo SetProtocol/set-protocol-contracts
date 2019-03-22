@@ -33,7 +33,7 @@ import { PriceFeedContract } from '../types/generated/price_feed';
 import { ProposeLibraryContract } from '../types/generated/propose_library';
 import { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 import { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
-import { RebalancingHelperLibraryContract } from '../types/generated/rebalancing_helper_library';
+import { RebalancingLibraryContract } from '../types/generated/rebalancing_library';
 import {
   RebalancingSetExchangeIssuanceModuleContract,
 } from '../types/generated/rebalancing_set_exchange_issuance_module';
@@ -94,7 +94,7 @@ export {
   ProposeLibraryContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
-  RebalancingHelperLibraryContract,
+  RebalancingLibraryContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,

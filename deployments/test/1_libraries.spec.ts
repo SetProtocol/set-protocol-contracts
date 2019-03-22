@@ -5,7 +5,7 @@ import expect from 'expect';
 import { CoreIssuanceLibrary } from '../../artifacts/ts/CoreIssuanceLibrary';
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { ExchangeIssuanceLibrary } from '../../artifacts/ts/ExchangeIssuanceLibrary';
-import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
+import { RebalancingLibrary } from '../../artifacts/ts/RebalancingLibrary';
 import { FailAuctionLibrary } from '../../artifacts/ts/FailAuctionLibrary';
 import { PlaceBidLibrary } from '../../artifacts/ts/PlaceBidLibrary';
 import { ProposeLibrary } from '../../artifacts/ts/ProposeLibrary';
@@ -46,8 +46,8 @@ describe('Deployment: Libraries', () => {
   });
 
   describe('Rebalancing Libraries', () => {
-    it('finds a valid RebalancingHelperLibrary at the address', async () => {
-      const code = await getContractCode(RebalancingHelperLibrary.contractName, web3);
+    it('finds a valid RebalancingLibrary at the address', async () => {
+      const code = await getContractCode(RebalancingLibrary.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 

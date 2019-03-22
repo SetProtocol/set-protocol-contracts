@@ -20,7 +20,7 @@ import { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
 import { PlaceBidLibrary } from "./ts/PlaceBidLibrary";
 import { ProposeLibrary } from "./ts/ProposeLibrary";
 import { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
-import { RebalancingHelperLibrary } from "./ts/RebalancingHelperLibrary";
+import { RebalancingLibrary } from "./ts/RebalancingLibrary";
 import { RebalancingSetExchangeIssuanceModule } from "./ts/RebalancingSetExchangeIssuanceModule";
 import { RebalancingSetToken } from "./ts/RebalancingSetToken";
 import { RebalancingSetTokenFactory } from "./ts/RebalancingSetTokenFactory";
@@ -109,7 +109,7 @@ export {
   PlaceBidLibrary,
   ProposeLibrary,
   RebalanceAuctionModule,
-  RebalancingHelperLibrary,
+  RebalancingLibrary,
   RebalancingSetExchangeIssuanceModule,
   RebalancingSetToken,
   RebalancingSetTokenFactory,

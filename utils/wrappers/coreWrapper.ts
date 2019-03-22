@@ -44,7 +44,7 @@ const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
 const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
-const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
+const RebalancingLibrary = artifacts.require('RebalancingLibrary');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const RebalancingTokenIssuanceModule = artifacts.require('RebalancingTokenIssuanceModule');
 const SetToken = artifacts.require('SetToken');
@@ -249,15 +249,15 @@ export class CoreWrapper {
   public async linkRebalancingLibrariesAsync(
     contract: any,
   ): Promise<void> {
-    const truffleRebalancingHelperLibrary = await RebalancingHelperLibrary.new(
+    const truffleRebalancingLibrary = await RebalancingLibrary.new(
       { from: this._tokenOwnerAddress },
     );
 
-    await ProposeLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
-    await StartRebalanceLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
-    await PlaceBidLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
-    await SettleRebalanceLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
-    await FailAuctionLibrary.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await ProposeLibrary.link('RebalancingLibrary', truffleRebalancingLibrary.address);
+    await StartRebalanceLibrary.link('RebalancingLibrary', truffleRebalancingLibrary.address);
+    await PlaceBidLibrary.link('RebalancingLibrary', truffleRebalancingLibrary.address);
+    await SettleRebalanceLibrary.link('RebalancingLibrary', truffleRebalancingLibrary.address);
+    await FailAuctionLibrary.link('RebalancingLibrary', truffleRebalancingLibrary.address);
 
     const truffleProposeLibrary = await ProposeLibrary.new(
       { from: this._tokenOwnerAddress },
@@ -275,7 +275,7 @@ export class CoreWrapper {
       { from: this._tokenOwnerAddress },
     );
 
-    await contract.link('RebalancingHelperLibrary', truffleRebalancingHelperLibrary.address);
+    await contract.link('RebalancingLibrary', truffleRebalancingLibrary.address);
     await contract.link('ProposeLibrary', truffleProposeLibrary.address);
     await contract.link('StartRebalanceLibrary', truffleStartRebalanceLibrary.address);
     await contract.link('PlaceBidLibrary', trufflePlaceBidLibrary.address);

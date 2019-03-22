@@ -29,7 +29,7 @@ import { CommonValidationsLibrary } from '../../artifacts/ts/CommonValidationsLi
 import { Core } from '../../artifacts/ts/Core';
 import { CoreIssuanceLibrary } from '../../artifacts/ts/CoreIssuanceLibrary';
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
-import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
+import { RebalancingLibrary } from '../../artifacts/ts/RebalancingLibrary';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 import { SetTokenLibrary } from '../../artifacts/ts/SetTokenLibrary';
@@ -220,7 +220,7 @@ export class CoreStage implements DeploymentStageInterface {
     const proposeLibrary = await getContractAddress(ProposeLibrary.contractName);
     const placeBidLibrary = await getContractAddress(PlaceBidLibrary.contractName);
     const settleRebalanceLibrary = await getContractAddress(SettleRebalanceLibrary.contractName);
-    const rebalancingHelperLibrary = await getContractAddress(RebalancingHelperLibrary.contractName);
+    const rebalancingLibrary = await getContractAddress(RebalancingLibrary.contractName);
 
     const originalByteCode = RebalancingSetTokenFactory.bytecode;
     const linkedByteCode = linkLibraries([
@@ -229,7 +229,7 @@ export class CoreStage implements DeploymentStageInterface {
       { name: ProposeLibrary.contractName, address: proposeLibrary },
       { name: PlaceBidLibrary.contractName, address: placeBidLibrary },
       { name: SettleRebalanceLibrary.contractName, address: settleRebalanceLibrary },
-      { name: RebalancingHelperLibrary.contractName, address: rebalancingHelperLibrary },
+      { name: RebalancingLibrary.contractName, address: rebalancingLibrary },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(RebalancingSetTokenFactory.abi).deploy({

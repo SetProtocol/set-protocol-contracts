@@ -25,7 +25,7 @@ import { IAuctionPriceCurve } from "../../lib/auction-price-libraries/IAuctionPr
 import { ICore } from "../../interfaces/ICore.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IVault } from "../../interfaces/IVault.sol";
-import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
+import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 /**
@@ -58,7 +58,7 @@ library StartRebalanceLibrary {
     {
         // Must be in "Proposal" state before going into "Rebalance" state
         require(
-            _rebalanceState == uint8(RebalancingHelperLibrary.State.Proposal),
+            _rebalanceState == uint8(RebalancingLibrary.State.Proposal),
             "RebalancingSetToken.validateStartRebalance: State must be Proposal"
         );
 
@@ -87,7 +87,7 @@ library StartRebalanceLibrary {
         address _vaultAddress
     )
         public
-        returns (RebalancingHelperLibrary.BiddingParameters memory)
+        returns (RebalancingLibrary.BiddingParameters memory)
     {
         // Redeem rounded quantity of current Sets and return redeemed amount of Sets
         uint256 remainingCurrentSets = redeemCurrentSet(
@@ -97,7 +97,7 @@ library StartRebalanceLibrary {
         );
 
         // Create combined array data structures and calculate minimum bid needed for auction
-        RebalancingHelperLibrary.BiddingParameters memory biddingParameters = setUpBiddingParameters(
+        RebalancingLibrary.BiddingParameters memory biddingParameters = setUpBiddingParameters(
             _currentSet,
             _nextSet,
             _auctionLibrary,
@@ -125,7 +125,7 @@ library StartRebalanceLibrary {
         uint256 _remainingCurrentSets
     )
         public
-        returns (RebalancingHelperLibrary.BiddingParameters memory)
+        returns (RebalancingLibrary.BiddingParameters memory)
     {
         // Get set details for currentSet and nextSet (units, components, natural units)
         SetTokenLibrary.SetDetails memory currentSet = SetTokenLibrary.getSetDetails(_currentSet);
@@ -166,7 +166,7 @@ library StartRebalanceLibrary {
         );
 
         // Build Bidding Parameters struct and return
-        return RebalancingHelperLibrary.BiddingParameters({
+        return RebalancingLibrary.BiddingParameters({
             minimumBid: minimumBid,
             remainingCurrentSets: _remainingCurrentSets,
             combinedCurrentUnits: combinedCurrentUnits,
@@ -272,7 +272,7 @@ library StartRebalanceLibrary {
 
         // Compute unit amounts of token in Set
         if (isComponent) {
-            return RebalancingHelperLibrary.computeTransferValue(
+            return RebalancingLibrary.computeTransferValue(
                 _setToken.units[indexCurrent],
                 _setToken.naturalUnit,
                 _minimumBid,

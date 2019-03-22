@@ -23,7 +23,7 @@ import { ICore } from "../../core/interfaces/ICore.sol";
 import { IMedian } from "../../external/DappHub/interfaces/IMedian.sol";
 import { IRebalancingSetToken } from "../../core/interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";
-import { RebalancingHelperLibrary } from "../../core/lib/RebalancingHelperLibrary.sol";
+import { RebalancingLibrary } from "../../core/lib/RebalancingLibrary.sol";
 
 
 /**
@@ -159,7 +159,7 @@ contract BTCETHRebalancingManager {
         // Require that Rebalancing Set Token is in Default state, won't allow for re-proposals
         // because malicious actor could prevent token from ever rebalancing
         require(
-            rebalancingSetInterface.rebalanceState() == RebalancingHelperLibrary.State.Default,
+            rebalancingSetInterface.rebalanceState() == RebalancingLibrary.State.Default,
             "RebalancingTokenManager.proposeNewRebalance: State must be in Default"
         );
 

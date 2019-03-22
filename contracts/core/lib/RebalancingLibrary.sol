@@ -21,16 +21,16 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IAuctionPriceCurve } from "./auction-price-libraries/IAuctionPriceCurve.sol";
 
 /**
- * @title RebalancingHelperLibrary
+ * @title RebalancingLibrary
  * @author Set Protocol
  *
- * The Rebalancing Helper Library contains functions for facilitating the rebalancing process for
+ * The RebalancingLibrary contains functions for facilitating the rebalancing process for
  * Rebalancing Set Tokens.
  *
  */
 
 
-library RebalancingHelperLibrary {
+library RebalancingLibrary {
     using SafeMath for uint256;
 
     /* ============ Enums ============ */

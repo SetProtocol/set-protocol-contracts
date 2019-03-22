@@ -66,6 +66,39 @@ export function UpgradeRegistered(
     },
   };
 }
+
+/**** Core Issuance Logs ****/
+
+export function SetIssued(
+  _coreAddress: Address,
+  _setAddress: Address,
+  _quantity: BigNumber,
+): Log {
+  return {
+    event: 'SetIssued',
+    address: _coreAddress,
+    args: {
+      _setAddress,
+      _quantity,
+    },
+  };
+}
+
+export function SetRedeemed(
+  _coreAddress: Address,
+  _setAddress: Address,
+  _quantity: BigNumber,
+): Log {
+  return {
+    event: 'SetRedeemed',
+    address: _coreAddress,
+    args: {
+      _setAddress,
+      _quantity,
+    },
+  };
+}
+
 /**** Core Internal Logs ****/
 
 export function FactoryAdded(

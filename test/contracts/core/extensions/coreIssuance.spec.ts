@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address } from 'set-protocol-utils';
+import { Address, Log } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
@@ -19,6 +19,10 @@ import {
   TransferProxyContract,
   VaultContract,
 } from '@utils/contracts';
+import {
+  SetIssued,
+  SetRedeemed,
+} from '@utils/contract_logs/core';
 import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
@@ -41,9 +45,10 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const Core = artifacts.require('Core');
-const { SetProtocolUtils: SetUtils } = setProtocolUtils;
+const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
+const setTestUtils = new SetTestUtils(web3);
 const { NULL_ADDRESS } =  SetUtils.CONSTANTS;
 
 
@@ -182,6 +187,19 @@ contract('CoreIssuance', accounts => {
       await subject();
 
       await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+    });
+
+    it('emits a SetIssued event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = [
+        SetIssued(
+          core.address,
+          subjectSetToIssue,
+          subjectQuantityToIssue,
+        ),
+      ];
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the set was not created through core', async () => {
@@ -454,6 +472,19 @@ contract('CoreIssuance', accounts => {
       );
     });
 
+    it('emits a SetIssued event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = [
+        SetIssued(
+          core.address,
+          subjectSetToIssue,
+          subjectQuantityToIssue,
+        ),
+      ];
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
     describe('when the set was not created through core', async () => {
       beforeEach(async () => {
         subjectSetToIssue = NULL_ADDRESS;
@@ -640,6 +671,19 @@ contract('CoreIssuance', accounts => {
       await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), vault.address);
     });
 
+    it('emits a SetIssued event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = [
+        SetIssued(
+          core.address,
+          subjectSetToIssue,
+          subjectQuantityToIssue,
+        ),
+      ];
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
     it('vault attributes Set to caller', async () => {
       const existingBalance = await vault.getOwnerBalance.callAsync(setToken.address, subjectCaller);
 
@@ -775,6 +819,19 @@ contract('CoreIssuance', accounts => {
       await subject();
 
       await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), subjectRecipient);
+    });
+
+    it('emits a SetIssued event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = [
+        SetIssued(
+          core.address,
+          subjectSetToIssue,
+          subjectQuantityToIssue,
+        ),
+      ];
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the set was not created through core', async () => {
@@ -916,6 +973,19 @@ contract('CoreIssuance', accounts => {
       expect(newSetBalance).to.be.bignumber.equal(expectedSetBalance);
     });
 
+    it('emits a SetRedeemed event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = [
+        SetRedeemed(
+          core.address,
+          subjectSetToRedeem,
+          subjectQuantityToRedeem,
+        ),
+      ];
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
     describe('when the set was not created through core', async () => {
       beforeEach(async () => {
         subjectSetToRedeem = NULL_ADDRESS;
@@ -1052,6 +1122,19 @@ contract('CoreIssuance', accounts => {
       expect(newSetBalance).to.be.bignumber.equal(expectedSetBalance);
     });
 
+    it('emits a SetRedeemed event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = [
+        SetRedeemed(
+          core.address,
+          subjectSetToRedeem,
+          subjectQuantityToRedeem,
+        ),
+      ];
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
     describe('when the set was not created through core', async () => {
       beforeEach(async () => {
         subjectSetToRedeem = NULL_ADDRESS;
@@ -1154,6 +1237,19 @@ contract('CoreIssuance', accounts => {
       });
       const newTokenBalances = await erc20Wrapper.getTokenBalances(components, ownerAccount);
       expect(newTokenBalances).to.eql(expectedNewBalances);
+    });
+
+    it('emits a SetRedeemed event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = [
+        SetRedeemed(
+          core.address,
+          subjectSetToRedeem,
+          subjectQuantityToRedeem,
+        ),
+      ];
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the exclude mask includes two of three components', async () => {
@@ -1344,6 +1440,19 @@ contract('CoreIssuance', accounts => {
       expect(newVaultBalances).to.eql(expectedVaultBalances);
     });
 
+    it('emits a SetRedeemed event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = [
+        SetRedeemed(
+          core.address,
+          subjectSetToRedeem,
+          subjectQuantityToRedeem,
+        ),
+      ];
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
     describe('when the set was not created through core', async () => {
       beforeEach(async () => {
         subjectSetToRedeem = NULL_ADDRESS;
@@ -1457,6 +1566,19 @@ contract('CoreIssuance', accounts => {
       const newVaultBalances =
         await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectRecipient);
       expect(newVaultBalances).to.eql(expectedVaultBalances);
+    });
+
+    it('emits a SetRedeemed event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = [
+        SetRedeemed(
+          core.address,
+          subjectSetToRedeem,
+          subjectQuantityToRedeem,
+        ),
+      ];
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the set was not created through core', async () => {

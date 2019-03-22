@@ -666,7 +666,7 @@ contract RebalancingSetToken is
         nextSet = address(0);
         auctionLibrary = address(0);
         startingCurrentSetAmount = 0;
-        delete auctionParameters;
+        delete auctionPriceParameters;
         delete biddingParameters;
     }
 }

@@ -106,7 +106,7 @@ contract LinearAuctionPriceCurve {
 
         // Initialize numerator and denominator
         uint256 priceNumerator = _auctionPriceParameters.auctionPivotPrice;
-        uint256 currentPriceDenominator = priceDenominator;
+        uint256 currentPriceDivisor = priceDivisor;
 
         // Determine the auctionStartPrice based on if it should be self-defined
         uint256 auctionStartPrice = 0;
@@ -168,14 +168,14 @@ contract LinearAuctionPriceCurve {
             if (thirtySecondPeriods < MAX_30_SECOND_PERIODS) {
                 // Calculate new denominator where the denominator decays at a rate of 0.1% of the ORIGINAL
                 // priceDivisor per time increment (hence divide by 1000)
-                currentPriceDenominator = priceDivisor
+                currentPriceDivisor = priceDivisor
                     .sub(thirtySecondPeriods
                         .mul(priceDivisor)
                         .div(MAX_30_SECOND_PERIODS)
                     );
             } else {
                 // Once denominator has fully decayed, fix it at 1
-                currentPriceDenominator = 1;
+                currentPriceDivisor = 1;
 
                 // Now priceNumerator just changes linearly, but with slope equal to the pivot price
                 priceNumerator = _auctionPriceParameters.auctionPivotPrice.add(
@@ -184,6 +184,6 @@ contract LinearAuctionPriceCurve {
             }
         }
 
-        return (priceNumerator, currentPriceDenominator);
+        return (priceNumerator, currentPriceDivisor);
     }
 }

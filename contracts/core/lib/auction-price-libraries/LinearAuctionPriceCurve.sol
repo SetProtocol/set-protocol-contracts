@@ -105,13 +105,8 @@ contract LinearAuctionPriceCurve {
         uint256 elapsed = block.timestamp.sub(_auctionPriceParameters.auctionStartTime);
 
         // Initialize numerator and denominator
-<<<<<<< HEAD
-        uint256 priceNumerator = _auctionParameters.auctionPivotPrice;
-        uint256 currentPriceDenominator = priceDivisor;
-=======
         uint256 priceNumerator = _auctionPriceParameters.auctionPivotPrice;
         uint256 currentPriceDenominator = priceDenominator;
->>>>>>> Clean up proposal
 
         // Determine the auctionStartPrice based on if it should be self-defined
         uint256 auctionStartPrice = 0;

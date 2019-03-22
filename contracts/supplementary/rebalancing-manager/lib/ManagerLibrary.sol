@@ -21,7 +21,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { IMedian } from "../../../external/DappHub/interfaces/IMedian.sol";
 import { IRebalancingSetToken } from "../../../core/interfaces/IRebalancingSetToken.sol";
-import { RebalancingHelperLibrary } from "../../../core/lib/RebalancingHelperLibrary.sol";
+import { RebalancingLibrary } from "../../../core/lib/RebalancingLibrary.sol";
 
 
 /**
@@ -34,6 +34,11 @@ import { RebalancingHelperLibrary } from "../../../core/lib/RebalancingHelperLib
 library ManagerLibrary {
     using SafeMath for uint256;
 
+    /*
+     * Validates whether the Rebalancing Set is in the correct state and sufficient time has elapsed.
+     *
+     * @param  _rebalancingSetInterface      Instance of the Rebalancing Set Token
+     */
     function validateManagerPropose(
         IRebalancingSetToken _rebalancingSetInterface
     )
@@ -50,7 +55,7 @@ library ManagerLibrary {
         // Require that Rebalancing Set Token is in Default state, won't allow for re-proposals
         // because malicious actor could prevent token from ever rebalancing
         require(
-            _rebalancingSetInterface.rebalanceState() == RebalancingHelperLibrary.State.Default,
+            _rebalancingSetInterface.rebalanceState() == RebalancingLibrary.State.Default,
             "ManagerLibrary.proposeNewRebalance: State must be in Default"
         );        
     }

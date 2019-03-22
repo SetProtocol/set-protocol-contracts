@@ -146,20 +146,7 @@ contract BTCETHRebalancingManager {
         // Create interface to interact with RebalancingSetToken
         IRebalancingSetToken rebalancingSetInterface = IRebalancingSetToken(_rebalancingSetTokenAddress);
 
-        // Require that enough time has passed from last rebalance
-        uint256 lastRebalanceTimestamp = rebalancingSetInterface.lastRebalanceTimestamp();
-        uint256 rebalanceInterval = rebalancingSetInterface.rebalanceInterval();
-        require(
-            block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
-            "RebalancingTokenManager.proposeNewRebalance: Rebalance interval not elapsed"
-        );
-
-        // Require that Rebalancing Set Token is in Default state, won't allow for re-proposals
-        // because malicious actor could prevent token from ever rebalancing
-        require(
-            rebalancingSetInterface.rebalanceState() == RebalancingLibrary.State.Default,
-            "RebalancingTokenManager.proposeNewRebalance: State must be in Default"
-        );
+        ManagerLibrary.validateManagerPropose(rebalancingSetInterface);
 
         // Get price data
         uint256 btcPrice = ManagerLibrary.queryPriceData(btcPriceFeed);
@@ -345,79 +332,46 @@ contract BTCETHRebalancingManager {
         returns (uint256, uint256, uint256[] memory)
     {
         // Initialize set token parameters
-        uint256 naturalUnit;
-        uint256[] memory units = new uint256[](2);
-        uint256 nextSetDollarAmount;
+        uint256 nextSetNaturalUnit;
+        uint256[] memory nextSetUnits = new uint256[](2);
 
         if (_btcPrice >= _ethPrice) {
-            // Calculate ethereum units, determined by the following equation:
+            // Calculate ethereum nextSetUnits, determined by the following equation:
             // (btcPrice / ethPrice) * (10 ** (ethDecimal - btcDecimal))
             uint256 ethUnits = _btcPrice.mul(DECIMAL_DIFF_MULTIPLIER).div(_ethPrice);
 
             // Create unit array and define natural unit
-            units[0] = btcMultiplier;
-            units[1] = ethUnits.mul(ethMultiplier);
-            naturalUnit = 10 ** 10;
+            nextSetUnits[0] = btcMultiplier;
+            nextSetUnits[1] = ethUnits.mul(ethMultiplier);
+            nextSetNaturalUnit = 10 ** 10;
         } else {
-            // Calculate btc units as (ethPrice / btcPrice) * 100. 100 is used to add
+            // Calculate btc nextSetUnits as (ethPrice / btcPrice) * 100. 100 is used to add
             // precision. The increase in unit amounts is offset by increasing the
-            // naturalUnit by two orders of magnitude so that issuance cost is still
+            // nextSetNaturalUnit by two orders of magnitude so that issuance cost is still
             // roughly the same
             uint256 ethBtcPrice = _ethPrice.mul(PRICE_PRECISION).div(_btcPrice);
 
             // Create unit array and define natural unit
-            units[0] = ethBtcPrice.mul(btcMultiplier);
-            units[1] = PRICE_PRECISION.mul(DECIMAL_DIFF_MULTIPLIER).mul(ethMultiplier);
-            naturalUnit = 10 ** 12;
+            nextSetUnits[0] = ethBtcPrice.mul(btcMultiplier);
+            nextSetUnits[1] = PRICE_PRECISION.mul(DECIMAL_DIFF_MULTIPLIER).mul(ethMultiplier);
+            nextSetNaturalUnit = 10 ** 12;
         }
 
-        // Calculate the nextSet dollar value (in cents)
-        nextSetDollarAmount = calculateSetTokenPriceUSD(
-            _btcPrice,
-            _ethPrice,
-            naturalUnit,
-            units
+        uint256[] memory assetPrices = new uint256[](2);
+        assetPrices[0] = _btcPrice;
+        assetPrices[1] = _ethPrice;
+
+        uint256[] memory assetDecimals = new uint256[](2);
+        assetDecimals[0] = BTC_DECIMALS;
+        assetDecimals[1] = ETH_DECIMALS;
+
+        uint256 nextSetDollarAmount = ManagerLibrary.calculateSetTokenDollarValue(
+            assetPrices,
+            nextSetNaturalUnit,
+            nextSetUnits,
+            assetDecimals
         );
 
-        return (naturalUnit, nextSetDollarAmount, units);
-    }
-
-    /*
-     * Get USD value of one set
-     *
-     * @param  _btcPrice            The 18 decimal value of one full BTC
-     * @param  _ethPrice            The 18 decimal value of one full ETH
-     * @param  _naturalUnit         The naturalUnit of the set being valued
-     * @param  _units               The units of the set being valued
-     * @return uint256              The USD value of the set (in cents)
-     */
-    function calculateSetTokenPriceUSD(
-        uint256 _btcPrice,
-        uint256 _ethPrice,
-        uint256 _naturalUnit,
-        uint256[] memory _units
-    )
-        private
-        view
-        returns (uint256)
-    {
-        // Calculate btcDollarAmount of one Set Token (in cents)
-        uint256 btcDollarAmount = ManagerLibrary.calculateTokenAllocationAmountUSD(
-            _btcPrice,
-            _naturalUnit,
-            _units[0],
-            BTC_DECIMALS
-        );
-
-        // Calculate ethDollarAmount of one Set Token (in cents)
-        uint256 ethDollarAmount = ManagerLibrary.calculateTokenAllocationAmountUSD(
-            _ethPrice,
-            _naturalUnit,
-            _units[1],
-            ETH_DECIMALS
-        );
-
-        // Return sum of two components USD value (in cents)
-        return btcDollarAmount.add(ethDollarAmount);
+        return (nextSetNaturalUnit, nextSetDollarAmount, nextSetUnits);
     }
 }

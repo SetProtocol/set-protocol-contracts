@@ -26,6 +26,7 @@ import { ISetToken } from "../../core/interfaces/ISetToken.sol";
 import { RebalancingLibrary } from "../../core/lib/RebalancingLibrary.sol";
 import { ManagerLibrary } from "./lib/ManagerLibrary.sol";
 
+
 /**
  * @title ETHDaiRebalancingManager
  * @author Set Protocol
@@ -143,20 +144,7 @@ contract ETHDaiRebalancingManager {
         // Create interface to interact with RebalancingSetToken
         IRebalancingSetToken rebalancingSetInterface = IRebalancingSetToken(_rebalancingSetTokenAddress);
 
-        // Require that enough time has passed from last rebalance
-        uint256 lastRebalanceTimestamp = rebalancingSetInterface.lastRebalanceTimestamp();
-        uint256 rebalanceInterval = rebalancingSetInterface.rebalanceInterval();
-        require(
-            block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
-            "RebalancingTokenManager.proposeNewRebalance: Rebalance interval not elapsed"
-        );
-
-        // Require that Rebalancing Set Token is in Default state, won't allow for re-proposals
-        // because malicious actor could prevent token from ever rebalancing
-        require(
-            rebalancingSetInterface.rebalanceState() == RebalancingLibrary.State.Default,
-            "RebalancingTokenManager.proposeNewRebalance: State must be in Default"
-        );
+        ManagerLibrary.validateManagerPropose(rebalancingSetInterface);
 
         // Get price data
         uint256 ethPrice = ManagerLibrary.queryPriceData(ethPriceFeed);
@@ -322,71 +310,41 @@ contract ETHDaiRebalancingManager {
         returns (uint256, uint256, uint256[] memory)
     {
         // Initialize set token parameters
-        uint256[] memory units = new uint256[](2);
-        uint256 nextSetDollarAmount;
+        uint256[] memory nextSetUnits = new uint256[](2);
         uint256 nextSetNaturalUnit = PRICE_PRECISION;
 
         if (_ethPrice >= DAI_PRICE) {
-            // Dai units is equal the USD Ethereum price
+            // Dai nextSetUnits is equal the USD Ethereum price
             uint256 daiUnits = _ethPrice.mul(PRICE_PRECISION).div(DAI_PRICE);
 
             // Create unit array and define natural unit
-            units[0] = daiUnits.mul(daiMultiplier);
-            units[1] = ethMultiplier.mul(PRICE_PRECISION);          
+            nextSetUnits[0] = daiUnits.mul(daiMultiplier);
+            nextSetUnits[1] = ethMultiplier.mul(PRICE_PRECISION);          
         } else {
-            // Calculate dai units as (daiPrice/ethPrice)*100. 100 is used to add 
+            // Calculate dai nextSetUnits as (daiPrice/ethPrice)*100. 100 is used to add 
             // precision.
             uint256 ethDaiPrice = DAI_PRICE.mul(PRICE_PRECISION).div(_ethPrice);
 
             // Create unit array and define natural unit
-            units[0] = daiMultiplier.mul(PRICE_PRECISION); 
-            units[1] = ethDaiPrice.mul(ethMultiplier);         
+            nextSetUnits[0] = daiMultiplier.mul(PRICE_PRECISION); 
+            nextSetUnits[1] = ethDaiPrice.mul(ethMultiplier);         
         }
 
-        // Calculate the nextSet dollar value (in cents)
-        nextSetDollarAmount = calculateSetTokenPriceUSD(
-            _ethPrice,
+        uint256[] memory assetPrices = new uint256[](2);
+        assetPrices[0] = DAI_PRICE;
+        assetPrices[1] = _ethPrice;
+
+        uint256[] memory assetDecimals = new uint256[](2);
+        assetDecimals[0] = DAI_DECIMALS;
+        assetDecimals[1] = ETH_DECIMALS;
+
+        uint256 nextSetDollarAmount = ManagerLibrary.calculateSetTokenDollarValue(
+            assetPrices,
             nextSetNaturalUnit,
-            units
-        ); 
-
-        return (nextSetNaturalUnit, nextSetDollarAmount, units);
-    }
-
-    /*
-     * Get USD value of one set
-     *
-     * @param  _ethPrice            The 18 decimal value of one full ETH
-     * @param  _naturalUnit         The naturalUnit of the set being valued
-     * @param  _units               The units of the set being valued
-     * @return uint256              The USD value of the set (in cents)
-     */
-    function calculateSetTokenPriceUSD(
-        uint256 _ethPrice,
-        uint256 _naturalUnit,
-        uint256[] memory _units
-    )
-        private
-        view
-        returns (uint256)
-    {
-        // Calculate daiDollarAmount of one Set Token (in cents) 
-        uint256 daiDollarAmount = ManagerLibrary.calculateTokenAllocationAmountUSD(
-            DAI_PRICE,
-            _naturalUnit,
-            _units[0],
-            DAI_DECIMALS
+            nextSetUnits,
+            assetDecimals
         );
 
-        // Calculate ethDollarAmount of one Set Token (in cents)
-        uint256 ethDollarAmount = ManagerLibrary.calculateTokenAllocationAmountUSD(
-            _ethPrice,
-            _naturalUnit,
-            _units[1],
-            ETH_DECIMALS
-        );
-
-        // Return sum of two components USD value (in cents)
-        return daiDollarAmount.add(ethDollarAmount);        
+        return (nextSetNaturalUnit, nextSetDollarAmount, nextSetUnits);
     }
 }

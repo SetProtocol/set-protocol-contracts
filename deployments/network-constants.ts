@@ -21,7 +21,17 @@ export default {
     staging: (constants.ONE_DAY_IN_SECONDS  * 3),
     development: (constants.ONE_DAY_IN_SECONDS * 3),
   },
-  timeLockPeriod: {
+  transferProxyTimeLockPeriod: {
+    production: 7*constants.ONE_DAY_IN_SECONDS,
+    staging: 7*constants.ONE_DAY_IN_SECONDS,
+    development: 7*constants.ONE_DAY_IN_SECONDS,
+  },
+  vaultTimeLockPeriod: {
+    production: 7*constants.ONE_DAY_IN_SECONDS,
+    staging: 7*constants.ONE_DAY_IN_SECONDS,
+    development: 7*constants.ONE_DAY_IN_SECONDS,
+  },
+  generalTimeLockPeriod: {
     production: 0,
     staging: 0,
     development: 0,

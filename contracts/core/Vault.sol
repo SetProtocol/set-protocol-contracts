@@ -214,13 +214,11 @@ contract Vault is
         );
 
         for (uint256 i = 0; i < tokenCount; i++) {
-            if (_quantities[i] > 0) {
-                withdrawTo(
-                    _tokens[i],
-                    _to,
-                    _quantities[i]
-                );
-            }
+            withdrawTo(
+                _tokens[i],
+                _to,
+                _quantities[i]
+            );
         }
     }
 
@@ -256,13 +254,11 @@ contract Vault is
         );
 
         for (uint256 i = 0; i < tokenCount; i++) {
-            if (_quantities[i] > 0) {
-                incrementTokenOwner(
-                    _tokens[i],
-                    _owner,
-                    _quantities[i]
-                );
-            }
+            incrementTokenOwner(
+                _tokens[i],
+                _owner,
+                _quantities[i]
+            );
         }
     }
 
@@ -298,13 +294,11 @@ contract Vault is
         );
 
         for (uint256 i = 0; i < tokenCount; i++) {
-            if (_quantities[i] > 0) {
-                decrementTokenOwner(
-                    _tokens[i],
-                    _owner,
-                    _quantities[i]
-                );
-            }
+            decrementTokenOwner(
+                _tokens[i],
+                _owner,
+                _quantities[i]
+            );
         }
     }
 
@@ -341,14 +335,12 @@ contract Vault is
         );
 
         for (uint256 i = 0; i < tokenCount; i++) {
-            if (_quantities[i] > 0) {
-                transferBalance(
-                    _tokens[i],
-                    _from,
-                    _to,
-                    _quantities[i]
-                );
-            }
+            transferBalance(
+                _tokens[i],
+                _from,
+                _to,
+                _quantities[i]
+            );
         }
     }
 

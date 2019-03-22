@@ -158,11 +158,19 @@ contract BTCDaiRebalancingManager {
         // Create new Set Token that collateralizes Rebalancing Set Token
         (
             address nextSetAddress,
+            uint256 nextSetDollarAmount
+        ) = createNewAllocationSetToken(btcPrice);
+
+        // Calculate the auctionStartPrice and auctionPivotPrice of rebalance auction using dollar value
+        // of both the current and nextSet
+        (
             uint256 auctionStartPrice,
             uint256 auctionPivotPrice
-        ) = createNewAllocationSetToken(
-            btcPrice,
-            currentSetDollarAmount
+        ) = ManagerLibrary.calculateAuctionPriceParameters(
+            currentSetDollarAmount,
+            nextSetDollarAmount,
+            AUCTION_LIB_PRICE_DIVISOR,
+            auctionTimeToPivot
         );
         
         // Propose new allocation to Rebalancing Set Token
@@ -242,17 +250,14 @@ contract BTCDaiRebalancingManager {
      * create nextSet
      *
      * @param  _btcPrice                    The 18 decimal dollar value of one full BTC
-     * @param  _currentSetDollarAmount      The USD value of the Rebalancing Set Token's currentSet
      * @return address                      The address of nextSet
-     * @return uint256                      The auctionStartPrice for rebalance auction
-     * @return uint256                      The auctionPivotPrice for rebalance auction
+     * @return uint256                      The dollar value of the nextSet
      */
     function createNewAllocationSetToken(
-        uint256 _btcPrice,
-        uint256 _currentSetDollarAmount
+        uint256 _btcPrice
     )
         private
-        returns (address, uint256, uint256)
+        returns (address, uint256)
     {
         // Calculate the nextSet units and naturalUnit, determine dollar value of nextSet
         (
@@ -261,18 +266,6 @@ contract BTCDaiRebalancingManager {
             uint256[] memory nextSetUnits
         ) = calculateNextSetUnits(
             _btcPrice
-        );
-
-        // Calculate the auctionStartPrice and auctionPivotPrice of rebalance auction using dollar value
-        // of both the current and nextSet
-        (
-            uint256 auctionStartPrice,
-            uint256 auctionPivotPrice
-        ) = ManagerLibrary.calculateAuctionPriceParameters(
-            _currentSetDollarAmount,
-            nextSetDollarAmount,
-            AUCTION_LIB_PRICE_DIVISOR,
-            auctionTimeToPivot
         );
         
         // Create static components array
@@ -292,7 +285,7 @@ contract BTCDaiRebalancingManager {
             ""
         );
 
-        return (nextSetAddress, auctionStartPrice, auctionPivotPrice);
+        return (nextSetAddress, nextSetDollarAmount);
     }
 
     /*

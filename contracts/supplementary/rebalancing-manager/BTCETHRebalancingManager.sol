@@ -160,18 +160,29 @@ contract BTCETHRebalancingManager {
         );
 
         // Create new Set Token that collateralizes Rebalancing Set Token
-        address nextSetAddress;
+        // address nextSetAddress;
+        (
+            address nextSetAddress,
+            uint256 nextSetDollarAmount
+        ) = createNewAllocationSetToken(
+            btcPrice,
+            ethPrice
+        );
+
+        // Calculate the auctionStartPrice and auctionPivotPrice of rebalance auction using dollar value
+        // of both the current and nextSet
         uint256 auctionStartPrice;
         uint256 auctionPivotPrice;
         (
-            nextSetAddress,
             auctionStartPrice,
             auctionPivotPrice
-        ) = createNewAllocationSetToken(
-            btcPrice,
-            ethPrice,
-            currentSetDollarAmount
+        ) = ManagerLibrary.calculateAuctionPriceParameters(
+            currentSetDollarAmount,
+            nextSetDollarAmount,
+            AUCTION_LIB_PRICE_DIVISOR,
+            auctionTimeToPivot
         );
+
 
         // Propose new allocation to Rebalancing Set Token
         rebalancingSetInterface.propose(
@@ -254,18 +265,15 @@ contract BTCETHRebalancingManager {
      *
      * @param  _btcPrice                    The 18 decimal value of one full BTC
      * @param  _ethPrice                    The 18 decimal value of one full ETH
-     * @param  _currentSetDollarAmount      The USD value of the Rebalancing Set Token's currentSet
      * @return address                      The address of nextSet
-     * @return uint256                      The auctionStartPrice for rebalance auction
-     * @return uint256                      The auctionPivotPrice for rebalance auction
+     * @return uint256                      The USD value of the nextSet
      */
     function createNewAllocationSetToken(
         uint256 _btcPrice,
-        uint256 _ethPrice,
-        uint256 _currentSetDollarAmount
+        uint256 _ethPrice
     )
         private
-        returns (address, uint256, uint256)
+        returns (address, uint256)
     {
         // Calculate the nextSet units and naturalUnit, determine dollar value of nextSet
         uint256 nextSetNaturalUnit;
@@ -278,20 +286,6 @@ contract BTCETHRebalancingManager {
         ) = calculateNextSetUnits(
             _btcPrice,
             _ethPrice
-        );
-
-        // Calculate the auctionStartPrice and auctionPivotPrice of rebalance auction using dollar value
-        // of both the current and nextSet
-        uint256 auctionStartPrice;
-        uint256 auctionPivotPrice;
-        (
-            auctionStartPrice,
-            auctionPivotPrice
-        ) = ManagerLibrary.calculateAuctionPriceParameters(
-            _currentSetDollarAmount,
-            nextSetDollarAmount,
-            AUCTION_LIB_PRICE_DIVISOR,
-            auctionTimeToPivot
         );
 
         // Create static components array
@@ -311,7 +305,7 @@ contract BTCETHRebalancingManager {
             ""
         );
 
-        return (nextSetAddress, auctionStartPrice, auctionPivotPrice);
+        return (nextSetAddress, nextSetDollarAmount);
     }
 
     /*

@@ -85,7 +85,7 @@ library PlaceBidLibrary {
      * @param _quantity               The amount of currentSet to be rebalanced
      * @param _auctionLibrary         Auction library used in rebalance
      * @param _biddingParameters      Struct containing relevant data for calculating token flows
-     * @param _auctionParameters      Struct containing auction price curve parameters
+     * @param _auctionPriceParameters Struct containing auction price curve parameters
      * @param _rebalanceState         State of rebalancing set token
      * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
      * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
@@ -94,7 +94,7 @@ library PlaceBidLibrary {
         uint256 _quantity,
         address _auctionLibrary,
         RebalancingHelperLibrary.BiddingParameters memory _biddingParameters,
-        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters,
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionPriceParameters,
         uint8 _rebalanceState
     )
         public
@@ -111,7 +111,7 @@ library PlaceBidLibrary {
         uint256 priceNumerator;
         uint256 priceDivisor;
         (priceNumerator, priceDivisor) = IAuctionPriceCurve(_auctionLibrary).getCurrentPrice(
-            _auctionParameters
+            _auctionPriceParameters
         );
 
         // Normalized quantity amount

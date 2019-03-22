@@ -80,7 +80,7 @@ contract RebalancingSetToken is
     address public nextSet;
     address public auctionLibrary;
     uint256 public startingCurrentSetAmount;
-    RebalancingHelperLibrary.AuctionPriceParameters public auctionParameters;
+    RebalancingHelperLibrary.AuctionPriceParameters public auctionPriceParameters;
     RebalancingHelperLibrary.BiddingParameters public biddingParameters;
 
     // To be used if token put into Drawdown State
@@ -212,30 +212,38 @@ contract RebalancingSetToken is
     )
         external
     {
+        // Put together auction price parameters
+        RebalancingHelperLibrary.AuctionPriceParameters memory auctionPriceParams =
+            RebalancingHelperLibrary.AuctionPriceParameters({
+                auctionTimeToPivot: _auctionTimeToPivot,
+                auctionStartPrice: _auctionStartPrice,
+                auctionPivotPrice: _auctionPivotPrice,
+                auctionStartTime: 0
+            });
+
         // Create ProposeAuctionParameters
-        ProposeLibrary.ProposeAuctionParameters memory proposeParameters =
-            ProposeLibrary.ProposeAuctionParameters({
+        ProposeLibrary.ProposalContext memory proposalContext =
+            ProposeLibrary.ProposalContext({
                 manager: manager,
                 currentSet: currentSet,
                 coreAddress: core,
+                componentWhitelist: componentWhiteListAddress,
+                factoryAddress: factory,
                 lastRebalanceTimestamp: lastRebalanceTimestamp,
                 rebalanceInterval: rebalanceInterval,
                 rebalanceState: uint8(rebalanceState)
             });
 
-        // Validate proposal inputs and initialize auctionParameters
-        auctionParameters = ProposeLibrary.propose(
+        // Validate proposal inputs and initialize auctionPriceParameters
+        ProposeLibrary.validateProposal(
             _nextSet,
             _auctionLibrary,
-            _auctionTimeToPivot,
-            _auctionStartPrice,
-            _auctionPivotPrice,
-            factory,
-            componentWhiteListAddress,
-            proposeParameters
+            proposalContext,
+            auctionPriceParams
         );
 
         // Update state parameters
+        auctionPriceParameters = auctionPriceParams;
         nextSet = _nextSet;
         auctionLibrary = _auctionLibrary;
         proposalStartTime = block.timestamp;
@@ -273,7 +281,7 @@ contract RebalancingSetToken is
 
         // Update state parameters
         startingCurrentSetAmount = biddingParameters.remainingCurrentSets;
-        auctionParameters.auctionStartTime = block.timestamp;
+        auctionPriceParameters.auctionStartTime = block.timestamp;
         rebalanceState = RebalancingHelperLibrary.State.Rebalance;
 
         emit RebalanceStarted(currentSet, nextSet);
@@ -367,7 +375,7 @@ contract RebalancingSetToken is
             calculatedUnitShares,
             currentSet,
             core,
-            auctionParameters,
+            auctionPriceParameters,
             biddingParameters,
             uint8(rebalanceState)
         );
@@ -402,7 +410,7 @@ contract RebalancingSetToken is
             _quantity,
             auctionLibrary,
             biddingParameters,
-            auctionParameters,
+            auctionPriceParameters,
             uint8(rebalanceState)
         );
     }
@@ -548,20 +556,20 @@ contract RebalancingSetToken is
     }
 
     /*
-     * Get auctionParameters of Rebalancing Set
+     * Get auctionPriceParameters of Rebalancing Set
      *
      * @return  auctionParams       Object with auction information
      */
-    function getAuctionParameters()
+    function getAuctionPriceParameters()
         external
         view
         returns (uint256[] memory)
     {
         uint256[] memory auctionParams = new uint256[](4);
-        auctionParams[0] = auctionParameters.auctionStartTime;
-        auctionParams[1] = auctionParameters.auctionTimeToPivot;
-        auctionParams[2] = auctionParameters.auctionStartPrice;
-        auctionParams[3] = auctionParameters.auctionPivotPrice;
+        auctionParams[0] = auctionPriceParameters.auctionStartTime;
+        auctionParams[1] = auctionPriceParameters.auctionTimeToPivot;
+        auctionParams[2] = auctionPriceParameters.auctionStartPrice;
+        auctionParams[3] = auctionPriceParameters.auctionPivotPrice;
         return auctionParams;
     }
 
@@ -658,7 +666,7 @@ contract RebalancingSetToken is
         nextSet = address(0);
         auctionLibrary = address(0);
         startingCurrentSetAmount = 0;
-        delete auctionParameters;
+        delete auctionPriceParameters;
         delete biddingParameters;
     }
 }

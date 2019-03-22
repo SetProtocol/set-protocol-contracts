@@ -60,7 +60,7 @@ contract ConstantAuctionPriceCurve {
      * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      */
     function validateAuctionPriceParameters(
-        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionPriceParameters
     )
         public
         view
@@ -68,13 +68,13 @@ contract ConstantAuctionPriceCurve {
         // Require pivot price to be greater than 0.5 * price denominator
         // Equivalent to oldSet/newSet = 0.5
         require(
-            _auctionParameters.auctionPivotPrice > priceDivisor.div(MIN_PIVOT_PRICE_DIVISOR),
+            _auctionPriceParameters.auctionPivotPrice > priceDivisor.div(MIN_PIVOT_PRICE_DIVISOR),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too low"
         );
          // Require pivot price to be less than 5 * price denominator
         // Equivalent to oldSet/newSet = 5
         require(
-            _auctionParameters.auctionPivotPrice < priceDivisor.mul(MAX_PIVOT_PRICE_NUMERATOR),
+            _auctionPriceParameters.auctionPivotPrice < priceDivisor.mul(MAX_PIVOT_PRICE_NUMERATOR),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too high"
         );
     }

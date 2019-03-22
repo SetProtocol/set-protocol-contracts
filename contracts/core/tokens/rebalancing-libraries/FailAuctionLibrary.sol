@@ -44,7 +44,7 @@ library FailAuctionLibrary {
      * @param _calculatedUnitShares         Calculated unitShares amount if rebalance were to be settled
      * @param _currentSet                   The Set that failed to rebalance
      * @param _coreAddress                  Core address
-     * @param _auctionParameters            Struct containing auction price curve parameters
+     * @param _auctionPriceParameters       Struct containing auction price curve parameters
      * @param _biddingParameters            Struct containing relevant data for calculating token flows
      * @param _rebalanceState               State rebalancing set token is in
      * @return                              State of Rebalancing Set after function called
@@ -54,7 +54,7 @@ library FailAuctionLibrary {
         uint256 _calculatedUnitShares,
         address _currentSet,
         address _coreAddress,
-        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters,
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionPriceParameters,
         RebalancingHelperLibrary.BiddingParameters memory _biddingParameters,
         uint8 _rebalanceState
     )
@@ -68,8 +68,8 @@ library FailAuctionLibrary {
         );
 
         // Calculate timestamp when pivot is reached
-        uint256 revertAuctionTime = _auctionParameters.auctionStartTime.add(
-            _auctionParameters.auctionTimeToPivot
+        uint256 revertAuctionTime = _auctionPriceParameters.auctionStartTime.add(
+            _auctionPriceParameters.auctionTimeToPivot
         );
 
         // Make sure auction has gone past pivot point

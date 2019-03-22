@@ -38,10 +38,12 @@ library ProposeLibrary {
 
     /* ============ Structs ============ */
 
-    struct ProposeAuctionParameters {
+    struct ProposalContext {
         address manager;
         address currentSet;
         address coreAddress;
+        address componentWhitelist;
+        address factoryAddress;
         uint256 lastRebalanceTimestamp;
         uint256 rebalanceInterval;
         uint8 rebalanceState;
@@ -50,110 +52,91 @@ library ProposeLibrary {
     /* ============ Internal Functions ============ */
 
     /**
-     * Function used to validate inputs to propose function and initialize auctionParameters struct
+     * Function used to validate inputs to propose function
      *
-     * @param _nextSet                      The Set to rebalance into
-     * @param _auctionLibrary               The library used to calculate the Dutch Auction price
-     * @param _auctionTimeToPivot           The amount of time for the auction to go ffrom start to pivot price
-     * @param _auctionStartPrice            The price to start the auction at
-     * @param _auctionPivotPrice            The price at which the price curve switches from linear to exponential
-     * @param _componentWhiteListAddress    Component WhiteList address
-     * @param _proposeParameters            Rebalancing Set Token state parameters needed to execute logic
-     * @return                              Struct containing auction price curve parameters
+     * @param _nextSet                    The Set to rebalance into
+     * @param _auctionLibrary             The library used to calculate the Dutch Auction price
+     * @param _proposalContext            Rebalancing Set Token state parameters needed for proposal validation
      */
-    function propose(
+    function validateProposal(
         address _nextSet,
         address _auctionLibrary,
-        uint256 _auctionTimeToPivot,
-        uint256 _auctionStartPrice,
-        uint256 _auctionPivotPrice,
-        address _factoryAddress,
-        address _componentWhiteListAddress,
-        ProposeAuctionParameters memory _proposeParameters
+        ProposalContext memory _proposalContext,
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionPriceParameters
     )
         public
-        returns (RebalancingHelperLibrary.AuctionPriceParameters memory)
     {
-        ICore coreInstance = ICore(_proposeParameters.coreAddress);
-        IRebalancingSetFactory factoryInstance = IRebalancingSetFactory(_factoryAddress);
+        ICore coreInstance = ICore(_proposalContext.coreAddress);
+        IRebalancingSetFactory factoryInstance = IRebalancingSetFactory(_proposalContext.factoryAddress);
 
         // Make sure it is manager that is proposing the rebalance
         require(
-            msg.sender == _proposeParameters.manager,
-            "RebalancingSetToken.propose: Sender must be manager"
+            msg.sender == _proposalContext.manager,
+            "ProposeLibrary.validateProposal: Sender must be manager"
         );
 
         // New Proposal can only be made in Default and Proposal state
         require(
-            _proposeParameters.rebalanceState == uint8(RebalancingHelperLibrary.State.Default) ||
-            _proposeParameters.rebalanceState == uint8(RebalancingHelperLibrary.State.Proposal),
-            "RebalancingSetToken.propose: State must be in Propose or Default"
+            _proposalContext.rebalanceState == uint8(RebalancingHelperLibrary.State.Default) ||
+            _proposalContext.rebalanceState == uint8(RebalancingHelperLibrary.State.Proposal),
+            "ProposeLibrary.validateProposal: State must be in Propose or Default"
         );
 
         // Make sure enough time has passed from last rebalance to start a new proposal
         require(
-            block.timestamp >= _proposeParameters.lastRebalanceTimestamp.add(
-                _proposeParameters.rebalanceInterval
+            block.timestamp >= _proposalContext.lastRebalanceTimestamp.add(
+                _proposalContext.rebalanceInterval
             ),
-            "RebalancingSetToken.propose: Rebalance interval not elapsed"
+            "ProposeLibrary.validateProposal: Rebalance interval not elapsed"
         );
 
         // Check that new proposed Set is valid Set created by Core
         require(
             coreInstance.validSets(_nextSet),
-            "RebalancingSetToken.propose: Invalid or disabled proposed SetToken address"
+            "ProposeLibrary.validateProposal: Invalid or disabled proposed SetToken address"
         );
 
         // Check proposed components on whitelist. This is to ensure managers are unable to add contract addresses
         // to a propose that prohibit the set from carrying out an auction i.e. a token that only the manager possesses
         require(
-            IWhiteList(_componentWhiteListAddress).areValidAddresses(ISetToken(_nextSet).getComponents()),
-            "RebalancingSetToken.propose: Proposed set contains invalid component token"
+            IWhiteList(
+                _proposalContext.componentWhitelist
+            ).areValidAddresses(ISetToken(_nextSet).getComponents()),
+            "ProposeLibrary.validateProposal: Proposed set contains invalid component token"
         );
 
         // Check that the auction library is a valid priceLibrary tracked by Core
         require(
             coreInstance.validPriceLibraries(_auctionLibrary),
-            "RebalancingSetToken.propose: Invalid or disabled PriceLibrary address"
+            "ProposeLibrary.validateProposal: Invalid or disabled PriceLibrary address"
         );
 
-        // Check that time to pivot is greater than 6 hours
+        // Check that auctionTimeToPivot is greater than or equal to 6 hours
         require(
-            _auctionTimeToPivot > factoryInstance.minimumTimeToPivot(),
-            "RebalancingSetToken.propose: Time to pivot must be greater than minimum defined on factory"
+            _auctionPriceParameters.auctionTimeToPivot >= factoryInstance.minimumTimeToPivot(),
+            "ProposeLibrary.validateProposal: Time to pivot must be greater than minimum"
         );
 
-        // Check that time to pivot is less than 3 days
+        // Check that auctionTimeToPivot is less than or equal to 3 days
         require(
-            _auctionTimeToPivot < factoryInstance.maximumTimeToPivot(),
-            "RebalancingSetToken.propose: Time to pivot must be greater than maximum defined on factory"
+            _auctionPriceParameters.auctionTimeToPivot <= factoryInstance.maximumTimeToPivot(),
+            "ProposeLibrary.validateProposal: Time to pivot must be greater than maximum"
         );
 
-        // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.
+        // Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.
         // Done to make sure that when calculating token units there will are no rounding errors.
-        uint256 currentNaturalUnit = ISetToken(_proposeParameters.currentSet).naturalUnit();
+        uint256 currentNaturalUnit = ISetToken(_proposalContext.currentSet).naturalUnit();
         uint256 nextSetNaturalUnit = ISetToken(_nextSet).naturalUnit();
         require(
             Math.max(currentNaturalUnit, nextSetNaturalUnit).mod(
                 Math.min(currentNaturalUnit, nextSetNaturalUnit)
             ) == 0,
-            "RebalancingSetToken.propose: Invalid proposed Set natural unit"
+            "ProposeLibrary.validateProposal: Invalid proposed Set natural unit"
         );
-
-        // Set auction parameters
-        RebalancingHelperLibrary.AuctionPriceParameters memory auctionParameters =
-            RebalancingHelperLibrary.AuctionPriceParameters({
-                auctionTimeToPivot: _auctionTimeToPivot,
-                auctionStartPrice: _auctionStartPrice,
-                auctionPivotPrice: _auctionPivotPrice,
-                auctionStartTime: 0
-            });
 
         // Check that pivot price is compliant with library restrictions
         IAuctionPriceCurve(_auctionLibrary).validateAuctionPriceParameters(
-            auctionParameters
+            _auctionPriceParameters
         );
-
-        return auctionParameters;
     }
 }

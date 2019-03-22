@@ -437,15 +437,15 @@ contract('BTCETHRebalancingManager', accounts => {
       it('updates the time to pivot correctly', async () => {
         await subject();
 
-        const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
-        const newAuctionTimeToPivot = auctionParameters[1];
+        const auctionPriceParameters = await rebalancingSetToken.auctionPriceParameters.callAsync();
+        const newAuctionTimeToPivot = auctionPriceParameters[1];
         expect(newAuctionTimeToPivot).to.be.bignumber.equal(ONE_DAY_IN_SECONDS);
       });
 
       it('updates the auction start price correctly', async () => {
         await subject();
 
-        const auctionParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
+        const auctionPriceParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
           btcPrice,
           ethPrice,
           btcMultiplier,
@@ -454,16 +454,16 @@ contract('BTCETHRebalancingManager', accounts => {
           initialAllocationToken,
         );
 
-        const newAuctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+        const newAuctionParameters = await rebalancingSetToken.auctionPriceParameters.callAsync();
         const newAuctionPivotPrice = newAuctionParameters[2];
 
-        expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionParameters['auctionStartPrice']);
+        expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionPriceParameters['auctionStartPrice']);
       });
 
       it('updates the auction pivot price correctly', async () => {
         await subject();
 
-        const auctionParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
+        const auctionPriceParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
           btcPrice,
           ethPrice,
           btcMultiplier,
@@ -472,10 +472,10 @@ contract('BTCETHRebalancingManager', accounts => {
           initialAllocationToken,
         );
 
-        const newAuctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+        const newAuctionParameters = await rebalancingSetToken.auctionPriceParameters.callAsync();
         const newAuctionPivotPrice = newAuctionParameters[3];
 
-        expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionParameters['auctionPivotPrice']);
+        expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionPriceParameters['auctionPivotPrice']);
       });
 
       it('emits correct LogProposal event', async () => {
@@ -584,7 +584,7 @@ contract('BTCETHRebalancingManager', accounts => {
         it('updates the auction start price correctly', async () => {
           await subject();
 
-          const auctionParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
+          const auctionPriceParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
             btcPrice,
             ethPrice,
             btcMultiplier,
@@ -593,16 +593,16 @@ contract('BTCETHRebalancingManager', accounts => {
             initialAllocationToken,
           );
 
-          const newAuctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+          const newAuctionParameters = await rebalancingSetToken.auctionPriceParameters.callAsync();
           const newAuctionPivotPrice = newAuctionParameters[2];
 
-          expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionParameters['auctionStartPrice']);
+          expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionPriceParameters['auctionStartPrice']);
         });
 
         it('updates the auction pivot price correctly', async () => {
           await subject();
 
-          const auctionParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
+          const auctionPriceParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
             btcPrice,
             ethPrice,
             btcMultiplier,
@@ -611,10 +611,10 @@ contract('BTCETHRebalancingManager', accounts => {
             initialAllocationToken,
           );
 
-          const newAuctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+          const newAuctionParameters = await rebalancingSetToken.auctionPriceParameters.callAsync();
           const newAuctionPivotPrice = newAuctionParameters[3];
 
-          expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionParameters['auctionPivotPrice']);
+          expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionPriceParameters['auctionPivotPrice']);
         });
 
         describe('but the new allocation is 75/25', async () => {

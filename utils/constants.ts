@@ -3,7 +3,7 @@ import { ether } from '../utils/units';
 
 export const AUCTION_TIME_INCREMENT = new BigNumber(30); // Unix seconds
 export const DEFAULT_AUCTION_PRICE_NUMERATOR = new BigNumber(1374);
-export const DEFAULT_AUCTION_PRICE_DENOMINATOR = new BigNumber(1000);
+export const DEFAULT_AUCTION_PRICE_DIVISOR = new BigNumber(1000);
 export const DEFAULT_GAS = 19000000;
 export const DEFAULT_MOCK_TOKEN_DECIMALS = 18;
 export const DEFAULT_REBALANCING_NATURAL_UNIT = new BigNumber(10 ** 6);

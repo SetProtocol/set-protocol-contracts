@@ -12,7 +12,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import ChaiSetup from '@utils/chaiSetup';
 import {
   DEFAULT_GAS,
-  DEFAULT_AUCTION_PRICE_DENOMINATOR,
+  DEFAULT_AUCTION_PRICE_DIVISOR,
   ZERO,
 } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
@@ -49,7 +49,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
     await blockchain.saveSnapshotAsync();
     const usesStartPrice = true;
     auctionCurve = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
-      DEFAULT_AUCTION_PRICE_DENOMINATOR,
+      DEFAULT_AUCTION_PRICE_DIVISOR,
       usesStartPrice
     );
   });
@@ -71,7 +71,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
       auctionStartPrice = new BigNumber(500);
       auctionTimeToPivot = new BigNumber(100000);
       auctionStartTime = ZERO;
-      auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(2);
+      auctionPivotPrice = DEFAULT_AUCTION_PRICE_DIVISOR.mul(2);
 
       subjectAuctionPriceParameters = {
         auctionStartTime,
@@ -98,7 +98,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
     describe('when the pivot price is lower than .5', async () => {
       beforeEach(async () => {
         const auctionPivotRatio = new BigNumber(0.4);
-        subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotRatio);
+        subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DIVISOR.mul(auctionPivotRatio);
         subjectAuctionPriceParameters.auctionStartPrice = ZERO;
       });
 
@@ -110,7 +110,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
     describe('when the pivot price is higher than 5', async () => {
       beforeEach(async () => {
         const auctionPivotRatio = new BigNumber(6);
-        subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotRatio);
+        subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DIVISOR.mul(auctionPivotRatio);
       });
 
       it('should revert', async () => {
@@ -122,8 +122,8 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
       beforeEach(async () => {
         const auctionPivotRatio = new BigNumber(0.6);
         const auctionStartRatio = new BigNumber(0.8);
-        subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotRatio);
-        subjectAuctionPriceParameters.auctionStartPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionStartRatio);
+        subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DIVISOR.mul(auctionPivotRatio);
+        subjectAuctionPriceParameters.auctionStartPrice = DEFAULT_AUCTION_PRICE_DIVISOR.mul(auctionStartRatio);
       });
 
       it('should revert', async () => {
@@ -145,7 +145,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
       auctionStartPrice = new BigNumber(500);
       auctionTimeToPivot = new BigNumber(100000);
       auctionStartTime = SetTestUtils.generateTimestamp(0);
-      auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(2);
+      auctionPivotPrice = DEFAULT_AUCTION_PRICE_DIVISOR.mul(2);
 
       subjectAuctionPriceParameters = {
         auctionStartPrice,
@@ -167,7 +167,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
       const returnedPrice = await subject();
 
       expect(returnedPrice[0]).to.be.bignumber.equal(auctionStartPrice);
-      expect(returnedPrice[1]).to.be.bignumber.equal(DEFAULT_AUCTION_PRICE_DENOMINATOR);
+      expect(returnedPrice[1]).to.be.bignumber.equal(DEFAULT_AUCTION_PRICE_DIVISOR);
     });
 
     it('returns the correct price after one hour', async () => {
@@ -181,11 +181,11 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
         subjectAuctionPriceParameters.auctionTimeToPivot,
         subjectAuctionPriceParameters.auctionStartPrice,
         subjectAuctionPriceParameters.auctionPivotPrice,
-        DEFAULT_AUCTION_PRICE_DENOMINATOR,
+        DEFAULT_AUCTION_PRICE_DIVISOR,
       );
 
       expect(returnedPrice[0]).to.be.bignumber.equal(expectedPrice.priceNumerator);
-      expect(returnedPrice[1]).to.be.bignumber.equal(expectedPrice.priceDenominator);
+      expect(returnedPrice[1]).to.be.bignumber.equal(expectedPrice.priceDivisor);
     });
 
     it('returns the correct price at the pivot', async () => {
@@ -195,7 +195,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
       const returnedPrice = await subject();
 
       expect(returnedPrice[0]).to.be.bignumber.equal(subjectAuctionPriceParameters.auctionPivotPrice);
-      expect(returnedPrice[1]).to.be.bignumber.equal(DEFAULT_AUCTION_PRICE_DENOMINATOR);
+      expect(returnedPrice[1]).to.be.bignumber.equal(DEFAULT_AUCTION_PRICE_DIVISOR);
     });
 
     it('returns the correct price after the pivot', async () => {
@@ -209,11 +209,11 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
         subjectAuctionPriceParameters.auctionTimeToPivot,
         subjectAuctionPriceParameters.auctionStartPrice,
         subjectAuctionPriceParameters.auctionPivotPrice,
-        DEFAULT_AUCTION_PRICE_DENOMINATOR,
+        DEFAULT_AUCTION_PRICE_DIVISOR,
       );
 
       expect(returnedPrice[0]).to.be.bignumber.equal(expectedPrice.priceNumerator);
-      expect(returnedPrice[1]).to.be.bignumber.equal(expectedPrice.priceDenominator);
+      expect(returnedPrice[1]).to.be.bignumber.equal(expectedPrice.priceDivisor);
     });
 
     it('returns the correct price after denominator hits 1', async () => {
@@ -227,11 +227,11 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
         subjectAuctionPriceParameters.auctionTimeToPivot,
         subjectAuctionPriceParameters.auctionStartPrice,
         subjectAuctionPriceParameters.auctionPivotPrice,
-        DEFAULT_AUCTION_PRICE_DENOMINATOR,
+        DEFAULT_AUCTION_PRICE_DIVISOR,
       );
 
       expect(returnedPrice[0]).to.be.bignumber.equal(expectedPrice.priceNumerator);
-      expect(returnedPrice[1]).to.be.bignumber.equal(expectedPrice.priceDenominator);
+      expect(returnedPrice[1]).to.be.bignumber.equal(expectedPrice.priceDivisor);
     });
   });
 });

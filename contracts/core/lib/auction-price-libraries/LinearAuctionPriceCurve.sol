@@ -35,24 +35,24 @@ contract LinearAuctionPriceCurve {
     uint256 constant public MAX_30_SECOND_PERIODS = 1000;
     uint256 constant public THIRTY_SECONDS = 30;
 
-    uint256 public priceDenominator;
+    uint256 public priceDivisor;
     bool public usesStartPrice;
 
     /*
      * Declare price denominator (or precision) of price curve
      *
-     * @param  _priceDenominator        The priceDenominator you want this library to always return
+     * @param  _priceDivisor            The priceDivisor you want this library to always return
      * @param  _usesStartPrice          Boolean indicating if provided auctionStartPrice is used (true) or
      *                                  auction starts at 0 (false)
      */
     constructor(
-        uint256 _priceDenominator,
+        uint256 _priceDivisor,
         bool _usesStartPrice
     )
         public
     {
         // Set price to be returned by library
-        priceDenominator = _priceDenominator;
+        priceDivisor = _priceDivisor;
         usesStartPrice = _usesStartPrice;
     }
 
@@ -76,13 +76,13 @@ contract LinearAuctionPriceCurve {
         // Require pivot price to be greater than 0.5 * price denominator
         // Equivalent to oldSet/newSet = 0.5
         require(
-            _auctionParameters.auctionPivotPrice > priceDenominator.div(MIN_PIVOT_PRICE_DIVISOR),
+            _auctionParameters.auctionPivotPrice > priceDivisor.div(MIN_PIVOT_PRICE_DIVISOR),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too low"
         );
          // Require pivot price to be less than 5 * price denominator
         // Equivalent to oldSet/newSet = 5
         require(
-            _auctionParameters.auctionPivotPrice < priceDenominator.mul(MAX_PIVOT_PRICE_NUMERATOR),
+            _auctionParameters.auctionPivotPrice < priceDivisor.mul(MAX_PIVOT_PRICE_NUMERATOR),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too high"
         );
     }
@@ -106,7 +106,7 @@ contract LinearAuctionPriceCurve {
 
         // Initialize numerator and denominator
         uint256 priceNumerator = _auctionParameters.auctionPivotPrice;
-        uint256 currentPriceDenominator = priceDenominator;
+        uint256 currentPriceDenominator = priceDivisor;
 
         // Determine the auctionStartPrice based on if it should be self-defined
         uint256 auctionStartPrice = 0;
@@ -119,9 +119,9 @@ contract LinearAuctionPriceCurve {
          * have control over the cadence of the auction, and then two more stages that are used to enforce finality
          * to the auction. The auction price, p(x), is defined by:
          *
-         * p(x) = (priceNumerator/priceDenominator
+         * p(x) = (priceNumerator/priceDivisor
          *
-         * In each stage either the priceNumerator or priceDenominator is manipulated to change p(x).The curve shape
+         * In each stage either the priceNumerator or priceDivisor is manipulated to change p(x).The curve shape
          * in each stage is defined below.
          *
          * 1) Managers have the greatest control over stage 1. Here they define a linear curve that starts at zero
@@ -133,10 +133,10 @@ contract LinearAuctionPriceCurve {
          *
          * 2) Stage 2 the protocol takes over to attempt to hasten/guarantee finality, this unfortunately decreases
          * the granularity of the auction price changes. In this stage the PriceNumerator remains fixed at the
-         * auctionPivotPrice. However, the priceDenominator decays at a rate equivalent to 0.1% of the ORIGINAL
-         * priceDenominator every 30 secs. This leads to the following function relative to time:
+         * auctionPivotPrice. However, the priceDivisor decays at a rate equivalent to 0.1% of the ORIGINAL
+         * priceDivisor every 30 secs. This leads to the following function relative to time:
          *
-         * PriceDenominator(x) = priceDenominator-(0.01*priceDenominator*((x-auctionTimeToPivot)/30)), where x is amount
+         * PriceDenominator(x) = priceDivisor-(0.01*priceDivisor*((x-auctionTimeToPivot)/30)), where x is amount
          * of time from auction start.
          *
          * Since we are decaying the denominator the price curve takes on the shape of e^x. Because of the limitations
@@ -144,7 +144,7 @@ contract LinearAuctionPriceCurve {
          * there is a third segment defined below.
          *
          * 3) The third segment is a simple linear calculation that changes the priceNumerator at the rate of the pivot
-         * price every 30 seconds and fixes the priceDenominator at 1:
+         * price every 30 seconds and fixes the priceDivisor at 1:
          *
          * PriceNumerator(x) = auctionPivotPrice + auctionPivotPrice*(x-auctionTimeToPivot-30000), where x is amount of
          * time from auction start and 30000 represents the amount of time spent in Stage 2
@@ -164,13 +164,13 @@ contract LinearAuctionPriceCurve {
                 .sub(_auctionParameters.auctionTimeToPivot)
                 .div(THIRTY_SECONDS);
 
-            // Because after 1000 thirtySecondPeriods the priceDenominator would be 0 (causes revert)
+            // Because after 1000 thirtySecondPeriods the priceDivisor would be 0 (causes revert)
             if (thirtySecondPeriods < MAX_30_SECOND_PERIODS) {
                 // Calculate new denominator where the denominator decays at a rate of 0.1% of the ORIGINAL
-                // priceDenominator per time increment (hence divide by 1000)
-                currentPriceDenominator = priceDenominator
+                // priceDivisor per time increment (hence divide by 1000)
+                currentPriceDenominator = priceDivisor
                     .sub(thirtySecondPeriods
-                        .mul(priceDenominator)
+                        .mul(priceDivisor)
                         .div(MAX_30_SECOND_PERIODS)
                     );
             } else {

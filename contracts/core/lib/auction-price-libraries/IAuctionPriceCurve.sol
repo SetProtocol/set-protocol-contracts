@@ -29,9 +29,9 @@ import { RebalancingHelperLibrary } from "../RebalancingHelperLibrary.sol";
 interface IAuctionPriceCurve {
 
     /*
-     * Getter for priceDenominator variable on Auction Price Curve Library
+     * Getter for priceDivisor variable on Auction Price Curve Library
      */
-    function priceDenominator()
+    function priceDivisor()
         external
         view
         returns (uint256);

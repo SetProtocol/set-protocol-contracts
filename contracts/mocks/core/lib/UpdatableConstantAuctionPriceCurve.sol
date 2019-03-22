@@ -34,12 +34,12 @@ contract UpdatableConstantAuctionPriceCurve is ConstantAuctionPriceCurve {
 
     constructor(
         uint256 _priceNumerator,
-        uint256 _priceDenominator
+        uint256 _priceDivisor
     )
         public
         ConstantAuctionPriceCurve(
             _priceNumerator,
-            _priceDenominator
+            _priceDivisor
         )
     {}
 

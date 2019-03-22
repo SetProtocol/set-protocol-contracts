@@ -35,23 +35,23 @@ contract ConstantAuctionPriceCurve {
     uint256 constant public MAX_PIVOT_PRICE_NUMERATOR = 5;
 
     uint256 public priceNumerator;
-    uint256 public priceDenominator;
+    uint256 public priceDivisor;
 
     /*
      * Declare price you want this library to return when queried
      *
-     * @param  _priceNumerator          The priceNumerator you want this library to always return
-     * @param  _priceDenominator        The priceDenominator you want this library to always return
+     * @param  _priceNumerator      The priceNumerator you want this library to always return
+     * @param  _priceDivisor        The priceDivisor you want this library to always return
      */
     constructor(
         uint256 _priceNumerator,
-        uint256 _priceDenominator
+        uint256 _priceDivisor
     )
         public
     {
         // Set price to be returned by library
         priceNumerator = _priceNumerator;
-        priceDenominator = _priceDenominator;
+        priceDivisor = _priceDivisor;
     }
 
     /*
@@ -68,13 +68,13 @@ contract ConstantAuctionPriceCurve {
         // Require pivot price to be greater than 0.5 * price denominator
         // Equivalent to oldSet/newSet = 0.5
         require(
-            _auctionParameters.auctionPivotPrice > priceDenominator.div(MIN_PIVOT_PRICE_DIVISOR),
+            _auctionParameters.auctionPivotPrice > priceDivisor.div(MIN_PIVOT_PRICE_DIVISOR),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too low"
         );
          // Require pivot price to be less than 5 * price denominator
         // Equivalent to oldSet/newSet = 5
         require(
-            _auctionParameters.auctionPivotPrice < priceDenominator.mul(MAX_PIVOT_PRICE_NUMERATOR),
+            _auctionParameters.auctionPivotPrice < priceDivisor.mul(MAX_PIVOT_PRICE_NUMERATOR),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too high"
         );
     }
@@ -93,6 +93,6 @@ contract ConstantAuctionPriceCurve {
         view
         returns (uint256, uint256)
     {
-        return (priceNumerator, priceDenominator);
+        return (priceNumerator, priceDivisor);
     }
 }

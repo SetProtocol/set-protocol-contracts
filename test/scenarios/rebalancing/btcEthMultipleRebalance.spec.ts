@@ -78,7 +78,7 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
   const REBALANCE_INTERVAL = new BigNumber(28).mul(SECONDS_PER_DAY);
   const PROPOSAL_PERIOD = new BigNumber(1).mul(SECONDS_PER_DAY);
   const TIME_TO_PIVOT = SECONDS_PER_DAY;
-  const PRICE_DENOMINATOR = new BigNumber(1000);
+  const PRICE_DIVISOR = new BigNumber(1000);
 
   // Bid Assumptions
 
@@ -191,7 +191,7 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
       proposalPeriod: PROPOSAL_PERIOD,
       rebalanceInterval: REBALANCE_INTERVAL,
       auctionTimeToPivot: TIME_TO_PIVOT,
-      priceDenominator: PRICE_DENOMINATOR,
+      priceDivisor: PRICE_DIVISOR,
     };
 
     const generalRebalancingData: GeneralRebalancingData = {

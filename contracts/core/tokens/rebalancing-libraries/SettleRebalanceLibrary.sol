@@ -32,7 +32,7 @@ import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
  * @title SettleRebalanceLibrary
  * @author Set Protocol
  *
- * Default implementation of Rebalancing Set Token placeBid function
+ * Default implementation of Rebalancing Set Token settle rebalance and related functions.
  */
 library SettleRebalanceLibrary {
     using SafeMath for uint256;

@@ -31,7 +31,7 @@ import {
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { STANDARD_NATURAL_UNIT, DEFAULT_AUCTION_PRICE_DENOMINATOR } from '@utils/constants';
+import { STANDARD_NATURAL_UNIT, DEFAULT_AUCTION_PRICE_DIVISOR } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
@@ -687,7 +687,7 @@ contract('CoreAdmin', accounts => {
     beforeEach(async () => {
       const usesStartPrice = false;
       priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
-        DEFAULT_AUCTION_PRICE_DENOMINATOR,
+        DEFAULT_AUCTION_PRICE_DIVISOR,
         usesStartPrice
       );
 
@@ -747,7 +747,7 @@ contract('CoreAdmin', accounts => {
     beforeEach(async () => {
       const usesStartPrice = false;
       priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
-        DEFAULT_AUCTION_PRICE_DENOMINATOR,
+        DEFAULT_AUCTION_PRICE_DIVISOR,
         usesStartPrice
       );
 

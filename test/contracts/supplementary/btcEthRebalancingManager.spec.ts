@@ -30,7 +30,7 @@ import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
-  DEFAULT_AUCTION_PRICE_DENOMINATOR,
+  DEFAULT_AUCTION_PRICE_DIVISOR,
 } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
@@ -113,7 +113,7 @@ contract('BTCETHRebalancingManager', accounts => {
     );
     constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(
       DEFAULT_AUCTION_PRICE_NUMERATOR,
-      DEFAULT_AUCTION_PRICE_DENOMINATOR,
+      DEFAULT_AUCTION_PRICE_DIVISOR,
     );
 
     btcMedianizer = await oracleWrapper.deployMedianizerAsync();

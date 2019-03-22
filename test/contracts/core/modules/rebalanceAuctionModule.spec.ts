@@ -26,7 +26,7 @@ import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
-  DEFAULT_AUCTION_PRICE_DENOMINATOR,
+  DEFAULT_AUCTION_PRICE_DIVISOR,
   ZERO,
 } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
@@ -104,7 +104,7 @@ contract('RebalanceAuctionModule', accounts => {
     );
     constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(
       DEFAULT_AUCTION_PRICE_NUMERATOR,
-      DEFAULT_AUCTION_PRICE_DENOMINATOR,
+      DEFAULT_AUCTION_PRICE_DIVISOR,
     );
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);

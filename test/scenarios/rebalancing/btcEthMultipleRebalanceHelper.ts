@@ -138,7 +138,7 @@ export interface InitializationParameters {
   proposalPeriod: BigNumber;
   rebalanceInterval: BigNumber;
   auctionTimeToPivot: BigNumber;
-  priceDenominator: BigNumber;
+  priceDivisor: BigNumber;
 }
 
 export interface GeneralRebalancingData {
@@ -265,7 +265,7 @@ export class BTCETHMultipleRebalanceWrapper {
     this._dataLogger.gasProfile.rebalancingFactory = await this._extractGasCostFromLatestBlockAsync();
 
     this._linearAuctionPriceCurve = await this._rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
-      this._rebalanceProgram.initializationParams.priceDenominator,
+      this._rebalanceProgram.initializationParams.priceDivisor,
       true
     );
     this._dataLogger.gasProfile.linearAuctionPriceCurve = await this._extractGasCostFromLatestBlockAsync();

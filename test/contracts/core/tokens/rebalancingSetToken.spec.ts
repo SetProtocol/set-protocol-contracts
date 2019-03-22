@@ -30,7 +30,7 @@ import {
   DEFAULT_UNIT_SHARES,
   ZERO,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
-  DEFAULT_AUCTION_PRICE_DENOMINATOR,
+  DEFAULT_AUCTION_PRICE_DIVISOR,
   DEFAULT_REBALANCING_NATURAL_UNIT,
 } from '@utils/constants';
 import {
@@ -116,7 +116,7 @@ contract('RebalancingSetToken', accounts => {
     );
     constantAuctionPriceCurve = await rebalancingWrapper.deployUpdatableConstantAuctionPriceCurveAsync(
       DEFAULT_AUCTION_PRICE_NUMERATOR,
-      DEFAULT_AUCTION_PRICE_DENOMINATOR,
+      DEFAULT_AUCTION_PRICE_DIVISOR,
     );
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
@@ -1249,7 +1249,7 @@ contract('RebalancingSetToken', accounts => {
       describe('when the pivot price is less than .5', async () => {
         beforeEach(async () => {
           const pivotPrice = new BigNumber(.4);
-          subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(pivotPrice);
+          subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DIVISOR.mul(pivotPrice);
         });
 
         it('should revert', async () => {
@@ -1260,7 +1260,7 @@ contract('RebalancingSetToken', accounts => {
       describe('when the pivot price is greater than 5', async () => {
         beforeEach(async () => {
           const pivotPrice = new BigNumber(6);
-          subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(pivotPrice);
+          subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DIVISOR.mul(pivotPrice);
         });
 
         it('should revert', async () => {

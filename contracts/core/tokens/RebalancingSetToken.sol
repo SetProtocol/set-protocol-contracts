@@ -249,22 +249,26 @@ contract RebalancingSetToken is
     }
 
     /*
-     * Initiate rebalance for the rebalancing set. Users can now submit bids.
-     *
+     * Initiate rebalance for the rebalancing set if the proposal period has elapsed after
+     * a proposal.
      */
     function startRebalance()
         external
     {
-        // Redeem currentSet and define biddingParameters
-        biddingParameters = StartRebalanceLibrary.startRebalance(
+        // Validate the correct rebalance state and time elapsed
+        StartRebalanceLibrary.validateStartRebalance(
+            proposalStartTime,
+            proposalPeriod,
+            uint8(rebalanceState)
+        );
+
+        // Redeem currentSet and set up biddingParameters
+        biddingParameters = StartRebalanceLibrary.redeemCurrentSetAndGetBiddingParameters(
             currentSet,
             nextSet,
             auctionLibrary,
             core,
-            vault,
-            proposalStartTime,
-            proposalPeriod,
-            uint8(rebalanceState)
+            vault
         );
 
         // Update state parameters

@@ -17,6 +17,7 @@
 pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
+import { SafeERC20 } from "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
@@ -266,7 +267,7 @@ contract KyberNetworkWrapper {
             // Transfer any unused or remainder send token back to the caller
             uint256 remainderSendToken = ERC20Wrapper.balanceOf(_sendTokens[i], address(this));
             if (remainderSendToken > 0) {
-                ERC20Wrapper.transfer(
+                SafeERC20.safeTransfer(
                     _sendTokens[i],
                     _caller,
                     remainderSendToken

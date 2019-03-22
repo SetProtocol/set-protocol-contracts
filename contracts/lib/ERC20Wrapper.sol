@@ -16,6 +16,8 @@
 
 pragma solidity 0.5.4;
 
+import { SafeERC20 } from "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
+
 import { CommonMath } from "./CommonMath.sol";
 import { IERC20 } from "./IERC20.sol";
 
@@ -70,79 +72,79 @@ library ERC20Wrapper {
         return IERC20(_token).allowance(_owner, _spender);
     }
 
-    /**
-     * Transfers tokens from an address. Handle's tokens that return true or null.
-     * If other value returned, reverts.
-     *
-     * @param  _token          The address of the ERC20 token
-     * @param  _to             The address to transfer to
-     * @param  _quantity       The amount of tokens to transfer
-     */
-    function transfer(
-        address _token,
-        address _to,
-        uint256 _quantity
-    )
-        external
-    {
-        IERC20(_token).transfer(_to, _quantity);
+    // /**
+    //  * Transfers tokens from an address. Handle's tokens that return true or null.
+    //  * If other value returned, reverts.
+    //  *
+    //  * @param  _token          The address of the ERC20 token
+    //  * @param  _to             The address to transfer to
+    //  * @param  _quantity       The amount of tokens to transfer
+    //  */
+    // function transfer(
+    //     address _token,
+    //     address _to,
+    //     uint256 _quantity
+    // )
+    //     external
+    // {
+    //     IERC20(_token).transfer(_to, _quantity);
 
-        // Check that transfer returns true or null
-        require(
-            checkSuccess(),
-            "ERC20Wrapper.transfer: Bad return value"
-        );
-    }
+    //     // Check that transfer returns true or null
+    //     require(
+    //         checkSuccess(),
+    //         "ERC20Wrapper.transfer: Bad return value"
+    //     );
+    // }
 
-    /**
-     * Transfers tokens from an address (that has set allowance on the proxy).
-     * Handle's tokens that return true or null. If other value returned, reverts.
-     *
-     * @param  _token          The address of the ERC20 token
-     * @param  _from           The address to transfer from
-     * @param  _to             The address to transfer to
-     * @param  _quantity       The number of tokens to transfer
-     */
-    function transferFrom(
-        address _token,
-        address _from,
-        address _to,
-        uint256 _quantity
-    )
-        external
-    {
-        IERC20(_token).transferFrom(_from, _to, _quantity);
+    // /**
+    //  * Transfers tokens from an address (that has set allowance on the proxy).
+    //  * Handle's tokens that return true or null. If other value returned, reverts.
+    //  *
+    //  * @param  _token          The address of the ERC20 token
+    //  * @param  _from           The address to transfer from
+    //  * @param  _to             The address to transfer to
+    //  * @param  _quantity       The number of tokens to transfer
+    //  */
+    // function transferFrom(
+    //     address _token,
+    //     address _from,
+    //     address _to,
+    //     uint256 _quantity
+    // )
+    //     external
+    // {
+    //     IERC20(_token).transferFrom(_from, _to, _quantity);
 
-        // Check that transferFrom returns true or null
-        require(
-            checkSuccess(),
-            "ERC20Wrapper.transferFrom: Bad return value"
-        );
-    }
+    //     // Check that transferFrom returns true or null
+    //     require(
+    //         checkSuccess(),
+    //         "ERC20Wrapper.transferFrom: Bad return value"
+    //     );
+    // }
 
-    /**
-     * Grants spender ability to spend on owner's behalf.
-     * Handle's tokens that return true or null. If other value returned, reverts.
-     *
-     * @param  _token          The address of the ERC20 token
-     * @param  _spender        The address to approve for transfer
-     * @param  _quantity       The amount of tokens to approve spender for
-     */
-    function approve(
-        address _token,
-        address _spender,
-        uint256 _quantity
-    )
-        internal
-    {
-        IERC20(_token).approve(_spender, _quantity);
+    // /**
+    //  * Grants spender ability to spend on owner's behalf.
+    //  * Handle's tokens that return true or null. If other value returned, reverts.
+    //  *
+    //  * @param  _token          The address of the ERC20 token
+    //  * @param  _spender        The address to approve for transfer
+    //  * @param  _quantity       The amount of tokens to approve spender for
+    //  */
+    // function approve(
+    //     address _token,
+    //     address _spender,
+    //     uint256 _quantity
+    // )
+    //     internal
+    // {
+    //     IERC20(_token).approve(_spender, _quantity);
 
-        // Check that approve returns true or null
-        require(
-            checkSuccess(),
-            "ERC20Wrapper.approve: Bad return value"
-        );
-    }
+    //     // Check that approve returns true or null
+    //     require(
+    //         checkSuccess(),
+    //         "ERC20Wrapper.approve: Bad return value"
+    //     );
+    // }
 
     /**
      * Ensure's the owner has granted enough allowance for system to
@@ -173,42 +175,42 @@ library ERC20Wrapper {
 
     // ============ Private Functions ============
 
-    /**
-     * Checks the return value of the previous function up to 32 bytes. Returns true if the previous
-     * function returned 0 bytes or 1.
-     */
-    function checkSuccess(
-    )
-        private
-        pure
-        returns (bool)
-    {
-        // default to failure
-        uint256 returnValue = 0;
+    // /**
+    //  * Checks the return value of the previous function up to 32 bytes. Returns true if the previous
+    //  * function returned 0 bytes or 1.
+    //  */
+    // function checkSuccess(
+    // )
+    //     private
+    //     pure
+    //     returns (bool)
+    // {
+    //     // default to failure
+    //     uint256 returnValue = 0;
 
-        assembly {
-            // check number of bytes returned from last function call
-            switch returndatasize
+    //     assembly {
+    //         // check number of bytes returned from last function call
+    //         switch returndatasize
 
-            // no bytes returned: assume success
-            case 0x0 {
-                returnValue := 1
-            }
+    //         // no bytes returned: assume success
+    //         case 0x0 {
+    //             returnValue := 1
+    //         }
 
-            // 32 bytes returned
-            case 0x20 {
-                // copy 32 bytes into scratch space
-                returndatacopy(0x0, 0x0, 0x20)
+    //         // 32 bytes returned
+    //         case 0x20 {
+    //             // copy 32 bytes into scratch space
+    //             returndatacopy(0x0, 0x0, 0x20)
 
-                // load those bytes into returnValue
-                returnValue := mload(0x0)
-            }
+    //             // load those bytes into returnValue
+    //             returnValue := mload(0x0)
+    //         }
 
-            // not sure what was returned: dont mark as success
-            default { }
-        }
+    //         // not sure what was returned: dont mark as success
+    //         default { }
+    //     }
 
-        // check if returned value is one or nothing
-        return returnValue == 1;
-    }
+    //     // check if returned value is one or nothing
+    //     return returnValue == 1;
+    // }
 }

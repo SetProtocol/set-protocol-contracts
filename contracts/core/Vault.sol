@@ -71,29 +71,32 @@ contract Vault is
         public
         onlyAuthorized
     {
-        // Retrieve current balance of token for the vault
-        uint256 existingVaultBalance = ERC20Wrapper.balanceOf(
-            _token,
-            address(this)
-        );
+        if (_quantity > 0) {
+            // Retrieve current balance of token for the vault
+            uint256 existingVaultBalance = ERC20Wrapper.balanceOf(
+                _token,
+                address(this)
+            );
 
-        // Call specified ERC20 token contract to transfer tokens from Vault to user
-        ERC20Wrapper.transfer(
-            _token,
-            _to,
-            _quantity
-        );
+            // Call specified ERC20 token contract to transfer tokens from Vault to user
+            ERC20Wrapper.transfer(
+                _token,
+                _to,
+                _quantity
+            );
 
-        // Verify transfer quantity is reflected in balance
-        uint256 newVaultBalance = ERC20Wrapper.balanceOf(
-            _token,
-            address(this)
-        );
-        // Check to make sure current balances are as expected
-        require(
-            newVaultBalance == existingVaultBalance.sub(_quantity),
-            "Vault.withdrawTo: Invalid post withdraw balance"
-        );
+            // Verify transfer quantity is reflected in balance
+            uint256 newVaultBalance = ERC20Wrapper.balanceOf(
+                _token,
+                address(this)
+            );
+            // Check to make sure current balances are as expected
+            require(
+                newVaultBalance == existingVaultBalance.sub(_quantity),
+                "Vault.withdrawTo: Invalid post withdraw balance"
+            );            
+        }
+
     }
 
     /*
@@ -112,8 +115,10 @@ contract Vault is
         public
         onlyAuthorized
     {
-        // Increment balances state variable adding _quantity to user's token amount
-        balances[_token][_owner] = balances[_token][_owner].add(_quantity);
+        if (_quantity > 0) {
+            // Increment balances state variable adding _quantity to user's token amount
+            balances[_token][_owner] = balances[_token][_owner].add(_quantity);    
+        }
     }
 
     /*
@@ -138,8 +143,10 @@ contract Vault is
             "Vault.decrementTokenOwner: Insufficient token balance"
         );
 
-        // Decrement balances state variable subtracting _quantity to user's token amount
-        balances[_token][_owner] = balances[_token][_owner].sub(_quantity);
+        if (_quantity > 0) {
+            // Decrement balances state variable subtracting _quantity to user's token amount
+            balances[_token][_owner] = balances[_token][_owner].sub(_quantity);    
+        }
     }
 
     /**
@@ -160,17 +167,19 @@ contract Vault is
         public
         onlyAuthorized
     {
-        // Require that user has enough unassociated tokens to withdraw tokens or issue Set
-        require(
-            balances[_token][_from] >= _quantity,
-            "Vault.transferBalance: Insufficient token balance"
-        );
+        if (_quantity > 0) {
+            // Require that user has enough unassociated tokens to withdraw tokens or issue Set
+            require(
+                balances[_token][_from] >= _quantity,
+                "Vault.transferBalance: Insufficient token balance"
+            );
 
-        // Decrement balances state variable subtracting _quantity to user's token amount
-        balances[_token][_from] = balances[_token][_from].sub(_quantity);
+            // Decrement balances state variable subtracting _quantity to user's token amount
+            balances[_token][_from] = balances[_token][_from].sub(_quantity);
 
-        // Increment balances state variable adding _quantity to user's token amount
-        balances[_token][_to] = balances[_token][_to].add(_quantity);
+            // Increment balances state variable adding _quantity to user's token amount
+            balances[_token][_to] = balances[_token][_to].add(_quantity);            
+        }
     }
 
     /*
@@ -205,13 +214,11 @@ contract Vault is
         );
 
         for (uint256 i = 0; i < tokenCount; i++) {
-            if (_quantities[i] > 0) {
-                withdrawTo(
-                    _tokens[i],
-                    _to,
-                    _quantities[i]
-                );
-            }
+            withdrawTo(
+                _tokens[i],
+                _to,
+                _quantities[i]
+            );
         }
     }
 
@@ -247,13 +254,11 @@ contract Vault is
         );
 
         for (uint256 i = 0; i < tokenCount; i++) {
-            if (_quantities[i] > 0) {
-                incrementTokenOwner(
-                    _tokens[i],
-                    _owner,
-                    _quantities[i]
-                );
-            }
+            incrementTokenOwner(
+                _tokens[i],
+                _owner,
+                _quantities[i]
+            );
         }
     }
 
@@ -289,13 +294,11 @@ contract Vault is
         );
 
         for (uint256 i = 0; i < tokenCount; i++) {
-            if (_quantities[i] > 0) {
-                decrementTokenOwner(
-                    _tokens[i],
-                    _owner,
-                    _quantities[i]
-                );
-            }
+            decrementTokenOwner(
+                _tokens[i],
+                _owner,
+                _quantities[i]
+            );
         }
     }
 
@@ -332,14 +335,12 @@ contract Vault is
         );
 
         for (uint256 i = 0; i < tokenCount; i++) {
-            if (_quantities[i] > 0) {
-                transferBalance(
-                    _tokens[i],
-                    _from,
-                    _to,
-                    _quantities[i]
-                );
-            }
+            transferBalance(
+                _tokens[i],
+                _from,
+                _to,
+                _quantities[i]
+            );
         }
     }
 

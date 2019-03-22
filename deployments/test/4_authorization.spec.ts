@@ -50,31 +50,36 @@ describe('Deployment: Authorization', () => {
      * - Issuance Order Module
      */
 
-    const expectedTimeLockPeriod = networkConstants.timeLockPeriod[networkName];
+    const expectedGeneralTimeLockPeriod = networkConstants.generalTimeLockPeriod[networkName];
 
     it('correct timelock applied to core', async () => {
       const timelock = await coreContract.methods.timeLockPeriod().call();
-      expect(parseInt(timelock)).toEqual(expectedTimeLockPeriod);
+      expect(parseInt(timelock)).toEqual(expectedGeneralTimeLockPeriod);
     });
 
     it('correct timelock applied to transfer proxy', async () => {
       const transferProxyAddress = await getContractAddress(TransferProxy.contractName);
       const transferProxyContract = new web3.eth.Contract(TransferProxy.abi, transferProxyAddress);
+
       const timelock = await transferProxyContract.methods.timeLockPeriod().call();
-      expect(parseInt(timelock)).toEqual(expectedTimeLockPeriod);
+      const expectedTransferProxyTimeLockPeriod = networkConstants.transferProxyTimeLockPeriod[networkName];
+      expect(parseInt(timelock)).toEqual(expectedTransferProxyTimeLockPeriod);
     });
 
     it('correct timelock applied to vault', async () => {
       const vaultContract = new web3.eth.Contract(Vault.abi, vaultAddress);
+      
       const timelock = await vaultContract.methods.timeLockPeriod().call();
-      expect(parseInt(timelock)).toEqual(expectedTimeLockPeriod);
+      const expectedVaultTimeLockPeriod = networkConstants.vaultTimeLockPeriod[networkName];
+
+      expect(parseInt(timelock)).toEqual(expectedVaultTimeLockPeriod);
     });
 
     it('correct timelock applied to white list', async () => {
       const whiteListAddress = await getContractAddress(WhiteList.contractName);
       const vaultContract = new web3.eth.Contract(WhiteList.abi, whiteListAddress);
       const timelock = await vaultContract.methods.timeLockPeriod().call();
-      expect(parseInt(timelock)).toEqual(expectedTimeLockPeriod);
+      expect(parseInt(timelock)).toEqual(expectedGeneralTimeLockPeriod);
     });
   });
 

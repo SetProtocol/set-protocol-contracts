@@ -74,10 +74,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
       {from: this._deployerAccount.address}
     );
 
-    const initialTimeLock = 0;
-    const finalTimeLock = networkConstants.timeLockPeriod[this._networkConstant];
-
-    await this.updateTimeLockPeriod(initialTimeLock);
+    const finalTimeLock = networkConstants.generalTimeLockPeriod[this._networkConstant];
 
     await this.addAuthorizedAddressesToVault([Core.contractName]);
     await this.addAuthorizedAddressesToTransferProxy([Core.contractName]);
@@ -117,6 +114,15 @@ export class AuthorizationStage implements DeploymentStageInterface {
       const data = this._vaultContract.addAuthorizedAddress.getABIEncodedTransactionData(contractAddress);
       await executeTransaction(data, this._vaultContract.address, this._web3);
     });
+
+    console.log('* Updating Vault time lock');
+    const period = networkConstants.vaultTimeLockPeriod[this._networkConstant];
+    const bigNumberPeriod = new BigNumber(period);
+    const vaultData =  this._vaultContract
+                        .setTimeLockPeriod
+                        .getABIEncodedTransactionData(bigNumberPeriod);
+
+    await executeTransaction(vaultData, this._vaultContract.address, this._web3);    
   }
 
   async addAuthorizedAddressesToTransferProxy(names: string[]) {
@@ -132,6 +138,15 @@ export class AuthorizationStage implements DeploymentStageInterface {
       const data = this._transferProxyContract.addAuthorizedAddress.getABIEncodedTransactionData(contractAddress);
       await executeTransaction(data, this._transferProxyContract.address, this._web3);
     });
+
+    console.log('* Updating Transfer Proxy time lock');
+    const period = networkConstants.transferProxyTimeLockPeriod[this._networkConstant];
+    const bigNumberPeriod = new BigNumber(period);
+    const transferProxyData = this._transferProxyContract
+                              .setTimeLockPeriod
+                              .getABIEncodedTransactionData(bigNumberPeriod);
+
+    await executeTransaction(transferProxyData, this._transferProxyContract.address, this._web3);
   }
 
   async registerCoreFactories(names: string[]) {
@@ -216,19 +231,5 @@ export class AuthorizationStage implements DeploymentStageInterface {
                               .getABIEncodedTransactionData(bigNumberPeriod);
 
     await executeTransaction(coreContractData, this._coreContract.address, this._web3);
-
-    console.log('* Updating Transfer Proxy time lock');
-    const transferProxyData = this._transferProxyContract
-                              .setTimeLockPeriod
-                              .getABIEncodedTransactionData(bigNumberPeriod);
-
-    await executeTransaction(transferProxyData, this._transferProxyContract.address, this._web3);
-
-    console.log('* Updating Vault time lock');
-    const vaultData =  this._vaultContract
-                        .setTimeLockPeriod
-                        .getABIEncodedTransactionData(bigNumberPeriod);
-
-    await executeTransaction(vaultData, this._vaultContract.address, this._web3);
   }
 }

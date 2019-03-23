@@ -42,7 +42,7 @@ contract KyberNetworkWrapper {
     address public kyberNetworkProxy;
     address public setTransferProxy;
 
-    uint256 public KYBER_TRADE_LENGTH = 128;
+    uint256 public KYBER_TRADE_LENGTH = 160;
 
     // ============ Structs ============
 
@@ -138,7 +138,7 @@ contract KyberNetworkWrapper {
         address[] memory receiveTokens = new address[](tradesCount);
         uint256[] memory receiveTokensAmounts = new uint256[](tradesCount);
 
-        // Parse and execute the trade at the current offset via the KyberNetworkProxy, each kyber trade is 128 bytes
+        // Parse and execute the trade at the current offset via the KyberNetworkProxy, each kyber trade is 160 bytes
         for (uint256 i = 0; i < tradesCount; i++) {
             // Parse Kyber trade at the current offset
             KyberTrade memory trade = parseKyberTrade(

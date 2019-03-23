@@ -20,10 +20,10 @@ pragma experimental "ABIEncoderV2";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
 import { ICore } from "../../core/interfaces/ICore.sol";
-import { IMedian } from "../../external/DappHub/interfaces/IMedian.sol";
 import { IRebalancingSetToken } from "../../core/interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";
 import { RebalancingLibrary } from "../../core/lib/RebalancingLibrary.sol";
+import { ManagerLibrary } from "./lib/ManagerLibrary.sol";
 
 
 /**
@@ -47,10 +47,6 @@ contract BTCDaiRebalancingManager {
     uint256 constant DAI_DECIMALS = 18;
     uint256 constant BTC_DECIMALS = 8;
     uint256 constant DECIMAL_DIFF_MULTIPLIER = 10 ** 10;
-    uint256 constant SET_TOKEN_DECIMALS = 18;
-    uint256 constant THIRTY_MINUTES_IN_SECONDS = 1800;
-    uint256 constant VALUE_TO_CENTS_CONVERSION = 10 ** 16;
-
 
     /* ============ State Variables ============ */
 
@@ -148,23 +144,10 @@ contract BTCDaiRebalancingManager {
         // Create interface to interact with RebalancingSetToken
         IRebalancingSetToken rebalancingSetInterface = IRebalancingSetToken(_rebalancingSetTokenAddress);
 
-        // Require that enough time has passed from last rebalance
-        uint256 lastRebalanceTimestamp = rebalancingSetInterface.lastRebalanceTimestamp();
-        uint256 rebalanceInterval = rebalancingSetInterface.rebalanceInterval();
-        require(
-            block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
-            "RebalancingTokenManager.proposeNewRebalance: Rebalance interval not elapsed"
-        );
-
-        // Require that Rebalancing Set Token is in Default state, won't allow for re-proposals
-        // because malicious actor could prevent token from ever rebalancing
-        require(
-            rebalancingSetInterface.rebalanceState() == RebalancingLibrary.State.Default,
-            "RebalancingTokenManager.proposeNewRebalance: State must be in Default"
-        );
+        ManagerLibrary.validateManagerPropose(rebalancingSetInterface);
 
         // Get price data
-        uint256 btcPrice = queryPriceData();
+        uint256 btcPrice = ManagerLibrary.queryPriceData(btcPriceFeed);
 
         // Require that allocation has changed sufficiently enough to justify rebalance
         uint256 currentSetDollarAmount = checkSufficientAllocationChange(
@@ -175,11 +158,19 @@ contract BTCDaiRebalancingManager {
         // Create new Set Token that collateralizes Rebalancing Set Token
         (
             address nextSetAddress,
+            uint256 nextSetDollarAmount
+        ) = createNewAllocationSetToken(btcPrice);
+
+        // Calculate the auctionStartPrice and auctionPivotPrice of rebalance auction using dollar value
+        // of both the current and nextSet
+        (
             uint256 auctionStartPrice,
             uint256 auctionPivotPrice
-        ) = createNewAllocationSetToken(
-            btcPrice,
-            currentSetDollarAmount
+        ) = ManagerLibrary.calculateAuctionPriceParameters(
+            currentSetDollarAmount,
+            nextSetDollarAmount,
+            AUCTION_LIB_PRICE_DIVISOR,
+            auctionTimeToPivot
         );
         
         // Propose new allocation to Rebalancing Set Token
@@ -197,25 +188,7 @@ contract BTCDaiRebalancingManager {
     }
 
     /* ============ Internal ============ */
-    /*
-     * Query price feed for wbtc, return as uint256
-     *
-     * @return          BTC price
-     */
-    function queryPriceData()
-        private
-        view
-        returns (uint256)
-    {
-        // Get price from oracles
-        bytes32 btcPriceBytes = IMedian(btcPriceFeed).read();
-
-        // Cast bytes32 prices to uint256
-        uint256 btcPrice = uint256(btcPriceBytes);
-
-        return (btcPrice);
-    }
-
+    
     /*
      * Check there has been a sufficient change in allocation as defined by maximumUpperThreshold
      * and minimumLowerThreshold and return USD value of currentSet.
@@ -239,24 +212,28 @@ contract BTCDaiRebalancingManager {
         uint256 currentSetNaturalUnit = currentSetTokenInterface.naturalUnit();
         uint256[] memory currentSetUnits = currentSetTokenInterface.getUnits();
 
-        // Calculate dai dollar value in currentSet (in cents)
-        uint256 daiDollarAmount = calculateTokenAllocationAmountUSD(
+        // // Calculate dai dollar value in currentSet (in cents)
+        uint256 daiDollarAmount = ManagerLibrary.calculateTokenAllocationAmountUSD(
             DAI_PRICE,
             currentSetNaturalUnit,
             currentSetUnits[0],
             DAI_DECIMALS
         );
 
-        // Calculate wbtc dollar value in currentSet (in cents)
-        uint256 btcDollarAmount = calculateTokenAllocationAmountUSD(
-            _btcPrice,
-            currentSetNaturalUnit,
-            currentSetUnits[1],
-            BTC_DECIMALS
-        );
+        uint256[] memory assetPrices = new uint256[](2);
+        assetPrices[0] = DAI_PRICE;
+        assetPrices[1] = _btcPrice;
 
-        // Total dollar value of currentSet (in cents)
-        uint256 currentSetDollarAmount = daiDollarAmount.add(btcDollarAmount);
+        uint256[] memory assetDecimals = new uint256[](2);
+        assetDecimals[0] = DAI_DECIMALS;
+        assetDecimals[1] = BTC_DECIMALS;
+
+        uint256 currentSetDollarAmount = ManagerLibrary.calculateSetTokenDollarValue(
+            assetPrices,
+            currentSetNaturalUnit,
+            currentSetUnits,
+            assetDecimals
+        );
 
         // Require that the allocation has changed enough to trigger buy or sell
         require(
@@ -273,17 +250,14 @@ contract BTCDaiRebalancingManager {
      * create nextSet
      *
      * @param  _btcPrice                    The 18 decimal dollar value of one full BTC
-     * @param  _currentSetDollarAmount      The USD value of the Rebalancing Set Token's currentSet
      * @return address                      The address of nextSet
-     * @return uint256                      The auctionStartPrice for rebalance auction
-     * @return uint256                      The auctionPivotPrice for rebalance auction
+     * @return uint256                      The dollar value of the nextSet
      */
     function createNewAllocationSetToken(
-        uint256 _btcPrice,
-        uint256 _currentSetDollarAmount
+        uint256 _btcPrice
     )
         private
-        returns (address, uint256, uint256)
+        returns (address, uint256)
     {
         // Calculate the nextSet units and naturalUnit, determine dollar value of nextSet
         (
@@ -292,16 +266,6 @@ contract BTCDaiRebalancingManager {
             uint256[] memory nextSetUnits
         ) = calculateNextSetUnits(
             _btcPrice
-        );
-
-        // Calculate the auctionStartPrice and auctionPivotPrice of rebalance auction using dollar value
-        // of both the current and nextSet
-        (
-            uint256 auctionStartPrice,
-            uint256 auctionPivotPrice
-        ) = calculateAuctionPriceParameters(
-            _currentSetDollarAmount,
-            nextSetDollarAmount
         );
         
         // Create static components array
@@ -321,7 +285,7 @@ contract BTCDaiRebalancingManager {
             ""
         );
 
-        return (nextSetAddress, auctionStartPrice, auctionPivotPrice);
+        return (nextSetAddress, nextSetDollarAmount);
     }
 
     /*
@@ -339,138 +303,41 @@ contract BTCDaiRebalancingManager {
         returns (uint256, uint256, uint256[] memory)
     {
         // Initialize set token parameters
-        uint256[] memory units = new uint256[](2);
-        uint256 nextSetDollarAmount;
+        uint256[] memory nextSetUnits = new uint256[](2);
         uint256 nextSetNaturalUnit = DECIMAL_DIFF_MULTIPLIER.mul(PRICE_PRECISION);
 
         if (_btcPrice >= DAI_PRICE) {
-            // Dai units is equal the USD Bitcoin price
+            // Dai nextSetUnits is equal the USD Bitcoin price
             uint256 daiUnits = _btcPrice.mul(DECIMAL_DIFF_MULTIPLIER).div(DAI_PRICE);
 
             // Create unit array and define natural unit
-            units[0] = daiUnits.mul(daiMultiplier).mul(PRICE_PRECISION);
-            units[1] = btcMultiplier.mul(PRICE_PRECISION);          
+            nextSetUnits[0] = daiUnits.mul(daiMultiplier).mul(PRICE_PRECISION);
+            nextSetUnits[1] = btcMultiplier.mul(PRICE_PRECISION);          
         } else {
-            // Calculate btc units as (daiPrice/btcPrice)*100. 100 is used to add 
+            // Calculate btc nextSetUnits as (daiPrice/btcPrice)*100. 100 is used to add 
             // precision.
             uint256 btcDaiPrice = DAI_PRICE.mul(PRICE_PRECISION).div(_btcPrice);
 
             // Create unit array and define natural unit
-            units[0] = daiMultiplier.mul(DECIMAL_DIFF_MULTIPLIER).mul(PRICE_PRECISION); 
-            units[1] = btcDaiPrice.mul(btcMultiplier);        
+            nextSetUnits[0] = daiMultiplier.mul(DECIMAL_DIFF_MULTIPLIER).mul(PRICE_PRECISION); 
+            nextSetUnits[1] = btcDaiPrice.mul(btcMultiplier);        
         }
 
-        // Calculate the nextSet dollar value (in cents)
-        nextSetDollarAmount = calculateSetTokenPriceUSD(
-            _btcPrice,
+        uint256[] memory assetPrices = new uint256[](2);
+        assetPrices[0] = DAI_PRICE;
+        assetPrices[1] = _btcPrice;
+
+        uint256[] memory assetDecimals = new uint256[](2);
+        assetDecimals[0] = DAI_DECIMALS;
+        assetDecimals[1] = BTC_DECIMALS;
+
+        uint256 nextSetDollarAmount = ManagerLibrary.calculateSetTokenDollarValue(
+            assetPrices,
             nextSetNaturalUnit,
-            units
-        ); 
-
-        return (nextSetNaturalUnit, nextSetDollarAmount, units);
-    }
-
-    /*
-     * Determine units and naturalUnit of nextSet to propose
-     *
-     * @param  _currentSetDollarAmount      The 18 decimal value of one currenSet
-     * @param  _nextSetDollarAmount         The 18 decimal value of one nextSet
-     * @return uint256                      The auctionStartPrice for rebalance auction
-     * @return uint256                      The auctionPivotPrice for rebalance auction
-     */
-    function calculateAuctionPriceParameters(
-        uint256 _currentSetDollarAmount,
-        uint256 _nextSetDollarAmount
-    )
-        private
-        view
-        returns (uint256, uint256)
-    {
-        // Determine fair value of nextSet/currentSet and put in terms of auction library price divisor
-        uint256 fairValue = _nextSetDollarAmount.mul(AUCTION_LIB_PRICE_DIVISOR).div(_currentSetDollarAmount);
-        // Calculate how much one percent slippage from fair value is
-        uint256 onePercentSlippage = fairValue.div(100);
-
-        // Calculate how many 30 minute periods are in auctionTimeToPivot
-        uint256 thirtyMinutePeriods = auctionTimeToPivot.div(THIRTY_MINUTES_IN_SECONDS);
-        // Since we are targeting a 1% slippage every 30 minutes the price range is defined as
-        // the price of a 1% move multiplied by the amount of 30 second intervals in the auctionTimeToPivot
-        // This value is then divided by two to get half the price range
-        uint256 halfPriceRange = thirtyMinutePeriods.mul(onePercentSlippage).div(2);
-
-        // Auction start price is fair value minus half price range to center the auction at fair value
-        uint256 auctionStartPrice = fairValue.sub(halfPriceRange);
-        // Auction pivot price is fair value plus half price range to center the auction at fair value
-        uint256 auctionPivotPrice = fairValue.add(halfPriceRange);
-
-        return (auctionStartPrice, auctionPivotPrice);
-    }
-
-    /*
-     * Get USD value of one set
-     *
-     * @param  _btcPrice            The 18 decimal value of one full BTC
-     * @param  _naturalUnit         The naturalUnit of the set being valued
-     * @param  _units               The units of the set being valued
-     * @return uint256              The USD value of the set (in cents)
-     */
-    function calculateSetTokenPriceUSD(
-        uint256 _btcPrice,
-        uint256 _naturalUnit,
-        uint256[] memory _units
-    )
-        private
-        view
-        returns (uint256)
-    {
-        // Calculate daiDollarAmount of one Set Token (in cents) 
-        uint256 daiDollarAmount = calculateTokenAllocationAmountUSD(
-            DAI_PRICE,
-            _naturalUnit,
-            _units[0],
-            DAI_DECIMALS
+            nextSetUnits,
+            assetDecimals
         );
 
-        // Calculate btcDollarAmount of one Set Token (in cents)
-        uint256 btcDollarAmount = calculateTokenAllocationAmountUSD(
-            _btcPrice,
-            _naturalUnit,
-            _units[1],
-            BTC_DECIMALS
-        );
-
-        // Return sum of two components USD value (in cents)
-        return daiDollarAmount.add(btcDollarAmount);        
-    }
-
-    /*
-     * Get USD value of one component in a Set
-     *
-     * @param  _tokenPrice          The 18 decimal value of one full token
-     * @param  _naturalUnit         The naturalUnit of the set being component belongs to
-     * @param  _unit                The unit of the component in the set
-     * @param  _tokenDecimals       The component token's decimal value
-     * @return uint256              The USD value of the component's allocation in the Set (in cents)
-     */
-    function calculateTokenAllocationAmountUSD(
-        uint256 _tokenPrice,
-        uint256 _naturalUnit,
-        uint256 _unit,
-        uint256 _tokenDecimals
-    )
-        private
-        view
-        returns (uint256)
-    {
-        // Calculate the amount of component base units are in one full set token
-        uint256 componentUnitsInFullToken = _unit
-            .mul(10 ** SET_TOKEN_DECIMALS)
-            .div(_naturalUnit);
-        
-        // Return value of component token in one full set token, divide by 10 ** 16 to turn tokenPrice into cents
-        return _tokenPrice
-            .mul(componentUnitsInFullToken)
-            .div(10 ** _tokenDecimals)
-            .div(VALUE_TO_CENTS_CONVERSION);
+        return (nextSetNaturalUnit, nextSetDollarAmount, nextSetUnits);
     }
 }

@@ -25,6 +25,7 @@ import { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_c
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
 import { KyberNetworkWrapperContract } from '../types/generated/kyber_network_wrapper';
 import { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
+import { ManagerLibraryMockContract } from '../types/generated/manager_library_mock';
 import { MedianContract } from '../types/generated/median';
 import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
@@ -86,6 +87,7 @@ export {
   InvalidReturnTokenMockContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
+  ManagerLibraryMockContract,
   MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,

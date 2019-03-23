@@ -6,6 +6,7 @@ import {
   CoreIssuanceLibraryMockContract,
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryMockContract,
+  ManagerLibraryMockContract,
   SetTokenLibraryMockContract,
   ZeroExOrderLibraryMockContract
 } from '../contracts';
@@ -14,14 +15,15 @@ import {
 } from '../web3Helper';
 
 const web3 = getWeb3();
+const Bytes32LibraryMock = artifacts.require('Bytes32LibraryMock');
+const CommonMathMock = artifacts.require('CommonMathMock');
+const CommonValidationsLibrary = artifacts.require('CommonValidationsLibrary');
+const CommonValidationsLibraryMock = artifacts.require('CommonValidationsLibraryMock');
 const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreIssuanceLibraryMock = artifacts.require('CoreIssuanceLibraryMock');
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
-const CommonValidationsLibrary = artifacts.require('CommonValidationsLibrary');
-const CommonValidationsLibraryMock = artifacts.require('CommonValidationsLibraryMock');
-const Bytes32LibraryMock = artifacts.require('Bytes32LibraryMock');
-const CommonMathMock = artifacts.require('CommonMathMock');
 const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
+const ManagerLibraryMock = artifacts.require('ManagerLibraryMock');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
 const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
 const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
@@ -112,6 +114,20 @@ export class LibraryMockWrapper {
       { from },
     );
   }
+
+  public async deployManagerLibraryMockAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<ManagerLibraryMockContract> {
+    const managerLibraryMockContract = await ManagerLibraryMock.new(
+      { from },
+    );
+
+    return new ManagerLibraryMockContract(
+      new web3.eth.Contract(managerLibraryMockContract.abi, managerLibraryMockContract.address),
+      { from },
+    );
+  }
+
 
   public async deployERC20WrapperLibraryAsync(
     from: Address = this._contractOwnerAddress

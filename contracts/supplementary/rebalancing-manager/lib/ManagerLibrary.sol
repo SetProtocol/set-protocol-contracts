@@ -61,7 +61,8 @@ library ManagerLibrary {
     }
 
     /*
-     * Determine units and naturalUnit of nextSet to propose
+     * Calculates the auction price parameters, utilizing targetting 1% slippage every 30 minutes
+     * and auctions beginning +50% and -50% relative to fair value.
      *
      * @param  _currentSetDollarAmount      The 18 decimal value of one currenSet
      * @param  _nextSetDollarAmount         The 18 decimal value of one nextSet
@@ -102,7 +103,8 @@ library ManagerLibrary {
     }
 
     /*
-     * Query price feeds, return as uint256
+     * Query the Medianizer price feeds for a value that is returned as a Uint. Prices
+     * have 18 decimals.
      *
      * @param  _priceFeedAddress            Address of the medianizer price feed
      * @return uint256                      The price from the price feed with 18 decimals
@@ -120,6 +122,16 @@ library ManagerLibrary {
         return uint256(priceInBytes);
     }
 
+    /*
+     * Calculates the USD Value of a Set Token - by taking the individual token prices, units
+     * and decimals.
+     *
+     * @param  _tokenPrices         The 18 decimal values of components
+     * @param  _naturalUnit         The naturalUnit of the set being component belongs to
+     * @param  _units               The units of the components in the Set
+     * @param  _tokenDecimals       The components decimal values
+     * @return uint256              The USD value of the Set (in cents)
+     */
     function calculateSetTokenDollarValue(
         uint256[] memory _tokenPrices,
         uint256 _naturalUnit,

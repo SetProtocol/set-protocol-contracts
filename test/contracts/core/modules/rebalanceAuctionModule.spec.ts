@@ -1088,7 +1088,7 @@ contract('RebalanceAuctionModule', accounts => {
     });
   });
 
-  describe('#withdrawFromFailedRebalance', async () => {
+  describe('#redeemFromFailedRebalance', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectCaller: Address;
     let proposalPeriod: BigNumber;
@@ -1133,13 +1133,13 @@ contract('RebalanceAuctionModule', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return rebalanceAuctionModuleMock.withdrawFromFailedRebalance.sendTransactionAsync(
+      return rebalanceAuctionModuleMock.redeemFromFailedRebalance.sendTransactionAsync(
         subjectRebalancingSetToken,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
 
-    describe('when withdrawFromFailedRebalance is called by an invalid Set Token', async () => {
+    describe('when redeemFromFailedRebalance is called by an invalid Set Token', async () => {
       beforeEach(async () => {
         subjectRebalancingSetToken = nonTrackedSetToken;
       });
@@ -1149,13 +1149,13 @@ contract('RebalanceAuctionModule', accounts => {
       });
     });
 
-    describe('when withdrawFromFailedRebalance is called and token is in Default state', async () => {
+    describe('when redeemFromFailedRebalance is called and token is in Default state', async () => {
       it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe('when withdrawFromFailedRebalance is called and token is in Proposal State', async () => {
+    describe('when redeemFromFailedRebalance is called and token is in Proposal State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
           coreMock,
@@ -1172,7 +1172,7 @@ contract('RebalanceAuctionModule', accounts => {
       });
     });
 
-    describe('when withdrawFromFailedRebalance is called and token is in Rebalance State', async () => {
+    describe('when redeemFromFailedRebalance is called and token is in Rebalance State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
@@ -1189,7 +1189,7 @@ contract('RebalanceAuctionModule', accounts => {
       });
     });
 
-    describe('when withdrawFromFailedRebalance is called and token is in Drawdown State', async () => {
+    describe('when redeemFromFailedRebalance is called and token is in Drawdown State', async () => {
       let minimumBid: BigNumber;
 
       beforeEach(async () => {

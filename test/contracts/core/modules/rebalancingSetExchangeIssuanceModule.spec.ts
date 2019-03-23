@@ -375,7 +375,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         await weth.changeAllowanceProxy.sendTransactionAsync(
           rebalancingSetExchangeIssuanceModule.address,
           transferProxy.address,
-          new BigNumber(0)
+          new BigNumber(0),
+          { gas: DEFAULT_GAS }
         );
       });
 

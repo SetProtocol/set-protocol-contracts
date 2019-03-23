@@ -120,6 +120,7 @@ contract('KyberNetworkWrapper', accounts => {
     let subjectExchangeData: ExchangeData;
 
     let maxDestinationQuantity: BigNumber;
+    let minimumConversionRate: BigNumber;
 
     let sourceToken: StandardTokenMockContract;
     let sourceTokenDecimals: number;
@@ -146,7 +147,7 @@ contract('KyberNetworkWrapper', accounts => {
       componentTokenDecimals = (await componentToken.decimals.callAsync()).toNumber();
       sourceTokenDecimals = (await sourceToken.decimals.callAsync()).toNumber();
       const conversionRatePower = new BigNumber(10).pow(18 + sourceTokenDecimals - componentTokenDecimals);
-      const minimumConversionRate = maxDestinationQuantity.div(sourceTokenQuantity).mul(conversionRatePower).round();
+      minimumConversionRate = maxDestinationQuantity.div(sourceTokenQuantity).mul(conversionRatePower).round();
 
       const kyberTrade = {
         destinationToken: componentToken.address,
@@ -247,6 +248,49 @@ contract('KyberNetworkWrapper', accounts => {
         const conversionRate = receivedComponentTokenAmount.div(sourceTokenUsed);
         const expectedTokenAmountToReceive = sourceTokenUsed.mul(conversionRate).round();
         expect(componentTokenAmountToReceive).to.be.bignumber.equal(expectedTokenAmountToReceive);
+      });
+    });
+
+    describe('when there are two Kyber trades', async () => {
+      beforeEach(async () => {
+        await erc20Wrapper.transferTokenAsync(
+          sourceToken,
+          kyberNetworkWrapper.address,
+          sourceTokenQuantity,
+          issuanceOrderMakerAccount
+        );
+
+        const kyberTradeOne = {
+          destinationToken: componentToken.address,
+          sourceToken: sourceToken.address,
+          sourceTokenQuantity: sourceTokenQuantity,
+          minimumConversionRate: minimumConversionRate,
+          maxDestinationQuantity: maxDestinationQuantity,
+        } as KyberTrade;
+
+        const kyberTradeTwo = {
+          destinationToken: componentToken.address,
+          sourceToken: sourceToken.address,
+          sourceTokenQuantity: sourceTokenQuantity,
+          minimumConversionRate: minimumConversionRate,
+          maxDestinationQuantity: maxDestinationQuantity,
+        } as KyberTrade;
+
+        const kyberTradeOneBytes = SetTestUtils.kyberTradeToBytes(kyberTradeOne);
+        const kyberTradeTwoBytes = SetTestUtils.kyberTradeToBytes(kyberTradeTwo);
+
+        subjectTradesCount = new BigNumber(2);
+        subjectTradesData = kyberTradeOneBytes.concat(kyberTradeTwoBytes.slice(2));
+      });
+
+      it('uses all of the available source token from the kyber wrapper', async () => {
+        const existingSourceTokenBalance = await sourceToken.balanceOf.callAsync(kyberNetworkWrapper.address);
+
+        await subject();
+
+        const expectedNewBalance = existingSourceTokenBalance.sub(sourceTokenQuantity.mul(2));
+        const newSourceTokenBalance = await sourceToken.balanceOf.callAsync(kyberNetworkWrapper.address);
+        expect(newSourceTokenBalance).to.be.bignumber.equal(expectedNewBalance);
       });
     });
   });

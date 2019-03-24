@@ -252,34 +252,51 @@ contract('KyberNetworkWrapper', accounts => {
     });
 
     describe('when there are two Kyber trades', async () => {
+      let secondTradeSourceQuantity: BigNumber;
+
       beforeEach(async () => {
+        secondTradeSourceQuantity = sourceTokenQuantity.mul(2);
+
         await erc20Wrapper.transferTokenAsync(
           sourceToken,
           kyberNetworkWrapper.address,
-          sourceTokenQuantity,
+          secondTradeSourceQuantity,
           issuanceOrderMakerAccount
         );
+
+        maxDestinationQuantity = maxDestinationQuantity.div(2).round();
+
+        const conversionRatePower = new BigNumber(10).pow(18 + sourceTokenDecimals - componentTokenDecimals);
+        const minimumConversionRateOne = maxDestinationQuantity
+                                          .div(sourceTokenQuantity)
+                                          .mul(conversionRatePower)
+                                          .round();
 
         const kyberTradeOne = {
           destinationToken: componentToken.address,
           sourceToken: sourceToken.address,
           sourceTokenQuantity: sourceTokenQuantity,
-          minimumConversionRate: minimumConversionRate,
+          minimumConversionRate: minimumConversionRateOne,
           maxDestinationQuantity: maxDestinationQuantity,
         } as KyberTrade;
+
+        const minimumConversionRateTwo = maxDestinationQuantity
+                                          .div(secondTradeSourceQuantity)
+                                          .mul(conversionRatePower)
+                                          .round();
 
         const kyberTradeTwo = {
           destinationToken: componentToken.address,
           sourceToken: sourceToken.address,
-          sourceTokenQuantity: sourceTokenQuantity,
-          minimumConversionRate: minimumConversionRate,
+          sourceTokenQuantity: secondTradeSourceQuantity,
+          minimumConversionRate: minimumConversionRateTwo,
           maxDestinationQuantity: maxDestinationQuantity,
         } as KyberTrade;
 
         const kyberTradeOneBytes = SetTestUtils.kyberTradeToBytes(kyberTradeOne);
         const kyberTradeTwoBytes = SetTestUtils.kyberTradeToBytes(kyberTradeTwo);
 
-        subjectTradesCount = new BigNumber(2);
+        subjectExchangeData.orderCount = new BigNumber(2);
         subjectTradesData = kyberTradeOneBytes.concat(kyberTradeTwoBytes.slice(2));
       });
 
@@ -288,9 +305,19 @@ contract('KyberNetworkWrapper', accounts => {
 
         await subject();
 
-        const expectedNewBalance = existingSourceTokenBalance.sub(sourceTokenQuantity.mul(2));
+        const expectedNewBalance = existingSourceTokenBalance.sub(sourceTokenQuantity).sub(secondTradeSourceQuantity);
         const newSourceTokenBalance = await sourceToken.balanceOf.callAsync(kyberNetworkWrapper.address);
         expect(newSourceTokenBalance).to.be.bignumber.equal(expectedNewBalance);
+      });
+
+      it('receives correct amount of component token in return', async () => {
+        const existingComponentToken = await componentToken.balanceOf.callAsync(kyberNetworkWrapper.address);
+
+        await subject();
+
+        const expectedNewBalance = existingComponentToken.add(maxDestinationQuantity.mul(2));
+        const newComponentTokenBalance = await componentToken.balanceOf.callAsync(kyberNetworkWrapper.address);
+        expect(newComponentTokenBalance).to.be.bignumber.equal(expectedNewBalance);
       });
     });
   });

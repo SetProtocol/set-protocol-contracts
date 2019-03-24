@@ -68,7 +68,7 @@ describe('Deployment: Authorization', () => {
 
     it('correct timelock applied to vault', async () => {
       const vaultContract = new web3.eth.Contract(Vault.abi, vaultAddress);
-      
+
       const timelock = await vaultContract.methods.timeLockPeriod().call();
       const expectedVaultTimeLockPeriod = networkConstants.vaultTimeLockPeriod[networkName];
 

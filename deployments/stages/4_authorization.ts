@@ -122,7 +122,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
                         .setTimeLockPeriod
                         .getABIEncodedTransactionData(bigNumberPeriod);
 
-    await executeTransaction(vaultData, this._vaultContract.address, this._web3);    
+    await executeTransaction(vaultData, this._vaultContract.address, this._web3);
   }
 
   async addAuthorizedAddressesToTransferProxy(names: string[]) {

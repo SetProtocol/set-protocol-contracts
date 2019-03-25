@@ -33,6 +33,7 @@ import {
   DEFAULT_GAS,
   DEFAULT_REBALANCING_NATURAL_UNIT,
   ONE_DAY_IN_SECONDS,
+  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from '@utils/constants';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
@@ -662,42 +663,47 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
 
     describe('when the implied base Set quantity is greater than the issuance params base Set quantity', async () => {
+      let excessBaseSetQuantity: BigNumber;
+
       beforeEach(async () => {
+        const excessNonExchangedWethQuantity = nonExchangedWethQuantity.mul(2);
+        excessBaseSetQuantity = exchangeRedeemQuantity.mul(2);
+
         // Generate wrapped Ether for the caller
         await weth.deposit.sendTransactionAsync(
-          { from: tokenPurchaser, value: nonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
+          { from: tokenPurchaser, value: excessNonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
         );
 
         // Approve Weth to the transferProxy
         await weth.approve.sendTransactionAsync(
           transferProxy.address,
-          nonExchangedWethQuantity.mul(2),
+          UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
           { from: tokenPurchaser, gas: DEFAULT_GAS }
         );
 
         // Issue the Base Set to the vault
         await core.issueInVault.sendTransactionAsync(
           baseSetToken.address,
-          exchangeRedeemQuantity,
+          excessBaseSetQuantity,
           { from: tokenPurchaser, gas: DEFAULT_GAS }
         );
 
         // Issue the Rebalancing Set
-        const rebalancingSetQuantity = exchangeRedeemQuantity
+        const excessRebalancingSetQuantity = excessBaseSetQuantity
                                          .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
                                          .div(rebalancingUnitShares);
         await core.issue.sendTransactionAsync(
           rebalancingSetToken.address,
-          rebalancingSetQuantity,
+          excessRebalancingSetQuantity,
           { from: tokenPurchaser, gas: DEFAULT_GAS }
         );
 
-        subjectRebalancingSetQuantity = subjectRebalancingSetQuantity.mul(2);
+        subjectRebalancingSetQuantity = subjectRebalancingSetQuantity.add(excessRebalancingSetQuantity);
       });
 
       it('should return the excess base Set to the caller', async () => {
         const previousReturnedAssetBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
-        const expectedReturnedAssetBalance = previousReturnedAssetBalance.add(exchangeRedeemQuantity);
+        const expectedReturnedAssetBalance = previousReturnedAssetBalance.add(excessBaseSetQuantity);
 
         await subject();
 

@@ -17,7 +17,6 @@ import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
 import { RebalancingSetExchangeIssuanceModule } from '../../artifacts/ts/RebalancingSetExchangeIssuanceModule';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
-import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
 import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
@@ -101,41 +100,6 @@ describe('Deployment: Modules', () => {
 
     it('got deployed with the vault', async () => {
       const retrievedVaultAddress = await rebalanceAuctionModule.methods.vault().call();
-      expect(retrievedVaultAddress).toEqual(vaultAddress);
-    });
-  });
-
-  describe('Rebalancing Token Issuance Module', () => {
-
-    /**
-     * Check if the RebalancingTokenIssuanceModule has been deployed with the following:
-     * - Core
-     * - TransferProxy
-     * - Vault
-     */
-
-    let rebalanceTokenIssuanceModule;
-
-    before(async () => {
-      const rebalanceAuctionAddress = await getContractAddress(RebalancingTokenIssuanceModule.contractName);
-      rebalanceTokenIssuanceModule = new web3.eth.Contract(
-        RebalancingTokenIssuanceModule.abi,
-        rebalanceAuctionAddress,
-      );
-    });
-
-    it('finds a valid contract at the address', async () => {
-      const code = await getContractCode(RebalancingTokenIssuanceModule.contractName, web3);
-      expect(code.length).toBeGreaterThan(3);
-    });
-
-    it('got deployed with core', async () => {
-      const retrievedCoreAddress = await rebalanceTokenIssuanceModule.methods.core().call();
-      expect(retrievedCoreAddress).toEqual(coreAddress);
-    });
-
-    it('got deployed with the vault', async () => {
-      const retrievedVaultAddress = await rebalanceTokenIssuanceModule.methods.vault().call();
       expect(retrievedVaultAddress).toEqual(vaultAddress);
     });
   });
@@ -230,7 +194,7 @@ describe('Deployment: Modules', () => {
     });
   });
 
-  describe('Payable Exchange', () => {
+  describe('RebalancingSetExchangeIssuanceModule', () => {
 
     /**
      * Check if the RebalancingSetExchangeIssuanceModule has been deployed with:
@@ -240,13 +204,15 @@ describe('Deployment: Modules', () => {
      * - WrappedEtherAddress
      */
 
-    let payableExchangeWrapper;
+    let rebalancingSetExchangeIssunace;
 
     before(async () => {
-      const payableExchangeAddress = await getContractAddress(RebalancingSetExchangeIssuanceModule.contractName);
-      payableExchangeWrapper = new web3.eth.Contract(
+      const rebalancingSetExchangeIssuanceModule = await getContractAddress(
+        RebalancingSetExchangeIssuanceModule.contractName
+      );
+      rebalancingSetExchangeIssunace = new web3.eth.Contract(
         RebalancingSetExchangeIssuanceModule.abi,
-        payableExchangeAddress
+        rebalancingSetExchangeIssuanceModule
       );
     });
 
@@ -256,23 +222,24 @@ describe('Deployment: Modules', () => {
     });
 
     it('got deployed with core', async () => {
-      const retrievedCoreAddress = await payableExchangeWrapper.methods.core().call();
+      const retrievedCoreAddress = await rebalancingSetExchangeIssunace.methods.core().call();
       expect(retrievedCoreAddress).toEqual(coreAddress);
     });
 
     it('got deployed with the transfer proxy', async () => {
-      const retrievedTransferProxyAddress = await payableExchangeWrapper.methods.transferProxy().call();
+      const retrievedTransferProxyAddress = await rebalancingSetExchangeIssunace.methods.transferProxy().call();
       expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
 
     it('got deployed with the exchange issuance module', async () => {
-      const retrievedExchangeIssueAddress = await payableExchangeWrapper.methods.exchangeIssuanceModule().call();
+      const retrievedExchangeIssueAddress = await rebalancingSetExchangeIssunace.methods.exchangeIssuanceModule()
+                                                    .call();
       const exchangeIssueModel = await getContractAddress(ExchangeIssuanceModule.contractName);
       expect(retrievedExchangeIssueAddress).toEqual(exchangeIssueModel);
     });
 
     it('got deployed with the correct wETH address', async () => {
-      const retrievedWETHAddress = await payableExchangeWrapper.methods.weth().call();
+      const retrievedWETHAddress = await rebalancingSetExchangeIssunace.methods.weth().call();
       const WETHAddress = await findDependency(DEPENDENCY.WETH);
       expect(retrievedWETHAddress).toEqual(WETHAddress);
     });

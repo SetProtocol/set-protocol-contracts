@@ -40,7 +40,6 @@ import {
 } from '../types/generated/rebalancing_set_exchange_issuance_module';
 import { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_token';
 import { RebalancingSetTokenFactoryContract } from '../types/generated/rebalancing_set_token_factory';
-import { RebalancingTokenIssuanceModuleContract } from '../types/generated/rebalancing_token_issuance_module';
 import { SettleRebalanceLibraryContract } from '../types/generated/settle_rebalance_library';
 import { SetTokenContract } from '../types/generated/set_token';
 import { SetTokenFactoryContract } from '../types/generated/set_token_factory';
@@ -100,7 +99,6 @@ export {
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
-  RebalancingTokenIssuanceModuleContract,
   SettleRebalanceLibraryContract,
   SetTokenContract,
   SetTokenFactoryContract,

@@ -10,8 +10,8 @@ import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModul
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
+import { RebalancingSetExchangeIssuanceModule } from '../../artifacts/ts/RebalancingSetExchangeIssuanceModule';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
-import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
@@ -40,16 +40,6 @@ describe('Deployment: Authorization', () => {
   });
 
   describe('Timelocks', () => {
-
-    /**
-     * Need to check whether a time lock was applied to the following contracts:
-     * - Core
-     * - TransferProxy
-     * - Vault
-     * - Whitelist
-     * - Issuance Order Module
-     */
-
     const expectedGeneralTimeLockPeriod = networkConstants.generalTimeLockPeriod[networkName];
 
     it('correct timelock applied to core', async () => {
@@ -84,15 +74,6 @@ describe('Deployment: Authorization', () => {
   });
 
   describe('Authorized Vault addresses', () => {
-
-    /**
-     * Check if Vault has the following contracts as authorized addresses:
-     * - Core
-     * - ExchangeIssuanceModule
-     * - RebalancingAuctionModule
-     * - RebalancingTokenIssuanceModule
-     */
-
     let vaultContract;
     let authorisedAddresses;
 
@@ -107,16 +88,6 @@ describe('Deployment: Authorization', () => {
   });
 
   describe('Authorized Transfer Proxy addresses', () => {
-
-    /**
-     * Check if the following contracts have the Transfer Proxy as an authorized address:
-     * - Core
-     * - ExchangeIssuanceModule
-     * - IssuanceOrderModule
-     * - RebalancingAuctionModule
-     * - RebalancingTokenIssuanceModule
-     */
-
     let transferProxyContract;
     let authorisedAddresses;
 
@@ -132,13 +103,6 @@ describe('Deployment: Authorization', () => {
   });
 
   describe('Factories in Core', () => {
-
-    /**
-     * Check if the following factories are registered with Core:
-     * - SetTokenFactory
-     * - RebalancingSetTokenFactory
-     */
-
     let factories;
 
     before(async () => {
@@ -157,15 +121,6 @@ describe('Deployment: Authorization', () => {
   });
 
   describe('Modules in Core', () => {
-
-    /**
-     * Check if the following modules have been added to Core:
-     * - ExchangeIssuanceModule
-     * - IssuanceOrderModule
-     * - RebalanceAuctionModule
-     * - RebalancingTokenIssuanceModule
-     */
-
     let modules;
 
     before(async () => {
@@ -177,27 +132,20 @@ describe('Deployment: Authorization', () => {
       expect(modules).toContain(exchangeIssueModuleAddress);
     });
 
+    it('core contains rebalancing Set exchange issuance module', async () => {
+      const rebalancingSetExchangeIssuanceModuleAddress = await getContractAddress(
+        RebalancingSetExchangeIssuanceModule.contractName
+      );
+      expect(modules).toContain(rebalancingSetExchangeIssuanceModuleAddress);
+    });
+
     it('core contains rebalancing auction module', async () => {
       const rebalanceAuctionModule = await getContractAddress(RebalanceAuctionModule.contractName);
       expect(modules).toContain(rebalanceAuctionModule);
     });
-
-    it('core contains rebalancing token issuance module', async () => {
-      const rebalanceTokenIssuanceModuleAddress = await getContractAddress(
-        RebalancingTokenIssuanceModule.contractName
-      );
-      expect(modules).toContain(rebalanceTokenIssuanceModuleAddress);
-    });
   });
 
   describe('Exchanges in Core', () => {
-
-    /**
-     * Check if the following exchange wrappers have been added to core:
-     * - ZeroExExchangeWrapper
-     * - KyberNetworkWrapper
-     */
-
     let exchanges;
 
     before(async () => {
@@ -216,12 +164,6 @@ describe('Deployment: Authorization', () => {
   });
 
   describe('Price Libraries in Core', () => {
-
-    /**
-     * Check if the following price libraries have been added to Core:
-     * - LinearAuctionPriceCurve
-     */
-
     let priceLibraries;
 
     before(async () => {

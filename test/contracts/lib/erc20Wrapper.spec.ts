@@ -40,7 +40,7 @@ contract('ERC20WrapperMock', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return erc20WrapperLibrary.ensureAllowance.sendTransactionAsync(
+      return erc20WrapperLibrary.testEnsureAllowance.sendTransactionAsync(
         token.address,
         ownerAccount,
         spenderAccount,

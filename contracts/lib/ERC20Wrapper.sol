@@ -17,7 +17,6 @@
 pragma solidity 0.5.4;
 
 import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import { SafeERC20 } from "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
 import { CommonMath } from "./CommonMath.sol";
 
@@ -49,9 +48,11 @@ library ERC20Wrapper {
     )
         internal
     {
-        uint256 currentAllowance = IERC20(_token).allowance(_owner, _spender);
+        IERC20 token = IERC20(_token);
+
+        uint256 currentAllowance = token.allowance(_owner, _spender);
         if (currentAllowance < _quantity) {
-            IERC20(_token).approve(
+            token.approve(
                 _spender,
                 CommonMath.maxUInt256()
             );

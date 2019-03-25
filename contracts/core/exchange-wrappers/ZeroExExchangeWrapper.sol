@@ -77,8 +77,7 @@ contract ZeroExExchangeWrapper {
         setTransferProxy = _setTransferProxy;
 
         // Approve transfer of 0x token from this wrapper in the event of zeroExOrder relayer fees
-        SafeERC20.safeApprove(
-            IERC20(_zeroExToken),
+        IERC20(_zeroExToken).approve(
             _zeroExProxy,
             CommonMath.maxUInt256()
         );

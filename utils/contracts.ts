@@ -22,7 +22,6 @@ import { ExchangeIssuanceModuleContract } from '../types/generated/exchange_issu
 import { FailAuctionLibraryContract } from '../types/generated/fail_auction_library';
 import { FeedFactoryContract } from '../types/generated/feed_factory';
 import { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
-import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
 import { KyberNetworkWrapperContract } from '../types/generated/kyber_network_wrapper';
 import { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
 import { ManagerLibraryMockContract } from '../types/generated/manager_library_mock';
@@ -84,7 +83,6 @@ export {
   FailAuctionLibraryContract,
   FeedFactoryContract,
   IAuctionPriceCurveContract,
-  InvalidReturnTokenMockContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
   ManagerLibraryMockContract,

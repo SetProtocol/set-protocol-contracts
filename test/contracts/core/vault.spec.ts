@@ -9,7 +9,6 @@ import { BigNumber } from 'bignumber.js';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
-  InvalidReturnTokenMockContract,
   NoXferReturnTokenMockContract,
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
@@ -168,19 +167,6 @@ contract('Vault', accounts => {
 
         const tokenBalance = await noXferReturnToken.balanceOf.callAsync(subjectReceiver);
         await expect(tokenBalance).to.be.bignumber.equal(subjectAmountToWithdraw);
-      });
-    });
-
-    describe('when the token returns an invalid value', async () => {
-      let invalidReturnToken: InvalidReturnTokenMockContract;
-
-      beforeEach(async () => {
-        invalidReturnToken = await erc20Wrapper.deployTokenInvalidReturnAsync(vault.address);
-        subjectTokenAddress = invalidReturnToken.address;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
       });
     });
 

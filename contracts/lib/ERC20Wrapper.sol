@@ -51,8 +51,7 @@ library ERC20Wrapper {
     {
         uint256 currentAllowance = IERC20(_token).allowance(_owner, _spender);
         if (currentAllowance < _quantity) {
-            SafeERC20.safeApprove(
-                IERC20(_token),
+            IERC20(_token).approve(
                 _spender,
                 CommonMath.maxUInt256()
             );

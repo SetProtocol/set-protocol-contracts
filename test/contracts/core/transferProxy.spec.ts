@@ -10,7 +10,6 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   ERC20DetailedContract,
-  InvalidReturnTokenMockContract,
   NoXferReturnTokenMockContract,
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
@@ -198,21 +197,6 @@ contract('TransferProxy', accounts => {
 
         const tokenBalance = await noXferReturnToken.balanceOf.callAsync(vaultAccount);
         await expect(tokenBalance).to.be.bignumber.equal(subjectQuantity);
-      });
-    });
-
-    describe('when the token returns an invalid value', async () => {
-      let invalidReturnToken: InvalidReturnTokenMockContract;
-
-      beforeEach(async () => {
-        invalidReturnToken = await erc20Wrapper.deployTokenInvalidReturnAsync(ownerAccount);
-        tokenAddress = invalidReturnToken.address;
-
-        await erc20Wrapper.approveInvalidTransferAsync(invalidReturnToken, transferProxy.address, ownerAccount);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
       });
     });
   });

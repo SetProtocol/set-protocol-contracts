@@ -5,7 +5,6 @@ import { SetProtocolTestUtils as TestUtils }  from 'set-protocol-utils';
 
 import {
   BadTokenMockContract,
-  InvalidReturnTokenMockContract,
   NoXferReturnTokenMockContract,
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
@@ -28,7 +27,6 @@ import { TX_DEFAULTS } from '../../deployments/utils/blockchain';
 const web3 = getWeb3();
 
 const BadTokenMock = artifacts.require('BadTokenMock');
-const InvalidReturnTokenMock = artifacts.require('InvalidReturnTokenMock');
 const NoDecimalTokenMock = artifacts.require('NoDecimalTokenMock');
 const NoXferReturnTokenMock = artifacts.require('NoXferReturnTokenMock');
 const StandardTokenMock = artifacts.require('StandardTokenMock');
@@ -145,25 +143,6 @@ export class ERC20Wrapper {
     );
   }
 
-  public async deployTokenInvalidReturnAsync(
-    initialAccount: Address,
-    fee: BigNumber = new BigNumber(100)
-  ): Promise<InvalidReturnTokenMockContract> {
-    const truffleMockTokenInvalidReturn = await InvalidReturnTokenMock.new(
-      initialAccount,
-      DEPLOYED_TOKEN_QUANTITY,
-      `Mock Token Invalid Return Value`,
-      `OOPS`,
-      DEFAULT_MOCK_TOKEN_DECIMALS,
-      { from: this._senderAccountAddress, gas: DEFAULT_GAS },
-    );
-
-    return new InvalidReturnTokenMockContract(
-      new web3.eth.Contract(truffleMockTokenInvalidReturn.abi, truffleMockTokenInvalidReturn.address),
-      { from: this._senderAccountAddress },
-    );
-  }
-
   public async deployTokenWithNoDecimalAsync(
     initialAccount: Address,
   ): Promise<NoDecimalTokenMockContract> {
@@ -274,29 +253,6 @@ export class ERC20Wrapper {
       ),
     );
     await Promise.all(transferPromises);
-  }
-
-  public async approveInvalidTransferAsync(
-    token: InvalidReturnTokenMockContract,
-    to: Address,
-    from: Address = this._senderAccountAddress,
-  ) {
-    await this.approveInvalidTransfersAsync([token], to, from);
-  }
-
-  public async approveInvalidTransfersAsync(
-    tokens: InvalidReturnTokenMockContract[],
-    to: Address,
-    from: Address = this._senderAccountAddress,
-  ) {
-    const approvePromises = _.map(tokens, token =>
-      token.approve.sendTransactionAsync(
-        to,
-        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-        { from },
-      ),
-    );
-    await Promise.all(approvePromises);
   }
 
   public async getTokenBalances(

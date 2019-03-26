@@ -19,7 +19,6 @@ import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCu
 import { RebalancingSetExchangeIssuanceModule } from '../../artifacts/ts/RebalancingSetExchangeIssuanceModule';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
-import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
@@ -88,7 +87,6 @@ export class AuthorizationStage implements DeploymentStageInterface {
       ExchangeIssuanceModule.contractName,
       RebalancingSetExchangeIssuanceModule.contractName,
       RebalanceAuctionModule.contractName,
-      RebalancingTokenIssuanceModule.contractName,
     ]);
 
     await this.registerCoreExchanges([

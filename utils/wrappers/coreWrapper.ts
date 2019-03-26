@@ -12,7 +12,6 @@ import {
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
-  RebalancingTokenIssuanceModuleContract,
   SetTokenContract,
   SetTokenFactoryContract,
   TimeLockUpgradeMockContract,
@@ -46,7 +45,6 @@ const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingLibrary = artifacts.require('RebalancingLibrary');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
-const RebalancingTokenIssuanceModule = artifacts.require('RebalancingTokenIssuanceModule');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
@@ -110,12 +108,6 @@ export class CoreWrapper {
     const address = await getContractAddress(ExchangeIssuanceModule.contractName);
 
      return await ExchangeIssuanceModuleContract.at(address, web3, TX_DEFAULTS);
-  }
-
-  public async getDeployedRebalancingTokenIssuanceModuleAsync(): Promise<RebalancingTokenIssuanceModuleContract> {
-    const address = await getContractAddress(RebalancingTokenIssuanceModule.contractName);
-
-     return await RebalancingTokenIssuanceModuleContract.at(address, web3, TX_DEFAULTS);
   }
 
   public async getDeployedWhiteList(): Promise<WhiteListContract> {
@@ -478,23 +470,6 @@ export class CoreWrapper {
 
     return new ExchangeIssuanceModuleContract(
       new web3.eth.Contract(truffleExchangeIssuanceModule.abi, truffleExchangeIssuanceModule.address),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
-  public async deployRebalancingTokenIssuanceModuleAsync(
-    core: CoreLikeContract,
-    vault: VaultContract,
-    from: Address = this._tokenOwnerAddress
-  ): Promise<RebalancingTokenIssuanceModuleContract> {
-    const truffleModule = await RebalancingTokenIssuanceModule.new(
-      core.address,
-      vault.address,
-      { from },
-    );
-
-    return new RebalancingTokenIssuanceModuleContract(
-      new web3.eth.Contract(truffleModule.abi, truffleModule.address),
       { from, gas: DEFAULT_GAS },
     );
   }

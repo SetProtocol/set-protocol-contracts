@@ -9,7 +9,6 @@ import {
   LinearAuctionPriceCurveContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalanceAuctionModuleContract,
-  RebalancingTokenIssuanceModuleContract,
   ZeroExExchangeWrapperContract,
 } from '../../utils/contracts';
 
@@ -21,7 +20,6 @@ import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
 import { RebalancingSetExchangeIssuanceModule } from '../../artifacts/ts/RebalancingSetExchangeIssuanceModule';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
-import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
 import { SetTokenLibrary } from '../../artifacts/ts/SetTokenLibrary';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
@@ -45,7 +43,6 @@ export class ModulesStage implements DeploymentStageInterface {
     this._networkConstant = getNetworkConstant();
 
     await this.deployExchangeIssuanceModule();
-    await this.deployRebalancingTokenIssuanceModule();
     await this.deployRebalancingAuctionModule();
 
     await this.deployKyberWrapper();
@@ -106,29 +103,6 @@ export class ModulesStage implements DeploymentStageInterface {
 
     address = await deployContract(data, this._web3, name);
     return await RebalanceAuctionModuleContract.at(address, this._web3, TX_DEFAULTS);
-  }
-
-  private async deployRebalancingTokenIssuanceModule(): Promise<RebalancingTokenIssuanceModuleContract> {
-    const name = RebalancingTokenIssuanceModule.contractName;
-    let address = await getContractAddress(name);
-
-    if (address) {
-      return await RebalancingTokenIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
-    }
-
-    const coreAddress = await getContractAddress(Core.contractName);
-    const vaultAddress = await getContractAddress(Vault.contractName);
-
-    const data = new this._web3.eth.Contract(RebalancingTokenIssuanceModule.abi).deploy({
-      data: RebalancingTokenIssuanceModule.bytecode,
-      arguments: [
-        coreAddress,
-        vaultAddress,
-      ],
-    }).encodeABI();
-
-    address = await deployContract(data, this._web3, name);
-    return await RebalancingTokenIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deployRebalancingSetExchangeIssuanceModule():

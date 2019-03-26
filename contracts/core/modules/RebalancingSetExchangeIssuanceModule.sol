@@ -152,6 +152,14 @@ contract RebalancingSetExchangeIssuanceModule is
         // wrap all eth
         wethInstance.deposit.value(msg.value)();
 
+        // Ensure weth allowance
+        ERC20Wrapper.ensureAllowance(
+            weth,
+            address(this),
+            transferProxy,
+            msg.value
+        );
+
         // exchange issue Base Set
         exchangeIssuanceInstance.exchangeIssue(
             _exchangeIssuanceParams,

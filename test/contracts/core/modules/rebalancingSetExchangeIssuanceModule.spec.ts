@@ -33,6 +33,7 @@ import {
   DEFAULT_GAS,
   DEFAULT_REBALANCING_NATURAL_UNIT,
   ONE_DAY_IN_SECONDS,
+  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from '@utils/constants';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
@@ -367,6 +368,33 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         const ownerBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
 
         expect(ownerBalance).to.bignumber.equal(excessBaseSetIssued);
+      });
+    });
+    describe('but the wrapper does not have enough allowance to transfer weth', async () => {
+      beforeEach(async () => {
+        await weth.changeAllowanceProxy.sendTransactionAsync(
+          rebalancingSetExchangeIssuanceModule.address,
+          transferProxy.address,
+          new BigNumber(0),
+          { gas: DEFAULT_GAS }
+        );
+      });
+
+      it('resets the transferProxy allowance', async () => {
+        const wethAllowance = await weth.allowance.callAsync(
+          rebalancingSetExchangeIssuanceModule.address,
+          transferProxy.address
+        );
+        expect(wethAllowance).to.bignumber.equal(ZERO);
+
+        await subject();
+
+        const expectedWethAllowance = UNLIMITED_ALLOWANCE_IN_BASE_UNITS;
+        const newWethAllowance = await weth.allowance.callAsync(
+          rebalancingSetExchangeIssuanceModule.address,
+          transferProxy.address
+        );
+        expect(newWethAllowance).to.bignumber.equal(expectedWethAllowance);
       });
     });
   });

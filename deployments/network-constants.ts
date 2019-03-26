@@ -32,9 +32,9 @@ export default {
     development: 7*constants.ONE_DAY_IN_SECONDS,
   },
   generalTimeLockPeriod: {
-    production: 0,
-    staging: 0,
-    development: 0,
+    production: 1,
+    staging: 1,
+    development: 1,
   },
   linearAuctionPriceCurve: {
     production: true,

@@ -8,6 +8,7 @@
     "baseUrl": ".",
     "moduleResolution": "node",
     "paths": {
+        "@deployments/*": [ "deployments/*" ],
         "@utils/*": [ "utils/*" ]
     },
     "rootDir": ".",

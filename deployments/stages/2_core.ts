@@ -16,6 +16,7 @@ import BigNumber from 'bignumber.js';
 
 import {
   CoreContract,
+  MedianContract,
   RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
@@ -29,6 +30,7 @@ import { CommonValidationsLibrary } from '../../artifacts/ts/CommonValidationsLi
 import { Core } from '../../artifacts/ts/Core';
 import { CoreIssuanceLibrary } from '../../artifacts/ts/CoreIssuanceLibrary';
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
+import { Median } from '../../artifacts/ts/Median';
 import { RebalancingLibrary } from '../../artifacts/ts/RebalancingLibrary';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
@@ -77,6 +79,14 @@ export class CoreStage implements DeploymentStageInterface {
 
     if (!dependencies.WETH[networkId]) {
       await this.deployDummyToken(DEPENDENCY.DAI, 18);
+    }
+
+    if (!dependencies.WBTC_MEDIANIZER[networkId]) {
+      await this.deployMedianizer(DEPENDENCY.WBTC_MEDIANIZER);
+    }
+
+    if (!dependencies.WETH_MEDIANIZER[networkId]) {
+      await this.deployMedianizer(DEPENDENCY.WETH_MEDIANIZER);
     }
 
     await this.deployVault();
@@ -289,5 +299,16 @@ export class CoreStage implements DeploymentStageInterface {
 
     address = await deployContract(data, this._web3, name);
     return await WethMockContract.at(address, this._web3, TX_DEFAULTS);
+  }
+
+  private async deployMedianizer(name: string): Promise<MedianContract> {
+    let address = await getContractAddress(name);
+
+    if (address) {
+      return await MedianContract.at(address, this._web3, TX_DEFAULTS);
+    }
+
+    address = await deployContract(Median.bytecode, this._web3, name);
+    return await MedianContract.at(address, this._web3, TX_DEFAULTS);
   }
 }

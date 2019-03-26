@@ -4,7 +4,6 @@ import expect from 'expect';
 
 import {
   getContractCode,
-  getNetworkId,
   getContractAddress,
   findDependency,
   getNetworkConstant
@@ -27,14 +26,12 @@ import { SetToken } from '../../artifacts/ts/SetToken';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 import { WhiteList } from '../../artifacts/ts/WhiteList';
 
-import { DEPLOYED_SETS_INFO } from '../deployedContractParameters';
-import dependencies from '../dependencies';
+import { DEPLOYED_SETS_INFO, DEPENDENCY } from '../deployedContractParameters';
 import constants from '../constants';
 
 describe('Deployment: Rebalancing', () => {
 
   let web3;
-  const networkId = getNetworkId();
   const networkName = getNetworkConstant();
 
   before(async () => {
@@ -42,20 +39,6 @@ describe('Deployment: Rebalancing', () => {
   });
 
   describe('BTCETH 75/25 Rebalancing Manager', () => {
-
-    /**
-     * Check if the BTCETHRebalancingManager was deployed correctly with the following:
-     * - Core
-     * - wbtcMedianizerAddress
-     * - wethMedianizerAddress
-     * - wbtcAddress
-     * - wethAddress
-     * - SetTokenFactory
-     * - LinearAuctionPriceCurve
-     * - auctionTimeToPivot
-     * - WBTC_MULTIPLIER
-     * - WETH_MULTIPLIER
-     */
 
     let rebalancingManagerContract;
     let expectedAllocationBounds;
@@ -78,13 +61,17 @@ describe('Deployment: Rebalancing', () => {
     });
 
     it('rebalancing manager has correct wBTC medianizer address', async () => {
-      const wBTCMedianizerAddress = dependencies.WBTC_MEDIANIZER[networkId];
+      const wBTCMedianizerAddress = await findDependency('WBTC_MEDIANIZER') ||
+        await getContractAddress(DEPENDENCY.WBTC_MEDIANIZER);
+
       const receivedBTCMedianizerAddress = await rebalancingManagerContract.methods.btcPriceFeed().call();
       expect(receivedBTCMedianizerAddress).toEqual(wBTCMedianizerAddress);
     });
 
     it('rebalancing manager has correct wETH medianizer address', async () => {
-      const wETHMedianizerAddress = dependencies.WETH_MEDIANIZER[networkId];
+      const wETHMedianizerAddress = await findDependency('WETH_MEDIANIZER') ||
+        await getContractAddress(DEPENDENCY.WETH_MEDIANIZER);
+
       const receivedETHMedianzierAddress = await rebalancingManagerContract.methods.ethPriceFeed().call();
       expect(receivedETHMedianzierAddress).toEqual(wETHMedianizerAddress);
     });
@@ -142,17 +129,6 @@ describe('Deployment: Rebalancing', () => {
 
   describe('Initial BTCETH 75/25 Collateralized Set', () => {
 
-    /**
-     * Check if there's a InitialCollateralSet address with the correct params:
-     * - SetTokenFactory
-     * - rebalancingSetComponents
-     * - rebalancingSetUnitShares
-     * - rebalancingSetNaturalUnit
-     * - rebalancingSetName
-     * - rebalancingSetSymbol
-     * - rebalancingSetCallData
-     */
-
     let initialCollateralisedSet;
     const setParams = DEPLOYED_SETS_INFO.BITETH_BTC_DOMINANT;
     const calculatedUnitShares = calculateInitialSetUnits(
@@ -203,17 +179,6 @@ describe('Deployment: Rebalancing', () => {
   });
 
   describe('BTCETH 75/25 Rebalancing Set Token', () => {
-
-    /**
-     * CHeck if there's a rebalanced set with the correct params:
-     * - RebalancingSetTokenFactory address
-     * - rebalancingSetComponents
-     * - rebalancingSetUnitShares
-     * - rebalancingSetNaturalUnit
-     * - rebalancingSetName
-     * - rebalancingSetSymbol
-     * - rebalancingSetCallData
-     */
 
     let bitEthRebalancingSetToken;
     const setParams = DEPLOYED_SETS_INFO.BITETH_BTC_DOMINANT;
@@ -314,13 +279,17 @@ describe('Deployment: Rebalancing', () => {
     });
 
     it('rebalancing manager has correct wBTC medianizer address', async () => {
-      const wBTCMedianizerAddress = dependencies.WBTC_MEDIANIZER[networkId];
+      const wBTCMedianizerAddress = await findDependency('WBTC_MEDIANIZER') ||
+        await getContractAddress(DEPENDENCY.WBTC_MEDIANIZER);
+
       const receivedBTCMedianizerAddress = await rebalancingManagerContract.methods.btcPriceFeed().call();
       expect(receivedBTCMedianizerAddress).toEqual(wBTCMedianizerAddress);
     });
 
     it('rebalancing manager has correct wETH medianizer address', async () => {
-      const wETHMedianizerAddress = dependencies.WETH_MEDIANIZER[networkId];
+      const wETHMedianizerAddress = await findDependency('WETH_MEDIANIZER') ||
+        await getContractAddress(DEPENDENCY.WETH_MEDIANIZER);
+
       const receivedETHMedianzierAddress = await rebalancingManagerContract.methods.ethPriceFeed().call();
       expect(receivedETHMedianzierAddress).toEqual(wETHMedianizerAddress);
     });
@@ -440,17 +409,6 @@ describe('Deployment: Rebalancing', () => {
 
   describe('BTCETH 25/75 Rebalancing Set Token', () => {
 
-    /**
-     * CHeck if there's a rebalanced set with the correct params:
-     * - RebalancingSetTokenFactory address
-     * - rebalancingSetComponents
-     * - rebalancingSetUnitShares
-     * - rebalancingSetNaturalUnit
-     * - rebalancingSetName
-     * - rebalancingSetSymbol
-     * - rebalancingSetCallData
-     */
-
     let bitEthRebalancingSetToken;
     const setParams = DEPLOYED_SETS_INFO.BITETH_ETH_DOMINANT;
 
@@ -515,19 +473,6 @@ describe('Deployment: Rebalancing', () => {
 
   describe('ETHDai Rebalancing Manager', () => {
 
-    /**
-     * Check if the ETHDaiRebalancingManager was deployed correctly with the following:
-     * - Core
-     * - wethMedianizerAddress
-     * - daiAddress
-     * - wethAddress
-     * - SetTokenFactory
-     * - LinearAuctionPriceCurve
-     * - auctionTimeToPivot
-     * - DAI_MULTIPLIER
-     * - WETH_MULTIPLIER
-     */
-
     let rebalancingManagerContract;
     let expectedAllocationBounds;
     const setParams = DEPLOYED_SETS_INFO.ETHDAI_BTD;
@@ -549,7 +494,9 @@ describe('Deployment: Rebalancing', () => {
     });
 
     it('rebalancing manager has correct wETH medianizer address', async () => {
-      const wETHMedianizerAddress = dependencies.WETH_MEDIANIZER[networkId];
+      const wETHMedianizerAddress = await findDependency('WETH_MEDIANIZER') ||
+        await getContractAddress(DEPENDENCY.WETH_MEDIANIZER);
+
       const receivedETHMedianzierAddress = await rebalancingManagerContract.methods.ethPriceFeed().call();
       expect(receivedETHMedianzierAddress).toEqual(wETHMedianizerAddress);
     });
@@ -607,17 +554,6 @@ describe('Deployment: Rebalancing', () => {
 
   describe('ETHDai Initial Collateralized Set', () => {
 
-    /**
-     * Check if there's a InitialCollateralSet address with the correct params:
-     * - SetTokenFactory
-     * - rebalancingSetComponents
-     * - rebalancingSetUnitShares
-     * - rebalancingSetNaturalUnit
-     * - rebalancingSetName
-     * - rebalancingSetSymbol
-     * - rebalancingSetCallData
-     */
-
     let initialCollateralisedSet;
     const setParams = DEPLOYED_SETS_INFO.ETHDAI_BTD;
     const calculatedUnitShares = calculateGeneralInitialSetUnits(
@@ -672,17 +608,6 @@ describe('Deployment: Rebalancing', () => {
   });
 
   describe('ETHDai Rebalanced Set Token', () => {
-
-    /**
-     * CHeck if there's a rebalanced set with the correct params:
-     * - RebalancingSetTokenFactory address
-     * - rebalancingSetComponents
-     * - rebalancingSetUnitShares
-     * - rebalancingSetNaturalUnit
-     * - rebalancingSetName
-     * - rebalancingSetSymbol
-     * - rebalancingSetCallData
-     */
 
     let ethDaiRebalancingSetToken;
     const setParams = DEPLOYED_SETS_INFO.ETHDAI_BTD;
@@ -748,21 +673,6 @@ describe('Deployment: Rebalancing', () => {
 
   describe('BTCDai Rebalancing Manager', () => {
 
-    /**
-     * Check if the BTCDaiRebalancingManager was deployed correctly with the following:
-     * - Core
-     * - wbtcMedianizerAddress
-     * - daiAddress
-     * - wbtcAddress
-     * - SetTokenFactory
-     * - LinearAuctionPriceCurve
-     * - auctionTimeToPivot
-     * - DAI_MULTIPLIER
-     * - WBTC_MULTIPLIER
-     * - lowerBound
-     * - upperBound
-     */
-
     let rebalancingManagerContract;
     let expectedAllocationBounds;
     const setParams = DEPLOYED_SETS_INFO.BTCDAI_BTD;
@@ -784,7 +694,9 @@ describe('Deployment: Rebalancing', () => {
     });
 
     it('rebalancing manager has correct wBTC medianizer address', async () => {
-      const wBTCMedianizerAddress = dependencies.WBTC_MEDIANIZER[networkId];
+      const wBTCMedianizerAddress = await findDependency('WBTC_MEDIANIZER') ||
+        await getContractAddress(DEPENDENCY.WBTC_MEDIANIZER);
+
       const receivedBTCMedianzierAddress = await rebalancingManagerContract.methods.btcPriceFeed().call();
       expect(receivedBTCMedianzierAddress).toEqual(wBTCMedianizerAddress);
     });
@@ -842,17 +754,6 @@ describe('Deployment: Rebalancing', () => {
 
   describe('BTCDai Initial Collateralized Set', () => {
 
-    /**
-     * Check if there's a InitialCollateralSet address with the correct params:
-     * - SetTokenFactory
-     * - rebalancingSetComponents
-     * - rebalancingSetUnitShares
-     * - rebalancingSetNaturalUnit
-     * - rebalancingSetName
-     * - rebalancingSetSymbol
-     * - rebalancingSetCallData
-     */
-
     let initialCollateralisedSet;
     const setParams = DEPLOYED_SETS_INFO.BTCDAI_BTD;
     const calculatedUnitShares = calculateGeneralInitialSetUnits(
@@ -907,17 +808,6 @@ describe('Deployment: Rebalancing', () => {
   });
 
   describe('BTCDai Rebalanced Set Token', () => {
-
-    /**
-     * CHeck if there's a rebalanced set with the correct params:
-     * - RebalancingSetTokenFactory address
-     * - rebalancingSetComponents
-     * - rebalancingSetUnitShares
-     * - rebalancingSetNaturalUnit
-     * - rebalancingSetName
-     * - rebalancingSetSymbol
-     * - rebalancingSetCallData
-     */
 
     let btcDaiRebalancingSetToken;
     const setParams = DEPLOYED_SETS_INFO.BTCDAI_BTD;

@@ -7,14 +7,14 @@ export default {
   },
 
   WBTC: {
-    PRICE: new BigNumber(3711),
+    PRICE: new BigNumber(3964),
     FULL_TOKEN_UNITS: new BigNumber(10 ** 8),
   },
   DEFAULT_WBTC_UNIT: new BigNumber(1),
 
   WETH: {
     FULL_TOKEN_UNITS: new BigNumber(10 ** 18),
-    PRICE: new BigNumber(128),
+    PRICE: new BigNumber(135),
   },
   DEFAULT_COLLATERAL_NATURAL_UNIT: new BigNumber(10 ** 10), 
   WETH_DOMINANT_COLLATERAL_NATURAL_UNIT: new BigNumber(10 ** 12),

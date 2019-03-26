@@ -24,7 +24,6 @@ import { RebalancingLibrary } from "./ts/RebalancingLibrary";
 import { RebalancingSetExchangeIssuanceModule } from "./ts/RebalancingSetExchangeIssuanceModule";
 import { RebalancingSetToken } from "./ts/RebalancingSetToken";
 import { RebalancingSetTokenFactory } from "./ts/RebalancingSetTokenFactory";
-import { RebalancingTokenIssuanceModule } from "./ts/RebalancingTokenIssuanceModule";
 import { SettleRebalanceLibrary } from "./ts/SettleRebalanceLibrary";
 import { SetToken } from "./ts/SetToken";
 import { SetTokenFactory } from "./ts/SetTokenFactory";
@@ -38,7 +37,6 @@ import { Vault } from "./ts/Vault";
 import { WethMock } from "./ts/WethMock";
 import { WhiteList } from "./ts/WhiteList";
 import { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
-
 
 
 // Export abi-gen contract wrappers
@@ -69,7 +67,6 @@ export {
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
-  RebalancingTokenIssuanceModuleContract,
   SetTokenContract,
   SetTokenFactoryContract,
   SetTokenLibraryContract,
@@ -113,7 +110,6 @@ export {
   RebalancingSetExchangeIssuanceModule,
   RebalancingSetToken,
   RebalancingSetTokenFactory,
-  RebalancingTokenIssuanceModule,
   SettleRebalanceLibrary,
   SetToken,
   SetTokenFactory,

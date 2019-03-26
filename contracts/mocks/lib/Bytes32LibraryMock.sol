@@ -1,4 +1,4 @@
-pragma solidity 0.5.4;
+pragma solidity 0.5.7;
 
 import { Bytes32Library } from "../../lib/Bytes32Library.sol";
 

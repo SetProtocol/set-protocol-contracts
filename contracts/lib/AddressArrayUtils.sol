@@ -1,7 +1,7 @@
 // Pulled in from Cryptofin Solidity package in order to control Solidity compiler version
 // https://github.com/cryptofinlabs/cryptofin-solidity/blob/master/contracts/array-utils/AddressArrayUtils.sol
 
-pragma solidity 0.5.4;
+pragma solidity 0.5.7;
 
 
 library AddressArrayUtils {

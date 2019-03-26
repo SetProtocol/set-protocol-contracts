@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.5.4;
+pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.5.4;
+pragma solidity 0.5.7;
 
 import { CommonMath } from "./CommonMath.sol";
 import { IERC20 } from "./IERC20.sol";

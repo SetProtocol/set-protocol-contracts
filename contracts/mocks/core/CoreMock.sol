@@ -1,4 +1,4 @@
-pragma solidity 0.5.4;
+pragma solidity 0.5.7;
 
 import { Core } from "../../core/Core.sol";
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";

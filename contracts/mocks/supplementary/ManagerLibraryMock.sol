@@ -1,4 +1,4 @@
-pragma solidity 0.5.4;
+pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { ManagerLibrary } from "../../supplementary/rebalancing-manager/lib/ManagerLibrary.sol";

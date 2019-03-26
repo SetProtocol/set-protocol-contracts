@@ -1,4 +1,4 @@
-pragma solidity 0.5.4;
+pragma solidity 0.5.7;
 
 import { RebalanceAuctionModule } from "../../../core/modules/RebalanceAuctionModule.sol";
 import { IRebalancingSetToken } from "../../../core/interfaces/IRebalancingSetToken.sol";

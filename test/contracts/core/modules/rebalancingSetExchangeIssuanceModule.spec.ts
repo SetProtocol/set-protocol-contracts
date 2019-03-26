@@ -689,6 +689,56 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       });
     });
 
+    describe('when the implied base Set quantity is greater than the issuance params base Set quantity', async () => {
+      let excessBaseSetQuantity: BigNumber;
+
+      beforeEach(async () => {
+        const excessNonExchangedWethQuantity = nonExchangedWethQuantity.mul(2);
+        excessBaseSetQuantity = exchangeRedeemQuantity.mul(2);
+
+        // Generate wrapped Ether for the caller
+        await weth.deposit.sendTransactionAsync(
+          { from: tokenPurchaser, value: excessNonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
+        );
+
+        // Approve Weth to the transferProxy
+        await weth.approve.sendTransactionAsync(
+          transferProxy.address,
+          UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+          { from: tokenPurchaser, gas: DEFAULT_GAS }
+        );
+
+        // Issue the Base Set to the vault
+        await core.issueInVault.sendTransactionAsync(
+          baseSetToken.address,
+          excessBaseSetQuantity,
+          { from: tokenPurchaser, gas: DEFAULT_GAS }
+        );
+
+        // Issue the Rebalancing Set
+        const excessRebalancingSetQuantity = excessBaseSetQuantity
+                                         .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
+                                         .div(rebalancingUnitShares);
+        await core.issue.sendTransactionAsync(
+          rebalancingSetToken.address,
+          excessRebalancingSetQuantity,
+          { from: tokenPurchaser, gas: DEFAULT_GAS }
+        );
+
+        subjectRebalancingSetQuantity = subjectRebalancingSetQuantity.add(excessRebalancingSetQuantity);
+      });
+
+      it('should return the excess base Set to the caller', async () => {
+        const previousReturnedAssetBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+        const expectedReturnedAssetBalance = previousReturnedAssetBalance.add(excessBaseSetQuantity);
+
+        await subject();
+
+        const currentReturnedAssetBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+        expect(expectedReturnedAssetBalance).to.bignumber.equal(currentReturnedAssetBalance);
+      });
+    });
+
     describe('when the receive tokens length is greater than 1', async () => {
       beforeEach(async () => {
         subjectExchangeIssuanceParams.receiveTokens = [weth.address, weth.address];
@@ -714,16 +764,6 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     describe('when the base Set of the rebalancing Set is not the issuance params Set', async () => {
       beforeEach(async () => {
         subjectExchangeIssuanceParams.setAddress = weth.address;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the base Set quantity is incongruent with the issuance params quantity', async () => {
-      beforeEach(async () => {
-        subjectExchangeIssuanceParams.quantity = exchangeRedeemQuantity.plus(1);
       });
 
       it('should revert', async () => {

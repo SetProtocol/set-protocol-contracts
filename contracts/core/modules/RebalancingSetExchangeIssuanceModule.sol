@@ -191,7 +191,7 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         // Send excess base Set and ether to the user
-        returnExcessFunds(baseSetAddress);
+        returnIssuanceExcessFunds(baseSetAddress);
 
         emit LogPayableExchangeIssue(
             _rebalancingSetAddress,
@@ -258,7 +258,7 @@ contract RebalancingSetExchangeIssuanceModule is
         msg.sender.transfer(wethBalance);
 
         // Non-exchanged components are returned to the user
-        returnExcessBaseSetComponents(_exchangeIssuanceParams.setAddress);
+        returnRedemptionExcessFunds(_exchangeIssuanceParams.setAddress);
 
         emit LogPayableExchangeRedeem(
             _rebalancingSetAddress,
@@ -274,7 +274,7 @@ contract RebalancingSetExchangeIssuanceModule is
      *
      * @param _baseSetAddress    The address of the base Set
      */
-    function returnExcessFunds(
+    function returnIssuanceExcessFunds(
         address _baseSetAddress
     )
         private
@@ -366,28 +366,29 @@ contract RebalancingSetExchangeIssuanceModule is
             baseSet == _exchangeIssuanceParams.setAddress,
             "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Base Set addresses must match"
         );
-
-        // Quantity of base Set must be the same as in exchange issuance params
-        uint256 baseSetUnit = rebalancingSet.getUnits()[0];
-        uint256 rebalancingSetNaturalUnit = rebalancingSet.naturalUnit();
-        uint256 impliedBaseSetQuantity = _rebalancingSetQuantity
-            .mul(baseSetUnit)
-            .div(rebalancingSetNaturalUnit);
-        require(
-            impliedBaseSetQuantity == _exchangeIssuanceParams.quantity,
-            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Base Set quantities must match"
-        );
     }
     /**
-     * Withdraw any non-exchanged components to the user
+     * Withdraw any remaining Base Set and non-exchanged components to the user
      *
      * @param  _setAddress   Address of the Base Set
      */
-    function returnExcessBaseSetComponents(
+    function returnRedemptionExcessFunds(
         address _setAddress
     )
         private
     {
+        // Return base Set if any that are in the Vault
+        uint256 baseSetQuantity = vaultInstance.getOwnerBalance(_setAddress, address(this));
+        if (baseSetQuantity > 0) {
+            coreInstance.withdrawModule(
+                address(this),
+                msg.sender,
+                _setAddress,
+                baseSetQuantity
+            );
+        }
+
+        // Return base Set components
         address[] memory baseSetComponents = ISetToken(_setAddress).getComponents();
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
             uint256 withdrawQuantity = ERC20Wrapper.balanceOf(baseSetComponents[i], address(this));

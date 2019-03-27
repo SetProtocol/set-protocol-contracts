@@ -169,8 +169,9 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
   });
 
-  describe('#issueRebalancingSetWithEther', async () => {
+  describe.only('#issueRebalancingSetWithEther', async () => {
     let subjectRebalancingSetAddress: Address;
+    let subjectRebalancingSetQuantity: BigNumber;
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
     let subjectExchangeOrdersData: Bytes;
     let subjectEtherValue: string;
@@ -181,6 +182,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let customRequiredETH: BigNumber;
     let customIssuePaymentTokenAmount: BigNumber;
     let customExchangeIssueQuantity: BigNumber;
+    let customWethUsedInTrade: BigNumber;
 
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
@@ -255,26 +257,27 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
       // Create 0x order for the component, using weth(4) paymentToken as default
       zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
-        NULL_ADDRESS,                                     // senderAddress
-        zeroExOrderMaker,                                 // makerAddress
-        NULL_ADDRESS,                                     // takerAddress
-        ZERO,                                             // makerFee
-        ZERO,                                             // takerFee
-        exchangeIssueReceiveTokenAmounts[0],              // makerAssetAmount
-        exchangeIssueSendTokenAmounts[0],                 // takerAssetAmount
-        exchangeIssueReceiveTokens[0],               	    // makerAssetAddress
-        exchangeIssueSendTokens[0],                       // takerAssetAddress
-        SetUtils.generateSalt(),                          // salt
-        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
-        NULL_ADDRESS,                                     // feeRecipientAddress
-        SetTestUtils.generateTimestamp(10000),            // expirationTimeSeconds
-        exchangeIssueSendTokenAmounts[0],                 // amount of zeroExOrder to fill
+        NULL_ADDRESS,                                                   // senderAddress
+        zeroExOrderMaker,                                               // makerAddress
+        NULL_ADDRESS,                                                   // takerAddress
+        ZERO,                                                           // makerFee
+        ZERO,                                                           // takerFee
+        exchangeIssueReceiveTokenAmounts[0],                            // makerAssetAmount
+        customWethUsedInTrade || exchangeIssueSendTokenAmounts[0],      // takerAssetAmount
+        exchangeIssueReceiveTokens[0],               	                  // makerAssetAddress
+        exchangeIssueSendTokens[0],                                     // takerAssetAddress
+        SetUtils.generateSalt(),                                        // salt
+        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,                          // exchangeAddress
+        NULL_ADDRESS,                                                   // feeRecipientAddress
+        SetTestUtils.generateTimestamp(10000),                          // expirationTimeSeconds
+        customWethUsedInTrade || exchangeIssueSendTokenAmounts[0],      // amount of zeroExOrder to fill
       );
 
       rebalancingSetQuantityToIssue = exchangeIssueQuantity.mul(DEFAULT_REBALANCING_NATURAL_UNIT)
                                                            .div(rebalancingUnitShares);
 
       subjectRebalancingSetAddress = rebalancingSetToken.address;
+      subjectRebalancingSetQuantity = DEFAULT_REBALANCING_NATURAL_UNIT;
       subjectExchangeIssuanceParams = exchangeIssuanceParams;
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
       subjectCaller = tokenPurchaser;
@@ -290,6 +293,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     async function subject(): Promise<string> {
       return rebalancingSetExchangeIssuanceModule.issueRebalancingSetWithEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
+        subjectRebalancingSetQuantity,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
         { from: subjectCaller, gas: DEFAULT_GAS, value: subjectEtherValue },
@@ -351,7 +355,27 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
                                     .sub(totalGasInEth);
 
         const currentEthBalance = await web3.eth.getBalance(subjectCaller);
-        expect(expectedEthBalance).to.bignumber.equal(currentEthBalance);
+        expect(currentEthBalance).to.bignumber.equal(expectedEthBalance);
+      });
+    });
+
+    describe('when sendToken amount is greater than amount needed to execute trades', async () => {
+      before(async () => {
+        customRequiredETH = new BigNumber(10 ** 10).times(2);
+        customWethUsedInTrade = new BigNumber(10 ** 10);
+      });
+
+      it('refunds the user the appropriate amount of eth', async () => {
+        const previousEthBalance: BigNumber = new BigNumber(await web3.eth.getBalance(subjectCaller));
+
+        const txHash = await subject();
+        const totalGasInEth = await getGasUsageInEth(txHash);
+        const expectedEthBalance = previousEthBalance
+                                    .sub(customWethUsedInTrade)
+                                    .sub(totalGasInEth);
+
+        const currentEthBalance = await web3.eth.getBalance(subjectCaller);
+        expect(currentEthBalance).to.bignumber.equal(expectedEthBalance);
       });
     });
 
@@ -395,6 +419,58 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
           transferProxy.address
         );
         expect(newWethAllowance).to.bignumber.equal(expectedWethAllowance);
+      });
+    });
+
+    describe('when the receive tokens length is greater than 1', async () => {
+      beforeEach(async () => {
+        subjectExchangeIssuanceParams.sendTokens = [weth.address, weth.address];
+        subjectExchangeIssuanceParams.sendTokenAmounts = [new BigNumber(1), new BigNumber(1)];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the receive token is not wrapped ether', async () => {
+      beforeEach(async () => {
+        const baseSetComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
+        subjectExchangeIssuanceParams.sendTokens = [baseSetComponent.address];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the base Set of the rebalancing Set is not the issuance params Set', async () => {
+      beforeEach(async () => {
+        subjectExchangeIssuanceParams.setAddress = weth.address;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the rebalancingSetQuantity is zero', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetQuantity = ZERO;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the rebalancingSetQuantity is not a multiple of the natural unit', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetQuantity = DEFAULT_REBALANCING_NATURAL_UNIT.mul(1.5);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

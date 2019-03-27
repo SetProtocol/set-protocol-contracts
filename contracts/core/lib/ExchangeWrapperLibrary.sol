@@ -19,6 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
@@ -50,6 +51,30 @@ library ExchangeWrapperLibrary {
     struct ExchangeResults {
         address[] receiveTokens;
         uint256[] receiveTokenAmounts;
+    }
+
+    /**
+     * Checks if any maker tokens leftover and transfers to maker
+     * @param  _sendTokens    The addresses of send tokens
+     * @param  _caller        The address of the original transaction caller
+     */
+    function settleLeftoverSendTokens(
+        address[] memory _sendTokens,
+        address _caller
+    )
+        internal
+    {
+        for (uint256 i = 0; i < _sendTokens.length; i++) {
+            // Transfer any unused or remainder send token back to the caller
+            uint256 remainderSendToken = ERC20Wrapper.balanceOf(_sendTokens[i], address(this));
+            if (remainderSendToken > 0) {
+                ERC20Wrapper.transfer(
+                    _sendTokens[i],
+                    _caller,
+                    remainderSendToken
+                );
+            }
+        }
     }
 
     /**

@@ -104,8 +104,10 @@ contract ZeroExExchangeWrapper {
             "ZeroExExchangeWrapper.exchange: Sender must be approved module"
         );
 
-        address[] memory receiveTokens = new address[](_exchangeData.orderCount);
-        uint256[] memory receiveTokenAmounts = new uint256[](_exchangeData.orderCount);
+        uint256 tradesCount = _exchangeData.orderCount;
+        address[] memory sendTokens = new address[](tradesCount);
+        address[] memory receiveTokens = new address[](tradesCount);
+        uint256[] memory receiveTokenAmounts = new uint256[](tradesCount);
 
         uint256 scannedBytes = 0;
         for (uint256 i = 0; i < _exchangeData.orderCount; i++) {
@@ -117,6 +119,9 @@ contract ZeroExExchangeWrapper {
                 _ordersData,
                 scannedBytes
             );
+
+            // Track the send tokens to ensure any leftovers are returned to the user
+            sendTokens[i] = orderInformation.takerToken;
 
             // Fill the order via the 0x exchange
             (receiveTokens[i], receiveTokenAmounts[i]) = fillZeroExOrder(
@@ -135,6 +140,12 @@ contract ZeroExExchangeWrapper {
             // Update current bytes
             scannedBytes = orderBodyStart.add(384);
         }
+
+        // Return leftover send tokens to the original caller
+        ExchangeWrapperLibrary.settleLeftoverSendTokens(
+            sendTokens,
+            _exchangeData.caller
+        );
 
         return ExchangeWrapperLibrary.ExchangeResults({
             receiveTokens: receiveTokens,

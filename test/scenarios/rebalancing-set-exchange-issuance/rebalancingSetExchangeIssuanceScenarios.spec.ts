@@ -92,6 +92,7 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
   describe('#issueRebalancingSetWithEther: RB 50/50 BTCETH priced at $1', async () => {
     let subjectCaller: Address;
     let subjectRebalancingSetAddress: Address;
+    let subjectRebalancingSetQuantity: BigNumber;
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
     let subjectExchangeOrdersData: Bytes;
     let subjectEther: BigNumber;
@@ -205,12 +206,16 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
 
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
       subjectRebalancingSetAddress = rebalancingSetToken.address;
+      subjectRebalancingSetQuantity = exchangeIssueQuantity
+                                        .div(rebalancingUnitShares)
+                                        .mul(DEFAULT_REBALANCING_NATURAL_UNIT);
       rebalancingSetQuantity = exchangeIssueQuantity.mul(DEFAULT_REBALANCING_NATURAL_UNIT).div(rebalancingUnitShares);
     });
 
     async function subject(): Promise<string> {
       return payableExchangeIssuance.issueRebalancingSetWithEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
+        subjectRebalancingSetQuantity,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
         { from: subjectCaller, gas: DEFAULT_GAS, value: subjectEther.toString() },

@@ -142,6 +142,7 @@ contract RebalancingSetExchangeIssuanceModule is
      */
     function issueRebalancingSetWithEther(
         address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity,
         ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
         bytes memory _orderData
     )
@@ -149,6 +150,14 @@ contract RebalancingSetExchangeIssuanceModule is
         payable
         nonReentrant
     {
+        // Validate Params
+        validateInputs(
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity,
+            _exchangeIssuanceParams.setAddress,
+            _exchangeIssuanceParams.sendTokens
+        );
+
         // wrap all eth
         wethInstance.deposit.value(msg.value)();
 
@@ -219,10 +228,11 @@ contract RebalancingSetExchangeIssuanceModule is
         nonReentrant
     {
         // Validate Params
-        validateRedeemInputs(
+        validateInputs(
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
-            _exchangeIssuanceParams
+            _exchangeIssuanceParams.setAddress,
+            _exchangeIssuanceParams.receiveTokens
         );
 
         // Redeem rebalancing Set from the user to this contract in the vault
@@ -336,25 +346,27 @@ contract RebalancingSetExchangeIssuanceModule is
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
      * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
-     * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
+     * @param  _collateralSetAddress     Address of base Set in ExchangeIssueanceParams
+     * @param  _collateralSetAddress     Address of base Set in ExchangeIssueanceParams
      */
-    function validateRedeemInputs(
+    function validateInputs(
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
-        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams
+        address _collateralSetAddress,
+        address[] memory _ethTokenArray
     )
         private
         view
     {
         // Require only 1 receive token
         require(
-            _exchangeIssuanceParams.receiveTokens.length == 1,
+            _ethTokenArray.length == 1,
             "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Only 1 Receive Token Allowed"
         );
 
         // Require receive token is weth
         require(
-            weth == _exchangeIssuanceParams.receiveTokens[0],
+            weth == _ethTokenArray[0],
             "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Receive token must be Weth"
         );
 
@@ -363,8 +375,13 @@ contract RebalancingSetExchangeIssuanceModule is
         // Validate that the base Set address matches the issuanceParams Set Address
         address baseSet = rebalancingSet.getComponents()[0];
         require(
-            baseSet == _exchangeIssuanceParams.setAddress,
+            baseSet == _collateralSetAddress,
             "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Base Set addresses must match"
+        );
+
+        ExchangeIssuanceLibrary.validateQuantity(
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity
         );
     }
     /**

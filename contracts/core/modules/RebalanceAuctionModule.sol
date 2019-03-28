@@ -24,7 +24,6 @@ import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
-import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 
 
 /**

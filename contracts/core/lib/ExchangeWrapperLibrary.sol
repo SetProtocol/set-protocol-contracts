@@ -54,11 +54,11 @@ library ExchangeWrapperLibrary {
     }
 
     /**
-     * Checks if any maker tokens leftover and transfers to maker
+     * Checks if any send tokens leftover and transfers to caller
      * @param  _sendTokens    The addresses of send tokens
      * @param  _caller        The address of the original transaction caller
      */
-    function settleLeftoverSendTokens(
+    function returnLeftoverSendTokens(
         address[] memory _sendTokens,
         address _caller
     )

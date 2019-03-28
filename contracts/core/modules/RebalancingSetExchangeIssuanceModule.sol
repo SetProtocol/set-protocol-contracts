@@ -380,13 +380,13 @@ contract RebalancingSetExchangeIssuanceModule is
         // Require only 1 receive token
         require(
             _ethTokenArray.length == 1,
-            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Only 1 Receive Token Allowed"
+            "RebalancingSetExchangeIssuanceModule.validateInputs: Only 1 Receive Token Allowed"
         );
 
         // Require receive token is weth
         require(
             weth == _ethTokenArray[0],
-            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Receive token must be Weth"
+            "RebalancingSetExchangeIssuanceModule.validateInputs: Receive token must be Weth"
         );
 
         ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
@@ -395,7 +395,7 @@ contract RebalancingSetExchangeIssuanceModule is
         address baseSet = rebalancingSet.getComponents()[0];
         require(
             baseSet == _collateralSetAddress,
-            "RebalancingSetExchangeIssuanceModule.validateRedeemInputs: Base Set addresses must match"
+            "RebalancingSetExchangeIssuanceModule.validateInputs: Base Set addresses must match"
         );
 
         ExchangeIssuanceLibrary.validateQuantity(

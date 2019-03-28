@@ -142,7 +142,7 @@ contract ZeroExExchangeWrapper {
         }
 
         // Return leftover send tokens to the original caller
-        ExchangeWrapperLibrary.settleLeftoverSendTokens(
+        ExchangeWrapperLibrary.returnLeftoverSendTokens(
             sendTokens,
             _exchangeData.caller
         );

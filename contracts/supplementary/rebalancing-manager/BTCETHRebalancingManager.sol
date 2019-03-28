@@ -143,6 +143,12 @@ contract BTCETHRebalancingManager {
     )
         external
     {
+        // Make sure the rebalancingSetToken is tracked by Core
+        require(
+            ICore(coreAddress).validSets(_rebalancingSetTokenAddress),
+            "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
+        );
+
         // Create interface to interact with RebalancingSetToken
         IRebalancingSetToken rebalancingSetInterface = IRebalancingSetToken(_rebalancingSetTokenAddress);
 

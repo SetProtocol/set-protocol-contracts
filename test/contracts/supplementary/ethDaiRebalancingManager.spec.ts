@@ -31,6 +31,8 @@ import {
   ONE_DAY_IN_SECONDS,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
   DEFAULT_AUCTION_PRICE_DIVISOR,
+  DEFAULT_UNIT_SHARES,
+  DEFAULT_REBALANCING_NATURAL_UNIT,
 } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
@@ -667,6 +669,27 @@ contract('ETHDaiRebalancingManager', accounts => {
             );
             expect(JSON.stringify(nextSetUnits)).to.be.eql(JSON.stringify(expectedNextSetParams['units']));
           });
+        });
+      });
+
+      describe('but the passed rebalancing set address was not created by Core', async () => {
+        beforeEach(async () => {
+          const rebalanceInterval = ONE_DAY_IN_SECONDS;
+          const unTrackedSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
+            rebalancingFactory.address,
+            ethDaiRebalancingManager.address,
+            initialAllocationToken.address,
+            DEFAULT_UNIT_SHARES,
+            DEFAULT_REBALANCING_NATURAL_UNIT,
+            proposalPeriod,
+            rebalanceInterval,
+            rebalancingComponentWhiteList.address,
+          );
+          subjectRebalancingSetToken = unTrackedSetToken.address;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
         });
       });
 

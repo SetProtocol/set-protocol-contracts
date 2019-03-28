@@ -186,17 +186,11 @@ contract RebalancingSetExchangeIssuanceModule is
             baseSetIssueQuantity
         );
 
-        // Calculate the rebalancing Set issue Quantity
-        uint256 rebalancingSetIssueQuantity = calculateRebalancingSetIssueQuantity(
-            _rebalancingSetAddress,
-            baseSetIssueQuantity
-        );
-
         // Issue rebalancing set to the caller
         coreInstance.issueTo(
             msg.sender,
             _rebalancingSetAddress,
-            rebalancingSetIssueQuantity
+            _rebalancingSetQuantity
         );
 
         // Send excess base Set and ether to the user
@@ -257,6 +251,17 @@ contract RebalancingSetExchangeIssuanceModule is
             _orderData
         );
 
+        // Withdraw any excess traded for eth from vault to contract
+        uint256 wethInVault = vaultInstance.getOwnerBalance(weth, address(this));
+        if ( wethInVault > 0 ) {
+            coreInstance.withdrawModule(
+                address(this),
+                address(this),
+                weth,
+                wethInVault
+            );
+        }
+
         // Withdraw eth from WETH
         uint256 wethBalance = ERC20Wrapper.balanceOf(
             weth,
@@ -289,7 +294,7 @@ contract RebalancingSetExchangeIssuanceModule is
     )
         private
     {
-        // Return any excess base Set to the user
+        // Return any excess base Set to the user not used in rebalancing set issuance
         uint256 leftoverBaseSet = ERC20Wrapper.balanceOf(
             _baseSetAddress,
             address(this)
@@ -300,6 +305,20 @@ contract RebalancingSetExchangeIssuanceModule is
                 msg.sender,
                 leftoverBaseSet
             );
+        }
+
+        // Return base Set components not used in issuance of base set
+        address[] memory baseSetComponents = ISetToken(_baseSetAddress).getComponents();
+        for (uint256 i = 0; i < baseSetComponents.length; i++) {
+            uint256 vaultQuantity = vaultInstance.getOwnerBalance(baseSetComponents[i], address(this));
+            if (vaultQuantity > 0) {
+                coreInstance.withdrawModule(
+                    address(this),
+                    msg.sender,
+                    baseSetComponents[i],
+                    vaultQuantity
+                );
+            }
         }
 
         // unwrap any leftover WETH and send eth back to the user

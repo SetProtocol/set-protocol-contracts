@@ -203,12 +203,6 @@ contract RebalanceAuctionModule is
             "RebalanceAuctionModule.redeemFromFailedRebalance: Invalid or disabled SetToken address"
         );
 
-        // Ensure that the rebalancing set is in drawdown
-        require(
-            uint8(rebalancingSetToken.rebalanceState()) == uint8(RebalancingLibrary.State.Drawdown),
-            "RebalanceAuctionModule.redeemFromFailedRebalance: Must be in drawdown"
-        );
-
         // Get getFailedAuctionWithdrawComponents from RebalancingSetToken
         address[] memory withdrawComponents = rebalancingSetToken.getFailedAuctionWithdrawComponents();
 

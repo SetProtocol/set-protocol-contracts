@@ -30,8 +30,7 @@ import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
  * @title RebalanceAuctionModule
  * @author Set Protocol
  *
- * The CoreBidding extension exposes a bid endpoint for use in the RebalancingSetToken
- * auction process.
+ * The RebalanceAuctionModule is a smart contract that exposes bidding and failed rebalance functionality.
  */
 contract RebalanceAuctionModule is
     ModuleCoreState,
@@ -49,10 +48,10 @@ contract RebalanceAuctionModule is
     /* ============ Constructor ============ */
 
     /**
-     * Constructor function for IssuanceOrderModule
+     * Constructor function for RebalanceAuctionModule
      *
      * @param _core       The address of Core
-     * @param _vault       The address of Vault
+     * @param _vault      The address of Vault
      */
     constructor(
         address _core,
@@ -188,7 +187,7 @@ contract RebalanceAuctionModule is
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token to withdraw from
      */
-    function withdrawFromFailedRebalance(
+    function redeemFromFailedRebalance(
         address _rebalancingSetToken
     )
         external
@@ -200,7 +199,7 @@ contract RebalanceAuctionModule is
         // Make sure the rebalancingSetToken is tracked by Core
         require(
             coreInstance.validSets(_rebalancingSetToken),
-            "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
+            "RebalanceAuctionModule.redeemFromFailedRebalance: Invalid or disabled SetToken address"
         );
 
         // Get getFailedAuctionWithdrawComponents from RebalancingSetToken

@@ -163,7 +163,7 @@ contract KyberNetworkWrapper {
         }
 
         // Return leftover send tokens to the original caller
-        settleLeftoverSendTokens(
+        ExchangeWrapperLibrary.returnLeftoverSendTokens(
             sendTokens,
             _exchangeData.caller
         );
@@ -249,29 +249,5 @@ contract KyberNetworkWrapper {
         }
 
         return trade;
-    }
-
-    /**
-     * Checks if any maker tokens leftover and transfers to maker
-     * @param  _sendTokens    The addresses of send tokens
-     * @param  _caller        The address of the original transaction caller
-     */
-    function settleLeftoverSendTokens(
-        address[] memory _sendTokens,
-        address _caller
-    )
-        private
-    {
-        for (uint256 i = 0; i < _sendTokens.length; i++) {
-            // Transfer any unused or remainder send token back to the caller
-            uint256 remainderSendToken = ERC20Wrapper.balanceOf(_sendTokens[i], address(this));
-            if (remainderSendToken > 0) {
-                ERC20Wrapper.transfer(
-                    _sendTokens[i],
-                    _caller,
-                    remainderSendToken
-                );
-            }
-        }
     }
 }

@@ -316,6 +316,16 @@ contract('RebalancingSetTokenFactory', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the unitShares is 0', async () => {
+      beforeEach(async () => {
+        subjectUnits = [ZERO];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#create not from core', async () => {

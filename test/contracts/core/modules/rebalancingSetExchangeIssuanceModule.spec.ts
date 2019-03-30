@@ -32,6 +32,7 @@ import { getWeb3, getGasUsageInEth } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
   DEFAULT_REBALANCING_NATURAL_UNIT,
+  DEFAULT_UNIT_SHARES,
   ONE_DAY_IN_SECONDS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from '@utils/constants';
@@ -496,6 +497,28 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the rebalancingSetAddress is not tracked by Core', async () => {
+      beforeEach(async () => {
+        const proposalPeriod = ONE_DAY_IN_SECONDS;
+        const rebalanceInterval = ONE_DAY_IN_SECONDS;
+        const unTrackedSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
+          rebalancingSetTokenFactory.address,
+          ownerAccount,
+          baseSetToken.address,
+          DEFAULT_UNIT_SHARES,
+          DEFAULT_REBALANCING_NATURAL_UNIT,
+          proposalPeriod,
+          rebalanceInterval,
+          whitelist,
+        );
+        subjectRebalancingSetAddress = unTrackedSetToken.address;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#redeemRebalancingSetIntoEther', async () => {
@@ -888,6 +911,28 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     describe('when the base Set of the rebalancing Set is not the issuance params Set', async () => {
       beforeEach(async () => {
         subjectExchangeIssuanceParams.setAddress = weth.address;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the rebalancingSetAddress is not tracked by Core', async () => {
+      beforeEach(async () => {
+        const proposalPeriod = ONE_DAY_IN_SECONDS;
+        const rebalanceInterval = ONE_DAY_IN_SECONDS;
+        const unTrackedSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
+          rebalancingSetTokenFactory.address,
+          ownerAccount,
+          baseSetToken.address,
+          DEFAULT_UNIT_SHARES,
+          DEFAULT_REBALANCING_NATURAL_UNIT,
+          proposalPeriod,
+          rebalanceInterval,
+          whitelist,
+        );
+        subjectRebalancingSetAddress = unTrackedSetToken.address;
       });
 
       it('should revert', async () => {

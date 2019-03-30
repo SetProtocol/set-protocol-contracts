@@ -157,6 +157,12 @@ contract RebalancingSetTokenFactory {
             "RebalancingSetTokenFactory.create: Units must be length 1"
         );
 
+        // Ensure unitShares is not set to 0
+        require(
+            _units[0] > 0,
+            "RebalancingSetTokenFactory.create: UnitShares must be greater than zero"
+        );
+
         // Retrieve address of initial Set for rebalancing token
         address startingSet = _components[0];
 

@@ -55,33 +55,33 @@ contract TransferProxy is
         public
         onlyAuthorized
     {
-        // Retrieve current balance of token for the receiver
-        uint256 existingBalance = ERC20Wrapper.balanceOf(
-            _token,
-            _to
-        );
-
         // Call specified ERC20 contract to transfer tokens (via proxy).
         if (_quantity > 0) {
+            // Retrieve current balance of token for the receiver
+            uint256 existingBalance = ERC20Wrapper.balanceOf(
+                _token,
+                _to
+            );
+
             ERC20Wrapper.transferFrom(
                 _token,
                 _from,
                 _to,
                 _quantity
             );
+
+            // Get new balance of transferred token for receiver
+            uint256 newBalance = ERC20Wrapper.balanceOf(
+                _token,
+                _to
+            );
+
+            // Verify transfer quantity is reflected in balance
+            require(
+                newBalance == existingBalance.add(_quantity),
+                "TransferProxy.transfer: Invalid post transfer balance"
+            );
         }
-
-        // Get new balance of transferred token for receiver
-        uint256 newBalance = ERC20Wrapper.balanceOf(
-            _token,
-            _to
-        );
-
-        // Verify transfer quantity is reflected in balance
-        require(
-            newBalance == existingBalance.add(_quantity),
-            "TransferProxy.transfer: Invalid post transfer balance"
-        );
     }
 
     /**

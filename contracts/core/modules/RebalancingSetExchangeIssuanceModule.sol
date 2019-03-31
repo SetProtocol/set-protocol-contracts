@@ -377,13 +377,19 @@ contract RebalancingSetExchangeIssuanceModule is
         private
         view
     {
-        // Require only 1 receive token
+        // Expect Set to rebalance to be valid and enabled Set
+        require(
+            coreInstance.validSets(_rebalancingSetAddress),
+            "RebalancingSetExchangeIssuanceModule.validateInputs: Invalid or disabled SetToken address"
+        );
+
+        // Require only 1 receive token in redeem and 1 send token in issue
         require(
             _ethTokenArray.length == 1,
             "RebalancingSetExchangeIssuanceModule.validateInputs: Only 1 Receive Token Allowed"
         );
 
-        // Require receive token is weth
+        // Require receive token in redeem and send token in issue is weth
         require(
             weth == _ethTokenArray[0],
             "RebalancingSetExchangeIssuanceModule.validateInputs: Receive token must be Weth"

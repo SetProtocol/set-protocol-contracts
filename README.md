@@ -38,7 +38,7 @@ Firstly, you need to install Docker. The easiest way is to follow the Instructio
 You need to pull the docker image that you want to use by using the following command:
 
 ```
-docker pull ethereum/solc:0.5.4
+docker pull ethereum/solc:0.5.7
 ```
 
 If you wish not to set up docker, you can turn off the `docker: true` flag in truffle.js

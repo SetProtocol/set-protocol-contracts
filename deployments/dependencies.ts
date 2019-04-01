@@ -54,6 +54,9 @@ export default {
     42: '0x9Fe0D478D0E290d50EF8DFc08760C4ad9D2C7AE9',
     50: '0x2002d3812f58E35f0EA1Ffbf80a75A38c32174fA',
   },
+  MULTI_SIG_OWNER: {
+    50: '0x2002d3812f58E35f0EA1Ffbf80a75A38c32174fA',
+  },
   INFURA_SUBDOMAIN: {
     1: 'https://mainnet.infura.io',
     42: 'https://kovan.infura.io',

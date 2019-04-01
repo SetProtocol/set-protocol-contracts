@@ -2,8 +2,9 @@
 
 import expect from 'expect';
 
-import { getNetworkConstant, getContractAddress } from '../utils/output-helper';
+import { getNetworkConstant, getContractAddress, findDependency, getPrivateKey } from '../utils/output-helper';
 import { getWeb3Instance } from '../utils/blockchain';
+import { DEPENDENCY } from '../deployedContractParameters';
 
 import { Core } from '../../artifacts/ts/Core';
 import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModule';
@@ -27,16 +28,26 @@ describe('Deployment: Authorization', () => {
 
   let coreAddress;
   let vaultAddress;
+  let transferProxyAddress;
+  let whiteListAddress;
 
   let coreContract;
+  let vaultContract;
+  let transferProxyContract;
+  let whiteListContract;
 
   before(async () => {
     web3 = await getWeb3Instance();
 
     coreAddress = await getContractAddress(Core.contractName);
     vaultAddress = await getContractAddress(Vault.contractName);
+    transferProxyAddress = await getContractAddress(TransferProxy.contractName);
+    whiteListAddress = await getContractAddress(WhiteList.contractName);
 
     coreContract = new web3.eth.Contract(Core.abi, coreAddress);
+    vaultContract = new web3.eth.Contract(Vault.abi, vaultAddress);
+    transferProxyContract = new web3.eth.Contract(TransferProxy.abi, transferProxyAddress);
+    whiteListContract = new web3.eth.Contract(WhiteList.abi, whiteListAddress); 
   });
 
   describe('Timelocks', () => {
@@ -48,17 +59,12 @@ describe('Deployment: Authorization', () => {
     });
 
     it('correct timelock applied to transfer proxy', async () => {
-      const transferProxyAddress = await getContractAddress(TransferProxy.contractName);
-      const transferProxyContract = new web3.eth.Contract(TransferProxy.abi, transferProxyAddress);
-
       const timelock = await transferProxyContract.methods.timeLockPeriod().call();
       const expectedTransferProxyTimeLockPeriod = networkConstants.transferProxyTimeLockPeriod[networkName];
       expect(parseInt(timelock)).toEqual(expectedTransferProxyTimeLockPeriod);
     });
 
     it('correct timelock applied to vault', async () => {
-      const vaultContract = new web3.eth.Contract(Vault.abi, vaultAddress);
-
       const timelock = await vaultContract.methods.timeLockPeriod().call();
       const expectedVaultTimeLockPeriod = networkConstants.vaultTimeLockPeriod[networkName];
 
@@ -66,19 +72,15 @@ describe('Deployment: Authorization', () => {
     });
 
     it('correct timelock applied to white list', async () => {
-      const whiteListAddress = await getContractAddress(WhiteList.contractName);
-      const vaultContract = new web3.eth.Contract(WhiteList.abi, whiteListAddress);
-      const timelock = await vaultContract.methods.timeLockPeriod().call();
+      const timelock = await whiteListContract.methods.timeLockPeriod().call();
       expect(parseInt(timelock)).toEqual(expectedGeneralTimeLockPeriod);
     });
   });
 
   describe('Authorized Vault addresses', () => {
-    let vaultContract;
     let authorisedAddresses;
 
     before(async () => {
-      vaultContract = new web3.eth.Contract(Vault.abi, vaultAddress);
       authorisedAddresses = await vaultContract.methods.getAuthorizedAddresses().call();
     });
 
@@ -88,12 +90,9 @@ describe('Deployment: Authorization', () => {
   });
 
   describe('Authorized Transfer Proxy addresses', () => {
-    let transferProxyContract;
     let authorisedAddresses;
 
     before(async () => {
-      const transferProxyAddress = await getContractAddress(TransferProxy.contractName);
-      transferProxyContract = new web3.eth.Contract(TransferProxy.abi, transferProxyAddress);
       authorisedAddresses = await transferProxyContract.methods.getAuthorizedAddresses().call();
     });
 
@@ -176,6 +175,42 @@ describe('Deployment: Authorization', () => {
       }
       const linearAuctionPriceCurveAddress = await getContractAddress(LinearAuctionPriceCurve.contractName);
       expect(priceLibraries).toContain(linearAuctionPriceCurveAddress);
+    });
+  });
+
+  describe('Hands off Vault, TransferProxy, WhiteList, and Core ownership', () => {
+    let expectedOwnerAddress: string;
+
+    before(async () => {
+      if (getNetworkConstant() == "production") {
+        expectedOwnerAddress = await findDependency(DEPENDENCY.MULTI_SIG_OWNER);
+      } else {
+        expectedOwnerAddress = await web3.eth.accounts.privateKeyToAccount(getPrivateKey()).address;
+      }
+    });
+
+    it('sets core owner to the correct address', async () => {
+      const coreOwnerAddress = await coreContract.methods.owner().call();
+
+      expect(coreOwnerAddress).toContain(expectedOwnerAddress);
+    });
+
+    it('sets vault owner to the correct address', async () => {
+      const vaultOwnerAddress = await vaultContract.methods.owner().call();
+
+      expect(vaultOwnerAddress).toContain(expectedOwnerAddress);
+    });
+
+    it('sets transferProxy owner to the correct address', async () => {
+      const transferProxyOwnerAddress = await transferProxyContract.methods.owner().call();
+
+      expect(transferProxyOwnerAddress).toContain(expectedOwnerAddress);
+    });
+
+    it('sets whiteList owner to the correct addres', async () => {
+      const whiteListOwnerAddress = await whiteListContract.methods.owner().call();
+
+      expect(whiteListOwnerAddress).toContain(expectedOwnerAddress);
     });
   });
 });

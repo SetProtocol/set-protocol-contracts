@@ -27,7 +27,7 @@
     "coverage-continuous": "./node_modules/.bin/solidity-coverage",
     "coverage-setup": "yarn transpile && cp -r transpiled/artifacts/ts/* artifacts/ts/. && cp -r transpiled/test/contracts/* test/. && cp -r transpiled/types/* types/. && cp -r transpiled/utils/* utils/.",
     "delete-dev-addresses": "jq 'del(.development)' ./deployments/outputs.json > outputs.tmp && mv outputs.tmp ./deployments/outputs.json && bash scripts/generate_outputs.sh && git add .",
-    "deploy": "yarn ts-node deployments/deploy.ts && bash scripts/generate_outputs.sh && yarn test-deployment",
+    "deploy": "yarn ts-node deployments/deploy.ts && bash scripts/generate_outputs.sh",
     "deploy-continuous": "yarn ts-node deployments/deploy.ts && bash scripts/generate_outputs.sh",
     "deploy-compile": "yarn deploy-setup && yarn deploy",
     "deploy-development": "bash scripts/deploy_development.sh",

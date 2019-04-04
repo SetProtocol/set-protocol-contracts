@@ -56,7 +56,7 @@ contract('TimeLockUpgrade', accounts => {
 
   describe('#setTimeLockPeriod', async () => {
     let subjectCaller: Address;
-    const subjectTimeLockPeriod: BigNumber = new BigNumber(0);
+    const subjectTimeLockPeriod: BigNumber = new BigNumber(86400);
 
     beforeEach(async () => {
       subjectCaller = ownerAccount;
@@ -76,8 +76,8 @@ contract('TimeLockUpgrade', accounts => {
       expect(timeLockPeriod).to.bignumber.equal(subjectTimeLockPeriod);
     });
 
-    describe('when the timelock has already been set', async () => {
-      const previouslyTimeLock = new BigNumber(2);
+    describe('when the timelock is not greater than the existing', async () => {
+      const previouslyTimeLock = subjectTimeLockPeriod.mul(2);
 
       beforeEach(async () => {
         await timeLockUpgradeMock.setTimeLockPeriod.sendTransactionAsync(
@@ -91,6 +91,24 @@ contract('TimeLockUpgrade', accounts => {
 
         const expectedTimeLock = await timeLockUpgradeMock.timeLockPeriod.callAsync();
         expect(expectedTimeLock).to.bignumber.equal(previouslyTimeLock);
+      });
+    });
+
+    describe('when the timelock is greater than existing', async () => {
+      const previouslyTimeLock = subjectTimeLockPeriod.div(2);
+
+      beforeEach(async () => {
+        await timeLockUpgradeMock.setTimeLockPeriod.sendTransactionAsync(
+          previouslyTimeLock,
+          { from: subjectCaller },
+        );
+      });
+
+      it('should update the timelock', async () => {
+        await subject();
+
+        const expectedTimeLock = await timeLockUpgradeMock.timeLockPeriod.callAsync();
+        expect(expectedTimeLock).to.bignumber.equal(subjectTimeLockPeriod);
       });
     });
 

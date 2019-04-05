@@ -95,9 +95,9 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
       expect(true).to.be.true;
     });
 
-    describe('when the pivot price is lower than .5', async () => {
+    describe('when the pivot price is lower than .2', async () => {
       beforeEach(async () => {
-        const auctionPivotRatio = new BigNumber(0.4);
+        const auctionPivotRatio = new BigNumber(0.15);
         subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DIVISOR.mul(auctionPivotRatio);
         subjectAuctionPriceParameters.auctionStartPrice = ZERO;
       });

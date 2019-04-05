@@ -17,7 +17,7 @@ export const DEPLOYED_SETS_INFO = {
       development: constants.ONE_DAY_IN_SECONDS,
     },
     REBALANCE_INTERVAL: {
-      production: constants.THIRTY_DAYS_IN_SECONDS,
+      production: constants.ONE_DAY_IN_SECONDS*14,
       staging: constants.THIRTY_MINUTES_IN_SECONDS,
       development: constants.ONE_DAY_IN_SECONDS,
     },
@@ -27,12 +27,12 @@ export const DEPLOYED_SETS_INFO = {
       development: constants.ONE_DAY_IN_SECONDS,
     },
     ALLOCATION_LOWER_BOUND: {
-      production: 10,
+      production: 12,
       staging: 0,
       development: 0,
     },
     ALLOCATION_UPPER_BOUND: {
-      production: 10,
+      production: 6,
       staging: 0,
       development: 0,
     }
@@ -52,7 +52,7 @@ export const DEPLOYED_SETS_INFO = {
       development: constants.ONE_DAY_IN_SECONDS,
     },
     REBALANCE_INTERVAL: {
-      production: constants.THIRTY_DAYS_IN_SECONDS,
+      production: constants.ONE_DAY_IN_SECONDS*14,
       staging: constants.THIRTY_MINUTES_IN_SECONDS,
       development: constants.ONE_DAY_IN_SECONDS,
     },
@@ -62,12 +62,12 @@ export const DEPLOYED_SETS_INFO = {
       development: constants.ONE_DAY_IN_SECONDS,
     },
     ALLOCATION_LOWER_BOUND: {
-      production: 10,
+      production: 17,
       staging: 0,
       development: 0,
     },
     ALLOCATION_UPPER_BOUND: {
-      production: 10,
+      production: 8,
       staging: 0,
       development: 0,
     }

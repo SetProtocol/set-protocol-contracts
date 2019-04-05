@@ -86,11 +86,8 @@ contract('TimeLockUpgrade', accounts => {
         );
       });
 
-      it('should not update the timelock', async () => {
-        await subject();
-
-        const expectedTimeLock = await timeLockUpgradeMock.timeLockPeriod.callAsync();
-        expect(expectedTimeLock).to.bignumber.equal(previouslyTimeLock);
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
 

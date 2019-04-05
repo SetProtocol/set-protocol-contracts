@@ -105,8 +105,11 @@ contract TimeLockUpgrade is
         onlyOwner
     {
         // Only allow setting of the timeLockPeriod if the period is greater than the existing
-        if (_timeLockPeriod > timeLockPeriod) {
-            timeLockPeriod = _timeLockPeriod;
-        }
+        require(
+            _timeLockPeriod > timeLockPeriod,
+            "TimeLockUpgrade: New period must be greater than existing"
+        );
+
+        timeLockPeriod = _timeLockPeriod;
     }
 }

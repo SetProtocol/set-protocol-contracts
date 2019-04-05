@@ -47,7 +47,7 @@ describe('Deployment: Authorization', () => {
     coreContract = new web3.eth.Contract(Core.abi, coreAddress);
     vaultContract = new web3.eth.Contract(Vault.abi, vaultAddress);
     transferProxyContract = new web3.eth.Contract(TransferProxy.abi, transferProxyAddress);
-    whiteListContract = new web3.eth.Contract(WhiteList.abi, whiteListAddress); 
+    whiteListContract = new web3.eth.Contract(WhiteList.abi, whiteListAddress);
   });
 
   describe('Timelocks', () => {
@@ -182,7 +182,7 @@ describe('Deployment: Authorization', () => {
     let expectedOwnerAddress: string;
 
     before(async () => {
-      if (getNetworkConstant() == "production") {
+      if (getNetworkConstant() == 'production') {
         expectedOwnerAddress = await findDependency(DEPENDENCY.MULTI_SIG_OWNER);
       } else {
         expectedOwnerAddress = await web3.eth.accounts.privateKeyToAccount(getPrivateKey()).address;

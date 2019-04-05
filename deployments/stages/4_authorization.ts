@@ -106,7 +106,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
     await this.registerCorePriceCurves();
     await this.updateTimeLockPeriod(finalTimeLock);
 
-    if (this._networkConstant == "production") {
+    if (this._networkConstant == 'production') {
       const ownerAddress = await findDependency(DEPENDENCY.MULTI_SIG_OWNER);
       await this.passSystemOwnership(ownerAddress);
     }
@@ -135,7 +135,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
                           .setTimeLockPeriod
                           .getABIEncodedTransactionData(bigNumberPeriod);
 
-      await executeTransaction(vaultData, this._vaultContract.address, this._web3);      
+      await executeTransaction(vaultData, this._vaultContract.address, this._web3);
     }
   }
 

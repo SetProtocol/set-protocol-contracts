@@ -12,7 +12,7 @@ export const DEPLOYED_SETS_INFO = {
     SET_NAME: 'BTCDaiRebalancingSetToken',
     SET_SYMBOL: 'BTCDai',
     PROPOSAL_PERIOD: {
-      production: constants.ONE_DAY_IN_SECONDS,
+      production: constants.ONE_HOUR_IN_SECONDS*8,
       staging: constants.THIRTY_MINUTES_IN_SECONDS,
       development: constants.ONE_DAY_IN_SECONDS,
     },
@@ -47,7 +47,7 @@ export const DEPLOYED_SETS_INFO = {
     SET_NAME: 'ETHDaiRebalancingSetToken',
     SET_SYMBOL: 'ETHDai',
     PROPOSAL_PERIOD: {
-      production: constants.ONE_DAY_IN_SECONDS,
+      production: constants.ONE_HOUR_IN_SECONDS*8,
       staging: constants.THIRTY_MINUTES_IN_SECONDS,
       development: constants.ONE_DAY_IN_SECONDS,
     },
@@ -82,7 +82,7 @@ export const DEPLOYED_SETS_INFO = {
     SET_NAME: 'BitEth5050RebalancingSetToken',
     SET_SYMBOL: 'BTCETH5050',
     PROPOSAL_PERIOD: {
-      production: constants.ONE_DAY_IN_SECONDS,
+      production: constants.ONE_HOUR_IN_SECONDS*8,
       staging: constants.THIRTY_MINUTES_IN_SECONDS,
       development: constants.ONE_DAY_IN_SECONDS,
     },
@@ -117,7 +117,7 @@ export const DEPLOYED_SETS_INFO = {
     SET_NAME: 'BitEth7525RebalancingSetToken',
     SET_SYMBOL: 'BTCETH7525',
     PROPOSAL_PERIOD: {
-      production: constants.ONE_DAY_IN_SECONDS,
+      production: constants.ONE_HOUR_IN_SECONDS*8,
       staging: constants.THIRTY_MINUTES_IN_SECONDS,
       development: constants.ONE_DAY_IN_SECONDS,
     },
@@ -152,7 +152,7 @@ export const DEPLOYED_SETS_INFO = {
     SET_NAME: 'BitEth2575RebalancingSetToken',
     SET_SYMBOL: 'BTCETH2575',
     PROPOSAL_PERIOD: {
-      production: constants.ONE_DAY_IN_SECONDS,
+      production: constants.ONE_HOUR_IN_SECONDS*8,
       staging: constants.THIRTY_MINUTES_IN_SECONDS,
       development: constants.ONE_DAY_IN_SECONDS,
     },

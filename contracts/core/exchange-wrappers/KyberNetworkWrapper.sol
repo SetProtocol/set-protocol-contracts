@@ -81,32 +81,36 @@ contract KyberNetworkWrapper {
      * Returns the conversion rate between the issuance order maker token and the set component token
      * in 18 decimals, regardless of component token's decimals
      *
-     * @param  _sourceToken       Address of source token used in exchange orders
-     * @param  _destinationToken  Address of destination token to trade for
-     * @param  _quantity          Amount of maker token to exchange for component token
-     * @return uint256            Conversion rate in wei
-     * @return uint256            Slippage in wei
+     * @param  _sourceTokens         Address of source token used in exchange orders
+     * @param  _destinationTokens    Address of destination token to trade for
+     * @param  _quantities           Amount of maker token to exchange for component token
+     * @return uint256[]             Conversion rate in wei
+     * @return uint256[]             Slippage in wei
      */
     function conversionRate(
-        address _sourceToken,
-        address _destinationToken,
-        uint256 _quantity
+        address[] calldata _sourceTokens,
+        address[] calldata _destinationTokens,
+        uint256[] calldata _quantities
     )
         external
         view
-        returns (uint256, uint256)
+        returns (uint256[] memory, uint256[] memory)
     {
-        uint256 rate;
-        uint256 slippage;
-        (rate, slippage) = KyberNetworkProxyInterface(kyberNetworkProxy).getExpectedRate(
-            _sourceToken,
-            _destinationToken,
-            _quantity
-        );
+        uint256 rateCount = _sourceTokens.length;
+        uint256[] memory expectedRates = new uint256[](rateCount);
+        uint256[] memory slippageRates = new uint256[](rateCount);
+        
+        for (uint256 i = 0; i < rateCount; i++) {
+            (expectedRates[i], slippageRates[i]) = KyberNetworkProxyInterface(kyberNetworkProxy).getExpectedRate(
+                _sourceTokens[i],
+                _destinationTokens[i],
+                _quantities[i]
+            );
+        }
 
         return (
-            rate,
-            slippage
+            expectedRates,
+            slippageRates
         );
     }
 

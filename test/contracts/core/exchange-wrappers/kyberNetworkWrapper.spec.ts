@@ -17,7 +17,7 @@ import {
 import { ether } from '@utils/units';
 import { ExchangeData } from '@utils/orders';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS, KYBER_RESERVE_CONFIGURED_RATE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '@utils/constants';
+import { DEFAULT_GAS, KYBER_RESERVE_CONFIGURED_RATE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -83,7 +83,7 @@ contract('KyberNetworkWrapper', accounts => {
 
       subjectSendTokens = [makerTokenAddress, makerTokenAddress];
       subjectReceiveTokens = [componentTokenAddress, componentTokenAddress];
-      subjectQuantities = [ether(5), ether(100)];
+      subjectQuantities = [ether(5), ether(0.5)];
       subjectCaller = deployedCoreAddress;
     });
 
@@ -106,11 +106,15 @@ contract('KyberNetworkWrapper', accounts => {
 
       const expectedRate = KYBER_RESERVE_CONFIGURED_RATE;
       expect(firstRate).to.be.bignumber.equal(expectedRate);
-      expect(secondRate).to.be.bignumber.equal(ZERO);
+
+      const expectedSecondRate = new BigNumber('321556325999999996');
+      expect(secondRate).to.be.bignumber.equal(expectedSecondRate);
 
       const expectedSlippage = new BigNumber('319948544369999997');
       expect(firstSlippage).to.be.bignumber.equal(expectedSlippage);
-      expect(secondSlippage).to.be.bignumber.equal(ZERO);
+
+      const expectedSecondSlippage = new BigNumber ('319948544369999996');
+      expect(secondSlippage).to.be.bignumber.equal(expectedSecondSlippage);
     });
   });
 

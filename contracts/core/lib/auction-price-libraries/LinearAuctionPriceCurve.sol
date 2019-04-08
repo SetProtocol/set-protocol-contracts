@@ -30,7 +30,7 @@ import { RebalancingLibrary } from "../RebalancingLibrary.sol";
 contract LinearAuctionPriceCurve {
     using SafeMath for uint256;
 
-    uint256 constant public MIN_PIVOT_PRICE_DIVISOR = 2;
+    uint256 constant public MIN_PIVOT_PRICE_DIVISOR = 5;
     uint256 constant public MAX_PIVOT_PRICE_NUMERATOR = 5;
     uint256 constant public MAX_30_SECOND_PERIODS = 1000;
     uint256 constant public THIRTY_SECONDS = 30;

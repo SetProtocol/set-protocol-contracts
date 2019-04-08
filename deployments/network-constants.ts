@@ -7,7 +7,7 @@ export default {
     development: constants.ONE_MINUTE_IN_SECONDS,
   },
   minimumRebalanceProposalPeriod: {
-    production: constants.ONE_DAY_IN_SECONDS,
+    production: constants.ONE_HOUR_IN_SECONDS*6,
     staging: constants.ONE_MINUTE_IN_SECONDS,
     development: constants.ONE_MINUTE_IN_SECONDS,
   },

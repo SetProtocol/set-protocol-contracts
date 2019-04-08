@@ -79,13 +79,17 @@ contract CoreOperationState is
         external
         onlyOwner
     {
-        if (_operationState < uint8(OperationState.InvalidState)) {
-            emit OperationStateChanged(
-                state.operationState,
-                _operationState
-            );
+        require(
+            _operationState < uint8(OperationState.InvalidState) &&
+            _operationState != state.operationState,
+            "InvalidOperationState"
+        );
 
-            state.operationState = _operationState;
-        }
+        emit OperationStateChanged(
+            state.operationState,
+            _operationState
+        );
+
+        state.operationState = _operationState;
     }
 }

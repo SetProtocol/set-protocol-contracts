@@ -241,11 +241,11 @@ contract KyberNetworkWrapper {
         uint256 tradeDataStart = _tradesData.contentAddress().add(_offset);
 
         assembly {
-            mstore(trade,           mload(tradeDataStart))             // destinationToken
-            mstore(add(trade, 32),  mload(add(tradeDataStart, 32)))    // sourceToken
-            mstore(add(trade, 64),  mload(add(tradeDataStart, 64)))    // sourceTokenQuantity
-            mstore(add(trade, 96),  mload(add(tradeDataStart, 96)))    // minimumConversionRate
-            mstore(add(trade, 128),  mload(add(tradeDataStart, 128)))  // maxDestinationQuantity
+            mstore(trade,           mload(tradeDataStart))            // destinationToken
+            mstore(add(trade, 32),  mload(add(tradeDataStart, 32)))   // sourceToken
+            mstore(add(trade, 64),  mload(add(tradeDataStart, 64)))   // sourceTokenQuantity
+            mstore(add(trade, 96),  mload(add(tradeDataStart, 96)))   // minimumConversionRate
+            mstore(add(trade, 128), mload(add(tradeDataStart, 128)))  // maxDestinationQuantity
         }
 
         return trade;

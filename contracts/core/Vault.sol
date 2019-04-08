@@ -96,7 +96,6 @@ contract Vault is
                 "Vault.withdrawTo: Invalid post withdraw balance"
             );            
         }
-
     }
 
     /*

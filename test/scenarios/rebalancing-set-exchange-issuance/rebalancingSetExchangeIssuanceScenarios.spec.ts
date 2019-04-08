@@ -19,12 +19,7 @@ import {
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
-import {
-  DEFAULT_GAS,
-  DEFAULT_REBALANCING_NATURAL_UNIT,
-  ONE_DAY_IN_SECONDS,
-} from '@utils/constants';
-
+import { DEFAULT_GAS, DEFAULT_REBALANCING_NATURAL_UNIT, ONE_DAY_IN_SECONDS } from '@utils/constants';
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
@@ -40,6 +35,7 @@ const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetEx
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setUtils = new SetUtils(web3);
 const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
+
 
 contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
   const [
@@ -73,7 +69,6 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
 
     weth = await erc20Wrapper.getDeployedWETHAsync();
     payableExchangeIssuance = await coreWrapper.getDeployedRebalancingSetExchangeIssuanceModuleAsync();
-    await coreWrapper.addModuleAsync(core, payableExchangeIssuance.address);
   });
 
   after(async () => {
@@ -103,9 +98,8 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
     const BTC_DECIMALS: number = 8;
     const WETH_DECIMALS: number = 18;
 
-    const WETH_COMPONENT_UNITS = BTC_USD_PRICE
-                                  .div(ETH_USD_PRICE)
-                                  .mul(new BigNumber(10).pow(WETH_DECIMALS - BTC_DECIMALS));
+    const WETH_COMPONENT_UNITS = BTC_USD_PRICE.div(ETH_USD_PRICE)
+                                              .mul(new BigNumber(10).pow(WETH_DECIMALS - BTC_DECIMALS));
 
     let bitcoinEtherIssueQuantity: BigNumber;
     let rebalancingSetQuantity: BigNumber;
@@ -171,13 +165,13 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
       ];
 
       subjectExchangeIssuanceParams = {
-        setAddress:                 exchangeIssueSetAddress,
-        sendTokenExchangeIds:       exchangeIssueSendTokenExchangeIds,
-        sendTokens:                 exchangeIssueSendTokens,
-        sendTokenAmounts:           exchangeIssueSendTokenAmounts,
-        quantity:                   exchangeIssueQuantity,
-        receiveTokens:               exchangeIssueReceiveTokens,
-        receiveTokenAmounts:         exchangeIssueReceiveTokenAmounts,
+        setAddress:           exchangeIssueSetAddress,
+        sendTokenExchangeIds: exchangeIssueSendTokenExchangeIds,
+        sendTokens:           exchangeIssueSendTokens,
+        sendTokenAmounts:     exchangeIssueSendTokenAmounts,
+        quantity:             exchangeIssueQuantity,
+        receiveTokens:        exchangeIssueReceiveTokens,
+        receiveTokenAmounts:  exchangeIssueReceiveTokenAmounts,
       };
 
       await erc20Wrapper.approveTransfersAsync(
@@ -206,9 +200,8 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
 
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
       subjectRebalancingSetAddress = rebalancingSetToken.address;
-      subjectRebalancingSetQuantity = exchangeIssueQuantity
-                                        .div(rebalancingUnitShares)
-                                        .mul(DEFAULT_REBALANCING_NATURAL_UNIT);
+      subjectRebalancingSetQuantity = exchangeIssueQuantity.div(rebalancingUnitShares)
+                                                           .mul(DEFAULT_REBALANCING_NATURAL_UNIT);
       rebalancingSetQuantity = exchangeIssueQuantity.mul(DEFAULT_REBALANCING_NATURAL_UNIT).div(rebalancingUnitShares);
     });
 

@@ -274,7 +274,7 @@ contract CoreIssuance is
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Invalid Set"
+            "IssueInternal"
         );
 
         // Validate quantity is multiple of natural unit
@@ -418,7 +418,7 @@ contract CoreIssuance is
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Invalid Set"
+            "RedeemAndDecrementVault"
         );
 
         // Validate quantity is multiple of natural unit

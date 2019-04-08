@@ -95,6 +95,10 @@ contract CoreAdmin is
         onlyOwner
         timeLockUpgrade
     {
+        require(
+            !state.validFactories[_factory]
+        );
+
         state.validFactories[_factory] = true;
 
         state.factories = state.factories.append(_factory);
@@ -117,8 +121,7 @@ contract CoreAdmin is
         onlyOwner
     {
         require(
-            state.validFactories[_factory],
-            "Invalid Factory"
+            state.validFactories[_factory]
         );
 
         state.factories = state.factories.remove(_factory);
@@ -146,8 +149,7 @@ contract CoreAdmin is
         timeLockUpgrade
     {
         require(
-            state.exchangeIds[_exchangeId] == address(0),
-            "Invalid Id"
+            state.exchangeIds[_exchangeId] == address(0)
         );
 
         state.exchangeIds[_exchangeId] = _exchange;
@@ -175,13 +177,8 @@ contract CoreAdmin is
         onlyOwner
     {
         require(
-            state.exchangeIds[_exchangeId] != address(0),
-            "Invalid exchange"
-        );
-
-        require(
-            state.exchangeIds[_exchangeId] == _exchange,
-            "ExchangeId != exchange"
+            state.exchangeIds[_exchangeId] != address(0) &&
+            state.exchangeIds[_exchangeId] == _exchange
         );
 
         state.exchanges = state.exchanges.remove(_exchange);
@@ -206,6 +203,10 @@ contract CoreAdmin is
         onlyOwner
         timeLockUpgrade
     {
+        require(
+            !state.validModules[_module]
+        );
+
         state.validModules[_module] = true;
 
         state.modules = state.modules.append(_module);
@@ -228,8 +229,7 @@ contract CoreAdmin is
         onlyOwner
     {
         require(
-            state.validModules[_module],
-            "Invalid Module"
+            state.validModules[_module]
         );
 
         state.modules = state.modules.remove(_module);
@@ -254,8 +254,7 @@ contract CoreAdmin is
         onlyOwner
     {
         require(
-            state.validSets[_set],
-            "Invalid Set"
+            state.validSets[_set]
         );
 
         state.setTokens = state.setTokens.remove(_set);
@@ -282,8 +281,7 @@ contract CoreAdmin is
         onlyOwner
     {
         require(
-            state.disabledSets[_set],
-            "Invalid Set"
+            state.disabledSets[_set]
         );
 
         state.setTokens = state.setTokens.append(_set);
@@ -310,6 +308,10 @@ contract CoreAdmin is
         onlyOwner
         timeLockUpgrade
     {
+        require(
+            !state.validPriceLibraries[_priceLibrary]
+        );
+
         state.validPriceLibraries[_priceLibrary] = true;
 
         state.priceLibraries = state.priceLibraries.append(_priceLibrary);
@@ -332,8 +334,7 @@ contract CoreAdmin is
         onlyOwner
     {
         require(
-            state.validPriceLibraries[_priceLibrary],
-            "Invalid Lib"
+            state.validPriceLibraries[_priceLibrary]
         );
 
         state.priceLibraries = state.priceLibraries.remove(_priceLibrary);

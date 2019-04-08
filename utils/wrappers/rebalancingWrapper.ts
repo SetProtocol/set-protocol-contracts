@@ -346,13 +346,7 @@ export class RebalancingWrapper {
     auctionPivotPrice: BigNumber,
     caller: Address
   ): Promise<void> {
-    // Approve price library
-    await core.addPriceLibrary.sendTransactionAsync(
-      auctionLibrary,
-      { from: this._tokenOwnerAddress, gas: DEFAULT_GAS}
-    );
-
-    // Transition to propose
+    // Transition to propose, auctionLibrary MUST be approved priceLibrary on Core already
     await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
     await rebalancingSetToken.propose.sendTransactionAsync(
       nextSetToken.address,

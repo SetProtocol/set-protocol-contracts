@@ -121,6 +121,7 @@ contract('RebalancingSetToken', accounts => {
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
+    await rebalancingWrapper.addPriceLibraryAsync(coreMock, constantAuctionPriceCurve);
   });
 
   afterEach(async () => {
@@ -1103,11 +1104,6 @@ contract('RebalancingSetToken', accounts => {
       subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
       subjectCaller = managerAccount;
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
-
-      await rebalancingWrapper.addPriceLibraryAsync(
-        coreMock,
-        constantAuctionPriceCurve,
-      );
     });
 
     async function subject(): Promise<string> {

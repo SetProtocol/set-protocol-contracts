@@ -139,6 +139,19 @@ contract('CoreAdmin', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the factory has already been added', async () => {
+      beforeEach(async () => {
+        await core.addFactory.sendTransactionAsync(
+          subjectFactoryAddress,
+          { from: subjectCaller },
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#removeFactory', async () => {
@@ -258,6 +271,19 @@ contract('CoreAdmin', accounts => {
     describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the module has already been added', async () => {
+      beforeEach(async () => {
+        await core.addModule.sendTransactionAsync(
+          subjectModuleAddress,
+          { from: subjectCaller },
+        );
       });
 
       it('should revert', async () => {
@@ -732,6 +758,19 @@ contract('CoreAdmin', accounts => {
     describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the price library has already been added', async () => {
+      beforeEach(async () => {
+        await core.addPriceLibrary.sendTransactionAsync(
+          subjectPriceLibrary,
+          { from: subjectCaller },
+        );
       });
 
       it('should revert', async () => {

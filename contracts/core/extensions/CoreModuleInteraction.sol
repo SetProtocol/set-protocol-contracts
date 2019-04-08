@@ -44,7 +44,7 @@ contract CoreModuleInteraction is
     function onlyModuleCallable() internal view {
         require(
             state.validModules[msg.sender],
-            "Not module"
+            "OnlyModule"
         );
     }
 

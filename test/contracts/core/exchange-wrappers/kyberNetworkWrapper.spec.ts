@@ -17,7 +17,7 @@ import {
 import { ether } from '@utils/units';
 import { ExchangeData } from '@utils/orders';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS, KYBER_RESERVE_CONFIGURED_RATE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
+import { DEFAULT_GAS, KYBER_RESERVE_CONFIGURED_RATE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -72,43 +72,45 @@ contract('KyberNetworkWrapper', accounts => {
   });
 
   describe('#conversionRate', async () => {
+    let subjectSendTokens: Address[];
+    let subjectReceiveTokens: Address[];
+    let subjectQuantities: BigNumber[];
     let subjectCaller: Address;
-    let subjectSendToken: Address;
-    let subjectReceiveToken: Address;
-    let subjectQuantity: BigNumber;
-
-    let makerToken: StandardTokenMockContract;
-    let componentToken: StandardTokenMockContract;
 
     beforeEach(async () => {
-      makerToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
-      componentToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
+      const makerTokenAddress = SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS;
+      const componentTokenAddress = SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS;
 
+      subjectSendTokens = [makerTokenAddress, makerTokenAddress];
+      subjectReceiveTokens = [componentTokenAddress, componentTokenAddress];
+      subjectQuantities = [ether(5), ether(100)];
       subjectCaller = deployedCoreAddress;
-      subjectSendToken = makerToken.address;
-      subjectReceiveToken = componentToken.address;
-      subjectQuantity = ether(5);
     });
 
-    async function subject(): Promise<BigNumber[]> {
+    async function subject(): Promise<[BigNumber[], BigNumber[]]> {
       return await kyberNetworkWrapper.conversionRate.callAsync(
-        subjectSendToken,
-        subjectReceiveToken,
-        subjectQuantity,
+        subjectSendTokens,
+        subjectReceiveTokens,
+        subjectQuantities,
         { from: subjectCaller }
       );
     }
 
-    it('returns the correct rate set on the reserve contract for the given quantity', async () => {
-      let rate: BigNumber;
-      let slippage: BigNumber;
-      [rate, slippage] = await subject();
+    it('returns the correct rates set on the reserve contract', async () => {
+      let firstRate: BigNumber;
+      let secondRate: BigNumber;
+      let firstSlippage: BigNumber;
+      let secondSlippage: BigNumber;
+      const results = await subject();
+      [[firstRate, secondRate], [firstSlippage, secondSlippage]] = results;
 
       const expectedRate = KYBER_RESERVE_CONFIGURED_RATE;
-      expect(rate).to.be.bignumber.equal(expectedRate);
+      expect(firstRate).to.be.bignumber.equal(expectedRate);
+      expect(secondRate).to.be.bignumber.equal(ZERO);
 
       const expectedSlippage = new BigNumber('319948544369999997');
-      expect(slippage).to.be.bignumber.equal(expectedSlippage);
+      expect(firstSlippage).to.be.bignumber.equal(expectedSlippage);
+      expect(secondSlippage).to.be.bignumber.equal(ZERO);
     });
   });
 

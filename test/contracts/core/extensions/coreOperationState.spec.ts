@@ -54,8 +54,13 @@ contract('CoreOperationState', accounts => {
   });
 
   describe('#setOperationState', async () => {
-    let subjectOperationState: BigNumber = ONE;
-    let subjectCaller: Address = ownerAccount;
+    let subjectOperationState: BigNumber;
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      subjectOperationState = ONE;
+      subjectCaller = ownerAccount;
+    });
 
     async function subject(): Promise<string> {
       return core.setOperationState.sendTransactionAsync(
@@ -88,6 +93,11 @@ contract('CoreOperationState', accounts => {
 
     describe('when the operation state input is Zero', async () => {
       beforeEach(async () => {
+        await core.setOperationState.sendTransactionAsync(
+          ONE,
+          { from: subjectCaller },
+        );
+
         subjectOperationState = ZERO;
       });
 
@@ -99,23 +109,32 @@ contract('CoreOperationState', accounts => {
       });
     });
 
+    describe('when the caller is not the owner', async () => {
+      beforeEach(async () => {
+        subjectCaller = notOwnerAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe('when the input operation state is the invalid state', async () => {
       beforeEach(async () => {
         subjectOperationState = new BigNumber(2);
       });
 
-      it('should not update the operation state', async () => {
-        await subject();
-
-        const originalOperationState = ZERO;
-        const currentOperationState = await core.operationState.callAsync();
-        expect(currentOperationState).to.bignumber.equal(originalOperationState);
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
 
-    describe('when the caller is not the owner', async () => {
+    describe('when the new operation state is the same as the existing state', async () => {
       beforeEach(async () => {
-        subjectCaller = notOwnerAccount;
+        await core.setOperationState.sendTransactionAsync(
+          subjectOperationState,
+          { from: subjectCaller },
+        );
       });
 
       it('should revert', async () => {

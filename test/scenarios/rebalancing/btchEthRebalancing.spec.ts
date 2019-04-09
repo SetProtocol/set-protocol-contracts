@@ -96,10 +96,9 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   // Base Set Details
   const BTC_ETH_NATURAL_UNIT = new BigNumber(10 ** 10);
   const INITIAL_BTC_UNIT = new BigNumber(1);
-  const INITIAL_ETH_UNIT = BTC_PRICE_INITIAL
-                            .div(ETH_PRICE_INITIAL)
-                            .mul(ETH_DECIMAL_EXPONENTIATION)
-                            .mul(INITIAL_BTC_UNIT);
+  const INITIAL_ETH_UNIT = BTC_PRICE_INITIAL.div(ETH_PRICE_INITIAL)
+                                            .mul(ETH_DECIMAL_EXPONENTIATION)
+                                            .mul(INITIAL_BTC_UNIT);
 
   // Rebalancing Set Details
   const REBALANCING_SET_UNIT_SHARES = new BigNumber(1.35).mul(10 ** 6);
@@ -108,9 +107,8 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   // Issue Quantity
   const BTC_ETH_ISSUE_QUANTITY = new BigNumber(10 ** 18);
   const REQUIRED_WETH = BTC_ETH_ISSUE_QUANTITY.div(BTC_ETH_NATURAL_UNIT).mul(INITIAL_ETH_UNIT);
-  const UNROUNDED_REBALANCING_SET_ISSUE_QUANTITY = BTC_ETH_ISSUE_QUANTITY
-                                                    .mul(REBALANCING_SET_NATURAL_UNIT)
-                                                    .div(REBALANCING_SET_UNIT_SHARES);
+  const UNROUNDED_REBALANCING_SET_ISSUE_QUANTITY = BTC_ETH_ISSUE_QUANTITY.mul(REBALANCING_SET_NATURAL_UNIT)
+                                                                         .div(REBALANCING_SET_UNIT_SHARES);
 
   // Round the number to a certain precision w/o rounding up
   const REBALANCING_SET_ISSUE_QUANTITY = UNROUNDED_REBALANCING_SET_ISSUE_QUANTITY
@@ -118,19 +116,16 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
 
 
   // Pre-Rebalance Value
-  const INITIAL_QUANTITY_BASE_SET = REBALANCING_SET_ISSUE_QUANTITY
-                                      .mul(REBALANCING_SET_UNIT_SHARES)
-                                      .div(REBALANCING_SET_NATURAL_UNIT);
-  const INITIAL_BTC_VALUE = INITIAL_QUANTITY_BASE_SET
-                              .mul(INITIAL_BTC_UNIT)
-                              .div(BTC_ETH_NATURAL_UNIT)
-                              .mul(BTC_PRICE_PROPOSAL)
-                              .div(10 ** WBTC_DECIMALS);
-  const INITIAL_ETH_VALUE = INITIAL_QUANTITY_BASE_SET
-                              .mul(INITIAL_ETH_UNIT)
-                              .div(BTC_ETH_NATURAL_UNIT)
-                              .mul(ETH_PRICE_INITIAL)
-                              .div(10 ** WETH_DECIMALS);
+  const INITIAL_QUANTITY_BASE_SET = REBALANCING_SET_ISSUE_QUANTITY.mul(REBALANCING_SET_UNIT_SHARES)
+                                                                  .div(REBALANCING_SET_NATURAL_UNIT);
+  const INITIAL_BTC_VALUE = INITIAL_QUANTITY_BASE_SET.mul(INITIAL_BTC_UNIT)
+                                                     .div(BTC_ETH_NATURAL_UNIT)
+                                                     .mul(BTC_PRICE_PROPOSAL)
+                                                     .div(10 ** WBTC_DECIMALS);
+  const INITIAL_ETH_VALUE = INITIAL_QUANTITY_BASE_SET.mul(INITIAL_ETH_UNIT)
+                                                     .div(BTC_ETH_NATURAL_UNIT)
+                                                     .mul(ETH_PRICE_INITIAL)
+                                                     .div(10 ** WETH_DECIMALS);
   const PRE_REBALANCE_VALUE = INITIAL_BTC_VALUE.plus(INITIAL_ETH_VALUE);
 
   // Rebalancing Details
@@ -236,11 +231,6 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       ethMedianizer,
       ETH_PRICE_INITIAL,
       SetProtocolTestUtils.generateTimestamp(1000),
-    );
-
-    await rebalancingWrapper.addPriceLibraryAsync(
-      core,
-      linearAuctionPriceCurve,
     );
 
     await erc20Wrapper.approveTransfersAsync(
@@ -369,14 +359,12 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       const [bitcoinUnit, etherUnit] = await newBaseSetInstance.getUnits.callAsync();
 
       const newBaseSetNaturalUnit = await newBaseSetInstance.naturalUnit.callAsync();
-
       const currentSetRBSetBalance = await vault.getOwnerBalance.callAsync(
         newBaseSetAddress,
         rebalancingSetToken.address
       );
 
       const ownedBTCBalance = currentSetRBSetBalance.mul(bitcoinUnit).div(newBaseSetNaturalUnit);
-
       const ownedETHBalance = currentSetRBSetBalance.mul(etherUnit).div(newBaseSetNaturalUnit);
 
       const btcValue = ownedBTCBalance.mul(BTC_PRICE_PROPOSAL).div(10 ** WBTC_DECIMALS);
@@ -384,7 +372,6 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       const totalValue = btcValue.plus(ethValue);
 
       const percentOfPreRebalanceValue = totalValue.div(PRE_REBALANCE_VALUE);
-
       const slippage = new BigNumber(1).minus(percentOfPreRebalanceValue);
 
       expect(slippage).to.bignumber.be.lessThan(MAX_SLIPPAGE);

@@ -7,7 +7,7 @@ export default {
     development: constants.ONE_MINUTE_IN_SECONDS,
   },
   minimumRebalanceProposalPeriod: {
-    production: constants.ONE_HOUR_IN_SECONDS*6,
+    production: constants.ONE_HOUR_IN_SECONDS * 6,
     staging: constants.ONE_MINUTE_IN_SECONDS,
     development: constants.ONE_MINUTE_IN_SECONDS,
   },
@@ -22,14 +22,14 @@ export default {
     development: (constants.ONE_DAY_IN_SECONDS * 3),
   },
   transferProxyTimeLockPeriod: {
-    production: 7*constants.ONE_DAY_IN_SECONDS,
-    staging: 7*constants.ONE_DAY_IN_SECONDS,
-    development: 7*constants.ONE_DAY_IN_SECONDS,
+    production: 7 * constants.ONE_DAY_IN_SECONDS,
+    staging: 7 * constants.ONE_DAY_IN_SECONDS,
+    development: 7 * constants.ONE_DAY_IN_SECONDS,
   },
   vaultTimeLockPeriod: {
-    production: 7*constants.ONE_DAY_IN_SECONDS,
-    staging: 7*constants.ONE_DAY_IN_SECONDS,
-    development: 7*constants.ONE_DAY_IN_SECONDS,
+    production: 7 * constants.ONE_DAY_IN_SECONDS,
+    staging: 7 * constants.ONE_DAY_IN_SECONDS,
+    development: 7 * constants.ONE_DAY_IN_SECONDS,
   },
   generalTimeLockPeriod: {
     production: 0,

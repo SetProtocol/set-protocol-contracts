@@ -245,10 +245,12 @@ export class RebalanceScenariosWrapper {
     const { priceSchedule } = this._rebalanceProgram;
     const iterationNumber = this._currentIteration;
 
-    const latestBlock = await web3.eth.getBlock('latest');
-    const latestBlockTimestamp = new BigNumber(latestBlock.timestamp);
+
 
     if (this._assetOneMedianizer) {
+      const latestBlock = await web3.eth.getBlock('latest');
+      const latestBlockTimestamp = new BigNumber(latestBlock.timestamp);
+
       await this._oracleWrapper.updateMedianizerPriceAsync(
         this._assetOneMedianizer,
         priceSchedule.assetOne[iterationNumber],
@@ -260,6 +262,9 @@ export class RebalanceScenariosWrapper {
     }
 
     if (this._assetTwoMedianizer) {
+      const latestBlock = await web3.eth.getBlock('latest');
+      const latestBlockTimestamp = new BigNumber(latestBlock.timestamp);
+
       await this._oracleWrapper.updateMedianizerPriceAsync(
         this._assetTwoMedianizer,
         priceSchedule.assetTwo[iterationNumber],

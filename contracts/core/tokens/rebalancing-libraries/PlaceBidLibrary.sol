@@ -62,7 +62,7 @@ library PlaceBidLibrary {
         // Make sure that bid amount is greater than zero
         require(
             _quantity > 0,
-            "RebalancingSetToken.placeBid: Must bid multiple of minimum bid"
+            "RebalancingSetToken.placeBid: Bid must be > 0"
         );
 
         // Make sure that bid amount is multiple of minimum bid amount

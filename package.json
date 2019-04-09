@@ -131,6 +131,7 @@
     ]
   },
   "_moduleAliases": {
+    "@deployments": "transpiled/deployments",
     "@utils": "transpiled/utils"
   }
 }

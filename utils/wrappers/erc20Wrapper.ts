@@ -237,7 +237,7 @@ export class ERC20Wrapper {
   }
 
   public async approveTransfersAsync(
-    tokens: StandardTokenMockContract[],
+    tokens: (StandardTokenMockContract | WethMockContract)[],
     to: Address,
     from: Address = this._senderAccountAddress,
   ) {
@@ -261,7 +261,7 @@ export class ERC20Wrapper {
   }
 
   public async transferTokensAsync(
-    tokens: StandardTokenMockContract[],
+    tokens: (StandardTokenMockContract | WethMockContract)[],
     to: Address,
     amount: BigNumber,
     from: Address = this._senderAccountAddress,

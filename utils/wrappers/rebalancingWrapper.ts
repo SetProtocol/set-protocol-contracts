@@ -210,6 +210,90 @@ export class RebalancingWrapper {
     return setTokenArray;
   }
 
+  public async issueRebalancingSetFromBaseComponentsAsync(
+    core: CoreLikeContract,
+    transferProxyAddress: Address,
+    rebalancingSetAddress: Address,
+    rebalancingSetQuantity: BigNumber,
+    from: Address = this._tokenOwnerAddress,
+  ): Promise<void> {
+      const rebalancingSet = await this._coreWrapper.getRebalancingInstanceFromAddress(rebalancingSetAddress);
+      const currentSetAddress = await rebalancingSet.currentSet.callAsync();
+      const currentSetInstance = await this._coreWrapper.getSetInstance(currentSetAddress);
+
+      const baseSetNaturalUnit = await currentSetInstance.naturalUnit.callAsync();
+
+      const rebalancingSetUnitShares = await rebalancingSet.unitShares.callAsync();
+      const rebalancingSetNaturalUnit = await rebalancingSet.naturalUnit.callAsync();
+      const currentSetRequiredAmountUnrounded = rebalancingSetQuantity
+                                         .mul(rebalancingSetUnitShares)
+                                         .div(rebalancingSetNaturalUnit)
+                                         .round(0, 3);
+      const currentSetRequiredAmount = currentSetRequiredAmountUnrounded.sub(
+        currentSetRequiredAmountUnrounded.modulo(baseSetNaturalUnit)
+      ).add(baseSetNaturalUnit);
+
+      await core.issue.sendTransactionAsync(
+        currentSetAddress,
+        currentSetRequiredAmount,
+        { from },
+      );
+
+      await currentSetInstance.approve.sendTransactionAsync(
+        transferProxyAddress,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        { from },
+      );
+      await core.issue.sendTransactionAsync(
+        rebalancingSet.address,
+        rebalancingSetQuantity,
+        { from },
+      );
+  }
+
+  public async redeemRebalancingSetToBaseComponentsAsync(
+    core: CoreLikeContract,
+    transferProxyAddress: Address,
+    rebalancingSetAddress: Address,
+    rebalancingSetQuantity: BigNumber,
+    from: Address = this._tokenOwnerAddress,
+  ): Promise<void> {
+    const rebalancingSet = await this._coreWrapper.getRebalancingInstanceFromAddress(rebalancingSetAddress);
+    const currentSetAddress = await rebalancingSet.currentSet.callAsync();
+    const currentSetInstance = await this._coreWrapper.getSetInstance(currentSetAddress);
+
+    const baseSetNaturalUnit = await currentSetInstance.naturalUnit.callAsync();
+
+    const rebalancingSetUnitShares = await rebalancingSet.unitShares.callAsync();
+    const rebalancingSetNaturalUnit = await rebalancingSet.naturalUnit.callAsync();
+    const currentSetRequiredAmountUnrounded = rebalancingSetQuantity
+                                       .mul(rebalancingSetUnitShares)
+                                       .div(rebalancingSetNaturalUnit)
+                                       .round(0, 3);
+    const currentSetRequiredAmount = currentSetRequiredAmountUnrounded.sub(
+      currentSetRequiredAmountUnrounded.modulo(baseSetNaturalUnit)
+    );
+
+    await core.redeemAndWithdrawTo.sendTransactionAsync(
+      rebalancingSet.address,
+      from,
+      rebalancingSetQuantity,
+      new BigNumber(0),
+      { from },
+    );
+
+    await core.redeemAndWithdrawTo.sendTransactionAsync(
+      currentSetAddress,
+      from,
+      currentSetRequiredAmount,
+      new BigNumber(0),
+      { from },
+    );
+
+
+  }
+
+
   /* ============ Price Libraries ============ */
 
   public async deployLinearAuctionPriceCurveAsync(
@@ -603,6 +687,22 @@ export class RebalancingWrapper {
 
   /* ============ Rebalancing Token Manager ============ */
 
+  public async getDeployedManagerInstance(
+    managerAddress: Address,
+  ): Promise<BTCETHRebalancingManagerContract> {
+    return await BTCETHRebalancingManagerContract.at(managerAddress, web3, TX_DEFAULTS);
+  }
+
+  public async proposeOnManager(
+    managerAddress: Address,
+    rebalancingSetAddress: Address,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<void> {
+    const instance = await BTCETHRebalancingManagerContract.at(managerAddress, web3, TX_DEFAULTS);
+
+    await instance.propose.sendTransactionAsync(rebalancingSetAddress, { from });
+  }
+
   public async deployBTCETHRebalancingManagerAsync(
     coreAddress: Address,
     btcPriceFeedAddress: Address,
@@ -907,5 +1007,35 @@ export class RebalancingWrapper {
              .div(tokenDecimals)
              .div(VALUE_TO_CENTS_CONVERSION)
              .round(0, 3);
+  }
+
+  /* ============ Bidding Convenience functions ============ */
+  public getTimeToFairValue(
+    auctionTimeToPivot: BigNumber
+  ): BigNumber {
+    return auctionTimeToPivot.div(2);
+  }
+
+  public async calculateCurrentSetBidQuantity(
+    startingCurrentSets: BigNumber,
+    percentToBid: number,
+    minimumBid: BigNumber,
+  ): Promise<BigNumber> {
+    const bidQuantity = startingCurrentSets.mul(percentToBid).div(100);
+    const normalizedQuantity = bidQuantity.div(minimumBid).round(0, 3).mul(minimumBid);
+
+    return normalizedQuantity;
+  }
+
+
+  /* ============ Set Token Convenience function ============ */
+  public async getRebalancingSetInstance(
+     rebalancingSetTokenAddress: Address,
+     from: Address = this._tokenOwnerAddress,
+  ): Promise<RebalancingSetTokenContract> {
+    return new RebalancingSetTokenContract(
+      new web3.eth.Contract(RebalancingSetToken.abi, rebalancingSetTokenAddress),
+      { from, gas: DEFAULT_GAS },
+    );
   }
 }

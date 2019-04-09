@@ -27,12 +27,12 @@ export const DEPLOYED_SETS_INFO = {
       development: constants.ONE_DAY_IN_SECONDS,
     },
     ALLOCATION_LOWER_BOUND: {
-      production: 12,
+      production: 6, // These values are in terms of DAI vs ETH in BITETH
       staging: 0,
       development: 0,
     },
     ALLOCATION_UPPER_BOUND: {
-      production: 6,
+      production: 12,
       staging: 0,
       development: 0,
     }
@@ -62,12 +62,12 @@ export const DEPLOYED_SETS_INFO = {
       development: constants.ONE_DAY_IN_SECONDS,
     },
     ALLOCATION_LOWER_BOUND: {
-      production: 17,
+      production: 8, // These values are in terms of DAI vs ETH in BITETH
       staging: 0,
       development: 0,
     },
     ALLOCATION_UPPER_BOUND: {
-      production: 8,
+      production: 17,
       staging: 0,
       development: 0,
     }

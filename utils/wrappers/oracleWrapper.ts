@@ -6,6 +6,7 @@ import { BigNumber } from 'bignumber.js';
 import { FeedFactoryContract, MedianContract, PriceFeedContract } from '../contracts';
 import { getWeb3 } from '../web3Helper';
 import { FeedCreatedArgs } from '../contract_logs/oracle';
+import { TX_DEFAULTS } from '../../deployments/utils/blockchain';
 
 const web3 = getWeb3();
 const FeedFactory = artifacts.require('FeedFactory');
@@ -21,6 +22,12 @@ export class OracleWrapper {
 
   constructor(contractOwnerAddress: Address) {
     this._contractOwnerAddress = contractOwnerAddress;
+  }
+
+  /* ============ Deployed Contracts ============ */
+
+  public async getDeployedMedianizerAsync(medianizerAddress: Address): Promise<MedianContract> {
+    return await MedianContract.at(medianizerAddress, web3, TX_DEFAULTS);
   }
 
   /* ============ Deployment ============ */

@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 
-import ChaiSetup from './chaiSetup';
+import ChaiSetup from '@utils/chaiSetup';
 ChaiSetup.configure();
 const { expect } = chai;
 

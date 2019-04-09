@@ -21,6 +21,8 @@ The deployment script will output all addresses to `outputs.json`.
 
 To deploy, simply run `yarn deploy`. Test are automatically run at the end.
 
+To update the gasPrice used with each transaction, edit the `TX_DEFAULTS` constant in `/blockchain.ts`
+
 ## Tests
 
 In order to run tests the outputs file should contain addresses for the contracts you would like to test against and the `.env` file should have the same `DEPLOYMENT_CONSTANT` and `DEPLOYMENT_NETWORK_ID`.

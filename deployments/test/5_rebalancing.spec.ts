@@ -475,7 +475,7 @@ describe('Deployment: Rebalancing', () => {
 
     let rebalancingManagerContract;
     let expectedAllocationBounds;
-    const setParams = DEPLOYED_SETS_INFO.ETHDAI_BTD;
+    const setParams = DEPLOYED_SETS_INFO.ETHDAI_LONG_TERM_BTD;
 
     before(async () => {
       const rebalancingMangerAddress = await getContractAddress(setParams.MANAGER_NAME);
@@ -555,7 +555,7 @@ describe('Deployment: Rebalancing', () => {
   describe('ETHDai Initial Collateralized Set', () => {
 
     let initialCollateralisedSet;
-    const setParams = DEPLOYED_SETS_INFO.ETHDAI_BTD;
+    const setParams = DEPLOYED_SETS_INFO.ETHDAI_LONG_TERM_BTD;
     const calculatedUnitShares = calculateGeneralInitialSetUnits(
       constants.DAI.PRICE,
       constants.WETH.PRICE,
@@ -610,7 +610,7 @@ describe('Deployment: Rebalancing', () => {
   describe('ETHDai Rebalanced Set Token', () => {
 
     let ethDaiRebalancingSetToken;
-    const setParams = DEPLOYED_SETS_INFO.ETHDAI_BTD;
+    const setParams = DEPLOYED_SETS_INFO.ETHDAI_LONG_TERM_BTD;
 
     before(async () => {
       const ethDaiRebalancingSetTokenAddress = await getContractAddress(setParams.SET_NAME);
@@ -675,7 +675,7 @@ describe('Deployment: Rebalancing', () => {
 
     let rebalancingManagerContract;
     let expectedAllocationBounds;
-    const setParams = DEPLOYED_SETS_INFO.BTCDAI_BTD;
+    const setParams = DEPLOYED_SETS_INFO.BTCDAI_LONG_TERM_BTD;
 
     before(async () => {
       const rebalancingMangerAddress = await getContractAddress(setParams.MANAGER_NAME);
@@ -755,7 +755,7 @@ describe('Deployment: Rebalancing', () => {
   describe('BTCDai Initial Collateralized Set', () => {
 
     let initialCollateralisedSet;
-    const setParams = DEPLOYED_SETS_INFO.BTCDAI_BTD;
+    const setParams = DEPLOYED_SETS_INFO.BTCDAI_LONG_TERM_BTD;
     const calculatedUnitShares = calculateGeneralInitialSetUnits(
       constants.DAI.PRICE,
       constants.WBTC.PRICE,
@@ -810,7 +810,7 @@ describe('Deployment: Rebalancing', () => {
   describe('BTCDai Rebalanced Set Token', () => {
 
     let btcDaiRebalancingSetToken;
-    const setParams = DEPLOYED_SETS_INFO.BTCDAI_BTD;
+    const setParams = DEPLOYED_SETS_INFO.BTCDAI_LONG_TERM_BTD;
 
     before(async () => {
       const btcDaiRebalancingSetTokenAddress = await getContractAddress(setParams.SET_NAME);

@@ -46,7 +46,7 @@
     },
     "state": {
       "network_id": 1,
-      "last_deployment_stage": 4
+      "last_deployment_stage": 5
     }
   },
   "1-staging": {
@@ -86,7 +86,13 @@
       "ETHDaiRebalancingSetToken": "0xa512EFbb98b7327B4cD053Af1857050eD9b59D31",
       "BTCDaiRebalancingManager": "0x72A9447cfc775b4EC0aC59a9BCC00c57B282D285",
       "BTCDaiInitialCollateralSet": "0xdBBF3305CA1fdF3BD403B92aB5f5496a1a6094b3",
-      "BTCDaiRebalancingSetToken": "0xEE388f0527907339254f31254faEafFc4072a7ed"
+      "BTCDaiRebalancingSetToken": "0xEE388f0527907339254f31254faEafFc4072a7ed",
+      "STETHDaiRebalancingManager": "0x4bb5E56754026C772A2e467FA205b7b8EF4FB954",
+      "STETHDaiInitialCollateralSet": "0x936CB8f9085e67037268117ADcD16F18Da95715C",
+      "STETHDaiRebalancingSetToken": "0xcb88DDA62C73423f987511bEe5603994136e1580",
+      "STBTCDaiRebalancingManager": "0xe855B143bE39f66B0442b2D49E13ceEdb15D7709",
+      "STBTCDaiInitialCollateralSet": "0xDC8FFFBb277fA7bbcA95f00bd523c700Db5A8F7C",
+      "STBTCDaiRebalancingSetToken": "0x972e9e1Cc5C28FcAa2C993c0E80f1598377011e3"
     },
     "state": {
       "network_id": 1,

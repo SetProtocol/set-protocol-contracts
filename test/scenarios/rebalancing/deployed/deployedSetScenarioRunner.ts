@@ -254,7 +254,7 @@ export class RebalanceScenariosWrapper {
       await this._oracleWrapper.updateMedianizerPriceAsync(
         this._assetOneMedianizer,
         priceSchedule.assetOne[iterationNumber],
-        latestBlockTimestamp + 1, // Add one second to make sure txn doesn't error
+        latestBlockTimestamp.add(1), // Add one second to make sure txn doesn't error
       );
       console.log(
         `Updating Oracle 1 to ${priceSchedule.assetOne[iterationNumber]} at iteration ${iterationNumber}`
@@ -268,7 +268,7 @@ export class RebalanceScenariosWrapper {
       await this._oracleWrapper.updateMedianizerPriceAsync(
         this._assetTwoMedianizer,
         priceSchedule.assetTwo[iterationNumber],
-        latestBlockTimestamp + 1, // Add one second to make sure txn doesn't error
+        latestBlockTimestamp.add(1), // Add one second to make sure txn doesn't error
       );
       console.log(
         `Updating Oracle 2 to ${priceSchedule.assetTwo[iterationNumber]} at iteration ${iterationNumber}`

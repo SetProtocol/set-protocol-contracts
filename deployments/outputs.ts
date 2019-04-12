@@ -37,11 +37,16 @@ export const outputs =
       "ETHDaiRebalancingSetToken": "0x8Ddc86DbA7ad728012eFc460b8A168Aba60B403B",
       "BTCDaiRebalancingManager": "0x56413b25A29185e8F5EF240009dc33f82aAf1008",
       "BTCDaiInitialCollateralSet": "0x27748E808680731e890a70b9f7A8198CeEc29A98",
-      "BTCDaiRebalancingSetToken": "0x6123A0CBC95Cb157995A0795187A60995B85e0A9"
+      "BTCDaiRebalancingSetToken": "0x6123A0CBC95Cb157995A0795187A60995B85e0A9",
+      "STETHDaiRebalancingManager": "0xc1E3D2a047EDFCae244E2d801E9A3ba98c607521",
+      "STETHDaiInitialCollateralSet": "0x37760B5f9364451b80af552817c451D949618FcC",
+      "STETHDaiRebalancingSetToken": "0x585C2cF94c41b528ec7329CBc3cdE3C4f8d268dB",
+      "STBTCDaiRebalancingManager": "0xfCE4a32b9F95F4c9595d7F2d67AA5F01BCAa950e",
+      "STBTCDaiInitialCollateralSet": "0xeDf923F0D8a88dd406e7dDC2e8aE7D4417606CC0"
     },
     "state": {
       "network_id": 1,
-      "last_deployment_stage": 5
+      "last_deployment_stage": 4
     }
   },
   "1-staging": {

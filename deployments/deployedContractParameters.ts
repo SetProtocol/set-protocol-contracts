@@ -1,16 +1,16 @@
 import BigNumber from 'bignumber.js';
-import { DeployedSetInfo } from '../types/deployment_stage_interface';
+import { ETHDaiDeployedSetInfo, BTCDaiDeployedSetInfo, BitEthDeployedSetInfo } from '../types/deployment_stage_interface';
 import constants from './constants';
 
 export const DEPLOYED_SETS_INFO = {
-  BTCDAI_BTD: {
+  BTCDAI_LONG_TERM_BTD: {
     PRICE_PRECISION: new BigNumber(1),
     DAI_MULTIPLIER: new BigNumber(1),
     WBTC_MULTIPLIER: new BigNumber(1),
-    MANAGER_NAME: 'BTCDaiRebalancingManager',
-    COLLATERAL_NAME: 'BTCDaiInitialCollateralSet',
-    SET_NAME: 'BTCDaiRebalancingSetToken',
-    SET_SYMBOL: 'BTCDai',
+    MANAGER_NAME: 'LTBTCDaiRebalancingManager',
+    COLLATERAL_NAME: 'LTBTCDaiInitialCollateralSet',
+    SET_NAME: 'LTBTCDaiRebalancingSetToken',
+    SET_SYMBOL: 'LTBTCDai',
     PROPOSAL_PERIOD: {
       production: constants.ONE_HOUR_IN_SECONDS*8,
       staging: constants.THIRTY_MINUTES_IN_SECONDS,
@@ -36,16 +36,51 @@ export const DEPLOYED_SETS_INFO = {
       staging: 0,
       development: 0,
     }
-  },
+  } as BTCDaiDeployedSetInfo,
 
-  ETHDAI_BTD: {
+  BTCDAI_SHORT_TERM_BTD: {
+    PRICE_PRECISION: new BigNumber(1),
+    DAI_MULTIPLIER: new BigNumber(1),
+    WBTC_MULTIPLIER: new BigNumber(1),
+    MANAGER_NAME: 'STBTCDaiRebalancingManager',
+    COLLATERAL_NAME: 'STBTCDaiInitialCollateralSet',
+    SET_NAME: 'STBTCDaiRebalancingSetToken',
+    SET_SYMBOL: 'STBTCDai',
+    PROPOSAL_PERIOD: {
+      production: constants.ONE_HOUR_IN_SECONDS*8,
+      staging: constants.THIRTY_MINUTES_IN_SECONDS,
+      development: constants.ONE_DAY_IN_SECONDS,
+    },
+    REBALANCE_INTERVAL: {
+      production: constants.ONE_DAY_IN_SECONDS*14,
+      staging: constants.THIRTY_MINUTES_IN_SECONDS,
+      development: constants.ONE_DAY_IN_SECONDS,
+    },
+    AUCTION_TIME_TO_PIVOT: {
+      production: constants.ONE_DAY_IN_SECONDS,
+      staging: constants.ONE_HOUR_IN_SECONDS,
+      development: constants.ONE_DAY_IN_SECONDS,
+    },
+    ALLOCATION_LOWER_BOUND: {
+      production: 6, // These values are in terms of DAI vs ETH in BITETH
+      staging: 0,
+      development: 0,
+    },
+    ALLOCATION_UPPER_BOUND: {
+      production: 6,
+      staging: 0,
+      development: 0,
+    }
+  } as BTCDaiDeployedSetInfo,
+
+  ETHDAI_LONG_TERM_BTD: {
     PRICE_PRECISION: new BigNumber(100),
     DAI_MULTIPLIER: new BigNumber(1),
     WETH_MULTIPLIER: new BigNumber(1),
-    MANAGER_NAME: 'ETHDaiRebalancingManager',
-    COLLATERAL_NAME: 'ETHDaiInitialCollateralSet',
-    SET_NAME: 'ETHDaiRebalancingSetToken',
-    SET_SYMBOL: 'ETHDai',
+    MANAGER_NAME: 'LTETHDaiRebalancingManager',
+    COLLATERAL_NAME: 'LTETHDaiInitialCollateralSet',
+    SET_NAME: 'LTETHDaiRebalancingSetToken',
+    SET_SYMBOL: 'LTETHDai',
     PROPOSAL_PERIOD: {
       production: constants.ONE_HOUR_IN_SECONDS*8,
       staging: constants.THIRTY_MINUTES_IN_SECONDS,
@@ -71,7 +106,42 @@ export const DEPLOYED_SETS_INFO = {
       staging: 0,
       development: 0,
     }
-  },
+  } as ETHDaiDeployedSetInfo,
+
+  ETHDAI_SHORT_TERM_BTD: {
+    PRICE_PRECISION: new BigNumber(100),
+    DAI_MULTIPLIER: new BigNumber(1),
+    WETH_MULTIPLIER: new BigNumber(1),
+    MANAGER_NAME: 'STETHDaiRebalancingManager',
+    COLLATERAL_NAME: 'STETHDaiInitialCollateralSet',
+    SET_NAME: 'STETHDaiRebalancingSetToken',
+    SET_SYMBOL: 'STETHDai',
+    PROPOSAL_PERIOD: {
+      production: constants.ONE_HOUR_IN_SECONDS*8,
+      staging: constants.THIRTY_MINUTES_IN_SECONDS,
+      development: constants.ONE_DAY_IN_SECONDS,
+    },
+    REBALANCE_INTERVAL: {
+      production: constants.ONE_DAY_IN_SECONDS*14,
+      staging: constants.THIRTY_MINUTES_IN_SECONDS,
+      development: constants.ONE_DAY_IN_SECONDS,
+    },
+    AUCTION_TIME_TO_PIVOT: {
+      production: constants.ONE_DAY_IN_SECONDS,
+      staging: constants.ONE_HOUR_IN_SECONDS,
+      development: constants.ONE_DAY_IN_SECONDS,
+    },
+    ALLOCATION_LOWER_BOUND: {
+      production: 7, // These values are in terms of DAI vs ETH in BITETH
+      staging: 0,
+      development: 0,
+    },
+    ALLOCATION_UPPER_BOUND: {
+      production: 8,
+      staging: 0,
+      development: 0,
+    }
+  } as ETHDaiDeployedSetInfo,
 
   BITETHSPLIT: {
     PRICE_PRECISION: new BigNumber(100),
@@ -106,7 +176,7 @@ export const DEPLOYED_SETS_INFO = {
       staging: 0,
       development: 0,
     }
-  } as DeployedSetInfo,
+  } as BitEthDeployedSetInfo,
 
   BITETH_BTC_DOMINANT: {
     PRICE_PRECISION: new BigNumber(100),
@@ -141,7 +211,7 @@ export const DEPLOYED_SETS_INFO = {
       staging: 0,
       development: 0,
     }
-  } as DeployedSetInfo,
+  } as BitEthDeployedSetInfo,
 
   BITETH_ETH_DOMINANT: {
     PRICE_PRECISION: new BigNumber(100),
@@ -176,7 +246,7 @@ export const DEPLOYED_SETS_INFO = {
       staging: 0,
       development: 0,
     }
-  } as DeployedSetInfo,
+  } as BitEthDeployedSetInfo,
 }
 
 export const DEPENDENCY = {

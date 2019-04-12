@@ -92,20 +92,20 @@ export class RebalancingStage implements DeploymentStageInterface {
   async deployBitEthStrategyEnabledToken(setParams: BitEthDeployedSetInfo): Promise<void> {
     await this.deployBitEthRebalancingManager(setParams);
     await this.deployBitEthInitialCollateralizedSet(setParams);
-    await this.deployBitEthRebalancingSetToken(setParams);  
-  };
+    await this.deployBitEthRebalancingSetToken(setParams);
+  }
 
   async deployETHDaiStrategyEnabledToken(setParams: ETHDaiDeployedSetInfo): Promise<void> {
     await this.deployETHDaiRebalancingManager(setParams);
     await this.deployETHDaiInitialCollateralizedSet(setParams);
     await this.deployETHDaiRebalancingSetToken(setParams);
-  };
+  }
 
-  async deployBTCDaiStrategyEnabledToken(setParams: BTCDaiDeployedSetInfo): Promise<void> { 
+  async deployBTCDaiStrategyEnabledToken(setParams: BTCDaiDeployedSetInfo): Promise<void> {
     await this.deployBTCDaiRebalancingManager(setParams);
     await this.deployBTCDaiInitialCollateralizedSet(setParams);
     await this.deployBTCDaiRebalancingSetToken(setParams);
-  };
+  }
 
   async deployBitEthRebalancingManager(setParams: BitEthDeployedSetInfo): Promise<BTCETHRebalancingManagerContract> {
     const name = setParams.MANAGER_NAME;

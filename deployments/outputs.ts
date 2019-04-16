@@ -37,7 +37,13 @@ export const outputs =
       "ETHDaiRebalancingSetToken": "0x8Ddc86DbA7ad728012eFc460b8A168Aba60B403B",
       "BTCDaiRebalancingManager": "0x56413b25A29185e8F5EF240009dc33f82aAf1008",
       "BTCDaiInitialCollateralSet": "0x27748E808680731e890a70b9f7A8198CeEc29A98",
-      "BTCDaiRebalancingSetToken": "0x6123A0CBC95Cb157995A0795187A60995B85e0A9"
+      "BTCDaiRebalancingSetToken": "0x6123A0CBC95Cb157995A0795187A60995B85e0A9",
+      "STETHDaiRebalancingManager": "0xc1E3D2a047EDFCae244E2d801E9A3ba98c607521",
+      "STETHDaiInitialCollateralSet": "0x37760B5f9364451b80af552817c451D949618FcC",
+      "STETHDaiRebalancingSetToken": "0x585C2cF94c41b528ec7329CBc3cdE3C4f8d268dB",
+      "STBTCDaiRebalancingManager": "0xfCE4a32b9F95F4c9595d7F2d67AA5F01BCAa950e",
+      "STBTCDaiInitialCollateralSet": "0xeDf923F0D8a88dd406e7dDC2e8aE7D4417606CC0",
+      "STBTCDaiRebalancingSetToken": "0x20649d97b1393105cf92a5083fd2afF7C99eBe56"
     },
     "state": {
       "network_id": 1,
@@ -81,7 +87,13 @@ export const outputs =
       "ETHDaiRebalancingSetToken": "0xa512EFbb98b7327B4cD053Af1857050eD9b59D31",
       "BTCDaiRebalancingManager": "0x72A9447cfc775b4EC0aC59a9BCC00c57B282D285",
       "BTCDaiInitialCollateralSet": "0xdBBF3305CA1fdF3BD403B92aB5f5496a1a6094b3",
-      "BTCDaiRebalancingSetToken": "0xEE388f0527907339254f31254faEafFc4072a7ed"
+      "BTCDaiRebalancingSetToken": "0xEE388f0527907339254f31254faEafFc4072a7ed",
+      "STETHDaiRebalancingManager": "0x4bb5E56754026C772A2e467FA205b7b8EF4FB954",
+      "STETHDaiInitialCollateralSet": "0x936CB8f9085e67037268117ADcD16F18Da95715C",
+      "STETHDaiRebalancingSetToken": "0xcb88DDA62C73423f987511bEe5603994136e1580",
+      "STBTCDaiRebalancingManager": "0xe855B143bE39f66B0442b2D49E13ceEdb15D7709",
+      "STBTCDaiInitialCollateralSet": "0xDC8FFFBb277fA7bbcA95f00bd523c700Db5A8F7C",
+      "STBTCDaiRebalancingSetToken": "0x972e9e1Cc5C28FcAa2C993c0E80f1598377011e3"
     },
     "state": {
       "network_id": 1,

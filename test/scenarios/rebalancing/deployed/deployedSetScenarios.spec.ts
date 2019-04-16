@@ -8,7 +8,14 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { BITETH_BTC_DOMINANT, BITETH_ETH_DOMINANT, BTCDAI_BTD, ETHDAI_BTD } from './inputs';
+import {
+  BITETH_BTC_DOMINANT,
+  BITETH_ETH_DOMINANT,
+  BTCDAI_BTD,
+  ETHDAI_BTD,
+  SHORT_TERM_BTCDAI_BTD,
+  SHORT_TERM_ETHDAI_BTD,
+} from './inputs';
 
 import {
   AssetScenario,
@@ -86,6 +93,16 @@ contract('Deployed Set Scenarios', accounts => {
     });
   });
 
+  describe('SHORT_TERM_BTCDAI_BTD', async () => {
+    before(async () => {
+      scenarioData = SHORT_TERM_BTCDAI_BTD;
+    });
+
+    it('works', async () => {
+      await subject();
+    });
+  });
+
   describe('ETHDAI_BTD', async () => {
     before(async () => {
       scenarioData = ETHDAI_BTD;
@@ -96,4 +113,13 @@ contract('Deployed Set Scenarios', accounts => {
     });
   });
 
+  describe('SHORT_TERM_ETHDAI_BTD', async () => {
+    before(async () => {
+      scenarioData = SHORT_TERM_ETHDAI_BTD;
+    });
+
+    it('works', async () => {
+      await subject();
+    });
+  });
 });

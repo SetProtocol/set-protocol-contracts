@@ -35,7 +35,7 @@ jobs:
           docker_layer_caching: true
       - run:
           name: Fetch solc version
-          command: docker pull ethereum/solc:0.5.4
+          command: docker pull ethereum/solc:0.5.7
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
       - run:
@@ -63,7 +63,7 @@ jobs:
           docker_layer_caching: true
       - run:
           name: Fetch solc version
-          command: docker pull ethereum/solc:0.5.4
+          command: docker pull ethereum/solc:0.5.7
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
       - run:
@@ -79,7 +79,7 @@ jobs:
           docker_layer_caching: true
       - run:
           name: Fetch solc version
-          command: docker pull ethereum/solc:0.5.4
+          command: docker pull ethereum/solc:0.5.7
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
       - run:

@@ -54,7 +54,7 @@ export default {
   },
   MULTI_SIG_OWNER: {
     1: '0xF8523c551763FE4261A28313015267F163de7541',
-    50: '0x2002d3812f58E35f0EA1Ffbf80a75A38c32174fA',
+    50: '0x5409ed021d9299bf6814279a6a1411a7e866a631', // Snapshot Account 0
   },
   INFURA_SUBDOMAIN: {
     1: 'https://mainnet.infura.io',

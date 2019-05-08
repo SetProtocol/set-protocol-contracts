@@ -178,7 +178,7 @@ export const outputs =
     },
     "state": {
       "network_id": 50,
-      "last_deployment_stage": 5
+      "last_deployment_stage": 4
     }
   }
 }

@@ -31,7 +31,7 @@ export class Manager {
     2: new CoreStage(),
     3: new ModulesStage(),
     4: new AuthorizationStage(),
-    // 5: new RebalancingStage(),
+    5: new RebalancingStage(),
   };
 
   constructor() {

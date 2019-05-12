@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import Web3 from "web3";
 import { BigNumber } from "bignumber.js";
-import Contract from "web3/eth/contract";
+import { Contract } from "web3-eth-contract";
 import { ABIDefinition } from "web3/eth/abi";
 import { Tx } from "web3/eth/types";
 
@@ -21,7 +21,6 @@ export class BaseContract {
   constructor(web3ContractInstance: Contract, defaults: Tx) {
     this.web3ContractInstance = web3ContractInstance;
     this.address = web3ContractInstance.options.address;
-    this.abi = web3ContractInstance.options.jsonInterface;
     this.defaults = defaults;
   }
 

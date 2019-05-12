@@ -23,7 +23,7 @@
 import { promisify } from '@0xproject/utils';
 import { {{contractName}} as ContractArtifacts } from '../../artifacts/ts/{{contractName}}';
 import Web3 from 'web3';
-import Contract from "web3/eth/contract";
+import { Contract, SendOptions } from "web3-eth-contract";
 import { ABIDefinition } from "web3/eth/abi";
 import { Tx } from "web3/eth/types";
 import { BigNumber, BN, UInt, Web3Utils } from 'set-protocol-utils';
@@ -40,14 +40,17 @@ export class {{contractName}}Contract extends BaseContract {
   {{> tx contractName=../contractName}}
   {{/this.constant}}
 {{/each}}
-  async deploy(data: string, args: any[]): Promise<any> {
+  async deploy(data: string, args: any[], from: string): Promise<any> {
     const wrapper = this;
 
     wrapper.web3ContractInstance.deploy({
       data,
       arguments: args,
     })
-    .send(wrapper.defaults)
+    .send({
+      ...wrapper.defaults,
+      from,
+    } as SendOptions)
     .then(function(newContractInstance){
       wrapper.web3ContractInstance = newContractInstance;
       wrapper.address = newContractInstance.options.address;

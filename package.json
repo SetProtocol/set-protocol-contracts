@@ -103,14 +103,14 @@
     "lint-staged": "^7.2.0",
     "module-alias": "^2.1.0",
     "openzeppelin-solidity": "^2.2",
-    "set-protocol-utils": "^1.0.0-beta.32",
+    "set-protocol-utils": "^1.0.0-beta.34",
     "ethlint": "^1.2.3",
     "tiny-promisify": "^1.0.0",
     "ts-mocha": "^6.0.0",
     "ts-node": "^8.0.2",
     "tslint-eslint-rules": "^5.3.1",
-    "web3": "1.0.0-beta.36",
-    "web3-utils": "1.0.0-beta.36"
+    "web3": "1.0.0-beta.54",
+    "web3-utils": "1.0.0-beta.54"
   },
   "husky": {
     "hooks": {

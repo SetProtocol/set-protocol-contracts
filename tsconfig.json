@@ -9,7 +9,8 @@
     "moduleResolution": "node",
     "paths": {
         "@deployments/*": [ "deployments/*" ],
-        "@utils/*": [ "utils/*" ]
+        "@utils/*": [ "utils/*" ],
+        "buffer": ["./buffer-override.d.ts"]
     },
     "rootDir": ".",
     "target": "es5",

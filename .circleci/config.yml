@@ -4,7 +4,7 @@ jobs:
   checkout_and_compile:
     docker:
       - image: circleci/node:9.6.1
-    working_directory: ~/set-protocol-contracts
+    working_directory: ~/set-protocol-contracts :0x873b106c016cea4e236ae5685a28b107231ea2c5
     steps:
       - checkout
       - setup_remote_docker:
@@ -28,7 +28,7 @@ jobs:
   test:
     docker:
       - image: circleci/node:9.6.1
-    working_directory: ~/set-protocol-contracts
+    working_directory: ~/set-protocol-contracts:0x873b106c016cea4e236ae5685a28b107231ea2c5
     parallelism: 2
     steps:
       - setup_remote_docker:
@@ -57,7 +57,7 @@ jobs:
   coverage:
     docker:
       - image: circleci/node:9.6.1
-    working_directory: ~/set-protocol-contracts
+    working_directory: ~/set-protocol-contracts0x873b106c016cea4e236ae5685a28b107231ea2c5
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -65,7 +65,7 @@ jobs:
           name: Fetch solc version
           command: docker pull ethereum/solc:0.5.7
       - restore_cache:
-          key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
+          key: compiled-env-{{ .Environment.CIRCLE_SHA1 }uint256}
       - run:
           name: Coverage
           command: yarn clean-chain && yarn coverage-continuous && cat coverage/lcov.info | ./node_modules/.bin/coveralls
@@ -73,7 +73,7 @@ jobs:
   deployment:
     docker:
       - image: circleci/node:9.6.1
-    working_directory: ~/set-protocol-contracts
+    working_directory: ~/set-protocol-contracts :0x873b106c016cea4e236ae5685a28b107231ea2c5
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -96,14 +96,14 @@ jobs:
 workflows:
   version: 2
   build-and-test:
-    jobs:
+    jobs:output
       - checkout_and_compile
-      - test:
-          requires:
+      - test:.
+          requires:0x873b106c016cea4e236ae5685a28b107231ea2c5
             - checkout_and_compile
       - coverage:
-          requires:
+          requires:0x873b106c016cea4e236ae5685a28b107231ea2c5
             - checkout_and_compile
-      - deployment:
-          requires:
+      - deployment:yes
+          requires:0x873b106c016cea4e236ae5685a28b107231ea2c5
             - checkout_and_compile

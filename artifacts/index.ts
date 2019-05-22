@@ -1,42 +1,44 @@
-import { BadTokenMock } from "./ts/BadTokenMock";
-import { BTCETHRebalancingManager } from "./ts/BTCETHRebalancingManager";
-import { CommonValidationsLibrary } from "./ts/CommonValidationsLibrary";
-import { ConstantAuctionPriceCurve } from "./ts/ConstantAuctionPriceCurve";
-import { Core } from "./ts/Core";
-import { CoreIssuanceLibrary } from "./ts/CoreIssuanceLibrary";
-import { ERC20 } from "./ts/ERC20";
-import { ERC20Detailed } from "./ts/ERC20Detailed";
-import { ERC20Wrapper } from "./ts/ERC20Wrapper";
-import { ETHDaiRebalancingManager } from "./ts/ETHDaiRebalancingManager";
-import { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
-import { FailAuctionLibrary } from "./ts/FailAuctionLibrary";
-import { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
-import { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
-import { KyberNetworkWrapper } from "./ts/KyberNetworkWrapper";
-import { LinearAuctionPriceCurve } from "./ts/LinearAuctionPriceCurve";
-import { Median } from "./ts/Median";
-import { NoDecimalTokenMock } from "./ts/NoDecimalTokenMock";
-import { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
-import { PlaceBidLibrary } from "./ts/PlaceBidLibrary";
-import { ProposeLibrary } from "./ts/ProposeLibrary";
-import { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
-import { RebalancingLibrary } from "./ts/RebalancingLibrary";
-import { RebalancingSetExchangeIssuanceModule } from "./ts/RebalancingSetExchangeIssuanceModule";
-import { RebalancingSetToken } from "./ts/RebalancingSetToken";
-import { RebalancingSetTokenFactory } from "./ts/RebalancingSetTokenFactory";
-import { SettleRebalanceLibrary } from "./ts/SettleRebalanceLibrary";
-import { SetToken } from "./ts/SetToken";
-import { SetTokenFactory } from "./ts/SetTokenFactory";
-import { SetTokenLibrary } from "./ts/SetTokenLibrary";
-import { StandardTokenMock } from "./ts/StandardTokenMock";
-import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
-import { StartRebalanceLibrary } from "./ts/StartRebalanceLibrary";
-import { TimeLockUpgrade } from "./ts/TimeLockUpgrade";
-import { TransferProxy } from "./ts/TransferProxy";
-import { Vault } from "./ts/Vault";
-import { WethMock } from "./ts/WethMock";
-import { WhiteList } from "./ts/WhiteList";
-import { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
+export { BadTokenMock } from "./ts/BadTokenMock";
+export { BTCDaiRebalancingManager } from "./ts/BTCDaiRebalancingManager";
+export { BTCETHRebalancingManager } from "./ts/BTCETHRebalancingManager";
+export { CommonValidationsLibrary } from "./ts/CommonValidationsLibrary";
+export { ConstantAuctionPriceCurve } from "./ts/ConstantAuctionPriceCurve";
+export { Core } from "./ts/Core";
+export { CoreIssuanceLibrary } from "./ts/CoreIssuanceLibrary";
+export { ERC20 } from "./ts/ERC20";
+export { ERC20Detailed } from "./ts/ERC20Detailed";
+export { ERC20Wrapper } from "./ts/ERC20Wrapper";
+export { ETHDaiRebalancingManager } from "./ts/ETHDaiRebalancingManager";
+export { ExchangeIssuanceLibrary } from "./ts/ExchangeIssuanceLibrary";
+export { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
+export { FailAuctionLibrary } from "./ts/FailAuctionLibrary";
+export { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
+export { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
+export { KyberNetworkWrapper } from "./ts/KyberNetworkWrapper";
+export { LinearAuctionPriceCurve } from "./ts/LinearAuctionPriceCurve";
+export { Median } from "./ts/Median";
+export { NoDecimalTokenMock } from "./ts/NoDecimalTokenMock";
+export { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
+export { PlaceBidLibrary } from "./ts/PlaceBidLibrary";
+export { ProposeLibrary } from "./ts/ProposeLibrary";
+export { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
+export { RebalancingLibrary } from "./ts/RebalancingLibrary";
+export { RebalancingSetExchangeIssuanceModule } from "./ts/RebalancingSetExchangeIssuanceModule";
+export { RebalancingSetToken } from "./ts/RebalancingSetToken";
+export { RebalancingSetTokenFactory } from "./ts/RebalancingSetTokenFactory";
+export { SettleRebalanceLibrary } from "./ts/SettleRebalanceLibrary";
+export { SetToken } from "./ts/SetToken";
+export { SetTokenFactory } from "./ts/SetTokenFactory";
+export { SetTokenLibrary } from "./ts/SetTokenLibrary";
+export { StandardTokenMock } from "./ts/StandardTokenMock";
+export { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
+export { StartRebalanceLibrary } from "./ts/StartRebalanceLibrary";
+export { TimeLockUpgrade } from "./ts/TimeLockUpgrade";
+export { TransferProxy } from "./ts/TransferProxy";
+export { Vault } from "./ts/Vault";
+export { WethMock } from "./ts/WethMock";
+export { WhiteList } from "./ts/WhiteList";
+export { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
 
 // Deployed contract addresses
 export { outputs as DeployedAddresses } from "../deployments/outputs";
@@ -46,6 +48,7 @@ export {
   AuthorizableContract,
   BadTokenMockContract,
   BaseContract,
+  BTCDaiRebalancingManagerContract,
   BTCETHRebalancingManagerContract,
   Bytes32LibraryMockContract,
   CommonMathMockContract,
@@ -55,9 +58,12 @@ export {
   CoreIssuanceLibraryContract,
   CoreMockContract,
   ERC20DetailedContract,
+  ERC20WrapperContract,
   ERC20WrapperMockContract,
   ETHDaiRebalancingManagerContract,
+  ExchangeIssuanceLibraryContract,
   ExchangeIssuanceModuleContract,
+  FailAuctionLibraryContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
   KyberNetworkWrapperContract,
@@ -65,15 +71,20 @@ export {
   MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
+  PlaceBidLibraryContract,
+  ProposeLibraryContract,
   RebalanceAuctionModuleContract,
+  RebalancingLibraryContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
+  SettleRebalanceLibraryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   SetTokenLibraryContract,
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
+  StartRebalanceLibraryContract,
   TimeLockUpgradeContract,
   TimeLockUpgradeMockContract,
   TransferProxyContract,
@@ -83,46 +94,3 @@ export {
   ZeroExExchangeWrapperContract,
   ZeroExOrderLibraryMockContract,
 } from "../utils/contracts";
-
-// Export contract artifacts
-export {
-  BadTokenMock,
-  BTCETHRebalancingManager,
-  CommonValidationsLibrary,
-  ConstantAuctionPriceCurve,
-  Core,
-  CoreIssuanceLibrary,
-  ERC20,
-  ERC20Detailed,
-  ERC20Wrapper,
-  ETHDaiRebalancingManager,
-  ExchangeIssuanceModule,
-  FailAuctionLibrary,
-  IAuctionPriceCurve,
-  InvalidReturnTokenMock,
-  KyberNetworkWrapper,
-  LinearAuctionPriceCurve,
-  Median,
-  NoDecimalTokenMock,
-  NoXferReturnTokenMock,
-  PlaceBidLibrary,
-  ProposeLibrary,
-  RebalanceAuctionModule,
-  RebalancingLibrary,
-  RebalancingSetExchangeIssuanceModule,
-  RebalancingSetToken,
-  RebalancingSetTokenFactory,
-  SettleRebalanceLibrary,
-  SetToken,
-  SetTokenFactory,
-  SetTokenLibrary,
-  StandardTokenMock,
-  StandardTokenWithFeeMock,
-  StartRebalanceLibrary,
-  TimeLockUpgrade,
-  TransferProxy,
-  Vault,
-  WethMock,
-  WhiteList,
-  ZeroExExchangeWrapper,
-};

@@ -10,11 +10,14 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
+  ExchangeIssuanceModuleContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
+  TransferProxyContract,
+  VaultContract,
   WethMockContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
@@ -42,12 +45,16 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
     ownerAccount,
     tokenPurchaser,
     zeroExOrderMaker,
+    whitelist,
   ] = accounts;
 
   let core: CoreContract;
+  let exchangeIssuanceModule: ExchangeIssuanceModuleContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let payableExchangeIssuance: RebalancingSetExchangeIssuanceModuleContract;
+  let rebalancingSetExchangeIssuanceModule: RebalancingSetExchangeIssuanceModuleContract;
+  let vault: VaultContract;
+  let transferProxy: TransferProxyContract;
   let weth: WethMockContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
@@ -63,12 +70,30 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
     ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(RebalancingSetExchangeIssuanceModule.abi);
 
-    core = await coreWrapper.getDeployedCoreAsync();
-    setTokenFactory = await coreWrapper.getDeployedSetTokenFactoryAsync();
-    rebalancingSetTokenFactory = await coreWrapper.getDeployedRebalancingSetTokenFactoryAsync();
+    core = await coreWrapper.deployCoreAndDependenciesAsync();
+    vault = await coreWrapper.deployVaultAsync();
+    transferProxy = await coreWrapper.deployTransferProxyAsync();
 
-    weth = await erc20Wrapper.getDeployedWETHAsync();
-    payableExchangeIssuance = await coreWrapper.getDeployedRebalancingSetExchangeIssuanceModuleAsync();
+    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+    rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+      core.address,
+      whitelist,
+    );
+    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+
+    exchangeIssuanceModule = await coreWrapper.deployExchangeIssuanceModuleAsync(core, vault);
+    await coreWrapper.addModuleAsync(core, exchangeIssuanceModule.address);
+
+    weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
+
+    rebalancingSetExchangeIssuanceModule = await coreWrapper.deployRebalancingSetExchangeIssuanceModuleAsync(
+      core.address,
+      transferProxy.address,
+      exchangeIssuanceModule.address,
+      weth.address,
+      vault.address,
+    );
+    await coreWrapper.addModuleAsync(core, rebalancingSetExchangeIssuanceModule.address);
   });
 
   after(async () => {
@@ -206,7 +231,7 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return payableExchangeIssuance.issueRebalancingSetWithEther.sendTransactionAsync(
+      return rebalancingSetExchangeIssuanceModule.issueRebalancingSetWithEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
         subjectRebalancingSetQuantity,
         subjectExchangeIssuanceParams,

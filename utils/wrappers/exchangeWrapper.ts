@@ -10,8 +10,6 @@ import {
 
 import { DEFAULT_GAS } from '../constants';
 import { getWeb3 } from '../web3Helper';
-import { getContractAddress } from '../../deployments/utils/output-helper';
-import { TX_DEFAULTS } from '../../deployments/utils/blockchain';
 
 import { CoreWrapper } from './coreWrapper';
 
@@ -29,20 +27,6 @@ export class ExchangeWrapper {
   constructor(contractOwnerAddress: Address) {
     this._contractOwnerAddress = contractOwnerAddress;
     this._coreWrapper = new CoreWrapper(this._contractOwnerAddress, this._contractOwnerAddress);
-  }
-
-  /* ============ Deployed Contracts ============ */
-
-  public async getDeployedKyberNetworkWrapper(): Promise<KyberNetworkWrapperContract> {
-    const address = await getContractAddress(KyberNetworkWrapper.contractName);
-
-    return await KyberNetworkWrapperContract.at(address, web3, TX_DEFAULTS);
-  }
-
-  public async getDeployedZeroExExchangeWrapper(): Promise<ZeroExExchangeWrapperContract> {
-    const address = await getContractAddress(ZeroExExchangeWrapper.contractName);
-
-    return await ZeroExExchangeWrapperContract.at(address, web3, TX_DEFAULTS);
   }
 
   /* ============ Deployment ============ */

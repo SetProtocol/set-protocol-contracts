@@ -40,9 +40,6 @@ export { WethMock } from "./ts/WethMock";
 export { WhiteList } from "./ts/WhiteList";
 export { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
 
-// Deployed contract addresses
-export { outputs as DeployedAddresses } from "../deployments/outputs";
-
 // Export abi-gen contract wrappers
 export {
   AuthorizableContract,

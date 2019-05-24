@@ -46,9 +46,6 @@ jobs:
           command: yarn chain
           background: true
       - run:
-          name: Deploy Contracts to TestRPC
-          command: yarn deploy-continuous
-      - run:
           name: Truffle Test
           command: |
             TEST_FILES="$(circleci tests glob "./transpiled/test/**/*.spec.js" | circleci tests split --split-by=timings)"
@@ -70,29 +67,6 @@ jobs:
           name: Coverage
           command: yarn clean-chain && yarn coverage-continuous && cat coverage/lcov.info | ./node_modules/.bin/coveralls
 
-  deployment:
-    docker:
-      - image: circleci/node:9.6.1
-    working_directory: ~/set-protocol-contracts
-    steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          name: Fetch solc version
-          command: docker pull ethereum/solc:0.5.7
-      - restore_cache:
-          key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
-      - run:
-          name: Set Up Environment Variables
-          command: cp .env.default .env
-      - run:
-            name: Test RPC
-            command: yarn chain
-            background: true
-      - run:
-          name: Test Deployment
-          command: yarn deploy
-
 workflows:
   version: 2
   build-and-test:
@@ -102,8 +76,5 @@ workflows:
           requires:
             - checkout_and_compile
       - coverage:
-          requires:
-            - checkout_and_compile
-      - deployment:
           requires:
             - checkout_and_compile

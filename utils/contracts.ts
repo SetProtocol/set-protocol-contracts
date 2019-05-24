@@ -1,8 +1,6 @@
 import { AuthorizableContract } from '../types/generated/authorizable';
 import { BadTokenMockContract } from '../types/generated/bad_token_mock';
 import { BaseContract } from '../types/base_contract';
-import { BTCDaiRebalancingManagerContract } from '../types/generated/b_t_c_dai_rebalancing_manager';
-import { BTCETHRebalancingManagerContract } from '../types/generated/b_t_c_e_t_h_rebalancing_manager';
 import { Bytes32LibraryMockContract } from '../types/generated/bytes32_library_mock';
 import { CommonMathMockContract } from '../types/generated/common_math_mock';
 import { CommonValidationsLibraryContract } from '../types/generated/common_validations_library';
@@ -15,7 +13,6 @@ import { CoreMockContract } from '../types/generated/core_mock';
 import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 import { ERC20WrapperContract } from '../types/generated/erc20_wrapper';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
-import { ETHDaiRebalancingManagerContract } from '../types/generated/e_t_h_dai_rebalancing_manager';
 import { ExchangeIssuanceLibraryContract } from '../types/generated/exchange_issuance_library';
 import { ExchangeIssuanceLibraryMockContract } from '../types/generated/exchange_issuance_library_mock';
 import { ExchangeIssuanceModuleContract } from '../types/generated/exchange_issuance_module';
@@ -25,7 +22,6 @@ import { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_c
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
 import { KyberNetworkWrapperContract } from '../types/generated/kyber_network_wrapper';
 import { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
-import { ManagerLibraryMockContract } from '../types/generated/manager_library_mock';
 import { MedianContract } from '../types/generated/median';
 import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
@@ -62,8 +58,6 @@ export {
   AuthorizableContract,
   BadTokenMockContract,
   BaseContract,
-  BTCDaiRebalancingManagerContract,
-  BTCETHRebalancingManagerContract,
   Bytes32LibraryMockContract,
   CommonMathMockContract,
   CommonValidationsLibraryContract,
@@ -76,7 +70,6 @@ export {
   ERC20DetailedContract,
   ERC20WrapperContract,
   ERC20WrapperMockContract,
-  ETHDaiRebalancingManagerContract,
   ExchangeIssuanceLibraryContract,
   ExchangeIssuanceLibraryMockContract,
   ExchangeIssuanceModuleContract,
@@ -86,7 +79,6 @@ export {
   InvalidReturnTokenMockContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
-  ManagerLibraryMockContract,
   MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,

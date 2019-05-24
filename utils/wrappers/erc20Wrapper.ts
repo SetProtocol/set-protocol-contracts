@@ -22,8 +22,6 @@ import {
 import {
   getWeb3,
 } from '../web3Helper';
-import { getContractAddress } from '../../deployments/utils/output-helper';
-import { TX_DEFAULTS } from '../../deployments/utils/blockchain';
 
 const web3 = getWeb3();
 
@@ -41,20 +39,6 @@ export class ERC20Wrapper {
 
   constructor(senderAccountAddress: Address) {
     this._senderAccountAddress = senderAccountAddress;
-  }
-
-  /* ============ Deployed Contracts ============ */
-
-  public async getDeployedWrappedBTCAsync(): Promise<StandardTokenMockContract> {
-    const address = await getContractAddress('WBTC');
-
-    return await StandardTokenMockContract.at(address, web3, TX_DEFAULTS);
-  }
-
-  public async getDeployedWETHAsync(): Promise<WethMockContract> {
-    const address = await getContractAddress('WETH');
-
-    return await WethMockContract.at(address, web3, TX_DEFAULTS);
   }
 
   /* ============ Deployment ============ */

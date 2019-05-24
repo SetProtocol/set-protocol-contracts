@@ -8,7 +8,6 @@
     "baseUrl": ".",
     "moduleResolution": "node",
     "paths": {
-        "@deployments/*": [ "deployments/*" ],
         "@utils/*": [ "utils/*" ]
     },
     "rootDir": ".",
@@ -24,7 +23,6 @@
   "include": [
     "types/*.ts",
     "utils/**/*.ts",
-    "test/**/*.ts",
-    "deployments/**/*.ts"
+    "test/**/*.ts"
   ]
 }

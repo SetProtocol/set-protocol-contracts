@@ -25,6 +25,7 @@ import { getWeb3 } from '@utils/web3Helper';
 import { DEFAULT_GAS, DEFAULT_REBALANCING_NATURAL_UNIT, ONE_DAY_IN_SECONDS } from '@utils/constants';
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 
 BigNumberSetup.configure();
@@ -59,6 +60,7 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const exchangeWrapper = new ExchangeWrapper(ownerAccount);
   const rebalancingWrapper = new RebalancingWrapper(
     ownerAccount,
     coreWrapper,
@@ -70,16 +72,17 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
     ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(RebalancingSetExchangeIssuanceModule.abi);
 
-    core = await coreWrapper.deployCoreAndDependenciesAsync();
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
-
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+
     rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
       core.address,
       whitelist,
     );
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
 
     exchangeIssuanceModule = await coreWrapper.deployExchangeIssuanceModuleAsync(core, vault);
     await coreWrapper.addModuleAsync(core, exchangeIssuanceModule.address);
@@ -94,6 +97,14 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
       vault.address,
     );
     await coreWrapper.addModuleAsync(core, rebalancingSetExchangeIssuanceModule.address);
+
+    await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
+      core,
+      SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
+      SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
+      SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
+      transferProxy
+    );
   });
 
   after(async () => {

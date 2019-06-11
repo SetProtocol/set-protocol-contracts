@@ -63,7 +63,8 @@ contract RebalancingSetExchangeIssuanceModule is
     event LogPayableExchangeIssue(
         address rebalancingSetAddress,
         address indexed callerAddress,
-        uint256 etherQuantity
+        address paymentToken,
+        uint256 paymentTokenQuantity
     );
 
     event LogPayableExchangeRedeem(
@@ -152,6 +153,7 @@ contract RebalancingSetExchangeIssuanceModule is
     {
         // Validate Params
         validateInputs(
+            weth,
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
             _exchangeIssuanceParams.setAddress,
@@ -161,45 +163,49 @@ contract RebalancingSetExchangeIssuanceModule is
         // wrap all eth
         wethInstance.deposit.value(msg.value)();
 
-        // Ensure weth allowance
-        ERC20Wrapper.ensureAllowance(
+        issueRebalancingSet(
             weth,
-            address(this),
-            transferProxy,
-            msg.value
-        );
-
-        // exchange issue Base Set
-        exchangeIssuanceInstance.exchangeIssue(
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity,
+            msg.value,
             _exchangeIssuanceParams,
             _orderData
         );
+    }
 
-        address baseSetAddress = _exchangeIssuanceParams.setAddress;
-        uint256 baseSetIssueQuantity = _exchangeIssuanceParams.quantity;
-
-        // Approve base Set to transfer proxy
-        ERC20Wrapper.ensureAllowance(
-            baseSetAddress,
-            address(this),
-            transferProxy,
-            baseSetIssueQuantity
+    function issueRebalancingSetWithERC20(
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity,
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
+        bytes memory _orderData
+    )
+        public
+        nonReentrant
+    {
+        // Validate Params
+        validateInputs(
+            _exchangeIssuanceParams.sendTokens[0],
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity,
+            _exchangeIssuanceParams.setAddress,
+            _exchangeIssuanceParams.sendTokens
         );
 
-        // Issue rebalancing set to the caller
-        coreInstance.issueTo(
+        // Deposit erc20 to this contract
+        coreInstance.transferModule(
+            _exchangeIssuanceParams.sendTokens[0],
+            _exchangeIssuanceParams.sendTokenAmounts[0],
             msg.sender,
-            _rebalancingSetAddress,
-            _rebalancingSetQuantity
+            address(this)
         );
 
-        // Send excess base Set and ether to the user
-        returnIssuanceExcessFunds(baseSetAddress);
-
-        emit LogPayableExchangeIssue(
+        issueRebalancingSet(
+            _exchangeIssuanceParams.sendTokens[0],
             _rebalancingSetAddress,
-            msg.sender,
-            msg.value
+            _rebalancingSetQuantity,
+            _exchangeIssuanceParams.sendTokenAmounts[0],
+            _exchangeIssuanceParams,
+            _orderData
         );
     }
 
@@ -223,6 +229,7 @@ contract RebalancingSetExchangeIssuanceModule is
     {
         // Validate Params
         validateInputs(
+            weth,
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
             _exchangeIssuanceParams.setAddress,
@@ -283,6 +290,60 @@ contract RebalancingSetExchangeIssuanceModule is
     }
 
     /* ============ Private Functions ============ */
+
+    function issueRebalancingSet(
+        address _paymentToken,
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity,
+        uint256 _paymentTokenQuantity,
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
+        bytes memory _orderData
+    )
+        private
+    {
+        // Ensure weth allowance
+        ERC20Wrapper.ensureAllowance(
+            _paymentToken,
+            address(this),
+            transferProxy,
+            _paymentTokenQuantity
+        );
+
+        // exchange issue Base Set
+        exchangeIssuanceInstance.exchangeIssue(
+            _exchangeIssuanceParams,
+            _orderData
+        );
+
+        address baseSetAddress = _exchangeIssuanceParams.setAddress;
+        uint256 baseSetIssueQuantity = _exchangeIssuanceParams.quantity;
+
+        // Approve base Set to transfer proxy
+        ERC20Wrapper.ensureAllowance(
+            baseSetAddress,
+            address(this),
+            transferProxy,
+            baseSetIssueQuantity
+        );
+
+        // Issue rebalancing set to the caller
+        coreInstance.issueTo(
+            msg.sender,
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity
+        );
+
+        // Send excess base Set and ether to the user
+        returnIssuanceExcessFunds(baseSetAddress);
+
+        emit LogPayableExchangeIssue(
+            _rebalancingSetAddress,
+            msg.sender,
+            _paymentToken,
+            _paymentTokenQuantity
+        );
+    }
+
 
     /**
      * Any unused Wrapped Ether or base Set issued is returned to the caller.
@@ -369,6 +430,7 @@ contract RebalancingSetExchangeIssuanceModule is
      * @param  _collateralSetAddress     Address of base Set in ExchangeIssueanceParams
      */
     function validateInputs(
+        address _transactToken,
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
         address _collateralSetAddress,
@@ -386,13 +448,13 @@ contract RebalancingSetExchangeIssuanceModule is
         // Require only 1 receive token in redeem and 1 send token in issue
         require(
             _ethTokenArray.length == 1,
-            "RebalancingSetExchangeIssuanceModule.validateInputs: Only 1 Receive Token Allowed"
+            "RebalancingSetExchangeIssuanceModule.validateInputs: Only 1 Send/Receive Token Allowed"
         );
 
-        // Require receive token in redeem and send token in issue is weth
+        // Require receive token in redeem and send token in issue is expected
         require(
-            weth == _ethTokenArray[0],
-            "RebalancingSetExchangeIssuanceModule.validateInputs: Receive token must be Weth"
+            _transactToken == _ethTokenArray[0],
+            "RebalancingSetExchangeIssuanceModule.validateInputs: Send/Receive token must match required"
         );
 
         ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);

@@ -163,7 +163,7 @@ contract RebalancingSetExchangeIssuanceModule is
         // wrap all eth
         wethInstance.deposit.value(msg.value)();
 
-        issueRebalancingSet(
+        issueRebalancingSetInternal(
             weth,
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
@@ -182,9 +182,12 @@ contract RebalancingSetExchangeIssuanceModule is
         public
         nonReentrant
     {
+        address paymentToken = _exchangeIssuanceParams.sendTokens[0];
+        uint256 paymentQuantity = _exchangeIssuanceParams.sendTokenAmounts[0];
+
         // Validate Params
         validateInputs(
-            _exchangeIssuanceParams.sendTokens[0],
+            paymentToken,
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
             _exchangeIssuanceParams.setAddress,
@@ -193,17 +196,17 @@ contract RebalancingSetExchangeIssuanceModule is
 
         // Deposit erc20 to this contract
         coreInstance.transferModule(
-            _exchangeIssuanceParams.sendTokens[0],
-            _exchangeIssuanceParams.sendTokenAmounts[0],
+            paymentToken,
+            paymentQuantity,
             msg.sender,
             address(this)
         );
 
-        issueRebalancingSet(
-            _exchangeIssuanceParams.sendTokens[0],
+        issueRebalancingSetInternal(
+            paymentToken,
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
-            _exchangeIssuanceParams.sendTokenAmounts[0],
+            paymentQuantity,
             _exchangeIssuanceParams,
             _orderData
         );
@@ -291,7 +294,7 @@ contract RebalancingSetExchangeIssuanceModule is
 
     /* ============ Private Functions ============ */
 
-    function issueRebalancingSet(
+    function issueRebalancingSetInternal(
         address _paymentToken,
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,

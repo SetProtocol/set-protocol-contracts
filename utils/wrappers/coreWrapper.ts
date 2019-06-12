@@ -6,6 +6,7 @@ import {
   AuthorizableContract,
   CoreContract,
   CoreMockContract,
+  ERC20RebalancingSetExchangeIssuanceModuleContract,
   ExchangeIssuanceModuleContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalanceAuctionModuleContract,
@@ -37,6 +38,7 @@ const Core = artifacts.require('Core');
 const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreMock = artifacts.require('CoreMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
+const ERC20RebalancingSetExchangeIssuanceModule = artifacts.require('ERC20RebalancingSetExchangeIssuanceModule');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
 const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
@@ -413,6 +415,33 @@ export class CoreWrapper {
     return new ExchangeIssuanceModuleContract(
       new web3.eth.Contract(truffleExchangeIssuanceModule.abi, truffleExchangeIssuanceModule.address),
       { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployERC20RebalancingSetExchangeIssuanceModuleAsync(
+    core: Address,
+    transferProxy: Address,
+    exchangeIssuanceModule: Address,
+    vault: Address,
+    from: Address = this._contractOwnerAddress
+  ): Promise<ERC20RebalancingSetExchangeIssuanceModuleContract> {
+    const erc20WrapperLibrary = await ERC20Wrapper.new(
+      { from: this._contractOwnerAddress },
+    );
+
+    await ERC20RebalancingSetExchangeIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+
+    const rebalancingExchangeIssuanceContract = await ERC20RebalancingSetExchangeIssuanceModule.new(
+      core,
+      transferProxy,
+      exchangeIssuanceModule,
+      vault,
+      { from },
+    );
+
+    return new ERC20RebalancingSetExchangeIssuanceModuleContract(
+      new web3.eth.Contract(rebalancingExchangeIssuanceContract.abi, rebalancingExchangeIssuanceContract.address),
+      { from },
     );
   }
 

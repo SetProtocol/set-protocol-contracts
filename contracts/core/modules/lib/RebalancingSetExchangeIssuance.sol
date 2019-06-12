@@ -122,34 +122,6 @@ contract RebalancingSetExchangeIssuance is
     }
 
     /**
-     * Given the issue quantity of the base Set, calculates the maximum quantity of rebalancing Set
-     * issuable. Quantity should already be a multiple of the natural unit.
-     *
-     * @param _rebalancingSetAddress    The address of the rebalancing Set
-     * @param _baseSetIssueQuantity     The quantity issued of the base Set
-     * @return rbSetIssueQuantity      The quantity of rebalancing Set to issue
-     */
-    function calculateRebalancingSetIssueQuantity(
-        address _rebalancingSetAddress,
-        uint256 _baseSetIssueQuantity
-    )
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 rbSetUnitShares = IRebalancingSetToken(_rebalancingSetAddress).unitShares();
-        uint256 rbSetNaturalUnit = IRebalancingSetToken(_rebalancingSetAddress).naturalUnit();
-
-        // Calculate the possible number of Sets issuable (may not be a multiple of natural unit)
-        uint256 possibleIssuableRBSetQuantity = _baseSetIssueQuantity.mul(rbSetNaturalUnit).div(rbSetUnitShares);
-
-        // Ensure that the base Set quantity is a multiple of the rebalancing Set natural unit
-        uint256 rbSetIssueQuantity = possibleIssuableRBSetQuantity.div(rbSetNaturalUnit).mul(rbSetNaturalUnit);
-
-        return rbSetIssueQuantity;
-    }
-
-    /**
      * Withdraw any remaining Base Set and non-exchanged components to the user
      *
      * @param  _setAddress   Address of the Base Set

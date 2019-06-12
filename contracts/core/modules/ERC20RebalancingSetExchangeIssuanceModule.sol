@@ -116,7 +116,6 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
         bytes memory _orderData
     )
         public
-        payable
         nonReentrant
     {
         // Validate Params

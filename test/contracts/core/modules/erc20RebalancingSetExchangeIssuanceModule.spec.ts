@@ -503,7 +503,7 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
     let customComponentUnits: BigNumber[];
     let customPaymentToken: StandardTokenMockContract;
 
-    let paymentToken: StandardTokenMockContract;
+    let receiveToken: StandardTokenMockContract;
     let baseSetComponent: StandardTokenMockContract;
     let nonExchangedPaymentTokenQuantity: BigNumber;
 
@@ -520,23 +520,22 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
     let exchangeRedeemReceiveTokens: Address[];
     let exchangeRedeemReceiveTokenAmounts: BigNumber[];
 
-    let paymentTokenQuantityToReceive: BigNumber;
-    let paymentTokenTradedFor: BigNumber;
+    let receiveTokenQuantityToReceive: BigNumber;
+    let receiveTokenTradedFor: BigNumber;
 
     let zeroExOrder: ZeroExSignedFillOrder;
 
     beforeEach(async () => {
-      paymentTokenQuantityToReceive = ether(2);
+      receiveTokenQuantityToReceive = ether(2);
 
       // Create component token
       baseSetComponent = customBaseSetComponent || await erc20Wrapper.deployTokenAsync(tokenPurchaser);
 
       // Create payment token
-      paymentToken = customPaymentToken || await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
-      subjectPaymentToken = paymentToken.address;
+      receiveToken = customPaymentToken || await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
 
       // Create the Set (2 component where one is payment token)
-      const componentAddresses = customComponentAddresses || [baseSetComponent.address, paymentToken.address];
+      const componentAddresses = customComponentAddresses || [baseSetComponent.address, receiveToken.address];
       const componentUnits = customComponentUnits || [new BigNumber(10 ** 10), new BigNumber(10 ** 10)];
       baseSetNaturalUnit = new BigNumber(10 ** 9);
       baseSetToken = await coreWrapper.createSetTokenAsync(
@@ -565,8 +564,8 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
       exchangeRedeemSendTokens = [componentAddresses[0]];
       exchangeRedeemSendTokenAmounts = customExchangeRedeemSendTokenAmounts ||
         [componentUnits[0].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit)];
-      exchangeRedeemReceiveTokens = [paymentToken.address];
-      exchangeRedeemReceiveTokenAmounts = [paymentTokenQuantityToReceive];
+      exchangeRedeemReceiveTokens = [receiveToken.address];
+      exchangeRedeemReceiveTokenAmounts = [receiveTokenQuantityToReceive];
 
       const exchangeIssuanceParams = {
         setAddress:             exchangeRedeemSetAddress,
@@ -578,8 +577,8 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
         receiveTokenAmounts:    exchangeRedeemReceiveTokenAmounts,
       };
 
-      const requiredExchangePaymentToken = paymentTokenTradedFor || exchangeRedeemReceiveTokenAmounts[0];
-      await paymentToken.approve.sendTransactionAsync(
+      const requiredExchangePaymentToken = receiveTokenTradedFor || exchangeRedeemReceiveTokenAmounts[0];
+      await receiveToken.approve.sendTransactionAsync(
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
         requiredExchangePaymentToken,
         { from: zeroExOrderMaker, gas: DEFAULT_GAS }
@@ -592,7 +591,7 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
         NULL_ADDRESS,                                                      // takerAddress
         ZERO,                                                              // makerFee
         ZERO,                                                              // takerFee
-        paymentTokenTradedFor || exchangeRedeemReceiveTokenAmounts[0],     // makerAssetAmount
+        receiveTokenTradedFor || exchangeRedeemReceiveTokenAmounts[0],     // makerAssetAmount
         exchangeRedeemSendTokenAmounts[0],                                 // takerAssetAmount
         exchangeRedeemReceiveTokens[0],                                    // makerAssetAddress
         exchangeRedeemSendTokens[0],                                       // takerAssetAddress
@@ -613,14 +612,14 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
       nonExchangedPaymentTokenQuantity = componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
 
       // Transfer some of the payment token to the purchaser
-      await paymentToken.transfer.sendTransactionAsync(
+      await receiveToken.transfer.sendTransactionAsync(
         tokenPurchaser,
         nonExchangedPaymentTokenQuantity,
         { from: zeroExOrderMaker, gas: DEFAULT_GAS }
       );
 
       // Approve Payment token to the transferProxy
-      await paymentToken.approve.sendTransactionAsync(
+      await receiveToken.approve.sendTransactionAsync(
         transferProxy.address,
         nonExchangedPaymentTokenQuantity,
         { from: tokenPurchaser, gas: DEFAULT_GAS }
@@ -675,14 +674,14 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
     });
 
     it('should increment the users payment token balance by the correct quantity', async () => {
-      const previousPaymentTokenBalance = await paymentToken.balanceOf.callAsync(subjectCaller);
+      const previousPaymentTokenBalance = await receiveToken.balanceOf.callAsync(subjectCaller);
 
       await subject();
 
       const expectedEthBalance = previousPaymentTokenBalance
-                                   .add(paymentTokenQuantityToReceive)
+                                   .add(receiveTokenQuantityToReceive)
                                    .add(nonExchangedPaymentTokenQuantity);
-      const currentBalance = await paymentToken.balanceOf.callAsync(subjectCaller);
+      const currentBalance = await receiveToken.balanceOf.callAsync(subjectCaller);
 
       expect(currentBalance).to.bignumber.equal(expectedEthBalance);
     });
@@ -754,24 +753,24 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
       });
     });
 
-    describe('when the quantity of paymentToken in receive tokens is less than the amount traded for', async () => {
+    describe('when the quantity of receiveToken in receive tokens is less than the amount traded for', async () => {
       before(async () => {
-        paymentTokenTradedFor = ether(3);
+        receiveTokenTradedFor = ether(3);
       });
 
       after(async () => {
-        paymentTokenTradedFor = undefined;
+        receiveTokenTradedFor = undefined;
       });
 
       it('should increment the users eth balance by the correct quantity', async () => {
-        const previousBalance = await paymentToken.balanceOf.callAsync(subjectCaller);
+        const previousBalance = await receiveToken.balanceOf.callAsync(subjectCaller);
 
         await subject();
 
         const expectedBalance = previousBalance
-                                     .add(paymentTokenTradedFor)
+                                     .add(receiveTokenTradedFor)
                                      .add(nonExchangedPaymentTokenQuantity);
-        const currentBalance = await paymentToken.balanceOf.callAsync(subjectCaller);
+        const currentBalance = await receiveToken.balanceOf.callAsync(subjectCaller);
         expect(currentBalance).to.bignumber.equal(expectedBalance);
       });
     });
@@ -812,14 +811,14 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
         excessBaseSetQuantity = exchangeRedeemQuantity.mul(2);
 
         // Transfer additional payment token to the purchaser
-        await paymentToken.transfer.sendTransactionAsync(
+        await receiveToken.transfer.sendTransactionAsync(
           tokenPurchaser,
           excessNonExchangedPaymentTokenQuantity,
           { from: zeroExOrderMaker, gas: DEFAULT_GAS }
         );
 
         // Approve payment token to the transferProxy
-        await paymentToken.approve.sendTransactionAsync(
+        await receiveToken.approve.sendTransactionAsync(
           transferProxy.address,
           UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
           { from: tokenPurchaser, gas: DEFAULT_GAS }
@@ -858,7 +857,7 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
 
     describe('when the receive tokens length is greater than 1', async () => {
       beforeEach(async () => {
-        subjectExchangeIssuanceParams.receiveTokens = [paymentToken.address, paymentToken.address];
+        subjectExchangeIssuanceParams.receiveTokens = [receiveToken.address, receiveToken.address];
         subjectExchangeIssuanceParams.receiveTokenAmounts = [new BigNumber(1), new BigNumber(1)];
       });
 
@@ -880,7 +879,7 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
 
     describe('when the base Set of the rebalancing Set is not the issuance params Set', async () => {
       beforeEach(async () => {
-        subjectExchangeIssuanceParams.setAddress = paymentToken.address;
+        subjectExchangeIssuanceParams.setAddress = receiveToken.address;
       });
 
       it('should revert', async () => {

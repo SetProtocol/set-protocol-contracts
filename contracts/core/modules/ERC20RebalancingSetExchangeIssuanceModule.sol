@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 Set Labs Inc.
+    Copyright 2019 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import { RebalancingSetExchangeIssuance } from "./lib/RebalancingSetExchangeIssu
  * @title ERC20RebalancingSetExchangeIssuanceModule
  * @author Set Protocol
  *
- * The ERC20RebalancingSetExchangeIssuanceModule supplementary smart contract allows a user to send Eth and atomically
- * issue a rebalancing Set
+ * The ERC20RebalancingSetExchangeIssuanceModule supplementary smart contract allows a user to send an ERC20 
+ * and atomically issue a RebalancingSet
  */
 contract ERC20RebalancingSetExchangeIssuanceModule is
     ModuleCoreState,
@@ -101,7 +101,9 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
     /* ============ Public Functions ============ */
 
     /**
-     * Issue a Rebalancing Set using Wrapped Ether to acquire the base components of the Base Set.
+     * Issue a Rebalancing Set using a single ERC20 token to acquire the base components of the Base Set.
+     * The Payment token is the first index in sendTokens in ExchangeIssuanceParams, which should
+     * only have one element.
      * The Base Set is then issued using ExchangeIssue and reissued into the Rebalancing Set.
      * This function is meant to be used with a user interface
      *
@@ -118,7 +120,7 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
         public
         nonReentrant
     {
-        // Validate Params
+        // Validate the inputs
         validateInputs(
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
@@ -129,8 +131,8 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
         address paymentToken = _exchangeIssuanceParams.sendTokens[0];
         uint256 paymentTokenAmount = _exchangeIssuanceParams.sendTokenAmounts[0];
 
-        // Transfer ERC20 payment token from the user to this contract
-        // Approvals must be set ahead of time
+        // Transfer ERC20 paymentToken from the user to this contract
+        // Approvals must be set ahead of time to the transferProxy
         coreInstance.transferModule(
             paymentToken,
             paymentTokenAmount,
@@ -138,7 +140,7 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
             address(this)
         );
 
-        // Ensure send token allowance
+        // Ensure paymentToken allowance to the transferProxy to allow Base Set issuance
         ERC20Wrapper.ensureAllowance(
             paymentToken,
             address(this),
@@ -146,7 +148,8 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
             paymentTokenAmount
         );
 
-        // exchange issue Base Set
+        // Using the order data, purchase the required components using the payment token
+        // Then it issues the Base Set to this contract.
         exchangeIssuanceInstance.exchangeIssue(
             _exchangeIssuanceParams,
             _orderData
@@ -155,7 +158,7 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
         address baseSetAddress = _exchangeIssuanceParams.setAddress;
         uint256 baseSetIssueQuantity = _exchangeIssuanceParams.quantity;
 
-        // Approve base Set to transfer proxy
+        // Approve base Set to transfer proxy for RebalancingSet issuance
         ERC20Wrapper.ensureAllowance(
             baseSetAddress,
             address(this),
@@ -163,14 +166,14 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
             baseSetIssueQuantity
         );
 
-        // Issue rebalancing set to the caller
+        // Issues the RebalancingSet to the caller
         coreInstance.issueTo(
             msg.sender,
             _rebalancingSetAddress,
             _rebalancingSetQuantity
         );
 
-        // Send excess base Set and ether to the user
+        // Send excess base Set, components, and paymentToken to the user
         returnIssuanceExcessFunds(
             baseSetAddress,
             paymentToken
@@ -185,8 +188,8 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
     }
 
     /**
-     * Redeems a Rebalancing Set into Wrapped Ether. The Rebalancing Set is redeemed into the Base Set, and
-     * Base Set components are traded for WETH. The WETH is then withdrawn into ETH and the ETH sent to the caller.
+     * Redeems a Rebalancing Set into a specific ERC20 / receive token. The Rebalancing Set 
+     * is redeemed into the Base Set, and Base Set components are traded for the ERC20 which is sent to the caller.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
      * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
@@ -210,7 +213,8 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
             _exchangeIssuanceParams.receiveTokens
         );
 
-        // Redeem rebalancing Set from the user to this contract in the vault
+        // Redeem rebalancing Set from the user, attributed to this contract, 
+        // with the underlying base Set held in the vault
         coreInstance.redeemModule(
             msg.sender,
             address(this),
@@ -218,7 +222,7 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
             _rebalancingSetQuantity
         );
 
-        // Withdraw components to this contract.
+        // Withdraw base Set to this contract.
         coreInstance.withdrawModule(
             address(this),
             address(this),
@@ -226,18 +230,19 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
             _exchangeIssuanceParams.quantity
         );
 
-        // Exchange redeem Base Set
+        // Exchange redeem Base Set into the specified receiveToken
         exchangeIssuanceInstance.exchangeRedeem(
             _exchangeIssuanceParams,
             _orderData
         );
 
-        // Withdraw any excess receive token from vault to contracts
+        // Withdraw any excess receiveToken from Vault to Contracts
+        // This could happen if the receiveToken is also a component of the base Set.
         uint256 paymentTokenInVault = vaultInstance.getOwnerBalance(
             _exchangeIssuanceParams.receiveTokens[0],
             address(this)
         );
-        if ( paymentTokenInVault > 0 ) {
+        if (paymentTokenInVault > 0) {
             coreInstance.withdrawModule(
                 address(this),
                 address(this),
@@ -246,14 +251,14 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
             );
         }
 
-        // Send receive token to the user
+        // Transfer receiveToken to the caller
         ERC20Wrapper.transfer(
             _exchangeIssuanceParams.receiveTokens[0],
             msg.sender,
             _exchangeIssuanceParams.receiveTokenAmounts[0]
         );
 
-        // Non-exchanged components are returned to the user
+        // Non-exchanged components and baseSets are returned to the user
         returnRedemptionExcessFunds(_exchangeIssuanceParams.setAddress);
 
         emit LogERC20ExchangeRedeem(
@@ -266,7 +271,7 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
     /* ============ Private Functions ============ */
 
     /**
-     * Any unused Wrapped Ether or base Set issued is returned to the caller.
+     * Any unused paymentToken or base Set issued is returned to the caller.
      *
      * @param _baseSetAddress           The address of the base Set
      * @param _paymentTokenAddress      The address of the payment token

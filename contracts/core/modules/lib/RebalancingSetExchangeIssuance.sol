@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 Set Labs Inc.
+    Copyright 2019 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import { ModuleCoreState } from "./ModuleCoreState.sol";
  * @title RebalancingSetExchangeIssuance
  * @author Set Protocol
  *
- * The RebalancingSetExchangeIssuance contains utility functions used in rebalancing set 
+ * The RebalancingSetExchangeIssuance contains utility functions used in RebalancingSet 
  * exchange issuance
  */
 contract RebalancingSetExchangeIssuance is 
@@ -38,11 +38,12 @@ contract RebalancingSetExchangeIssuance is
     using SafeMath for uint256;
 
     // ============ Internal ============
+
     /**
-     * Validate that the redeem parameters and inputs are congruent.
+     * Validate that the issuance parameters and inputs are congruent.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
-     * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
+     * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to issue or redeem
      * @param  _collateralSetAddress     Address of base Set in ExchangeIssueanceParams
      * @param  _transactTokenArray       List of addresses of send tokens (during issuance) and
      *                                     receive tokens (during redemption)
@@ -56,16 +57,16 @@ contract RebalancingSetExchangeIssuance is
         internal
         view
     {
-        // Expect Set to rebalance to be valid and enabled Set
+        // Expect RebalancingSet to be valid and enabled Set
         require(
             coreInstance.validSets(_rebalancingSetAddress),
-            "RebalancingSetExchangeIssuanceModule.validateInputs: Invalid or disabled SetToken address"
+            "RebalancingSetExchangeIssuance.validateInputs: Invalid or disabled SetToken address"
         );
 
         // Require only 1 receive token in redeem and 1 send token in issue
         require(
             _transactTokenArray.length == 1,
-            "RebalancingSetExchangeIssuanceModule.validateInputs: Only 1 Receive Token Allowed"
+            "RebalancingSetExchangeIssuance.validateInputs: Only 1 Receive Token Allowed"
         );
 
         ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
@@ -74,7 +75,7 @@ contract RebalancingSetExchangeIssuance is
         address baseSet = rebalancingSet.getComponents()[0];
         require(
             baseSet == _collateralSetAddress,
-            "RebalancingSetExchangeIssuanceModule.validateInputs: Base Set addresses must match"
+            "RebalancingSetExchangeIssuance.validateInputs: Base Set addresses must match"
         );
 
         ExchangeIssuanceLibrary.validateQuantity(

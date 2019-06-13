@@ -1,6 +1,4 @@
 export { BadTokenMock } from "./ts/BadTokenMock";
-export { BTCDaiRebalancingManager } from "./ts/BTCDaiRebalancingManager";
-export { BTCETHRebalancingManager } from "./ts/BTCETHRebalancingManager";
 export { CommonValidationsLibrary } from "./ts/CommonValidationsLibrary";
 export { ConstantAuctionPriceCurve } from "./ts/ConstantAuctionPriceCurve";
 export { Core } from "./ts/Core";
@@ -9,7 +7,6 @@ export { ERC20 } from "./ts/ERC20";
 export { ERC20Detailed } from "./ts/ERC20Detailed";
 export { ERC20RebalancingSetExchangeIssuanceModule } from "./ts/ERC20RebalancingSetExchangeIssuanceModule";
 export { ERC20Wrapper } from "./ts/ERC20Wrapper";
-export { ETHDaiRebalancingManager } from "./ts/ETHDaiRebalancingManager";
 export { ExchangeIssuanceLibrary } from "./ts/ExchangeIssuanceLibrary";
 export { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
 export { FailAuctionLibrary } from "./ts/FailAuctionLibrary";
@@ -46,8 +43,6 @@ export {
   AuthorizableContract,
   BadTokenMockContract,
   BaseContract,
-  BTCDaiRebalancingManagerContract,
-  BTCETHRebalancingManagerContract,
   Bytes32LibraryMockContract,
   CommonMathMockContract,
   CommonValidationsLibraryContract,
@@ -59,7 +54,6 @@ export {
   ERC20RebalancingSetExchangeIssuanceModuleContract,
   ERC20WrapperContract,
   ERC20WrapperMockContract,
-  ETHDaiRebalancingManagerContract,
   ExchangeIssuanceLibraryContract,
   ExchangeIssuanceModuleContract,
   FailAuctionLibraryContract,

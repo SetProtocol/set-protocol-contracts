@@ -47,11 +47,9 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
 
     // Address and instance of Transfer Proxy contract
     address public transferProxy;
-    ITransferProxy public transferProxyInstance;
 
     // Address and instance of ExchangeIssuance Module contract
-    address public exchangeIssuanceModule;
-    IExchangeIssuanceModule private exchangeIssuanceInstance;
+    IExchangeIssuanceModule public exchangeIssuanceInstance;
 
     /* ============ Events ============ */
 
@@ -81,7 +79,7 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
     constructor(
         address _core,
         address _transferProxy,
-        address _exchangeIssuanceModule,
+        IExchangeIssuanceModule _exchangeIssuanceModule,
         address _vault
     )
         public
@@ -94,8 +92,7 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
         transferProxy = _transferProxy;
 
         // Commit the address and instance of ExchangeIssuanceModule to state variables
-        exchangeIssuanceModule = _exchangeIssuanceModule;
-        exchangeIssuanceInstance = IExchangeIssuanceModule(_exchangeIssuanceModule);
+        exchangeIssuanceInstance = _exchangeIssuanceModule;
     }
 
     /* ============ Public Functions ============ */
@@ -193,8 +190,9 @@ contract ERC20RebalancingSetExchangeIssuanceModule is
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
      * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
-     * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
-     * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
+     * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance / redemption
+     * @param  _orderData                Bytecode formatted data with exchange data for acquiring/
+     *                                     selling base set components
      */
     function redeemRebalancingSetIntoERC20(
         address _rebalancingSetAddress,

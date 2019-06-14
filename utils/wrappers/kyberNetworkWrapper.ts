@@ -38,8 +38,8 @@ export class KyberNetworkWrapper {
    **/
   public async enableTokensForReserve(
     _tokenAddress: Address,
-    _minimalRecordResolution: BigNumber = new BigNumber(1000000000000),
-    _maxPerBlockImbalance: BigNumber = UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+    _minimalRecordResolution: BigNumber = new BigNumber(1000000000000000),
+    _maxPerBlockImbalance: BigNumber = new BigNumber(1000000000000000),
     _maxTotalImbalance: BigNumber = UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ) {
     const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
@@ -163,12 +163,28 @@ export class KyberNetworkWrapper {
     console.log("Trade enabled?", tradeEnabled);
 
     const sourceTokenBalance = await KyberReserveContract.methods.getBalance(_sourceToken).call();
+    console.log("Got source token balance", _sourceToken);
     const destinationTokenBalance = await KyberReserveContract.methods.getBalance(_destinationToken).call();
 
     console.log("SOurce", sourceTokenBalance);
     console.log("Destination", destinationTokenBalance);
 
+    // Debug by calling the conversion rates contract
+    const blockNumber1 = await web3.eth.getBlockNumber();
+    console.log("Blocknumber", blockNumber1);
 
+    const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
+    const getRateData = await ConversionRatesContract.methods.getRate(
+      _sourceToken,
+      blockNumber1,
+      false,
+      _sourceQuantity.toString()
+    ).call();
+    console.log("Get ConversionRate Data", getRateData);
+
+
+    // Then getDestQty
+    // And getSrcQty
 
 
     console.log("Getting rate of a specific reserve");

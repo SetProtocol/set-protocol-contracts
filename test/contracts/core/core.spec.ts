@@ -97,19 +97,19 @@ contract('Core', accounts => {
 
       await kyberNetworkWrapper.setUpConversionRates(
         [token.address, token2.address],
-        [new BigNumber(1000000), new BigNumber(2000000)],
-        [new BigNumber(1000000), new BigNumber(2000000)],
+        [new BigNumber(549000000000000000000), new BigNumber(61079439106994400000)],
+        [new BigNumber(1813123931381047), new BigNumber(16400993988000000)],
       );
 
       await kyberNetworkWrapper.approveToReserve(
         token,
-        new BigNumber(1000000000),
+        new BigNumber(1000000000000000000000000000),
         operatorAccount,
       );
 
       await kyberNetworkWrapper.approveToReserve(
         token2,
-        new BigNumber(2000000000),
+        new BigNumber(1000000000000000000000000000),
         operatorAccount,
       );
 
@@ -122,13 +122,14 @@ contract('Core', accounts => {
       );
 
       // Get Kyber Rate
-      const ethAddress = '0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+      const ethAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
       console.log("TOken address", token.address, ethAddress);
       await kyberNetworkWrapper.getKyberRate(
+        token.address,
         ethAddress,
-        // token.address,
-        token2.address,
-        new BigNumber(1000000),
+        
+        // token2.address,
+        new BigNumber(100000000000000000000),
       );
 
       await subject();

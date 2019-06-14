@@ -173,18 +173,30 @@ export class KyberNetworkWrapper {
     const blockNumber1 = await web3.eth.getBlockNumber();
     console.log("Blocknumber", blockNumber1);
 
+    console.log("Getting basic rate");
     const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
-    const getRateData = await ConversionRatesContract.methods.getRate(
-      _sourceToken,
-      blockNumber1,
-      false,
-      _sourceQuantity.toString()
+    const basicRate = await ConversionRatesContract.methods.getBasicRate(
+      _destinationToken,
+      true,
     ).call();
-    console.log("Get ConversionRate Data", getRateData);
+
+    console.log("Basic rate", basicRate);
+    
+    const basicInfo = await ConversionRatesContract.methods.getTokenBasicData(
+      _destinationToken,
+    ).call();
+    console.log("Get ConversionRate Data", basicInfo[0], basicInfo[1]);
+
+    const getRate = await ConversionRatesContract.methods.getRate(
+      _destinationToken,
+      blockNumber1,
+      true,
+      '1000000000000000000000'
+    ).call();
+    console.log("Get Rate", getRate.toString());
 
 
-    // Then getDestQty
-    // And getSrcQty
+    
 
 
     console.log("Getting rate of a specific reserve");
@@ -200,17 +212,17 @@ export class KyberNetworkWrapper {
     console.log("Reserve rate", reserveRate.toString());
 
     
-    // console.log("Getting Kyber Rate");
+    console.log("Getting Kyber Rate");
 
-    // const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
+    const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
 
-    // const expectedRate = await KyberNetworkContract.methods.findBestRate(
-    //   _sourceToken,
-    //   _destinationToken,
-    //   _sourceQuantity.toString(),
-    // ).call();
+    const expectedRate = await KyberNetworkContract.methods.findBestRate(
+      _sourceToken,
+      _destinationToken,
+      _sourceQuantity.toString(),
+    ).call();
 
-    // console.log("Expected rate", expectedRate.toString());
+    console.log("Expected rate", expectedRate.toString());
   }
 
   // This contract must be added during setup as it hasn't been set during the actual deployment script itself..

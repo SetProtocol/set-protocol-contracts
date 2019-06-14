@@ -158,7 +158,7 @@ contract('ERC20RebalancingSetExchangeIssuanceModule', accounts => {
       const rebalancingSetExchangeIssuanceModuleContract = await subject();
 
       const exchangeIssuanceModuleAddress = await rebalancingSetExchangeIssuanceModuleContract
-      .exchangeIssuanceModule.callAsync();
+      .exchangeIssuanceInstance.callAsync();
 
       expect(exchangeIssuanceModuleAddress).to.equal(exchangeIssuanceModule.address);
     });

@@ -20,7 +20,7 @@
   "scripts": {
     "chain": "yarn clean-chain && ganache-cli --db blockchain --networkId 50 --accounts 20 -l 19000000 -e 10000000000 -m 'concert load couple harbor equip island argue ramp clarify fence smart topic'",
     "clean": "rm -rf build; rm -rf transpiled; rm -rf types/generated",
-    "clean-chain": "rm -rf blockchain && cp -r snapshots/0x-Kyber blockchain",
+    "clean-chain": "rm -rf blockchain && cp -r snapshots/0x-Kyber-V2 blockchain",
     "compile": "./node_modules/.bin/truffle compile --all",
     "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup",
     "coverage-cleanup": "find artifacts/ts -name \\*.js* -type f -delete && find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete && find utils -name \\*.js* -type f -delete",
@@ -41,7 +41,7 @@
     "test-nocompile": "yarn transpile && yarn truffle-test-contracts",
     "test-continuous": "yarn deploy-development && truffle test",
     "transpile": "tsc",
-    "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name '*.spec.js'`",
+    "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name 'core.spec.js'`",
     "prepublishOnly": "yarn dist"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",

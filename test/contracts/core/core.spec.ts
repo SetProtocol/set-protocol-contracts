@@ -3,6 +3,7 @@ require('module-alias/register');
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { Address } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -11,6 +12,8 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { KyberNetworkWrapper } from '@utils/wrappers/kyberNetworkWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -23,12 +26,17 @@ const Core = artifacts.require('Core');
 contract('Core', accounts => {
   const [
     ownerAccount,
+    operatorAccount,
   ] = accounts;
 
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+
+  const kyberNetworkWrapper: KyberNetworkWrapper = new KyberNetworkWrapper();
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -76,6 +84,54 @@ contract('Core', accounts => {
       const vaultAddress = await coreContract.vault.callAsync();
 
       expect(vaultAddress).to.equal(vault.address);
+    });
+
+    it.only('test kyber functions', async () => {
+      const token = await erc20Wrapper.deployTokenAsync(operatorAccount);
+      const token2 = await erc20Wrapper.deployTokenAsync(operatorAccount);
+
+      await kyberNetworkWrapper.setExpectedRateOnKyberReserve();
+
+      await kyberNetworkWrapper.enableTokensForReserve(token.address);
+      await kyberNetworkWrapper.enableTokensForReserve(token2.address);
+
+      await kyberNetworkWrapper.setUpConversionRates(
+        [token.address, token2.address],
+        [new BigNumber(1000000), new BigNumber(2000000)],
+        [new BigNumber(1000000), new BigNumber(2000000)],
+      );
+
+      await kyberNetworkWrapper.approveToReserve(
+        token,
+        new BigNumber(1000000000),
+        operatorAccount,
+      );
+
+      await kyberNetworkWrapper.approveToReserve(
+        token2,
+        new BigNumber(2000000000),
+        operatorAccount,
+      );
+
+      await web3.eth.sendTransaction(
+        {
+          to: '0x038F9B392Fb9A9676DbAddF78EA5fdbf6C7d9710',
+          from: operatorAccount,
+          value: '1000000000000000000'
+        }
+      );
+
+      // Get Kyber Rate
+      const ethAddress = '0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+      console.log("TOken address", token.address, ethAddress);
+      await kyberNetworkWrapper.getKyberRate(
+        ethAddress,
+        // token.address,
+        token2.address,
+        new BigNumber(1000000),
+      );
+
+      await subject();
     });
   });
 });

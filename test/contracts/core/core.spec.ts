@@ -3,6 +3,7 @@ require('module-alias/register');
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { Address } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -11,6 +12,7 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -23,12 +25,14 @@ const Core = artifacts.require('Core');
 contract('Core', accounts => {
   const [
     ownerAccount,
+    operatorAccount,
   ] = accounts;
 
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);

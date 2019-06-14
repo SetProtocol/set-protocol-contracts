@@ -3,7 +3,6 @@ import Web3 from 'web3';
 
 import { BigNumber } from 'bignumber.js';
 
-
 export class Blockchain {
   private _web3: Web3;
   private _snapshotId: number;
@@ -41,3 +40,4 @@ export class Blockchain {
     });
   }
 }
+

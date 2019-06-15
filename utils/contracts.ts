@@ -11,6 +11,9 @@ import { CoreIssuanceLibraryContract } from '../types/generated/core_issuance_li
 import { CoreIssuanceLibraryMockContract } from '../types/generated/core_issuance_library_mock';
 import { CoreMockContract } from '../types/generated/core_mock';
 import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
+import {
+  ERC20RebalancingSetExchangeIssuanceModuleContract,
+} from '../types/generated/erc20_rebalancing_set_exchange_issuance_module';
 import { ERC20WrapperContract } from '../types/generated/erc20_wrapper';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
 import { ExchangeIssuanceLibraryContract } from '../types/generated/exchange_issuance_library';
@@ -68,6 +71,7 @@ export {
   CoreIssuanceLibraryMockContract,
   CoreMockContract,
   ERC20DetailedContract,
+  ERC20RebalancingSetExchangeIssuanceModuleContract,
   ERC20WrapperContract,
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryContract,

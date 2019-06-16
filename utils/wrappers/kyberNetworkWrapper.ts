@@ -93,6 +93,14 @@ export class KyberNetworkWrapper {
       gas: DEFAULT_GAS,
     });
 
+    const validBaseRateTxData = ConversionRatesContract.methods.setValidRateDurationInBlocks(100000).encodeABI();
+    await web3.eth.sendTransaction({
+      from: KYBER_PERMISSIONED_ACCOUNTS.admin,
+      to: KYBER_CONTRACTS.ConversionRates,
+      data: validBaseRateTxData,
+      gas: DEFAULT_GAS,
+    });    
+
     // Set Token Wallet to the operator. This means the operator must approve its tokens
     // to the contract
     const setTokenWalletTxData = KyberReserveContract.methods.setTokenWallet(
@@ -105,6 +113,19 @@ export class KyberNetworkWrapper {
       data: setTokenWalletTxData,
       gas: DEFAULT_GAS,
     });
+
+    const approveWithdrawAddressTxData = KyberReserveContract.methods.approveWithdrawAddress(
+      _tokenAddress,
+      KYBER_PERMISSIONED_ACCOUNTS.operator,
+      true
+    ).encodeABI();
+    await web3.eth.sendTransaction({
+      from: KYBER_PERMISSIONED_ACCOUNTS.admin,
+      to: KYBER_CONTRACTS.KyberReserve,
+      data: approveWithdrawAddressTxData,
+      gas: DEFAULT_GAS,
+    });
+
   }
 
   public async setUpConversionRates(
@@ -122,6 +143,41 @@ export class KyberNetworkWrapper {
     const indices = [];
     const blockNumber = await web3.eth.getBlockNumber();
 
+    console.log("Set step data");
+
+    for (let i = 0; i < _tokenAddresses.length; i++) {
+      const stepData = [0];
+      const setQtyStepFunctionTxData = ConversionRatesContract.methods.setQtyStepFunction(
+        _tokenAddresses[i],
+        stepData,
+        stepData,
+        stepData,
+        stepData,
+      ).encodeABI();
+      await web3.eth.sendTransaction({
+        from: KYBER_PERMISSIONED_ACCOUNTS.operator,
+        to: KYBER_CONTRACTS.ConversionRates,
+        data: setQtyStepFunctionTxData,
+        gas: DEFAULT_GAS,
+      });
+
+      const setImbalanceStepFunctionTxData = ConversionRatesContract.methods.setImbalanceStepFunction(
+        _tokenAddresses[i],
+        stepData,
+        stepData,
+        stepData,
+        stepData,
+      ).encodeABI();
+      await web3.eth.sendTransaction({
+        from: KYBER_PERMISSIONED_ACCOUNTS.operator,
+        to: KYBER_CONTRACTS.ConversionRates,
+        data: setImbalanceStepFunctionTxData,
+        gas: DEFAULT_GAS,
+      });  
+    }
+
+    console.log("setImbalanceStepFunctionTxData");
+
     const setBaseRateTxData = ConversionRatesContract.methods.setBaseRate(
       _tokenAddresses,
       baseBuys,
@@ -137,6 +193,8 @@ export class KyberNetworkWrapper {
       data: setBaseRateTxData,
       gas: DEFAULT_GAS,
     });
+
+    console.log("Set base rate");
   }
   
   public async approveToReserve(
@@ -191,7 +249,7 @@ export class KyberNetworkWrapper {
       _destinationToken,
       blockNumber1,
       true,
-      '1000000000000000000000'
+      '100000000000000000'
     ).call();
     console.log("Get Rate", getRate.toString());
 

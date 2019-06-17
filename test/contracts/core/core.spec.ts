@@ -125,10 +125,10 @@ contract('Core', accounts => {
       const ethAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
       console.log("TOken address", token.address, ethAddress);
       await kyberNetworkWrapper.getKyberRate(
-        ethAddress,
+        // ethAddress,
         token.address,
-        // token2.address,
-        new BigNumber(100000000000000000000),
+        token2.address,
+        new BigNumber(10000000000000),
       );
 
       await subject();

@@ -217,70 +217,104 @@ export class KyberNetworkWrapper {
     _sourceQuantity: BigNumber,
   ) {
     const KyberReserveContract = new web3.eth.Contract(KyberReserveABI, KYBER_CONTRACTS.KyberReserve);
+    const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
+    const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
+
+    const conversionRatesContract = await KyberReserveContract.methods.conversionRatesContract().call();
+    console.log("KyberReserveContract.methods.conversionRatesContract()", conversionRatesContract);
+
+    const sanityRatesContract = await KyberReserveContract.methods.sanityRatesContract().call();
+    console.log("KyberReserveContract.methods.sanityRatesContract()", sanityRatesContract);    
+
+    const reserveContract = await ConversionRatesContract.methods.reserveContract().call();
+    console.log("ConversionRatesContract.methods.reserveContract()", reserveContract);    
+
     const tradeEnabled = await KyberReserveContract.methods.tradeEnabled().call();
-    console.log("Trade enabled?", tradeEnabled);
+    console.log("KyberReserveContract.methods.tradeEnabled()?", tradeEnabled);
+
+    const expectedRateContract = await KyberNetworkContract.methods.expectedRateContract().call();
+    console.log("KyberReserveContract.methods.expectedRateContract()?", expectedRateContract);
 
     const sourceTokenBalance = await KyberReserveContract.methods.getBalance(_sourceToken).call();
-    console.log("Got source token balance", _sourceToken);
+    console.log("KyberReserveContract.methods.getBalance(_sourceToken)", sourceTokenBalance);
     const destinationTokenBalance = await KyberReserveContract.methods.getBalance(_destinationToken).call();
 
-    console.log("SOurce", sourceTokenBalance);
-    console.log("Destination", destinationTokenBalance);
+    console.log("KyberReserveContract.methods.getBalance(_destinationToken)", destinationTokenBalance);
 
     // Debug by calling the conversion rates contract
-    const blockNumber1 = await web3.eth.getBlockNumber();
-    console.log("Blocknumber", blockNumber1);
-
-    console.log("Getting basic rate");
-    const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
-    const basicRate = await ConversionRatesContract.methods.getBasicRate(
-      _destinationToken,
-      true,
-    ).call();
-
-    console.log("Basic rate", basicRate);
-    
-    const basicInfo = await ConversionRatesContract.methods.getTokenBasicData(
-      _destinationToken,
-    ).call();
-    console.log("Get ConversionRate Data", basicInfo[0], basicInfo[1]);
-
-    const getRate = await ConversionRatesContract.methods.getRate(
-      _destinationToken,
-      blockNumber1,
-      true,
-      '100000000000000000'
-    ).call();
-    console.log("Get Rate", getRate.toString());
-
-
-    
-
-
-    console.log("Getting rate of a specific reserve");
-    
     const blockNumber = await web3.eth.getBlockNumber();
-    const reserveRate = await KyberReserveContract.methods.getConversionRate(
-      _sourceToken,
-      _destinationToken,
-      _sourceQuantity.toString(),
-      blockNumber
-    ).call();
+    console.log("Current Blocknumber to Use", blockNumber);
 
-    console.log("Reserve rate", reserveRate.toString());
+    // const basicRate = await ConversionRatesContract.methods.getBasicRate(
+    //   _destinationToken,
+    //   true,
+    // ).call();
+
+    // console.log("ConversionRatesContract.methods.getBasicRate(_destinationToken, true)", basicRate);
+    
+    // const basicInfo = await ConversionRatesContract.methods.getTokenBasicData(
+    //   _destinationToken,
+    // ).call();
+    // console.log("ConversionRatesContract.methods.getTokenBasicData(_destinationToken)", basicInfo[0], basicInfo[1]);
+
+    // const getEth = await ConversionRatesContract.methods.getRate(
+    //   _sourceToken,
+    //   blockNumber,
+    //   false,
+    //   getRate
+    // ).call();
+    // console.log("ConversionRatesContract.methods.getRate(_sourceToken,blockNumber,false,_sourceQuantity.toString())",
+    //   getEth.toString()
+    //  );
+
+    const ethAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+
+    const ETHBalance = await KyberReserveContract.methods.getBalance(ethAddress).call();
+    console.log("ETH Balance",
+      ETHBalance.toString()
+     ); 
+   
+    const getRate = await ConversionRatesContract.methods.getRate(
+      _sourceToken,
+      blockNumber,
+      false,
+      _sourceQuantity.toString()
+    ).call();
+    console.log("ConversionRatesContract.methods.getRate(_destinationToken,blockNumber,true,_sourceQuantity.toString())",
+      getRate.toString()
+     );
+
+    const getDestQuantity = await KyberReserveContract.methods.getDestQty(
+      _sourceToken,
+      ethAddress,
+      _sourceQuantity.toString(),
+      getRate,
+    ).call();
+    console.log("KyberReserveContract.methods.getDestQty(_sourceToken,_destinationToken,_sourceQuantity.toString(),getRate)", getDestQuantity);
 
     
-    console.log("Getting Kyber Rate");
+    const sourceToEthRate = await KyberReserveContract.methods.getConversionRate(
+      _sourceToken,
+      ethAddress,
+      _sourceQuantity.toString(),
+      blockNumber,
+    ).call();
+    console.log("sourceToEthRate", sourceToEthRate);
 
-    const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
+    const ethToDestinationRate = await KyberReserveContract.methods.getConversionRate(
+      ethAddress,
+      _destinationToken,
+      sourceToEthRate.toString(),
+      blockNumber,
+    ).call();
+    console.log("ethToDestinationRate", ethToDestinationRate);
 
     const expectedRate = await KyberNetworkContract.methods.findBestRate(
       _sourceToken,
       _destinationToken,
       _sourceQuantity.toString(),
     ).call();
-
-    console.log("Expected rate", expectedRate.toString());
+    console.log("KyberNetworkContract.methods.findBestRate()", expectedRate[0], expectedRate[1]);
   }
 
   // This contract must be added during setup as it hasn't been set during the actual deployment script itself..

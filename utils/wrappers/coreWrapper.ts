@@ -9,6 +9,7 @@ import {
   ERC20RebalancingSetExchangeIssuanceModuleContract,
   ExchangeIssuanceModuleContract,
   RebalancingSetExchangeIssuanceModuleContract,
+  RebalancingSetIssuanceModuleContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
@@ -41,6 +42,7 @@ const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ERC20RebalancingSetExchangeIssuanceModule = artifacts.require('ERC20RebalancingSetExchangeIssuanceModule');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
 const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
+const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingLibrary = artifacts.require('RebalancingLibrary');
@@ -471,6 +473,23 @@ export class CoreWrapper {
     return new RebalancingSetExchangeIssuanceModuleContract(
       new web3.eth.Contract(payableExchangeIssuanceContract.abi, payableExchangeIssuanceContract.address),
       { from },
+    );
+  }
+
+  public async deployRebalancingSetIssuanceModuleAsync(
+    core: CoreLikeContract,
+    vault: VaultContract,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingSetIssuanceModuleContract> {
+    const truffleModule = await RebalancingSetIssuanceModule.new(
+      core.address,
+      vault.address,
+      { from },
+    );
+
+    return new RebalancingSetIssuanceModuleContract(
+      new web3.eth.Contract(truffleModule.abi, truffleModule.address),
+      { from, gas: DEFAULT_GAS },
     );
   }
 

@@ -27,6 +27,7 @@ import { IExchangeIssuanceModule } from "../interfaces/IExchangeIssuanceModule.s
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 import { RebalancingSetExchangeIssuance } from "./lib/RebalancingSetExchangeIssuance.sol";
+import { RebalancingSetIssuance } from "./lib/RebalancingSetIssuance.sol";
 
 
 /**
@@ -39,6 +40,7 @@ import { RebalancingSetExchangeIssuance } from "./lib/RebalancingSetExchangeIssu
 contract ERC20RebalancingSetExchangeIssuanceModule is
     ModuleCoreState,
     RebalancingSetExchangeIssuance,
+    RebalancingSetIssuance,
     ReentrancyGuard
 {
     using SafeMath for uint256;

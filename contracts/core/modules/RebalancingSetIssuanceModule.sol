@@ -80,7 +80,8 @@ contract RebalancingSetIssuanceModule is
     function redeemRebalancingSetIntoBaseComponents(
         address _rebalancingSetAddress,
         uint256 _redeemQuantity,
-        uint256 _toExclude
+        uint256 _toExclude,
+        bool _keepChangeInVault
     )
         external
         nonReentrant
@@ -101,14 +102,16 @@ contract RebalancingSetIssuanceModule is
 
         // Transfer any change of the base Set to the end user
         // To test
-        returnRedemptionExcessFunds(baseSetAddress);
+        // Add toggle to keep in Vault
+        returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
 
         // Add log
     }
 
     function redeemRebalancingSetIntoComponentsIncludingEther(
         address _rebalancingSetAddress,
-        uint256 _redeemQuantity
+        uint256 _redeemQuantity,
+        bool _keepChangeInVault
     )
         external
         nonReentrant
@@ -126,7 +129,12 @@ contract RebalancingSetIssuanceModule is
         );
 
         // Loop through the base Set components.
-       withdrawComponentsToSenderWithEther(baseSetAddress);
+        withdrawComponentsToSenderWithEther(baseSetAddress);
+
+        // Transfer any change of the base Set to the end user
+        // To test
+        // Add toggle to keep in Vault
+        returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
 
         // Log redeem
 

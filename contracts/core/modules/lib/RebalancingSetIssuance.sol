@@ -117,77 +117,34 @@ contract RebalancingSetIssuance is
         );
     }
 
-    /**
-     * Any base Set and base Set components issued are returned to the caller.
-     *
-     * @param _baseSetAddress           The address of the base Set
-     */
-    function returnIssuanceBaseSetAndComponentsExcessFunds(
-        address _baseSetAddress
-    )
-        internal
-    {
-        // Return any excess base Set to the user not used in rebalancing set issuance
-        uint256 leftoverBaseSet = ERC20Wrapper.balanceOf(
-            _baseSetAddress,
-            address(this)
-        );
-        if (leftoverBaseSet > 0) {
-            ERC20Wrapper.transfer(
-                _baseSetAddress,
-                msg.sender,
-                leftoverBaseSet
-            );
-        }
-
-        // Return base Set components not used in issuance of base set
-        address[] memory baseSetComponents = ISetToken(_baseSetAddress).getComponents();
-        for (uint256 i = 0; i < baseSetComponents.length; i++) {
-            uint256 vaultQuantity = vaultInstance.getOwnerBalance(baseSetComponents[i], address(this));
-            if (vaultQuantity > 0) {
-                coreInstance.withdrawModule(
-                    address(this),
-                    msg.sender,
-                    baseSetComponents[i],
-                    vaultQuantity
-                );
-            }
-        }
-    }
-
-    /**
-     * Withdraw any remaining Base Set and non-exchanged components to the user
-     *
-     * @param  _setAddress   Address of the Base Set
-     */
-    function returnRedemptionExcessFunds(
-        address _setAddress
+    function returnExcessBaseSet(
+        address _baseSetAddress,
+        bool _keepChangeInVault
     )
         internal
     {
         // Return base Set if any that are in the Vault
-        uint256 baseSetQuantity = vaultInstance.getOwnerBalance(_setAddress, address(this));
-        if (baseSetQuantity > 0) {
+        uint256 baseSetQuantity = vaultInstance.getOwnerBalance(_baseSetAddress, address(this));
+        
+        if (baseSetQuantity == 0) {
+            return;
+        }
+
+        if (_keepChangeInVault) {
+            // Transfer ownership within the vault to the user
+            coreInstance.transferModule(
+                _baseSetAddress,
+                baseSetQuantity,
+                address(this),
+                msg.sender
+            );
+        } else {
             coreInstance.withdrawModule(
                 address(this),
                 msg.sender,
-                _setAddress,
+                _baseSetAddress,
                 baseSetQuantity
             );
         }
-
-        // Return base Set components
-        address[] memory baseSetComponents = ISetToken(_setAddress).getComponents();
-        for (uint256 i = 0; i < baseSetComponents.length; i++) {
-            uint256 withdrawQuantity = ERC20Wrapper.balanceOf(baseSetComponents[i], address(this));
-            if (withdrawQuantity > 0) {
-                ERC20Wrapper.transfer(
-                    baseSetComponents[i],
-                    msg.sender,
-                    withdrawQuantity
-                );
-            }
-        }         
-    }
-    
+    }    
 }

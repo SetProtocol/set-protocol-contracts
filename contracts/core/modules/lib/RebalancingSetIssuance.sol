@@ -106,11 +106,10 @@ contract RebalancingSetIssuance is
 
         if (_keepChangeInVault) {
             // Transfer ownership within the vault to the user
-            coreInstance.transferModule(
+            coreInstance.internalTransfer(
                 _baseSetAddress,
-                baseSetQuantity,
-                address(this),
-                msg.sender
+                msg.sender,
+                baseSetQuantity
             );
         } else {
             coreInstance.withdrawModule(

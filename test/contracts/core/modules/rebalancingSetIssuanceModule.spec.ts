@@ -18,9 +18,10 @@ import {
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
+  WethMockContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
-import { getWeb3 } from '@utils/web3Helper';
+import { getWeb3, getGasUsageInEth } from '@utils/web3Helper';
 import { expectRevertError } from '@utils/tokenAssertions';
 import {
   DEFAULT_GAS,
@@ -56,6 +57,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let rebalancingTokenIssuanceModule: RebalancingSetIssuanceModuleContract;
+  let wethMock: WethMockContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
@@ -73,6 +75,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+    wethMock = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
 
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
@@ -83,7 +86,8 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
     rebalancingTokenIssuanceModule = await coreWrapper.deployRebalancingSetIssuanceModuleAsync(
       core,
-      vault
+      vault,
+      wethMock,
     );
     await coreWrapper.addModuleAsync(core, rebalancingTokenIssuanceModule.address);
 
@@ -106,7 +110,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     let subjectCaller: Address;
     let subjectRebalancingSetAddress: Address;
     let subjectRedeemQuantity: BigNumber;
-    let subjectComponentsToExclude: BigNumber;
+    let subjectKeepChangeInVault: boolean;
 
     let baseSetIssueQuantity: BigNumber;
     let baseSetComponentUnit: BigNumber;
@@ -122,16 +126,15 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
-      subjectComponentsToExclude = ZERO;
 
       baseSetComponent = await erc20Wrapper.deployTokenAsync(ownerAccount);
       await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address);
 
       // Create the Set (1 component)
       const componentAddresses = [baseSetComponent.address];
-      baseSetComponentUnit = new BigNumber(10 ** 10);
+      baseSetComponentUnit = new BigNumber(100);
       const componentUnits = [baseSetComponentUnit];
-      baseSetNaturalUnit = new BigNumber(10 ** 10);
+      baseSetNaturalUnit = new BigNumber(100);
       baseSetToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
@@ -154,7 +157,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       subjectRebalancingSetAddress = rebalancingSetToken.address;
 
-      subjectRedeemQuantity = new BigNumber(10 ** 10);
+      subjectRedeemQuantity = new BigNumber(10 ** 18);
       baseSetIssueQuantity = customBaseIssueQuantity ||
         subjectRedeemQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
 
@@ -170,13 +173,15 @@ contract('RebalancingSetIssuanceModule', accounts => {
         rebalancingSetToken.address,
         subjectRedeemQuantity,
       );
+
+      subjectKeepChangeInVault = false;
     });
 
     async function subject(): Promise<string> {
       return rebalancingTokenIssuanceModule.redeemRebalancingSetIntoBaseComponents.sendTransactionAsync(
         subjectRebalancingSetAddress,
         subjectRedeemQuantity,
-        subjectComponentsToExclude,
+        subjectKeepChangeInVault,
         {
           from: subjectCaller,
           gas: DEFAULT_GAS,
@@ -213,6 +218,133 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       const baseSetComponentBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
       expect(baseSetComponentBalance).to.bignumber.equal(expectedBaseComponentBalance);
+    });
+  });
+
+  describe.only('#redeemRebalancingSetIntoComponentsAndEther', async () => {
+    let subjectCaller: Address;
+    let subjectRebalancingSetAddress: Address;
+    let subjectRedeemQuantity: BigNumber;
+    let subjectKeepChangeInVault: boolean;
+
+    let baseSetIssueQuantity: BigNumber;
+    let baseSetComponentUnit: BigNumber;
+
+    let baseSetComponent: WethMockContract;
+    let baseSetToken: SetTokenContract;
+    let baseSetNaturalUnit: BigNumber;
+    let rebalancingSetToken: RebalancingSetTokenContract;
+    let rebalancingUnitShares: BigNumber;
+
+    let customBaseIssueQuantity: BigNumber;
+    let customRebalancingUnitShares: BigNumber;
+
+    let wethRequiredToMintSet: BigNumber;
+
+    beforeEach(async () => {
+      subjectCaller = functionCaller;
+
+      baseSetComponent = wethMock;
+      await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address);
+
+      // Create the Set (1 component)
+      const componentAddresses = [baseSetComponent.address];
+      baseSetComponentUnit = new BigNumber(100);
+      const componentUnits = [baseSetComponentUnit];
+      baseSetNaturalUnit = new BigNumber(100);
+      baseSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        baseSetNaturalUnit,
+      );
+      await erc20Wrapper.approveTransferAsync(baseSetToken, transferProxy.address);
+
+      // Create the Rebalancing Set
+      rebalancingUnitShares = customRebalancingUnitShares || new BigNumber(10 ** 10);
+      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+        core,
+        rebalancingSetTokenFactory.address,
+        ownerAccount,
+        baseSetToken.address,
+        ONE_DAY_IN_SECONDS,
+        rebalancingUnitShares,
+      );
+
+      subjectRebalancingSetAddress = rebalancingSetToken.address;
+
+      subjectRedeemQuantity = new BigNumber(10 ** 10);
+      baseSetIssueQuantity = customBaseIssueQuantity ||
+        subjectRedeemQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
+
+      // Wrap WETH
+      wethRequiredToMintSet = baseSetIssueQuantity.mul(baseSetComponentUnit).div(baseSetNaturalUnit);
+      await wethMock.deposit.sendTransactionAsync(
+        { from: ownerAccount, gas: DEFAULT_GAS, value: wethRequiredToMintSet.toString() }
+      );
+
+      await coreWrapper.issueSetTokenAsync(
+        core,
+        baseSetToken.address,
+        baseSetIssueQuantity,
+      );
+
+      // Issue the rebalancing Set Token
+      await core.issueTo.sendTransactionAsync(
+        functionCaller,
+        rebalancingSetToken.address,
+        subjectRedeemQuantity,
+      );
+
+      subjectKeepChangeInVault = false;
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingTokenIssuanceModule.redeemRebalancingSetIntoComponentsAndEther.sendTransactionAsync(
+        subjectRebalancingSetAddress,
+        subjectRedeemQuantity,
+        subjectKeepChangeInVault,
+        {
+          from: subjectCaller,
+          gas: DEFAULT_GAS,
+        },
+      );
+    }
+
+    afterEach(async () => {
+      customRebalancingUnitShares = undefined;
+      customBaseIssueQuantity = undefined;
+    });
+
+    it('redeems the rebalancing Set', async () => {
+      const previousRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
+      const expectedRBSetTokenBalance = previousRBSetTokenBalance.sub(subjectRedeemQuantity);
+
+      await subject();
+
+      const currentRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
+      expect(expectedRBSetTokenBalance).to.bignumber.equal(currentRBSetTokenBalance);
+    });
+
+    it('redeems the base Set', async () => {
+      await subject();
+
+      const currentSaseSetTokenBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+      expect(currentSaseSetTokenBalance).to.bignumber.equal(ZERO);
+    });
+
+    it('attributes the correct amount of ETH to the caller', async () => {
+      const previousEthBalance: BigNumber = new BigNumber(await web3.eth.getBalance(subjectCaller));
+
+      const txHash = await subject();
+      const totalGasInEth = await getGasUsageInEth(txHash);
+      const expectedEthBalance = previousEthBalance
+                                  .add(wethRequiredToMintSet)
+                                  .sub(totalGasInEth);
+
+      const ethBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
+      expect(ethBalance).to.bignumber.equal(expectedEthBalance);
     });
   });
 });

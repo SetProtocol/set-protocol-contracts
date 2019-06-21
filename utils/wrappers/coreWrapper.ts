@@ -19,6 +19,7 @@ import {
   TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract,
+  WethMockContract,
   WhiteListContract,
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
@@ -479,11 +480,19 @@ export class CoreWrapper {
   public async deployRebalancingSetIssuanceModuleAsync(
     core: CoreLikeContract,
     vault: VaultContract,
+    weth: WethMockContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetIssuanceModuleContract> {
+    const erc20WrapperLibrary = await ERC20Wrapper.new(
+      { from: this._contractOwnerAddress },
+    );
+
+    await RebalancingSetIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+
     const truffleModule = await RebalancingSetIssuanceModule.new(
       core.address,
       vault.address,
+      weth.address,
       { from },
     );
 

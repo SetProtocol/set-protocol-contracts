@@ -24,6 +24,7 @@ import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { IWETH } from "../../lib/IWETH.sol";
+import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 import { RebalancingSetIssuance } from "./lib/RebalancingSetIssuance.sol";
 
@@ -68,6 +69,20 @@ contract RebalancingSetIssuanceModule is
         weth = _weth;
     }
 
+    /**
+     * Fallback function. Disallows ether to be sent to this contract without data except when
+     * unwrapping WETH.
+     */
+    function ()
+        external
+        payable
+    {
+        require( // coverage-disable-line
+            msg.sender == address(weth),
+            "RebalancingSetIssuanceModule.fallback: Cannot receive ETH directly unless unwrapping WETH"
+        );
+    }
+
     /* ============ Public Functions ============ */
 
     /**
@@ -75,12 +90,10 @@ contract RebalancingSetIssuanceModule is
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set to redeem
      * @param  _redeemQuantity           The Quantity of the rebalancing Set to redeem
-     * @param  _toExclude                Mask of indexes of tokens to exclude from withdrawing
      */
     function redeemRebalancingSetIntoBaseComponents(
         address _rebalancingSetAddress,
         uint256 _redeemQuantity,
-        uint256 _toExclude,
         bool _keepChangeInVault
     )
         external
@@ -90,14 +103,16 @@ contract RebalancingSetIssuanceModule is
 
         // Calculate the Base Set Redeem quantity
         address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
-        uint256 baseSetRedeemQuantity = getBaseSetRedeemQuantity(baseSetAddress);
+        uint256 baseSetRedeemQuantity = ERC20Wrapper.balanceOf(baseSetAddress, address(this));
 
         // Redeem Base Set and send components to the the user
+        // If you exclude, do the tokens get stuck with the contract?
+        // Yes they need to be handled separately if they do.
         coreInstance.redeemAndWithdrawTo(
             baseSetAddress,
             msg.sender,
             baseSetRedeemQuantity,
-            _toExclude
+            0
         );
 
         // Transfer any change of the base Set to the end user
@@ -108,7 +123,7 @@ contract RebalancingSetIssuanceModule is
         // Add log
     }
 
-    function redeemRebalancingSetIntoComponentsIncludingEther(
+    function redeemRebalancingSetIntoComponentsAndEther(
         address _rebalancingSetAddress,
         uint256 _redeemQuantity,
         bool _keepChangeInVault
@@ -120,10 +135,10 @@ contract RebalancingSetIssuanceModule is
 
         // Calculate the Base Set Redeem quantity
         address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
-        uint256 baseSetRedeemQuantity = getBaseSetRedeemQuantity(baseSetAddress);
+        uint256 baseSetRedeemQuantity = ERC20Wrapper.balanceOf(baseSetAddress, address(this));
 
         // Redeem. The components stay in the vault
-        coreInstance.redeemInVault(
+        coreInstance.redeem(
             baseSetAddress,
             baseSetRedeemQuantity
         );
@@ -171,6 +186,8 @@ contract RebalancingSetIssuanceModule is
         }
     }
 
+    // TODO: To move this to its own library
+    // TODO: rename function
     function processWrappedEtherDuringRedemption(
         uint256 _wethQuantity
     )
@@ -184,6 +201,7 @@ contract RebalancingSetIssuanceModule is
         );
 
         weth.withdraw(_wethQuantity);
+
         msg.sender.transfer(_wethQuantity);
     }
 }

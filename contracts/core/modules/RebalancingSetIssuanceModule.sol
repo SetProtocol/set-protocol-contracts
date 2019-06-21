@@ -19,10 +19,8 @@ pragma solidity 0.5.7;
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import { ICore } from "../interfaces/ICore.sol";
 import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
-import { IVault } from "../interfaces/IVault.sol";
 import { IWETH } from "../../lib/IWETH.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
@@ -44,6 +42,14 @@ contract RebalancingSetIssuanceModule is
 
     // Address and instance of Wrapped Ether contract
     IWETH public weth;
+
+    /* ============ Events ============ */
+
+    event LogRebalancingSetRedeem(
+        address rebalancingSetAddress,
+        address indexed callerAddress,
+        uint256 rebalancingSetQuantity
+    );
 
     /* ============ Constructor ============ */
 
@@ -116,11 +122,14 @@ contract RebalancingSetIssuanceModule is
         );
 
         // Transfer any change of the base Set to the end user
-        // To test
-        // Add toggle to keep in Vault
         returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
 
-        // Add log
+        // Log RebalancingSetRedeem
+        emit LogRebalancingSetRedeem(
+            _rebalancingSetAddress,
+            msg.sender,
+            _redeemQuantity
+        );
     }
 
     function redeemRebalancingSetIntoComponentsAndEther(
@@ -147,12 +156,14 @@ contract RebalancingSetIssuanceModule is
         withdrawComponentsToSenderWithEther(baseSetAddress);
 
         // Transfer any change of the base Set to the end user
-        // To test
-        // Add toggle to keep in Vault
         returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
 
-        // Log redeem
-
+        // Log RebalancingSetRedeem
+        emit LogRebalancingSetRedeem(
+            _rebalancingSetAddress,
+            msg.sender,
+            _redeemQuantity
+        );
     }
 
     /* ============ Private Functions ============ */

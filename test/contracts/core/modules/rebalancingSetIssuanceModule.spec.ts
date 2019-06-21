@@ -160,7 +160,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       subjectRebalancingSetAddress = rebalancingSetToken.address;
 
-      subjectRedeemQuantity = customRedeemQuantity || ether(1);
+      subjectRedeemQuantity = customRedeemQuantity || new BigNumber(10 ** 7);
       baseSetIssueQuantity = customBaseIssueQuantity ||
         subjectRedeemQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
 
@@ -227,6 +227,8 @@ contract('RebalancingSetIssuanceModule', accounts => {
       const baseSetComponentBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
       expect(baseSetComponentBalance).to.bignumber.equal(expectedBaseComponentBalance);
     });
+
+    // Test logs
 
     describe('when the redeem quantity results in excess base Set', async () => {
       describe('when keep change in vault is false', async () => {
@@ -347,7 +349,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       subjectRebalancingSetAddress = rebalancingSetToken.address;
 
-      subjectRedeemQuantity = ether(1);
+      subjectRedeemQuantity = new BigNumber(10 ** 7);
       baseSetIssueQuantity = customBaseIssueQuantity ||
         subjectRedeemQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
 

@@ -308,10 +308,24 @@ contract('RebalancingSetIssuanceModule', accounts => {
       expect(expectedComponentBalance).to.bignumber.equal(componentBalance);
     });
 
+    it('uses the correct amount of ETH from the caller', async () => {
+      const previousEthBalance: BigNumber = new BigNumber(await web3.eth.getBalance(subjectCaller));
+
+      const txHash = await subject();
+      const totalGasInEth = await getGasUsageInEth(txHash);
+      const expectedEthBalance = previousEthBalance
+                                  .sub(subjectWethQuantity)
+                                  .sub(totalGasInEth);
+
+      const ethBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
+      expect(ethBalance).to.bignumber.equal(expectedEthBalance);
+    });
+
     // Add test for log
     // Add test for multiple components
     // Add test for wonky base Set component
     // Do we add check for rebalancing Set quantity resulting in natural unit multiple of base set?
+    // Add test for returning eth
   });
 
   describe('#redeemRebalancingSetIntoBaseComponents', async () => {

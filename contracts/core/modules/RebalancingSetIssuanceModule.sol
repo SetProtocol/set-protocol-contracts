@@ -172,44 +172,41 @@ contract RebalancingSetIssuanceModule is
 
         // Deposit all the required non-weth components to the vault
         // under the name of this contract
-        // depositComponentsIncludingEth(
-        //     baseSetAddress,
-        //     requiredBaseSetQuantity
-        // );
+        depositComponentsIncludingEth(
+            baseSetAddress,
+            requiredBaseSetQuantity
+        );
 
         // issue Base Set to this contract (all components should be in the vault)
-        // coreInstance.issueInVault(
-        //     baseSetAddress,
-        //     requiredBaseSetQuantity
-        // );
+        coreInstance.issueInVault(
+            baseSetAddress,
+            requiredBaseSetQuantity
+        );
 
-        // // Ensure base Set allowance
-        // // Don't need to set allowance as the set is in the vault
-        // // ERC20Wrapper.ensureAllowance(
-        // //     baseSetAddress,
-        // //     address(this),
-        // //     transferProxy,
-        // //     requiredBaseSetQuantity
-        // // );
+        // Note: Don't need to set allowance of the BaseSet as the BaseSet is already in the vault
 
-        // // Issue rebalancing Set
-        // coreInstance.issueTo(
-        //     msg.sender,
-        //     _rebalancingSetAddress,
-        //     _rebalancingSetQuantity
-        // );
+        // Issue rebalancing Set
+        coreInstance.issueTo(
+            msg.sender,
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity
+        );
 
-        // // Return any excess base Set token
-        // returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
+        // Return any excess base Set token
+        returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
 
-        // // Log RebalancingSetRedeem
-        // emit LogRebalancingSetIssue(
-        //     _rebalancingSetAddress,
-        //     msg.sender,
-        //     _rebalancingSetQuantity
-        // );
+        // Log RebalancingSetRedeem
+        emit LogRebalancingSetIssue(
+            _rebalancingSetAddress,
+            msg.sender,
+            _rebalancingSetQuantity
+        );
 
-        // Need to return extra weth/eth
+        // Send excess eth back to the user
+        uint256 leftoverEth = address(this).balance;
+        if (leftoverEth > 0) {
+            msg.sender.transfer(leftoverEth);
+        }
     }
 
     /**
@@ -314,17 +311,17 @@ contract RebalancingSetIssuanceModule is
                 );
 
                 // wrap all eth
-                weth.deposit.value(msg.value)();
+                weth.deposit.value(currentComponentQuantity)();
 
                 // Ensure weth allowance
                 ERC20Wrapper.ensureAllowance(
                     address(weth),
                     address(this),
                     transferProxy,
-                    msg.value
+                    currentComponentQuantity
                 );
 
-                // Don't continue. We also want to deposit
+                continue;
             }
 
             coreInstance.depositModule(

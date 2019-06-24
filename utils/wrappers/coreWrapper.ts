@@ -480,6 +480,7 @@ export class CoreWrapper {
   public async deployRebalancingSetIssuanceModuleAsync(
     core: CoreLikeContract,
     vault: VaultContract,
+    transferProxy: TransferProxyContract,
     weth: WethMockContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetIssuanceModuleContract> {
@@ -492,6 +493,7 @@ export class CoreWrapper {
     const truffleModule = await RebalancingSetIssuanceModule.new(
       core.address,
       vault.address,
+      transferProxy.address,
       weth.address,
       { from },
     );

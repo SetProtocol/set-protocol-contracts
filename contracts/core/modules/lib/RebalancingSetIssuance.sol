@@ -39,6 +39,23 @@ contract RebalancingSetIssuance is
 
     // ============ Internal ============
 
+    function getBaseSetRequiredQuantity(
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetIssueQuantity
+    )
+        internal
+        returns (uint256)
+    {
+        IRebalancingSetToken rebalancingSet = IRebalancingSetToken(_rebalancingSetAddress);
+
+        uint256 unitShares = rebalancingSet.unitShares();
+        uint256 naturalUnit = rebalancingSet.naturalUnit();
+
+        // TODO Need to somehow make sure this figure is a multiple of the Base Set natural unit
+
+        return _rebalancingSetIssueQuantity.mul(unitShares).div(naturalUnit);
+    }
+
     function redeemRebalancingSetAndWithdraw(
         address _rebalancingSetAddress,
         uint256 _redeemQuantity

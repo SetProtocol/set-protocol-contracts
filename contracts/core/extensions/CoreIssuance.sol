@@ -256,6 +256,7 @@ contract CoreIssuance is
     /**
      * Exchange components for Set tokens, accepting any owner
      * Used in issue, issueTo, and issueInVaultInternal
+     * The tokens minted are held by the recipient.
      *
      * @param  _componentOwner  Address to use tokens from
      * @param  _setRecipient    Address to issue Set to

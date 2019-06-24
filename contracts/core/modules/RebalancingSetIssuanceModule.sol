@@ -40,10 +40,19 @@ contract RebalancingSetIssuanceModule is
 {
     using SafeMath for uint256;
 
+    // Address and instance of Transfer Proxy contract
+    address public transferProxy;
+
     // Address and instance of Wrapped Ether contract
     IWETH public weth;
 
     /* ============ Events ============ */
+
+    event LogRebalancingSetIssue(
+        address rebalancingSetAddress,
+        address indexed callerAddress,
+        uint256 rebalancingSetQuantity
+    );
 
     event LogRebalancingSetRedeem(
         address rebalancingSetAddress,
@@ -57,12 +66,14 @@ contract RebalancingSetIssuanceModule is
      * Constructor function for RebalancingSetIssuanceModule
      *
      * @param _core                The address of Core
+     * @param _transferProxy       The address of Transfer Proxy
      * @param _vault               The address of Vault
      * @param _weth                The address of Wrapped Ether
      */
     constructor(
         address _core,
         address _vault,
+        address _transferProxy,
         IWETH _weth
     )
         public
@@ -73,6 +84,9 @@ contract RebalancingSetIssuanceModule is
     {
         // Commit the WETH instance
         weth = _weth;
+
+        // Commit the transferProxy instance
+        transferProxy = _transferProxy;
     }
 
     /**
@@ -89,23 +103,130 @@ contract RebalancingSetIssuanceModule is
         );
     }
 
-    /* ============ Public Functions ============ */
+    /* ============ External Functions ============ */
 
-    /**
-     * Redeems a Rebalancing Set into the base components of the Base Set.
-     *
-     * @param  _rebalancingSetAddress    Address of the rebalancing Set to redeem
-     * @param  _redeemQuantity           The Quantity of the rebalancing Set to redeem
-     */
-    function redeemRebalancingSetIntoBaseComponents(
+    function issueRebalancingSet(
         address _rebalancingSetAddress,
-        uint256 _redeemQuantity,
+        uint256 _rebalancingSetQuantity,
         bool _keepChangeInVault
     )
         external
         nonReentrant
     {
-        redeemRebalancingSetAndWithdraw(_rebalancingSetAddress, _redeemQuantity);
+        // Calculate required base Set quantity
+        address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
+        uint256 requiredBaseSetQuantity = getBaseSetRequiredQuantity(
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity
+        );
+
+        // issue Base Set to this contract (ideally in vault)
+        coreInstance.issueModule(
+            msg.sender,
+            address(this),
+            baseSetAddress,
+            requiredBaseSetQuantity
+        );
+
+        // Ensure base Set allowance
+        ERC20Wrapper.ensureAllowance(
+            baseSetAddress,
+            address(this),
+            transferProxy,
+            requiredBaseSetQuantity
+        );
+
+        // Issue rebalancing Set
+        coreInstance.issueTo(
+            msg.sender,
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity
+        );
+
+        // Return any excess base Set token
+        returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
+
+        // Log RebalancingSetRedeem
+        emit LogRebalancingSetIssue(
+            _rebalancingSetAddress,
+            msg.sender,
+            _rebalancingSetQuantity
+        );
+    }
+
+    function issueRebalancingSetWithEther(
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity,
+        bool _keepChangeInVault
+    )
+        external
+        payable
+        nonReentrant
+    {
+        // Calculate required base Set quantity
+        address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
+        uint256 requiredBaseSetQuantity = getBaseSetRequiredQuantity(
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity
+        );
+
+        // Deposit all the required non-weth components to the vault
+        // under the name of this contract
+        // depositComponentsIncludingEth(
+        //     baseSetAddress,
+        //     requiredBaseSetQuantity
+        // );
+
+        // issue Base Set to this contract (all components should be in the vault)
+        // coreInstance.issueInVault(
+        //     baseSetAddress,
+        //     requiredBaseSetQuantity
+        // );
+
+        // // Ensure base Set allowance
+        // // Don't need to set allowance as the set is in the vault
+        // // ERC20Wrapper.ensureAllowance(
+        // //     baseSetAddress,
+        // //     address(this),
+        // //     transferProxy,
+        // //     requiredBaseSetQuantity
+        // // );
+
+        // // Issue rebalancing Set
+        // coreInstance.issueTo(
+        //     msg.sender,
+        //     _rebalancingSetAddress,
+        //     _rebalancingSetQuantity
+        // );
+
+        // // Return any excess base Set token
+        // returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
+
+        // // Log RebalancingSetRedeem
+        // emit LogRebalancingSetIssue(
+        //     _rebalancingSetAddress,
+        //     msg.sender,
+        //     _rebalancingSetQuantity
+        // );
+
+        // Need to return extra weth/eth
+    }
+
+    /**
+     * Redeems a Rebalancing Set into the base components of the Base Set.
+     *
+     * @param  _rebalancingSetAddress    Address of the rebalancing Set to redeem
+     * @param  _rebalancingSetQuantity   The Quantity of the rebalancing Set to redeem
+     */
+    function redeemRebalancingSetIntoBaseComponents(
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity,
+        bool _keepChangeInVault
+    )
+        external
+        nonReentrant
+    {
+        redeemRebalancingSetAndWithdraw(_rebalancingSetAddress, _rebalancingSetQuantity);
 
         // Calculate the Base Set Redeem quantity
         address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
@@ -114,6 +235,7 @@ contract RebalancingSetIssuanceModule is
         // Redeem Base Set and send components to the the user
         // If you exclude, do the tokens get stuck with the contract?
         // Yes they need to be handled separately if they do.
+        // Also all the components we allow have to be whitelisted. So no point
         coreInstance.redeemAndWithdrawTo(
             baseSetAddress,
             msg.sender,
@@ -128,19 +250,19 @@ contract RebalancingSetIssuanceModule is
         emit LogRebalancingSetRedeem(
             _rebalancingSetAddress,
             msg.sender,
-            _redeemQuantity
+            _rebalancingSetQuantity
         );
     }
 
     function redeemRebalancingSetIntoComponentsAndEther(
         address _rebalancingSetAddress,
-        uint256 _redeemQuantity,
+        uint256 _rebalancingSetQuantity,
         bool _keepChangeInVault
     )
         external
         nonReentrant
     {
-        redeemRebalancingSetAndWithdraw(_rebalancingSetAddress, _redeemQuantity);
+        redeemRebalancingSetAndWithdraw(_rebalancingSetAddress, _rebalancingSetQuantity);
 
         // Calculate the Base Set Redeem quantity
         address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
@@ -162,11 +284,57 @@ contract RebalancingSetIssuanceModule is
         emit LogRebalancingSetRedeem(
             _rebalancingSetAddress,
             msg.sender,
-            _redeemQuantity
+            _rebalancingSetQuantity
         );
     }
 
     /* ============ Private Functions ============ */
+
+    function depositComponentsIncludingEth(
+        address _baseSetAddress,
+        uint256 _baseSetQuantity
+    )
+        internal
+    {
+       // Loop through the base Set components.
+        address[] memory baseSetComponents = ISetToken(_baseSetAddress).getComponents();
+        uint256[] memory baseSetUnits = ISetToken(_baseSetAddress).getUnits();
+        uint256 baseSetNaturalUnit = ISetToken(_baseSetAddress).naturalUnit();
+        for (uint256 i = 0; i < baseSetComponents.length; i++) {
+            address currentComponent = baseSetComponents[i];
+            uint256 currentUnit = baseSetUnits[i];
+
+            uint256 currentComponentQuantity = _baseSetQuantity.mul(currentUnit).div(baseSetNaturalUnit);
+
+            // If address is weth, withdraw weth and transfer eth
+            if (currentComponent == address(weth)) {
+                require(
+                    msg.value >= currentComponentQuantity,
+                    "depositNonWethComponents: Not enough ether for base Set"
+                );
+
+                // wrap all eth
+                weth.deposit.value(msg.value)();
+
+                // Ensure weth allowance
+                ERC20Wrapper.ensureAllowance(
+                    address(weth),
+                    address(this),
+                    transferProxy,
+                    msg.value
+                );
+
+                // Don't continue. We also want to deposit
+            }
+
+            coreInstance.depositModule(
+                msg.sender,
+                address(this),
+                currentComponent,
+                currentComponentQuantity
+            );
+        }
+    }
 
     function withdrawComponentsToSenderWithEther(
         address _baseSetAddress
@@ -188,12 +356,12 @@ contract RebalancingSetIssuanceModule is
                     address(this),
                     address(this),
                     address(weth),
-                    _wethQuantity
+                    currentComponentQuantity
                 );
 
-                weth.withdraw(_wethQuantity);
+                weth.withdraw(currentComponentQuantity);
 
-                msg.sender.transfer(_wethQuantity);
+                msg.sender.transfer(currentComponentQuantity);
 
                 continue;
             }

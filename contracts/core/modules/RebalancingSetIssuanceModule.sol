@@ -184,7 +184,17 @@ contract RebalancingSetIssuanceModule is
 
             // If address is weth, withdraw weth and transfer eth
             if (currentComponent == address(weth)) {
-                processWrappedEtherDuringRedemption(currentComponentQuantity);
+                coreInstance.withdrawModule(
+                    address(this),
+                    address(this),
+                    address(weth),
+                    _wethQuantity
+                );
+
+                weth.withdraw(_wethQuantity);
+
+                msg.sender.transfer(_wethQuantity);
+
                 continue;
             }
 
@@ -195,24 +205,5 @@ contract RebalancingSetIssuanceModule is
                 currentComponentQuantity
             );
         }
-    }
-
-    // TODO: To move this to its own library
-    // TODO: rename function
-    function processWrappedEtherDuringRedemption(
-        uint256 _wethQuantity
-    )
-        internal 
-    {
-        coreInstance.withdrawModule(
-            address(this),
-            address(this),
-            address(weth),
-            _wethQuantity
-        );
-
-        weth.withdraw(_wethQuantity);
-
-        msg.sender.transfer(_wethQuantity);
     }
 }

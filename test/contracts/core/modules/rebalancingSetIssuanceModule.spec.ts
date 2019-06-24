@@ -305,7 +305,8 @@ contract('RebalancingSetIssuanceModule', accounts => {
     let baseSetIssueQuantity: BigNumber;
     let baseSetComponentUnit: BigNumber;
 
-    let baseSetComponent: WethMockContract;
+    let baseSetWethComponent: WethMockContract;
+    let baseSetComponent: StandardTokenMockContract;
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
     let rebalancingSetToken: RebalancingSetTokenContract;
@@ -315,17 +316,21 @@ contract('RebalancingSetIssuanceModule', accounts => {
     let customRebalancingUnitShares: BigNumber;
 
     let wethRequiredToMintSet: BigNumber;
+    let baseComponentQuantity: BigNumber;
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
 
-      baseSetComponent = wethMock;
+      baseSetWethComponent = wethMock;
+      await erc20Wrapper.approveTransferAsync(baseSetWethComponent, transferProxy.address);
+
+      baseSetComponent = await erc20Wrapper.deployTokenAsync(ownerAccount);
       await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address);
 
-      // Create the Set (1 component)
-      const componentAddresses = [baseSetComponent.address];
+      // Create the Set (2 component)
+      const componentAddresses = [baseSetWethComponent.address, baseSetComponent.address];
       baseSetComponentUnit = ether(1);
-      const componentUnits = [baseSetComponentUnit];
+      const componentUnits = [baseSetComponentUnit, baseSetComponentUnit];
       baseSetNaturalUnit = ether(1);
       baseSetToken = await coreWrapper.createSetTokenAsync(
         core,
@@ -352,6 +357,8 @@ contract('RebalancingSetIssuanceModule', accounts => {
       subjectRedeemQuantity = new BigNumber(10 ** 7);
       baseSetIssueQuantity = customBaseIssueQuantity ||
         subjectRedeemQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
+
+      baseComponentQuantity = baseSetIssueQuantity.mul(baseSetComponentUnit).div(baseSetNaturalUnit);
 
       // Wrap WETH
       wethRequiredToMintSet = baseSetIssueQuantity.mul(baseSetComponentUnit).div(baseSetNaturalUnit);
@@ -420,6 +427,13 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       const ethBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
       expect(ethBalance).to.bignumber.equal(expectedEthBalance);
+    });
+
+    it('attributes the base Set component to the caller', async () => {
+      await subject();
+
+      const baseSetComponentBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
+      expect(baseSetComponentBalance).to.bignumber.equal(baseComponentQuantity);
     });
   });
 });

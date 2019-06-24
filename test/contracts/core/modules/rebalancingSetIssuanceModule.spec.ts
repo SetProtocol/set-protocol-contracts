@@ -32,6 +32,7 @@ import { ether } from '@utils/units';
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
+import { LogRebalancingSetIssue, LogRebalancingSetRedeem } from '@utils/contract_logs/rebalancingSetIssuanceModule';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -41,8 +42,9 @@ const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
 const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
 
-const { SetProtocolUtils: SetUtils } = setProtocolUtils;
+const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { ZERO } = SetUtils.CONSTANTS;
+const setTestUtils = new SetTestUtils(web3);
 
 contract('RebalancingSetIssuanceModule', accounts => {
   const [
@@ -125,7 +127,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     let customRebalancingUnitShares: BigNumber;
     let customRebalancingSetIssueQuantity: BigNumber;
     let customBaseComponentUnit: BigNumber;
-    let customIssueQuantity: BigNumber;
+    let customRebalancingSetQuantity: BigNumber;
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
@@ -159,7 +161,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       subjectRebalancingSetAddress = rebalancingSetToken.address;
 
-      subjectRebalancingSetQuantity = customIssueQuantity || new BigNumber(10 ** 7);
+      subjectRebalancingSetQuantity = customRebalancingSetQuantity || new BigNumber(10 ** 7);
       baseSetIssueQuantity = customBaseIssueQuantity ||
         subjectRebalancingSetQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
 
@@ -201,13 +203,61 @@ contract('RebalancingSetIssuanceModule', accounts => {
       expect(expectedComponentBalance).to.bignumber.equal(componentBalance);
     });
 
-    // Add test for log
-    // Add test for multiple components
-    // Add test for wonky base Set component
-    // Do we add check for rebalancing Set quantity resulting in natural unit multiple of base set?
+    it('emits correct LogRebalancingSetIssue event', async () => {
+      const txHash = await subject();
+
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs = LogRebalancingSetIssue(
+        subjectRebalancingSetAddress,
+        subjectCaller,
+        subjectRebalancingSetQuantity,
+        rebalancingTokenIssuanceModule.address
+      );
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the rebalancing Set quantiy results in base Set change', async () => {
+      before(async () => {
+        customRebalancingSetQuantity = new BigNumber(1.5).mul(10 ** 7);
+        customRebalancingUnitShares = new BigNumber(10 ** 17);
+      });
+
+      after(async () => {
+        customRebalancingSetQuantity = undefined;
+        customRebalancingUnitShares = undefined;
+      });
+
+      it('returns the correct quantity of base Set change', async () => {
+        await subject();
+
+        const baseSetChange = baseSetIssueQuantity.mod(baseSetNaturalUnit);
+
+        const baseSetBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+        expect(baseSetBalance).to.bignumber.equal(baseSetChange);
+      });
+
+      describe('when keepChangeInVault is true', async () => {
+        beforeEach(async () => {
+          subjectKeepChangeInVault = true;
+        });
+
+        it('returns the correct quantity of base Set change in the Vault', async () => {
+          await subject();
+
+          const baseSetChange = baseSetIssueQuantity.mod(baseSetNaturalUnit);
+
+          const baseSetBalance = await vault.getOwnerBalance.callAsync(
+            baseSetToken.address,
+            subjectCaller,
+          );
+          expect(baseSetBalance).to.bignumber.equal(baseSetChange);
+        });
+      });
+    });
   });
 
-  describe.only('#issueRebalancingSetWithEther', async () => {
+  describe('#issueRebalancingSetWithEther', async () => {
     let subjectCaller: Address;
     let subjectRebalancingSetAddress: Address;
     let subjectRebalancingSetQuantity: BigNumber;
@@ -227,7 +277,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     let customRebalancingUnitShares: BigNumber;
     let customRebalancingSetIssueQuantity: BigNumber;
     let customBaseComponentUnit: BigNumber;
-    let customIssueQuantity: BigNumber;
+    let customRebalancingSetQuantity: BigNumber;
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
@@ -263,7 +313,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       subjectRebalancingSetAddress = rebalancingSetToken.address;
 
-      subjectRebalancingSetQuantity = customIssueQuantity || new BigNumber(10 ** 7);
+      subjectRebalancingSetQuantity = customRebalancingSetQuantity || new BigNumber(10 ** 7);
       baseSetIssueQuantity = customBaseIssueQuantity ||
         subjectRebalancingSetQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
 
@@ -321,11 +371,82 @@ contract('RebalancingSetIssuanceModule', accounts => {
       expect(ethBalance).to.bignumber.equal(expectedEthBalance);
     });
 
-    // Add test for log
-    // Add test for multiple components
-    // Add test for wonky base Set component
-    // Do we add check for rebalancing Set quantity resulting in natural unit multiple of base set?
-    // Add test for returning eth
+    it('emits correct LogRebalancingSetIssue event', async () => {
+      const txHash = await subject();
+
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs = LogRebalancingSetIssue(
+        subjectRebalancingSetAddress,
+        subjectCaller,
+        subjectRebalancingSetQuantity,
+        rebalancingTokenIssuanceModule.address
+      );
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the eth sent is more than required', async () => {
+      const extraWeth = ether(1);
+
+      beforeEach(async () => {
+        subjectWethQuantity = subjectWethQuantity.add(extraWeth);
+      });
+
+      it('returns the change back to the user', async () => {
+        const previousEthBalance: BigNumber = new BigNumber(await web3.eth.getBalance(subjectCaller));
+
+        const txHash = await subject();
+        const totalGasInEth = await getGasUsageInEth(txHash);
+        const expectedEthBalance = previousEthBalance
+                                    .sub(subjectWethQuantity)
+                                    .add(extraWeth)
+                                    .sub(totalGasInEth);
+
+        const ethBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
+        expect(ethBalance).to.bignumber.equal(expectedEthBalance);
+      });
+    });
+
+    describe('when the rebalancing Set quantiy results in base Set change', async () => {
+      before(async () => {
+        customRebalancingSetQuantity = new BigNumber(1.5).mul(10 ** 7);
+        customRebalancingUnitShares = new BigNumber(10 ** 17);
+        customBaseIssueQuantity = ether(2);
+      });
+
+      after(async () => {
+        customRebalancingSetQuantity = undefined;
+        customRebalancingUnitShares = undefined;
+        customBaseIssueQuantity = undefined;
+      });
+
+      it('returns the correct quantity of base Set change', async () => {
+        await subject();
+
+        const expectedBaseSetChange = new BigNumber(5).mul(10 ** 17);
+
+        const baseSetBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+        expect(baseSetBalance).to.bignumber.equal(expectedBaseSetChange);
+      });
+
+      describe('when keepChangeInVault is true', async () => {
+        beforeEach(async () => {
+          subjectKeepChangeInVault = true;
+        });
+
+        it('returns the correct quantity of base Set change in the Vault', async () => {
+          await subject();
+
+          const expectedBaseSetChange = new BigNumber(5).mul(10 ** 17);
+
+          const baseSetBalance = await vault.getOwnerBalance.callAsync(
+            baseSetToken.address,
+            subjectCaller,
+          );
+          expect(baseSetBalance).to.bignumber.equal(expectedBaseSetChange);
+        });
+      });
+    });
   });
 
   describe('#redeemRebalancingSetIntoBaseComponents', async () => {
@@ -450,7 +571,19 @@ contract('RebalancingSetIssuanceModule', accounts => {
       expect(baseSetComponentBalance).to.bignumber.equal(expectedBaseComponentBalance);
     });
 
-    // Test logs
+    it('emits correct LogRebalancingSetRedeem event', async () => {
+      const txHash = await subject();
+
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs = LogRebalancingSetRedeem(
+        subjectRebalancingSetAddress,
+        subjectCaller,
+        subjectRebalancingSetQuantity,
+        rebalancingTokenIssuanceModule.address
+      );
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
 
     describe('when the redeem quantity results in excess base Set', async () => {
       describe('when keep change in vault is false', async () => {
@@ -657,5 +790,21 @@ contract('RebalancingSetIssuanceModule', accounts => {
       const baseSetComponentBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
       expect(baseSetComponentBalance).to.bignumber.equal(baseComponentQuantity);
     });
+
+    it('emits correct LogRebalancingSetRedeem event', async () => {
+      const txHash = await subject();
+
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs = LogRebalancingSetRedeem(
+        subjectRebalancingSetAddress,
+        subjectCaller,
+        subjectRebalancingSetQuantity,
+        rebalancingTokenIssuanceModule.address
+      );
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    // Test returning extra base Set
   });
 });

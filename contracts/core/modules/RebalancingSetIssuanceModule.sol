@@ -115,12 +115,12 @@ contract RebalancingSetIssuanceModule is
     {
         // Calculate required base Set quantity
         address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
-        uint256 requiredBaseSetQuantity = getBaseSetRequiredQuantity(
+        uint256 requiredBaseSetQuantity = getBaseSetIssuanceRequiredQuantity(
             _rebalancingSetAddress,
             _rebalancingSetQuantity
         );
 
-        // issue Base Set to this contract (ideally in vault)
+        // issue base Set to this contract, held in this contract
         coreInstance.issueModule(
             msg.sender,
             address(this),
@@ -146,7 +146,7 @@ contract RebalancingSetIssuanceModule is
         // Return any excess base Set token
         returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
 
-        // Log RebalancingSetRedeem
+        // Log RebalancingSetIssue
         emit LogRebalancingSetIssue(
             _rebalancingSetAddress,
             msg.sender,
@@ -165,7 +165,7 @@ contract RebalancingSetIssuanceModule is
     {
         // Calculate required base Set quantity
         address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
-        uint256 requiredBaseSetQuantity = getBaseSetRequiredQuantity(
+        uint256 requiredBaseSetQuantity = getBaseSetIssuanceRequiredQuantity(
             _rebalancingSetAddress,
             _rebalancingSetQuantity
         );
@@ -195,7 +195,7 @@ contract RebalancingSetIssuanceModule is
         // Return any excess base Set token
         returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
 
-        // Log RebalancingSetRedeem
+        // Log RebalancingSetIssue
         emit LogRebalancingSetIssue(
             _rebalancingSetAddress,
             msg.sender,

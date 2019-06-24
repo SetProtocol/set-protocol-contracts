@@ -39,7 +39,7 @@ contract RebalancingSetIssuance is
 
     // ============ Internal ============
 
-    function getBaseSetRequiredQuantity(
+    function getBaseSetIssuanceRequiredQuantity(
         address _rebalancingSetAddress,
         uint256 _rebalancingSetIssueQuantity
     )
@@ -51,9 +51,18 @@ contract RebalancingSetIssuance is
         uint256 unitShares = rebalancingSet.unitShares();
         uint256 naturalUnit = rebalancingSet.naturalUnit();
 
-        // TODO Need to somehow make sure this figure is a multiple of the Base Set natural unit
+        uint256 requiredBaseSetQuantity = _rebalancingSetIssueQuantity.mul(unitShares).div(naturalUnit);
 
-        return _rebalancingSetIssueQuantity.mul(unitShares).div(naturalUnit);
+        address baseSet = rebalancingSet.currentSet();
+        uint256 baseSetNaturalUnit = ISetToken(baseSet).naturalUnit();
+
+        // Round up to the next base Set natural unit
+        if (requiredBaseSetQuantity.mod(baseSetNaturalUnit) > 0) {
+            uint256 roundDownQuantity = requiredBaseSetQuantity.mod(baseSetNaturalUnit);
+            requiredBaseSetQuantity = requiredBaseSetQuantity.sub(roundDownQuantity).add(baseSetNaturalUnit);
+        }
+
+        return requiredBaseSetQuantity;
     }
 
     function redeemRebalancingSetAndWithdraw(
@@ -114,10 +123,58 @@ contract RebalancingSetIssuance is
     )
         internal
     {
-        // Return base Set if any that are in the Vault
-        uint256 baseSetQuantity = vaultInstance.getOwnerBalance(_baseSetAddress, address(this));
+        returnExcessBaseSetFromContract(_baseSetAddress, _keepChangeInVault);
+
+        returnExcessBaseSetInVault(_baseSetAddress, _keepChangeInVault);
+    }   
+
+    function returnExcessBaseSetFromContract(
+        address _baseSetAddress,
+        bool _keepChangeInVault
+    )
+        internal
+    {
+        // Return base Set if any that are in the smart contract
+        uint256 baseSetQuantity = ERC20Wrapper.balanceOf(
+            _baseSetAddress,
+            address(this)
+        );
         
         if (baseSetQuantity == 0) {
+            return;
+        }
+
+        if (_keepChangeInVault) {
+            // Transfer ownership within the vault to the user
+            coreInstance.depositModule(
+                address(this),
+                msg.sender,
+                _baseSetAddress,
+                baseSetQuantity
+            );
+        } else {
+            ERC20Wrapper.transfer(
+                _baseSetAddress,
+                msg.sender,
+                baseSetQuantity
+            );
+        }
+    }
+
+
+    function returnExcessBaseSetInVault(
+        address _baseSetAddress,
+        bool _keepChangeInVault
+    )
+        internal
+    {
+        // Return base Set if any that are in the Vault
+        uint256 baseSetQuantityInVault = vaultInstance.getOwnerBalance(
+            _baseSetAddress,
+            address(this)
+        );
+        
+        if (baseSetQuantityInVault == 0) {
             return;
         }
 
@@ -126,14 +183,14 @@ contract RebalancingSetIssuance is
             coreInstance.internalTransfer(
                 _baseSetAddress,
                 msg.sender,
-                baseSetQuantity
+                baseSetQuantityInVault
             );
         } else {
             coreInstance.withdrawModule(
                 address(this),
                 msg.sender,
                 _baseSetAddress,
-                baseSetQuantity
+                baseSetQuantityInVault
             );
         }
     }    

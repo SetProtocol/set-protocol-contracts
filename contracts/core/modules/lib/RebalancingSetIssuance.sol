@@ -51,7 +51,7 @@ contract RebalancingSetIssuance is
      */    
     function getBaseSetIssuanceRequiredQuantity(
         address _rebalancingSetAddress,
-        uint256 _rebalancingSetIssueQuantity
+        uint256 _rebalancingSetQuantity
     )
         internal
         returns (uint256)
@@ -61,7 +61,7 @@ contract RebalancingSetIssuance is
         uint256 unitShares = rebalancingSet.unitShares();
         uint256 naturalUnit = rebalancingSet.naturalUnit();
 
-        uint256 requiredBaseSetQuantity = _rebalancingSetIssueQuantity.mul(unitShares).div(naturalUnit);
+        uint256 requiredBaseSetQuantity = _rebalancingSetQuantity.mul(unitShares).div(naturalUnit);
 
         address baseSet = rebalancingSet.currentSet();
         uint256 baseSetNaturalUnit = ISetToken(baseSet).naturalUnit();

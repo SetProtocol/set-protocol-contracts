@@ -270,9 +270,7 @@ contract RebalancingSetIssuanceModule is
         );
 
         // Redeem Base Set and send components to the the user
-        // If you exclude, do the tokens get stuck with the contract?
-        // Yes they need to be handled separately if they do.
-        // Also all the components we allow have to be whitelisted. So no point
+        // Set exclude to 0, as tokens in Rebalancing Sets are already whitelisted
         coreInstance.redeemAndWithdrawTo(
             baseSetAddress,
             msg.sender,
@@ -291,6 +289,15 @@ contract RebalancingSetIssuanceModule is
         );
     }
 
+    /**
+     * Redeems a Rebalancing Set into the base components of the Base Set. Unwraps
+     * any wrapped ether and sends eth to the user.
+     *
+     * @param  _rebalancingSetAddress    Address of the rebalancing Set to redeem
+     * @param  _rebalancingSetQuantity   The Quantity of the rebalancing Set to redeem
+     * @param  _keepChangeInVault        Boolean signifying whether excess base Set is transfered to the user 
+     *                                     or left in the vault
+     */
     function redeemRebalancingSetWithEther(
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
@@ -317,7 +324,7 @@ contract RebalancingSetIssuanceModule is
             baseSetRedeemQuantity
         );
 
-        // Redeem. The components stay in the vault
+        // Redeem the base Set. The components stay in the vault
         coreInstance.redeem(
             baseSetAddress,
             baseSetRedeemQuantity
@@ -350,7 +357,7 @@ contract RebalancingSetIssuanceModule is
         address _baseSetAddress,
         uint256 _baseSetQuantity
     )
-        internal
+        private
     {
         ISetToken baseSet = ISetToken(_baseSetAddress);
 
@@ -398,13 +405,20 @@ contract RebalancingSetIssuanceModule is
         }
     }
 
+    /**
+     * During redemption, withdraw the required quantity of Base Set, unwrapwrap Ether, and withdraw
+     * components to the sender
+     *
+     * @param  _baseSetAddress           Address of the base Set token
+     */
     function withdrawComponentsToSenderWithEther(
         address _baseSetAddress
     )
-        internal
+        private
     {
-        // Loop through the base Set components.
         address[] memory baseSetComponents = ISetToken(_baseSetAddress).getComponents();
+
+        // Loop through the base Set components.
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
             address currentComponent = baseSetComponents[i];
             uint256 currentComponentQuantity = vaultInstance.getOwnerBalance(
@@ -414,6 +428,7 @@ contract RebalancingSetIssuanceModule is
 
             // If address is weth, withdraw weth and transfer eth to sender
             if (currentComponent == address(weth)) {
+                // Trasfer the wrapped ether to this address from the Vault
                 coreInstance.withdrawModule(
                     address(this),
                     address(this),
@@ -421,15 +436,16 @@ contract RebalancingSetIssuanceModule is
                     currentComponentQuantity
                 );
 
-                withdrawWrappedEtherAndTransfer(
-                    weth,
-                    msg.sender,
-                    currentComponentQuantity
-                );
+                // Unwrap wrapped ether
+                weth.withdraw(currentComponentQuantity);
+
+                // Transfer to recipient
+                msg.sender.transfer(currentComponentQuantity);
 
                 continue;
             }
 
+            // Withdraw component from the Vault and send to the user
             coreInstance.withdrawModule(
                 address(this),
                 msg.sender,

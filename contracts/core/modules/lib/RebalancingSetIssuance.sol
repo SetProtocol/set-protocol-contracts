@@ -39,6 +39,16 @@ contract RebalancingSetIssuance is
 
     // ============ Internal ============
 
+    /**
+     * Given a rebalancing Set and a desired issue quantity, calculates the 
+     * minimum issuable quantity of the base Set. If the calculated quantity is initially
+     * not a multiple of the base Set's natural unit, the quantity is rounded up
+     * to the next base set natural unit.
+     *
+     * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
+     * @param  _rebalancingSetQuantity   The issuance quantity of Rebalancing Set
+     * @return requiredBaseSetQuantity      The quantity of base Set to issue
+     */    
     function getBaseSetIssuanceRequiredQuantity(
         address _rebalancingSetAddress,
         uint256 _rebalancingSetIssueQuantity
@@ -92,6 +102,15 @@ contract RebalancingSetIssuance is
         return redeemQuantity;
     }
 
+    /**
+     * Checks the base Set balances in the Vault and on the contract. 
+     * Sends any positive quantity to the user directly or into the Vault
+     * depending on the keepChangeInVault flag.
+     *
+     * @param _baseSetAddress             The address of the base Set
+     * @param  _keepChangeInVault         Boolean signifying whether excess base Set is transfered to the user 
+     *                                     or left in the vault
+     */
     function returnExcessBaseSet(
         address _baseSetAddress,
         bool _keepChangeInVault
@@ -103,21 +122,24 @@ contract RebalancingSetIssuance is
         returnExcessBaseSetInVault(_baseSetAddress, _keepChangeInVault);
     }   
 
+    /**
+     * Checks the base Set balances on the contract and sends
+     * any positive quantity to the user directly or into the Vault
+     * depending on the keepChangeInVault flag.
+     *
+     * @param _baseSetAddress             The address of the base Set
+     * @param  _keepChangeInVault         Boolean signifying whether excess base Set is transfered to the user 
+     *                                     or left in the vault
+     */
     function returnExcessBaseSetFromContract(
         address _baseSetAddress,
         bool _keepChangeInVault
     )
         internal
     {
-        // Return base Set if any that are in the smart contract
-        uint256 baseSetQuantity = ERC20Wrapper.balanceOf(
-            _baseSetAddress,
-            address(this)
-        );
+        uint256 baseSetQuantity = ERC20Wrapper.balanceOf(_baseSetAddress, address(this));
         
-        if (baseSetQuantity == 0) {
-            return;
-        }
+        if (baseSetQuantity == 0) { return; }
 
         if (_keepChangeInVault) {
             // Transfer ownership within the vault to the user
@@ -128,6 +150,7 @@ contract RebalancingSetIssuance is
                 baseSetQuantity
             );
         } else {
+            // Transfer directly to the user
             ERC20Wrapper.transfer(
                 _baseSetAddress,
                 msg.sender,
@@ -136,7 +159,15 @@ contract RebalancingSetIssuance is
         }
     }
 
-
+    /**
+     * Checks the base Set balances in the Vault and sends
+     * any positive quantity to the user directly or into the Vault
+     * depending on the keepChangeInVault flag.
+     *
+     * @param _baseSetAddress             The address of the base Set
+     * @param  _keepChangeInVault         Boolean signifying whether excess base Set is transfered to the user 
+     *                                     or left in the vault
+     */
     function returnExcessBaseSetInVault(
         address _baseSetAddress,
         bool _keepChangeInVault
@@ -149,9 +180,7 @@ contract RebalancingSetIssuance is
             address(this)
         );
         
-        if (baseSetQuantityInVault == 0) {
-            return;
-        }
+        if (baseSetQuantityInVault == 0) { return; }
 
         if (_keepChangeInVault) {
             // Transfer ownership within the vault to the user
@@ -161,6 +190,7 @@ contract RebalancingSetIssuance is
                 baseSetQuantityInVault
             );
         } else {
+            // Transfer ownership directly to the user
             coreInstance.withdrawModule(
                 address(this),
                 msg.sender,

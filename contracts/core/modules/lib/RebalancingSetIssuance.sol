@@ -65,31 +65,6 @@ contract RebalancingSetIssuance is
         return requiredBaseSetQuantity;
     }
 
-    function redeemRebalancingSetAndWithdraw(
-        address _rebalancingSetAddress,
-        uint256 _redeemQuantity
-    )
-        internal
-    {
-        // Redeem RB Set to the vault attributed to this contract
-        coreInstance.redeemModule(
-            msg.sender,
-            address(this),
-            _rebalancingSetAddress,
-            _redeemQuantity
-        );
-
-        // Calculate the Base Set Redeem quantity
-        address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
-        uint256 baseSetRedeemQuantity = getBaseSetRedeemQuantity(baseSetAddress);
-
-        // Withdraw base Set to this contract
-        coreInstance.withdraw(
-            baseSetAddress,
-            baseSetRedeemQuantity
-        );
-    }
-
 
     /**
      * Given a rebalancing set address, retrieve the base set quantity redeem quantity.
@@ -111,7 +86,7 @@ contract RebalancingSetIssuance is
             address(this)
         );
 
-        // Round the balance to the natural unit
+        // Round the balance to the base Set natural unit
         uint256 redeemQuantity = baseSetBalance.div(baseSetNaturalUnit).mul(baseSetNaturalUnit);
 
         return redeemQuantity;

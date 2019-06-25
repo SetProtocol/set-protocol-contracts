@@ -25,7 +25,6 @@ import { IWETH } from "../../lib/IWETH.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 import { RebalancingSetIssuance } from "./lib/RebalancingSetIssuance.sol";
-import { WrappedEther } from "./lib/WrappedEther.sol";
 
 
 /**
@@ -37,7 +36,6 @@ import { WrappedEther } from "./lib/WrappedEther.sol";
 contract RebalancingSetIssuanceModule is
     ModuleCoreState,
     RebalancingSetIssuance,
-    WrappedEther,
     ReentrancyGuard
 {
     using SafeMath for uint256;

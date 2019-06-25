@@ -376,7 +376,7 @@ contract RebalancingSetIssuanceModule is
                 // Expect the ether included exceeds the required Weth quantity
                 require(
                     msg.value >= currentComponentQuantity,
-                    "RebalancingSetIssuanceMOdule.depositNonWethComponents: Not enough ether included for base Set"
+                    "RebalancingSetIssuanceModule.depositNonWethComponents: Not enough ether included for base Set"
                 );
 
                 // wrap the required ether quantity

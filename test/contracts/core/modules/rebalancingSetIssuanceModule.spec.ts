@@ -123,10 +123,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     let baseSetComponentUnit: BigNumber;
     let baseSetIssueQuantity: BigNumber;
 
-    let customBaseIssueQuantity: BigNumber;
     let customRebalancingUnitShares: BigNumber;
-    let customRebalancingSetIssueQuantity: BigNumber;
-    let customBaseComponentUnit: BigNumber;
     let customRebalancingSetQuantity: BigNumber;
 
     beforeEach(async () => {
@@ -137,7 +134,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       // Create the Set (1 component)
       const componentAddresses = [baseSetComponent.address];
-      baseSetComponentUnit = customBaseComponentUnit || ether(1);
+      baseSetComponentUnit = ether(1);
       const componentUnits = [baseSetComponentUnit];
       baseSetNaturalUnit = ether(1);
       baseSetToken = await coreWrapper.createSetTokenAsync(
@@ -162,7 +159,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
       subjectRebalancingSetAddress = rebalancingSetToken.address;
 
       subjectRebalancingSetQuantity = customRebalancingSetQuantity || new BigNumber(10 ** 7);
-      baseSetIssueQuantity = customBaseIssueQuantity ||
+      baseSetIssueQuantity =
         subjectRebalancingSetQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
 
       subjectKeepChangeInVault = false;
@@ -275,8 +272,6 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
     let customBaseIssueQuantity: BigNumber;
     let customRebalancingUnitShares: BigNumber;
-    let customRebalancingSetIssueQuantity: BigNumber;
-    let customBaseComponentUnit: BigNumber;
     let customRebalancingSetQuantity: BigNumber;
 
     beforeEach(async () => {
@@ -289,7 +284,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       // Create the Set (2 component)
       const componentAddresses = [baseSetWethComponent.address, baseSetComponent.address];
-      baseSetComponentUnit = customBaseComponentUnit || ether(1);
+      baseSetComponentUnit = ether(1);
       const componentUnits = [baseSetComponentUnit, baseSetComponentUnit];
       baseSetNaturalUnit = ether(1);
       baseSetToken = await coreWrapper.createSetTokenAsync(
@@ -669,6 +664,8 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
     let customBaseIssueQuantity: BigNumber;
     let customRebalancingUnitShares: BigNumber;
+    let customRedeemQuantity: BigNumber;
+    let customRebalancingSetIssueQuantity: BigNumber;
 
     let wethRequiredToMintSet: BigNumber;
     let baseComponentQuantity: BigNumber;
@@ -709,7 +706,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       subjectRebalancingSetAddress = rebalancingSetToken.address;
 
-      subjectRebalancingSetQuantity = new BigNumber(10 ** 7);
+      subjectRebalancingSetQuantity = customRedeemQuantity || new BigNumber(10 ** 7);
       baseSetIssueQuantity = customBaseIssueQuantity ||
         subjectRebalancingSetQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
 
@@ -727,11 +724,13 @@ contract('RebalancingSetIssuanceModule', accounts => {
         baseSetIssueQuantity,
       );
 
+      const rebalancingSetIssueQuantity = customRebalancingSetIssueQuantity || subjectRebalancingSetQuantity;
+
       // Issue the rebalancing Set Token
       await core.issueTo.sendTransactionAsync(
         functionCaller,
         rebalancingSetToken.address,
-        subjectRebalancingSetQuantity,
+        rebalancingSetIssueQuantity,
       );
 
       subjectKeepChangeInVault = false;
@@ -752,6 +751,8 @@ contract('RebalancingSetIssuanceModule', accounts => {
     afterEach(async () => {
       customRebalancingUnitShares = undefined;
       customBaseIssueQuantity = undefined;
+      customRedeemQuantity = undefined;
+      customRebalancingSetIssueQuantity = undefined;
     });
 
     it('redeems the rebalancing Set', async () => {
@@ -805,6 +806,69 @@ contract('RebalancingSetIssuanceModule', accounts => {
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
-    // Test returning extra base Set
+    describe('when the redeem quantity results in excess base Set', async () => {
+      describe('when keep change in vault is false', async () => {
+        before(async () => {
+          customRebalancingUnitShares  = new BigNumber(10 ** 17);
+          customRedeemQuantity = new BigNumber(1.5).mul(10 ** 7);
+          customBaseIssueQuantity = ether(2);
+          customRebalancingSetIssueQuantity = new BigNumber(2).mul(10 ** 7);
+        });
+
+        after(async () => {
+          customRebalancingUnitShares = undefined;
+          customRedeemQuantity = undefined;
+          customBaseIssueQuantity = undefined;
+          customRebalancingSetIssueQuantity = undefined;
+        });
+
+        // It sends the change to the user
+        it('sends the correct base set quantity to the user', async () => {
+          await subject();
+
+          const expectedBalance = customRedeemQuantity
+                                    .mul(rebalancingUnitShares)
+                                    .div(DEFAULT_REBALANCING_NATURAL_UNIT)
+                                    .mod(baseSetNaturalUnit);
+
+          const currentBaseSetBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+          expect(currentBaseSetBalance).to.bignumber.equal(expectedBalance);
+        });
+      });
+
+      describe('when keep change in vault is true', async () => {
+        before(async () => {
+          customRebalancingUnitShares  = new BigNumber(10 ** 17);
+          customRedeemQuantity = new BigNumber(1.5).mul(10 ** 7);
+          customBaseIssueQuantity = ether(2);
+          customRebalancingSetIssueQuantity = new BigNumber(2).mul(10 ** 7);
+        });
+
+        after(async () => {
+          customRebalancingUnitShares = undefined;
+          customRedeemQuantity = undefined;
+          customBaseIssueQuantity = undefined;
+          customRebalancingSetIssueQuantity = undefined;
+        });
+
+        beforeEach(async () => {
+          subjectKeepChangeInVault = true;
+        });
+
+        it('sends the correct base set quantity to the user in the vault', async () => {
+          await subject();
+
+          const expectedBalance = customRedeemQuantity
+                                  .mul(rebalancingUnitShares)
+                                  .div(DEFAULT_REBALANCING_NATURAL_UNIT)
+                                  .mod(baseSetNaturalUnit);
+          const currentBaseSetBalance = await vault.getOwnerBalance.callAsync(
+            baseSetToken.address,
+            subjectCaller,
+          );
+          expect(currentBaseSetBalance).to.bignumber.equal(expectedBalance);
+        });
+      });
+    });
   });
 });

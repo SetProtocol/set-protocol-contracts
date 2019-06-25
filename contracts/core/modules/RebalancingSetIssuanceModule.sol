@@ -25,17 +25,19 @@ import { IWETH } from "../../lib/IWETH.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 import { RebalancingSetIssuance } from "./lib/RebalancingSetIssuance.sol";
+import { WrappedEther } from "./lib/WrappedEther.sol";
 
 
 /**
  * @title RebalancingSetIssuanceModule
  * @author Set Protocol
  *
- * A module that includes a convenience function for redeeming a rebalancing set into components efficiently.
+ * A module that includes functions for issuing / redeeming Rebalancing Sets to/from its base components and ether.
  */
 contract RebalancingSetIssuanceModule is
     ModuleCoreState,
     RebalancingSetIssuance,
+    WrappedEther,
     ReentrancyGuard
 {
     using SafeMath for uint256;
@@ -356,9 +358,11 @@ contract RebalancingSetIssuanceModule is
                     currentComponentQuantity
                 );
 
-                weth.withdraw(currentComponentQuantity);
-
-                msg.sender.transfer(currentComponentQuantity);  // coverage-disable-line
+                withdrawWrappedEtherAndTransfer(
+                    weth,
+                    msg.sender,
+                    currentComponentQuantity
+                );
 
                 continue;
             }

@@ -66,7 +66,8 @@ contract RebalancingSetIssuance is
         address baseSet = rebalancingSet.currentSet();
         uint256 baseSetNaturalUnit = ISetToken(baseSet).naturalUnit();
 
-        // Round up to the next base Set natural unit
+        // If there is a mismatch between the required quantity and the base Set natural unit,
+        // round up to the next base Set natural unit if required.
         if (requiredBaseSetQuantity.mod(baseSetNaturalUnit) > 0) {
             uint256 roundDownQuantity = requiredBaseSetQuantity.mod(baseSetNaturalUnit);
             requiredBaseSetQuantity = requiredBaseSetQuantity.sub(roundDownQuantity).add(baseSetNaturalUnit);
@@ -78,6 +79,7 @@ contract RebalancingSetIssuance is
 
     /**
      * Given a rebalancing set address, retrieve the base set quantity redeem quantity.
+     * Rounds down to the nearest base Set natural unit.
      *
      * @param _baseSetAddress             The address of the base Set
      * @return baseSetRedeemQuantity      The quantity of base Set to redeem
@@ -96,7 +98,7 @@ contract RebalancingSetIssuance is
             address(this)
         );
 
-        // Round the balance to the base Set natural unit
+        // Round the balance down to the base Set natural unit
         uint256 redeemQuantity = baseSetBalance.div(baseSetNaturalUnit).mul(baseSetNaturalUnit);
 
         return redeemQuantity;

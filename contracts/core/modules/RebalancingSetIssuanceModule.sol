@@ -271,7 +271,7 @@ contract RebalancingSetIssuanceModule is
             baseSetRedeemQuantity
         );
 
-        // Loop through the base Set components.
+        // Loop through the base Set components and transfer to sender.
         withdrawComponentsToSenderWithEther(baseSetAddress);
 
         // Transfer any change of the base Set to the end user
@@ -347,7 +347,7 @@ contract RebalancingSetIssuanceModule is
                 address(this)
             );
 
-            // If address is weth, withdraw weth and transfer eth
+            // If address is weth, withdraw weth and transfer eth to sender
             if (currentComponent == address(weth)) {
                 coreInstance.withdrawModule(
                     address(this),
@@ -358,7 +358,7 @@ contract RebalancingSetIssuanceModule is
 
                 weth.withdraw(currentComponentQuantity);
 
-                msg.sender.transfer(currentComponentQuantity);
+                msg.sender.transfer(currentComponentQuantity);  // coverage-disable-line
 
                 continue;
             }

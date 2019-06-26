@@ -29,7 +29,7 @@ import { ModuleCoreState } from "./ModuleCoreState.sol";
  * @title RebalancingSetIssuance
  * @author Set Protocol
  *
- * The RebalancingSetIssuance contains utility functions used in RebalancingSet 
+ * The RebalancingSetIssuance contains utility functions used in rebalancing SetToken 
  * issuance
  */
 contract RebalancingSetIssuance is 
@@ -41,12 +41,12 @@ contract RebalancingSetIssuance is
     // ============ Internal ============
 
     /**
-     * Validates that wrapped Ether is a component of the Set
+     * Validates that wrapped Ether is a component of the SetToken
      *
      * @param  _setAddress            Address of the SetToken
      * @param  _wrappedEtherAddress   Address of wrapped Ether
      */
-    function validateWethIsAComponentOfSet(
+    function validateWETHIsAComponentOfSet(
         address _setAddress,
         address _wrappedEtherAddress
     )
@@ -55,7 +55,7 @@ contract RebalancingSetIssuance is
         address[] memory setComponents = ISetToken(_setAddress).getComponents();
         require(
             setComponents.contains(_wrappedEtherAddress),
-            "RebalancingSetIssuance.validateWethIsAComponentOfSet: Components must contain weth"
+            "RebalancingSetIssuance.validateWETHIsAComponentOfSet: Components must contain weth"
         );
     }
 
@@ -63,8 +63,8 @@ contract RebalancingSetIssuance is
      * Validates that the passed in address is tracked by Core and that the quantity
      * is a multiple of the natural unit
      *
-     * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue/redeem
-     * @param  _rebalancingSetQuantity   The issuance quantity of Rebalancing Set
+     * @param  _rebalancingSetAddress    Address of the rebalancing SetToken to issue/redeem
+     * @param  _rebalancingSetQuantity   The issuance quantity of rebalancing SetToken
      */   
     function validateRebalancingSetIssuance(
         address _rebalancingSetAddress,
@@ -72,13 +72,13 @@ contract RebalancingSetIssuance is
     ) 
         internal
     {
-        // Expect RebalancingSet to be valid and enabled Set
+        // Expect rebalancing SetToken to be valid and enabled SetToken
         require(
             coreInstance.validSets(_rebalancingSetAddress),
             "RebalancingSetIssuance.validateRebalancingIssuance: Invalid or disabled SetToken address"
         );
         
-        // Make sure Issuance quantity is multiple of the RebalancingSet natural unit
+        // Make sure Issuance quantity is multiple of the rebalancing SetToken natural unit
         require(
             _rebalancingSetQuantity.mod(ISetToken(_rebalancingSetAddress).naturalUnit()) == 0,
             "RebalancingSetIssuance.validateRebalancingIssuance: Quantity must be multiple of natural unit"
@@ -86,14 +86,14 @@ contract RebalancingSetIssuance is
     }
 
     /**
-     * Given a rebalancing Set and a desired issue quantity, calculates the 
-     * minimum issuable quantity of the base Set. If the calculated quantity is initially
-     * not a multiple of the base Set's natural unit, the quantity is rounded up
+     * Given a rebalancing SetToken and a desired issue quantity, calculates the 
+     * minimum issuable quantity of the base SetToken. If the calculated quantity is initially
+     * not a multiple of the base SetToken's natural unit, the quantity is rounded up
      * to the next base set natural unit.
      *
-     * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
-     * @param  _rebalancingSetQuantity   The issuance quantity of Rebalancing Set
-     * @return requiredBaseSetQuantity      The quantity of base Set to issue
+     * @param  _rebalancingSetAddress    Address of the rebalancing SetToken to issue
+     * @param  _rebalancingSetQuantity   The issuance quantity of rebalancing SetToken
+     * @return requiredBaseSetQuantity   The quantity of base SetToken to issue
      */    
     function getBaseSetIssuanceRequiredQuantity(
         address _rebalancingSetAddress,
@@ -112,8 +112,8 @@ contract RebalancingSetIssuance is
         address baseSet = rebalancingSet.currentSet();
         uint256 baseSetNaturalUnit = ISetToken(baseSet).naturalUnit();
 
-        // If there is a mismatch between the required quantity and the base Set natural unit,
-        // round up to the next base Set natural unit if required.
+        // If there is a mismatch between the required quantity and the base SetToken natural unit,
+        // round up to the next base SetToken natural unit if required.
         if (requiredBaseSetQuantity.mod(baseSetNaturalUnit) > 0) {
             uint256 roundDownQuantity = requiredBaseSetQuantity.mod(baseSetNaturalUnit);
             requiredBaseSetQuantity = requiredBaseSetQuantity.sub(roundDownQuantity).add(baseSetNaturalUnit);
@@ -124,11 +124,11 @@ contract RebalancingSetIssuance is
 
 
     /**
-     * Given a rebalancing set address, retrieve the base set quantity redeem quantity based on the quantity
-     * held in the Vault. Rounds down to the nearest base Set natural unit.
+     * Given a rebalancing SetToken address, retrieve the base SetToken quantity redeem quantity based on the quantity
+     * held in the Vault. Rounds down to the nearest base SetToken natural unit.
      *
-     * @param _baseSetAddress             The address of the base Set
-     * @return baseSetRedeemQuantity      The quantity of base Set to redeem
+     * @param _baseSetAddress             The address of the base SetToken
+     * @return baseSetRedeemQuantity      The quantity of base SetToken to redeem
      */
     function getBaseSetRedeemQuantity(
         address _baseSetAddress
@@ -137,27 +137,27 @@ contract RebalancingSetIssuance is
         view
         returns (uint256)
     {
-        // Get Base Set Details from the rebalancing Set
+        // Get base SetToken Details from the rebalancing SetToken
         uint256 baseSetNaturalUnit = ISetToken(_baseSetAddress).naturalUnit();
         uint256 baseSetBalance = vaultInstance.getOwnerBalance(
             _baseSetAddress,
             address(this)
         );
 
-        // Round the balance down to the base Set natural unit
+        // Round the balance down to the base SetToken natural unit
         uint256 redeemQuantity = baseSetBalance.div(baseSetNaturalUnit).mul(baseSetNaturalUnit);
 
         return redeemQuantity;
     }
 
     /**
-     * Checks the base Set balances in the Vault and on the contract. 
+     * Checks the base SetToken balances in the Vault and on the contract. 
      * Sends any positive quantity to the user directly or into the Vault
      * depending on the keepChangeInVault flag.
      *
-     * @param _baseSetAddress             The address of the base Set
+     * @param _baseSetAddress             The address of the base SetToken
      * @param _transferProxyAddress       The address of the TransferProxy
-     * @param  _keepChangeInVault         Boolean signifying whether excess base Set is transfered to the user 
+     * @param  _keepChangeInVault         Boolean signifying whether excess base SetToken is transfered to the user 
      *                                     or left in the vault
      */
     function returnExcessBaseSet(
@@ -173,13 +173,13 @@ contract RebalancingSetIssuance is
     }   
 
     /**
-     * Checks the base Set balances on the contract and sends
+     * Checks the base SetToken balances on the contract and sends
      * any positive quantity to the user directly or into the Vault
      * depending on the keepChangeInVault flag.
      *
-     * @param _baseSetAddress             The address of the base Set
+     * @param _baseSetAddress             The address of the base SetToken
      * @param _transferProxyAddress       The address of the TransferProxy
-     * @param  _keepChangeInVault         Boolean signifying whether excess base Set is transfered to the user 
+     * @param  _keepChangeInVault         Boolean signifying whether excess base SetToken is transfered to the user 
      *                                     or left in the vault
      */
     function returnExcessBaseSetFromContract(
@@ -202,7 +202,7 @@ contract RebalancingSetIssuance is
                 baseSetQuantity
             );
 
-            // Deposit Base Set to the user
+            // Deposit base SetToken to the user
             coreInstance.depositModule(
                 address(this),
                 msg.sender,
@@ -220,12 +220,12 @@ contract RebalancingSetIssuance is
     }
 
     /**
-     * Checks the base Set balances in the Vault and sends
+     * Checks the base SetToken balances in the Vault and sends
      * any positive quantity to the user directly or into the Vault
      * depending on the keepChangeInVault flag.
      *
-     * @param _baseSetAddress             The address of the base Set
-     * @param  _keepChangeInVault         Boolean signifying whether excess base Set is transfered to the user 
+     * @param _baseSetAddress             The address of the base SetToken
+     * @param  _keepChangeInVault         Boolean signifying whether excess base SetToken is transfered to the user 
      *                                     or left in the vault
      */
     function returnExcessBaseSetInVault(
@@ -234,7 +234,7 @@ contract RebalancingSetIssuance is
     )
         internal
     {
-        // Return base Set if any that are in the Vault
+        // Return base SetToken if any that are in the Vault
         uint256 baseSetQuantityInVault = vaultInstance.getOwnerBalance(
             _baseSetAddress,
             address(this)

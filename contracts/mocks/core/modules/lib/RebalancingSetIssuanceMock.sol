@@ -14,13 +14,13 @@ contract RebalancingSetIssuanceMock is
         ModuleCoreState(_core, _vault)
     {}
 
-    function validateWethIsAComponentOfSetMock(
+    function validateWETHIsAComponentOfSetMock(
         address _setAddress,
         address _wrappedEtherAddress
     )
         external
     {
-    	validateWethIsAComponentOfSet(_setAddress, _wrappedEtherAddress);
+    	validateWETHIsAComponentOfSet(_setAddress, _wrappedEtherAddress);
     }
 
 	function validateRebalancingSetIssuanceMock(

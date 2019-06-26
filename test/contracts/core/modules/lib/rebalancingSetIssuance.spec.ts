@@ -102,7 +102,7 @@ contract('RebalancingSetIssuance', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#validateWethIsAComponentOfSet', async () => {
+  describe('#validateWETHIsAComponentOfSet', async () => {
     let subjectCaller: Address;
     let subjectSetAddress: Address;
     let subjectWrappedEtherAddress: Address;
@@ -140,7 +140,7 @@ contract('RebalancingSetIssuance', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return rebalancingTokenIssuanceMock.validateWethIsAComponentOfSetMock.sendTransactionAsync(
+      return rebalancingTokenIssuanceMock.validateWETHIsAComponentOfSetMock.sendTransactionAsync(
         subjectSetAddress,
         subjectWrappedEtherAddress,
         {

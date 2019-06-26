@@ -291,7 +291,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     });
   });
 
-  describe('#issueRebalancingSetWithEther', async () => {
+  describe('#issueRebalancingSetWrappingEther', async () => {
     let subjectCaller: Address;
     let subjectRebalancingSetAddress: Address;
     let subjectRebalancingSetQuantity: BigNumber;
@@ -357,7 +357,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return rebalancingTokenIssuanceModule.issueRebalancingSetWithEther.sendTransactionAsync(
+      return rebalancingTokenIssuanceModule.issueRebalancingSetWrappingEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
         subjectRebalancingSetQuantity,
         subjectKeepChangeInVault,
@@ -764,7 +764,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     });
   });
 
-  describe('#redeemRebalancingSetWithEther', async () => {
+  describe('#redeemRebalancingSetUnwrappingEther', async () => {
     let subjectCaller: Address;
     let subjectRebalancingSetAddress: Address;
     let subjectRebalancingSetQuantity: BigNumber;
@@ -856,7 +856,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return rebalancingTokenIssuanceModule.redeemRebalancingSetWithEther.sendTransactionAsync(
+      return rebalancingTokenIssuanceModule.redeemRebalancingSetUnwrappingEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
         subjectRebalancingSetQuantity,
         subjectKeepChangeInVault,

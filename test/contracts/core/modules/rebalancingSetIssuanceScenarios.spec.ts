@@ -163,7 +163,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return rebalancingTokenIssuanceModule.issueRebalancingSetWithEther.sendTransactionAsync(
+      return rebalancingTokenIssuanceModule.issueRebalancingSetWrappingEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
         subjectRebalancingSetQuantity,
         subjectKeepChangeInVault,
@@ -367,7 +367,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return rebalancingTokenIssuanceModule.redeemRebalancingSetWithEther.sendTransactionAsync(
+      return rebalancingTokenIssuanceModule.redeemRebalancingSetUnwrappingEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
         subjectRebalancingSetQuantity,
         subjectKeepChangeInVault,

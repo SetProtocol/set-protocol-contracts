@@ -22,6 +22,7 @@ import {
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3, getGasUsageInEth } from '@utils/web3Helper';
+import { expectRevertError } from '@utils/tokenAssertions';
 import {
   DEFAULT_GAS,
   DEFAULT_REBALANCING_NATURAL_UNIT,
@@ -116,6 +117,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     let subjectKeepChangeInVault: boolean;
 
     let baseSetComponent: StandardTokenMockContract;
+    let baseSetComponent2: StandardTokenMockContract;
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
     let rebalancingSetToken: RebalancingSetTokenContract;
@@ -132,10 +134,13 @@ contract('RebalancingSetIssuanceModule', accounts => {
       baseSetComponent = await erc20Wrapper.deployTokenAsync(subjectCaller);
       await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address, subjectCaller);
 
+      baseSetComponent2 = await erc20Wrapper.deployTokenAsync(subjectCaller);
+      await erc20Wrapper.approveTransferAsync(baseSetComponent2, transferProxy.address, subjectCaller);
+
       // Create the Set (1 component)
-      const componentAddresses = [baseSetComponent.address];
+      const componentAddresses = [baseSetComponent.address, baseSetComponent2.address];
       baseSetComponentUnit = ether(1);
-      const componentUnits = [baseSetComponentUnit];
+      const componentUnits = [baseSetComponentUnit, baseSetComponentUnit];
       baseSetNaturalUnit = ether(1);
       baseSetToken = await coreWrapper.createSetTokenAsync(
         core,
@@ -200,6 +205,18 @@ contract('RebalancingSetIssuanceModule', accounts => {
       expect(expectedComponentBalance).to.bignumber.equal(componentBalance);
     });
 
+    it('uses the correct amount of component 2 tokens', async () => {
+      const previousComponentBalance = await baseSetComponent2.balanceOf.callAsync(subjectCaller);
+      const expectedComponentUsed = baseSetIssueQuantity.mul(baseSetComponentUnit).div(baseSetNaturalUnit);
+
+      const expectedComponentBalance = previousComponentBalance.sub(expectedComponentUsed);
+
+      await subject();
+
+      const componentBalance = await baseSetComponent2.balanceOf.callAsync(subjectCaller);
+      expect(expectedComponentBalance).to.bignumber.equal(componentBalance);
+    });
+
     it('emits correct LogRebalancingSetIssue event', async () => {
       const txHash = await subject();
 
@@ -212,6 +229,26 @@ contract('RebalancingSetIssuanceModule', accounts => {
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the rebalancing Set address is not an approved Set', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetAddress = ownerAccount;
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the rebalancing Set quantity is not a multiple of the natural unit', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetQuantity = subjectRebalancingSetQuantity.sub(1);
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
     });
 
     describe('when the rebalancing Set quantiy results in base Set change', async () => {
@@ -273,6 +310,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     let customBaseIssueQuantity: BigNumber;
     let customRebalancingUnitShares: BigNumber;
     let customRebalancingSetQuantity: BigNumber;
+    let customWethMock: WethMockContract;
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
@@ -280,7 +318,8 @@ contract('RebalancingSetIssuanceModule', accounts => {
       baseSetComponent = await erc20Wrapper.deployTokenAsync(subjectCaller);
       await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address, subjectCaller);
 
-      baseSetWethComponent = wethMock;
+      baseSetWethComponent = customWethMock || wethMock;
+      await erc20Wrapper.approveTransferAsync(baseSetWethComponent, transferProxy.address, subjectCaller);
 
       // Create the Set (2 component)
       const componentAddresses = [baseSetWethComponent.address, baseSetComponent.address];
@@ -380,6 +419,40 @@ contract('RebalancingSetIssuanceModule', accounts => {
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
+    describe('when the base SetToken components do not include wrapped Ether', async () => {
+      before(async () => {
+        customWethMock = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
+      });
+
+      after(async () => {
+        customWethMock = undefined;
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the rebalancing Set address is not an approved Set', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetAddress = ownerAccount;
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the rebalancing Set quantity is not a multiple of the natural unit', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetQuantity = subjectRebalancingSetQuantity.sub(1);
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe('when the eth sent is more than required', async () => {
       const extraWeth = ether(1);
 
@@ -399,6 +472,18 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
         const ethBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
         expect(ethBalance).to.bignumber.equal(expectedEthBalance);
+      });
+    });
+
+    describe('when the eth sent is less than required', async () => {
+      const extraWeth = new BigNumber(10 ** 6);
+
+      beforeEach(async () => {
+        subjectWethQuantity = subjectWethQuantity.sub(extraWeth);
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
       });
     });
 
@@ -454,6 +539,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     let baseSetComponentUnit: BigNumber;
 
     let baseSetComponent: StandardTokenMockContract;
+    let baseSetComponent2: StandardTokenMockContract;
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
     let rebalancingSetToken: RebalancingSetTokenContract;
@@ -471,10 +557,13 @@ contract('RebalancingSetIssuanceModule', accounts => {
       baseSetComponent = await erc20Wrapper.deployTokenAsync(ownerAccount);
       await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address);
 
-      // Create the Set (1 component)
-      const componentAddresses = [baseSetComponent.address];
+      baseSetComponent2 = await erc20Wrapper.deployTokenAsync(ownerAccount);
+      await erc20Wrapper.approveTransferAsync(baseSetComponent2, transferProxy.address);
+
+      // Create the Set (2 component)
+      const componentAddresses = [baseSetComponent.address, baseSetComponent2.address];
       baseSetComponentUnit = customBaseComponentUnit || ether(1);
-      const componentUnits = [baseSetComponentUnit];
+      const componentUnits = [baseSetComponentUnit, baseSetComponentUnit];
       baseSetNaturalUnit = ether(1);
       baseSetToken = await coreWrapper.createSetTokenAsync(
         core,
@@ -566,6 +655,15 @@ contract('RebalancingSetIssuanceModule', accounts => {
       expect(baseSetComponentBalance).to.bignumber.equal(expectedBaseComponentBalance);
     });
 
+    it('attributes the base Set components 2 to the caller', async () => {
+      await subject();
+
+      const expectedBaseComponentBalance = baseSetIssueQuantity.mul(baseSetComponentUnit).div(baseSetNaturalUnit);
+
+      const baseSetComponentBalance = await baseSetComponent2.balanceOf.callAsync(subjectCaller);
+      expect(baseSetComponentBalance).to.bignumber.equal(expectedBaseComponentBalance);
+    });
+
     it('emits correct LogRebalancingSetRedeem event', async () => {
       const txHash = await subject();
 
@@ -578,6 +676,26 @@ contract('RebalancingSetIssuanceModule', accounts => {
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the rebalancing Set address is not an approved Set', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetAddress = ownerAccount;
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the rebalancing Set quantity is not a multiple of the natural unit', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetQuantity = subjectRebalancingSetQuantity.sub(1);
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
     });
 
     describe('when the redeem quantity results in excess base Set', async () => {
@@ -666,6 +784,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     let customRebalancingUnitShares: BigNumber;
     let customRedeemQuantity: BigNumber;
     let customRebalancingSetIssueQuantity: BigNumber;
+    let customWethMock: WethMockContract;
 
     let wethRequiredToMintSet: BigNumber;
     let baseComponentQuantity: BigNumber;
@@ -673,7 +792,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
     beforeEach(async () => {
       subjectCaller = functionCaller;
 
-      baseSetWethComponent = wethMock;
+      baseSetWethComponent = customWethMock || wethMock;
       await erc20Wrapper.approveTransferAsync(baseSetWethComponent, transferProxy.address);
 
       baseSetComponent = await erc20Wrapper.deployTokenAsync(ownerAccount);
@@ -804,6 +923,40 @@ contract('RebalancingSetIssuanceModule', accounts => {
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the base SetToken components do not include wrapped Ether', async () => {
+      before(async () => {
+        customWethMock = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
+      });
+
+      after(async () => {
+        customWethMock = undefined;
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the rebalancing Set address is not an approved Set', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetAddress = ownerAccount;
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the rebalancing Set quantity is not a multiple of the natural unit', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetQuantity = subjectRebalancingSetQuantity.sub(1);
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
     });
 
     describe('when the redeem quantity results in excess base Set', async () => {

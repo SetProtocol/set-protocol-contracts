@@ -18,6 +18,7 @@ pragma solidity 0.5.7;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
 import { ERC20Wrapper } from "../../../lib/ERC20Wrapper.sol";
 import { IRebalancingSetToken } from "../../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
@@ -35,8 +36,54 @@ contract RebalancingSetIssuance is
     ModuleCoreState
 {
     using SafeMath for uint256;
+    using AddressArrayUtils for address[];
 
     // ============ Internal ============
+
+    /**
+     * Validates that wrapped Ether is a component of the Set
+     *
+     * @param  _setAddress            Address of the SetToken
+     * @param  _wrappedEtherAddress   Address of wrapped Ether
+     */
+    function validateWethIsAComponentOfSet(
+        address _setAddress,
+        address _wrappedEtherAddress
+    )
+        internal
+    {
+        address[] memory setComponents = ISetToken(_setAddress).getComponents();
+        require(
+            setComponents.contains(_wrappedEtherAddress),
+            "RebalancingSetIssuance.validateWethIsAComponentOfSet: Components must contain weth"
+        );
+    }
+
+    /**
+     * Validates that the passed in address is tracked by Core and that the quantity
+     * is a multiple of the natural unit
+     *
+     * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue/redeem
+     * @param  _rebalancingSetQuantity   The issuance quantity of Rebalancing Set
+     */   
+    function validateRebalancingSetIssuance(
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity
+    ) 
+        internal
+    {
+        // Expect RebalancingSet to be valid and enabled Set
+        require(
+            coreInstance.validSets(_rebalancingSetAddress),
+            "RebalancingSetIssuance.validateRebalancingIssuance: Invalid or disabled SetToken address"
+        );
+        
+        // Make sure Issuance quantity is multiple of the RebalancingSet natural unit
+        require(
+            _rebalancingSetQuantity.mod(ISetToken(_rebalancingSetAddress).naturalUnit()) == 0,
+            "RebalancingSetIssuance.validateRebalancingIssuance: Quantity must be multiple of natural unit"
+        );
+    }
 
     /**
      * Given a rebalancing Set and a desired issue quantity, calculates the 

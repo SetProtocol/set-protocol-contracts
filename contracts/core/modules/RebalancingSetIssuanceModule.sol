@@ -97,7 +97,7 @@ contract RebalancingSetIssuanceModule is
         external
         payable
     {
-        require( // coverage-disable-line
+        require(
             msg.sender == address(weth),
             "RebalancingSetIssuanceModule.fallback: Cannot receive ETH directly unless unwrapping WETH"
         );
@@ -106,8 +106,8 @@ contract RebalancingSetIssuanceModule is
     /* ============ External Functions ============ */
 
     /**
-     * Issue a Rebalancing Set using the base components of the Base Set.
-     * The Base Set is then issued and reissued into the Rebalancing Set. The Base Set quantity issued is calculated
+     * Issue a Rebalancing Set using the base components of the base SetToken.
+     * The base SetToken is then issued into the Rebalancing Set. The Base SetToken quantity issued is calculated
      * by taking the Rebalancing Set's quantity, unit shares, and natural unit. If the calculated quantity is not
      * a multiple of the natural unit of the base Set, the quantity is rounded up to the base Set natural unit.
      *
@@ -124,6 +124,9 @@ contract RebalancingSetIssuanceModule is
         external
         nonReentrant
     {
+        // Validate the RebalancingSet is valid and the quantity is a multiple of the natural unit
+        validateRebalancingSetIssuance(_rebalancingSetAddress, _rebalancingSetQuantity);
+
         address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
 
         // Calculate required base Set quantity to issue Rebalancing Set
@@ -155,7 +158,9 @@ contract RebalancingSetIssuanceModule is
             _rebalancingSetQuantity
         );
 
-        // Return any excess base Set token to the sender
+        // Return any excess base SetToken (whether in this contract or the Vault) to the sender.
+        // Excess base SetTokens can be generated when required base SetToken quantity exceeds
+        // that required in the RebalancingSetToken issuance.
         returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
 
         // Log RebalancingSetIssue
@@ -186,7 +191,12 @@ contract RebalancingSetIssuanceModule is
         payable
         nonReentrant
     {
+        // Validate the RebalancingSet is valid and the quantity is a multiple of the natural unit
+        validateRebalancingSetIssuance(_rebalancingSetAddress, _rebalancingSetQuantity);
+
         address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
+
+        validateWethIsAComponentOfSet(baseSetAddress, address(weth));
 
         // Calculate required base Set quantity
         uint256 requiredBaseSetQuantity = getBaseSetIssuanceRequiredQuantity(
@@ -226,7 +236,8 @@ contract RebalancingSetIssuanceModule is
             _rebalancingSetQuantity
         );
 
-        // Send excess eth back to the user
+        // Any eth that is not wrapped is sent back to the user
+        // Only the amount required for the base SetToken issuance is wrapped.
         uint256 leftoverEth = address(this).balance;
         if (leftoverEth > 0) {
             msg.sender.transfer(leftoverEth);
@@ -234,7 +245,7 @@ contract RebalancingSetIssuanceModule is
     }
 
     /**
-     * Redeems a Rebalancing Set into the base components of the Base Set.
+     * Redeems a Rebalancing Set into the base components of the Base SetToken.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set to redeem
      * @param  _rebalancingSetQuantity   The Quantity of the rebalancing Set to redeem
@@ -249,6 +260,9 @@ contract RebalancingSetIssuanceModule is
         external
         nonReentrant
     {
+        // Validate the RebalancingSet is valid and the quantity is a multiple of the natural unit
+        validateRebalancingSetIssuance(_rebalancingSetAddress, _rebalancingSetQuantity);
+
         // Redeem RB Set to the vault attributed to this contract
         coreInstance.redeemModule(
             msg.sender,
@@ -304,6 +318,13 @@ contract RebalancingSetIssuanceModule is
         external
         nonReentrant
     {
+        // Validate the RebalancingSet is valid and the quantity is a multiple of the natural unit
+        validateRebalancingSetIssuance(_rebalancingSetAddress, _rebalancingSetQuantity);
+
+        address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
+
+        validateWethIsAComponentOfSet(baseSetAddress, address(weth));
+
         // Redeem RB Set to the vault attributed to this contract
         coreInstance.redeemModule(
             msg.sender,
@@ -313,7 +334,6 @@ contract RebalancingSetIssuanceModule is
         );
 
         // Calculate the Base Set Redeem quantity
-        address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
         uint256 baseSetRedeemQuantity = getBaseSetRedeemQuantity(baseSetAddress);
 
         // Withdraw base Set to this contract
@@ -404,7 +424,7 @@ contract RebalancingSetIssuanceModule is
     }
 
     /**
-     * During redemption, withdraw the required quantity of Base Set, unwrapwrap Ether, and withdraw
+     * During redemption, withdraw the required quantity of Base Set, unwrapping Ether, and withdraw
      * components to the sender
      *
      * @param  _baseSetAddress           Address of the base Set token

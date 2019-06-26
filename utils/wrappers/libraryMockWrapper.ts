@@ -1,12 +1,15 @@
 import { Address } from 'set-protocol-utils';
 import {
   CommonValidationsLibraryMockContract,
+  CoreContract,
   Bytes32LibraryMockContract,
   CommonMathMockContract,
   CoreIssuanceLibraryMockContract,
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryMockContract,
+  RebalancingSetIssuanceMockContract,
   SetTokenLibraryMockContract,
+  VaultContract,
   ZeroExOrderLibraryMockContract
 } from '../contracts';
 import {
@@ -20,8 +23,10 @@ const CommonValidationsLibrary = artifacts.require('CommonValidationsLibrary');
 const CommonValidationsLibraryMock = artifacts.require('CommonValidationsLibraryMock');
 const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreIssuanceLibraryMock = artifacts.require('CoreIssuanceLibraryMock');
+const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
+const RebalancingSetIssuanceMock = artifacts.require('RebalancingSetIssuanceMock');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
 const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
 const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
@@ -109,6 +114,29 @@ export class LibraryMockWrapper {
 
     return new ExchangeIssuanceLibraryMockContract(
       new web3.eth.Contract(exchangeIssuanceMockContract.abi, exchangeIssuanceMockContract.address),
+      { from },
+    );
+  }
+
+  public async deployRebalancingSetIssuanceMockAsync(
+    core: CoreContract,
+    vault: VaultContract,
+    from: Address = this._contractOwnerAddress
+  ): Promise<RebalancingSetIssuanceMockContract> {
+    const truffleERC20Wrapper = await ERC20Wrapper.new(
+      { from: this._contractOwnerAddress },
+    );
+
+    await RebalancingSetIssuanceMock.link('ERC20Wrapper', truffleERC20Wrapper.address);
+
+    const rebalancingSetIssuanceMockContract = await RebalancingSetIssuanceMock.new(
+      core.address,
+      vault.address,
+      { from },
+    );
+
+    return new RebalancingSetIssuanceMockContract(
+      new web3.eth.Contract(rebalancingSetIssuanceMockContract.abi, rebalancingSetIssuanceMockContract.address),
       { from },
     );
   }

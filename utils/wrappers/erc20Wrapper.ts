@@ -213,7 +213,7 @@ export class ERC20Wrapper {
   }
 
   public async approveTransferAsync(
-    token: StandardTokenMockContract,
+    token: StandardTokenMockContract | WethMockContract,
     to: Address,
     from: Address = this._senderAccountAddress,
   ) {

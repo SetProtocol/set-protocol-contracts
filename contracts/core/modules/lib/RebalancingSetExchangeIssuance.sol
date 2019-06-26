@@ -82,6 +82,41 @@ contract RebalancingSetExchangeIssuance is
             _rebalancingSetAddress,
             _rebalancingSetQuantity
         );
+    } 
+
+    /**
+     * Withdraw any remaining Base Set and non-exchanged components to the user
+     *
+     * @param  _setAddress   Address of the Base Set
+     */
+    function returnRedemptionExcessFunds(
+        address _setAddress
+    )
+        internal
+    {
+        // Return base Set if any that are in the Vault
+        uint256 baseSetQuantity = vaultInstance.getOwnerBalance(_setAddress, address(this));
+        if (baseSetQuantity > 0) {
+            coreInstance.withdrawModule(
+                address(this),
+                msg.sender,
+                _setAddress,
+                baseSetQuantity
+            );
+        }
+
+        // Return base Set components
+        address[] memory baseSetComponents = ISetToken(_setAddress).getComponents();
+        for (uint256 i = 0; i < baseSetComponents.length; i++) {
+            uint256 withdrawQuantity = ERC20Wrapper.balanceOf(baseSetComponents[i], address(this));
+            if (withdrawQuantity > 0) {
+                ERC20Wrapper.transfer(
+                    baseSetComponents[i],
+                    msg.sender,
+                    withdrawQuantity
+                );
+            }
+        }         
     }
 
     /**
@@ -121,40 +156,4 @@ contract RebalancingSetExchangeIssuance is
             }
         }
     }
-
-    /**
-     * Withdraw any remaining Base Set and non-exchanged components to the user
-     *
-     * @param  _setAddress   Address of the Base Set
-     */
-    function returnRedemptionExcessFunds(
-        address _setAddress
-    )
-        internal
-    {
-        // Return base Set if any that are in the Vault
-        uint256 baseSetQuantity = vaultInstance.getOwnerBalance(_setAddress, address(this));
-        if (baseSetQuantity > 0) {
-            coreInstance.withdrawModule(
-                address(this),
-                msg.sender,
-                _setAddress,
-                baseSetQuantity
-            );
-        }
-
-        // Return base Set components
-        address[] memory baseSetComponents = ISetToken(_setAddress).getComponents();
-        for (uint256 i = 0; i < baseSetComponents.length; i++) {
-            uint256 withdrawQuantity = ERC20Wrapper.balanceOf(baseSetComponents[i], address(this));
-            if (withdrawQuantity > 0) {
-                ERC20Wrapper.transfer(
-                    baseSetComponents[i],
-                    msg.sender,
-                    withdrawQuantity
-                );
-            }
-        }         
-    }
-    
 }

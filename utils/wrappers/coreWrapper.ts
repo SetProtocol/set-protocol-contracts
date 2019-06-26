@@ -9,6 +9,7 @@ import {
   ERC20RebalancingSetExchangeIssuanceModuleContract,
   ExchangeIssuanceModuleContract,
   RebalancingSetExchangeIssuanceModuleContract,
+  RebalancingSetIssuanceModuleContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
@@ -18,6 +19,7 @@ import {
   TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract,
+  WethMockContract,
   WhiteListContract,
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
@@ -41,6 +43,7 @@ const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ERC20RebalancingSetExchangeIssuanceModule = artifacts.require('ERC20RebalancingSetExchangeIssuanceModule');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
 const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
+const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingLibrary = artifacts.require('RebalancingLibrary');
@@ -471,6 +474,33 @@ export class CoreWrapper {
     return new RebalancingSetExchangeIssuanceModuleContract(
       new web3.eth.Contract(payableExchangeIssuanceContract.abi, payableExchangeIssuanceContract.address),
       { from },
+    );
+  }
+
+  public async deployRebalancingSetIssuanceModuleAsync(
+    core: CoreLikeContract,
+    vault: VaultContract,
+    transferProxy: TransferProxyContract,
+    weth: WethMockContract,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingSetIssuanceModuleContract> {
+    const erc20WrapperLibrary = await ERC20Wrapper.new(
+      { from: this._contractOwnerAddress },
+    );
+
+    await RebalancingSetIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+
+    const truffleModule = await RebalancingSetIssuanceModule.new(
+      core.address,
+      vault.address,
+      transferProxy.address,
+      weth.address,
+      { from },
+    );
+
+    return new RebalancingSetIssuanceModuleContract(
+      new web3.eth.Contract(truffleModule.abi, truffleModule.address),
+      { from, gas: DEFAULT_GAS },
     );
   }
 

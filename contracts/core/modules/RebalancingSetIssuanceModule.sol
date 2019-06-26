@@ -161,7 +161,7 @@ contract RebalancingSetIssuanceModule is
         // Return any excess base SetToken (whether in this contract or the Vault) to the sender.
         // Excess base SetTokens can be generated when required base SetToken quantity exceeds
         // that required in the RebalancingSetToken issuance.
-        returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
+        returnExcessBaseSet(baseSetAddress, transferProxy, _keepChangeInVault);
 
         // Log RebalancingSetIssue
         emit LogRebalancingSetIssue(
@@ -227,7 +227,7 @@ contract RebalancingSetIssuanceModule is
         );
 
         // Return any excess base Set token to the sender
-        returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
+        returnExcessBaseSet(baseSetAddress, transferProxy, _keepChangeInVault);
 
         // Log RebalancingSetIssue
         emit LogRebalancingSetIssue(
@@ -291,7 +291,7 @@ contract RebalancingSetIssuanceModule is
         );
 
         // Transfer any change of the base Set to the end user
-        returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
+        returnExcessBaseSet(baseSetAddress, transferProxy, _keepChangeInVault);
 
         // Log RebalancingSetRedeem
         emit LogRebalancingSetRedeem(
@@ -352,7 +352,7 @@ contract RebalancingSetIssuanceModule is
         withdrawComponentsToSenderWithEther(baseSetAddress);
 
         // Transfer any change of the base Set to the end user
-        returnExcessBaseSet(baseSetAddress, _keepChangeInVault);
+        returnExcessBaseSet(baseSetAddress, transferProxy, _keepChangeInVault);
 
         // Log RebalancingSetRedeem
         emit LogRebalancingSetRedeem(

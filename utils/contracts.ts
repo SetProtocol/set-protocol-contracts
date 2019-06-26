@@ -38,6 +38,7 @@ export {
   RebalancingSetExchangeIssuanceModuleContract,
 } from '../types/generated/rebalancing_set_exchange_issuance_module';
 export { RebalancingSetIssuanceModuleContract } from '../types/generated/rebalancing_set_issuance_module';
+export { RebalancingSetIssuanceMockContract } from '../types/generated/rebalancing_set_issuance_mock';
 export { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_token';
 export { RebalancingSetTokenFactoryContract } from '../types/generated/rebalancing_set_token_factory';
 export { SettleRebalanceLibraryContract } from '../types/generated/settle_rebalance_library';

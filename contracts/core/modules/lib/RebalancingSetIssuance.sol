@@ -124,8 +124,8 @@ contract RebalancingSetIssuance is
 
 
     /**
-     * Given a rebalancing set address, retrieve the base set quantity redeem quantity.
-     * Rounds down to the nearest base Set natural unit.
+     * Given a rebalancing set address, retrieve the base set quantity redeem quantity based on the quantity
+     * held in the Vault. Rounds down to the nearest base Set natural unit.
      *
      * @param _baseSetAddress             The address of the base Set
      * @return baseSetRedeemQuantity      The quantity of base Set to redeem
@@ -138,7 +138,7 @@ contract RebalancingSetIssuance is
         returns (uint256)
     {
         // Get Base Set Details from the rebalancing Set
-        uint256 baseSetNaturalUnit = IRebalancingSetToken(_baseSetAddress).naturalUnit();
+        uint256 baseSetNaturalUnit = ISetToken(_baseSetAddress).naturalUnit();
         uint256 baseSetBalance = vaultInstance.getOwnerBalance(
             _baseSetAddress,
             address(this)
@@ -156,16 +156,18 @@ contract RebalancingSetIssuance is
      * depending on the keepChangeInVault flag.
      *
      * @param _baseSetAddress             The address of the base Set
+     * @param _transferProxyAddress       The address of the TransferProxy
      * @param  _keepChangeInVault         Boolean signifying whether excess base Set is transfered to the user 
      *                                     or left in the vault
      */
     function returnExcessBaseSet(
         address _baseSetAddress,
+        address _transferProxyAddress,
         bool _keepChangeInVault
     )
         internal
     {
-        returnExcessBaseSetFromContract(_baseSetAddress, _keepChangeInVault);
+        returnExcessBaseSetFromContract(_baseSetAddress, _transferProxyAddress, _keepChangeInVault);
 
         returnExcessBaseSetInVault(_baseSetAddress, _keepChangeInVault);
     }   
@@ -176,11 +178,13 @@ contract RebalancingSetIssuance is
      * depending on the keepChangeInVault flag.
      *
      * @param _baseSetAddress             The address of the base Set
+     * @param _transferProxyAddress       The address of the TransferProxy
      * @param  _keepChangeInVault         Boolean signifying whether excess base Set is transfered to the user 
      *                                     or left in the vault
      */
     function returnExcessBaseSetFromContract(
         address _baseSetAddress,
+        address _transferProxyAddress,
         bool _keepChangeInVault
     )
         internal
@@ -190,7 +194,15 @@ contract RebalancingSetIssuance is
         if (baseSetQuantity == 0) { return; }
 
         if (_keepChangeInVault) {
-            // Transfer ownership within the vault to the user
+            // Ensure base SetToken allowance
+            ERC20Wrapper.ensureAllowance(
+                _baseSetAddress,
+                address(this),
+                _transferProxyAddress,
+                baseSetQuantity
+            );
+
+            // Deposit Base Set to the user
             coreInstance.depositModule(
                 address(this),
                 msg.sender,

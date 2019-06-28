@@ -17,17 +17,17 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { RebalancingLibrary2 } from "../lib/RebalancingLibrary2.sol";
+import { RebalancingLibraryV2 } from "../lib/RebalancingLibraryV2.sol";
 
 /**
- * @title IRebalancingSetToken
+ * @title IRebalancingSetTokenV2
  * @author Set Protocol
  *
  * The IRebalancingSetToken interface provides a light-weight, structured way to interact with the
  * RebalancingSetToken contract from another contract.
  */
 
-interface IRebalancingSetToken {
+interface IRebalancingSetTokenV2 {
 
     /*
      * Get totalSupply of Rebalancing Set
@@ -67,7 +67,7 @@ interface IRebalancingSetToken {
     function rebalanceState()
         external
         view
-        returns (RebalancingLibrary2.State);
+        returns (RebalancingLibraryV2.State);
 
     /**
      * Gets the balance of the specified address.

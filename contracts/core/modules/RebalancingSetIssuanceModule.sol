@@ -19,7 +19,7 @@ pragma solidity 0.5.7;
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
+import { IRebalancingSetTokenV2 } from "../interfaces/IRebalancingSetTokenV2.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IWETH } from "../../lib/IWETH.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
@@ -127,7 +127,7 @@ contract RebalancingSetIssuanceModule is
         // Validate the rebalancing SetToken is valid and the quantity is a multiple of the natural unit
         validateRebalancingSetIssuance(_rebalancingSetAddress, _rebalancingSetQuantity);
 
-        address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
+        address baseSetAddress = IRebalancingSetTokenV2(_rebalancingSetAddress).currentSet();
 
         // Calculate required base SetToken quantity to issue rebalancing SetToken
         uint256 requiredBaseSetQuantity = getBaseSetIssuanceRequiredQuantity(
@@ -194,7 +194,7 @@ contract RebalancingSetIssuanceModule is
         // Validate the rebalancing SetToken is valid and the quantity is a multiple of the natural unit
         validateRebalancingSetIssuance(_rebalancingSetAddress, _rebalancingSetQuantity);
 
-        address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
+        address baseSetAddress = IRebalancingSetTokenV2(_rebalancingSetAddress).currentSet();
 
         validateWETHIsAComponentOfSet(baseSetAddress, address(weth));
 
@@ -272,7 +272,7 @@ contract RebalancingSetIssuanceModule is
         );
 
         // Calculate the base SetToken Redeem quantity
-        address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
+        address baseSetAddress = IRebalancingSetTokenV2(_rebalancingSetAddress).currentSet();
         uint256 baseSetRedeemQuantity = getBaseSetRedeemQuantity(baseSetAddress);
 
         // Withdraw base SetToken to this contract
@@ -321,7 +321,7 @@ contract RebalancingSetIssuanceModule is
         // Validate the rebalancing SetToken is valid and the quantity is a multiple of the natural unit
         validateRebalancingSetIssuance(_rebalancingSetAddress, _rebalancingSetQuantity);
 
-        address baseSetAddress = IRebalancingSetToken(_rebalancingSetAddress).currentSet();
+        address baseSetAddress = IRebalancingSetTokenV2(_rebalancingSetAddress).currentSet();
 
         validateWETHIsAComponentOfSet(baseSetAddress, address(weth));
 

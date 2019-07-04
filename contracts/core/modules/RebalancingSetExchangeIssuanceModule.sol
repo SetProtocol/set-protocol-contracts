@@ -25,12 +25,17 @@ import { ExchangeIssuanceLibrary } from "./lib/ExchangeIssuanceLibrary.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IExchangeIssuanceModule } from "../interfaces/IExchangeIssuanceModule.sol";
-import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IWETH } from "../../lib/IWETH.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
+import { RebalancingSetExchangeIssuance } from "./lib/RebalancingSetExchangeIssuance.sol";
 
+// TODO
+    // Ensure we handle: 
+        // Base Sets who have the payment/send token as component
+        // Flushing all tokens out of the system
+        // Allow users to keep tokens in Vault or send back
 
 /**
  * @title RebalancingSetExchangeIssuanceModule
@@ -41,6 +46,7 @@ import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
  */
 contract RebalancingSetExchangeIssuanceModule is
     ModuleCoreState,
+    RebalancingSetExchangeIssuance,
     ReentrancyGuard
 {
     using SafeMath for uint256;
@@ -145,32 +151,83 @@ contract RebalancingSetExchangeIssuanceModule is
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
         ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
-        bytes memory _orderData
+        bytes memory _orderData,
+        bool _keepChangeInVault
     )
         public
         payable
         nonReentrant
     {
+        address paymentToken = _exchangeIssuanceParams.sendTokens[0];
+        uint256 paymentQuantity = _exchangeIssuanceParams.sendTokenAmounts[0];
+
+        // Require payment token is weth
+        // Require receive token in redeem and send token in issue is expected
+        require(
+            weth == paymentToken,
+            "RebalancingSetExchangeIssuanceModule.validateInputs: Send/Receive token must match required"
+        );
+
         // Validate Params
         validateInputs(
-            weth,
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
             _exchangeIssuanceParams.setAddress,
             _exchangeIssuanceParams.sendTokens
         );
 
-        // wrap all eth
+        // wrap all eth, since weth could be a component in the Set
+        // as well as the payment token
         wethInstance.deposit.value(msg.value)();
 
-        issueRebalancingSetInternal(
+        // Ensure weth allowance
+        ERC20Wrapper.ensureAllowance(
             weth,
-            _rebalancingSetAddress,
-            _rebalancingSetQuantity,
-            msg.value,
+            address(this),
+            transferProxy,
+            msg.value
+        );
+
+        // exchange issue Base Set
+        exchangeIssuanceInstance.exchangeIssue(
             _exchangeIssuanceParams,
             _orderData
         );
+
+        address baseSetAddress = _exchangeIssuanceParams.setAddress;
+        uint256 baseSetIssueQuantity = _exchangeIssuanceParams.quantity;
+
+        // Approve base Set to transfer proxy
+        ERC20Wrapper.ensureAllowance(
+            baseSetAddress,
+            address(this),
+            transferProxy,
+            baseSetIssueQuantity
+        );
+
+        // Issue rebalancing set to the caller
+        coreInstance.issueTo(
+            msg.sender,
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity
+        );
+
+        // Send excess base Set and ether to the user
+        returnIssuanceExcessFunds(baseSetAddress);
+
+        emit LogPayableExchangeIssue(
+            _rebalancingSetAddress,
+            msg.sender,
+            _paymentToken,
+            _paymentTokenQuantity
+        );
+
+        // Any eth that is not wrapped is sent back to the user
+        // Only the amount required for the base SetToken issuance is wrapped.
+        uint256 leftoverEth = address(this).balance;
+        if (leftoverEth > 0) {
+            msg.sender.transfer(leftoverEth);
+        }
     }
 
     function issueRebalancingSetWithERC20(
@@ -194,7 +251,16 @@ contract RebalancingSetExchangeIssuanceModule is
             _exchangeIssuanceParams.sendTokens
         );
 
+        // If the paymentToken is also a component of the baseSet
+        // the transfer quanitty is greater
+
         // Deposit erc20 to this contract
+        // TODO: An issue is that the component may also be needed
+        // In the Set and the payment token is not enough
+        // Perhaps it's the component required quantity + sendToken required
+        // That quantity is only required if the component is a component
+        // of the base Set
+        // Edge case: you can trade the paymentTOken for more payment tokens?
         coreInstance.transferModule(
             paymentToken,
             paymentQuantity,
@@ -210,6 +276,17 @@ contract RebalancingSetExchangeIssuanceModule is
             _exchangeIssuanceParams,
             _orderData
         );
+
+
+        // unwrap any leftover WETH and send eth back to the user
+        uint256 leftoverEth = ERC20Wrapper.balanceOf(
+            weth,
+            address(this)
+        );
+        if (leftoverEth > 0) {
+            wethInstance.withdraw(leftoverEth);
+            msg.sender.transfer(leftoverEth);
+        }
     }
 
     /**
@@ -256,6 +333,8 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         // Exchange redeem Base Set
+        // To investigate: Could there ever be a case where there is an issue
+        // 
         exchangeIssuanceInstance.exchangeRedeem(
             _exchangeIssuanceParams,
             _orderData
@@ -291,6 +370,82 @@ contract RebalancingSetExchangeIssuanceModule is
             _rebalancingSetQuantity
         );
     }
+
+    function redeemRebalancingSetIntoERC20(
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity,
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
+        bytes memory _orderData
+    )
+        public
+        nonReentrant
+    {
+        address receiveToken = _exchangeIssuanceParams.receiveTokens[0];
+        uint256 receiveQuantity = _exchangeIssuanceParams.receiveTokenAmounts[0];
+
+        // Validate Params
+        validateInputs(
+            receiveToken,
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity,
+            _exchangeIssuanceParams.setAddress,
+            _exchangeIssuanceParams.receiveTokens
+        );
+
+        // Redeem rebalancing Set from the user to this contract in the vault
+        coreInstance.redeemModule(
+            msg.sender,
+            address(this),
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity
+        );
+
+        // Withdraw components to this contract.
+        coreInstance.withdrawModule(
+            address(this),
+            address(this),
+            _exchangeIssuanceParams.setAddress,
+            _exchangeIssuanceParams.quantity
+        );
+
+        // Exchange redeem Base Set
+        exchangeIssuanceInstance.exchangeRedeem(
+            _exchangeIssuanceParams,
+            _orderData
+        );
+
+        // Withdraw any excess receiveToken from Vault to Contracts
+        // This could happen if the receiveToken is also a component of the base Set.
+        uint256 paymentTokenInVault = vaultInstance.getOwnerBalance(
+            _exchangeIssuanceParams.receiveTokens[0],
+            address(this)
+        );
+        if (paymentTokenInVault > 0) {
+            coreInstance.withdrawModule(
+                address(this),
+                address(this),
+                _exchangeIssuanceParams.receiveTokens[0],
+                paymentTokenInVault
+            );
+        }
+
+        // Transfer receiveToken to the caller
+        ERC20Wrapper.transfer(
+            _exchangeIssuanceParams.receiveTokens[0],
+            msg.sender,
+            _exchangeIssuanceParams.receiveTokenAmounts[0]
+        );
+
+        // Non-exchanged components are returned to the user
+        returnRedemptionExcessFunds(_exchangeIssuanceParams.setAddress);
+
+        emit LogPayableExchangeRedeem(
+            _rebalancingSetAddress,
+            msg.sender,
+            _rebalancingSetQuantity
+        );
+    }
+
 
     /* ============ Private Functions ============ */
 
@@ -384,44 +539,6 @@ contract RebalancingSetExchangeIssuanceModule is
                 );
             }
         }
-
-        // unwrap any leftover WETH and send eth back to the user
-        uint256 leftoverEth = ERC20Wrapper.balanceOf(
-            weth,
-            address(this)
-        );
-        if (leftoverEth > 0) {
-            wethInstance.withdraw(leftoverEth);
-            msg.sender.transfer(leftoverEth);
-        }
-    }
-
-    /**
-     * Given the issue quantity of the base Set, calculates the maximum quantity of rebalancing Set
-     * issuable. Quantity should already be a multiple of the natural unit.
-     *
-     * @param _rebalancingSetAddress    The address of the rebalancing Set
-     * @param _baseSetIssueQuantity     The quantity issued of the base Set
-     * @return rbSetIssueQuantity      The quantity of rebalancing Set to issue
-     */
-    function calculateRebalancingSetIssueQuantity(
-        address _rebalancingSetAddress,
-        uint256 _baseSetIssueQuantity
-    )
-        private
-        view
-        returns (uint256)
-    {
-        uint256 rbSetUnitShares = IRebalancingSetToken(_rebalancingSetAddress).unitShares();
-        uint256 rbSetNaturalUnit = IRebalancingSetToken(_rebalancingSetAddress).naturalUnit();
-
-        // Calculate the possible number of Sets issuable (may not be a multiple of natural unit)
-        uint256 possibleIssuableRBSetQuantity = _baseSetIssueQuantity.mul(rbSetNaturalUnit).div(rbSetUnitShares);
-
-        // Ensure that the base Set quantity is a multiple of the rebalancing Set natural unit
-        uint256 rbSetIssueQuantity = possibleIssuableRBSetQuantity.div(rbSetNaturalUnit).mul(rbSetNaturalUnit);
-
-        return rbSetIssueQuantity;
     }
 
     /**
@@ -437,7 +554,7 @@ contract RebalancingSetExchangeIssuanceModule is
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
         address _collateralSetAddress,
-        address[] memory _ethTokenArray
+        address[] memory _transactTokenArray
     )
         private
         view
@@ -450,14 +567,8 @@ contract RebalancingSetExchangeIssuanceModule is
 
         // Require only 1 receive token in redeem and 1 send token in issue
         require(
-            _ethTokenArray.length == 1,
+            _transactTokenArray.length == 1,
             "RebalancingSetExchangeIssuanceModule.validateInputs: Only 1 Send/Receive Token Allowed"
-        );
-
-        // Require receive token in redeem and send token in issue is expected
-        require(
-            _transactToken == _ethTokenArray[0],
-            "RebalancingSetExchangeIssuanceModule.validateInputs: Send/Receive token must match required"
         );
 
         ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
@@ -469,7 +580,8 @@ contract RebalancingSetExchangeIssuanceModule is
             "RebalancingSetExchangeIssuanceModule.validateInputs: Base Set addresses must match"
         );
 
-        ExchangeIssuanceLibrary.validateQuantity(
+        // TODO: this is confusing. We should put this into a single issuanceLibrary
+        validateRebalancingSetIssuance(
             _rebalancingSetAddress,
             _rebalancingSetQuantity
         );

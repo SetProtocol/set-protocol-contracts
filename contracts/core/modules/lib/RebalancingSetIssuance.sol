@@ -51,10 +51,10 @@ contract RebalancingSetIssuance is
         address _wrappedEtherAddress
     )
         internal
+        view
     {
-        address[] memory setComponents = ISetToken(_setAddress).getComponents();
         require(
-            setComponents.contains(_wrappedEtherAddress),
+            ISetToken(_setAddress).tokenIsComponent(_wrappedEtherAddress),
             "RebalancingSetIssuance.validateWETHIsAComponentOfSet: Components must contain weth"
         );
     }
@@ -71,6 +71,7 @@ contract RebalancingSetIssuance is
         uint256 _rebalancingSetQuantity
     ) 
         internal
+        view
     {
         // Expect rebalancing SetToken to be valid and enabled SetToken
         require(
@@ -100,6 +101,7 @@ contract RebalancingSetIssuance is
         uint256 _rebalancingSetQuantity
     )
         internal
+        view
         returns (uint256)
     {
         IRebalancingSetTokenV2 rebalancingSet = IRebalancingSetTokenV2(_rebalancingSetAddress);
@@ -107,15 +109,15 @@ contract RebalancingSetIssuance is
         uint256 unitShares = rebalancingSet.unitShares();
         uint256 naturalUnit = rebalancingSet.naturalUnit();
 
-        uint256 requiredBaseSetQuantity = _rebalancingSetQuantity.mul(unitShares).div(naturalUnit);
+        uint256 requiredBaseSetQuantity = _rebalancingSetQuantity.div(naturalUnit).mul(unitShares);
 
         address baseSet = rebalancingSet.currentSet();
         uint256 baseSetNaturalUnit = ISetToken(baseSet).naturalUnit();
 
         // If there is a mismatch between the required quantity and the base SetToken natural unit,
         // round up to the next base SetToken natural unit if required.
-        if (requiredBaseSetQuantity.mod(baseSetNaturalUnit) > 0) {
-            uint256 roundDownQuantity = requiredBaseSetQuantity.mod(baseSetNaturalUnit);
+        uint256 roundDownQuantity = requiredBaseSetQuantity.mod(baseSetNaturalUnit);
+        if (roundDownQuantity > 0) {
             requiredBaseSetQuantity = requiredBaseSetQuantity.sub(roundDownQuantity).add(baseSetNaturalUnit);
         }
 
@@ -125,7 +127,7 @@ contract RebalancingSetIssuance is
 
     /**
      * Given a rebalancing SetToken address, retrieve the base SetToken quantity redeem quantity based on the quantity
-     * held in the Vault. Rounds down to the nearest base SetToken natural unit.
+     * held in the Vault. Rounds down to the nearest base SetToken natural unit
      *
      * @param _baseSetAddress             The address of the base SetToken
      * @return baseSetRedeemQuantity      The quantity of base SetToken to redeem
@@ -144,10 +146,8 @@ contract RebalancingSetIssuance is
             address(this)
         );
 
-        // Round the balance down to the base SetToken natural unit
-        uint256 redeemQuantity = baseSetBalance.div(baseSetNaturalUnit).mul(baseSetNaturalUnit);
-
-        return redeemQuantity;
+        // Round the balance down to the base SetToken natural unit and return
+        return baseSetBalance.sub(baseSetBalance.mod(baseSetNaturalUnit));
     }
 
     /**
@@ -157,7 +157,7 @@ contract RebalancingSetIssuance is
      *
      * @param _baseSetAddress             The address of the base SetToken
      * @param _transferProxyAddress       The address of the TransferProxy
-     * @param  _keepChangeInVault         Boolean signifying whether excess base SetToken is transfered to the user 
+     * @param  _keepChangeInVault         Boolean signifying whether excess base SetToken is transferred to the user 
      *                                     or left in the vault
      */
     function returnExcessBaseSet(
@@ -191,9 +191,9 @@ contract RebalancingSetIssuance is
     {
         uint256 baseSetQuantity = ERC20Wrapper.balanceOf(_baseSetAddress, address(this));
         
-        if (baseSetQuantity == 0) { return; }
-
-        if (_keepChangeInVault) {
+        if (baseSetQuantity == 0) { 
+            return; 
+        } else if (_keepChangeInVault) {
             // Ensure base SetToken allowance
             ERC20Wrapper.ensureAllowance(
                 _baseSetAddress,
@@ -240,9 +240,9 @@ contract RebalancingSetIssuance is
             address(this)
         );
         
-        if (baseSetQuantityInVault == 0) { return; }
-
-        if (_keepChangeInVault) {
+        if (baseSetQuantityInVault == 0) { 
+            return; 
+        } else if (_keepChangeInVault) {
             // Transfer ownership within the vault to the user
             coreInstance.internalTransfer(
                 _baseSetAddress,

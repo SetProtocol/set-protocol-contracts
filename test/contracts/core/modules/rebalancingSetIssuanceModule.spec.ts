@@ -94,7 +94,6 @@ contract('RebalancingSetIssuanceModule', accounts => {
       wethMock,
     );
     await coreWrapper.addModuleAsync(core, rebalancingTokenIssuanceModule.address);
-
   });
 
   after(async () => {

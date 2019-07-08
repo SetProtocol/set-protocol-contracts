@@ -347,9 +347,9 @@ contract RebalancingSetIssuanceModule is
      * Gets base set address from rebalancing set token and calculates amount of base set needed
      * for issuance.
      *
-     * @param  _rebalancingSetAddress    Address of the rebalancing SetToken to issue
+     * @param  _rebalancingSetAddress    Address of the RebalancingSetToken to issue
      * @param  _rebalancingSetQuantity   The Quantity of the rebalancing SetToken to issue
-     * @return baseSetAddress            The address of rebalancing set's base set
+     * @return baseSetAddress            The address of RebalancingSet's base SetToken
      * @return requiredBaseSetQuantity   The quantity of base SetToken to issue
      */
     function getBaseSetAddressAndQuantity(
@@ -411,7 +411,7 @@ contract RebalancingSetIssuanceModule is
 
     /**
      * During issuance, deposit the required quantity of base SetToken, wrap Ether, and deposit components
-     * (excluding Ether) to the Vault in the name of the module.
+     * (excluding Ether, which is deposited during issuance) to the Vault in the name of the module.
      *
      * @param  _baseSetAddress           Address of the base SetToken token
      * @param  _baseSetQuantity          The Quantity of the base SetToken token to issue

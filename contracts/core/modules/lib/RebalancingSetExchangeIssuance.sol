@@ -40,6 +40,7 @@ contract RebalancingSetExchangeIssuance is
 
     /**
      * Validate that the issuance parameters and inputs are congruent.
+     * TODO: Fix comments
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
      * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to issue or redeem
@@ -48,6 +49,7 @@ contract RebalancingSetExchangeIssuance is
      *                                     receive tokens (during redemption)
      */
     function validateInputs(
+        address _transactToken,
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
         address _collateralSetAddress,
@@ -66,6 +68,11 @@ contract RebalancingSetExchangeIssuance is
         require(
             _transactTokenArray.length == 1,
             "RebalancingSetExchangeIssuance.validateInputs: Only 1 Receive Token Allowed"
+        );
+
+        require(
+            _transactToken == _transactTokenArray[0],
+            "RebalancingSetExchangeIssuanceModule.validateInputs: Send/Receive token must match required"
         );
 
         ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
@@ -123,7 +130,7 @@ contract RebalancingSetExchangeIssuance is
      *
      * @param _baseSetAddress           The address of the base Set
      */
-    function returnIssuanceBaseSetAndComponentsExcessFunds(
+    function returnIssuanceExcessFunds(
         address _baseSetAddress
     )
         internal

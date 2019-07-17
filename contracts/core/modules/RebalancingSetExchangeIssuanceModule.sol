@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 Set Labs Inc.
+    Copyright 2019 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -36,8 +36,9 @@ import { RebalancingSetIssuance } from "./lib/RebalancingSetIssuance.sol";
  * @title RebalancingSetExchangeIssuanceModule
  * @author Set Protocol
  *
- * The RebalancingSetExchangeIssuanceModule supplementary smart contract allows a user to send Eth and atomically
- * issue a rebalancing Set
+ * The RebalancingSetExchangeIssuanceModule supplementary smart contract allows a user to issue and redeem a Rebalancing Set
+ * using a payment token or receiving a receive token atomically in a single transaction using liquidity from
+ * decentralized exchanges.
  */
 contract RebalancingSetExchangeIssuanceModule is
     ModuleCoreState,
@@ -53,7 +54,6 @@ contract RebalancingSetExchangeIssuanceModule is
     address public transferProxy;
 
     // Address and instance of ExchangeIssuance Module contract
-    address public exchangeIssuanceModule;
     IExchangeIssuanceModule private exchangeIssuanceInstance;
 
     // Address and instance of Wrapped Ether contract
@@ -89,7 +89,7 @@ contract RebalancingSetExchangeIssuanceModule is
     constructor(
         address _core,
         address _transferProxy,
-        address _exchangeIssuanceModule,
+        IExchangeIssuanceModule _exchangeIssuanceModule,
         address _wrappedEther,
         address _vault
     )
@@ -102,9 +102,8 @@ contract RebalancingSetExchangeIssuanceModule is
         // Commit the address and instance of Transfer Proxy to state variables
         transferProxy = _transferProxy;
 
-        // Commit the address and instance of ExchangeIssuanceModule to state variables
-        exchangeIssuanceModule = _exchangeIssuanceModule;
-        exchangeIssuanceInstance = IExchangeIssuanceModule(_exchangeIssuanceModule);
+        // Commit the instance of ExchangeIssuanceModule to state variables
+        exchangeIssuanceInstance = _exchangeIssuanceModule;
 
         // Commit the address and instance of Wrapped Ether to state variables
         weth = _wrappedEther;
@@ -126,7 +125,7 @@ contract RebalancingSetExchangeIssuanceModule is
         external
         payable
     {
-        require( // coverage-disable-line
+        require(
             msg.sender == weth,
             "RebalancingSetExchangeIssuanceModule.fallback: Cannot receive ETH directly unless unwrapping WETH"
         );
@@ -137,11 +136,14 @@ contract RebalancingSetExchangeIssuanceModule is
     /**
      * Issue a Rebalancing Set using Wrapped Ether to acquire the base components of the Base Set.
      * The Base Set is then issued using ExchangeIssue and reissued into the Rebalancing Set.
-     * This function is meant to be used with a user interface
+     * All remaining tokens / change are flushed and returned to the user.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
+     * @param  _rebalancingSetQuantity   Quantity of the rebalancing Set
      * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
      * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
+     *                                     or left in the vault
      */
     function issueRebalancingSetWithEther(
         address _rebalancingSetAddress,
@@ -154,9 +156,10 @@ contract RebalancingSetExchangeIssuanceModule is
         payable
         nonReentrant
     {
-        // wrap all eth, since weth could be a component in the Set
+        // Wrap all Ether; Wrapped Ether could be a component of the Set being issued.
         wethInstance.deposit.value(msg.value)();
 
+        // Perform exchange transactions, mint the base SetToken, and issue the Rebalancing Set to the sender
         issueRebalancingSetInternal(
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
@@ -168,10 +171,7 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         // unwrap any leftover WETH and transfer to sender
-        uint256 leftoverWeth = ERC20Wrapper.balanceOf(
-            weth,
-            address(this)
-        );
+        uint256 leftoverWeth = ERC20Wrapper.balanceOf(weth, address(this));
         if (leftoverWeth > 0) {
             // Withdraw wrapped Ether
             wethInstance.withdraw(leftoverWeth);
@@ -181,6 +181,22 @@ contract RebalancingSetExchangeIssuanceModule is
         }
     }
 
+    /**
+     * Issue a Rebalancing Set using a specified ERC20 payment token. The payment token is used in ExchangeIssue
+     * to acquire the base SetToken components and issue the base SetToken. The base SetToken is then used to
+     * issue the Rebalancing SetToken. The payment token can be utilized as a component of the base SetToken.
+     * All remaining tokens / change are flushed and returned to the user.
+     * Ahead of calling this function, the user must approve their paymentToken to the transferProxy.
+     *
+     * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
+     * @param  _rebalancingSetQuantity   Quantity of the rebalancing Set
+     * @param  _paymentTokenAddress      Address of the ERC20 token to pay with
+     * @param  _paymentTokenQuantity     Quantity of the payment token
+     * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
+     * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
+     *                                     or left in the vault
+     */
     function issueRebalancingSetWithERC20(
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
@@ -193,9 +209,7 @@ contract RebalancingSetExchangeIssuanceModule is
         public
         nonReentrant
     {
-        // Deposit the erc20 to this contract
-        // The quantity can be higher than the exchangeIssuance payment token quantity
-        // as the component may also be used as the underlying component during issuance
+        // Deposit the erc20 to this contract. This token can be used for payment and issuance of the base SetToken
         coreInstance.transferModule(
             _paymentTokenAddress,
             _paymentTokenQuantity,
@@ -203,6 +217,7 @@ contract RebalancingSetExchangeIssuanceModule is
             address(this)
         );
 
+        // Perform exchange transactions, mint the base SetToken, and issue the Rebalancing Set to the sender
         issueRebalancingSetInternal(
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
@@ -214,10 +229,7 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         // Send back any unused payment token
-        uint256 leftoverPaymentTokenQuantity = ERC20Wrapper.balanceOf(
-            _paymentTokenAddress,
-            address(this)
-        );
+        uint256 leftoverPaymentTokenQuantity = ERC20Wrapper.balanceOf(_paymentTokenAddress, address(this));
         if (leftoverPaymentTokenQuantity > 0) {
             ERC20Wrapper.transfer(
                 _paymentTokenAddress,
@@ -228,13 +240,15 @@ contract RebalancingSetExchangeIssuanceModule is
     }
 
     /**
-     * Redeems a Rebalancing Set into Wrapped Ether. The Rebalancing Set is redeemed into the Base Set, and
+     * Redeems a Rebalancing Set into ether. The Rebalancing Set is redeemed into the Base Set, and
      * Base Set components are traded for WETH. The WETH is then withdrawn into ETH and the ETH sent to the caller.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
      * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
      * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
-     * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
+     * @param  _orderData                Bytecode formatted data with exchange data for disposing base set components
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
+     *                                     or left in the vault
      */
     function redeemRebalancingSetIntoEther(
         address _rebalancingSetAddress,
@@ -246,6 +260,8 @@ contract RebalancingSetExchangeIssuanceModule is
         public
         nonReentrant
     {
+        // Redeems the rebalancing Set into the base SetToken, redeems the base SetToken into its components,
+        // and exchanges the components into wrapped ether to this contract.
         redeemRebalancingSetIntoComponentsInternal(
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
@@ -254,34 +270,49 @@ contract RebalancingSetExchangeIssuanceModule is
             _orderData
         );
 
-        // Withdraw any excess traded for eth from vault to contract
-        // We call these ahead of time to allow unwrapping of Weth
-        uint256 wethInVault = vaultInstance.getOwnerBalance(weth, address(this));
-        if (wethInVault > 0) {
+        // In the event that exchangeIssue returns more receiveTokens or wrappedEth than
+        // specified in receiveToken quantity, those tokens are also retrieved into this contract.
+        // We also call this ahead of returnRedemptionChange to allow the unwrapping of the wrappedEther
+        uint256 wethQuantityInVault = vaultInstance.getOwnerBalance(weth, address(this));
+        if (wethQuantityInVault > 0) {
             coreInstance.withdrawModule(
                 address(this),
                 address(this),
                 weth,
-                wethInVault
+                wethQuantityInVault
             );
         }
 
-        // Withdraw eth from WETH
-        uint256 wethBalance = ERC20Wrapper.balanceOf(
-            weth,
-            address(this)
-        );
+        // Unwrap wrapped Ether
+        uint256 wethBalance = ERC20Wrapper.balanceOf(weth, address(this));
         wethInstance.withdraw(wethBalance);
 
         // Send eth to user
         msg.sender.transfer(wethBalance);
 
-        returnRedemptionChange(
-            _exchangeIssuanceParams.setAddress,
-            _keepChangeInVault     
+        // Send excess base Set to the user
+        returnExcessBaseSetFromContract(
+            _baseSetAddress,
+            transferProxy,
+            _keepChangeInVault
         );
+
+        // Return non-exchanged components to the user
+        returnExcessComponentsFromContract(_baseSetAddress);
     }
 
+    /**
+     * Redeems a Rebalancing Set into ether. The Rebalancing Set is redeemed into the Base Set, and
+     * Base Set components are traded for WETH. The WETH is then withdrawn into ETH and the ETH sent to the caller.
+     *
+     * @param  _rebalancingSetAddress    Address of the rebalancing Set
+     * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
+     * @param  _receiveTokenAddress      Address of the receiveToken
+     * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
+     * @param  _orderData                Bytecode formatted data with exchange data for disposing base set components
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
+     *                                     or left in the vault
+     */
     function redeemRebalancingSetIntoERC20(
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
@@ -293,6 +324,8 @@ contract RebalancingSetExchangeIssuanceModule is
         public
         nonReentrant
     {
+        // Redeems the rebalancing Set into the base SetToken, redeems the base SetToken into its components,
+        // and exchanges the components into the receiveToken to this contract.
         redeemRebalancingSetIntoComponentsInternal(
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
@@ -301,8 +334,9 @@ contract RebalancingSetExchangeIssuanceModule is
             _orderData
         );
 
-        // Withdraw any excess traded for receiveToken from vault to contract
-        // We call these ahead of time to allow unwrapping of Weth
+        // In the event that exchangeIssue returns more receiveTokens or wrappedEth than
+        // specified in receiveToken quantity, those tokens are also retrieved into this contract.
+        // We also call this ahead of returnRedemptionChange to allow the unwrapping of the wrappedEther
         uint256 receiveTokenInVault = vaultInstance.getOwnerBalance(_receiveTokenAddress, address(this));
         if (receiveTokenInVault > 0) {
             coreInstance.withdrawModule(
@@ -313,19 +347,23 @@ contract RebalancingSetExchangeIssuanceModule is
             );
         }
 
-        uint256 receiveTokenBalance = ERC20Wrapper.balanceOf(_receiveTokenAddress, address(this));
-
         // Transfer receiveToken to the caller
+        uint256 receiveTokenBalance = ERC20Wrapper.balanceOf(_receiveTokenAddress, address(this));
         ERC20Wrapper.transfer(
             _receiveTokenAddress,
             msg.sender,
             receiveTokenBalance
         );
 
-        returnRedemptionChange(
-            _exchangeIssuanceParams.setAddress,
-            _keepChangeInVault     
+        // Send excess base SetToken to the user
+        returnExcessBaseSetFromContract(
+            _baseSetAddress,
+            transferProxy,
+            _keepChangeInVault
         );
+
+        // Non-exchanged components are returned to the user
+        returnExcessComponentsFromContract(_baseSetAddress);
     }
 
 
@@ -451,22 +489,5 @@ contract RebalancingSetExchangeIssuanceModule is
             msg.sender,
             _rebalancingSetQuantity
         );        
-    }
-
-    function returnRedemptionChange(
-        address _baseSetAddress,
-        bool _keepChangeInVault
-    )
-        private
-    {
-        // Send excess base Set and ether to the user
-        returnExcessBaseSetFromContract(
-            _baseSetAddress,
-            transferProxy,
-            _keepChangeInVault
-        );
-
-        // Non-exchanged components are returned to the user
-        returnExcessComponentsFromContract(_baseSetAddress);
     }
 }

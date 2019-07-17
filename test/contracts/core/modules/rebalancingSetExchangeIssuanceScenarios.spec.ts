@@ -126,6 +126,7 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
     let subjectRebalancingSetQuantity: BigNumber;
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
     let subjectExchangeOrdersData: Bytes;
+    let subjectKeepChangeInVault: boolean;
     let subjectEther: BigNumber;
 
     const BTC_USD_PRICE: BigNumber = new BigNumber(3711);
@@ -239,6 +240,7 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
       subjectRebalancingSetQuantity = exchangeIssueQuantity.div(rebalancingUnitShares)
                                                            .mul(DEFAULT_REBALANCING_NATURAL_UNIT);
       rebalancingSetQuantity = exchangeIssueQuantity.mul(DEFAULT_REBALANCING_NATURAL_UNIT).div(rebalancingUnitShares);
+      subjectKeepChangeInVault = false;
     });
 
     async function subject(): Promise<string> {
@@ -247,6 +249,7 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
         subjectRebalancingSetQuantity,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
+        subjectKeepChangeInVault,
         { from: subjectCaller, gas: DEFAULT_GAS, value: subjectEther.toString() },
       );
     }

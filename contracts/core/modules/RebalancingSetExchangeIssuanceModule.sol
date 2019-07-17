@@ -30,6 +30,7 @@ import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IWETH } from "../../lib/IWETH.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 import { RebalancingSetExchangeIssuance } from "./lib/RebalancingSetExchangeIssuance.sol";
+import { RebalancingSetIssuance } from "./lib/RebalancingSetIssuance.sol";
 
 // TODO
     // Ensure we handle: 
@@ -47,6 +48,7 @@ import { RebalancingSetExchangeIssuance } from "./lib/RebalancingSetExchangeIssu
 contract RebalancingSetExchangeIssuanceModule is
     ModuleCoreState,
     RebalancingSetExchangeIssuance,
+    RebalancingSetIssuance,
     ReentrancyGuard
 {
     using SafeMath for uint256;
@@ -162,9 +164,9 @@ contract RebalancingSetExchangeIssuanceModule is
         wethInstance.deposit.value(msg.value)();
 
         issueRebalancingSetInternal(
-            weth,
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
+            weth,
             msg.value,
             _exchangeIssuanceParams,
             _orderData,
@@ -188,60 +190,40 @@ contract RebalancingSetExchangeIssuanceModule is
         }
     }
 
-    // function issueRebalancingSetWithERC20(
-    //     address _rebalancingSetAddress,
-    //     uint256 _rebalancingSetQuantity,
-    //     ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
-    //     bytes memory _orderData
-    // )
-    //     public
-    //     nonReentrant
-    // {
-    //     // address paymentToken = _exchangeIssuanceParams.sendTokens[0];
-    //     // uint256 paymentQuantity = _exchangeIssuanceParams.sendTokenAmounts[0];
+    function issueRebalancingSetWithERC20(
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity,
+        address _paymentTokenAddress,
+        uint256 _paymentTokenQuantity,
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
+        bytes memory _orderData,
+        bool _keepChangeInVault
+    )
+        public
+        nonReentrant
+    {
+        // Deposit the erc20 to this contract
+        // The quantity can be higher than the exchangeIssuance payment token quantity
+        // as the component may also be used as the underlying component during issuance
+        coreInstance.transferModule(
+            _paymentTokenAddress,
+            _paymentTokenQuantity,
+            msg.sender,
+            address(this)
+        );
 
-    //     // // Require payment token is the same as exchange issuance payment token
-    //     // // Require payment token quanitty >= payment Quantity
+        issueRebalancingSetInternal(
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity,
+            _paymentTokenAddress,
+            _paymentTokenQuantity,
+            _exchangeIssuanceParams,
+            _orderData,
+            _keepChangeInVault
+        );
 
-    //     // // Validate Params
-    //     // validateInputs(
-    //     //     paymentToken,
-    //     //     _rebalancingSetAddress,
-    //     //     _rebalancingSetQuantity,
-    //     //     _exchangeIssuanceParams.setAddress,
-    //     //     _exchangeIssuanceParams.sendTokens
-    //     // );
-
-    //     // // Transfer passed in payment token quantity
-
-    //     // // If the paymentToken is also a component of the baseSet
-    //     // // the transfer quanitty is greater
-
-    //     // // Deposit erc20 to this contract
-    //     // // TODO: An issue is that the component may also be needed
-    //     // // In the Set and the payment token is not enough
-    //     // // Perhaps it's the component required quantity + sendToken required
-    //     // // That quantity is only required if the component is a component
-    //     // // of the base Set
-    //     // // Edge case: you can trade the paymentTOken for more payment tokens?
-    //     // coreInstance.transferModule(
-    //     //     paymentToken,
-    //     //     paymentQuantity,
-    //     //     msg.sender,
-    //     //     address(this)
-    //     // );
-
-    //     // issueRebalancingSetInternal(
-    //     //     paymentToken,
-    //     //     _rebalancingSetAddress,
-    //     //     _rebalancingSetQuantity,
-    //     //     paymentQuantity,
-    //     //     _exchangeIssuanceParams,
-    //     //     _orderData
-    //     // );
-
-    //     // // Send back any unused payment token
-    // }
+        // Send back any unused payment token
+    }
 
     // /**
     //  * Redeems a Rebalancing Set into Wrapped Ether. The Rebalancing Set is redeemed into the Base Set, and
@@ -404,9 +386,9 @@ contract RebalancingSetExchangeIssuanceModule is
     /* ============ Private Functions ============ */
 
     function issueRebalancingSetInternal(
-        address _paymentToken,
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
+        address _paymentToken,
         uint256 _paymentTokenQuantity,
         ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
         bytes memory _orderData,
@@ -456,8 +438,16 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         // Send excess base Set and ether to the user
-        returnIssuanceExcessFunds(baseSetAddress);
+        returnExcessBaseSet(
+            baseSetAddress,
+            transferProxy,
+            _keepChangeInVault
+        );
 
+        // Return Excess Components
+        returnExcessComponents(baseSetAddress);
+
+        // Note paymentTokenQuantity could be spoofed
         emit LogPayableExchangeIssue(
             _rebalancingSetAddress,
             msg.sender,

@@ -19,7 +19,6 @@ pragma solidity 0.5.7;
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ERC20Wrapper } from "../../../lib/ERC20Wrapper.sol";
-import { ExchangeIssuanceLibrary } from "./ExchangeIssuanceLibrary.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { ModuleCoreState } from "./ModuleCoreState.sol";
 
@@ -58,10 +57,16 @@ contract RebalancingSetExchangeIssuance is
         internal
         view
     {
-        // Expect RebalancingSet to be valid and enabled Set
+        // Expect rebalancing SetToken to be valid and enabled SetToken
         require(
             coreInstance.validSets(_rebalancingSetAddress),
-            "RebalancingSetExchangeIssuance.validateInputs: Invalid or disabled SetToken address"
+            "RebalancingSetExchangeIssuance.validateRebalancingIssuance: Invalid or disabled SetToken address"
+        );
+        
+        // Make sure Issuance quantity is multiple of the rebalancing SetToken natural unit
+        require(
+            _rebalancingSetQuantity.mod(ISetToken(_rebalancingSetAddress).naturalUnit()) == 0,
+            "RebalancingSetExchangeIssuance.validateRebalancingIssuance: Quantity must be multiple of natural unit"
         );
 
         // Require only 1 receive token in redeem and 1 send token in issue
@@ -82,11 +87,6 @@ contract RebalancingSetExchangeIssuance is
         require(
             baseSet == _collateralSetAddress,
             "RebalancingSetExchangeIssuance.validateInputs: Base Set addresses must match"
-        );
-
-        ExchangeIssuanceLibrary.validateQuantity(
-            _rebalancingSetAddress,
-            _rebalancingSetQuantity
         );
     } 
 
@@ -130,24 +130,11 @@ contract RebalancingSetExchangeIssuance is
      *
      * @param _baseSetAddress           The address of the base Set
      */
-    function returnIssuanceExcessFunds(
+    function returnExcessComponents(
         address _baseSetAddress
     )
         internal
     {
-        // Return any excess base Set to the user not used in rebalancing set issuance
-        uint256 leftoverBaseSet = ERC20Wrapper.balanceOf(
-            _baseSetAddress,
-            address(this)
-        );
-        if (leftoverBaseSet > 0) {
-            ERC20Wrapper.transfer(
-                _baseSetAddress,
-                msg.sender,
-                leftoverBaseSet
-            );
-        }
-
         // Return base Set components not used in issuance of base set
         address[] memory baseSetComponents = ISetToken(_baseSetAddress).getComponents();
         for (uint256 i = 0; i < baseSetComponents.length; i++) {

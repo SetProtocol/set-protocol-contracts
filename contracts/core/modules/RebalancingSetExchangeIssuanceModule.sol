@@ -234,87 +234,96 @@ contract RebalancingSetExchangeIssuanceModule is
         }
     }
 
-    // /**
-    //  * Redeems a Rebalancing Set into Wrapped Ether. The Rebalancing Set is redeemed into the Base Set, and
-    //  * Base Set components are traded for WETH. The WETH is then withdrawn into ETH and the ETH sent to the caller.
-    //  *
-    //  * @param  _rebalancingSetAddress    Address of the rebalancing Set
-    //  * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
-    //  * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
-    //  * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
-    //  */
-    // function redeemRebalancingSetIntoEther(
-    //     address _rebalancingSetAddress,
-    //     uint256 _rebalancingSetQuantity,
-    //     ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
-    //     bytes memory _orderData
-    // )
-    //     public
-    //     nonReentrant
-    // {
-    //     // Validate Params
-    //     validateInputs(
-    //         weth,
-    //         _rebalancingSetAddress,
-    //         _rebalancingSetQuantity,
-    //         _exchangeIssuanceParams.setAddress,
-    //         _exchangeIssuanceParams.receiveTokens
-    //     );
+    /**
+     * Redeems a Rebalancing Set into Wrapped Ether. The Rebalancing Set is redeemed into the Base Set, and
+     * Base Set components are traded for WETH. The WETH is then withdrawn into ETH and the ETH sent to the caller.
+     *
+     * @param  _rebalancingSetAddress    Address of the rebalancing Set
+     * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
+     * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
+     * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
+     */
+    function redeemRebalancingSetIntoEther(
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity,
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
+        bytes memory _orderData,
+        bool _keepChangeInVault
+    )
+        public
+        nonReentrant
+    {
+        // Validate Params
+        validateInputs(
+            weth,
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity,
+            _exchangeIssuanceParams.setAddress,
+            _exchangeIssuanceParams.receiveTokens
+        );
 
-    //     // Redeem rebalancing Set from the user to this contract in the vault
-    //     coreInstance.redeemModule(
-    //         msg.sender,
-    //         address(this),
-    //         _rebalancingSetAddress,
-    //         _rebalancingSetQuantity
-    //     );
+        // Redeem rebalancing Set from the user to this contract in the vault
+        coreInstance.redeemModule(
+            msg.sender,
+            address(this),
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity
+        );
 
-    //     // Withdraw components to this contract.
-    //     coreInstance.withdrawModule(
-    //         address(this),
-    //         address(this),
-    //         _exchangeIssuanceParams.setAddress,
-    //         _exchangeIssuanceParams.quantity
-    //     );
+        address baseSetAddress = _exchangeIssuanceParams.setAddress;
 
-    //     // Exchange redeem Base Set
-    //     // To investigate: Could there ever be a case where there is an issue
-    //     // 
-    //     exchangeIssuanceInstance.exchangeRedeem(
-    //         _exchangeIssuanceParams,
-    //         _orderData
-    //     );
+        // Withdraw Base Set from Vault to this contract.
+        coreInstance.withdrawModule(
+            address(this),
+            address(this),
+            baseSetAddress,
+            _exchangeIssuanceParams.quantity
+        );
 
-    //     // Withdraw any excess traded for eth from vault to contract
-    //     uint256 wethInVault = vaultInstance.getOwnerBalance(weth, address(this));
-    //     if ( wethInVault > 0 ) {
-    //         coreInstance.withdrawModule(
-    //             address(this),
-    //             address(this),
-    //             weth,
-    //             wethInVault
-    //         );
-    //     }
+        // Exchange redeem Base Set
+        // To investigate: Could there ever be a case where there is an issue
+        exchangeIssuanceInstance.exchangeRedeem(
+            _exchangeIssuanceParams,
+            _orderData
+        );
 
-    //     // Withdraw eth from WETH
-    //     uint256 wethBalance = ERC20Wrapper.balanceOf(
-    //         weth,
-    //         address(this)
-    //     );
-    //     wethInstance.withdraw(wethBalance);
+        // Withdraw any excess traded for eth from vault to contract
+        uint256 wethInVault = vaultInstance.getOwnerBalance(weth, address(this));
+        if (wethInVault > 0) {
+            coreInstance.withdrawModule(
+                address(this),
+                address(this),
+                weth,
+                wethInVault
+            );
+        }
 
-    //     // Send eth to user
-    //     msg.sender.transfer(wethBalance);
+        // Withdraw eth from WETH
+        uint256 wethBalance = ERC20Wrapper.balanceOf(
+            weth,
+            address(this)
+        );
+        wethInstance.withdraw(wethBalance);
 
-    //     // Non-exchanged components are returned to the user
-    //     returnRedemptionExcessFunds(_exchangeIssuanceParams.setAddress);
+        // Send eth to user
+        msg.sender.transfer(wethBalance);
 
-    //     emit LogPayableExchangeRedeem(
-    //         _rebalancingSetAddress,
-    //         msg.sender,
-    //         _rebalancingSetQuantity
-    //     );
-    // }
+        // Send excess base Set and ether to the user
+        returnExcessBaseSetFromContract(
+            baseSetAddress,
+            transferProxy,
+            _keepChangeInVault
+        );
+
+        // Non-exchanged components are returned to the user
+        returnExcessComponentsFromContract(baseSetAddress);
+
+        emit LogPayableExchangeRedeem(
+            _rebalancingSetAddress,
+            msg.sender,
+            _rebalancingSetQuantity
+        );
+    }
 
     // function redeemRebalancingSetIntoERC20(
     //     address _rebalancingSetAddress,

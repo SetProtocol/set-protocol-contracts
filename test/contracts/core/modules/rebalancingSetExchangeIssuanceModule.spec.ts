@@ -599,7 +599,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
   });
 
-  describe.only('#issueRebalancingSetWithERC20', async () => {
+  describe('#issueRebalancingSetWithERC20', async () => {
     let subjectRebalancingSetAddress: Address;
     let subjectRebalancingSetQuantity: BigNumber;
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
@@ -1000,423 +1000,423 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
   });
 
-  // describe('#redeemRebalancingSetIntoEther', async () => {
-  //   let subjectRebalancingSetAddress: Address;
-  //   let subjectRebalancingSetQuantity: BigNumber;
-  //   let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
-  //   let subjectExchangeOrdersData: Bytes;
-  //   let subjectCaller: Address;
-
-  //   let customExchangeRedeemQuantity: BigNumber;
-  //   let customExchangeRedeemSendTokenAmounts: BigNumber[];
-  //   let customBaseSetComponent: StandardTokenMockContract;
-  //   let customComponentAddresses: Address[];
-  //   let customComponentUnits: BigNumber[];
-
-  //   let baseSetComponent: StandardTokenMockContract;
-  //   let nonExchangedWethQuantity: BigNumber;
-
-  //   let baseSetToken: SetTokenContract;
-  //   let baseSetNaturalUnit: BigNumber;
-  //   let rebalancingSetToken: RebalancingSetTokenContract;
-  //   let rebalancingUnitShares: BigNumber;
-
-  //   let exchangeRedeemSetAddress: Address;
-  //   let exchangeRedeemQuantity: BigNumber;
-  //   let exchangeRedeemSendTokenExchangeIds: BigNumber[];
-  //   let exchangeRedeemSendTokens: Address[];
-  //   let exchangeRedeemSendTokenAmounts: BigNumber[];
-  //   let exchangeRedeemReceiveTokens: Address[];
-  //   let exchangeRedeemReceiveTokenAmounts: BigNumber[];
-
-  //   let etherQuantityToReceive: BigNumber;
-  //   let etherTradedFor: BigNumber;
-
-  //   let zeroExOrder: ZeroExSignedFillOrder;
-
-  //   beforeEach(async () => {
-  //     etherQuantityToReceive = ether(2);
-
-  //     // Create component token
-  //     baseSetComponent = customBaseSetComponent || await erc20Wrapper.deployTokenAsync(tokenPurchaser);
-
-  //     // Create the Set (2 component where one is WETH)
-  //     const componentAddresses = customComponentAddresses || [baseSetComponent.address, weth.address];
-  //     const componentUnits = customComponentUnits || [new BigNumber(10 ** 10), new BigNumber(10 ** 10)];
-  //     baseSetNaturalUnit = new BigNumber(10 ** 9);
-  //     baseSetToken = await coreWrapper.createSetTokenAsync(
-  //       core,
-  //       setTokenFactory.address,
-  //       componentAddresses,
-  //       componentUnits,
-  //       baseSetNaturalUnit,
-  //     );
-
-  //     // Create the Rebalancing Set
-  //     rebalancingUnitShares = new BigNumber(10 ** 10);
-  //     rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
-  //       core,
-  //       rebalancingSetTokenFactory.address,
-  //       ownerAccount,
-  //       baseSetToken.address,
-  //       ONE_DAY_IN_SECONDS,
-  //       rebalancingUnitShares,
-  //     );
-
-  //     // Generate exchangeRedeem data
-  //     exchangeRedeemSetAddress = baseSetToken.address;
-  //     exchangeRedeemQuantity = customExchangeRedeemQuantity || new BigNumber(10 ** 10);
-  //     exchangeRedeemSendTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
-  //     exchangeRedeemSendTokens = [componentAddresses[0]];
-  //     exchangeRedeemSendTokenAmounts = customExchangeRedeemSendTokenAmounts ||
-  //       [componentUnits[0].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit)];
-  //     exchangeRedeemReceiveTokens = [weth.address];
-  //     exchangeRedeemReceiveTokenAmounts = [etherQuantityToReceive];
-
-  //     const exchangeIssuanceParams = {
-  //       setAddress:             exchangeRedeemSetAddress,
-  //       sendTokenExchangeIds:   exchangeRedeemSendTokenExchangeIds,
-  //       sendTokens:             exchangeRedeemSendTokens,
-  //       sendTokenAmounts:       exchangeRedeemSendTokenAmounts,
-  //       quantity:               exchangeRedeemQuantity,
-  //       receiveTokens:          exchangeRedeemReceiveTokens,
-  //       receiveTokenAmounts:    exchangeRedeemReceiveTokenAmounts,
-  //     };
-
-  //     // Approve weth to the transfer proxy
-  //     const requiredEthForExchangeOrder = etherTradedFor || exchangeRedeemReceiveTokenAmounts[0];
-  //     await weth.approve.sendTransactionAsync(
-  //       SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
-  //       requiredEthForExchangeOrder,
-  //       { from: zeroExOrderMaker, gas: DEFAULT_GAS }
-  //     );
-
-  //     // Deposit weth
-  //     const requiredEthForExchangeOrderValue = requiredEthForExchangeOrder.toString();
-  //     await weth.deposit.sendTransactionAsync(
-  //       { from: zeroExOrderMaker, value: requiredEthForExchangeOrderValue, gas: DEFAULT_GAS }
-  //     );
-
-  //     // Create 0x order for the component
-  //     zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
-  //       NULL_ADDRESS,                                               // senderAddress
-  //       zeroExOrderMaker,                                           // makerAddress
-  //       NULL_ADDRESS,                                               // takerAddress
-  //       ZERO,                                                       // makerFee
-  //       ZERO,                                                       // takerFee
-  //       etherTradedFor || exchangeRedeemReceiveTokenAmounts[0],     // makerAssetAmount
-  //       exchangeRedeemSendTokenAmounts[0],                          // takerAssetAmount
-  //       exchangeRedeemReceiveTokens[0],                             // makerAssetAddress
-  //       exchangeRedeemSendTokens[0],                                // takerAssetAddress
-  //       SetUtils.generateSalt(),                                    // salt
-  //       SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,                      // exchangeAddress
-  //       NULL_ADDRESS,                                               // feeRecipientAddress
-  //       SetTestUtils.generateTimestamp(10000),                      // expirationTimeSeconds
-  //       exchangeRedeemSendTokenAmounts[0],                          // amount of zeroExOrder to fill
-  //     );
-
-  //     // Approve base component to transfer proxy
-  //     await erc20Wrapper.approveTransfersAsync(
-  //       [baseSetComponent],
-  //       transferProxy.address,
-  //       tokenPurchaser
-  //     );
-
-  //     nonExchangedWethQuantity = componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
-
-  //     // Approve Weth to the transferProxy
-  //     await weth.approve.sendTransactionAsync(
-  //       transferProxy.address,
-  //       nonExchangedWethQuantity,
-  //       { from: tokenPurchaser, gas: DEFAULT_GAS }
-  //     );
-
-  //     // Generate wrapped Ether for the caller
-  //     await weth.deposit.sendTransactionAsync(
-  //       { from: tokenPurchaser, value: nonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
-  //     );
-
-  //     // Issue the Base Set to the vault
-  //     await core.issueInVault.sendTransactionAsync(
-  //       baseSetToken.address,
-  //       exchangeRedeemQuantity,
-  //       { from: tokenPurchaser, gas: DEFAULT_GAS }
-  //     );
-
-  //     // Issue the Rebalancing Set
-  //     const rebalancingSetQuantity = exchangeRedeemQuantity
-  //                                      .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
-  //                                      .div(rebalancingUnitShares);
-  //     await core.issue.sendTransactionAsync(
-  //       rebalancingSetToken.address,
-  //       rebalancingSetQuantity,
-  //       { from: tokenPurchaser, gas: DEFAULT_GAS }
-  //     );
-
-  //     subjectRebalancingSetAddress = rebalancingSetToken.address;
-  //     subjectRebalancingSetQuantity = rebalancingSetQuantity;
-  //     subjectExchangeIssuanceParams = exchangeIssuanceParams;
-  //     subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
-  //     subjectCaller = tokenPurchaser;
-  //   });
-
-  //   afterEach(async () => {
-  //     customExchangeRedeemQuantity = undefined;
-  //   });
-
-  //   async function subject(): Promise<string> {
-  //     return rebalancingSetExchangeIssuanceModule.redeemRebalancingSetIntoEther.sendTransactionAsync(
-  //       subjectRebalancingSetAddress,
-  //       subjectRebalancingSetQuantity,
-  //       subjectExchangeIssuanceParams,
-  //       subjectExchangeOrdersData,
-  //       { from: subjectCaller, gas: DEFAULT_GAS },
-  //     );
-  //   }
-
-  //   it('redeems the rebalancing Set', async () => {
-  //     const previousRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
-  //     const expectedRBSetTokenBalance = previousRBSetTokenBalance.sub(subjectRebalancingSetQuantity);
-
-  //     await subject();
-
-  //     const currentRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
-  //     expect(expectedRBSetTokenBalance).to.bignumber.equal(currentRBSetTokenBalance);
-  //   });
-
-  //   it('should increment the users eth balance by the correct quantity', async () => {
-  //     const previousEthBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
-
-  //     const txHash = await subject();
-  //     const totalGasInEth = await getGasUsageInEth(txHash);
-
-  //     const expectedEthBalance = previousEthBalance
-  //                                  .add(etherQuantityToReceive)
-  //                                  .add(nonExchangedWethQuantity)
-  //                                  .sub(totalGasInEth);
-  //     const currentEthBalance =  await web3.eth.getBalance(subjectCaller);
-
-  //     expect(currentEthBalance).to.bignumber.equal(expectedEthBalance);
-  //   });
-
-  //   it('increases the 0x makers send token quantity properly', async () => {
-  //     const previousTakerTokenBalance = await baseSetComponent.balanceOf.callAsync(zeroExOrderMaker);
-  //     const expectedTakerTokenBalance = previousTakerTokenBalance.add(exchangeRedeemSendTokenAmounts[0]);
-
-  //     await subject();
-
-  //     const currentTakerTokenBalance = await baseSetComponent.balanceOf.callAsync(zeroExOrderMaker);
-  //     expect(expectedTakerTokenBalance).to.bignumber.equal(currentTakerTokenBalance);
-  //   });
-
-  //   it('emits correct LogPayableExchangeRedeem event', async () => {
-  //     const txHash = await subject();
-
-  //     const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-  //     const expectedLogs = LogPayableExchangeRedeem(
-  //       subjectRebalancingSetAddress,
-  //       subjectCaller,
-  //       subjectRebalancingSetQuantity,
-  //       rebalancingSetExchangeIssuanceModule.address
-  //     );
-
-  //     await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-  //   });
-
-  //   describe('when the Set has a component that has not been exchanged', async () => {
-  //     let nonExchangedNonWethComponent: StandardTokenMockContract;
-
-  //     before(async () => {
-  //       nonExchangedNonWethComponent = await erc20Wrapper.deployTokenAsync(tokenPurchaser);
-
-  //       customBaseSetComponent = await erc20Wrapper.deployTokenAsync(tokenPurchaser);
-  //       customComponentAddresses = [
-  //         customBaseSetComponent.address,
-  //         weth.address,
-  //         nonExchangedNonWethComponent.address,
-  //       ];
-  //       customComponentUnits = [new BigNumber(10 ** 10), new BigNumber(10 ** 10), new BigNumber(10 ** 10)];
-
-  //       await erc20Wrapper.approveTransfersAsync(
-  //         [nonExchangedNonWethComponent],
-  //         transferProxy.address,
-  //         tokenPurchaser
-  //       );
-  //     });
-
-  //     after(async () => {
-  //       customBaseSetComponent = undefined;
-  //       customComponentAddresses = undefined;
-  //       customComponentUnits = undefined;
-  //     });
-
-  //     it('should send the extra asset to the caller', async () => {
-  //       const previousReturnedAssetBalance = await nonExchangedNonWethComponent.balanceOf.callAsync(subjectCaller);
-  //       const expectedReturnedAssetBalance = previousReturnedAssetBalance.add(
-  //         customComponentUnits[2].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit)
-  //       );
-
-  //       await subject();
-
-  //       const currentReturnedAssetBalance = await nonExchangedNonWethComponent.balanceOf.callAsync(subjectCaller);
-  //       expect(expectedReturnedAssetBalance).to.bignumber.equal(currentReturnedAssetBalance);
-  //     });
-  //   });
-
-  //   describe('when the quantity of weth in receive tokens is less than the amount traded for', async () => {
-  //     before(async () => {
-  //       etherTradedFor = ether(3);
-  //     });
-
-  //     after(async () => {
-  //       etherTradedFor = undefined;
-  //     });
-
-  //     it('should increment the users eth balance by the correct quantity', async () => {
-  //       const previousEthBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
-
-  //       const txHash = await subject();
-  //       const totalGasInEth = await getGasUsageInEth(txHash);
-
-  //       const expectedEthBalance = previousEthBalance
-  //                                    .add(etherTradedFor)
-  //                                    .add(nonExchangedWethQuantity)
-  //                                    .sub(totalGasInEth);
-  //       const currentEthBalance =  await web3.eth.getBalance(subjectCaller);
-  //       expect(currentEthBalance).to.bignumber.equal(expectedEthBalance);
-  //     });
-  //   });
-
-  //   describe('when the quantity of send token is less than the components redeemed', async () => {
-  //     let halfBaseComponentQuantity: BigNumber;
-
-  //     before(async () => {
-  //       const componentUnit = new BigNumber(10 ** 10);
-  //       const naturalUnit = new BigNumber(10 ** 9);
-  //       const redeemQuantity = new BigNumber(10 ** 10);
-
-  //       halfBaseComponentQuantity =  componentUnit.mul(redeemQuantity).div(naturalUnit).div(2);
-
-  //       customExchangeRedeemSendTokenAmounts = [halfBaseComponentQuantity];
-  //     });
-
-  //     after(async () => {
-  //       customExchangeRedeemSendTokenAmounts = undefined;
-  //     });
-
-  //     it('should send the unsold components to the caller', async () => {
-  //       const previousReturnedAssetBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
-  //       const expectedReturnedAssetBalance = previousReturnedAssetBalance.add(halfBaseComponentQuantity);
-
-  //       await subject();
-
-  //       const currentReturnedAssetBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
-  //       expect(expectedReturnedAssetBalance).to.bignumber.equal(currentReturnedAssetBalance);
-  //     });
-  //   });
-
-  //   describe('when the implied base Set quantity is greater than the issuance params base Set quantity', async () => {
-  //     let excessBaseSetQuantity: BigNumber;
-
-  //     beforeEach(async () => {
-  //       const excessNonExchangedWethQuantity = nonExchangedWethQuantity.mul(2);
-  //       excessBaseSetQuantity = exchangeRedeemQuantity.mul(2);
-
-  //       // Generate wrapped Ether for the caller
-  //       await weth.deposit.sendTransactionAsync(
-  //         { from: tokenPurchaser, value: excessNonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
-  //       );
-
-  //       // Approve Weth to the transferProxy
-  //       await weth.approve.sendTransactionAsync(
-  //         transferProxy.address,
-  //         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-  //         { from: tokenPurchaser, gas: DEFAULT_GAS }
-  //       );
-
-  //       // Issue the Base Set to the vault
-  //       await core.issueInVault.sendTransactionAsync(
-  //         baseSetToken.address,
-  //         excessBaseSetQuantity,
-  //         { from: tokenPurchaser, gas: DEFAULT_GAS }
-  //       );
-
-  //       // Issue the Rebalancing Set
-  //       const excessRebalancingSetQuantity = excessBaseSetQuantity
-  //                                        .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
-  //                                        .div(rebalancingUnitShares);
-  //       await core.issue.sendTransactionAsync(
-  //         rebalancingSetToken.address,
-  //         excessRebalancingSetQuantity,
-  //         { from: tokenPurchaser, gas: DEFAULT_GAS }
-  //       );
-
-  //       subjectRebalancingSetQuantity = subjectRebalancingSetQuantity.add(excessRebalancingSetQuantity);
-  //     });
-
-  //     it('should return the excess base Set to the caller', async () => {
-  //       const previousReturnedAssetBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
-  //       const expectedReturnedAssetBalance = previousReturnedAssetBalance.add(excessBaseSetQuantity);
-
-  //       await subject();
-
-  //       const currentReturnedAssetBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
-  //       expect(expectedReturnedAssetBalance).to.bignumber.equal(currentReturnedAssetBalance);
-  //     });
-  //   });
-
-  //   describe('when the receive tokens length is greater than 1', async () => {
-  //     beforeEach(async () => {
-  //       subjectExchangeIssuanceParams.receiveTokens = [weth.address, weth.address];
-  //       subjectExchangeIssuanceParams.receiveTokenAmounts = [new BigNumber(1), new BigNumber(1)];
-  //     });
-
-  //     it('should revert', async () => {
-  //       await expectRevertError(subject());
-  //     });
-  //   });
-
-  //   describe('when the receive token is not wrapped ether', async () => {
-  //     beforeEach(async () => {
-  //       const baseSetComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
-  //       subjectExchangeIssuanceParams.receiveTokens = [baseSetComponent.address];
-  //     });
-
-  //     it('should revert', async () => {
-  //       await expectRevertError(subject());
-  //     });
-  //   });
-
-  //   describe('when the base Set of the rebalancing Set is not the issuance params Set', async () => {
-  //     beforeEach(async () => {
-  //       subjectExchangeIssuanceParams.setAddress = weth.address;
-  //     });
-
-  //     it('should revert', async () => {
-  //       await expectRevertError(subject());
-  //     });
-  //   });
-
-  //   describe('when the rebalancingSetAddress is not tracked by Core', async () => {
-  //     beforeEach(async () => {
-  //       const proposalPeriod = ONE_DAY_IN_SECONDS;
-  //       const rebalanceInterval = ONE_DAY_IN_SECONDS;
-  //       const unTrackedSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
-  //         rebalancingSetTokenFactory.address,
-  //         ownerAccount,
-  //         baseSetToken.address,
-  //         DEFAULT_UNIT_SHARES,
-  //         DEFAULT_REBALANCING_NATURAL_UNIT,
-  //         proposalPeriod,
-  //         rebalanceInterval,
-  //         whitelist,
-  //       );
-  //       subjectRebalancingSetAddress = unTrackedSetToken.address;
-  //     });
-
-  //     it('should revert', async () => {
-  //       await expectRevertError(subject());
-  //     });
-  //   });
-  // });
+  describe.only('#redeemRebalancingSetIntoEther', async () => {
+    let subjectRebalancingSetAddress: Address;
+    let subjectRebalancingSetQuantity: BigNumber;
+    let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
+    let subjectExchangeOrdersData: Bytes;
+    let subjectCaller: Address;
+
+    let customExchangeRedeemQuantity: BigNumber;
+    let customExchangeRedeemSendTokenAmounts: BigNumber[];
+    let customBaseSetComponent: StandardTokenMockContract;
+    let customComponentAddresses: Address[];
+    let customComponentUnits: BigNumber[];
+
+    let baseSetComponent: StandardTokenMockContract;
+    let nonExchangedWethQuantity: BigNumber;
+
+    let baseSetToken: SetTokenContract;
+    let baseSetNaturalUnit: BigNumber;
+    let rebalancingSetToken: RebalancingSetTokenContract;
+    let rebalancingUnitShares: BigNumber;
+
+    let exchangeRedeemSetAddress: Address;
+    let exchangeRedeemQuantity: BigNumber;
+    let exchangeRedeemSendTokenExchangeIds: BigNumber[];
+    let exchangeRedeemSendTokens: Address[];
+    let exchangeRedeemSendTokenAmounts: BigNumber[];
+    let exchangeRedeemReceiveTokens: Address[];
+    let exchangeRedeemReceiveTokenAmounts: BigNumber[];
+
+    let etherQuantityToReceive: BigNumber;
+    let etherTradedFor: BigNumber;
+
+    let zeroExOrder: ZeroExSignedFillOrder;
+
+    beforeEach(async () => {
+      etherQuantityToReceive = ether(2);
+
+      // Create component token
+      baseSetComponent = customBaseSetComponent || await erc20Wrapper.deployTokenAsync(tokenPurchaser);
+
+      // Create the Set (2 component where one is WETH)
+      const componentAddresses = customComponentAddresses || [baseSetComponent.address, weth.address];
+      const componentUnits = customComponentUnits || [new BigNumber(10 ** 10), new BigNumber(10 ** 10)];
+      baseSetNaturalUnit = new BigNumber(10 ** 9);
+      baseSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        baseSetNaturalUnit,
+      );
+
+      // Create the Rebalancing Set
+      rebalancingUnitShares = new BigNumber(10 ** 10);
+      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+        core,
+        rebalancingSetTokenFactory.address,
+        ownerAccount,
+        baseSetToken.address,
+        ONE_DAY_IN_SECONDS,
+        rebalancingUnitShares,
+      );
+
+      // Generate exchangeRedeem data
+      exchangeRedeemSetAddress = baseSetToken.address;
+      exchangeRedeemQuantity = customExchangeRedeemQuantity || new BigNumber(10 ** 10);
+      exchangeRedeemSendTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
+      exchangeRedeemSendTokens = [componentAddresses[0]];
+      exchangeRedeemSendTokenAmounts = customExchangeRedeemSendTokenAmounts ||
+        [componentUnits[0].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit)];
+      exchangeRedeemReceiveTokens = [weth.address];
+      exchangeRedeemReceiveTokenAmounts = [etherQuantityToReceive];
+
+      const exchangeIssuanceParams = {
+        setAddress:             exchangeRedeemSetAddress,
+        sendTokenExchangeIds:   exchangeRedeemSendTokenExchangeIds,
+        sendTokens:             exchangeRedeemSendTokens,
+        sendTokenAmounts:       exchangeRedeemSendTokenAmounts,
+        quantity:               exchangeRedeemQuantity,
+        receiveTokens:          exchangeRedeemReceiveTokens,
+        receiveTokenAmounts:    exchangeRedeemReceiveTokenAmounts,
+      };
+
+      // Approve weth to the transfer proxy
+      const requiredEthForExchangeOrder = etherTradedFor || exchangeRedeemReceiveTokenAmounts[0];
+      await weth.approve.sendTransactionAsync(
+        SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
+        requiredEthForExchangeOrder,
+        { from: zeroExOrderMaker, gas: DEFAULT_GAS }
+      );
+
+      // Deposit weth
+      const requiredEthForExchangeOrderValue = requiredEthForExchangeOrder.toString();
+      await weth.deposit.sendTransactionAsync(
+        { from: zeroExOrderMaker, value: requiredEthForExchangeOrderValue, gas: DEFAULT_GAS }
+      );
+
+      // Create 0x order for the component
+      zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
+        NULL_ADDRESS,                                               // senderAddress
+        zeroExOrderMaker,                                           // makerAddress
+        NULL_ADDRESS,                                               // takerAddress
+        ZERO,                                                       // makerFee
+        ZERO,                                                       // takerFee
+        etherTradedFor || exchangeRedeemReceiveTokenAmounts[0],     // makerAssetAmount
+        exchangeRedeemSendTokenAmounts[0],                          // takerAssetAmount
+        exchangeRedeemReceiveTokens[0],                             // makerAssetAddress
+        exchangeRedeemSendTokens[0],                                // takerAssetAddress
+        SetUtils.generateSalt(),                                    // salt
+        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,                      // exchangeAddress
+        NULL_ADDRESS,                                               // feeRecipientAddress
+        SetTestUtils.generateTimestamp(10000),                      // expirationTimeSeconds
+        exchangeRedeemSendTokenAmounts[0],                          // amount of zeroExOrder to fill
+      );
+
+      // Approve base component to transfer proxy
+      await erc20Wrapper.approveTransfersAsync(
+        [baseSetComponent],
+        transferProxy.address,
+        tokenPurchaser
+      );
+
+      nonExchangedWethQuantity = componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
+
+      // Approve Weth to the transferProxy
+      await weth.approve.sendTransactionAsync(
+        transferProxy.address,
+        nonExchangedWethQuantity,
+        { from: tokenPurchaser, gas: DEFAULT_GAS }
+      );
+
+      // Generate wrapped Ether for the caller
+      await weth.deposit.sendTransactionAsync(
+        { from: tokenPurchaser, value: nonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
+      );
+
+      // Issue the Base Set to the vault
+      await core.issueInVault.sendTransactionAsync(
+        baseSetToken.address,
+        exchangeRedeemQuantity,
+        { from: tokenPurchaser, gas: DEFAULT_GAS }
+      );
+
+      // Issue the Rebalancing Set
+      const rebalancingSetQuantity = exchangeRedeemQuantity
+                                       .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
+                                       .div(rebalancingUnitShares);
+      await core.issue.sendTransactionAsync(
+        rebalancingSetToken.address,
+        rebalancingSetQuantity,
+        { from: tokenPurchaser, gas: DEFAULT_GAS }
+      );
+
+      subjectRebalancingSetAddress = rebalancingSetToken.address;
+      subjectRebalancingSetQuantity = rebalancingSetQuantity;
+      subjectExchangeIssuanceParams = exchangeIssuanceParams;
+      subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
+      subjectCaller = tokenPurchaser;
+    });
+
+    afterEach(async () => {
+      customExchangeRedeemQuantity = undefined;
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingSetExchangeIssuanceModule.redeemRebalancingSetIntoEther.sendTransactionAsync(
+        subjectRebalancingSetAddress,
+        subjectRebalancingSetQuantity,
+        subjectExchangeIssuanceParams,
+        subjectExchangeOrdersData,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+    }
+
+    it('redeems the rebalancing Set', async () => {
+      const previousRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
+      const expectedRBSetTokenBalance = previousRBSetTokenBalance.sub(subjectRebalancingSetQuantity);
+
+      await subject();
+
+      const currentRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
+      expect(expectedRBSetTokenBalance).to.bignumber.equal(currentRBSetTokenBalance);
+    });
+
+    it('should increment the users eth balance by the correct quantity', async () => {
+      const previousEthBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
+
+      const txHash = await subject();
+      const totalGasInEth = await getGasUsageInEth(txHash);
+
+      const expectedEthBalance = previousEthBalance
+                                   .add(etherQuantityToReceive)
+                                   .add(nonExchangedWethQuantity)
+                                   .sub(totalGasInEth);
+      const currentEthBalance =  await web3.eth.getBalance(subjectCaller);
+
+      expect(currentEthBalance).to.bignumber.equal(expectedEthBalance);
+    });
+
+    it('increases the 0x makers send token quantity properly', async () => {
+      const previousTakerTokenBalance = await baseSetComponent.balanceOf.callAsync(zeroExOrderMaker);
+      const expectedTakerTokenBalance = previousTakerTokenBalance.add(exchangeRedeemSendTokenAmounts[0]);
+
+      await subject();
+
+      const currentTakerTokenBalance = await baseSetComponent.balanceOf.callAsync(zeroExOrderMaker);
+      expect(expectedTakerTokenBalance).to.bignumber.equal(currentTakerTokenBalance);
+    });
+
+    it('emits correct LogPayableExchangeRedeem event', async () => {
+      const txHash = await subject();
+
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs = LogPayableExchangeRedeem(
+        subjectRebalancingSetAddress,
+        subjectCaller,
+        subjectRebalancingSetQuantity,
+        rebalancingSetExchangeIssuanceModule.address
+      );
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the Set has a component that has not been exchanged', async () => {
+      let nonExchangedNonWethComponent: StandardTokenMockContract;
+
+      before(async () => {
+        nonExchangedNonWethComponent = await erc20Wrapper.deployTokenAsync(tokenPurchaser);
+
+        customBaseSetComponent = await erc20Wrapper.deployTokenAsync(tokenPurchaser);
+        customComponentAddresses = [
+          customBaseSetComponent.address,
+          weth.address,
+          nonExchangedNonWethComponent.address,
+        ];
+        customComponentUnits = [new BigNumber(10 ** 10), new BigNumber(10 ** 10), new BigNumber(10 ** 10)];
+
+        await erc20Wrapper.approveTransfersAsync(
+          [nonExchangedNonWethComponent],
+          transferProxy.address,
+          tokenPurchaser
+        );
+      });
+
+      after(async () => {
+        customBaseSetComponent = undefined;
+        customComponentAddresses = undefined;
+        customComponentUnits = undefined;
+      });
+
+      it('should send the extra asset to the caller', async () => {
+        const previousReturnedAssetBalance = await nonExchangedNonWethComponent.balanceOf.callAsync(subjectCaller);
+        const expectedReturnedAssetBalance = previousReturnedAssetBalance.add(
+          customComponentUnits[2].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit)
+        );
+
+        await subject();
+
+        const currentReturnedAssetBalance = await nonExchangedNonWethComponent.balanceOf.callAsync(subjectCaller);
+        expect(expectedReturnedAssetBalance).to.bignumber.equal(currentReturnedAssetBalance);
+      });
+    });
+
+    describe('when the quantity of weth in receive tokens is less than the amount traded for', async () => {
+      before(async () => {
+        etherTradedFor = ether(3);
+      });
+
+      after(async () => {
+        etherTradedFor = undefined;
+      });
+
+      it('should increment the users eth balance by the correct quantity', async () => {
+        const previousEthBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
+
+        const txHash = await subject();
+        const totalGasInEth = await getGasUsageInEth(txHash);
+
+        const expectedEthBalance = previousEthBalance
+                                     .add(etherTradedFor)
+                                     .add(nonExchangedWethQuantity)
+                                     .sub(totalGasInEth);
+        const currentEthBalance =  await web3.eth.getBalance(subjectCaller);
+        expect(currentEthBalance).to.bignumber.equal(expectedEthBalance);
+      });
+    });
+
+    describe('when the quantity of send token is less than the components redeemed', async () => {
+      let halfBaseComponentQuantity: BigNumber;
+
+      before(async () => {
+        const componentUnit = new BigNumber(10 ** 10);
+        const naturalUnit = new BigNumber(10 ** 9);
+        const redeemQuantity = new BigNumber(10 ** 10);
+
+        halfBaseComponentQuantity =  componentUnit.mul(redeemQuantity).div(naturalUnit).div(2);
+
+        customExchangeRedeemSendTokenAmounts = [halfBaseComponentQuantity];
+      });
+
+      after(async () => {
+        customExchangeRedeemSendTokenAmounts = undefined;
+      });
+
+      it('should send the unsold components to the caller', async () => {
+        const previousReturnedAssetBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
+        const expectedReturnedAssetBalance = previousReturnedAssetBalance.add(halfBaseComponentQuantity);
+
+        await subject();
+
+        const currentReturnedAssetBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
+        expect(expectedReturnedAssetBalance).to.bignumber.equal(currentReturnedAssetBalance);
+      });
+    });
+
+    describe('when the implied base Set quantity is greater than the issuance params base Set quantity', async () => {
+      let excessBaseSetQuantity: BigNumber;
+
+      beforeEach(async () => {
+        const excessNonExchangedWethQuantity = nonExchangedWethQuantity.mul(2);
+        excessBaseSetQuantity = exchangeRedeemQuantity.mul(2);
+
+        // Generate wrapped Ether for the caller
+        await weth.deposit.sendTransactionAsync(
+          { from: tokenPurchaser, value: excessNonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
+        );
+
+        // Approve Weth to the transferProxy
+        await weth.approve.sendTransactionAsync(
+          transferProxy.address,
+          UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+          { from: tokenPurchaser, gas: DEFAULT_GAS }
+        );
+
+        // Issue the Base Set to the vault
+        await core.issueInVault.sendTransactionAsync(
+          baseSetToken.address,
+          excessBaseSetQuantity,
+          { from: tokenPurchaser, gas: DEFAULT_GAS }
+        );
+
+        // Issue the Rebalancing Set
+        const excessRebalancingSetQuantity = excessBaseSetQuantity
+                                         .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
+                                         .div(rebalancingUnitShares);
+        await core.issue.sendTransactionAsync(
+          rebalancingSetToken.address,
+          excessRebalancingSetQuantity,
+          { from: tokenPurchaser, gas: DEFAULT_GAS }
+        );
+
+        subjectRebalancingSetQuantity = subjectRebalancingSetQuantity.add(excessRebalancingSetQuantity);
+      });
+
+      it('should return the excess base Set to the caller', async () => {
+        const previousReturnedAssetBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+        const expectedReturnedAssetBalance = previousReturnedAssetBalance.add(excessBaseSetQuantity);
+
+        await subject();
+
+        const currentReturnedAssetBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+        expect(expectedReturnedAssetBalance).to.bignumber.equal(currentReturnedAssetBalance);
+      });
+    });
+
+    describe('when the receive tokens length is greater than 1', async () => {
+      beforeEach(async () => {
+        subjectExchangeIssuanceParams.receiveTokens = [weth.address, weth.address];
+        subjectExchangeIssuanceParams.receiveTokenAmounts = [new BigNumber(1), new BigNumber(1)];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the receive token is not wrapped ether', async () => {
+      beforeEach(async () => {
+        const baseSetComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
+        subjectExchangeIssuanceParams.receiveTokens = [baseSetComponent.address];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the base Set of the rebalancing Set is not the issuance params Set', async () => {
+      beforeEach(async () => {
+        subjectExchangeIssuanceParams.setAddress = weth.address;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the rebalancingSetAddress is not tracked by Core', async () => {
+      beforeEach(async () => {
+        const proposalPeriod = ONE_DAY_IN_SECONDS;
+        const rebalanceInterval = ONE_DAY_IN_SECONDS;
+        const unTrackedSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
+          rebalancingSetTokenFactory.address,
+          ownerAccount,
+          baseSetToken.address,
+          DEFAULT_UNIT_SHARES,
+          DEFAULT_REBALANCING_NATURAL_UNIT,
+          proposalPeriod,
+          rebalanceInterval,
+          whitelist,
+        );
+        subjectRebalancingSetAddress = unTrackedSetToken.address;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
 });

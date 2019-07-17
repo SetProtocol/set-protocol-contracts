@@ -1013,6 +1013,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let customBaseSetComponent: StandardTokenMockContract;
     let customComponentAddresses: Address[];
     let customComponentUnits: BigNumber[];
+    let customNonExchangedWeth: BigNumber;
 
     let baseSetComponent: StandardTokenMockContract;
     let nonExchangedWethQuantity: BigNumber;
@@ -1123,19 +1124,22 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         tokenPurchaser
       );
 
-      nonExchangedWethQuantity = componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
+      nonExchangedWethQuantity = customNonExchangedWeth || 
+        componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
 
-      // Approve Weth to the transferProxy
-      await weth.approve.sendTransactionAsync(
-        transferProxy.address,
-        nonExchangedWethQuantity,
-        { from: tokenPurchaser, gas: DEFAULT_GAS }
-      );
+      if (nonExchangedWethQuantity.gt(0)) {
+        // Approve Weth to the transferProxy
+        await weth.approve.sendTransactionAsync(
+          transferProxy.address,
+          nonExchangedWethQuantity,
+          { from: tokenPurchaser, gas: DEFAULT_GAS }
+        );
 
-      // Generate wrapped Ether for the caller
-      await weth.deposit.sendTransactionAsync(
-        { from: tokenPurchaser, value: nonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
-      );
+        // Generate wrapped Ether for the caller
+        await weth.deposit.sendTransactionAsync(
+          { from: tokenPurchaser, value: nonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
+        );         
+      }
 
       // Issue the Base Set to the vault
       await core.issueInVault.sendTransactionAsync(
@@ -1422,6 +1426,16 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       });
     });
 
+    describe('when the rebalancingSetQuantity is zero', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetQuantity = ZERO;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe('when the rebalancingSetAddress is not tracked by Core', async () => {
       beforeEach(async () => {
         const proposalPeriod = ONE_DAY_IN_SECONDS;
@@ -1443,5 +1457,26 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the Set is only made of one component', async () => {
+      before(async () => {
+        customBaseSetComponent = await erc20Wrapper.deployTokenAsync(tokenPurchaser);
+
+        customComponentAddresses = [customBaseSetComponent.address];
+        customComponentUnits = [new BigNumber(10 ** 10)];
+
+        customNonExchangedWeth = new BigNumber(0);
+      });
+
+      it('redeems the rebalancing Set', async () => {
+        const previousRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
+        const expectedRBSetTokenBalance = previousRBSetTokenBalance.sub(subjectRebalancingSetQuantity);
+
+        await subject();
+
+        const currentRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
+        expect(expectedRBSetTokenBalance).to.bignumber.equal(currentRBSetTokenBalance);
+      });
+    });    
   });
 });

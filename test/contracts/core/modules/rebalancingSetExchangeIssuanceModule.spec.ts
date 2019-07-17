@@ -1005,6 +1005,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let subjectRebalancingSetQuantity: BigNumber;
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
     let subjectExchangeOrdersData: Bytes;
+    let subjectKeepChangeInVault: boolean;
     let subjectCaller: Address;
 
     let customExchangeRedeemQuantity: BigNumber;
@@ -1157,6 +1158,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       subjectRebalancingSetQuantity = rebalancingSetQuantity;
       subjectExchangeIssuanceParams = exchangeIssuanceParams;
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
+      subjectKeepChangeInVault = false;
       subjectCaller = tokenPurchaser;
     });
 
@@ -1170,6 +1172,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         subjectRebalancingSetQuantity,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
+        subjectKeepChangeInVault,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
@@ -1361,7 +1364,29 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         await subject();
 
         const currentReturnedAssetBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
-        expect(expectedReturnedAssetBalance).to.bignumber.equal(currentReturnedAssetBalance);
+        expect(currentReturnedAssetBalance).to.bignumber.equal(expectedReturnedAssetBalance);
+      });
+
+      describe('and keepChangeInVault is true', async () => {
+        beforeEach(async () => {
+          subjectKeepChangeInVault = true;
+        });
+
+        it('refunds the user the appropriate amount of base Set to the Vault', async () => {
+          const previousReturnedAssetBalance = await vault.getOwnerBalance.callAsync(
+            baseSetToken.address,
+            subjectCaller
+          );
+          const expectedReturnedAssetBalance = previousReturnedAssetBalance.add(excessBaseSetQuantity);
+
+          await subject();
+
+          const currentReturnedAssetBalance = await vault.getOwnerBalance.callAsync(
+            baseSetToken.address,
+            subjectCaller
+          );
+          expect(currentReturnedAssetBalance).to.bignumber.equal(expectedReturnedAssetBalance);
+        });
       });
     });
 

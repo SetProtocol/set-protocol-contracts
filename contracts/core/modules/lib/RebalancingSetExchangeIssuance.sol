@@ -60,13 +60,18 @@ contract RebalancingSetExchangeIssuance is
         // Expect rebalancing SetToken to be valid and enabled SetToken
         require(
             coreInstance.validSets(_rebalancingSetAddress),
-            "RebalancingSetExchangeIssuance.validateRebalancingIssuance: Invalid or disabled SetToken address"
+            "RebalancingSetExchangeIssuance.validateInputs: Invalid or disabled SetToken address"
+        );
+
+        require(
+            _rebalancingSetQuantity > 0,
+            "RebalancingSetExchangeIssuanceModule.validateInputs: Quantity must be > 0"
         );
         
         // Make sure Issuance quantity is multiple of the rebalancing SetToken natural unit
         require(
             _rebalancingSetQuantity.mod(ISetToken(_rebalancingSetAddress).naturalUnit()) == 0,
-            "RebalancingSetExchangeIssuance.validateRebalancingIssuance: Quantity must be multiple of natural unit"
+            "RebalancingSetExchangeIssuance.validateInputs: Quantity must be multiple of natural unit"
         );
 
         // Require only 1 receive token in redeem and 1 send token in issue
@@ -79,6 +84,8 @@ contract RebalancingSetExchangeIssuance is
             _transactToken == _transactTokenArray[0],
             "RebalancingSetExchangeIssuanceModule.validateInputs: Send/Receive token must match required"
         );
+
+        // TODO: Transact token must be equal or exceed payment token
 
         ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
 
@@ -130,7 +137,7 @@ contract RebalancingSetExchangeIssuance is
      *
      * @param _baseSetAddress           The address of the base Set
      */
-    function returnExcessComponents(
+    function returnExcessComponentsFromVault(
         address _baseSetAddress
     )
         internal

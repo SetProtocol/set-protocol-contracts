@@ -170,7 +170,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
   });
 
-  describe('#issueRebalancingSetWithEther', async () => {
+  describe.only('#issueRebalancingSetWithEther', async () => {
     let subjectRebalancingSetAddress: Address;
     let subjectRebalancingSetQuantity: BigNumber;
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
@@ -389,16 +389,39 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     describe('when the base Set acquired is in excess of required', async () => {
       const excessBaseSetIssued = new BigNumber(10 ** 9);
 
-      before(async () => {
-        customExchangeIssueQuantity = new BigNumber(10 ** 10).plus(excessBaseSetIssued);
+      describe('and keepChangeInVault is false', async () => {
+        before(async () => {
+          customExchangeIssueQuantity = new BigNumber(10 ** 10).plus(excessBaseSetIssued);
+        });
+
+        it('refunds the user the appropriate amount of base Set', async () => {
+          await subject();
+
+          const ownerBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+
+          expect(ownerBalance).to.bignumber.equal(excessBaseSetIssued);
+        });
       });
 
-      it('refunds the user the appropriate amount of base Set', async () => {
-        await subject();
+      describe('and keepChangeInVault is true', async () => {
+        beforeEach(async () => {
+          subjectKeepChangeInVault = true;
+        });
 
-        const ownerBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+        before(async () => {
+          customExchangeIssueQuantity = new BigNumber(10 ** 10).plus(excessBaseSetIssued);
+        });
 
-        expect(ownerBalance).to.bignumber.equal(excessBaseSetIssued);
+        it('refunds the user the appropriate amount of base Set to the Vault', async () => {
+          await subject();
+
+          const ownerBalance = await vault.getOwnerBalance.callAsync(
+            baseSetToken.address,
+            subjectCaller
+          );
+
+          expect(ownerBalance).to.bignumber.equal(excessBaseSetIssued);
+        });
       });
     });
 
@@ -525,7 +548,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
   });
 
-  describe.only('#issueRebalancingSetWithERC20', async () => {
+  describe('#issueRebalancingSetWithERC20', async () => {
     let subjectRebalancingSetAddress: Address;
     let subjectRebalancingSetQuantity: BigNumber;
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;

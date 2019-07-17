@@ -37,6 +37,7 @@ import { RebalancingSetIssuance } from "./lib/RebalancingSetIssuance.sol";
         // Base Sets who have the payment/send token as component
         // Flushing all tokens out of the system
         // Allow users to keep tokens in Vault or send back
+        // Can events be manipulable?
 
 /**
  * @title RebalancingSetExchangeIssuanceModule
@@ -173,20 +174,17 @@ contract RebalancingSetExchangeIssuanceModule is
             _keepChangeInVault
         );
 
-        // unwrap any leftover WETH
+        // unwrap any leftover WETH and transfer to sender
         uint256 leftoverWeth = ERC20Wrapper.balanceOf(
             weth,
             address(this)
         );
         if (leftoverWeth > 0) {
+            // Withdraw wrapped Ether
             wethInstance.withdraw(leftoverWeth);
-        }
 
-        // Any eth that is not wrapped is sent back to the user
-        // Only the amount required for the base SetToken issuance is wrapped.
-        uint256 leftoverEth = address(this).balance;
-        if (leftoverEth > 0) {
-            msg.sender.transfer(leftoverEth);
+            // Transfer ether to user
+            msg.sender.transfer(leftoverWeth);
         }
     }
 
@@ -223,6 +221,17 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         // Send back any unused payment token
+        uint256 leftoverPaymentTokenQuantity = ERC20Wrapper.balanceOf(
+            _paymentTokenAddress,
+            address(this)
+        );
+        if (leftoverPaymentTokenQuantity > 0) {
+            ERC20Wrapper.transfer(
+                _paymentTokenAddress,
+                msg.sender,
+                leftoverPaymentTokenQuantity
+            );
+        }
     }
 
     // /**
@@ -438,14 +447,14 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         // Send excess base Set and ether to the user
-        returnExcessBaseSet(
+        returnExcessBaseSetFromContract(
             baseSetAddress,
             transferProxy,
             _keepChangeInVault
         );
 
-        // Return Excess Components
-        returnExcessComponents(baseSetAddress);
+        // Return Excess Components in Vault from exchangeIssuance
+        returnExcessComponentsFromVault(baseSetAddress);
 
         // Note paymentTokenQuantity could be spoofed
         emit LogPayableExchangeIssue(

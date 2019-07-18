@@ -122,7 +122,7 @@ contract RebalancingSetExchangeIssuance is
     }
 
     /**
-     * Any base Set and base Set components issued are returned to the caller.
+     * Any base Set components issued are returned to the caller.
      *
      * @param _baseSetAddress           The address of the base Set
      */

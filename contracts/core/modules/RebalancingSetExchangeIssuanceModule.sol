@@ -104,7 +104,7 @@ contract RebalancingSetExchangeIssuanceModule is
         // Commit the address and instance of Transfer Proxy to state variables
         transferProxy = _transferProxy;
 
-        // Commit the instance of ExchangeIssuanceModule to state variables
+        // Commit the address and instance of ExchangeIssuanceModule to state variables
         exchangeIssuanceModule = _exchangeIssuanceModule;
         exchangeIssuanceInstance = IExchangeIssuanceModule(_exchangeIssuanceModule);
 
@@ -212,7 +212,7 @@ contract RebalancingSetExchangeIssuanceModule is
         public
         nonReentrant
     {
-        // Deposit the erc20 to this contract. This token can be used for payment and issuance of the base SetToken
+        // Deposit the erc20 to this contract. The token must be approved the caller to the transferProxy
         coreInstance.transferModule(
             _paymentTokenAddress,
             _paymentTokenQuantity,
@@ -417,6 +417,7 @@ contract RebalancingSetExchangeIssuanceModule is
 
         // Ensure payment token allowance to the TransferProxy
         // Note that the paymentToken may also be used as a component to issue the Set
+        // So the paymentTokenQuantity must be used vs. the exchangeIssuanceParams sendToken quantity
         ERC20Wrapper.ensureAllowance(
             _paymentTokenAddress,
             address(this),
@@ -424,14 +425,13 @@ contract RebalancingSetExchangeIssuanceModule is
             _paymentTokenQuantity
         );
 
-        // Atomically trade paymentToken for base SetToken components
-        // and mint the base SetToken
+        // Atomically trade paymentToken for base SetToken components and mint the base SetToken
         exchangeIssuanceInstance.exchangeIssue(
             _exchangeIssuanceParams,
             _orderData
         );
 
-        // Approve base SetToken to transfer proxy for minting rebalancing SetToken
+        // Approve base SetToken to transferProxy for minting rebalancing SetToken
         ERC20Wrapper.ensureAllowance(
             baseSetAddress,
             address(this),

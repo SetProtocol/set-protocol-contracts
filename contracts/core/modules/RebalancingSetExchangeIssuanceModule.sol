@@ -32,6 +32,7 @@ import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 import { RebalancingSetExchangeIssuance } from "./lib/RebalancingSetExchangeIssuance.sol";
 import { RebalancingSetIssuance } from "./lib/RebalancingSetIssuance.sol";
 
+
 /**
  * @title RebalancingSetExchangeIssuanceModule
  * @author Set Protocol
@@ -54,6 +55,7 @@ contract RebalancingSetExchangeIssuanceModule is
     address public transferProxy;
 
     // Address and instance of ExchangeIssuance Module contract
+    address public exchangeIssuanceModule;
     IExchangeIssuanceModule private exchangeIssuanceInstance;
 
     // Address and instance of Wrapped Ether contract
@@ -89,7 +91,7 @@ contract RebalancingSetExchangeIssuanceModule is
     constructor(
         address _core,
         address _transferProxy,
-        IExchangeIssuanceModule _exchangeIssuanceModule,
+        address _exchangeIssuanceModule,
         address _wrappedEther,
         address _vault
     )
@@ -103,7 +105,8 @@ contract RebalancingSetExchangeIssuanceModule is
         transferProxy = _transferProxy;
 
         // Commit the instance of ExchangeIssuanceModule to state variables
-        exchangeIssuanceInstance = _exchangeIssuanceModule;
+        exchangeIssuanceModule = _exchangeIssuanceModule;
+        exchangeIssuanceInstance = IExchangeIssuanceModule(_exchangeIssuanceModule);
 
         // Commit the address and instance of Wrapped Ether to state variables
         weth = _wrappedEther;

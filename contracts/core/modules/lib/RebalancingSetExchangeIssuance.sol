@@ -27,7 +27,7 @@ import { ModuleCoreState } from "./ModuleCoreState.sol";
  * @title RebalancingSetExchangeIssuance
  * @author Set Protocol
  *
- * The RebalancingSetExchangeIssuance contains utility functions used in RebalancingSet 
+ * The RebalancingSetExchangeIssuance contains utility functions used in rebalancing SetToken
  * exchange issuance
  */
 contract RebalancingSetExchangeIssuance is 
@@ -39,19 +39,19 @@ contract RebalancingSetExchangeIssuance is
 
     /**
      * Validate that the issuance parameters and inputs are congruent.
-     * TODO: Fix comments
      *
-     * @param  _rebalancingSetAddress    Address of the rebalancing Set
-     * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to issue or redeem
-     * @param  _collateralSetAddress     Address of base Set in ExchangeIssueanceParams
+     * @param  _transactTokenAddress     Address of the sendToken (issue) or receiveToken (redeem)
+     * @param  _rebalancingSetAddress    Address of the rebalancing SetToken
+     * @param  _rebalancingSetQuantity   Quantity of rebalancing SetToken to issue or redeem
+     * @param  _baseSetAddress           Address of base SetToken in ExchangeIssueanceParams
      * @param  _transactTokenArray       List of addresses of send tokens (during issuance) and
      *                                     receive tokens (during redemption)
      */
     function validateInputs(
-        address _transactToken,
+        address _transactTokenAddress,
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
-        address _collateralSetAddress,
+        address _baseSetAddress,
         address[] memory _transactTokenArray
     )
         internal
@@ -65,7 +65,7 @@ contract RebalancingSetExchangeIssuance is
 
         require(
             _rebalancingSetQuantity > 0,
-            "RebalancingSetExchangeIssuanceModule.validateInputs: Quantity must be > 0"
+            "RebalancingSetExchangeIssuance.validateInputs: Quantity must be > 0"
         );
         
         // Make sure Issuance quantity is multiple of the rebalancing SetToken natural unit
@@ -74,75 +74,22 @@ contract RebalancingSetExchangeIssuance is
             "RebalancingSetExchangeIssuance.validateInputs: Quantity must be multiple of natural unit"
         );
 
-        // Require only 1 receive token in redeem and 1 send token in issue
+        // Only 1 receive token in redeem and 1 send token in issue allowed
         require(
             _transactTokenArray.length == 1,
-            "RebalancingSetExchangeIssuance.validateInputs: Only 1 Receive Token Allowed"
+            "RebalancingSetExchangeIssuance.validateInputs: Only 1 Send/Receive Token Allowed"
         );
 
         require(
-            _transactToken == _transactTokenArray[0],
-            "RebalancingSetExchangeIssuanceModule.validateInputs: Send/Receive token must match required"
+            _transactTokenAddress == _transactTokenArray[0],
+            "RebalancingSetExchangeIssuance.validateInputs: Send/Receive token must match required"
         );
-
-        // TODO: Transact token must be equal or exceed payment token
-
-        ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
 
         // Validate that the base Set address matches the issuanceParams Set Address
-        address baseSet = rebalancingSet.getComponents()[0];
+        address baseSet = ISetToken(_rebalancingSetAddress).getComponents()[0];
         require(
-            baseSet == _collateralSetAddress,
+            baseSet == _baseSetAddress,
             "RebalancingSetExchangeIssuance.validateInputs: Base Set addresses must match"
         );
     } 
-
-    /**
-     * Withdraw any remaining non-exchanged components to the user
-     *
-     * @param  _setAddress   Address of the Base Set
-     */
-    function returnExcessComponentsFromContract(
-        address _setAddress
-    )
-        internal
-    {
-        // Return base Set components
-        address[] memory baseSetComponents = ISetToken(_setAddress).getComponents();
-        for (uint256 i = 0; i < baseSetComponents.length; i++) {
-            uint256 withdrawQuantity = ERC20Wrapper.balanceOf(baseSetComponents[i], address(this));
-            if (withdrawQuantity > 0) {
-                ERC20Wrapper.transfer(
-                    baseSetComponents[i],
-                    msg.sender,
-                    withdrawQuantity
-                );
-            }
-        }         
-    }
-
-    /**
-     * Any base Set components issued are returned to the caller.
-     *
-     * @param _baseSetAddress           The address of the base Set
-     */
-    function returnExcessComponentsFromVault(
-        address _baseSetAddress
-    )
-        internal
-    {
-        // Return base Set components not used in issuance of base set
-        address[] memory baseSetComponents = ISetToken(_baseSetAddress).getComponents();
-        for (uint256 i = 0; i < baseSetComponents.length; i++) {
-            uint256 vaultQuantity = vaultInstance.getOwnerBalance(baseSetComponents[i], address(this));
-            if (vaultQuantity > 0) {
-                coreInstance.withdrawModule(
-                    address(this),
-                    msg.sender,
-                    baseSetComponents[i],
-                    vaultQuantity
-                );
-            }
-        }
-    }
 }

@@ -288,15 +288,17 @@ contract RebalancingSetExchangeIssuanceModule is
         wethInstance.withdraw(wethBalance);
         msg.sender.transfer(wethBalance);
 
+        address baseSetAddress = _exchangeIssuanceParams.setAddress;
+
         // Send excess base Set to the user
         returnExcessBaseSetFromContract(
-            _baseSetAddress,
+            baseSetAddress,
             transferProxy,
             _keepChangeInVault
         );
 
         // Return non-exchanged components to the user
-        returnExcessComponentsFromContract(_baseSetAddress);
+        returnExcessComponentsFromContract(baseSetAddress);
     }
 
     /**
@@ -353,15 +355,17 @@ contract RebalancingSetExchangeIssuanceModule is
             receiveTokenBalance
         );
 
+        address baseSetAddress = _exchangeIssuanceParams.setAddress;
+
         // Send excess base SetToken to the user
         returnExcessBaseSetFromContract(
-            _baseSetAddress,
+            baseSetAddress,
             transferProxy,
             _keepChangeInVault
         );
 
         // Non-exchanged base SetToken components are returned to the user
-        returnExcessComponentsFromContract(_baseSetAddress);
+        returnExcessComponentsFromContract(baseSetAddress);
     }
 
 
@@ -372,6 +376,9 @@ contract RebalancingSetExchangeIssuanceModule is
      * to acquire the base SetToken components and issue the base SetToken. The base SetToken is then used to
      * issue the Rebalancing SetToken. The payment token can be utilized as a component of the base SetToken.
      * All remaining tokens / change are flushed and returned to the user.
+     *
+     * Note: We do not validate the rebalancing SetToken quantity and the exchangeIssuanceParams base SetToken 
+     * quantity. Thus there could be extra base SetToken (or change) generated.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
      * @param  _rebalancingSetQuantity   Quantity of the rebalancing Set
@@ -461,13 +468,14 @@ contract RebalancingSetExchangeIssuanceModule is
      * Redeems a Rebalancing Set into the receiveToken. The Rebalancing Set is redeemed into the Base Set, and
      * Base Set components are traded for the receiveToken located in this contract.
      *
+     * Note: We do not validate the rebalancing SetToken quantity and the exchangeIssuanceParams base SetToken 
+     * quantity. Thus there could be extra base SetToken (or change) generated.
+     *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
      * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
      * @param  _receiveTokenAddress      Address of the receiveToken
      * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
      * @param  _orderData                Bytecode formatted data with exchange data for disposing base set components
-     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
-     *                                     or left in the vault
      */
     function redeemRebalancingSetIntoComponentsInternal(
         address _rebalancingSetAddress,

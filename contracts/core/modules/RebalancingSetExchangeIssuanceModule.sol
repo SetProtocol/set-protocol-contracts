@@ -29,7 +29,6 @@ import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IWETH } from "../../lib/IWETH.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
-import { RebalancingSetExchangeIssuance } from "./lib/RebalancingSetExchangeIssuance.sol";
 import { RebalancingSetIssuance } from "./lib/RebalancingSetIssuance.sol";
 
 
@@ -43,7 +42,6 @@ import { RebalancingSetIssuance } from "./lib/RebalancingSetIssuance.sol";
  */
 contract RebalancingSetExchangeIssuanceModule is
     ModuleCoreState,
-    RebalancingSetExchangeIssuance,
     RebalancingSetIssuance,
     ReentrancyGuard
 {
@@ -373,6 +371,62 @@ contract RebalancingSetExchangeIssuanceModule is
 
 
     /* ============ Private Functions ============ */
+
+    /**
+     * Validate that the issuance parameters and inputs are congruent.
+     *
+     * @param  _transactTokenAddress     Address of the sendToken (issue) or receiveToken (redeem)
+     * @param  _rebalancingSetAddress    Address of the rebalancing SetToken
+     * @param  _rebalancingSetQuantity   Quantity of rebalancing SetToken to issue or redeem
+     * @param  _baseSetAddress           Address of base SetToken in ExchangeIssueanceParams
+     * @param  _transactTokenArray       List of addresses of send tokens (during issuance) and
+     *                                     receive tokens (during redemption)
+     */
+    function validateInputs(
+        address _transactTokenAddress,
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity,
+        address _baseSetAddress,
+        address[] memory _transactTokenArray
+    )
+        private
+        view
+    {
+        // Expect rebalancing SetToken to be valid and enabled SetToken
+        require(
+            coreInstance.validSets(_rebalancingSetAddress),
+            "RebalancingSetExchangeIssuance.validateInputs: Invalid or disabled SetToken address"
+        );
+
+        require(
+            _rebalancingSetQuantity > 0,
+            "RebalancingSetExchangeIssuance.validateInputs: Quantity must be > 0"
+        );
+        
+        // Make sure Issuance quantity is multiple of the rebalancing SetToken natural unit
+        require(
+            _rebalancingSetQuantity.mod(ISetToken(_rebalancingSetAddress).naturalUnit()) == 0,
+            "RebalancingSetExchangeIssuance.validateInputs: Quantity must be multiple of natural unit"
+        );
+
+        // Only 1 receive token in redeem and 1 send token in issue allowed
+        require(
+            _transactTokenArray.length == 1,
+            "RebalancingSetExchangeIssuance.validateInputs: Only 1 Send/Receive Token Allowed"
+        );
+
+        require(
+            _transactTokenAddress == _transactTokenArray[0],
+            "RebalancingSetExchangeIssuance.validateInputs: Send/Receive token must match required"
+        );
+
+        // Validate that the base Set address matches the issuanceParams Set Address
+        address baseSet = ISetToken(_rebalancingSetAddress).getComponents()[0];
+        require(
+            baseSet == _baseSetAddress,
+            "RebalancingSetExchangeIssuance.validateInputs: Base Set addresses must match"
+        );
+    } 
 
     /**
      * Issue a Rebalancing Set using a specified ERC20 payment token. The payment token is used in ExchangeIssue

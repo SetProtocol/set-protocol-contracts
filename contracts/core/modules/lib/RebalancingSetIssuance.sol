@@ -263,15 +263,15 @@ contract RebalancingSetIssuance is
     /**
      * Withdraw any remaining non-exchanged components to the user
      *
-     * @param  _setAddress   Address of the Base Set
+     * @param  _baseSetAddress   Address of the Base Set
      */
     function returnExcessComponentsFromContract(
-        address _setAddress
+        address _baseSetAddress
     )
         internal
     {
         // Return base Set components
-        address[] memory baseSetComponents = ISetToken(_setAddress).getComponents();
+        address[] memory baseSetComponents = ISetToken(_baseSetAddress).getComponents();
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
             uint256 withdrawQuantity = ERC20Wrapper.balanceOf(baseSetComponents[i], address(this));
             if (withdrawQuantity > 0) {

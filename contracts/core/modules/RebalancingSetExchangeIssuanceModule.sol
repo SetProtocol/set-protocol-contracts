@@ -65,8 +65,7 @@ contract RebalancingSetExchangeIssuanceModule is
     event LogPayableExchangeIssue(
         address rebalancingSetAddress,
         address indexed callerAddress,
-        address paymentToken,
-        uint256 paymentTokenQuantity
+        uint256 rebalancingSetQuantity
     );
 
     event LogPayableExchangeRedeem(
@@ -303,8 +302,8 @@ contract RebalancingSetExchangeIssuanceModule is
     }
 
     /**
-     * Redeems a Rebalancing Set into ether. The Rebalancing Set is redeemed into the Base Set, and
-     * Base Set components are traded for WETH. The WETH is then withdrawn into ETH and the ETH sent to the caller.
+     * Redeems a Rebalancing Set into a specified ERC20 token. The Rebalancing Set is redeemed into the Base Set, and
+     * Base Set components are traded for the ERC20 and sent to the caller.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
      * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
@@ -512,12 +511,10 @@ contract RebalancingSetExchangeIssuanceModule is
         // Return any extra components acquired during exchangeIssue to the user
         returnExcessComponentsFromVault(baseSetAddress);
 
-        // Note: paymentTokenQuantity could be spoofed
         emit LogPayableExchangeIssue(
             _rebalancingSetAddress,
             msg.sender,
-            _paymentTokenAddress,
-            _paymentTokenQuantity
+            _rebalancingSetQuantity
         );
     }
 
@@ -569,7 +566,7 @@ contract RebalancingSetExchangeIssuanceModule is
             address(this),
             baseSetAddress,
             baseSetVaultQuantity
-        );
+        ); 
 
         // Redeem base SetToken into components and perform trades / exchanges
         // into the receiveToken. The receiveTokens are transferred to this contract

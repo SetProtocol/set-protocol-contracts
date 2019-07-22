@@ -246,7 +246,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       exchangeIssueSendTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
       exchangeIssueSendTokens = [weth.address];
       exchangeIssueSendTokenAmounts = [customIssuePaymentTokenAmount || requiredPaymentEth];
-      
+
       // Only the base set component is exchangeIssued
       exchangeIssueReceiveTokens = [componentAddresses[0]];
       exchangeIssueReceiveTokenAmounts = [componentUnits[0].mul(exchangeIssueQuantity).div(baseSetNaturalUnit)];
@@ -287,7 +287,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
       rebalancingSetQuantityToIssue = exchangeIssueQuantity.mul(DEFAULT_REBALANCING_NATURAL_UNIT)
                                                           .div(rebalancingUnitShares);
-      
+
       // Modify for 1 component
       requiredComponentEth = customRequiredComponentEth ||
         exchangeIssueQuantity.mul(componentUnits[1]).div(baseSetNaturalUnit);
@@ -337,7 +337,6 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       const txHash = await subject();
       const totalGasInEth = await getGasUsageInEth(txHash);
       const totalSendToken = exchangeIssueSendTokenAmounts[0];
-      const totalComponentUsage = requiredComponentEth;
       const expectedEthBalance = previousEthBalance
                                   .sub(totalSendToken)
                                   .sub(requiredComponentEth)
@@ -354,8 +353,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       const expectedLogs = LogPayableExchangeIssue(
         subjectRebalancingSetAddress,
         subjectCaller,
-        weth.address,
-        new BigNumber(subjectEtherValue),
+        subjectRebalancingSetQuantity,
         rebalancingSetExchangeIssuanceModule.address
       );
 
@@ -374,7 +372,6 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         const txHash = await subject();
         const totalGasInEth = await getGasUsageInEth(txHash);
         const totalSendToken = exchangeIssueSendTokenAmounts[0];
-        const totalComponentUsage = requiredComponentEth;
         const expectedEthBalance = previousEthBalance
                                     .sub(totalSendToken)
                                     .sub(requiredComponentEth)
@@ -396,7 +393,6 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
         const txHash = await subject();
         const totalGasInEth = await getGasUsageInEth(txHash);
-        const totalComponentUsage = requiredComponentEth;
         const expectedEthBalance = previousEthBalance
                                     .sub(customWethUsedInTrade)
                                     .sub(requiredComponentEth)
@@ -530,7 +526,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       before(async () => {
         customRequiredComponentEth = new BigNumber(0);
       });
-      
+
       it('should revert', async () => {
         await expectRevertError(subject());
       });
@@ -717,7 +713,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       rebalancingSetQuantityToIssue = exchangeIssueQuantity.mul(DEFAULT_REBALANCING_NATURAL_UNIT)
                                                            .div(rebalancingUnitShares);
       requiredComponentEth = customRequiredComponentEth ||
-        exchangeIssueQuantity.mul(componentUnits[1]).div(baseSetNaturalUnit); 
+        exchangeIssueQuantity.mul(componentUnits[1]).div(baseSetNaturalUnit);
 
       subjectRebalancingSetAddress = rebalancingSetToken.address;
       subjectRebalancingSetQuantity = DEFAULT_REBALANCING_NATURAL_UNIT;
@@ -778,7 +774,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
       const currentWethBalance = await weth.balanceOf.callAsync(subjectCaller);
       expect(expectedWethBalance).to.bignumber.equal(currentWethBalance);
-    });    
+    });
 
     it('emits correct LogPayableExchangeIssue event', async () => {
       const txHash = await subject();
@@ -787,8 +783,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       const expectedLogs = LogPayableExchangeIssue(
         subjectRebalancingSetAddress,
         subjectCaller,
-        weth.address,
-        new BigNumber(subjectPaymentTokenQuantity),
+        subjectRebalancingSetQuantity,
         rebalancingSetExchangeIssuanceModule.address
       );
 
@@ -806,7 +801,6 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
         await subject();
         const totalSendToken = exchangeIssueSendTokenAmounts[0];
-        const totalComponentUsage = requiredComponentEth;
         const expectedWethBalance = previousWethBalance
                                     .sub(totalSendToken)
                                     .sub(requiredComponentEth);
@@ -826,7 +820,6 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         const previousWethBalance: BigNumber = await weth.balanceOf.callAsync(subjectCaller);
 
         await subject();
-        const totalComponentUsage = requiredComponentEth;
         const expectedEthBalance = previousWethBalance
                                     .sub(customWethUsedInTrade)
                                     .sub(requiredComponentEth);
@@ -893,7 +886,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
         expect(ownerBalance).to.bignumber.equal(expectedOwnerBalance);
       });
-    });    
+    });
 
     describe('when the weth sent is insufficient', async () => {
       before(async () => {
@@ -1124,7 +1117,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         tokenPurchaser
       );
 
-      nonExchangedWethQuantity = customNonExchangedWeth || 
+      nonExchangedWethQuantity = customNonExchangedWeth ||
         componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
 
       if (nonExchangedWethQuantity.gt(0)) {
@@ -1138,7 +1131,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         // Generate wrapped Ether for the caller
         await weth.deposit.sendTransactionAsync(
           { from: tokenPurchaser, value: nonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
-        );         
+        );
       }
 
       // Issue the Base Set to the vault
@@ -1477,7 +1470,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         const currentRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
         expect(expectedRBSetTokenBalance).to.bignumber.equal(currentRBSetTokenBalance);
       });
-    });    
+    });
   });
 
   describe('#redeemRebalancingSetIntoERC20', async () => {
@@ -1605,7 +1598,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         tokenPurchaser
       );
 
-      nonExchangedWethQuantity = customNonExchangedWeth || 
+      nonExchangedWethQuantity = customNonExchangedWeth ||
         componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
 
       if (nonExchangedWethQuantity.gt(0)) {
@@ -1619,7 +1612,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         // Generate wrapped Ether for the caller
         await weth.deposit.sendTransactionAsync(
           { from: tokenPurchaser, value: nonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
-        );         
+        );
       }
 
       // Issue the Base Set to the vault
@@ -1956,7 +1949,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         const currentRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
         expect(expectedRBSetTokenBalance).to.bignumber.equal(currentRBSetTokenBalance);
       });
-    });    
+    });
 
   });
 

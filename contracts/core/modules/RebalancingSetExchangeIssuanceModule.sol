@@ -307,7 +307,7 @@ contract RebalancingSetExchangeIssuanceModule is
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
      * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
-     * @param  _receiveTokenAddress      Address of the receiveToken
+     * @param  _outputTokenAddress       Address of the resulting ERC20 token sent to the user
      * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
      * @param  _orderData                Bytecode formatted data with exchange data for disposing base set components
      * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
@@ -316,7 +316,7 @@ contract RebalancingSetExchangeIssuanceModule is
     function redeemRebalancingSetIntoERC20(
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
-        address _receiveTokenAddress,
+        address _outputTokenAddress,
         ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
         bytes memory _orderData,
         bool _keepChangeInVault
@@ -329,30 +329,29 @@ contract RebalancingSetExchangeIssuanceModule is
         redeemRebalancingSetIntoComponentsInternal(
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
-            _receiveTokenAddress,
+            _outputTokenAddress,
             _exchangeIssuanceParams,
             _orderData
         );
 
-        // In the event that exchangeIssue returns more receiveTokens than
+        // In the event that exchangeIssue returns more outputTokens than
         // specified in receiveToken quantity, those tokens are also retrieved into this contract.
-        // We also call this ahead of returnRedemptionChange to allow the unwrapping of the wrappedEther
-        uint256 receiveTokenInVault = vaultInstance.getOwnerBalance(_receiveTokenAddress, address(this));
-        if (receiveTokenInVault > 0) {
+        uint256 outputTokenInVault = vaultInstance.getOwnerBalance(_outputTokenAddress, address(this));
+        if (outputTokenInVault > 0) {
             coreInstance.withdrawModule(
                 address(this),
                 address(this),
-                _receiveTokenAddress,
-                receiveTokenInVault
+                _outputTokenAddress,
+                outputTokenInVault
             );
         }
 
-        // Transfer receiveToken to the caller
-        uint256 receiveTokenBalance = ERC20Wrapper.balanceOf(_receiveTokenAddress, address(this));
+        // Transfer outputToken to the caller
+        uint256 outputTokenBalance = ERC20Wrapper.balanceOf(_outputTokenAddress, address(this));
         ERC20Wrapper.transfer(
-            _receiveTokenAddress,
+            _outputTokenAddress,
             msg.sender,
-            receiveTokenBalance
+            outputTokenBalance
         );
 
         address baseSetAddress = _exchangeIssuanceParams.setAddress;

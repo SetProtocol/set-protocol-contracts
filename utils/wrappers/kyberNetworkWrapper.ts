@@ -13,6 +13,7 @@ import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, DEFAULT_GAS } from '../constants';
 import { ConversionRateABI } from '../external/abis/ConversionRateABI';
 import { KyberNetworkABI } from '../external/abis/KyberNetworkABI';
 import { KyberReserveABI } from '../external/abis/KyberReserveABI';
+import { KyberNetworkProxyABI } from '../external/abis/KyberNetworkProxyABI';
 
 import { KYBER_CONTRACTS, KYBER_PERMISSIONED_ACCOUNTS } from '../kyberSnapshotAddresses';
 
@@ -20,6 +21,9 @@ const web3 = getWeb3();
 
 
 export class KyberNetworkWrapper {
+
+  public kyberNetworkProxy: Address = KYBER_CONTRACTS.KyberNetworkProxy;
+
   constructor() {}
 
   /* ============ Kyber Network System Methods ============ */
@@ -93,7 +97,7 @@ export class KyberNetworkWrapper {
       gas: DEFAULT_GAS,
     });
 
-    const validBaseRateTxData = ConversionRatesContract.methods.setValidRateDurationInBlocks(100000).encodeABI();
+    const validBaseRateTxData = ConversionRatesContract.methods.setValidRateDurationInBlocks(1000000000).encodeABI();
     await web3.eth.sendTransaction({
       from: KYBER_PERMISSIONED_ACCOUNTS.admin,
       to: KYBER_CONTRACTS.ConversionRates,
@@ -125,7 +129,6 @@ export class KyberNetworkWrapper {
       data: approveWithdrawAddressTxData,
       gas: DEFAULT_GAS,
     });
-
   }
 
   public async setUpConversionRates(
@@ -138,12 +141,12 @@ export class KyberNetworkWrapper {
     // Set Base Rate arguments
     const baseBuys = _baseBuy.map(quantity => { return quantity.toString() });
     const baseSells = _baseSell.map(quantity => { return quantity.toString()});
-    const bytes14Buy = [];
-    const bytes14Sell = [];
-    const indices = [];
+    const bytes14Buy = ["0x0000"];
+    const bytes14Sell = ["0x0000"];
+    const indices = [0];
     const blockNumber = await web3.eth.getBlockNumber();
 
-    console.log("Set step data");
+    console.log("ConversionRatesContract.methods.setQtyStepFunction()");
 
     for (let i = 0; i < _tokenAddresses.length; i++) {
       const stepData = [0];
@@ -176,7 +179,7 @@ export class KyberNetworkWrapper {
       });  
     }
 
-    console.log("setImbalanceStepFunctionTxData");
+    console.log("ConversionRatesContract.methods.setImbalanceStepFunction()");
 
     const setBaseRateTxData = ConversionRatesContract.methods.setBaseRate(
       _tokenAddresses,
@@ -194,7 +197,7 @@ export class KyberNetworkWrapper {
       gas: DEFAULT_GAS,
     });
 
-    console.log("Set base rate");
+    console.log("ConversionRatesContract.methods.setBaseRate()");
   }
   
   public async approveToReserve(
@@ -215,7 +218,7 @@ export class KyberNetworkWrapper {
     _sourceToken: Address,
     _destinationToken: Address,
     _sourceQuantity: BigNumber,
-  ) {
+  ): Promise<BigNumber> {
     const KyberReserveContract = new web3.eth.Contract(KyberReserveABI, KYBER_CONTRACTS.KyberReserve);
     const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
     const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
@@ -228,6 +231,9 @@ export class KyberNetworkWrapper {
 
     const reserveContract = await ConversionRatesContract.methods.reserveContract().call();
     console.log("ConversionRatesContract.methods.reserveContract()", reserveContract);    
+
+    const enabledReserves = await KyberNetworkContract.methods.getReserves().call();
+    console.log("KyberNetworkContract.methods.getReserves()", enabledReserves.toString());    
 
     const tradeEnabled = await KyberReserveContract.methods.tradeEnabled().call();
     console.log("KyberReserveContract.methods.tradeEnabled()?", tradeEnabled);
@@ -242,30 +248,22 @@ export class KyberNetworkWrapper {
     console.log("KyberReserveContract.methods.getBalance(_destinationToken)", destinationTokenBalance);
 
     // Debug by calling the conversion rates contract
-    const blockNumber = await web3.eth.getBlockNumber();
-    console.log("Current Blocknumber to Use", blockNumber);
+    const currentBlockNumber = await web3.eth.getBlockNumber();
+    console.log("Current Blocknumber", currentBlockNumber);
 
-    // const basicRate = await ConversionRatesContract.methods.getBasicRate(
-    //   _destinationToken,
-    //   true,
-    // ).call();
+    const blockNumber = currentBlockNumber * 50;
+    console.log("Rate Blocknumber", blockNumber);
 
-    // console.log("ConversionRatesContract.methods.getBasicRate(_destinationToken, true)", basicRate);
+    const basicRate = await ConversionRatesContract.methods.getBasicRate(
+      _destinationToken,
+      true,
+    ).call();
+    console.log("ConversionRatesContract.methods.getBasicRate(_destinationToken, true)", basicRate);
     
-    // const basicInfo = await ConversionRatesContract.methods.getTokenBasicData(
-    //   _destinationToken,
-    // ).call();
-    // console.log("ConversionRatesContract.methods.getTokenBasicData(_destinationToken)", basicInfo[0], basicInfo[1]);
-
-    // const getEth = await ConversionRatesContract.methods.getRate(
-    //   _sourceToken,
-    //   blockNumber,
-    //   false,
-    //   getRate
-    // ).call();
-    // console.log("ConversionRatesContract.methods.getRate(_sourceToken,blockNumber,false,_sourceQuantity.toString())",
-    //   getEth.toString()
-    //  );
+    const basicInfo = await ConversionRatesContract.methods.getTokenBasicData(
+      _destinationToken,
+    ).call();
+    console.log("ConversionRatesContract.methods.getTokenBasicData(_destinationToken)", basicInfo[0], basicInfo[1]);
 
     const ethAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
@@ -276,7 +274,7 @@ export class KyberNetworkWrapper {
    
     const getRate = await ConversionRatesContract.methods.getRate(
       _sourceToken,
-      blockNumber,
+      blockNumber + 1,
       false,
       _sourceQuantity.toString()
     ).call();
@@ -299,7 +297,7 @@ export class KyberNetworkWrapper {
       _sourceQuantity.toString(),
       blockNumber,
     ).call();
-    console.log("sourceToEthRate", sourceToEthRate);
+    console.log("KyberReserveContract.methods.getConversionRate() - sourceToEthRate", sourceToEthRate);
 
     const ethToDestinationRate = await KyberReserveContract.methods.getConversionRate(
       ethAddress,
@@ -307,7 +305,7 @@ export class KyberNetworkWrapper {
       sourceToEthRate.toString(),
       blockNumber,
     ).call();
-    console.log("ethToDestinationRate", ethToDestinationRate);
+    console.log("KyberReserveContract.methods.getConversionRate() - ethToDestinationRate", ethToDestinationRate);
 
     const expectedRate = await KyberNetworkContract.methods.findBestRate(
       _sourceToken,
@@ -315,6 +313,8 @@ export class KyberNetworkWrapper {
       _sourceQuantity.toString(),
     ).call();
     console.log("KyberNetworkContract.methods.findBestRate()", expectedRate[0], expectedRate[1]);
+
+    return expectedRate[1];
   }
 
   // This contract must be added during setup as it hasn't been set during the actual deployment script itself..
@@ -332,5 +332,58 @@ export class KyberNetworkWrapper {
       data: setExpectedRateTxData,
       gas: DEFAULT_GAS,
     });
+  }
+
+  public async performTrade(
+    _sourceToken: Address,
+    _sourceQuantity: BigNumber,
+    _destinationToken: Address,
+    _minConversionRate: BigNumber,
+    _from: Address,
+  ) {
+    const KyberNetworkProxyContract = new web3.eth.Contract(KyberNetworkProxyABI, KYBER_CONTRACTS.KyberNetworkProxy);
+
+    const userCap = await KyberNetworkProxyContract.methods.getUserCapInWei(_from).call();
+    console.log("KyberNetworkProxyContract.methods.getUserCapInWei", userCap);
+
+    const swapTokenToTokenTxData = await KyberNetworkProxyContract.methods.swapTokenToToken(
+      _sourceToken,
+      _sourceQuantity.toString(),
+      _destinationToken,
+      _minConversionRate.toString(),
+    ).encodeABI();
+
+    await web3.eth.sendTransaction({
+      from: _from,
+      to: KYBER_CONTRACTS.KyberNetworkProxy,
+      data: swapTokenToTokenTxData,
+      gas: DEFAULT_GAS,
+    });
+  }
+
+  public async setup() {
+    const KyberReserveContract = new web3.eth.Contract(KyberReserveABI, KYBER_CONTRACTS.KyberReserve);
+    const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
+    // Called anywhere when setting up ConversionRatesContract
+    const setReserveAddressTxData = ConversionRatesContract.methods.setReserveAddress(KYBER_CONTRACTS.KyberReserve).encodeABI();
+    await web3.eth.sendTransaction({
+      from: KYBER_PERMISSIONED_ACCOUNTS.admin,
+      to: KYBER_CONTRACTS.ConversionRates,
+      data: setReserveAddressTxData,
+      gas: DEFAULT_GAS,
+    });
+
+    // Set Contracts
+    const setContractsTxData = KyberReserveContract.methods.setContracts(
+      KYBER_CONTRACTS.KyberNetwork,
+      KYBER_CONTRACTS.ConversionRates,
+      '0x0000000000000000000000000000000000000000',
+    ).encodeABI();
+    await web3.eth.sendTransaction({
+      from: KYBER_PERMISSIONED_ACCOUNTS.admin,
+      to: KYBER_CONTRACTS.KyberReserve,
+      data: setContractsTxData,
+      gas: DEFAULT_GAS,
+    });    
   }
 }

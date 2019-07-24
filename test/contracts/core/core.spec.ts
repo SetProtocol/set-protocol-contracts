@@ -90,6 +90,8 @@ contract('Core', accounts => {
       const token = await erc20Wrapper.deployTokenAsync(operatorAccount);
       const token2 = await erc20Wrapper.deployTokenAsync(operatorAccount);
 
+      await kyberNetworkWrapper.setup();
+
       await kyberNetworkWrapper.setExpectedRateOnKyberReserve();
 
       await kyberNetworkWrapper.enableTokensForReserve(token.address);
@@ -97,8 +99,10 @@ contract('Core', accounts => {
 
       await kyberNetworkWrapper.setUpConversionRates(
         [token.address, token2.address],
-        [new BigNumber(549000000000000000000), new BigNumber(61079439106994400000)],
-        [new BigNumber(1813123931381047), new BigNumber(16400993988000000)],
+        // [new BigNumber(549000000000000000000), new BigNumber(61079439106994400000)],
+        // [new BigNumber(1813123931381047), new BigNumber(16400993988000000)],
+        [new BigNumber(1000000000000000000), new BigNumber(2000000000000000000)],
+        [new BigNumber(1000000000000000000), new BigNumber(2000000000000000000)],
       );
 
       await kyberNetworkWrapper.approveToReserve(
@@ -122,13 +126,36 @@ contract('Core', accounts => {
       );
 
       // Get Kyber Rate
-      const ethAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-      console.log("TOken address", token.address, ethAddress);
-      await kyberNetworkWrapper.getKyberRate(
-        // ethAddress,
+      const minConversionRate = await kyberNetworkWrapper.getKyberRate(
         token.address,
         token2.address,
         new BigNumber(10000000000000),
+      );
+
+      const sourceToken = token.address;
+      const sourceTokenQuantity = new BigNumber(10000);
+      const destinationToken = token2.address;
+
+      // Fund Caller
+      await token.transfer.sendTransactionAsync(
+        subjectCaller,
+        sourceTokenQuantity,
+        { from: operatorAccount, gas: 1000000 }
+      );
+
+      await token.approve.sendTransactionAsync(
+        kyberNetworkWrapper.kyberNetworkProxy,
+        sourceTokenQuantity,
+        { from: subjectCaller, gas: 1000000 }
+      );
+
+      // Perform Trade
+      await kyberNetworkWrapper.performTrade(
+        sourceToken,
+        sourceTokenQuantity,
+        destinationToken,
+        minConversionRate,
+        subjectCaller,
       );
 
       await subject();

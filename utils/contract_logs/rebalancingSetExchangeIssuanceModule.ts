@@ -4,7 +4,7 @@ import { BigNumber } from 'bignumber.js';
 export function LogPayableExchangeIssue(
   rebalancingSetAddress: Address,
   callerAddress: Address,
-  etherQuantity: BigNumber,
+  rebalancingSetQuantity: BigNumber,
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -13,7 +13,7 @@ export function LogPayableExchangeIssue(
     args: {
       rebalancingSetAddress,
       callerAddress,
-      etherQuantity,
+      rebalancingSetQuantity,
     },
   }];
 }

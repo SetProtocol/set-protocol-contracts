@@ -68,7 +68,20 @@ export class KyberNetworkWrapper {
       to: KYBER_CONTRACTS.KyberNetwork,
       data: setExpectedRateTxData,
       gas: DEFAULT_GAS,
-    });  
+    }); 
+  }
+
+  public async fundReserveWithEth(
+    _from: Address,
+    _quantity: BigNumber,
+  ) {
+    await web3.eth.sendTransaction(
+      {
+        to: KYBER_CONTRACTS.KyberReserve,
+        from: _from,
+        value: _quantity.toString(),
+      }
+    );
   }
 
   /**
@@ -189,8 +202,6 @@ export class KyberNetworkWrapper {
     const indices = [0];
     const blockNumber = await web3.eth.getBlockNumber();
 
-    console.log("ConversionRatesContract.methods.setQtyStepFunction()");
-
     for (let i = 0; i < _tokenAddresses.length; i++) {
       const stepData = [0];
       const setQtyStepFunctionTxData = ConversionRatesContract.methods.setQtyStepFunction(
@@ -222,8 +233,6 @@ export class KyberNetworkWrapper {
       });  
     }
 
-    console.log("ConversionRatesContract.methods.setImbalanceStepFunction()");
-
     const setBaseRateTxData = ConversionRatesContract.methods.setBaseRate(
       _tokenAddresses,
       baseBuys,
@@ -231,7 +240,7 @@ export class KyberNetworkWrapper {
       bytes14Buy,
       bytes14Sell,
       blockNumber,
-      indices // Indices to apply bps adjustments to
+      indices,
     ).encodeABI();
     await web3.eth.sendTransaction({
       from: KYBER_PERMISSIONED_ACCOUNTS.operator,
@@ -239,8 +248,6 @@ export class KyberNetworkWrapper {
       data: setBaseRateTxData,
       gas: DEFAULT_GAS,
     });
-
-    console.log("ConversionRatesContract.methods.setBaseRate()");
   }
   
   public async approveToReserve(
@@ -390,16 +397,12 @@ export class KyberNetworkWrapper {
   ) {
     const KyberNetworkProxyContract = new web3.eth.Contract(KyberNetworkProxyABI, KYBER_CONTRACTS.KyberNetworkProxy);
 
-    const userCap = await KyberNetworkProxyContract.methods.getUserCapInWei(_from).call();
-    console.log("KyberNetworkProxyContract.methods.getUserCapInWei", userCap);
-
     const swapTokenToTokenTxData = await KyberNetworkProxyContract.methods.swapTokenToToken(
       _sourceToken,
       _sourceQuantity.toString(),
       _destinationToken,
       _minConversionRate.toString(),
     ).encodeABI();
-
     await web3.eth.sendTransaction({
       from: _from,
       to: KYBER_CONTRACTS.KyberNetworkProxy,

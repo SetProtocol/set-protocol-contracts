@@ -13,7 +13,6 @@ import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { KyberNetworkWrapper } from '@utils/wrappers/kyberNetworkWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -33,10 +32,7 @@ contract('Core', accounts => {
   let vault: VaultContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-
-  const kyberNetworkWrapper: KyberNetworkWrapper = new KyberNetworkWrapper();
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -84,78 +80,6 @@ contract('Core', accounts => {
       const vaultAddress = await coreContract.vault.callAsync();
 
       expect(vaultAddress).to.equal(vault.address);
-    });
-
-    it.only('test kyber functions', async () => {
-      const token = await erc20Wrapper.deployTokenAsync(operatorAccount);
-      const token2 = await erc20Wrapper.deployTokenAsync(operatorAccount);
-
-      await kyberNetworkWrapper.setup();
-
-      await kyberNetworkWrapper.enableTokensForReserve(token.address);
-      await kyberNetworkWrapper.enableTokensForReserve(token2.address);
-
-      await kyberNetworkWrapper.setUpConversionRates(
-        [token.address, token2.address],
-        [new BigNumber(1000000000000000000), new BigNumber(2000000000000000000)],
-        [new BigNumber(1000000000000000000), new BigNumber(2000000000000000000)],
-      );
-
-      await kyberNetworkWrapper.approveToReserve(
-        token,
-        new BigNumber(1000000000000000000000000000),
-        operatorAccount,
-      );
-
-      await kyberNetworkWrapper.approveToReserve(
-        token2,
-        new BigNumber(1000000000000000000000000000),
-        operatorAccount,
-      );
-
-      await web3.eth.sendTransaction(
-        {
-          to: '0xb23672F74749bf7916bA6827C64111A4d6dE7f11',
-          from: operatorAccount,
-          value: '1000000000000000000'
-        }
-      );
-
-      // Get Kyber Rate
-      // Has to work for expectedrate
-      const minConversionRate = await kyberNetworkWrapper.getKyberRate(
-        token.address,
-        token2.address,
-        new BigNumber(10000000000000),
-      );
-
-      const sourceToken = token.address;
-      const sourceTokenQuantity = new BigNumber(10000);
-      const destinationToken = token2.address;
-
-      // Fund Caller
-      await token.transfer.sendTransactionAsync(
-        subjectCaller,
-        sourceTokenQuantity,
-        { from: operatorAccount, gas: 1000000 }
-      );
-
-      await token.approve.sendTransactionAsync(
-        kyberNetworkWrapper.kyberNetworkProxy,
-        sourceTokenQuantity,
-        { from: subjectCaller, gas: 1000000 }
-      );
-
-      // Perform Trade
-      await kyberNetworkWrapper.performTrade(
-        sourceToken,
-        sourceTokenQuantity,
-        destinationToken,
-        minConversionRate,
-        subjectCaller,
-      );
-
-      await subject();
     });
   });
 });

@@ -92,15 +92,11 @@ contract('Core', accounts => {
 
       await kyberNetworkWrapper.setup();
 
-      await kyberNetworkWrapper.setExpectedRateOnKyberReserve();
-
       await kyberNetworkWrapper.enableTokensForReserve(token.address);
       await kyberNetworkWrapper.enableTokensForReserve(token2.address);
 
       await kyberNetworkWrapper.setUpConversionRates(
         [token.address, token2.address],
-        // [new BigNumber(549000000000000000000), new BigNumber(61079439106994400000)],
-        // [new BigNumber(1813123931381047), new BigNumber(16400993988000000)],
         [new BigNumber(1000000000000000000), new BigNumber(2000000000000000000)],
         [new BigNumber(1000000000000000000), new BigNumber(2000000000000000000)],
       );
@@ -119,13 +115,14 @@ contract('Core', accounts => {
 
       await web3.eth.sendTransaction(
         {
-          to: '0x038F9B392Fb9A9676DbAddF78EA5fdbf6C7d9710',
+          to: '0xb23672F74749bf7916bA6827C64111A4d6dE7f11',
           from: operatorAccount,
           value: '1000000000000000000'
         }
       );
 
       // Get Kyber Rate
+      // Has to work for expectedrate
       const minConversionRate = await kyberNetworkWrapper.getKyberRate(
         token.address,
         token2.address,

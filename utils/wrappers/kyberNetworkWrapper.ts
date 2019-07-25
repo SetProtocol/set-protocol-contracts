@@ -11,6 +11,7 @@ import { asyncForEach } from '../array';
 import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, DEFAULT_GAS } from '../constants';
 
 import { ConversionRateABI } from '../external/abis/ConversionRateABI';
+import { ExpectedRateABI } from '../external/abis/ExpectedRateABI';
 import { KyberNetworkABI } from '../external/abis/KyberNetworkABI';
 import { KyberReserveABI } from '../external/abis/KyberReserveABI';
 import { KyberNetworkProxyABI } from '../external/abis/KyberNetworkProxyABI';
@@ -23,10 +24,52 @@ const web3 = getWeb3();
 export class KyberNetworkWrapper {
 
   public kyberNetworkProxy: Address = KYBER_CONTRACTS.KyberNetworkProxy;
+  public defaultSlippagePercentage: BigNumber = new BigNumber(3);
 
   constructor() {}
 
   /* ============ Kyber Network System Methods ============ */
+
+  // Must be called ahead of any test
+  public async setup() {
+    const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
+    const KyberReserveContract = new web3.eth.Contract(KyberReserveABI, KYBER_CONTRACTS.KyberReserve);
+    const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
+    
+    // Called anywhere when setting up ConversionRatesContract
+    const setReserveAddressTxData = ConversionRatesContract.methods.setReserveAddress(KYBER_CONTRACTS.KyberReserve).encodeABI();
+    await web3.eth.sendTransaction({
+      from: KYBER_PERMISSIONED_ACCOUNTS.admin,
+      to: KYBER_CONTRACTS.ConversionRates,
+      data: setReserveAddressTxData,
+      gas: DEFAULT_GAS,
+    });
+
+    // Set Contracts
+    const setContractsTxData = KyberReserveContract.methods.setContracts(
+      KYBER_CONTRACTS.KyberNetwork,
+      KYBER_CONTRACTS.ConversionRates,
+      '0x0000000000000000000000000000000000000000',
+    ).encodeABI();
+    await web3.eth.sendTransaction({
+      from: KYBER_PERMISSIONED_ACCOUNTS.admin,
+      to: KYBER_CONTRACTS.KyberReserve,
+      data: setContractsTxData,
+      gas: DEFAULT_GAS,
+    });
+
+    // This contract must be added during setup as it hasn't been set during the actual deployment script itself..
+    // Fix the deployment so that it is set.
+    const setExpectedRateTxData = await KyberNetworkContract.methods.setExpectedRate(
+      KYBER_CONTRACTS.ExpectedRate
+    ).encodeABI();
+    await web3.eth.sendTransaction({
+      from: KYBER_PERMISSIONED_ACCOUNTS.admin,
+      to: KYBER_CONTRACTS.KyberNetwork,
+      data: setExpectedRateTxData,
+      gas: DEFAULT_GAS,
+    });  
+  }
 
   /**
    * In this function, we are enabling an ERC20 token onto a normal Kyber Reserve (not automated or orderbook).
@@ -47,6 +90,7 @@ export class KyberNetworkWrapper {
     _maxTotalImbalance: BigNumber = UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ) {
     const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
+    const ExpectedRateContract = new web3.eth.Contract(ExpectedRateABI, KYBER_CONTRACTS.ExpectedRate);
     const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
     const KyberReserveContract = new web3.eth.Contract(KyberReserveABI, KYBER_CONTRACTS.KyberReserve);
 
@@ -57,7 +101,6 @@ export class KyberNetworkWrapper {
       true,
       true,
     ).encodeABI();
-
     await web3.eth.sendTransaction({
       from: KYBER_PERMISSIONED_ACCOUNTS.operator,
       to: KYBER_CONTRACTS.KyberNetwork,
@@ -222,6 +265,7 @@ export class KyberNetworkWrapper {
     const KyberReserveContract = new web3.eth.Contract(KyberReserveABI, KYBER_CONTRACTS.KyberReserve);
     const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
     const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
+    const ExpectedRateContract = new web3.eth.Contract(ExpectedRateABI, KYBER_CONTRACTS.ExpectedRate);
 
     const conversionRatesContract = await KyberReserveContract.methods.conversionRatesContract().call();
     console.log("KyberReserveContract.methods.conversionRatesContract()", conversionRatesContract);
@@ -268,9 +312,7 @@ export class KyberNetworkWrapper {
     const ethAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
     const ETHBalance = await KyberReserveContract.methods.getBalance(ethAddress).call();
-    console.log("ETH Balance",
-      ETHBalance.toString()
-     ); 
+    console.log("ETH Balance", ETHBalance.toString()); 
    
     const getRate = await ConversionRatesContract.methods.getRate(
       _sourceToken,
@@ -307,31 +349,36 @@ export class KyberNetworkWrapper {
     ).call();
     console.log("KyberReserveContract.methods.getConversionRate() - ethToDestinationRate", ethToDestinationRate);
 
-    const expectedRate = await KyberNetworkContract.methods.findBestRate(
+    // Expected Rate Contract logs
+    const quantityFactor = await ExpectedRateContract.methods.quantityFactor().call();
+    console.log("ExpectedRateContract.methods.quantityFactor().call()", quantityFactor);
+
+    const worstCaseRateFactorInBps = await ExpectedRateContract.methods.worstCaseRateFactorInBps().call();
+    console.log("ExpectedRateContract.methods.worstCaseRateFactorInBps().call()", worstCaseRateFactorInBps);
+
+    const bestRate = await KyberNetworkContract.methods.findBestRate(
       _sourceToken,
       _destinationToken,
       _sourceQuantity.toString(),
     ).call();
-    console.log("KyberNetworkContract.methods.findBestRate()", expectedRate[0], expectedRate[1]);
+    console.log("KyberNetworkContract.methods.findBestRate()", bestRate[0], bestRate[1]);
+
+    const expectedRateResult = await ExpectedRateContract.methods.getExpectedRate(
+      _sourceToken,
+      _destinationToken,
+      _sourceQuantity.toString(),
+      true,
+    ).call();
+    console.log("ExpectedRateContract.methods.getExpectedRate()", expectedRateResult[0], expectedRateResult[1]);
+
+    const expectedRate = await KyberNetworkContract.methods.getExpectedRate(
+      _sourceToken,
+      _destinationToken,
+      _sourceQuantity.toString(),
+    ).call();
+    console.log("KyberNetworkContract.methods.getExpectedRate()", expectedRate[0], expectedRate[1]);
 
     return expectedRate[1];
-  }
-
-  // This contract must be added during setup as it hasn't been set during the actual deployment script itself..
-  // Fix the deployment so that it is set.
-  public async setExpectedRateOnKyberReserve() {
-    const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
-    const expectedRateAddress = KYBER_CONTRACTS.ExpectedRate;
-
-    const setExpectedRateTxData = await KyberNetworkContract.methods.setExpectedRate(
-      expectedRateAddress
-    ).encodeABI();
-    await web3.eth.sendTransaction({
-      from: KYBER_PERMISSIONED_ACCOUNTS.admin,
-      to: KYBER_CONTRACTS.KyberNetwork,
-      data: setExpectedRateTxData,
-      gas: DEFAULT_GAS,
-    });
   }
 
   public async performTrade(
@@ -359,31 +406,5 @@ export class KyberNetworkWrapper {
       data: swapTokenToTokenTxData,
       gas: DEFAULT_GAS,
     });
-  }
-
-  public async setup() {
-    const KyberReserveContract = new web3.eth.Contract(KyberReserveABI, KYBER_CONTRACTS.KyberReserve);
-    const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
-    // Called anywhere when setting up ConversionRatesContract
-    const setReserveAddressTxData = ConversionRatesContract.methods.setReserveAddress(KYBER_CONTRACTS.KyberReserve).encodeABI();
-    await web3.eth.sendTransaction({
-      from: KYBER_PERMISSIONED_ACCOUNTS.admin,
-      to: KYBER_CONTRACTS.ConversionRates,
-      data: setReserveAddressTxData,
-      gas: DEFAULT_GAS,
-    });
-
-    // Set Contracts
-    const setContractsTxData = KyberReserveContract.methods.setContracts(
-      KYBER_CONTRACTS.KyberNetwork,
-      KYBER_CONTRACTS.ConversionRates,
-      '0x0000000000000000000000000000000000000000',
-    ).encodeABI();
-    await web3.eth.sendTransaction({
-      from: KYBER_PERMISSIONED_ACCOUNTS.admin,
-      to: KYBER_CONTRACTS.KyberReserve,
-      data: setContractsTxData,
-      gas: DEFAULT_GAS,
-    });    
   }
 }

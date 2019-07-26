@@ -1,18 +1,15 @@
 import * as _ from 'lodash';
-import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import { StandardTokenMockContract } from '@utils/contracts';
 
 import { getWeb3 } from '../web3Helper';
-import { asyncForEach } from '../array';
 import { ether } from '@utils/units';
 
 import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, DEFAULT_GAS } from '../constants';
 
 import { ConversionRateABI } from '../external/abis/ConversionRateABI';
-import { ExpectedRateABI } from '../external/abis/ExpectedRateABI';
 import { KyberNetworkABI } from '../external/abis/KyberNetworkABI';
 import { KyberReserveABI } from '../external/abis/KyberReserveABI';
 import { KyberNetworkProxyABI } from '../external/abis/KyberNetworkProxyABI';
@@ -36,9 +33,11 @@ export class KyberNetworkWrapper {
     const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
     const KyberReserveContract = new web3.eth.Contract(KyberReserveABI, KYBER_CONTRACTS.KyberReserve);
     const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
-    
+
     // Called anywhere when setting up ConversionRatesContract
-    const setReserveAddressTxData = ConversionRatesContract.methods.setReserveAddress(KYBER_CONTRACTS.KyberReserve).encodeABI();
+    const setReserveAddressTxData = ConversionRatesContract.methods.setReserveAddress(
+      KYBER_CONTRACTS.KyberReserve
+    ).encodeABI();
     await web3.eth.sendTransaction({
       from: KYBER_PERMISSIONED_ACCOUNTS.admin,
       to: KYBER_CONTRACTS.ConversionRates,
@@ -46,7 +45,7 @@ export class KyberNetworkWrapper {
       gas: DEFAULT_GAS,
     });
 
-    // Set Contracts
+    // Set Contracts. Leave the sanity rates null
     const setContractsTxData = KyberReserveContract.methods.setContracts(
       KYBER_CONTRACTS.KyberNetwork,
       KYBER_CONTRACTS.ConversionRates,
@@ -69,7 +68,7 @@ export class KyberNetworkWrapper {
       to: KYBER_CONTRACTS.KyberNetwork,
       data: setExpectedRateTxData,
       gas: DEFAULT_GAS,
-    }); 
+    });
   }
 
   public async fundReserveWithEth(
@@ -86,17 +85,17 @@ export class KyberNetworkWrapper {
   }
 
   /**
-   * In this function, we are enabling an ERC20 token onto a normal Kyber Reserve (not automated or orderbook).
-   * We do three things:
-   * 1. List the asset on a specific reserve by calling the KyberNetwork's listPairforReserveContract
-   *    This can only be called by the operator of that reserve. Our standard reserve is operated by address 1
-   * 2. Add the token to the ConversionRatesContract. This is the equivalent to approving the token to the Kyber System.
-   *    This can only be called by the admin of the Kyber Network system. Our admin is account 0
-   * 3. Set the Token Control Info 
-   * 4. Enable token for trading on Kyber
-   * See more about how to add tokens onto a kyber reserve here.
-   * https://developer.kyber.network/docs/FedPriceReservesGuide/#adding-tokens
-   **/
+   *  In this function, we are enabling an ERC20 token onto a normal Kyber Reserve (not automated or orderbook).
+   *  We do three things:
+   *  1. List the asset on a specific reserve by calling the KyberNetwork's listPairforReserveContract
+   *     This can only be called by the operator of that reserve. Our standard reserve is operated by address 1
+   *  2. Add the token to the ConversionRatesContract.
+   *     This can only be called by the admin of the Kyber Network system. Our admin is account 0
+   *  3. Set the Token Control Info
+   *  4. Enable token for trading on Kyber
+   *  See more about how to add tokens onto a kyber reserve here.
+   *  https://developer.kyber.network/docs/FedPriceReservesGuide/#adding-tokens
+   */
   public async enableTokensForReserve(
     _tokenAddress: Address,
     _minimalRecordResolution: BigNumber = new BigNumber(1000000000000000),
@@ -104,7 +103,6 @@ export class KyberNetworkWrapper {
     _maxTotalImbalance: BigNumber = UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ) {
     const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
-    const ExpectedRateContract = new web3.eth.Contract(ExpectedRateABI, KYBER_CONTRACTS.ExpectedRate);
     const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
     const KyberReserveContract = new web3.eth.Contract(KyberReserveABI, KYBER_CONTRACTS.KyberReserve);
 
@@ -146,7 +144,7 @@ export class KyberNetworkWrapper {
       gas: DEFAULT_GAS,
     });
 
-    const enableTokenTradeTxData = ConversionRatesContract.methods.enableTokenTrade(_tokenAddress,).encodeABI();
+    const enableTokenTradeTxData = ConversionRatesContract.methods.enableTokenTrade(_tokenAddress, ).encodeABI();
     await web3.eth.sendTransaction({
       from: KYBER_PERMISSIONED_ACCOUNTS.admin,
       to: KYBER_CONTRACTS.ConversionRates,
@@ -160,7 +158,7 @@ export class KyberNetworkWrapper {
       to: KYBER_CONTRACTS.ConversionRates,
       data: validBaseRateTxData,
       gas: DEFAULT_GAS,
-    });    
+    });
 
     // Set Token Wallet to the operator. This means the operator must approve its tokens
     // to the contract
@@ -188,7 +186,26 @@ export class KyberNetworkWrapper {
     });
   }
 
-  public async setUpConversionRates(
+  public async setConversionRates(
+    _sourceToken: Address,
+    _destinationToken: Address,
+    _sourceTokenQuantity: BigNumber,
+    _destinationTokenQuantity: BigNumber,
+  ) {
+    await this.enableTokensForReserve(_sourceToken);
+    await this.enableTokensForReserve(_destinationToken);
+
+    const sourceTokenRate = ether(1).div(_sourceTokenQuantity.div(ether(1)));
+    const destinationTokenRate = ether(1).mul(_destinationTokenQuantity.div(ether(1)));
+
+    await this.setUpConversionRatesRaw(
+      [_sourceToken, _destinationToken],
+      [sourceTokenRate, destinationTokenRate],
+      [sourceTokenRate, destinationTokenRate],
+    );
+  }
+
+  public async setUpConversionRatesRaw(
     _tokenAddresses: Address[],
     _baseBuy: BigNumber[],
     _baseSell: BigNumber[],
@@ -196,10 +213,10 @@ export class KyberNetworkWrapper {
     const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
 
     // Set Base Rate arguments
-    const baseBuys = _baseBuy.map(quantity => { return quantity.toString() });
-    const baseSells = _baseSell.map(quantity => { return quantity.toString()});
-    const bytes14Buy = ["0x0000"];
-    const bytes14Sell = ["0x0000"];
+    const baseBuys = _baseBuy.map(quantity => { return quantity.toString(); });
+    const baseSells = _baseSell.map(quantity => { return quantity.toString(); });
+    const bytes14Buy = ['0x0000'];
+    const bytes14Sell = ['0x0000'];
     const indices = [0];
     const blockNumber = await web3.eth.getBlockNumber();
 
@@ -231,7 +248,7 @@ export class KyberNetworkWrapper {
         to: KYBER_CONTRACTS.ConversionRates,
         data: setImbalanceStepFunctionTxData,
         gas: DEFAULT_GAS,
-      });  
+      });
     }
 
     const setBaseRateTxData = ConversionRatesContract.methods.setBaseRate(
@@ -250,7 +267,7 @@ export class KyberNetworkWrapper {
       gas: DEFAULT_GAS,
     });
   }
-  
+
   public async approveToReserve(
     _token: StandardTokenMockContract,
     _quantity: BigNumber,
@@ -278,9 +295,10 @@ export class KyberNetworkWrapper {
       _sourceQuantity.toString(),
     ).call();
 
-    return expectedRate; 
+    return expectedRate;
   }
 
+  // Convenience function to execute a Kyber trade
   public async performTrade(
     _sourceToken: Address,
     _sourceQuantity: BigNumber,

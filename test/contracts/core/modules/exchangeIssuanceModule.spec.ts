@@ -27,7 +27,7 @@ import {
 import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, KYBER_RESERVE_CONFIGURED_RATE } from '@utils/constants';
+import { DEFAULT_GAS, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { LogExchangeIssue, LogExchangeRedeem } from '@utils/contract_logs/exchangeIssuanceModule';
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { getWeb3 } from '@utils/web3Helper';
@@ -97,7 +97,7 @@ contract('ExchangeIssuanceModule', accounts => {
     await kyberNetworkWrapper.setup();
     await kyberNetworkWrapper.fundReserveWithEth(
       kyberReserveOperator,
-      ether(10),
+      ether(90),
     );
   });
 
@@ -128,15 +128,9 @@ contract('ExchangeIssuanceModule', accounts => {
     let zeroExOrderMakerTokenAmount: BigNumber;
     let zeroExOrderTakerAssetAmount: BigNumber;
     let kyberTrade: KyberTrade;
-    let kyberTradeMakerTokenChange: BigNumber;
+    let kyberTradeSourceTokenUtilized: BigNumber;
+    let kyberTradeSourceTokenChange: BigNumber;
     let kyberConversionRatePower: BigNumber;
-
-    const componentTokenBuyRate = ether(1);
-    const sourceTokenBuyRate = ether(2);
-    const componentTokenSellRate = ether(1);
-    const sourceTokenSellRate = ether(1).div(2);
-
-    const componentTokenSupplyQuantity = ether(1000000000);
 
     beforeEach(async () => {
       await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
@@ -155,21 +149,6 @@ contract('ExchangeIssuanceModule', accounts => {
       const firstComponent = await erc20Wrapper.deployTokenAsync(kyberReserveOperator);
       const secondComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
       sendToken = await erc20Wrapper.deployTokenAsync(exchangeIssuanceCaller);
-
-      await kyberNetworkWrapper.enableTokensForReserve(firstComponent.address);
-      await kyberNetworkWrapper.enableTokensForReserve(sendToken.address);
-
-      await kyberNetworkWrapper.setUpConversionRates(
-        [firstComponent.address, sendToken.address],
-        [componentTokenBuyRate, sourceTokenBuyRate],
-        [componentTokenSellRate, sourceTokenSellRate],
-      );
-
-      await kyberNetworkWrapper.approveToReserve(
-        firstComponent,
-        componentTokenSupplyQuantity,
-        kyberReserveOperator,
-      );
 
       const componentTokens = [firstComponent, secondComponent];
       const setComponentUnit = ether(4);
@@ -196,8 +175,11 @@ contract('ExchangeIssuanceModule', accounts => {
         zeroExOrderMaker
       );
 
+      kyberTradeSourceTokenUtilized = ether(25);
+      kyberTradeSourceTokenChange = new BigNumber(1000000);
+
       const zeroExTakerTokenQuantity = zeroExOrderTakerAssetAmount || ether(4);
-      const kyberSourceTokenQuantity = ether(25);
+      const kyberSourceTokenQuantity = kyberTradeSourceTokenUtilized.add(kyberTradeSourceTokenChange);
       totalSendToken = zeroExTakerTokenQuantity.add(kyberSourceTokenQuantity);
 
       // Create issuance order, submitting ether(30) makerToken for ether(4) of the Set with 3 components
@@ -237,11 +219,10 @@ contract('ExchangeIssuanceModule', accounts => {
       const componentTokenDecimals = (await firstComponent.decimals.callAsync()).toNumber();
       const sourceTokenDecimals = (await sendToken.decimals.callAsync()).toNumber();
       kyberConversionRatePower = new BigNumber(10).pow(18 + sourceTokenDecimals - componentTokenDecimals);
-      const minimumConversionRate = maxDestinationQuantity.div(kyberSourceTokenQuantity)
+      const minimumConversionRate = maxDestinationQuantity.div(kyberTradeSourceTokenUtilized)
                                                           .mul(kyberConversionRatePower)
                                                           .round();
-      kyberTradeMakerTokenChange = kyberSourceTokenQuantity.sub(
-        maxDestinationQuantity.mul(kyberConversionRatePower).div(componentTokenBuyRate).floor());
+
       kyberTrade = {
         sourceToken: sendToken.address,
         destinationToken: firstComponent.address,
@@ -249,6 +230,19 @@ contract('ExchangeIssuanceModule', accounts => {
         minimumConversionRate: minimumConversionRate,
         maxDestinationQuantity: maxDestinationQuantity,
       } as KyberTrade;
+
+      await kyberNetworkWrapper.approveToReserve(
+        firstComponent,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        kyberReserveOperator,
+      );
+
+      await kyberNetworkWrapper.setConversionRates(
+        sendToken.address,
+        firstComponent.address,
+        kyberTradeSourceTokenUtilized,
+        maxDestinationQuantity,
+      );
 
       // Create 0x order for the second component, using ether(4) sendToken as default
       zeroExOrderMakerTokenAmount = zeroExOrderMakerTokenAmount || exchangeIssueReceiveTokenAmounts[1];
@@ -289,7 +283,7 @@ contract('ExchangeIssuanceModule', accounts => {
       );
     }
 
-    it.only('mints the correct quantity of the set for the sender', async () => {
+    it('mints the correct quantity of the set for the sender', async () => {
       const existingBalance = await setToken.balanceOf.callAsync(exchangeIssuanceCaller);
 
       await subject();
@@ -297,18 +291,16 @@ contract('ExchangeIssuanceModule', accounts => {
       await assertTokenBalanceAsync(setToken, existingBalance.add(exchangeIssueQuantity), exchangeIssuanceCaller);
     });
 
-    it('transfers the maker token amount from the maker, and returns change from Kyber', async () => {
+    it('transfers the source token amount from the caller, and returns change from Kyber', async () => {
       const existingBalance = await sendToken.balanceOf.callAsync(exchangeIssuanceCaller);
-      await assertTokenBalanceAsync(sendToken, DEPLOYED_TOKEN_QUANTITY, exchangeIssuanceCaller);
 
       await subject();
 
-      // TODO: Change from unused kyber source token is not being calculated correctly, off by 3 * 10 ** -26
       const expectedNewBalance = existingBalance.sub(totalSendToken)
-                                                .add(kyberTradeMakerTokenChange);
+                                                .add(kyberTradeSourceTokenChange);
       const newBalance = await sendToken.balanceOf.callAsync(exchangeIssuanceCaller);
 
-      await expect(newBalance.toPrecision(26)).to.be.bignumber.equal(expectedNewBalance.toPrecision(26));
+      await expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });
 
     it('transfers the maker token amount from the maker to the 0x maker', async () => {
@@ -593,6 +585,8 @@ contract('ExchangeIssuanceModule', accounts => {
     let kyberTrade: KyberTrade;
     let kyberConversionRatePower: BigNumber;
 
+    let customSourceTokenRateCalculationQuantity: BigNumber;
+
     beforeEach(async () => {
       subjectCaller = exchangeIssuanceCaller;
 
@@ -605,14 +599,14 @@ contract('ExchangeIssuanceModule', accounts => {
       );
       await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
         core,
-        SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
+        kyberNetworkWrapper.kyberNetworkProxy,
         transferProxy
       );
 
-      const firstComponent = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
+      const firstComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
       const secondComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
       nonExchangedComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
-      receiveToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
+      receiveToken = await erc20Wrapper.deployTokenAsync(kyberReserveOperator);
 
       const componentTokens = [firstComponent, secondComponent, nonExchangedComponent];
       setComponentUnit = ether(4);
@@ -629,7 +623,7 @@ contract('ExchangeIssuanceModule', accounts => {
       );
 
       zeroExOrderMakerTokenAmount = zeroExOrderMakerTokenAmount || ether(4);
-      const kyberDestinationTokenQuantity = ether(2.56);
+      const kyberDestinationTokenQuantity = ether(3);
       totalReceiveToken = zeroExOrderMakerTokenAmount.add(kyberDestinationTokenQuantity);
 
       exchangeRedeemSetAddress = exchangeRedeemSetAddress || setToken.address;
@@ -654,7 +648,7 @@ contract('ExchangeIssuanceModule', accounts => {
       // Property:                Value                         | Property
       subjectExchangeIssuanceParams = {
         setAddress:             exchangeRedeemSetAddress,          // setAddress
-        sendTokenExchangeIds:     exchangeRedeemSendTokenExchanges,  // sendTokenExchangeIds
+        sendTokenExchangeIds:   exchangeRedeemSendTokenExchanges,  // sendTokenExchangeIds
         sendTokens:             exchangeRedeemSendTokens,          // sendToken
         sendTokenAmounts:       exchangeRedeemSendTokenAmounts,    // sendTokenAmount
         quantity:               exchangeRedeemQuantity,            // quantity
@@ -669,7 +663,6 @@ contract('ExchangeIssuanceModule', accounts => {
       const sourceTokenDecimals = (await firstComponent.decimals.callAsync()).toNumber();
       kyberConversionRatePower = new BigNumber(10).pow(18 + sourceTokenDecimals - destinationTokenDecimals);
 
-      // NOTE: Kyber Minimum Conversion rates should be < 3.2 x 10**17
       const minimumConversionRate = maxDestinationQuantity.div(sourceTokenQuantity)
                                                           .mul(kyberConversionRatePower)
                                                           .round();
@@ -681,6 +674,21 @@ contract('ExchangeIssuanceModule', accounts => {
         minimumConversionRate: minimumConversionRate,
         maxDestinationQuantity: maxDestinationQuantity,
       } as KyberTrade;
+
+      await kyberNetworkWrapper.approveToReserve(
+        receiveToken,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        kyberReserveOperator,
+      );
+
+      const sourceTokenRateQuantity = customSourceTokenRateCalculationQuantity || sourceTokenQuantity;
+
+      await kyberNetworkWrapper.setConversionRates(
+        firstComponent.address,
+        receiveToken.address,
+        sourceTokenRateQuantity,
+        maxDestinationQuantity,
+      );
 
       // Create 0x order for the second component, using ether(4) sendToken as default
       zeroExOrderTakerTokenAmount = zeroExOrderTakerTokenAmount || exchangeRedeemSendTokenAmounts[1];
@@ -716,6 +724,7 @@ contract('ExchangeIssuanceModule', accounts => {
         receiveToken,
         zeroExOrderMaker,
         zeroExOrderMakerTokenAmount,
+        kyberReserveOperator,
       );
 
       await erc20Wrapper.approveTransfersAsync(
@@ -833,10 +842,12 @@ contract('ExchangeIssuanceModule', accounts => {
     describe('when send quantities is zero', async () => {
       before(async () => {
         exchangeRedeemSendTokenAmounts = [ZERO, new BigNumber(0)];
+        customSourceTokenRateCalculationQuantity = ether(1);
       });
 
      after(async () => {
         exchangeRedeemSendTokenAmounts = undefined;
+        customSourceTokenRateCalculationQuantity = undefined;
       });
 
       it('should revert', async () => {

@@ -17,7 +17,7 @@ import {
 import { ether } from '@utils/units';
 import { ExchangeData } from '@utils/orders';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS, KYBER_RESERVE_CONFIGURED_RATE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
+import { DEFAULT_GAS, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -80,7 +80,7 @@ contract('KyberNetworkWrapper', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe.only('#conversionRate', async () => {
+  describe('#conversionRate', async () => {
     let subjectSendTokens: Address[];
     let subjectReceiveTokens: Address[];
     let subjectQuantities: BigNumber[];
@@ -101,7 +101,7 @@ contract('KyberNetworkWrapper', accounts => {
       await kyberHelperWrapper.enableTokensForReserve(token.address);
       await kyberHelperWrapper.enableTokensForReserve(token2.address);
 
-      await kyberHelperWrapper.setUpConversionRates(
+      await kyberHelperWrapper.setUpConversionRatesRaw(
         [token.address, token2.address],
         [token1BuyRate, token2BuyRate],
         [token1SellRate, token2SellRate],
@@ -126,13 +126,6 @@ contract('KyberNetworkWrapper', accounts => {
       subjectReceiveTokens = [receiveTokenAddress, receiveTokenAddress];
       subjectQuantities = [new BigNumber(10000), new BigNumber(10000)];
       subjectCaller = deployedCoreAddress;
-
-      const rate = await kyberHelperWrapper.getKyberRate(
-        token.address,
-        token2.address,
-        ether(1),
-      );
-      console.log("Rate", rate.toString());
     });
 
     async function subject(): Promise<[BigNumber[], BigNumber[]]> {
@@ -190,7 +183,6 @@ contract('KyberNetworkWrapper', accounts => {
     const componentTokenSellRate = ether(1);
     const sourceTokenSellRate = ether(1).div(2);
 
-    const sourceTokenSupplyQuantity = ether(1000000000);
     const componentTokenSupplyQuantity = ether(1000000000);
 
     beforeEach(async () => {
@@ -200,7 +192,7 @@ contract('KyberNetworkWrapper', accounts => {
       await kyberHelperWrapper.enableTokensForReserve(sourceToken.address);
       await kyberHelperWrapper.enableTokensForReserve(componentToken.address);
 
-      await kyberHelperWrapper.setUpConversionRates(
+      await kyberHelperWrapper.setUpConversionRatesRaw(
         [componentToken.address, sourceToken.address],
         [componentTokenBuyRate, sourceTokenBuyRate],
         [componentTokenSellRate, sourceTokenSellRate],

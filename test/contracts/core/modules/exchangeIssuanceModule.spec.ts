@@ -35,6 +35,7 @@ import { getWeb3 } from '@utils/web3Helper';
 import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { KyberNetworkWrapper } from '@utils/wrappers/kyberNetworkWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -51,9 +52,10 @@ const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 contract('ExchangeIssuanceModule', accounts => {
   const [
     contractDeployer,
-    notExchangeIssueCaller,
+    kyberReserveOperator,
     zeroExOrderMaker,
     exchangeIssuanceCaller,
+    notExchangeIssueCaller,
   ] = accounts;
 
   let core: CoreContract;
@@ -65,6 +67,7 @@ contract('ExchangeIssuanceModule', accounts => {
   const coreWrapper = new CoreWrapper(contractDeployer, contractDeployer);
   const erc20Wrapper = new ERC20Wrapper(contractDeployer);
   const exchangeWrapper = new ExchangeWrapper(contractDeployer);
+  const kyberNetworkWrapper = new KyberNetworkWrapper();
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -90,6 +93,12 @@ contract('ExchangeIssuanceModule', accounts => {
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+
+    await kyberNetworkWrapper.setup();
+    await kyberNetworkWrapper.fundReserveWithEth(
+      kyberReserveOperator,
+      ether(10),
+    );
   });
 
   afterEach(async () => {
@@ -122,6 +131,13 @@ contract('ExchangeIssuanceModule', accounts => {
     let kyberTradeMakerTokenChange: BigNumber;
     let kyberConversionRatePower: BigNumber;
 
+    const componentTokenBuyRate = ether(1);
+    const sourceTokenBuyRate = ether(2);
+    const componentTokenSellRate = ether(1);
+    const sourceTokenSellRate = ether(1).div(2);
+
+    const componentTokenSupplyQuantity = ether(1000000000);
+
     beforeEach(async () => {
       await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
         core,
@@ -132,13 +148,28 @@ contract('ExchangeIssuanceModule', accounts => {
       );
       await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
         core,
-        SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
+        kyberNetworkWrapper.kyberNetworkProxy,
         transferProxy
       );
 
-      const firstComponent = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
+      const firstComponent = await erc20Wrapper.deployTokenAsync(kyberReserveOperator);
       const secondComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
-      sendToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
+      sendToken = await erc20Wrapper.deployTokenAsync(exchangeIssuanceCaller);
+
+      await kyberNetworkWrapper.enableTokensForReserve(firstComponent.address);
+      await kyberNetworkWrapper.enableTokensForReserve(sendToken.address);
+
+      await kyberNetworkWrapper.setUpConversionRates(
+        [firstComponent.address, sendToken.address],
+        [componentTokenBuyRate, sourceTokenBuyRate],
+        [componentTokenSellRate, sourceTokenSellRate],
+      );
+
+      await kyberNetworkWrapper.approveToReserve(
+        firstComponent,
+        componentTokenSupplyQuantity,
+        kyberReserveOperator,
+      );
 
       const componentTokens = [firstComponent, secondComponent];
       const setComponentUnit = ether(4);
@@ -210,7 +241,7 @@ contract('ExchangeIssuanceModule', accounts => {
                                                           .mul(kyberConversionRatePower)
                                                           .round();
       kyberTradeMakerTokenChange = kyberSourceTokenQuantity.sub(
-        maxDestinationQuantity.mul(kyberConversionRatePower).div(KYBER_RESERVE_CONFIGURED_RATE).floor());
+        maxDestinationQuantity.mul(kyberConversionRatePower).div(componentTokenBuyRate).floor());
       kyberTrade = {
         sourceToken: sendToken.address,
         destinationToken: firstComponent.address,
@@ -258,7 +289,7 @@ contract('ExchangeIssuanceModule', accounts => {
       );
     }
 
-    it('mints the correct quantity of the set for the sender', async () => {
+    it.only('mints the correct quantity of the set for the sender', async () => {
       const existingBalance = await setToken.balanceOf.callAsync(exchangeIssuanceCaller);
 
       await subject();

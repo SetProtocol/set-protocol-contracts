@@ -7,6 +7,7 @@ import { StandardTokenMockContract } from '@utils/contracts';
 
 import { getWeb3 } from '../web3Helper';
 import { asyncForEach } from '../array';
+import { ether } from '@utils/units';
 
 import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, DEFAULT_GAS } from '../constants';
 
@@ -99,7 +100,7 @@ export class KyberNetworkWrapper {
   public async enableTokensForReserve(
     _tokenAddress: Address,
     _minimalRecordResolution: BigNumber = new BigNumber(1000000000000000),
-    _maxPerBlockImbalance: BigNumber = new BigNumber(1000000000000000),
+    _maxPerBlockImbalance: BigNumber = UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
     _maxTotalImbalance: BigNumber = UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ) {
     const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
@@ -269,123 +270,15 @@ export class KyberNetworkWrapper {
     _destinationToken: Address,
     _sourceQuantity: BigNumber,
   ): Promise<BigNumber> {
-    const KyberReserveContract = new web3.eth.Contract(KyberReserveABI, KYBER_CONTRACTS.KyberReserve);
-    const ConversionRatesContract = new web3.eth.Contract(ConversionRateABI, KYBER_CONTRACTS.ConversionRates);
     const KyberNetworkContract = new web3.eth.Contract(KyberNetworkABI, KYBER_CONTRACTS.KyberNetwork);
-    const ExpectedRateContract = new web3.eth.Contract(ExpectedRateABI, KYBER_CONTRACTS.ExpectedRate);
 
-    const conversionRatesContract = await KyberReserveContract.methods.conversionRatesContract().call();
-    console.log("KyberReserveContract.methods.conversionRatesContract()", conversionRatesContract);
-
-    const sanityRatesContract = await KyberReserveContract.methods.sanityRatesContract().call();
-    console.log("KyberReserveContract.methods.sanityRatesContract()", sanityRatesContract);    
-
-    const reserveContract = await ConversionRatesContract.methods.reserveContract().call();
-    console.log("ConversionRatesContract.methods.reserveContract()", reserveContract);    
-
-    const enabledReserves = await KyberNetworkContract.methods.getReserves().call();
-    console.log("KyberNetworkContract.methods.getReserves()", enabledReserves.toString());    
-
-    const tradeEnabled = await KyberReserveContract.methods.tradeEnabled().call();
-    console.log("KyberReserveContract.methods.tradeEnabled()?", tradeEnabled);
-
-    const expectedRateContract = await KyberNetworkContract.methods.expectedRateContract().call();
-    console.log("KyberReserveContract.methods.expectedRateContract()?", expectedRateContract);
-
-    const sourceTokenBalance = await KyberReserveContract.methods.getBalance(_sourceToken).call();
-    console.log("KyberReserveContract.methods.getBalance(_sourceToken)", sourceTokenBalance);
-    const destinationTokenBalance = await KyberReserveContract.methods.getBalance(_destinationToken).call();
-
-    console.log("KyberReserveContract.methods.getBalance(_destinationToken)", destinationTokenBalance);
-
-    // Debug by calling the conversion rates contract
-    const currentBlockNumber = await web3.eth.getBlockNumber();
-    console.log("Current Blocknumber", currentBlockNumber);
-
-    const blockNumber = currentBlockNumber * 50;
-    console.log("Rate Blocknumber", blockNumber);
-
-    const basicRate = await ConversionRatesContract.methods.getBasicRate(
-      _destinationToken,
-      true,
-    ).call();
-    console.log("ConversionRatesContract.methods.getBasicRate(_destinationToken, true)", basicRate);
-    
-    const basicInfo = await ConversionRatesContract.methods.getTokenBasicData(
-      _destinationToken,
-    ).call();
-    console.log("ConversionRatesContract.methods.getTokenBasicData(_destinationToken)", basicInfo[0], basicInfo[1]);
-
-    const ethAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-
-    const ETHBalance = await KyberReserveContract.methods.getBalance(ethAddress).call();
-    console.log("ETH Balance", ETHBalance.toString()); 
-   
-    const getRate = await ConversionRatesContract.methods.getRate(
-      _sourceToken,
-      blockNumber + 1,
-      false,
-      _sourceQuantity.toString()
-    ).call();
-    console.log("ConversionRatesContract.methods.getRate(_destinationToken,blockNumber,true,_sourceQuantity.toString())",
-      getRate.toString()
-     );
-
-    const getDestQuantity = await KyberReserveContract.methods.getDestQty(
-      _sourceToken,
-      ethAddress,
-      _sourceQuantity.toString(),
-      getRate,
-    ).call();
-    console.log("KyberReserveContract.methods.getDestQty(_sourceToken,_destinationToken,_sourceQuantity.toString(),getRate)", getDestQuantity);
-
-    
-    const sourceToEthRate = await KyberReserveContract.methods.getConversionRate(
-      _sourceToken,
-      ethAddress,
-      _sourceQuantity.toString(),
-      blockNumber,
-    ).call();
-    console.log("KyberReserveContract.methods.getConversionRate() - sourceToEthRate", sourceToEthRate);
-
-    const ethToDestinationRate = await KyberReserveContract.methods.getConversionRate(
-      ethAddress,
-      _destinationToken,
-      sourceToEthRate.toString(),
-      blockNumber,
-    ).call();
-    console.log("KyberReserveContract.methods.getConversionRate() - ethToDestinationRate", ethToDestinationRate);
-
-    // Expected Rate Contract logs
-    const quantityFactor = await ExpectedRateContract.methods.quantityFactor().call();
-    console.log("ExpectedRateContract.methods.quantityFactor().call()", quantityFactor);
-
-    const worstCaseRateFactorInBps = await ExpectedRateContract.methods.worstCaseRateFactorInBps().call();
-    console.log("ExpectedRateContract.methods.worstCaseRateFactorInBps().call()", worstCaseRateFactorInBps);
-
-    const bestRate = await KyberNetworkContract.methods.findBestRate(
+    const [expectedRate] = await KyberNetworkContract.methods.getExpectedRate(
       _sourceToken,
       _destinationToken,
       _sourceQuantity.toString(),
     ).call();
-    console.log("KyberNetworkContract.methods.findBestRate()", bestRate[0], bestRate[1]);
 
-    const expectedRateResult = await ExpectedRateContract.methods.getExpectedRate(
-      _sourceToken,
-      _destinationToken,
-      _sourceQuantity.toString(),
-      true,
-    ).call();
-    console.log("ExpectedRateContract.methods.getExpectedRate()", expectedRateResult[0], expectedRateResult[1]);
-
-    const expectedRate = await KyberNetworkContract.methods.getExpectedRate(
-      _sourceToken,
-      _destinationToken,
-      _sourceQuantity.toString(),
-    ).call();
-    console.log("KyberNetworkContract.methods.getExpectedRate()", expectedRate[0], expectedRate[1]);
-
-    return expectedRate[1];
+    return expectedRate; 
   }
 
   public async performTrade(

@@ -331,7 +331,7 @@ contract('ExchangeIssuanceModule', accounts => {
 
     describe('when a receiveToken is not a component of the Set', async () => {
       before(async () => {
-        const firstComponent = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
+        const firstComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
         const notComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
 
         exchangeIssueReceiveTokens = [firstComponent.address, notComponent.address];
@@ -456,7 +456,7 @@ contract('ExchangeIssuanceModule', accounts => {
 
     describe('when the send token length differ from other send inputs', async () => {
       before(async () => {
-        const sendToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
+        const sendToken = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
 
         exchangeIssueSendTokens = [sendToken.address];
       });
@@ -818,6 +818,16 @@ contract('ExchangeIssuanceModule', accounts => {
 
       after(async () => {
         exchangeRedeemSendTokens = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when an encoded exchangeId is invalid', async () => {
+      beforeEach(async () => {
+        subjectExchangeOrdersData = generateOrdersDataWithIncorrectExchange();
       });
 
       it('should revert', async () => {

@@ -256,7 +256,7 @@ contract('ExchangeIssuanceModule', accounts => {
 
       // Create 0x order for the second component, using ether(4) sendToken as default
       zeroExOrderMakerTokenAmount = customZeroExOrderMakerTokenAmount || exchangeIssueReceiveTokenAmounts[1];
-      zeroExOrderTakerAssetAmount = customZeroExOrderTakerAssetAmount || ether(4);
+      zeroExOrderTakerAssetAmount = ether(4);
       zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
         NULL_ADDRESS,                                      // senderAddress
         zeroExOrderMaker,                                  // makerAddress

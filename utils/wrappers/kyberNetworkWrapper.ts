@@ -12,7 +12,6 @@ import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, DEFAULT_GAS } from '../constants';
 import { ConversionRateABI } from '../external/abis/ConversionRateABI';
 import { KyberNetworkABI } from '../external/abis/KyberNetworkABI';
 import { KyberReserveABI } from '../external/abis/KyberReserveABI';
-import { KyberNetworkProxyABI } from '../external/abis/KyberNetworkProxyABI';
 
 import { KYBER_CONTRACTS, KYBER_PERMISSIONED_ACCOUNTS } from '../kyberSnapshotAddresses';
 
@@ -120,9 +119,6 @@ export class KyberNetworkWrapper {
       gas: DEFAULT_GAS,
     });
 
-    // Add token to conversion rate instance
-    // Only argument is the token address
-    // Must be called by the admin
     const addTokenTxData = ConversionRatesContract.methods.addToken(_tokenAddress).encodeABI();
     await web3.eth.sendTransaction({
       from: KYBER_PERMISSIONED_ACCOUNTS.admin,
@@ -161,7 +157,6 @@ export class KyberNetworkWrapper {
     });
 
     // Set Token Wallet to the operator. This means the operator must approve its tokens
-    // to the contract
     const setTokenWalletTxData = KyberReserveContract.methods.setTokenWallet(
       _tokenAddress,
       KYBER_PERMISSIONED_ACCOUNTS.operator,
@@ -186,6 +181,8 @@ export class KyberNetworkWrapper {
     });
   }
 
+  // Pass in the arguments for a Kyber Trade and it will automatically
+  // set rates for the reserve that map to the source and destination token quantities.
   public async setConversionRates(
     _sourceToken: Address,
     _destinationToken: Address,
@@ -296,29 +293,5 @@ export class KyberNetworkWrapper {
     ).call();
 
     return expectedRate;
-  }
-
-  // Convenience function to execute a Kyber trade
-  public async performTrade(
-    _sourceToken: Address,
-    _sourceQuantity: BigNumber,
-    _destinationToken: Address,
-    _minConversionRate: BigNumber,
-    _from: Address,
-  ) {
-    const KyberNetworkProxyContract = new web3.eth.Contract(KyberNetworkProxyABI, KYBER_CONTRACTS.KyberNetworkProxy);
-
-    const swapTokenToTokenTxData = await KyberNetworkProxyContract.methods.swapTokenToToken(
-      _sourceToken,
-      _sourceQuantity.toString(),
-      _destinationToken,
-      _minConversionRate.toString(),
-    ).encodeABI();
-    await web3.eth.sendTransaction({
-      from: _from,
-      to: KYBER_CONTRACTS.KyberNetworkProxy,
-      data: swapTokenToTokenTxData,
-      gas: DEFAULT_GAS,
-    });
   }
 }

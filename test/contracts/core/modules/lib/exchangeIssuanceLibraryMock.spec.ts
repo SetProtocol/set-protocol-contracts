@@ -272,7 +272,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
       subjectSendTokenExchanges = [new BigNumber(1), new BigNumber(2)];
       subjectSendTokens = [otherAccount, otherAccount];
-      subjectSendTokenAmounts = subjectSendTokenAmounts || [new BigNumber(1), new BigNumber(1)];
+      subjectSendTokenAmounts = [new BigNumber(1), new BigNumber(1)];
     });
 
     async function subject(): Promise<any> {

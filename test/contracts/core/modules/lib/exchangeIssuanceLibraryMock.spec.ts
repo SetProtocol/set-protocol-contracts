@@ -27,6 +27,7 @@ import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
+import { KyberNetworkWrapper } from '@utils/wrappers/kyberNetworkWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -54,6 +55,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
   const erc20Wrapper = new ERC20Wrapper(contractDeployer);
   const exchangeWrapper = new ExchangeWrapper(contractDeployer);
   const libraryMockWrapper = new LibraryMockWrapper(contractDeployer);
+  const kyberNetworkWrapper = new KyberNetworkWrapper();
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -100,7 +102,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
     );
     await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
       core,
-      SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
+      kyberNetworkWrapper.kyberNetworkProxy,
       transferProxy
     );
   });

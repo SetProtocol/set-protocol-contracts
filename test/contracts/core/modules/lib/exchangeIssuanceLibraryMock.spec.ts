@@ -270,9 +270,9 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
     beforeEach(async () => {
       subjectCoreAddress = core.address;
 
-      subjectSendTokenExchanges = [new BigNumber(1)];
-      subjectSendTokens = [otherAccount];
-      subjectSendTokenAmounts = subjectSendTokenAmounts || [new BigNumber(1)];
+      subjectSendTokenExchanges = [new BigNumber(1), new BigNumber(2)];
+      subjectSendTokens = [otherAccount, otherAccount];
+      subjectSendTokenAmounts = subjectSendTokenAmounts || [new BigNumber(1), new BigNumber(1)];
     });
 
     async function subject(): Promise<any> {
@@ -302,7 +302,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
     describe('when send token amounts is uneven', async () => {
       beforeEach(async () => {
-        subjectSendTokenAmounts = [new BigNumber(1), new BigNumber(2)];
+        subjectSendTokenAmounts = [new BigNumber(1)];
       });
 
       it('should revert', async () => {
@@ -312,7 +312,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
     describe('when send token exchange ids length is uneven', async () => {
       beforeEach(async () => {
-        subjectSendTokenExchanges = [new BigNumber(1), new BigNumber(2)];
+        subjectSendTokenExchanges = [new BigNumber(1)];
       });
 
       it('should revert', async () => {
@@ -322,7 +322,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
     describe('when send token exchange id is invalid', async () => {
       beforeEach(async () => {
-        subjectSendTokenExchanges = [new BigNumber(4)];
+        subjectSendTokenExchanges = [new BigNumber(1), new BigNumber(4)];
       });
 
       it('should revert', async () => {
@@ -332,7 +332,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
     describe('when send token quantities is zero', async () => {
       beforeEach(async () => {
-        subjectSendTokenAmounts = [ZERO];
+        subjectSendTokenAmounts = [new BigNumber(1), ZERO];
       });
 
       it('should revert', async () => {

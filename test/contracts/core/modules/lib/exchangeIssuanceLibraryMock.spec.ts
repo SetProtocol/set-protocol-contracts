@@ -27,6 +27,7 @@ import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
+import { KyberNetworkWrapper } from '@utils/wrappers/kyberNetworkWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -54,6 +55,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
   const erc20Wrapper = new ERC20Wrapper(contractDeployer);
   const exchangeWrapper = new ExchangeWrapper(contractDeployer);
   const libraryMockWrapper = new LibraryMockWrapper(contractDeployer);
+  const kyberNetworkWrapper = new KyberNetworkWrapper();
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -100,7 +102,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
     );
     await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
       core,
-      SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
+      kyberNetworkWrapper.kyberNetworkProxy,
       transferProxy
     );
   });
@@ -268,9 +270,9 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
     beforeEach(async () => {
       subjectCoreAddress = core.address;
 
-      subjectSendTokenExchanges = [new BigNumber(1)];
-      subjectSendTokens = [otherAccount];
-      subjectSendTokenAmounts = subjectSendTokenAmounts || [new BigNumber(1)];
+      subjectSendTokenExchanges = [new BigNumber(1), new BigNumber(2)];
+      subjectSendTokens = [otherAccount, otherAccount];
+      subjectSendTokenAmounts = [new BigNumber(1), new BigNumber(1)];
     });
 
     async function subject(): Promise<any> {
@@ -300,7 +302,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
     describe('when send token amounts is uneven', async () => {
       beforeEach(async () => {
-        subjectSendTokenAmounts = [new BigNumber(1), new BigNumber(2)];
+        subjectSendTokenAmounts = [new BigNumber(1)];
       });
 
       it('should revert', async () => {
@@ -310,7 +312,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
     describe('when send token exchange ids length is uneven', async () => {
       beforeEach(async () => {
-        subjectSendTokenExchanges = [new BigNumber(1), new BigNumber(2)];
+        subjectSendTokenExchanges = [new BigNumber(1)];
       });
 
       it('should revert', async () => {
@@ -320,7 +322,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
     describe('when send token exchange id is invalid', async () => {
       beforeEach(async () => {
-        subjectSendTokenExchanges = [new BigNumber(4)];
+        subjectSendTokenExchanges = [new BigNumber(1), new BigNumber(4)];
       });
 
       it('should revert', async () => {
@@ -330,7 +332,7 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
     describe('when send token quantities is zero', async () => {
       beforeEach(async () => {
-        subjectSendTokenAmounts = [ZERO];
+        subjectSendTokenAmounts = [new BigNumber(1), ZERO];
       });
 
       it('should revert', async () => {

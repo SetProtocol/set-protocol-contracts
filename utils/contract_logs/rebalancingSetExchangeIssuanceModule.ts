@@ -5,6 +5,7 @@ export function LogPayableExchangeIssue(
   rebalancingSetAddress: Address,
   callerAddress: Address,
   rebalancingSetQuantity: BigNumber,
+  paymentTokenReturned: BigNumber,
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -14,6 +15,7 @@ export function LogPayableExchangeIssue(
       rebalancingSetAddress,
       callerAddress,
       rebalancingSetQuantity,
+      paymentTokenReturned,
     },
   }];
 }

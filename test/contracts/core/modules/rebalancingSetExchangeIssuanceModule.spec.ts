@@ -347,6 +347,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
 
     it('emits correct LogPayableExchangeIssue event', async () => {
+      const expectedReturnedEth = new BigNumber(0);
+
       const txHash = await subject();
 
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
@@ -354,7 +356,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         subjectRebalancingSetAddress,
         subjectCaller,
         subjectRebalancingSetQuantity,
-        rebalancingSetExchangeIssuanceModule.address
+        expectedReturnedEth,
+        rebalancingSetExchangeIssuanceModule.address,
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
@@ -777,6 +780,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
 
     it('emits correct LogPayableExchangeIssue event', async () => {
+      const expectedReturnedERC20 = new BigNumber(0);
+
       const txHash = await subject();
 
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
@@ -784,6 +789,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         subjectRebalancingSetAddress,
         subjectCaller,
         subjectRebalancingSetQuantity,
+        expectedReturnedERC20,
         rebalancingSetExchangeIssuanceModule.address
       );
 

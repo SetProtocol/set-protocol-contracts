@@ -65,7 +65,8 @@ contract RebalancingSetExchangeIssuanceModule is
     event LogPayableExchangeIssue(
         address rebalancingSetAddress,
         address indexed callerAddress,
-        uint256 rebalancingSetQuantity
+        uint256 rebalancingSetQuantity,
+        uint256 paymentTokenReturned
     );
 
     event LogPayableExchangeRedeem(
@@ -179,6 +180,13 @@ contract RebalancingSetExchangeIssuanceModule is
             // Transfer ether to user
             msg.sender.transfer(leftoverWeth);
         }
+
+        emit LogPayableExchangeIssue(
+            _rebalancingSetAddress,
+            msg.sender,
+            _rebalancingSetQuantity,
+            leftoverWeth
+        );
     }
 
     /**
@@ -237,6 +245,13 @@ contract RebalancingSetExchangeIssuanceModule is
                 leftoverPaymentTokenQuantity
             );
         }
+
+        emit LogPayableExchangeIssue(
+            _rebalancingSetAddress,
+            msg.sender,
+            _rebalancingSetQuantity,
+            leftoverPaymentTokenQuantity
+        );
     }
 
     /**
@@ -509,12 +524,6 @@ contract RebalancingSetExchangeIssuanceModule is
 
         // Return any extra components acquired during exchangeIssue to the user
         returnExcessComponentsFromVault(baseSetAddress);
-
-        emit LogPayableExchangeIssue(
-            _rebalancingSetAddress,
-            msg.sender,
-            _rebalancingSetQuantity
-        );
     }
 
     /**

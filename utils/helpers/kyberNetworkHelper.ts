@@ -2,10 +2,10 @@ import * as _ from 'lodash';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
-import { StandardTokenMockContract } from '@utils/contracts';
+import { StandardTokenMockContract } from '../contracts';
 
 import { getWeb3 } from '../web3Helper';
-import { ether } from '@utils/units';
+import { ether } from '../units';
 
 import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, DEFAULT_GAS } from '../constants';
 
@@ -18,7 +18,7 @@ import { KYBER_CONTRACTS, KYBER_PERMISSIONED_ACCOUNTS } from '../kyberSnapshotAd
 const web3 = getWeb3();
 
 
-export class KyberNetworkWrapper {
+export class KyberNetworkHelper {
 
   public kyberNetworkProxy: Address = KYBER_CONTRACTS.KyberNetworkProxy;
   public defaultSlippagePercentage: BigNumber = new BigNumber(3);

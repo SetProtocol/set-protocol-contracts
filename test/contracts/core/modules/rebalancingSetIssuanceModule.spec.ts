@@ -30,9 +30,9 @@ import {
 } from '@utils/constants';
 import { ether } from '@utils/units';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 import { LogRebalancingSetIssue, LogRebalancingSetRedeem } from '@utils/contract_logs/rebalancingSetIssuanceModule';
 
 BigNumberSetup.configure();
@@ -62,12 +62,12 @@ contract('RebalancingSetIssuanceModule', accounts => {
   let rebalancingTokenIssuanceModule: RebalancingSetIssuanceModuleContract;
   let wethMock: WethMockContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const rebalancingWrapper = new RebalancingWrapper(
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
+  const rebalancingHelper = new RebalancingHelper(
     ownerAccount,
-    coreWrapper,
-    erc20Wrapper,
+    coreHelper,
+    erc20Helper,
     blockchain
   );
 
@@ -75,25 +75,25 @@ contract('RebalancingSetIssuanceModule', accounts => {
     ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(RebalancingSetIssuanceModule.abi);
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    wethMock = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    vault = await coreHelper.deployVaultAsync();
+    core = await coreHelper.deployCoreAsync(transferProxy, vault);
+    wethMock = await erc20Helper.deployWrappedEtherAsync(ownerAccount);
 
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
 
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
-    rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address, whitelist);
-    await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
+    rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(core.address, whitelist);
+    await coreHelper.addFactoryAsync(core, rebalancingSetTokenFactory);
 
-    rebalancingTokenIssuanceModule = await coreWrapper.deployRebalancingSetIssuanceModuleAsync(
+    rebalancingTokenIssuanceModule = await coreHelper.deployRebalancingSetIssuanceModuleAsync(
       core,
       vault,
       transferProxy,
       wethMock,
     );
-    await coreWrapper.addModuleAsync(core, rebalancingTokenIssuanceModule.address);
+    await coreHelper.addModuleAsync(core, rebalancingTokenIssuanceModule.address);
   });
 
   after(async () => {
@@ -130,18 +130,18 @@ contract('RebalancingSetIssuanceModule', accounts => {
     beforeEach(async () => {
       subjectCaller = functionCaller;
 
-      baseSetComponent = await erc20Wrapper.deployTokenAsync(subjectCaller);
-      await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address, subjectCaller);
+      baseSetComponent = await erc20Helper.deployTokenAsync(subjectCaller);
+      await erc20Helper.approveTransferAsync(baseSetComponent, transferProxy.address, subjectCaller);
 
-      baseSetComponent2 = await erc20Wrapper.deployTokenAsync(subjectCaller);
-      await erc20Wrapper.approveTransferAsync(baseSetComponent2, transferProxy.address, subjectCaller);
+      baseSetComponent2 = await erc20Helper.deployTokenAsync(subjectCaller);
+      await erc20Helper.approveTransferAsync(baseSetComponent2, transferProxy.address, subjectCaller);
 
       // Create the Set (1 component)
       const componentAddresses = [baseSetComponent.address, baseSetComponent2.address];
       baseSetComponentUnit = ether(1);
       const componentUnits = [baseSetComponentUnit, baseSetComponentUnit];
       baseSetNaturalUnit = ether(1);
-      baseSetToken = await coreWrapper.createSetTokenAsync(
+      baseSetToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -151,7 +151,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       // Create the Rebalancing Set
       rebalancingUnitShares = customRebalancingUnitShares || ether(1);
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         core,
         rebalancingSetTokenFactory.address,
         ownerAccount,
@@ -314,18 +314,18 @@ contract('RebalancingSetIssuanceModule', accounts => {
     beforeEach(async () => {
       subjectCaller = functionCaller;
 
-      baseSetComponent = await erc20Wrapper.deployTokenAsync(subjectCaller);
-      await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address, subjectCaller);
+      baseSetComponent = await erc20Helper.deployTokenAsync(subjectCaller);
+      await erc20Helper.approveTransferAsync(baseSetComponent, transferProxy.address, subjectCaller);
 
       baseSetWethComponent = customWethMock || wethMock;
-      await erc20Wrapper.approveTransferAsync(baseSetWethComponent, transferProxy.address, subjectCaller);
+      await erc20Helper.approveTransferAsync(baseSetWethComponent, transferProxy.address, subjectCaller);
 
       // Create the Set (2 component)
       const componentAddresses = [baseSetWethComponent.address, baseSetComponent.address];
       baseSetComponentUnit = ether(1);
       const componentUnits = [baseSetComponentUnit, baseSetComponentUnit];
       baseSetNaturalUnit = ether(1);
-      baseSetToken = await coreWrapper.createSetTokenAsync(
+      baseSetToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -335,7 +335,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
       // Create the Rebalancing Set
       rebalancingUnitShares = customRebalancingUnitShares || ether(1);
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         core,
         rebalancingSetTokenFactory.address,
         ownerAccount,
@@ -420,7 +420,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
     describe('when the base SetToken components do not include wrapped Ether', async () => {
       before(async () => {
-        customWethMock = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
+        customWethMock = await erc20Helper.deployWrappedEtherAsync(ownerAccount);
       });
 
       after(async () => {
@@ -553,29 +553,29 @@ contract('RebalancingSetIssuanceModule', accounts => {
     beforeEach(async () => {
       subjectCaller = functionCaller;
 
-      baseSetComponent = await erc20Wrapper.deployTokenAsync(ownerAccount);
-      await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address);
+      baseSetComponent = await erc20Helper.deployTokenAsync(ownerAccount);
+      await erc20Helper.approveTransferAsync(baseSetComponent, transferProxy.address);
 
-      baseSetComponent2 = await erc20Wrapper.deployTokenAsync(ownerAccount);
-      await erc20Wrapper.approveTransferAsync(baseSetComponent2, transferProxy.address);
+      baseSetComponent2 = await erc20Helper.deployTokenAsync(ownerAccount);
+      await erc20Helper.approveTransferAsync(baseSetComponent2, transferProxy.address);
 
       // Create the Set (2 component)
       const componentAddresses = [baseSetComponent.address, baseSetComponent2.address];
       baseSetComponentUnit = customBaseComponentUnit || ether(1);
       const componentUnits = [baseSetComponentUnit, baseSetComponentUnit];
       baseSetNaturalUnit = ether(1);
-      baseSetToken = await coreWrapper.createSetTokenAsync(
+      baseSetToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
         componentUnits,
         baseSetNaturalUnit,
       );
-      await erc20Wrapper.approveTransferAsync(baseSetToken, transferProxy.address);
+      await erc20Helper.approveTransferAsync(baseSetToken, transferProxy.address);
 
       // Create the Rebalancing Set
       rebalancingUnitShares = customRebalancingUnitShares || ether(1);
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         core,
         rebalancingSetTokenFactory.address,
         ownerAccount,
@@ -590,7 +590,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
       baseSetIssueQuantity = customBaseIssueQuantity ||
         subjectRebalancingSetQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
 
-      await coreWrapper.issueSetTokenAsync(
+      await coreHelper.issueSetTokenAsync(
         core,
         baseSetToken.address,
         baseSetIssueQuantity,
@@ -792,28 +792,28 @@ contract('RebalancingSetIssuanceModule', accounts => {
       subjectCaller = functionCaller;
 
       baseSetWethComponent = customWethMock || wethMock;
-      await erc20Wrapper.approveTransferAsync(baseSetWethComponent, transferProxy.address);
+      await erc20Helper.approveTransferAsync(baseSetWethComponent, transferProxy.address);
 
-      baseSetComponent = await erc20Wrapper.deployTokenAsync(ownerAccount);
-      await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address);
+      baseSetComponent = await erc20Helper.deployTokenAsync(ownerAccount);
+      await erc20Helper.approveTransferAsync(baseSetComponent, transferProxy.address);
 
       // Create the Set (2 component)
       const componentAddresses = [baseSetWethComponent.address, baseSetComponent.address];
       baseSetComponentUnit = ether(1);
       const componentUnits = [baseSetComponentUnit, baseSetComponentUnit];
       baseSetNaturalUnit = ether(1);
-      baseSetToken = await coreWrapper.createSetTokenAsync(
+      baseSetToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
         componentUnits,
         baseSetNaturalUnit,
       );
-      await erc20Wrapper.approveTransferAsync(baseSetToken, transferProxy.address);
+      await erc20Helper.approveTransferAsync(baseSetToken, transferProxy.address);
 
       // Create the Rebalancing Set
       rebalancingUnitShares = customRebalancingUnitShares || ether(1);
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         core,
         rebalancingSetTokenFactory.address,
         ownerAccount,
@@ -836,7 +836,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
         { from: ownerAccount, gas: DEFAULT_GAS, value: wethRequiredToMintSet.toString() }
       );
 
-      await coreWrapper.issueSetTokenAsync(
+      await coreHelper.issueSetTokenAsync(
         core,
         baseSetToken.address,
         baseSetIssueQuantity,
@@ -926,7 +926,7 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
     describe('when the base SetToken components do not include wrapped Ether', async () => {
       before(async () => {
-        customWethMock = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
+        customWethMock = await erc20Helper.deployWrappedEtherAsync(ownerAccount);
       });
 
       after(async () => {

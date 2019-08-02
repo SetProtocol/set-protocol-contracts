@@ -17,9 +17,9 @@ import {
 } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -35,20 +35,20 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
 
   let auctionCurve: LinearAuctionPriceCurveContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
   const blockchain = new Blockchain(web3);
-  const rebalancingWrapper = new RebalancingWrapper(
+  const rebalancingHelper = new RebalancingHelper(
     ownerAccount,
-    coreWrapper,
-    erc20Wrapper,
+    coreHelper,
+    erc20Helper,
     blockchain
   );
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
     const usesStartPrice = true;
-    auctionCurve = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
+    auctionCurve = await rebalancingHelper.deployLinearAuctionPriceCurveAsync(
       DEFAULT_AUCTION_PRICE_DIVISOR,
       usesStartPrice
     );
@@ -176,7 +176,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
 
       const returnedPrice = await subject();
 
-      const expectedPrice = rebalancingWrapper.getExpectedOpenLinearAuctionPrice(
+      const expectedPrice = rebalancingHelper.getExpectedOpenLinearAuctionPrice(
         timeJump,
         subjectAuctionPriceParameters.auctionTimeToPivot,
         subjectAuctionPriceParameters.auctionStartPrice,
@@ -204,7 +204,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
 
       const returnedPrice = await subject();
 
-      const expectedPrice = rebalancingWrapper.getExpectedOpenLinearAuctionPrice(
+      const expectedPrice = rebalancingHelper.getExpectedOpenLinearAuctionPrice(
         timeJump,
         subjectAuctionPriceParameters.auctionTimeToPivot,
         subjectAuctionPriceParameters.auctionStartPrice,
@@ -222,7 +222,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
 
       const returnedPrice = await subject();
 
-      const expectedPrice = rebalancingWrapper.getExpectedOpenLinearAuctionPrice(
+      const expectedPrice = rebalancingHelper.getExpectedOpenLinearAuctionPrice(
         timeJump,
         subjectAuctionPriceParameters.auctionTimeToPivot,
         subjectAuctionPriceParameters.auctionStartPrice,

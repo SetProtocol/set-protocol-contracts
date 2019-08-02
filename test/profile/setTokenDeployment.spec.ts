@@ -12,8 +12,8 @@ import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -27,8 +27,8 @@ contract('Deployment', accounts => {
     ownerAccount,
   ] = accounts;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
 
   describe('SetToken', async () => {
     let core: CoreContract;
@@ -48,9 +48,9 @@ contract('Deployment', accounts => {
     beforeEach(async () => {
       await blockchain.saveSnapshotAsync();
 
-      core = await coreWrapper.deployCoreAndDependenciesAsync();
-      factory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-      await coreWrapper.addFactoryAsync(core, factory);
+      core = await coreHelper.deployCoreAndDependenciesAsync();
+      factory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+      await coreHelper.addFactoryAsync(core, factory);
     });
 
     afterEach(async () => {
@@ -72,7 +72,7 @@ contract('Deployment', accounts => {
 
     _.forEach(subjectComponentsInSetToDeploy, function(componentCount) {
       it(`Deploying SetToken with ${componentCount} Components`, async () => {
-        const components = await erc20Wrapper.deployTokensAsync(componentCount, ownerAccount);
+        const components = await erc20Helper.deployTokensAsync(componentCount, ownerAccount);
 
         subjectFactoryAddress = factory.address;
         subjectComponents = _.map(components, token => token.address);

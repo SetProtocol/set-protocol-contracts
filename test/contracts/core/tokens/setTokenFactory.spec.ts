@@ -21,8 +21,8 @@ import { Blockchain } from '@utils/blockchain';
 import { ZERO, STANDARD_NATURAL_UNIT } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -46,8 +46,8 @@ contract('SetTokenFactory', accounts => {
   let core: CoreContract;
   let setTokenFactory: SetTokenFactoryContract;
 
-  const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
-  const erc20Wrapper = new ERC20Wrapper(deployerAccount);
+  const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
+  const erc20Helper = new ERC20Helper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(SetTokenFactory.abi);
@@ -62,12 +62,12 @@ contract('SetTokenFactory', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+    vault = await coreHelper.deployVaultAsync();
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    core = await coreHelper.deployCoreAsync(transferProxy, vault);
 
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.addFactoryAsync(core, setTokenFactory);
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+    await coreHelper.addFactoryAsync(core, setTokenFactory);
   });
 
   afterEach(async () => {
@@ -84,7 +84,7 @@ contract('SetTokenFactory', accounts => {
     const subjectCallData: Bytes = '0x0';
 
     beforeEach(async () => {
-      const components = await erc20Wrapper.deployTokensAsync(1, deployerAccount);
+      const components = await erc20Helper.deployTokensAsync(1, deployerAccount);
 
       subjectFactory = setTokenFactory.address;
       subjectComponents = [components[0].address];
@@ -95,7 +95,7 @@ contract('SetTokenFactory', accounts => {
     });
 
     async function subject(): Promise<SetTokenContract> {
-      return await coreWrapper.createSetTokenAsync(
+      return await coreHelper.createSetTokenAsync(
         core,
         subjectFactory,
         subjectComponents,
@@ -146,7 +146,7 @@ contract('SetTokenFactory', accounts => {
     let subjectCaller: Address = authorizedAccount;
 
     beforeEach(async () => {
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(authorizedAccount);
+      setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(authorizedAccount);
     });
 
     async function subject(): Promise<string> {
@@ -163,7 +163,7 @@ contract('SetTokenFactory', accounts => {
 
     describe('when there is one component', async () => {
       beforeEach(async () => {
-        const deployedComponent: StandardTokenMockContract = await erc20Wrapper.deployTokenAsync(deployerAccount);
+        const deployedComponent: StandardTokenMockContract = await erc20Helper.deployTokenAsync(deployerAccount);
 
         components = [deployedComponent.address];
         units = [new BigNumber(1)];

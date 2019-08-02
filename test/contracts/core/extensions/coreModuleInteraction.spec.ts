@@ -30,8 +30,8 @@ import {
 } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -58,8 +58,8 @@ contract('CoreModuleInteraction', accounts => {
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(StandardTokenMock.abi);
@@ -74,12 +74,12 @@ contract('CoreModuleInteraction', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-    await coreWrapper.addModuleAsync(core, moduleAccount);
+    vault = await coreHelper.deployVaultAsync();
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    core = await coreHelper.deployCoreAsync(transferProxy, vault);
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+    await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    await coreHelper.addModuleAsync(core, moduleAccount);
   });
 
   afterEach(async () => {
@@ -95,7 +95,7 @@ contract('CoreModuleInteraction', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
+      mockToken = await erc20Helper.deployTokenAsync(tokenOwner);
       await mockToken.approve.sendTransactionAsync(
         transferProxy.address,
         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -123,27 +123,27 @@ contract('CoreModuleInteraction', accounts => {
     }
 
     it('transfers the correct amount of each token from the caller', async () => {
-      const [existingTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], ownerAccount);
+      const [existingTokenBalance] = await erc20Helper.getTokenBalances([mockToken], ownerAccount);
       const expectedNewBalance = existingTokenBalance.sub(DEPLOYED_TOKEN_QUANTITY);
 
       await subject();
 
-      const [newTokenBalance] = await await erc20Wrapper.getTokenBalances([mockToken], ownerAccount);
+      const [newTokenBalance] = await await erc20Helper.getTokenBalances([mockToken], ownerAccount);
       expect(newTokenBalance).to.eql(expectedNewBalance);
     });
 
     it('transfers the correct amount of each token to the vault', async () => {
-      const [existingTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], vault.address);
+      const [existingTokenBalance] = await erc20Helper.getTokenBalances([mockToken], vault.address);
       const expectedNewBalance = existingTokenBalance.add(DEPLOYED_TOKEN_QUANTITY);
 
       await subject();
 
-      const [newTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], vault.address);
+      const [newTokenBalance] = await erc20Helper.getTokenBalances([mockToken], vault.address);
       expect(newTokenBalance).to.eql(expectedNewBalance);
     });
 
     it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
-      const [existingOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const [existingOwnerVaultBalance] = await coreHelper.getVaultBalancesForTokensForOwner(
         [mockToken.address],
         vault,
         ownerAccount,
@@ -152,7 +152,7 @@ contract('CoreModuleInteraction', accounts => {
 
       await subject();
 
-      const [newOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const [newOwnerVaultBalance] = await coreHelper.getVaultBalancesForTokensForOwner(
         [mockToken.address],
         vault,
         ownerAccount,
@@ -180,7 +180,7 @@ contract('CoreModuleInteraction', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
+      mockTokens = await erc20Helper.deployTokensAsync(tokenCount, tokenOwner);
       subjectTokens = _.map(mockTokens, token => token.address);
 
       const approvePromises = _.map(mockTokens, token =>
@@ -212,31 +212,31 @@ contract('CoreModuleInteraction', accounts => {
     }
 
     it('transfers the correct amount of each token from the caller', async () => {
-      const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+      const existingTokenBalances = await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
       const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.sub(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
 
-      const newTokenBalances = await await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+      const newTokenBalances = await await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
     it('transfers the correct amount of each token to the vault', async () => {
-      const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+      const existingTokenBalances = await erc20Helper.getTokenBalances(mockTokens, vault.address);
       const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.add(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
 
-      const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+      const newTokenBalances = await erc20Helper.getTokenBalances(mockTokens, vault.address);
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
     it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
-      const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const existingOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokens,
         vault,
         ownerAccount,
@@ -247,7 +247,7 @@ contract('CoreModuleInteraction', accounts => {
 
       await subject();
 
-      const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokens,
         vault,
         ownerAccount,
@@ -263,31 +263,31 @@ contract('CoreModuleInteraction', accounts => {
       });
 
       it('transfers the correct amount of each token from the caller', async () => {
-        const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+        const existingTokenBalances = await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
         const expectedNewBalances = _.map(existingTokenBalances, (balance, index) =>
           balance.sub(subjectQuantities[index]),
         );
 
         await subject();
 
-        const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+        const newTokenBalances = await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
         expect(newTokenBalances).to.eql(expectedNewBalances);
       });
 
       it('transfers the correct amount of each token to the vault', async () => {
-        const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+        const existingTokenBalances = await erc20Helper.getTokenBalances(mockTokens, vault.address);
         const expectedNewBalances = _.map(existingTokenBalances, (balance, index) =>
           balance.add(subjectQuantities[index]),
         );
 
         await subject();
 
-        const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+        const newTokenBalances = await erc20Helper.getTokenBalances(mockTokens, vault.address);
         expect(newTokenBalances).to.eql(expectedNewBalances);
       });
 
       it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
-        const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const existingOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokens,
           vault,
           ownerAccount,
@@ -298,7 +298,7 @@ contract('CoreModuleInteraction', accounts => {
 
         await subject();
 
-        const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokens,
           vault,
           ownerAccount,
@@ -380,7 +380,7 @@ contract('CoreModuleInteraction', accounts => {
 
     describe('when the protocol is not in operational state', async () => {
       beforeEach(async () => {
-        await coreWrapper.setOperationStateAsync(
+        await coreHelper.setOperationStateAsync(
           core,
           ONE,
         );
@@ -400,7 +400,7 @@ contract('CoreModuleInteraction', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
+      mockToken = await erc20Helper.deployTokenAsync(tokenOwner);
       subjectToken = mockToken.address;
       await mockToken.approve.sendTransactionAsync(
         transferProxy.address,
@@ -434,27 +434,27 @@ contract('CoreModuleInteraction', accounts => {
     }
 
     it('transfers the correct amount of each token to the caller', async () => {
-      const [existingTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], ownerAccount);
+      const [existingTokenBalance] = await erc20Helper.getTokenBalances([mockToken], ownerAccount);
       const expectedNewBalance = existingTokenBalance.add(DEPLOYED_TOKEN_QUANTITY);
 
       await subject();
 
-      const [newTokenBalance] = await await erc20Wrapper.getTokenBalances([mockToken], ownerAccount);
+      const [newTokenBalance] = await await erc20Helper.getTokenBalances([mockToken], ownerAccount);
       expect(newTokenBalance).to.eql(expectedNewBalance);
     });
 
     it('transfers the correct amount of each token from the vault', async () => {
-      const [existingTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], vault.address);
+      const [existingTokenBalance] = await erc20Helper.getTokenBalances([mockToken], vault.address);
       const expectedNewBalance = existingTokenBalance.sub(DEPLOYED_TOKEN_QUANTITY);
 
       await subject();
 
-      const [newTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], vault.address);
+      const [newTokenBalance] = await erc20Helper.getTokenBalances([mockToken], vault.address);
       expect(newTokenBalance).to.eql(expectedNewBalance);
     });
 
     it('decrements the vault balances of the tokens of the owner by the correct amount', async () => {
-      const [existingOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const [existingOwnerVaultBalance] = await coreHelper.getVaultBalancesForTokensForOwner(
         [subjectToken],
         vault,
         ownerAccount,
@@ -463,7 +463,7 @@ contract('CoreModuleInteraction', accounts => {
 
       await subject();
 
-      const [newOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const [newOwnerVaultBalance] = await coreHelper.getVaultBalancesForTokensForOwner(
         [subjectToken],
         vault,
         ownerAccount,
@@ -491,7 +491,7 @@ contract('CoreModuleInteraction', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
+      mockTokens = await erc20Helper.deployTokensAsync(tokenCount, tokenOwner);
       subjectTokens = _.map(mockTokens, token => token.address);
       const approvePromises = _.map(mockTokens, token =>
         token.approve.sendTransactionAsync(
@@ -529,31 +529,31 @@ contract('CoreModuleInteraction', accounts => {
     }
 
     it('transfers the correct amount of each token from the caller', async () => {
-      const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+      const existingTokenBalances = await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
       const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.add(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
 
-      const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+      const newTokenBalances = await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
     it('transfers the correct amount of each token to the vault', async () => {
-      const existingTokenBalances = await await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+      const existingTokenBalances = await await erc20Helper.getTokenBalances(mockTokens, vault.address);
       const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.sub(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
 
-      const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+      const newTokenBalances = await erc20Helper.getTokenBalances(mockTokens, vault.address);
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
     it('decrements the vault balances of the tokens of the owner by the correct amount', async () => {
-      const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const existingOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokens,
         vault,
         ownerAccount,
@@ -564,7 +564,7 @@ contract('CoreModuleInteraction', accounts => {
 
       await subject();
 
-      const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokens,
         vault,
         ownerAccount,
@@ -644,12 +644,12 @@ contract('CoreModuleInteraction', accounts => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Helper.deployTokensAsync(2, ownerAccount);
+      await erc20Helper.approveTransfersAsync(components, transferProxy.address);
 
       componentAddresses = _.map(components, token => token.address);
       componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -689,7 +689,7 @@ contract('CoreModuleInteraction', accounts => {
     });
 
     it('updates the balances of the components in the vault to belong to the set token', async () => {
-      const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const existingBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         componentAddresses,
         vault,
         setToken.address,
@@ -701,7 +701,7 @@ contract('CoreModuleInteraction', accounts => {
         const units = componentUnits[idx];
         return balance.add(subjectQuantityToIssue.div(naturalUnit).mul(units));
       });
-      const newBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         componentAddresses,
         vault,
         setToken.address
@@ -710,7 +710,7 @@ contract('CoreModuleInteraction', accounts => {
     });
 
     it('does not change balances of the components in the vault for the user', async () => {
-      const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const existingBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         componentAddresses,
         vault,
         ownerAccount
@@ -718,7 +718,7 @@ contract('CoreModuleInteraction', accounts => {
 
       await subject();
 
-      const newBalances = await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, ownerAccount);
+      const newBalances = await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, ownerAccount);
       expect(newBalances).to.be.bignumber.eql(existingBalances);
     });
 
@@ -782,7 +782,7 @@ contract('CoreModuleInteraction', accounts => {
       beforeEach(async () => {
         alreadyDepositedComponent = _.first(components);
         componentUnit = _.first(componentUnits);
-        await coreWrapper.depositFromUser(core, alreadyDepositedComponent.address, alreadyDepositedQuantity);
+        await coreHelper.depositFromUser(core, alreadyDepositedComponent.address, alreadyDepositedQuantity);
       });
 
       it('updates the vault balance of the component for the user by the correct amount', async () => {
@@ -814,7 +814,7 @@ contract('CoreModuleInteraction', accounts => {
         componentUnit = _.first(componentUnits);
 
         alreadyDepositedQuantity = subjectQuantityToIssue.div(naturalUnit).mul(componentUnit).div(2);
-        await coreWrapper.depositFromUser(core, alreadyDepositedComponent.address, alreadyDepositedQuantity);
+        await coreHelper.depositFromUser(core, alreadyDepositedComponent.address, alreadyDepositedQuantity);
 
         quantityToTransfer = subjectQuantityToIssue.div(naturalUnit).mul(componentUnit).sub(alreadyDepositedQuantity);
       });
@@ -855,7 +855,7 @@ contract('CoreModuleInteraction', accounts => {
 
       beforeEach(async () => {
         const depositPromises = _.map(components, component =>
-          coreWrapper.depositFromUser(core, component.address, alreadyDepositedQuantity),
+          coreHelper.depositFromUser(core, component.address, alreadyDepositedQuantity),
         );
         await Promise.all(depositPromises);
       });
@@ -894,7 +894,7 @@ contract('CoreModuleInteraction', accounts => {
 
     describe('when the protocol is not in operational state', async () => {
       beforeEach(async () => {
-        await coreWrapper.setOperationStateAsync(
+        await coreHelper.setOperationStateAsync(
           core,
           ONE,
         );
@@ -920,12 +920,12 @@ contract('CoreModuleInteraction', accounts => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Helper.deployTokensAsync(2, ownerAccount);
+      await erc20Helper.approveTransfersAsync(components, transferProxy.address);
 
       componentAddresses = _.map(components, token => token.address);
       componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -934,7 +934,7 @@ contract('CoreModuleInteraction', accounts => {
       );
 
       const depositPromises = _.map(components, component =>
-        coreWrapper.depositFromUser(core, component.address, alreadyDepositedQuantity),
+        coreHelper.depositFromUser(core, component.address, alreadyDepositedQuantity),
       );
       await Promise.all(depositPromises);
 
@@ -1029,12 +1029,12 @@ contract('CoreModuleInteraction', accounts => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Helper.deployTokensAsync(2, ownerAccount);
+      await erc20Helper.approveTransfersAsync(components, transferProxy.address);
 
       const componentAddresses = _.map(components, token => token.address);
       componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -1042,7 +1042,7 @@ contract('CoreModuleInteraction', accounts => {
         naturalUnit,
       );
 
-      await coreWrapper.issueSetTokenAsync(core, setToken.address, naturalUnit);
+      await coreHelper.issueSetTokenAsync(core, setToken.address, naturalUnit);
 
       subjectRedeemer = ownerAccount;
       subjectQuantityToRedeem = naturalUnit;
@@ -1164,7 +1164,7 @@ contract('CoreModuleInteraction', accounts => {
     let subjectCaller: Address;
 
      beforeEach(async () => {
-      subjectTokens = (await erc20Wrapper.deployTokensAsync(2, ownerAccount)).map(token => token.address);
+      subjectTokens = (await erc20Helper.deployTokensAsync(2, ownerAccount)).map(token => token.address);
       subjectOwner = otherAccount;
       subjectQuantities = [new BigNumber(10), new BigNumber(20)];
       subjectCaller = moduleAccount;
@@ -1219,11 +1219,11 @@ contract('CoreModuleInteraction', accounts => {
     const initialIncrementedQuantities = [new BigNumber(100), new BigNumber(100)];
 
      beforeEach(async () => {
-      subjectTokens = (await erc20Wrapper.deployTokensAsync(2, ownerAccount)).map(token => token.address);
+      subjectTokens = (await erc20Helper.deployTokensAsync(2, ownerAccount)).map(token => token.address);
       subjectOwner = otherAccount;
       subjectCaller = moduleAccount;
 
-      await coreWrapper.addAuthorizationAsync(vault, subjectCaller);
+      await coreHelper.addAuthorizationAsync(vault, subjectCaller);
       await vault.batchIncrementTokenOwner.sendTransactionAsync(
         subjectTokens,
         subjectOwner,
@@ -1281,12 +1281,12 @@ contract('CoreModuleInteraction', accounts => {
     const initialIncrementedQuantities = [new BigNumber(100), new BigNumber(100)];
 
      beforeEach(async () => {
-      subjectTokens = (await erc20Wrapper.deployTokensAsync(2, ownerAccount)).map(token => token.address);
+      subjectTokens = (await erc20Helper.deployTokensAsync(2, ownerAccount)).map(token => token.address);
       subjectFrom = otherAccount;
       subjectTo = recipientAccount;
       subjectCaller = moduleAccount;
 
-      await coreWrapper.addAuthorizationAsync(vault, subjectCaller);
+      await coreHelper.addAuthorizationAsync(vault, subjectCaller);
       await vault.batchIncrementTokenOwner.sendTransactionAsync(
         subjectTokens,
         subjectFrom,
@@ -1358,7 +1358,7 @@ contract('CoreModuleInteraction', accounts => {
     let subjectTokenContract;
 
      beforeEach(async () => {
-      subjectTokenContract = await erc20Wrapper.deployTokenAsync(otherAccount);
+      subjectTokenContract = await erc20Helper.deployTokenAsync(otherAccount);
 
       subjectToken = subjectTokenContract.address;
       subjectFrom = otherAccount;
@@ -1424,7 +1424,7 @@ contract('CoreModuleInteraction', accounts => {
     let subjectTokenContracts: StandardTokenMockContract[];
 
      beforeEach(async () => {
-      subjectTokenContracts = await erc20Wrapper.deployTokensAsync(2, otherAccount);
+      subjectTokenContracts = await erc20Helper.deployTokensAsync(2, otherAccount);
 
       subjectTokens = subjectTokenContracts.map(token => token.address);
       subjectFrom = otherAccount;

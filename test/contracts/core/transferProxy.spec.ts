@@ -25,8 +25,8 @@ import { Blockchain } from '@utils/blockchain';
 import { DEPLOYED_TOKEN_QUANTITY, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -49,8 +49,8 @@ contract('TransferProxy', accounts => {
   let mockToken2: StandardTokenMockContract;
   let transferProxy: TransferProxyContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(TransferProxy.abi);
@@ -76,10 +76,10 @@ contract('TransferProxy', accounts => {
     let tokenAddress: Address;
 
     beforeEach(async () => {
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      await coreWrapper.addAuthorizationAsync(transferProxy, authorizedContract);
-      mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
-      await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
+      transferProxy = await coreHelper.deployTransferProxyAsync();
+      await coreHelper.addAuthorizationAsync(transferProxy, authorizedContract);
+      mockToken = await erc20Helper.deployTokenAsync(ownerAccount);
+      await erc20Helper.approveTransferAsync(mockToken, transferProxy.address, approver);
 
       subjectQuantity = subjectQuantity || DEPLOYED_TOKEN_QUANTITY;
     });
@@ -168,10 +168,10 @@ contract('TransferProxy', accounts => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
       beforeEach(async () => {
-        mockTokenWithFee = await erc20Wrapper.deployTokenWithFeeAsync(ownerAccount);
+        mockTokenWithFee = await erc20Helper.deployTokenWithFeeAsync(ownerAccount);
         tokenAddress = mockTokenWithFee.address;
 
-        await erc20Wrapper.approveTransferAsync(mockTokenWithFee, transferProxy.address, ownerAccount);
+        await erc20Helper.approveTransferAsync(mockTokenWithFee, transferProxy.address, ownerAccount);
       });
 
       it('should revert', async () => {
@@ -183,7 +183,7 @@ contract('TransferProxy', accounts => {
       let noXferReturnToken: NoXferReturnTokenMockContract;
 
       beforeEach(async () => {
-        noXferReturnToken = await erc20Wrapper.deployTokenNoXferReturnAsync(ownerAccount);
+        noXferReturnToken = await erc20Helper.deployTokenNoXferReturnAsync(ownerAccount);
         tokenAddress = noXferReturnToken.address;
 
         await noXferReturnToken.approve.sendTransactionAsync(
@@ -205,10 +205,10 @@ contract('TransferProxy', accounts => {
       let invalidReturnToken: InvalidReturnTokenMockContract;
 
       beforeEach(async () => {
-        invalidReturnToken = await erc20Wrapper.deployTokenInvalidReturnAsync(ownerAccount);
+        invalidReturnToken = await erc20Helper.deployTokenInvalidReturnAsync(ownerAccount);
         tokenAddress = invalidReturnToken.address;
 
-        await erc20Wrapper.approveInvalidTransferAsync(invalidReturnToken, transferProxy.address, ownerAccount);
+        await erc20Helper.approveInvalidTransferAsync(invalidReturnToken, transferProxy.address, ownerAccount);
       });
 
       it('should revert', async () => {
@@ -226,13 +226,13 @@ contract('TransferProxy', accounts => {
     let subjectTokens: ERC20DetailedContract[];
 
     beforeEach(async () => {
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      await coreWrapper.addAuthorizationAsync(transferProxy, authorizedContract);
-      mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
-      mockToken2 = await erc20Wrapper.deployTokenAsync(ownerAccount);
+      transferProxy = await coreHelper.deployTransferProxyAsync();
+      await coreHelper.addAuthorizationAsync(transferProxy, authorizedContract);
+      mockToken = await erc20Helper.deployTokenAsync(ownerAccount);
+      mockToken2 = await erc20Helper.deployTokenAsync(ownerAccount);
       subjectTokens = [mockToken, mockToken2];
-      await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
-      await erc20Wrapper.approveTransferAsync(mockToken2, transferProxy.address, approver);
+      await erc20Helper.approveTransferAsync(mockToken, transferProxy.address, approver);
+      await erc20Helper.approveTransferAsync(mockToken2, transferProxy.address, approver);
     });
 
     afterEach(async () => {

@@ -12,7 +12,7 @@ import { getExpectedAddAuthorizedLog, getExpectedRemoveAuthorizedLog } from '@ut
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -32,7 +32,7 @@ contract('Authorizable', accounts => {
   ] = accounts;
 
   let authorizableContract: AuthorizableContract;
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Authorizable.abi);
@@ -46,7 +46,7 @@ contract('Authorizable', accounts => {
     let caller: Address = ownerAccount;
 
     beforeEach(async () => {
-      authorizableContract = await coreWrapper.deployAuthorizableAsync();
+      authorizableContract = await coreHelper.deployAuthorizableAsync();
     });
 
     afterEach(async () => {
@@ -120,11 +120,11 @@ contract('Authorizable', accounts => {
     let addressToRemove: Address = authorizedAccount;
 
     beforeEach(async () => {
-      authorizableContract = await coreWrapper.deployAuthorizableAsync();
+      authorizableContract = await coreHelper.deployAuthorizableAsync();
 
       const authAccountArray: Address[] = [authAccount1, authAccount2, authorizedAccount];
       for (const account of authAccountArray) {
-        await coreWrapper.addAuthorizationAsync(authorizableContract, account);
+        await coreHelper.addAuthorizationAsync(authorizableContract, account);
       }
     });
 

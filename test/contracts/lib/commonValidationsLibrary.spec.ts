@@ -8,7 +8,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { CommonValidationsLibraryMockContract } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 
-import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
+import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -18,12 +18,12 @@ contract('CommonValidationsLibrary', accounts => {
     ownerAccount,
     otherAccount,
   ] = accounts;
-  const libraryMockWrapper = new LibraryMockWrapper(ownerAccount);
+  const libraryMockHelper = new LibraryMockHelper(ownerAccount);
 
   let commonValidationsMockLibrary: CommonValidationsLibraryMockContract;
 
   beforeEach(async () => {
-    commonValidationsMockLibrary = await libraryMockWrapper.deployCommonValidationsLibraryAsync();
+    commonValidationsMockLibrary = await libraryMockHelper.deployCommonValidationsLibraryAsync();
   });
 
   describe('#testValidateNonEmpty', async () => {

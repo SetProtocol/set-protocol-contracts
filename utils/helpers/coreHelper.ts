@@ -64,7 +64,7 @@ const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setPr
 const setTestUtils = new SetTestUtils(web3);
 
 
-export class CoreWrapper {
+export class CoreHelper {
   private _tokenOwnerAddress: Address;
   private _contractOwnerAddress: Address;
 

@@ -20,8 +20,8 @@ import { Blockchain } from '@utils/blockchain';
 import { DEPLOYED_TOKEN_QUANTITY, ZERO } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -44,8 +44,8 @@ contract('Vault', accounts => {
   let mockToken2: StandardTokenMockContract;
   let vault: VaultContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
@@ -63,11 +63,11 @@ contract('Vault', accounts => {
     const ownerExistingBalanceInVault: BigNumber = DEPLOYED_TOKEN_QUANTITY;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
+      vault = await coreHelper.deployVaultAsync();
+      await coreHelper.addAuthorizationAsync(vault, authorizedAccount);
 
-      mockToken = await erc20Wrapper.deployTokenAsync(vault.address);
-      await coreWrapper.incrementAccountBalanceAsync(
+      mockToken = await erc20Helper.deployTokenAsync(vault.address);
+      await coreHelper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
         mockToken.address,
@@ -113,7 +113,7 @@ contract('Vault', accounts => {
 
     describe('when working with a bad ERC20 token', async () => {
       beforeEach(async () => {
-        mockToken = await erc20Wrapper.deployTokenWithInvalidBalancesAsync(vault.address);
+        mockToken = await erc20Helper.deployTokenWithInvalidBalancesAsync(vault.address);
         subjectTokenAddress = mockToken.address;
       });
 
@@ -146,7 +146,7 @@ contract('Vault', accounts => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
       beforeEach(async () => {
-        mockTokenWithFee = await erc20Wrapper.deployTokenWithFeeAsync(ownerAccount);
+        mockTokenWithFee = await erc20Helper.deployTokenWithFeeAsync(ownerAccount);
         subjectTokenAddress = mockTokenWithFee.address;
       });
 
@@ -159,7 +159,7 @@ contract('Vault', accounts => {
       let noXferReturnToken: NoXferReturnTokenMockContract;
 
       beforeEach(async () => {
-        noXferReturnToken = await erc20Wrapper.deployTokenNoXferReturnAsync(vault.address);
+        noXferReturnToken = await erc20Helper.deployTokenNoXferReturnAsync(vault.address);
         subjectTokenAddress = noXferReturnToken.address;
       });
 
@@ -175,7 +175,7 @@ contract('Vault', accounts => {
       let invalidReturnToken: InvalidReturnTokenMockContract;
 
       beforeEach(async () => {
-        invalidReturnToken = await erc20Wrapper.deployTokenInvalidReturnAsync(vault.address);
+        invalidReturnToken = await erc20Helper.deployTokenInvalidReturnAsync(vault.address);
         subjectTokenAddress = invalidReturnToken.address;
       });
 
@@ -207,8 +207,8 @@ contract('Vault', accounts => {
     let subjectAmountToIncrement: BigNumber;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, authorized);
+      vault = await coreHelper.deployVaultAsync();
+      await coreHelper.addAuthorizationAsync(vault, authorized);
 
       subjectCaller = authorizedAccount;
       subjectAmountToIncrement = DEPLOYED_TOKEN_QUANTITY;
@@ -263,9 +263,9 @@ contract('Vault', accounts => {
     let subjectCaller: Address = authorizedAccount;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
-      await coreWrapper.incrementAccountBalanceAsync(
+      vault = await coreHelper.deployVaultAsync();
+      await coreHelper.addAuthorizationAsync(vault, authorizedAccount);
+      await coreHelper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
         tokenAddress,
@@ -342,11 +342,11 @@ contract('Vault', accounts => {
     const amountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
+      vault = await coreHelper.deployVaultAsync();
+      await coreHelper.addAuthorizationAsync(vault, authorizedAccount);
 
-      token = await erc20Wrapper.deployTokenAsync(ownerAccount);
-      await coreWrapper.incrementAccountBalanceAsync(
+      token = await erc20Helper.deployTokenAsync(ownerAccount);
+      await coreHelper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
         token.address,
@@ -444,15 +444,15 @@ contract('Vault', accounts => {
     let subjectAmountsToWithdraw: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, authorized);
+      vault = await coreHelper.deployVaultAsync();
+      await coreHelper.addAuthorizationAsync(vault, authorized);
 
-      mockToken = await erc20Wrapper.deployTokenAsync(vault.address);
-      mockToken2 = await erc20Wrapper.deployTokenAsync(vault.address);
+      mockToken = await erc20Helper.deployTokenAsync(vault.address);
+      mockToken2 = await erc20Helper.deployTokenAsync(vault.address);
 
       subjectTokenAddresses = [mockToken.address, mockToken2.address];
 
-      await coreWrapper.incrementAccountBalanceAsync(
+      await coreHelper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
         subjectTokenAddresses[0],
@@ -460,7 +460,7 @@ contract('Vault', accounts => {
         authorizedAccount,
       );
 
-      await coreWrapper.incrementAccountBalanceAsync(
+      await coreHelper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
         subjectTokenAddresses[1],
@@ -505,7 +505,7 @@ contract('Vault', accounts => {
       });
 
       it('should not increment the balance of the receiver', async () => {
-        const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const oldReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
           subjectToAccount
@@ -513,7 +513,7 @@ contract('Vault', accounts => {
 
         await subject();
 
-        const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
           subjectToAccount
@@ -573,8 +573,8 @@ contract('Vault', accounts => {
     beforeEach(async () => {
       subjectOwner = ownerAccount;
 
-      vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, authorized);
+      vault = await coreHelper.deployVaultAsync();
+      await coreHelper.addAuthorizationAsync(vault, authorized);
     });
 
     afterEach(async () => {
@@ -593,7 +593,7 @@ contract('Vault', accounts => {
     }
 
     it('should increment the balance of the user by the correct amount', async () => {
-      const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const oldSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
         subjectOwner
@@ -601,7 +601,7 @@ contract('Vault', accounts => {
 
       await subject();
 
-      const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
         subjectOwner
@@ -618,7 +618,7 @@ contract('Vault', accounts => {
       });
 
       it('should not increment the balance of the receiver', async () => {
-        const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const oldReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
           subjectOwner
@@ -626,7 +626,7 @@ contract('Vault', accounts => {
 
         await subject();
 
-        const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
           subjectOwner
@@ -686,10 +686,10 @@ contract('Vault', accounts => {
     beforeEach(async () => {
       subjectOwner = ownerAccount;
 
-      vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, authorized);
+      vault = await coreHelper.deployVaultAsync();
+      await coreHelper.addAuthorizationAsync(vault, authorized);
 
-      await coreWrapper.incrementAccountBalanceAsync(
+      await coreHelper.incrementAccountBalanceAsync(
         vault,
         subjectOwner,
         subjectTokenAddresses[0],
@@ -697,7 +697,7 @@ contract('Vault', accounts => {
         authorizedAccount,
       );
 
-      await coreWrapper.incrementAccountBalanceAsync(
+      await coreHelper.incrementAccountBalanceAsync(
         vault,
         subjectOwner,
         subjectTokenAddresses[1],
@@ -722,7 +722,7 @@ contract('Vault', accounts => {
     }
 
     it('should decrement the balance of the user by the correct amount', async () => {
-      const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const oldSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
         subjectOwner
@@ -730,7 +730,7 @@ contract('Vault', accounts => {
 
       await subject();
 
-      const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
         subjectOwner
@@ -747,7 +747,7 @@ contract('Vault', accounts => {
       });
 
       it('should not increment the balance of the receiver', async () => {
-        const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const oldReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
           subjectOwner
@@ -755,7 +755,7 @@ contract('Vault', accounts => {
 
         await subject();
 
-        const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
           subjectOwner
@@ -804,11 +804,11 @@ contract('Vault', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
+      vault = await coreHelper.deployVaultAsync();
+      await coreHelper.addAuthorizationAsync(vault, authorizedAccount);
       subjectTokenAddresses = [NULL_ADDRESS, randomTokenAddress];
 
-      await coreWrapper.incrementAccountBalanceAsync(
+      await coreHelper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
         subjectTokenAddresses[0],
@@ -816,7 +816,7 @@ contract('Vault', accounts => {
         authorizedAccount,
       );
 
-      await coreWrapper.incrementAccountBalanceAsync(
+      await coreHelper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
         subjectTokenAddresses[1],
@@ -846,7 +846,7 @@ contract('Vault', accounts => {
     }
 
     it('should decrement the balance of the sender by the correct amount', async () => {
-      const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const oldSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
         subjectFromAddress
@@ -854,7 +854,7 @@ contract('Vault', accounts => {
 
       await subject();
 
-      const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
         subjectFromAddress
@@ -866,7 +866,7 @@ contract('Vault', accounts => {
     });
 
     it('should increment the balance of the receiver by the correct amount', async () => {
-      const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const oldReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
         subjectToAddress
@@ -874,7 +874,7 @@ contract('Vault', accounts => {
 
       await subject();
 
-      const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         subjectTokenAddresses,
         vault,
         subjectToAddress
@@ -895,7 +895,7 @@ contract('Vault', accounts => {
       });
 
       it('should not decrement the balance of the sender', async () => {
-        const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const oldSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
           subjectFromAddress
@@ -903,7 +903,7 @@ contract('Vault', accounts => {
 
         await subject();
 
-        const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
           subjectFromAddress
@@ -912,7 +912,7 @@ contract('Vault', accounts => {
       });
 
       it('should not increment the balance of the receiver', async () => {
-        const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const oldReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
           subjectToAddress
@@ -920,7 +920,7 @@ contract('Vault', accounts => {
 
         await subject();
 
-        const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           subjectTokenAddresses,
           vault,
           subjectToAddress
@@ -986,11 +986,11 @@ contract('Vault', accounts => {
     let subjectTokenAddress: Address;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
+      vault = await coreHelper.deployVaultAsync();
+      await coreHelper.addAuthorizationAsync(vault, authorizedAccount);
 
-      mockToken = await erc20Wrapper.deployTokenAsync(vault.address);
-      await coreWrapper.incrementAccountBalanceAsync(
+      mockToken = await erc20Helper.deployTokenAsync(vault.address);
+      await coreHelper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
         mockToken.address,

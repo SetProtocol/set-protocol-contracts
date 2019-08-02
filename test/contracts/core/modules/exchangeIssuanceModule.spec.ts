@@ -32,10 +32,10 @@ import { LogExchangeIssue, LogExchangeRedeem } from '@utils/contract_logs/exchan
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { KyberNetworkWrapper } from '@utils/wrappers/kyberNetworkWrapper';
+import { ExchangeHelper } from '@utils/helpers/exchangeHelper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { KyberNetworkHelper } from '@utils/helpers/kyberNetworkHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -64,10 +64,10 @@ contract('ExchangeIssuanceModule', accounts => {
   let exchangeIssuanceModule: ExchangeIssuanceModuleContract;
   let setTokenFactory: SetTokenFactoryContract;
 
-  const coreWrapper = new CoreWrapper(contractDeployer, contractDeployer);
-  const erc20Wrapper = new ERC20Wrapper(contractDeployer);
-  const exchangeWrapper = new ExchangeWrapper(contractDeployer);
-  const kyberNetworkWrapper = new KyberNetworkWrapper();
+  const coreHelper = new CoreHelper(contractDeployer, contractDeployer);
+  const erc20Helper = new ERC20Helper(contractDeployer);
+  const exchangeHelper = new ExchangeHelper(contractDeployer);
+  const kyberNetworkHelper = new KyberNetworkHelper();
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -82,20 +82,20 @@ contract('ExchangeIssuanceModule', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    exchangeIssuanceModule = await coreWrapper.deployExchangeIssuanceModuleAsync(
+    vault = await coreHelper.deployVaultAsync();
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    core = await coreHelper.deployCoreAsync(transferProxy, vault);
+    exchangeIssuanceModule = await coreHelper.deployExchangeIssuanceModuleAsync(
       core,
       vault
     );
-    await coreWrapper.addModuleAsync(core, exchangeIssuanceModule.address);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+    await coreHelper.addModuleAsync(core, exchangeIssuanceModule.address);
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
 
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
-    await kyberNetworkWrapper.setup();
-    await kyberNetworkWrapper.fundReserveWithEth(
+    await kyberNetworkHelper.setup();
+    await kyberNetworkHelper.fundReserveWithEth(
       kyberReserveOperator,
       ether(90),
     );
@@ -143,22 +143,22 @@ contract('ExchangeIssuanceModule', accounts => {
     let customZeroExOrderMakerTokenAmount: BigNumber;
 
     beforeEach(async () => {
-      await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
+      await exchangeHelper.deployAndAuthorizeZeroExExchangeWrapper(
         core,
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
         SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
         transferProxy
       );
-      await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
+      await exchangeHelper.deployAndAuthorizeKyberNetworkWrapper(
         core,
-        kyberNetworkWrapper.kyberNetworkProxy,
+        kyberNetworkHelper.kyberNetworkProxy,
         transferProxy
       );
 
-      const firstComponent = await erc20Wrapper.deployTokenAsync(kyberReserveOperator);
-      const secondComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
-      sendToken = await erc20Wrapper.deployTokenAsync(exchangeIssuanceCaller);
+      const firstComponent = await erc20Helper.deployTokenAsync(kyberReserveOperator);
+      const secondComponent = await erc20Helper.deployTokenAsync(zeroExOrderMaker);
+      sendToken = await erc20Helper.deployTokenAsync(exchangeIssuanceCaller);
 
       const componentTokens = [firstComponent, secondComponent];
       const setComponentUnit = ether(4);
@@ -166,7 +166,7 @@ contract('ExchangeIssuanceModule', accounts => {
       const componentUnits = componentTokens.map(token => setComponentUnit);
       naturalUnit = ether(2);
 
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -174,12 +174,12 @@ contract('ExchangeIssuanceModule', accounts => {
         naturalUnit,
       );
 
-      await erc20Wrapper.approveTransfersAsync(
+      await erc20Helper.approveTransfersAsync(
         [sendToken],
         transferProxy.address,
         exchangeIssuanceCaller
       );
-      await erc20Wrapper.approveTransfersAsync(
+      await erc20Helper.approveTransfersAsync(
         [secondComponent],
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
         zeroExOrderMaker
@@ -241,13 +241,13 @@ contract('ExchangeIssuanceModule', accounts => {
         maxDestinationQuantity: maxDestinationQuantity,
       } as KyberTrade;
 
-      await kyberNetworkWrapper.approveToReserve(
+      await kyberNetworkHelper.approveToReserve(
         firstComponent,
         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
         kyberReserveOperator,
       );
 
-      await kyberNetworkWrapper.setConversionRates(
+      await kyberNetworkHelper.setConversionRates(
         sendToken.address,
         firstComponent.address,
         kyberTradeSourceTokenUtilized,
@@ -341,8 +341,8 @@ contract('ExchangeIssuanceModule', accounts => {
 
     describe('when a receiveToken is not a component of the Set', async () => {
       before(async () => {
-        const firstComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
-        const notComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+        const firstComponent = await erc20Helper.deployTokenAsync(contractDeployer);
+        const notComponent = await erc20Helper.deployTokenAsync(contractDeployer);
 
         customExchangeIssueReceiveTokens = [firstComponent.address, notComponent.address];
       });
@@ -470,7 +470,7 @@ contract('ExchangeIssuanceModule', accounts => {
 
     describe('when the send token length differ from other send inputs', async () => {
       before(async () => {
-        const sendToken = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
+        const sendToken = await erc20Helper.deployTokenAsync(zeroExOrderMaker);
 
         customExchangeIssueSendTokens = [sendToken.address];
       });
@@ -531,8 +531,8 @@ contract('ExchangeIssuanceModule', accounts => {
 
     describe('when a receive token is not a member of the Set', async () => {
       before(async () => {
-        const notComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
-        const notComponent2 = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
+        const notComponent = await erc20Helper.deployTokenAsync(zeroExOrderMaker);
+        const notComponent2 = await erc20Helper.deployTokenAsync(zeroExOrderMaker);
         customExchangeIssueReceiveTokens = [notComponent.address, notComponent2.address];
       });
 
@@ -614,23 +614,23 @@ contract('ExchangeIssuanceModule', accounts => {
     beforeEach(async () => {
       subjectCaller = exchangeIssuanceCaller;
 
-      await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
+      await exchangeHelper.deployAndAuthorizeZeroExExchangeWrapper(
         core,
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
         SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
         transferProxy
       );
-      await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
+      await exchangeHelper.deployAndAuthorizeKyberNetworkWrapper(
         core,
-        kyberNetworkWrapper.kyberNetworkProxy,
+        kyberNetworkHelper.kyberNetworkProxy,
         transferProxy
       );
 
-      const firstComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
-      const secondComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
-      nonExchangedComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
-      receiveToken = await erc20Wrapper.deployTokenAsync(kyberReserveOperator);
+      const firstComponent = await erc20Helper.deployTokenAsync(contractDeployer);
+      const secondComponent = await erc20Helper.deployTokenAsync(contractDeployer);
+      nonExchangedComponent = await erc20Helper.deployTokenAsync(contractDeployer);
+      receiveToken = await erc20Helper.deployTokenAsync(kyberReserveOperator);
 
       const componentTokens = [firstComponent, secondComponent, nonExchangedComponent];
       setComponentUnit = ether(4);
@@ -638,7 +638,7 @@ contract('ExchangeIssuanceModule', accounts => {
       const componentUnits = componentTokens.map(token => setComponentUnit);
       naturalUnit = ether(2);
 
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -698,7 +698,7 @@ contract('ExchangeIssuanceModule', accounts => {
         maxDestinationQuantity: maxDestinationQuantity,
       } as KyberTrade;
 
-      await kyberNetworkWrapper.approveToReserve(
+      await kyberNetworkHelper.approveToReserve(
         receiveToken,
         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
         kyberReserveOperator,
@@ -706,7 +706,7 @@ contract('ExchangeIssuanceModule', accounts => {
 
       const sourceTokenRateQuantity = customSourceTokenRateCalculationQuantity || sourceTokenQuantity;
 
-      await kyberNetworkWrapper.setConversionRates(
+      await kyberNetworkHelper.setConversionRates(
         firstComponent.address,
         receiveToken.address,
         sourceTokenRateQuantity,
@@ -736,34 +736,34 @@ contract('ExchangeIssuanceModule', accounts => {
         customSubjectExchangeOrdersData || setUtils.generateSerializedOrders([zeroExOrder, kyberTrade]);
 
       // Approve the receive token to the 0x maker
-      await erc20Wrapper.approveTransfersAsync(
+      await erc20Helper.approveTransfersAsync(
         [receiveToken],
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
         zeroExOrderMaker
       );
 
       // Fund the 0x maker with the receive token
-      await erc20Wrapper.transferTokenAsync(
+      await erc20Helper.transferTokenAsync(
         receiveToken,
         zeroExOrderMaker,
         zeroExOrderMakerTokenAmount,
         kyberReserveOperator,
       );
 
-      await erc20Wrapper.approveTransfersAsync(
+      await erc20Helper.approveTransfersAsync(
         [firstComponent, secondComponent, nonExchangedComponent],
         transferProxy.address,
         contractDeployer
       );
 
       // Issue the Set and transfer to the caller
-      await coreWrapper.issueSetTokenAsync(
+      await coreHelper.issueSetTokenAsync(
         core,
         setToken.address,
         exchangeRedeemQuantity
       );
 
-      await erc20Wrapper.transferTokenAsync(
+      await erc20Helper.transferTokenAsync(
         setToken,
         subjectCaller,
         exchangeRedeemQuantity
@@ -833,8 +833,8 @@ contract('ExchangeIssuanceModule', accounts => {
 
     describe('when a sendToken is not a component of the Set', async () => {
       before(async () => {
-        const firstComponent = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
-        const notComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+        const firstComponent = erc20Helper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
+        const notComponent = await erc20Helper.deployTokenAsync(contractDeployer);
 
         customExchangeRedeemSendTokens = [firstComponent.address, notComponent.address];
       });

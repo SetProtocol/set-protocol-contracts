@@ -30,8 +30,8 @@ import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 import { Blockchain } from '../blockchain';
 import { getWeb3 } from '../web3Helper';
 
-import { CoreWrapper } from './coreWrapper';
-import { ERC20Wrapper } from './erc20Wrapper';
+import { CoreHelper } from './coreHelper';
+import { ERC20Helper } from './erc20Helper';
 
 const web3 = getWeb3();
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
@@ -47,22 +47,22 @@ const {
   SET_FULL_TOKEN_UNITS,
 } = SetUtils.CONSTANTS;
 
-export class RebalancingWrapper {
+export class RebalancingHelper {
   private _tokenOwnerAddress: Address;
-  private _coreWrapper: CoreWrapper;
-  private _erc20Wrapper: ERC20Wrapper;
+  private _coreHelper: CoreHelper;
+  private _erc20Helper: ERC20Helper;
   private _blockchain: Blockchain;
 
   constructor(
     tokenOwnerAddress: Address,
-    coreWrapper: CoreWrapper,
-    erc20Wrapper: ERC20Wrapper,
+    coreHelper: CoreHelper,
+    erc20Helper: ERC20Helper,
     blockchain: Blockchain,
   ) {
     this._tokenOwnerAddress = tokenOwnerAddress;
 
-    this._coreWrapper = coreWrapper;
-    this._erc20Wrapper = erc20Wrapper;
+    this._coreHelper = coreHelper;
+    this._erc20Helper = erc20Helper;
     this._blockchain = blockchain;
   }
 
@@ -81,7 +81,7 @@ export class RebalancingWrapper {
     symbol: string = 'RBSET',
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenContract> {
-    await this._coreWrapper.linkRebalancingLibrariesAsync(RebalancingSetToken);
+    await this._coreHelper.linkRebalancingLibrariesAsync(RebalancingSetToken);
     const truffleRebalancingToken = await RebalancingSetToken.new(
       factory,
       tokenManager,
@@ -150,8 +150,8 @@ export class RebalancingWrapper {
     let naturalUnit: BigNumber;
     const setTokenArray: SetTokenContract[] = [];
 
-    const components = await this._erc20Wrapper.deployTokensAsync(tokenCount + 1, this._tokenOwnerAddress);
-    await this._erc20Wrapper.approveTransfersAsync(components, transferProxy);
+    const components = await this._erc20Helper.deployTokensAsync(tokenCount + 1, this._tokenOwnerAddress);
+    await this._erc20Helper.approveTransfersAsync(components, transferProxy);
 
     const indexArray = _.times(tokenCount, Number);
     for (const index in indexArray) {
@@ -178,7 +178,7 @@ export class RebalancingWrapper {
       ];
 
       // Create Set token
-      const setToken = await this._coreWrapper.createSetTokenAsync(
+      const setToken = await this._coreHelper.createSetTokenAsync(
         core,
         factory,
         setComponentAddresses,
@@ -199,9 +199,9 @@ export class RebalancingWrapper {
     rebalancingSetQuantity: BigNumber,
     from: Address = this._tokenOwnerAddress,
   ): Promise<void> {
-      const rebalancingSet = await this._coreWrapper.getRebalancingInstanceFromAddress(rebalancingSetAddress);
+      const rebalancingSet = await this._coreHelper.getRebalancingInstanceFromAddress(rebalancingSetAddress);
       const currentSetAddress = await rebalancingSet.currentSet.callAsync();
-      const currentSetInstance = await this._coreWrapper.getSetInstance(currentSetAddress);
+      const currentSetInstance = await this._coreHelper.getSetInstance(currentSetAddress);
 
       const baseSetNaturalUnit = await currentSetInstance.naturalUnit.callAsync();
 
@@ -240,9 +240,9 @@ export class RebalancingWrapper {
     rebalancingSetQuantity: BigNumber,
     from: Address = this._tokenOwnerAddress,
   ): Promise<void> {
-    const rebalancingSet = await this._coreWrapper.getRebalancingInstanceFromAddress(rebalancingSetAddress);
+    const rebalancingSet = await this._coreHelper.getRebalancingInstanceFromAddress(rebalancingSetAddress);
     const currentSetAddress = await rebalancingSet.currentSet.callAsync();
-    const currentSetInstance = await this._coreWrapper.getSetInstance(currentSetAddress);
+    const currentSetInstance = await this._coreHelper.getSetInstance(currentSetAddress);
 
     const baseSetNaturalUnit = await currentSetInstance.naturalUnit.callAsync();
 
@@ -384,7 +384,7 @@ export class RebalancingWrapper {
     const auctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
 
     const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
-    await this._coreWrapper.addTokensToWhiteList(
+    await this._coreHelper.addTokensToWhiteList(
       nextSetTokenComponentAddresses,
       rebalancingComponentWhiteList
     );

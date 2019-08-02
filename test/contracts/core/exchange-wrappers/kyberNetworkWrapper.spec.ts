@@ -21,10 +21,10 @@ import { DEFAULT_GAS, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
-import { KyberNetworkWrapper } from '@utils/wrappers/kyberNetworkWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { ExchangeHelper } from '@utils/helpers/exchangeHelper';
+import { KyberNetworkHelper } from '@utils/helpers/kyberNetworkHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -44,10 +44,10 @@ contract('KyberNetworkWrapper', accounts => {
     deployedCoreAddress,
   ] = accounts;
 
-  const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
-  const erc20Wrapper = new ERC20Wrapper(deployerAccount);
-  const exchangeWrapper = new ExchangeWrapper(deployerAccount);
-  const kyberHelperWrapper = new KyberNetworkWrapper();
+  const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
+  const erc20Helper = new ERC20Helper(deployerAccount);
+  const exchangeHelper = new ExchangeHelper(deployerAccount);
+  const kyberNetworkHelper = new KyberNetworkHelper();
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
@@ -58,20 +58,20 @@ contract('KyberNetworkWrapper', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
-    await coreWrapper.addModuleAsync(core, callerAccount);
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    vault = await coreHelper.deployVaultAsync();
+    core = await coreHelper.deployCoreMockAsync(transferProxy, vault);
+    await coreHelper.addModuleAsync(core, callerAccount);
 
-    await kyberHelperWrapper.setup();
-    await kyberHelperWrapper.fundReserveWithEth(
+    await kyberNetworkHelper.setup();
+    await kyberNetworkHelper.fundReserveWithEth(
       kyberReserveOperator,
       ether(90),
     );
 
-    kyberNetworkWrapper = await exchangeWrapper.deployKyberNetworkWrapper(
+    kyberNetworkWrapper = await exchangeHelper.deployKyberNetworkWrapper(
       core.address,
-      kyberHelperWrapper.kyberNetworkProxy,
+      kyberNetworkHelper.kyberNetworkProxy,
       transferProxy
     );
   });
@@ -95,25 +95,25 @@ contract('KyberNetworkWrapper', accounts => {
     const operatorToken2SupplyQuantity = ether(1000000000);
 
     beforeEach(async () => {
-      const token = await erc20Wrapper.deployTokenAsync(kyberReserveOperator);
-      const token2 = await erc20Wrapper.deployTokenAsync(kyberReserveOperator);
+      const token = await erc20Helper.deployTokenAsync(kyberReserveOperator);
+      const token2 = await erc20Helper.deployTokenAsync(kyberReserveOperator);
 
-      await kyberHelperWrapper.enableTokensForReserve(token.address);
-      await kyberHelperWrapper.enableTokensForReserve(token2.address);
+      await kyberNetworkHelper.enableTokensForReserve(token.address);
+      await kyberNetworkHelper.enableTokensForReserve(token2.address);
 
-      await kyberHelperWrapper.setUpConversionRatesRaw(
+      await kyberNetworkHelper.setUpConversionRatesRaw(
         [token.address, token2.address],
         [token1BuyRate, token2BuyRate],
         [token1SellRate, token2SellRate],
       );
 
-      await kyberHelperWrapper.approveToReserve(
+      await kyberNetworkHelper.approveToReserve(
         token,
         operatorToken1SupplyQuantity,
         kyberReserveOperator,
       );
 
-      await kyberHelperWrapper.approveToReserve(
+      await kyberNetworkHelper.approveToReserve(
         token2,
         operatorToken2SupplyQuantity,
         kyberReserveOperator,
@@ -151,7 +151,7 @@ contract('KyberNetworkWrapper', accounts => {
       const expectedSecondRate = token2BuyRate;
       expect(secondRate).to.be.bignumber.equal(expectedSecondRate);
 
-      const slippagePercentage = new BigNumber(100).sub(kyberHelperWrapper.defaultSlippagePercentage);
+      const slippagePercentage = new BigNumber(100).sub(kyberNetworkHelper.defaultSlippagePercentage);
       const expectedSlippage = expectedRate.mul(slippagePercentage).div(100);
       expect(firstSlippage).to.be.bignumber.equal(expectedSlippage);
 
@@ -186,19 +186,19 @@ contract('KyberNetworkWrapper', accounts => {
     const componentTokenSupplyQuantity = ether(1000000000);
 
     beforeEach(async () => {
-      sourceToken = await erc20Wrapper.deployTokenAsync(kyberReserveOperator);
-      componentToken = await erc20Wrapper.deployTokenAsync(kyberReserveOperator);
+      sourceToken = await erc20Helper.deployTokenAsync(kyberReserveOperator);
+      componentToken = await erc20Helper.deployTokenAsync(kyberReserveOperator);
 
-      await kyberHelperWrapper.enableTokensForReserve(sourceToken.address);
-      await kyberHelperWrapper.enableTokensForReserve(componentToken.address);
+      await kyberNetworkHelper.enableTokensForReserve(sourceToken.address);
+      await kyberNetworkHelper.enableTokensForReserve(componentToken.address);
 
-      await kyberHelperWrapper.setUpConversionRatesRaw(
+      await kyberNetworkHelper.setUpConversionRatesRaw(
         [componentToken.address, sourceToken.address],
         [componentTokenBuyRate, sourceTokenBuyRate],
         [componentTokenSellRate, sourceTokenSellRate],
       );
 
-      await kyberHelperWrapper.approveToReserve(
+      await kyberNetworkHelper.approveToReserve(
         componentToken,
         componentTokenSupplyQuantity,
         kyberReserveOperator,
@@ -207,7 +207,7 @@ contract('KyberNetworkWrapper', accounts => {
       maxDestinationQuantity = componentTokenAmountToReceive || new BigNumber(1000);
       sourceTokenQuantity = new BigNumber(2000);
 
-      await erc20Wrapper.transferTokenAsync(
+      await erc20Helper.transferTokenAsync(
         sourceToken,
         kyberNetworkWrapper.address,
         sourceTokenQuantity,
@@ -327,7 +327,7 @@ contract('KyberNetworkWrapper', accounts => {
       beforeEach(async () => {
         secondTradeSourceQuantity = sourceTokenQuantity.mul(2);
 
-        await erc20Wrapper.transferTokenAsync(
+        await erc20Helper.transferTokenAsync(
           sourceToken,
           kyberNetworkWrapper.address,
           secondTradeSourceQuantity,

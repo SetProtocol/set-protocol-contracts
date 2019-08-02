@@ -18,8 +18,8 @@ import { ZERO } from '@utils/constants';
 import { ether } from '@utils/units';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -33,8 +33,8 @@ contract('Issuance', accounts => {
     ownerAccount,
   ] = accounts;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -60,12 +60,12 @@ contract('Issuance', accounts => {
     beforeEach(async () => {
       await blockchain.saveSnapshotAsync();
 
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      vault = await coreWrapper.deployVaultAsync();
-      core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+      transferProxy = await coreHelper.deployTransferProxyAsync();
+      vault = await coreHelper.deployVaultAsync();
+      core = await coreHelper.deployCoreAsync(transferProxy, vault);
+      setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
 
-      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+      await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
     });
 
     afterEach(async () => {
@@ -92,8 +92,8 @@ contract('Issuance', accounts => {
 
     subjectComponentsInSetToIssue.forEach(function(componentCount) {
       it(`Issuing & Redeeming SetToken with ${componentCount} Components`, async () => {
-        const components = await erc20Wrapper.deployTokensAsync(componentCount, ownerAccount);
-        const setToken = await coreWrapper.createSetTokenAsync(
+        const components = await erc20Helper.deployTokensAsync(componentCount, ownerAccount);
+        const setToken = await coreHelper.createSetTokenAsync(
           core,
           setTokenFactory.address,
           _.map(components, token => token.address),
@@ -101,7 +101,7 @@ contract('Issuance', accounts => {
           ether(2)
         );
 
-        await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+        await erc20Helper.approveTransfersAsync(components, transferProxy.address);
 
         subjectSetToIssue = setToken.address;
         subjectQuantityToIssue = ether(2);

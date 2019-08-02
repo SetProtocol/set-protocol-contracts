@@ -11,7 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { CommonMathMockContract } from '@utils/contracts';
 
-import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
+import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -20,12 +20,12 @@ const { expect } = chai;
 
 contract('CommonMathMock', accounts => {
   const [ownerAccount] = accounts;
-  const libraryMockWrapper = new LibraryMockWrapper(ownerAccount);
+  const libraryMockHelper = new LibraryMockHelper(ownerAccount);
 
   let commonMathLibrary: CommonMathMockContract;
 
   beforeEach(async () => {
-    commonMathLibrary = await libraryMockWrapper.deployCommonMathLibraryAsync();
+    commonMathLibrary = await libraryMockHelper.deployCommonMathLibraryAsync();
   });
 
   describe('#testMaxUInt256', async () => {

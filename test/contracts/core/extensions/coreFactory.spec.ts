@@ -15,8 +15,8 @@ import { extractNewSetTokenAddressFromLogs, SetTokenCreated } from '@utils/contr
 import { ONE } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -37,8 +37,8 @@ contract('CoreFactory', accounts => {
   let core: CoreContract;
   let setTokenFactory: SetTokenFactoryContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -51,9 +51,9 @@ contract('CoreFactory', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    core = await coreWrapper.deployCoreAndDependenciesAsync();
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.addFactoryAsync(core, setTokenFactory);
+    core = await coreHelper.deployCoreAndDependenciesAsync();
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+    await coreHelper.addFactoryAsync(core, setTokenFactory);
   });
 
   afterEach(async () => {
@@ -73,7 +73,7 @@ contract('CoreFactory', accounts => {
     const subjectCallData: Bytes = '0x0';
 
     beforeEach(async () => {
-      mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
+      mockToken = await erc20Helper.deployTokenAsync(ownerAccount);
 
       factoryAddress = setTokenFactory.address;
       components = [mockToken.address];

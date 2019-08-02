@@ -347,38 +347,70 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
 
     it('emits correct LogPayableExchangeIssue event', async () => {
+      const expectedReturnedEth = new BigNumber(0);
+
       const txHash = await subject();
 
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
       const expectedLogs = LogPayableExchangeIssue(
         subjectRebalancingSetAddress,
         subjectCaller,
+        weth.address,
         subjectRebalancingSetQuantity,
-        rebalancingSetExchangeIssuanceModule.address
+        expectedReturnedEth,
+        rebalancingSetExchangeIssuanceModule.address,
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the eth transferred is in excess of required', async () => {
-      before(async () => {
-        customRequiredPaymentETH = new BigNumber(10 ** 10).times(2);
-        customIssuePaymentTokenAmount = new BigNumber(10 ** 10);
+      const excessEth = new BigNumber(10 ** 10);
+
+      describe('', async () => {
+        before(async () => {
+          customRequiredPaymentETH = new BigNumber(10 ** 10).plus(excessEth);
+          customIssuePaymentTokenAmount = new BigNumber(10 ** 10);
+        });
+
+        it('refunds the user the appropriate amount of eth', async () => {
+          const previousEthBalance: BigNumber = new BigNumber(await web3.eth.getBalance(subjectCaller));
+
+          const txHash = await subject();
+          const totalGasInEth = await getGasUsageInEth(txHash);
+          const totalSendToken = exchangeIssueSendTokenAmounts[0];
+          const expectedEthBalance = previousEthBalance
+                                      .sub(totalSendToken)
+                                      .sub(requiredComponentEth)
+                                      .sub(totalGasInEth);
+
+          const currentEthBalance = await web3.eth.getBalance(subjectCaller);
+          expect(currentEthBalance).to.bignumber.equal(expectedEthBalance);
+        });
       });
 
-      it('refunds the user the appropriate amount of eth', async () => {
-        const previousEthBalance: BigNumber = new BigNumber(await web3.eth.getBalance(subjectCaller));
+      describe('', async () => {
+        before(async () => {
+          customRequiredPaymentETH = new BigNumber(10 ** 10).plus(excessEth);
+          customIssuePaymentTokenAmount = new BigNumber(10 ** 10);
+        });
 
-        const txHash = await subject();
-        const totalGasInEth = await getGasUsageInEth(txHash);
-        const totalSendToken = exchangeIssueSendTokenAmounts[0];
-        const expectedEthBalance = previousEthBalance
-                                    .sub(totalSendToken)
-                                    .sub(requiredComponentEth)
-                                    .sub(totalGasInEth);
+        it('emits log with correct return quantity', async () => {
+          const txHash = await subject();
+          const expectedEthBalance = excessEth;
 
-        const currentEthBalance = await web3.eth.getBalance(subjectCaller);
-        expect(currentEthBalance).to.bignumber.equal(expectedEthBalance);
+          const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+          const expectedLogs = LogPayableExchangeIssue(
+            subjectRebalancingSetAddress,
+            subjectCaller,
+            weth.address,
+            subjectRebalancingSetQuantity,
+            expectedEthBalance,
+            rebalancingSetExchangeIssuanceModule.address,
+          );
+
+          await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+        });
       });
     });
 
@@ -777,13 +809,17 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
 
     it('emits correct LogPayableExchangeIssue event', async () => {
+      const expectedReturnedERC20 = new BigNumber(0);
+
       const txHash = await subject();
 
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
       const expectedLogs = LogPayableExchangeIssue(
         subjectRebalancingSetAddress,
         subjectCaller,
+        subjectPaymentTokenAddress,
         subjectRebalancingSetQuantity,
+        expectedReturnedERC20,
         rebalancingSetExchangeIssuanceModule.address
       );
 
@@ -791,22 +827,51 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
 
     describe('when the wrapped eth transferred is in excess of required', async () => {
-      before(async () => {
-        customRequiredPaymentETH = new BigNumber(10 ** 10).times(2);
-        customIssuePaymentTokenAmount = new BigNumber(10 ** 10);
+      const excessTokenAmount = new BigNumber(10 ** 10);
+
+      describe('', async () => {
+        before(async () => {
+          customRequiredPaymentETH = new BigNumber(10 ** 10).plus(excessTokenAmount);
+          customIssuePaymentTokenAmount = new BigNumber(10 ** 10);
+        });
+
+        it('refunds the user the appropriate amount of weth', async () => {
+          const previousWethBalance: BigNumber = await weth.balanceOf.callAsync(subjectCaller);
+
+          await subject();
+          const totalSendToken = exchangeIssueSendTokenAmounts[0];
+          const expectedWethBalance = previousWethBalance
+                                      .sub(totalSendToken)
+                                      .sub(requiredComponentEth);
+
+          const currentWethBalance: BigNumber = await weth.balanceOf.callAsync(subjectCaller);
+          expect(currentWethBalance).to.bignumber.equal(expectedWethBalance);
+        });
       });
 
-      it('refunds the user the appropriate amount of weth', async () => {
-        const previousWethBalance: BigNumber = await weth.balanceOf.callAsync(subjectCaller);
+      describe('', async () => {
+        before(async () => {
+          customRequiredPaymentETH = new BigNumber(10 ** 10).plus(excessTokenAmount);
+          customIssuePaymentTokenAmount = new BigNumber(10 ** 10);
+        });
 
-        await subject();
-        const totalSendToken = exchangeIssueSendTokenAmounts[0];
-        const expectedWethBalance = previousWethBalance
-                                    .sub(totalSendToken)
-                                    .sub(requiredComponentEth);
+        it('emits correct LogPayableExchangeIssue event', async () => {
+          const expectedReturnedERC20 = excessTokenAmount;
 
-        const currentWethBalance: BigNumber = await weth.balanceOf.callAsync(subjectCaller);
-        expect(currentWethBalance).to.bignumber.equal(expectedWethBalance);
+          const txHash = await subject();
+
+          const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+          const expectedLogs = LogPayableExchangeIssue(
+            subjectRebalancingSetAddress,
+            subjectCaller,
+            subjectPaymentTokenAddress,
+            subjectRebalancingSetQuantity,
+            expectedReturnedERC20,
+            rebalancingSetExchangeIssuanceModule.address
+          );
+
+          await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+        });
       });
     });
 
@@ -1212,11 +1277,15 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     it('emits correct LogPayableExchangeRedeem event', async () => {
       const txHash = await subject();
 
+      const outputTokenQuantity = etherQuantityToReceive.plus(nonExchangedWethQuantity);
+
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
       const expectedLogs = LogPayableExchangeRedeem(
         subjectRebalancingSetAddress,
         subjectCaller,
+        weth.address,
         subjectRebalancingSetQuantity,
+        outputTokenQuantity,
         rebalancingSetExchangeIssuanceModule.address
       );
 
@@ -1693,11 +1762,15 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     it('emits correct LogPayableExchangeRedeem event', async () => {
       const txHash = await subject();
 
+      const outputTokenQuantity = wethQuantityToReceive.plus(nonExchangedWethQuantity);
+
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
       const expectedLogs = LogPayableExchangeRedeem(
         subjectRebalancingSetAddress,
         subjectCaller,
+        subjectReceiveTokenAddress,
         subjectRebalancingSetQuantity,
+        outputTokenQuantity,
         rebalancingSetExchangeIssuanceModule.address
       );
 

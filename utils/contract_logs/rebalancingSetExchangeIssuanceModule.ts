@@ -4,7 +4,9 @@ import { BigNumber } from 'bignumber.js';
 export function LogPayableExchangeIssue(
   rebalancingSetAddress: Address,
   callerAddress: Address,
+  paymentTokenAddress: Address,
   rebalancingSetQuantity: BigNumber,
+  paymentTokenReturned: BigNumber,
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -13,7 +15,9 @@ export function LogPayableExchangeIssue(
     args: {
       rebalancingSetAddress,
       callerAddress,
+      paymentTokenAddress,
       rebalancingSetQuantity,
+      paymentTokenReturned,
     },
   }];
 }
@@ -21,7 +25,9 @@ export function LogPayableExchangeIssue(
 export function LogPayableExchangeRedeem(
   rebalancingSetAddress: Address,
   callerAddress: Address,
+  outputTokenAddress: Address,
   rebalancingSetQuantity: BigNumber,
+  outputTokenQuantity: BigNumber,
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -30,7 +36,9 @@ export function LogPayableExchangeRedeem(
     args: {
       rebalancingSetAddress,
       callerAddress,
+      outputTokenAddress,
       rebalancingSetQuantity,
+      outputTokenQuantity,
     },
   }];
 }

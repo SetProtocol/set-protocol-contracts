@@ -65,13 +65,17 @@ contract RebalancingSetExchangeIssuanceModule is
     event LogPayableExchangeIssue(
         address rebalancingSetAddress,
         address indexed callerAddress,
-        uint256 rebalancingSetQuantity
+        address paymentTokenAddress,
+        uint256 rebalancingSetQuantity,
+        uint256 paymentTokenReturned
     );
 
     event LogPayableExchangeRedeem(
         address rebalancingSetAddress,
         address indexed callerAddress,
-        uint256 rebalancingSetQuantity
+        address outputTokenAddress,
+        uint256 rebalancingSetQuantity,
+        uint256 outputTokenQuantity
     );
 
     /* ============ Constructor ============ */
@@ -179,6 +183,14 @@ contract RebalancingSetExchangeIssuanceModule is
             // Transfer ether to user
             msg.sender.transfer(leftoverWeth);
         }
+
+        emit LogPayableExchangeIssue(
+            _rebalancingSetAddress,
+            msg.sender,
+            weth,
+            _rebalancingSetQuantity,
+            leftoverWeth
+        );
     }
 
     /**
@@ -237,6 +249,14 @@ contract RebalancingSetExchangeIssuanceModule is
                 leftoverPaymentTokenQuantity
             );
         }
+
+        emit LogPayableExchangeIssue(
+            _rebalancingSetAddress,
+            msg.sender,
+            _paymentTokenAddress,
+            _rebalancingSetQuantity,
+            leftoverPaymentTokenQuantity
+        );
     }
 
     /**
@@ -299,6 +319,14 @@ contract RebalancingSetExchangeIssuanceModule is
 
         // Return non-exchanged components to the user
         returnExcessComponentsFromContract(baseSetAddress);
+
+        emit LogPayableExchangeRedeem(
+            _rebalancingSetAddress,
+            msg.sender,
+            weth,
+            _rebalancingSetQuantity,
+            wethBalance
+        );
     }
 
     /**
@@ -365,6 +393,14 @@ contract RebalancingSetExchangeIssuanceModule is
 
         // Non-exchanged base SetToken components are returned to the user
         returnExcessComponentsFromContract(baseSetAddress);
+
+        emit LogPayableExchangeRedeem(
+            _rebalancingSetAddress,
+            msg.sender,
+            _outputTokenAddress,
+            _rebalancingSetQuantity,
+            outputTokenBalance
+        );
     }
 
 
@@ -509,12 +545,6 @@ contract RebalancingSetExchangeIssuanceModule is
 
         // Return any extra components acquired during exchangeIssue to the user
         returnExcessComponentsFromVault(baseSetAddress);
-
-        emit LogPayableExchangeIssue(
-            _rebalancingSetAddress,
-            msg.sender,
-            _rebalancingSetQuantity
-        );
     }
 
     /**
@@ -573,12 +603,6 @@ contract RebalancingSetExchangeIssuanceModule is
         exchangeIssuanceInstance.exchangeRedeem(
             _exchangeIssuanceParams,
             _orderData
-        );
-
-        emit LogPayableExchangeRedeem(
-            _rebalancingSetAddress,
-            msg.sender,
-            _rebalancingSetQuantity
-        );        
+        );     
     }
 }

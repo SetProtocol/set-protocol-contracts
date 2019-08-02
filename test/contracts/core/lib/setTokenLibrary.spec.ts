@@ -21,10 +21,10 @@ import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
+import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -45,12 +45,12 @@ const [
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
 
-  const coreWrapper = new CoreWrapper(contractDeployer, contractDeployer);
-  const erc20Wrapper = new ERC20Wrapper(contractDeployer);
+  const coreHelper = new CoreHelper(contractDeployer, contractDeployer);
+  const erc20Helper = new ERC20Helper(contractDeployer);
 
   let setTokenLibraryMock: SetTokenLibraryMockContract;
 
-  const libraryMockWrapper = new LibraryMockWrapper(contractDeployer);
+  const libraryMockHelper = new LibraryMockHelper(contractDeployer);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -63,13 +63,13 @@ const [
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    vault = await coreHelper.deployVaultAsync();
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    core = await coreHelper.deployCoreAsync(transferProxy, vault);
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+    await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
-    setTokenLibraryMock = await libraryMockWrapper.deploySetTokenLibraryAsync();
+    setTokenLibraryMock = await libraryMockHelper.deploySetTokenLibraryAsync();
   });
 
   afterEach(async () => {
@@ -84,15 +84,15 @@ const [
     let naturalUnit: BigNumber;
 
     beforeEach(async () => {
-      const firstComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
-      const secondComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+      const firstComponent = await erc20Helper.deployTokenAsync(contractDeployer);
+      const secondComponent = await erc20Helper.deployTokenAsync(contractDeployer);
       const componentTokens = [firstComponent, secondComponent];
       const setComponentUnit = ether(4);
       const componentAddresses = componentTokens.map(token => token.address);
       const componentUnits = componentTokens.map(token => setComponentUnit);
       naturalUnit = ether(2);
 
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -134,15 +134,15 @@ const [
     let naturalUnit: BigNumber;
 
     beforeEach(async () => {
-      const firstComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
-      const secondComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+      const firstComponent = await erc20Helper.deployTokenAsync(contractDeployer);
+      const secondComponent = await erc20Helper.deployTokenAsync(contractDeployer);
       const componentTokens = [firstComponent, secondComponent];
       const setComponentUnit = ether(4);
       const componentAddresses = componentTokens.map(token => token.address);
       const componentUnits = componentTokens.map(token => setComponentUnit);
       naturalUnit = ether(2);
 
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -185,15 +185,15 @@ const [
     let componentUnits: BigNumber[];
 
     beforeEach(async () => {
-      const firstComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
-      const secondComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+      const firstComponent = await erc20Helper.deployTokenAsync(contractDeployer);
+      const secondComponent = await erc20Helper.deployTokenAsync(contractDeployer);
       const componentTokens = [firstComponent, secondComponent];
       const setComponentUnit = ether(4);
       componentAddresses = componentTokens.map(token => token.address);
       componentUnits = componentTokens.map(token => setComponentUnit);
       naturalUnit = ether(2);
 
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,

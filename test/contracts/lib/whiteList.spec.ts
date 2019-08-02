@@ -13,7 +13,7 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -36,7 +36,7 @@ contract('WhiteList', accounts => {
 
   let whiteList: WhiteListContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(WhiteList.abi);
@@ -68,7 +68,7 @@ contract('WhiteList', accounts => {
     });
 
     async function subject(): Promise<WhiteListContract> {
-      return await coreWrapper.deployWhiteListAsync(
+      return await coreHelper.deployWhiteListAsync(
         subjectInitialAddresses,
         subjectCaller
       );
@@ -92,7 +92,7 @@ contract('WhiteList', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      whiteList = await coreWrapper.deployWhiteListAsync([firstTokenAddress, secondTokenAddress]);
+      whiteList = await coreHelper.deployWhiteListAsync([firstTokenAddress, secondTokenAddress]);
 
       subjectAddressToAdd = thirdTokenAddress;
       subjectCaller = ownerAccount;
@@ -161,7 +161,7 @@ contract('WhiteList', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      whiteList = await coreWrapper.deployWhiteListAsync([firstTokenAddress, secondTokenAddress, thirdTokenAddress]);
+      whiteList = await coreHelper.deployWhiteListAsync([firstTokenAddress, secondTokenAddress, thirdTokenAddress]);
 
       subjectAddressToRemove = thirdTokenAddress;
       subjectCaller = ownerAccount;
@@ -227,7 +227,7 @@ contract('WhiteList', accounts => {
     let subjectAddressesToVerify: Address[];
 
     beforeEach(async () => {
-      whiteList = await coreWrapper.deployWhiteListAsync([firstTokenAddress, secondTokenAddress, thirdTokenAddress]);
+      whiteList = await coreHelper.deployWhiteListAsync([firstTokenAddress, secondTokenAddress, thirdTokenAddress]);
 
       subjectAddressesToVerify = [firstTokenAddress, secondTokenAddress, thirdTokenAddress];
     });

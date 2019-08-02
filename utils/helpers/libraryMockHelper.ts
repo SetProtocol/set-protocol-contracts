@@ -32,7 +32,7 @@ const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
 const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
 
 
-export class LibraryMockWrapper {
+export class LibraryMockHelper {
   private _contractOwnerAddress: Address;
 
   constructor(contractOwnerAddress: Address) {

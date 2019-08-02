@@ -19,7 +19,7 @@ import { Blockchain } from '@utils/blockchain';
 import { ZERO } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { OracleWrapper } from '@utils/wrappers/oracleWrapper';
+import { OracleHelper } from '@utils/helpers/oracleHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -40,7 +40,7 @@ contract('Median Oracle', accounts => {
 
   let feedFactory: FeedFactoryContract;
 
-  const oracleWrapper = new OracleWrapper(ownerAccount);
+  const oracleHelper = new OracleHelper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(FeedFactory.abi);
@@ -60,12 +60,12 @@ contract('Median Oracle', accounts => {
 
   describe('FeedFactory', async () => {
     beforeEach(async () => {
-      feedFactory = await oracleWrapper.deployFeedFactoryAsync();
+      feedFactory = await oracleHelper.deployFeedFactoryAsync();
     });
 
     describe('#create', async () => {
       async function subject(): Promise<PriceFeedContract> {
-        return await oracleWrapper.deployPriceFeedAsync(feedFactory);
+        return await oracleHelper.deployPriceFeedAsync(feedFactory);
       }
 
       it('creates a price feed', async () => {
@@ -83,8 +83,8 @@ contract('Median Oracle', accounts => {
     let priceFeed: PriceFeedContract;
 
     beforeEach(async () => {
-      feedFactory = await oracleWrapper.deployFeedFactoryAsync();
-      priceFeed = await oracleWrapper.deployPriceFeedAsync(feedFactory);
+      feedFactory = await oracleHelper.deployFeedFactoryAsync();
+      priceFeed = await oracleHelper.deployPriceFeedAsync(feedFactory);
     });
 
     describe('#poke', async () => {
@@ -134,7 +134,7 @@ contract('Median Oracle', accounts => {
     let medianizer: MedianContract;
 
     beforeEach(async () => {
-      medianizer = await oracleWrapper.deployMedianizerAsync();
+      medianizer = await oracleHelper.deployMedianizerAsync();
     });
 
     describe('#poke', async () => {
@@ -149,9 +149,9 @@ contract('Median Oracle', accounts => {
 
       beforeEach(async () => {
         oracleCount = 3;
-        await oracleWrapper.addPriceFeedOwnerToMedianizer(medianizer, ownerAccount);
-        await oracleWrapper.addPriceFeedOwnerToMedianizer(medianizer, secondOracleAccount);
-        await oracleWrapper.addPriceFeedOwnerToMedianizer(medianizer, thirdOracleAccount);
+        await oracleHelper.addPriceFeedOwnerToMedianizer(medianizer, ownerAccount);
+        await oracleHelper.addPriceFeedOwnerToMedianizer(medianizer, secondOracleAccount);
+        await oracleHelper.addPriceFeedOwnerToMedianizer(medianizer, thirdOracleAccount);
 
         updatedPrice = new BigNumber(10000000);
         const updatedTimestamp = SetTestUtils.generateTimestamp(1000);
@@ -198,7 +198,7 @@ contract('Median Oracle', accounts => {
 
       describe('when the number of updates (3) is less than the quorum (4)', async () => {
         beforeEach(async () => {
-          await oracleWrapper.setMedianizerMinimumQuorumAsync(medianizer, oracleCount + 1);
+          await oracleHelper.setMedianizerMinimumQuorumAsync(medianizer, oracleCount + 1);
         });
 
         it('should revert', async () => {

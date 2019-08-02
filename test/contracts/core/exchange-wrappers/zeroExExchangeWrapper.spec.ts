@@ -23,9 +23,9 @@ import { DEFAULT_GAS, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '@utils/con
 import { ether } from '@utils/units';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { ExchangeHelper } from '@utils/helpers/exchangeHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -49,9 +49,9 @@ contract('ZeroExExchangeWrapper', accounts => {
     moduleAccount,
   ] = accounts;
 
-  const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
-  const erc20Wrapper = new ERC20Wrapper(deployerAccount);
-  const exchangeWrapper = new ExchangeWrapper(deployerAccount);
+  const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
+  const erc20Helper = new ERC20Helper(deployerAccount);
+  const exchangeHelper = new ExchangeHelper(deployerAccount);
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
@@ -66,12 +66,12 @@ contract('ZeroExExchangeWrapper', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
-    await coreWrapper.addModuleAsync(core, moduleAccount);
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    vault = await coreHelper.deployVaultAsync();
+    core = await coreHelper.deployCoreMockAsync(transferProxy, vault);
+    await coreHelper.addModuleAsync(core, moduleAccount);
 
-    zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
+    zeroExExchangeWrapper = await exchangeHelper.deployZeroExExchangeWrapper(
       core.address,
       SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
       SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
@@ -80,25 +80,25 @@ contract('ZeroExExchangeWrapper', accounts => {
     );
 
     // ZRX token is already deployed to zrxTokenOwnerAccount via the test snapshot
-    zrxToken = erc20Wrapper.zrxToken();
+    zrxToken = erc20Helper.zrxToken();
     const orderTakerZRXBalanceForFees = ether(1000);
-    await erc20Wrapper.transferTokenAsync(
+    await erc20Helper.transferTokenAsync(
       zrxToken,
       zeroExTakerAccount,
       orderTakerZRXBalanceForFees,
       zrxTokenOwnerAccount
     );
-    await erc20Wrapper.transferTokenAsync(
+    await erc20Helper.transferTokenAsync(
       zrxToken,
       zeroExOrderMakerAccount,
       orderTakerZRXBalanceForFees,
       zrxTokenOwnerAccount
     );
 
-    zeroExOrderMakerToken = await erc20Wrapper.deployTokenAsync(zeroExOrderMakerAccount);
-    zeroExOrderTakerToken = await erc20Wrapper.deployTokenAsync(zeroExExchangeWrapper.address);
+    zeroExOrderMakerToken = await erc20Helper.deployTokenAsync(zeroExOrderMakerAccount);
+    zeroExOrderTakerToken = await erc20Helper.deployTokenAsync(zeroExExchangeWrapper.address);
 
-    await erc20Wrapper.approveTransferAsync(
+    await erc20Helper.approveTransferAsync(
       zeroExOrderMakerToken,
       SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
       zeroExOrderMakerAccount
@@ -219,7 +219,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       });
 
       beforeEach(async () => {
-        await erc20Wrapper.approveTransferAsync(
+        await erc20Helper.approveTransferAsync(
           zrxToken,
           zeroExExchangeWrapper.address,
           zeroExTakerAccount
@@ -259,7 +259,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       });
 
       beforeEach(async () => {
-        await erc20Wrapper.approveTransferAsync(
+        await erc20Helper.approveTransferAsync(
           zrxToken,
           SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
           zeroExOrderMakerAccount
@@ -361,8 +361,8 @@ contract('ZeroExExchangeWrapper', accounts => {
         subjectOrderCount = new BigNumber(2);
         subjectExchangeData.orderCount = subjectOrderCount;
 
-        secondZeroExOrderMakerToken = await erc20Wrapper.deployTokenAsync(secondZeroExOrderMakerAccount);
-        await erc20Wrapper.approveTransferAsync(
+        secondZeroExOrderMakerToken = await erc20Helper.deployTokenAsync(secondZeroExOrderMakerAccount);
+        await erc20Helper.approveTransferAsync(
           secondZeroExOrderMakerToken,
           SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
           secondZeroExOrderMakerAccount

@@ -15,7 +15,7 @@ import { UpgradeRegistered } from '@utils/contract_logs/core';
 import { ZERO, ONE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -34,7 +34,7 @@ contract('TimeLockUpgrade', accounts => {
 
   let timeLockUpgradeMock: TimeLockUpgradeMockContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(TimeLockUpgrade.abi);
@@ -47,7 +47,7 @@ contract('TimeLockUpgrade', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    timeLockUpgradeMock = await coreWrapper.deployTimeLockUpgradeMockAsync();
+    timeLockUpgradeMock = await coreHelper.deployTimeLockUpgradeMockAsync();
   });
 
   afterEach(async () => {

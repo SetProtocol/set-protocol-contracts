@@ -15,8 +15,8 @@ import { ether } from '@utils/units';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '@utils/constants';
 
-import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -32,8 +32,8 @@ contract('ERC20WrapperMock', accounts => {
 
   let erc20WrapperLibrary: ERC20WrapperMockContract;
 
-  const erc20Wrapper = new ERC20Wrapper(deployerAccount);
-  const libraryMockWrapper = new LibraryMockWrapper(deployerAccount);
+  const erc20Helper = new ERC20Helper(deployerAccount);
+  const libraryMockHelper = new LibraryMockHelper(deployerAccount);
 
   describe('#approve', async () => {
     const subjectTransferAllowance: BigNumber = UNLIMITED_ALLOWANCE_IN_BASE_UNITS;
@@ -42,10 +42,10 @@ contract('ERC20WrapperMock', accounts => {
     const caller: Address = ownerAccount;
 
     beforeEach(async () => {
-      token = await erc20Wrapper.deployTokenAsync(ownerAccount);
+      token = await erc20Helper.deployTokenAsync(ownerAccount);
       subjectTokenAddress = token.address;
 
-      erc20WrapperLibrary = await libraryMockWrapper.deployERC20WrapperLibraryAsync();
+      erc20WrapperLibrary = await libraryMockHelper.deployERC20WrapperLibraryAsync();
     });
 
     async function subject(): Promise<string> {
@@ -77,7 +77,7 @@ contract('ERC20WrapperMock', accounts => {
       let invalidReturnToken: InvalidReturnTokenMockContract;
 
       beforeEach(async () => {
-        invalidReturnToken = await erc20Wrapper.deployTokenInvalidReturnAsync(ownerAccount);
+        invalidReturnToken = await erc20Helper.deployTokenInvalidReturnAsync(ownerAccount);
         subjectTokenAddress = invalidReturnToken.address;
       });
 
@@ -92,8 +92,8 @@ contract('ERC20WrapperMock', accounts => {
     const caller: Address = ownerAccount;
 
     beforeEach(async () => {
-      token = await erc20Wrapper.deployTokenAsync(ownerAccount);
-      erc20WrapperLibrary = await libraryMockWrapper.deployERC20WrapperLibraryAsync();
+      token = await erc20Helper.deployTokenAsync(ownerAccount);
+      erc20WrapperLibrary = await libraryMockHelper.deployERC20WrapperLibraryAsync();
     });
 
     async function subject(): Promise<BigNumber> {
@@ -115,8 +115,8 @@ contract('ERC20WrapperMock', accounts => {
     let token: StandardTokenMockContract;
 
     beforeEach(async () => {
-      token = await erc20Wrapper.deployTokenAsync(ownerAccount);
-      erc20WrapperLibrary = await libraryMockWrapper.deployERC20WrapperLibraryAsync();
+      token = await erc20Helper.deployTokenAsync(ownerAccount);
+      erc20WrapperLibrary = await libraryMockHelper.deployERC20WrapperLibraryAsync();
     });
 
     async function subject(): Promise<string> {

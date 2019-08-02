@@ -31,9 +31,9 @@ import {
  } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -61,9 +61,9 @@ contract('RebalancingSetTokenFactory', accounts => {
   let setTokenFactory: SetTokenFactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
 
-  const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
-  const erc20Wrapper = new ERC20Wrapper(deployerAccount);
-  const rebalanceWrapper = new RebalancingWrapper(deployerAccount, coreWrapper, erc20Wrapper, blockchain);
+  const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
+  const erc20Helper = new ERC20Helper(deployerAccount);
+  const rebalanceHelper = new RebalancingHelper(deployerAccount, coreHelper, erc20Helper, blockchain);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -76,20 +76,20 @@ contract('RebalancingSetTokenFactory', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(core, vault);
-    await coreWrapper.addModuleAsync(core, rebalanceAuctionModule.address);
+    vault = await coreHelper.deployVaultAsync();
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    core = await coreHelper.deployCoreAsync(transferProxy, vault);
+    rebalanceAuctionModule = await coreHelper.deployRebalanceAuctionModuleAsync(core, vault);
+    await coreHelper.addModuleAsync(core, rebalanceAuctionModule.address);
 
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.addFactoryAsync(core, setTokenFactory);
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+    await coreHelper.addFactoryAsync(core, setTokenFactory);
 
-    const components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
+    const components = await erc20Helper.deployTokensAsync(2, deployerAccount);
     const componentAddresses = _.map(components, token => token.address);
     const componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
     const naturalUnit: BigNumber = ether(2);
-    setToken = await coreWrapper.createSetTokenAsync(
+    setToken = await coreHelper.createSetTokenAsync(
       core,
       setTokenFactory.address,
       componentAddresses,
@@ -97,7 +97,7 @@ contract('RebalancingSetTokenFactory', accounts => {
       naturalUnit,
     );
 
-    rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
+    rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
   });
 
   afterEach(async () => {
@@ -126,7 +126,7 @@ contract('RebalancingSetTokenFactory', accounts => {
     });
 
     async function subject(): Promise<RebalancingSetTokenFactoryContract> {
-      return await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+      return await coreHelper.deployRebalancingSetTokenFactoryAsync(
         subjectCoreAddress,
         subjectWhiteListAddress,
         subjectMinimumRebalanceInterval,
@@ -208,11 +208,11 @@ contract('RebalancingSetTokenFactory', accounts => {
     let callDataRebalanceInterval: BigNumber;
 
     beforeEach(async () => {
-      rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+      rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(
         core.address,
         rebalancingComponentWhiteList.address
       );
-      await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
+      await coreHelper.addFactoryAsync(core, rebalancingSetTokenFactory);
 
       subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];
@@ -231,7 +231,7 @@ contract('RebalancingSetTokenFactory', accounts => {
     });
 
     async function subject(): Promise<RebalancingSetTokenContract> {
-      return await rebalanceWrapper.createRebalancingTokenAsync(
+      return await rebalanceHelper.createRebalancingTokenAsync(
         core,
         rebalancingSetTokenFactory.address,
         subjectComponents,
@@ -338,11 +338,11 @@ contract('RebalancingSetTokenFactory', accounts => {
     let subjectCallData: Bytes;
 
     beforeEach(async () => {
-      rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+      rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(
         core.address,
         rebalancingComponentWhiteList.address
       );
-      await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
+      await coreHelper.addFactoryAsync(core, rebalancingSetTokenFactory);
 
       subjectCaller = notCoreAccount;
       subjectComponents = [setToken.address];

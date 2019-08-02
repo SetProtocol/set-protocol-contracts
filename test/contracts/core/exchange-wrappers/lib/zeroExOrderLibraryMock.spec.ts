@@ -15,7 +15,7 @@ import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
+import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -35,7 +35,7 @@ contract('ZeroExOrderLibraryMock', accounts => {
     takerTokenAddress,
   ] = accounts;
 
-  const libraryMockWrapper: LibraryMockWrapper = new LibraryMockWrapper(ownerAccount);
+  const libraryMockHelper: LibraryMockHelper = new LibraryMockHelper(ownerAccount);
   let zeroExExchangeWrapper: ZeroExOrderLibraryMockContract;
 
   let zeroExOrder: ZeroExOrder;
@@ -59,7 +59,7 @@ contract('ZeroExOrderLibraryMock', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    zeroExExchangeWrapper = await libraryMockWrapper.deployZeroExOrderLibraryAsync();
+    zeroExExchangeWrapper = await libraryMockHelper.deployZeroExOrderLibraryAsync();
     zeroExOrder = SetTestUtils.generateZeroExOrder(
       senderAddress || senderAccount,
       makerAddress || ownerAccount,

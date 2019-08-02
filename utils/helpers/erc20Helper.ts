@@ -34,7 +34,7 @@ const StandardTokenWithFeeMock = artifacts.require('StandardTokenWithFeeMock');
 const WethMock = artifacts.require('WethMock');
 
 
-export class ERC20Wrapper {
+export class ERC20Helper {
   private _senderAccountAddress: Address;
 
   constructor(senderAccountAddress: Address) {

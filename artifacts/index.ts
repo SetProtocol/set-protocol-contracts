@@ -5,7 +5,6 @@ export { Core } from "./ts/Core";
 export { CoreIssuanceLibrary } from "./ts/CoreIssuanceLibrary";
 export { ERC20 } from "./ts/ERC20";
 export { ERC20Detailed } from "./ts/ERC20Detailed";
-export { ERC20RebalancingSetExchangeIssuanceModule } from "./ts/ERC20RebalancingSetExchangeIssuanceModule";
 export { ERC20Wrapper } from "./ts/ERC20Wrapper";
 export { ExchangeIssuanceLibrary } from "./ts/ExchangeIssuanceLibrary";
 export { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
@@ -52,7 +51,6 @@ export {
   CoreIssuanceLibraryContract,
   CoreMockContract,
   ERC20DetailedContract,
-  ERC20RebalancingSetExchangeIssuanceModuleContract,
   ERC20WrapperContract,
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryContract,

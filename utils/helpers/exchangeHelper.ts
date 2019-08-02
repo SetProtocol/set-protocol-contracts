@@ -11,7 +11,7 @@ import {
 import { DEFAULT_GAS } from '../constants';
 import { getWeb3 } from '../web3Helper';
 
-import { CoreWrapper } from './coreWrapper';
+import { CoreHelper } from './coreHelper';
 
 const web3 = getWeb3();
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
@@ -20,13 +20,13 @@ const ZeroExExchangeWrapper = artifacts.require('ZeroExExchangeWrapper');
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 
 
-export class ExchangeWrapper {
+export class ExchangeHelper {
   private _contractOwnerAddress: Address;
-  private _coreWrapper: CoreWrapper;
+  private _coreHelper: CoreHelper;
 
   constructor(contractOwnerAddress: Address) {
     this._contractOwnerAddress = contractOwnerAddress;
-    this._coreWrapper = new CoreWrapper(this._contractOwnerAddress, this._contractOwnerAddress);
+    this._coreHelper = new CoreHelper(this._contractOwnerAddress, this._contractOwnerAddress);
   }
 
   /* ============ Deployment ============ */
@@ -67,7 +67,7 @@ export class ExchangeWrapper {
       transferProxy
     );
 
-    await this._coreWrapper.addExchange(core, SetUtils.EXCHANGES.KYBER, kyberNetworkWrapper.address);
+    await this._coreHelper.addExchange(core, SetUtils.EXCHANGES.KYBER, kyberNetworkWrapper.address);
 
     return kyberNetworkWrapper;
   }
@@ -117,7 +117,7 @@ export class ExchangeWrapper {
       from
     );
 
-    await this._coreWrapper.addExchange(core, SetUtils.EXCHANGES.ZERO_EX, zeroExExchangeWrapper.address);
+    await this._coreHelper.addExchange(core, SetUtils.EXCHANGES.ZERO_EX, zeroExExchangeWrapper.address);
 
     return zeroExExchangeWrapper;
   }

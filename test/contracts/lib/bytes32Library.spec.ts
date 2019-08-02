@@ -9,7 +9,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { Bytes32LibraryMockContract } from '@utils/contracts';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
+import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -20,7 +20,7 @@ const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 
 contract('Bytes32Mock', accounts => {
   const [ownerAccount] = accounts;
-  const libraryMockWrapper = new LibraryMockWrapper(ownerAccount);
+  const libraryMockHelper = new LibraryMockHelper(ownerAccount);
 
   let bytes32Library: Bytes32LibraryMockContract;
 
@@ -29,7 +29,7 @@ contract('Bytes32Mock', accounts => {
     let subjectData: Bytes;
 
     beforeEach(async () => {
-      bytes32Library = await libraryMockWrapper.deployBytes32LibraryAsync();
+      bytes32Library = await libraryMockHelper.deployBytes32LibraryAsync();
     });
 
     async function subject(data: Bytes): Promise<string> {
@@ -59,7 +59,7 @@ contract('Bytes32Mock', accounts => {
     let subjectData: Bytes;
 
     beforeEach(async () => {
-      bytes32Library = await libraryMockWrapper.deployBytes32LibraryAsync();
+      bytes32Library = await libraryMockHelper.deployBytes32LibraryAsync();
     });
 
     async function subject(data: Bytes): Promise<string> {

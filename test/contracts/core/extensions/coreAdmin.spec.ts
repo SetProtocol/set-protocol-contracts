@@ -34,9 +34,9 @@ import { Blockchain } from '@utils/blockchain';
 import { STANDARD_NATURAL_UNIT, DEFAULT_AUCTION_PRICE_DIVISOR } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -63,9 +63,9 @@ contract('CoreAdmin', accounts => {
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const rebalancingWrapper = new RebalancingWrapper(ownerAccount, coreWrapper, erc20Wrapper, blockchain);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
+  const rebalancingHelper = new RebalancingHelper(ownerAccount, coreHelper, erc20Helper, blockchain);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -78,7 +78,7 @@ contract('CoreAdmin', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    core = await coreWrapper.deployCoreAndDependenciesAsync();
+    core = await coreHelper.deployCoreAndDependenciesAsync();
   });
 
   afterEach(async () => {
@@ -90,7 +90,7 @@ contract('CoreAdmin', accounts => {
     let subjectFactoryAddress: Address;
 
     beforeEach(async () => {
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+      setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
 
       subjectFactoryAddress = setTokenFactory.address;
       subjectCaller = ownerAccount;
@@ -159,7 +159,7 @@ contract('CoreAdmin', accounts => {
     let subjectFactoryAddress: Address;
 
     beforeEach(async () => {
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+      setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
 
       subjectFactoryAddress = setTokenFactory.address;
       subjectCaller = ownerAccount;
@@ -525,19 +525,19 @@ contract('CoreAdmin', accounts => {
     let subjectSet: Address;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+      vault = await coreHelper.deployVaultAsync();
+      transferProxy = await coreHelper.deployTransferProxyAsync();
+      setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+      await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
       subjectCaller = ownerAccount;
 
-      const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+      const components = await erc20Helper.deployTokensAsync(2, ownerAccount);
       const componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
 
       // Create and enable an arbitrary set
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -616,19 +616,19 @@ contract('CoreAdmin', accounts => {
     let subjectSet: Address;
 
     beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+      vault = await coreHelper.deployVaultAsync();
+      transferProxy = await coreHelper.deployTransferProxyAsync();
+      setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+      await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
       subjectCaller = ownerAccount;
 
-      const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+      const components = await erc20Helper.deployTokensAsync(2, ownerAccount);
       const componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
 
       // Create and enable an arbitrary set
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -712,7 +712,7 @@ contract('CoreAdmin', accounts => {
 
     beforeEach(async () => {
       const usesStartPrice = false;
-      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
+      priceLibrary = await rebalancingHelper.deployLinearAuctionPriceCurveAsync(
         DEFAULT_AUCTION_PRICE_DIVISOR,
         usesStartPrice
       );
@@ -785,7 +785,7 @@ contract('CoreAdmin', accounts => {
 
     beforeEach(async () => {
       const usesStartPrice = false;
-      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
+      priceLibrary = await rebalancingHelper.deployLinearAuctionPriceCurveAsync(
         DEFAULT_AUCTION_PRICE_DIVISOR,
         usesStartPrice
       );

@@ -22,8 +22,8 @@ import { getExpectedTransferLogs } from '@utils/contract_logs/core';
 import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO, ONE } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -48,8 +48,8 @@ contract('CoreAccounting', accounts => {
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(StandardTokenMock.abi);
@@ -62,11 +62,11 @@ contract('CoreAccounting', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    vault = await coreHelper.deployVaultAsync();
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    core = await coreHelper.deployCoreAsync(transferProxy, vault);
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+    await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
   afterEach(async () => {
@@ -81,8 +81,8 @@ contract('CoreAccounting', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      subjectToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
-      await erc20Wrapper.approveTransferAsync(subjectToken, transferProxy.address, approver);
+      subjectToken = await erc20Helper.deployTokenAsync(tokenOwner);
+      await erc20Helper.approveTransferAsync(subjectToken, transferProxy.address, approver);
 
       subjectQuantity = DEPLOYED_TOKEN_QUANTITY;
       subjectCaller = ownerAccount;
@@ -172,7 +172,7 @@ contract('CoreAccounting', accounts => {
 
     describe('when the protocol is not in operational state', async () => {
       beforeEach(async () => {
-        await coreWrapper.setOperationStateAsync(
+        await coreHelper.setOperationStateAsync(
           core,
           ONE,
         );
@@ -193,9 +193,9 @@ contract('CoreAccounting', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
-      await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
-      await coreWrapper.depositFromUser(core, mockToken.address, ownerBalanceInVault);
+      mockToken = await erc20Helper.deployTokenAsync(tokenOwner);
+      await erc20Helper.approveTransferAsync(mockToken, transferProxy.address, approver);
+      await coreHelper.depositFromUser(core, mockToken.address, ownerBalanceInVault);
 
       subjectQuantity = DEPLOYED_TOKEN_QUANTITY;
       subjectCaller = ownerAccount;
@@ -296,7 +296,7 @@ contract('CoreAccounting', accounts => {
     let mockTokenAddresses: Address[];
 
     beforeEach(async () => {
-      mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
+      mockTokens = await erc20Helper.deployTokensAsync(tokenCount, tokenOwner);
       mockTokenAddresses = _.map(mockTokens, token => token.address);
       const approvePromises = _.map(mockTokens, token =>
         token.approve.sendTransactionAsync(
@@ -330,31 +330,31 @@ contract('CoreAccounting', accounts => {
     }
 
     it('transfers the correct amount of each token from the caller', async () => {
-      const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+      const existingTokenBalances = await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
       const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.sub(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
 
-      const newTokenBalances = await await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+      const newTokenBalances = await await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
     it('transfers the correct amount of each token to the vault', async () => {
-      const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+      const existingTokenBalances = await erc20Helper.getTokenBalances(mockTokens, vault.address);
       const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.add(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
 
-      const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+      const newTokenBalances = await erc20Helper.getTokenBalances(mockTokens, vault.address);
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
     it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
-      const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const existingOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         mockTokenAddresses,
         vault,
         ownerAccount,
@@ -365,7 +365,7 @@ contract('CoreAccounting', accounts => {
 
       await subject();
 
-      const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         mockTokenAddresses,
         vault,
         ownerAccount,
@@ -381,31 +381,31 @@ contract('CoreAccounting', accounts => {
       });
 
       it('transfers the correct amount of each token from the caller', async () => {
-        const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+        const existingTokenBalances = await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
         const expectedNewBalances = _.map(existingTokenBalances, (balance, index) =>
           balance.sub(amountsToDeposit[index]),
         );
 
         await subject();
 
-        const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+        const newTokenBalances = await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
         expect(newTokenBalances).to.eql(expectedNewBalances);
       });
 
       it('transfers the correct amount of each token to the vault', async () => {
-        const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+        const existingTokenBalances = await erc20Helper.getTokenBalances(mockTokens, vault.address);
         const expectedNewBalances = _.map(existingTokenBalances, (balance, index) =>
           balance.add(amountsToDeposit[index]),
         );
 
         await subject();
 
-        const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+        const newTokenBalances = await erc20Helper.getTokenBalances(mockTokens, vault.address);
         expect(newTokenBalances).to.eql(expectedNewBalances);
       });
 
       it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
-        const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const existingOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           mockTokenAddresses,
           vault,
           ownerAccount,
@@ -416,7 +416,7 @@ contract('CoreAccounting', accounts => {
 
         await subject();
 
-        const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           mockTokenAddresses,
           vault,
           ownerAccount,
@@ -488,7 +488,7 @@ contract('CoreAccounting', accounts => {
 
     describe('when the protocol is not in operational state', async () => {
       beforeEach(async () => {
-        await coreWrapper.setOperationStateAsync(
+        await coreHelper.setOperationStateAsync(
           core,
           ONE,
         );
@@ -506,7 +506,7 @@ contract('CoreAccounting', accounts => {
     let mockTokenAddresses: Address[];
 
     beforeEach(async () => {
-      mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
+      mockTokens = await erc20Helper.deployTokensAsync(tokenCount, tokenOwner);
       mockTokenAddresses = _.map(mockTokens, token => token.address);
       const approvePromises = _.map(mockTokens, token =>
         token.approve.sendTransactionAsync(
@@ -547,31 +547,31 @@ contract('CoreAccounting', accounts => {
     }
 
     it('transfers the correct amount of each token from the caller', async () => {
-      const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+      const existingTokenBalances = await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
       const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.add(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
 
-      const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+      const newTokenBalances = await erc20Helper.getTokenBalances(mockTokens, ownerAccount);
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
     it('transfers the correct amount of each token to the vault', async () => {
-      const existingTokenBalances = await await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+      const existingTokenBalances = await await erc20Helper.getTokenBalances(mockTokens, vault.address);
       const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.sub(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
 
-      const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+      const newTokenBalances = await erc20Helper.getTokenBalances(mockTokens, vault.address);
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
     it('decrements the vault balances of the tokens of the owner by the correct amount', async () => {
-      const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const existingOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         mockTokenAddresses,
         vault,
         ownerAccount,
@@ -582,7 +582,7 @@ contract('CoreAccounting', accounts => {
 
       await subject();
 
-      const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newOwnerVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         mockTokenAddresses,
         vault,
         ownerAccount,
@@ -644,9 +644,9 @@ contract('CoreAccounting', accounts => {
     let subjectAmountToTransfer: BigNumber;
 
     beforeEach(async () => {
-      mockToken = await erc20Wrapper.deployTokenAsync(subjectSender);
-      await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, subjectSender);
-      await coreWrapper.depositFromUser(core, mockToken.address, DEPLOYED_TOKEN_QUANTITY.div(2));
+      mockToken = await erc20Helper.deployTokenAsync(subjectSender);
+      await erc20Helper.approveTransferAsync(mockToken, transferProxy.address, subjectSender);
+      await coreHelper.depositFromUser(core, mockToken.address, DEPLOYED_TOKEN_QUANTITY.div(2));
       subjectAmountToTransfer = DEPLOYED_TOKEN_QUANTITY.div(2);
     });
 
@@ -703,7 +703,7 @@ contract('CoreAccounting', accounts => {
 
     describe('when the protocol is not in operational state', async () => {
       beforeEach(async () => {
-        await coreWrapper.setOperationStateAsync(
+        await coreHelper.setOperationStateAsync(
           core,
           ONE,
         );

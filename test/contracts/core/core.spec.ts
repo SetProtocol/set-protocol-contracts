@@ -10,7 +10,7 @@ import { CoreContract, TransferProxyContract, VaultContract } from '@utils/contr
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -28,7 +28,7 @@ contract('Core', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -50,12 +50,12 @@ contract('Core', accounts => {
     const subjectCaller: Address = ownerAccount;
 
     beforeEach(async () => {
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      vault = await coreWrapper.deployVaultAsync();
+      transferProxy = await coreHelper.deployTransferProxyAsync();
+      vault = await coreHelper.deployVaultAsync();
     });
 
     async function subject(): Promise<CoreContract> {
-      return await coreWrapper.deployCoreAsync(
+      return await coreHelper.deployCoreAsync(
         transferProxy,
         vault,
         subjectCaller,

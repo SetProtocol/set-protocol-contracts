@@ -14,7 +14,7 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
+import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -31,7 +31,7 @@ contract('CoreIssuanceLibraryMock', accounts => {
 
   let coreIssuanceLibraryMock: CoreIssuanceLibraryMockContract;
 
-  const libraryMockWrapper = new LibraryMockWrapper(contractDeployer);
+  const libraryMockHelper = new LibraryMockHelper(contractDeployer);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -44,7 +44,7 @@ contract('CoreIssuanceLibraryMock', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    coreIssuanceLibraryMock = await libraryMockWrapper.deployCoreIssuanceLibraryAsync();
+    coreIssuanceLibraryMock = await libraryMockHelper.deployCoreIssuanceLibraryAsync();
   });
 
   afterEach(async () => {

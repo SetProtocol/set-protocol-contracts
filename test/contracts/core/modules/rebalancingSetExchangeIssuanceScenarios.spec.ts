@@ -23,10 +23,10 @@ import {
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import { DEFAULT_GAS, DEFAULT_REBALANCING_NATURAL_UNIT, ONE_DAY_IN_SECONDS } from '@utils/constants';
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
-import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { ExchangeHelper } from '@utils/helpers/exchangeHelper';
+import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -58,13 +58,13 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
   let transferProxy: TransferProxyContract;
   let weth: WethMockContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const exchangeWrapper = new ExchangeWrapper(ownerAccount);
-  const rebalancingWrapper = new RebalancingWrapper(
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
+  const exchangeHelper = new ExchangeHelper(ownerAccount);
+  const rebalancingHelper = new RebalancingHelper(
     ownerAccount,
-    coreWrapper,
-    erc20Wrapper,
+    coreHelper,
+    erc20Helper,
     blockchain
   );
 
@@ -72,33 +72,33 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
     ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(RebalancingSetExchangeIssuanceModule.abi);
 
-    vault = await coreWrapper.deployVaultAsync();
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    vault = await coreHelper.deployVaultAsync();
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    core = await coreHelper.deployCoreAsync(transferProxy, vault);
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+    await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
-    rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+    rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(
       core.address,
       whitelist,
     );
-    await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
+    await coreHelper.addFactoryAsync(core, rebalancingSetTokenFactory);
 
-    exchangeIssuanceModule = await coreWrapper.deployExchangeIssuanceModuleAsync(core, vault);
-    await coreWrapper.addModuleAsync(core, exchangeIssuanceModule.address);
+    exchangeIssuanceModule = await coreHelper.deployExchangeIssuanceModuleAsync(core, vault);
+    await coreHelper.addModuleAsync(core, exchangeIssuanceModule.address);
 
-    weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
+    weth = await erc20Helper.deployWrappedEtherAsync(ownerAccount);
 
-    rebalancingSetExchangeIssuanceModule = await coreWrapper.deployRebalancingSetExchangeIssuanceModuleAsync(
+    rebalancingSetExchangeIssuanceModule = await coreHelper.deployRebalancingSetExchangeIssuanceModuleAsync(
       core.address,
       transferProxy.address,
       exchangeIssuanceModule.address,
       weth.address,
       vault.address,
     );
-    await coreWrapper.addModuleAsync(core, rebalancingSetExchangeIssuanceModule.address);
+    await coreHelper.addModuleAsync(core, rebalancingSetExchangeIssuanceModule.address);
 
-    await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
+    await exchangeHelper.deployAndAuthorizeZeroExExchangeWrapper(
       core,
       SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
       SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
@@ -160,13 +160,13 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
       subjectCaller = tokenPurchaser;
 
       // Create wrapped Bitcoin (owned by 0x order maker)
-      const wrappedBitcoin = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker, 8);
+      const wrappedBitcoin = await erc20Helper.deployTokenAsync(zeroExOrderMaker, 8);
 
       // Create the Set with BTC and WETH in realistic quantities
       const componentAddresses = [wrappedBitcoin.address, weth.address];
       const componentUnits = [new BigNumber(1), WETH_COMPONENT_UNITS];
       bitcoinEtherNaturalUnit = new BigNumber(10 ** 10);
-      bitcoinEtherSet = await coreWrapper.createSetTokenAsync(
+      bitcoinEtherSet = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -176,7 +176,7 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
 
       // Create the Rebalancing Set
       rebalancingUnitShares = new BigNumber(1350000); // Unit shares required for each RB Set to be $1
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         core,
         rebalancingSetTokenFactory.address,
         ownerAccount,
@@ -211,7 +211,7 @@ contract('RebalancingSetExchangeIssuanceModule::Scenarios', accounts => {
         receiveTokenAmounts:  exchangeIssueReceiveTokenAmounts,
       };
 
-      await erc20Wrapper.approveTransfersAsync(
+      await erc20Helper.approveTransfersAsync(
         [wrappedBitcoin],
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
         zeroExOrderMaker

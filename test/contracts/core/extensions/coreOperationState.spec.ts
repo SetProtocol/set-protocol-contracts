@@ -13,7 +13,7 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { OperationStateChanged } from '@utils/contract_logs/core';
 import { ZERO, ONE } from '@utils/constants';
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
 import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
@@ -33,7 +33,7 @@ contract('CoreOperationState', accounts => {
 
   let core: CoreContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -46,7 +46,7 @@ contract('CoreOperationState', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    core = await coreWrapper.deployCoreAndDependenciesAsync();
+    core = await coreHelper.deployCoreAndDependenciesAsync();
   });
 
   afterEach(async () => {

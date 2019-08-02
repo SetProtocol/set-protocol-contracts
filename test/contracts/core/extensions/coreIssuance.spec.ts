@@ -37,9 +37,9 @@ import {
 } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -64,12 +64,12 @@ contract('CoreIssuance', accounts => {
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const rebalancingTokenWrapper = new RebalancingWrapper(
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
+  const rebalancingTokenWrapper = new RebalancingHelper(
     ownerAccount,
-    coreWrapper,
-    erc20Wrapper,
+    coreHelper,
+    erc20Helper,
     blockchain
   );
 
@@ -84,11 +84,11 @@ contract('CoreIssuance', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    vault = await coreHelper.deployVaultAsync();
+    core = await coreHelper.deployCoreAsync(transferProxy, vault);
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+    await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
   afterEach(async () => {
@@ -107,12 +107,12 @@ contract('CoreIssuance', accounts => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Helper.deployTokensAsync(2, ownerAccount);
+      await erc20Helper.approveTransfersAsync(components, transferProxy.address);
 
       componentAddresses = _.map(components, token => token.address);
       componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -148,7 +148,7 @@ contract('CoreIssuance', accounts => {
     });
 
     it('updates the balances of the components in the vault to belong to the set token', async () => {
-      const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const existingBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         componentAddresses,
         vault,
         setToken.address,
@@ -160,7 +160,7 @@ contract('CoreIssuance', accounts => {
         const units = componentUnits[idx];
         return balance.add(subjectQuantityToIssue.div(naturalUnit).mul(units));
       });
-      const newBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         componentAddresses,
         vault,
         setToken.address
@@ -169,7 +169,7 @@ contract('CoreIssuance', accounts => {
     });
 
     it('does not change balances of the components in the vault for the user', async () => {
-      const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const existingBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         componentAddresses,
         vault,
         ownerAccount
@@ -177,7 +177,7 @@ contract('CoreIssuance', accounts => {
 
       await subject();
 
-      const newBalances = await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, ownerAccount);
+      const newBalances = await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, ownerAccount);
       expect(newBalances).to.be.bignumber.eql(existingBalances);
     });
 
@@ -244,7 +244,7 @@ contract('CoreIssuance', accounts => {
       beforeEach(async () => {
         alreadyDepositedComponent = _.first(components);
         componentUnit = _.first(componentUnits);
-        await coreWrapper.depositFromUser(core, alreadyDepositedComponent.address, alreadyDepositedQuantity);
+        await coreHelper.depositFromUser(core, alreadyDepositedComponent.address, alreadyDepositedQuantity);
       });
 
       it('updates the vault balance of the component for the user by the correct amount', async () => {
@@ -276,7 +276,7 @@ contract('CoreIssuance', accounts => {
         componentUnit = _.first(componentUnits);
 
         alreadyDepositedQuantity = subjectQuantityToIssue.div(naturalUnit).mul(componentUnit).div(2);
-        await coreWrapper.depositFromUser(core, alreadyDepositedComponent.address, alreadyDepositedQuantity);
+        await coreHelper.depositFromUser(core, alreadyDepositedComponent.address, alreadyDepositedQuantity);
 
         quantityToTransfer = subjectQuantityToIssue.div(naturalUnit).mul(componentUnit).sub(alreadyDepositedQuantity);
       });
@@ -317,7 +317,7 @@ contract('CoreIssuance', accounts => {
 
       beforeEach(async () => {
         const depositPromises = _.map(components, component =>
-          coreWrapper.depositFromUser(core, component.address, alreadyDepositedQuantity),
+          coreHelper.depositFromUser(core, component.address, alreadyDepositedQuantity),
         );
         await Promise.all(depositPromises);
       });
@@ -356,7 +356,7 @@ contract('CoreIssuance', accounts => {
 
     describe('when the protocol is not in operational state', async () => {
       beforeEach(async () => {
-        await coreWrapper.setOperationStateAsync(
+        await coreHelper.setOperationStateAsync(
           core,
           ONE,
         );
@@ -385,12 +385,12 @@ contract('CoreIssuance', accounts => {
     let rebalancingSetToken: RebalancingSetTokenContract;
 
     beforeEach(async () => {
-      const rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
-      rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+      const rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
+      rebalancingTokenFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(
         core.address,
         rebalancingComponentWhiteList.address
       );
-      await coreWrapper.addFactoryAsync(core, rebalancingTokenFactory);
+      await coreHelper.addFactoryAsync(core, rebalancingTokenFactory);
 
       const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         core,
@@ -412,8 +412,8 @@ contract('CoreIssuance', accounts => {
 
       vanillaQuantityToIssue = ether(2);
       vanillaSetToIssue = setToken.address;
-      await coreWrapper.issueSetTokenAsync(core, vanillaSetToIssue, vanillaQuantityToIssue);
-      await erc20Wrapper.approveTransfersAsync([setToken], transferProxy.address);
+      await coreHelper.issueSetTokenAsync(core, vanillaSetToIssue, vanillaQuantityToIssue);
+      await erc20Helper.approveTransfersAsync([setToken], transferProxy.address);
 
       subjectCaller = ownerAccount;
       subjectQuantityToIssue = ether(1);
@@ -514,7 +514,7 @@ contract('CoreIssuance', accounts => {
 
       beforeEach(async () => {
         alreadyDepositedQuantity = vanillaQuantityToIssue;
-        await coreWrapper.depositFromUser(core, setToken.address, alreadyDepositedQuantity);
+        await coreHelper.depositFromUser(core, setToken.address, alreadyDepositedQuantity);
       });
 
       it('updates the vault balance of the component for the user by the correct amount', async () => {
@@ -548,7 +548,7 @@ contract('CoreIssuance', accounts => {
 
       beforeEach(async () => {
         alreadyDepositedQuantity = subjectQuantityToIssue.div(rebalancingNaturalUnit).mul(initialShareRatio).div(2);
-        await coreWrapper.depositFromUser(core, setToken.address, alreadyDepositedQuantity);
+        await coreHelper.depositFromUser(core, setToken.address, alreadyDepositedQuantity);
 
         quantityToTransfer = subjectQuantityToIssue.div(rebalancingNaturalUnit).mul(initialShareRatio)
         .sub(alreadyDepositedQuantity);
@@ -602,12 +602,12 @@ contract('CoreIssuance', accounts => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Helper.deployTokensAsync(2, ownerAccount);
+      await erc20Helper.approveTransfersAsync(components, transferProxy.address);
 
       componentAddresses = _.map(components, token => token.address);
       componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -643,7 +643,7 @@ contract('CoreIssuance', accounts => {
     });
 
     it('updates the balances of the components in the vault to belong to the set token', async () => {
-      const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const existingBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         componentAddresses,
         vault,
         setToken.address,
@@ -655,7 +655,7 @@ contract('CoreIssuance', accounts => {
         const units = componentUnits[idx];
         return balance.add(subjectQuantityToIssue.div(naturalUnit).mul(units));
       });
-      const newBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         componentAddresses,
         vault,
         setToken.address
@@ -725,7 +725,7 @@ contract('CoreIssuance', accounts => {
 
     describe('when the protocol is not in operational state', async () => {
       beforeEach(async () => {
-        await coreWrapper.setOperationStateAsync(
+        await coreHelper.setOperationStateAsync(
           core,
           ONE,
         );
@@ -750,12 +750,12 @@ contract('CoreIssuance', accounts => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Helper.deployTokensAsync(2, ownerAccount);
+      await erc20Helper.approveTransfersAsync(components, transferProxy.address);
 
       componentAddresses = _.map(components, token => token.address);
       componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -793,7 +793,7 @@ contract('CoreIssuance', accounts => {
     });
 
     it('updates the balances of the components in the vault to belong to the set token', async () => {
-      const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const existingBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         componentAddresses,
         vault,
         setToken.address,
@@ -805,7 +805,7 @@ contract('CoreIssuance', accounts => {
         const units = componentUnits[idx];
         return balance.add(subjectQuantityToIssue.div(naturalUnit).mul(units));
       });
-      const newBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+      const newBalances = await coreHelper.getVaultBalancesForTokensForOwner(
         componentAddresses,
         vault,
         setToken.address
@@ -866,7 +866,7 @@ contract('CoreIssuance', accounts => {
 
     describe('when the protocol is not in operational state', async () => {
       beforeEach(async () => {
-        await coreWrapper.setOperationStateAsync(
+        await coreHelper.setOperationStateAsync(
           core,
           ONE,
         );
@@ -889,12 +889,12 @@ contract('CoreIssuance', accounts => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Helper.deployTokensAsync(2, ownerAccount);
+      await erc20Helper.approveTransfersAsync(components, transferProxy.address);
 
       const componentAddresses = _.map(components, token => token.address);
       componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -902,7 +902,7 @@ contract('CoreIssuance', accounts => {
         naturalUnit,
       );
 
-      await coreWrapper.issueSetTokenAsync(core, setToken.address, naturalUnit);
+      await coreHelper.issueSetTokenAsync(core, setToken.address, naturalUnit);
 
       subjectCaller = ownerAccount;
       subjectQuantityToRedeem = naturalUnit;
@@ -1038,12 +1038,12 @@ contract('CoreIssuance', accounts => {
     let rebalancingToken: RebalancingSetTokenContract;
 
     beforeEach(async () => {
-      const rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
-      rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+      const rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
+      rebalancingTokenFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(
         core.address,
         rebalancingComponentWhiteList.address
       );
-      await coreWrapper.addFactoryAsync(core, rebalancingTokenFactory);
+      await coreHelper.addFactoryAsync(core, rebalancingTokenFactory);
 
       const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         core,
@@ -1066,12 +1066,12 @@ contract('CoreIssuance', accounts => {
 
       vanillaQuantityToIssue = ether(2);
       vanillaSetToIssue = setToken.address;
-      await coreWrapper.issueSetTokenAsync(core, vanillaSetToIssue, vanillaQuantityToIssue);
-      await erc20Wrapper.approveTransfersAsync([setToken], transferProxy.address);
+      await coreHelper.issueSetTokenAsync(core, vanillaSetToIssue, vanillaQuantityToIssue);
+      await erc20Helper.approveTransfersAsync([setToken], transferProxy.address);
 
       rebalancingTokenToIssue = rebalancingToken.address;
       rebalancingQuantityToIssue = ether(1);
-      await coreWrapper.issueSetTokenAsync(core, rebalancingTokenToIssue, rebalancingQuantityToIssue);
+      await coreHelper.issueSetTokenAsync(core, rebalancingTokenToIssue, rebalancingQuantityToIssue);
 
       const totalFees = rebalancingQuantityToIssue.mul(entranceFee).div(10000).round(0, 3);
 
@@ -1170,12 +1170,12 @@ contract('CoreIssuance', accounts => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(numComponents, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Helper.deployTokensAsync(numComponents, ownerAccount);
+      await erc20Helper.approveTransfersAsync(components, transferProxy.address);
 
       componentAddresses = _.map(components, token => token.address);
       componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -1183,7 +1183,7 @@ contract('CoreIssuance', accounts => {
         naturalUnit,
       );
 
-      await coreWrapper.issueSetTokenAsync(core, setToken.address, naturalUnit);
+      await coreHelper.issueSetTokenAsync(core, setToken.address, naturalUnit);
 
       subjectCaller = ownerAccount;
       subjectQuantityToRedeem = naturalUnit;
@@ -1203,7 +1203,7 @@ contract('CoreIssuance', accounts => {
 
     it('decrements the balance of the tokens owned by set in vault', async () => {
       const existingVaultBalances =
-        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
+        await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
 
       await subject();
 
@@ -1212,7 +1212,7 @@ contract('CoreIssuance', accounts => {
         return existingVaultBalances[idx].sub(requiredQuantityToRedeem);
       });
       const newVaultBalances =
-        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
+        await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
       expect(newVaultBalances).to.eql(expectedVaultBalances);
     });
 
@@ -1227,7 +1227,7 @@ contract('CoreIssuance', accounts => {
     });
 
     it('transfers all of the component tokens back to the user', async () => {
-      const existingTokenBalances = await erc20Wrapper.getTokenBalances(components, ownerAccount);
+      const existingTokenBalances = await erc20Helper.getTokenBalances(components, ownerAccount);
 
       await subject();
 
@@ -1235,7 +1235,7 @@ contract('CoreIssuance', accounts => {
         const quantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
         return balance.add(quantityToRedeem);
       });
-      const newTokenBalances = await erc20Wrapper.getTokenBalances(components, ownerAccount);
+      const newTokenBalances = await erc20Helper.getTokenBalances(components, ownerAccount);
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
@@ -1256,7 +1256,7 @@ contract('CoreIssuance', accounts => {
       const componentIndicesToExclude: number[] = [1, 2];
 
       beforeEach(async () => {
-        subjectComponentsToExcludeMask = coreWrapper.maskForComponentsAtIndexes(componentIndicesToExclude);
+        subjectComponentsToExcludeMask = coreHelper.maskForComponentsAtIndexes(componentIndicesToExclude);
       });
 
       it('transfers the first component back to the user', async () => {
@@ -1275,7 +1275,7 @@ contract('CoreIssuance', accounts => {
         const remainingComponents = _.tail(components);
         const remainingComponentAddresses = _.map(remainingComponents, token => token.address);
         const existingBalances =
-          await coreWrapper.getVaultBalancesForTokensForOwner(remainingComponentAddresses, vault, subjectSetToRedeem);
+          await coreHelper.getVaultBalancesForTokensForOwner(remainingComponentAddresses, vault, subjectSetToRedeem);
 
         await subject();
 
@@ -1284,19 +1284,19 @@ contract('CoreIssuance', accounts => {
           return existingBalances[idx].sub(requiredQuantityToRedeem);
         });
         const newVaultBalances =
-          await coreWrapper.getVaultBalancesForTokensForOwner(remainingComponentAddresses, vault, subjectSetToRedeem);
+          await coreHelper.getVaultBalancesForTokensForOwner(remainingComponentAddresses, vault, subjectSetToRedeem);
         expect(newVaultBalances).to.eql(expectedVaultBalances);
       });
     });
 
     describe('when the exclude mask includes all of the components', async () => {
       beforeEach(async () => {
-        subjectComponentsToExcludeMask = coreWrapper.maskForAllComponents(numComponents);
+        subjectComponentsToExcludeMask = coreHelper.maskForAllComponents(numComponents);
       });
 
       it('increments the balances of the tokens back to the user in vault', async () => {
         const existingVaultBalances =
-          await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, ownerAccount);
+          await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, ownerAccount);
 
         await subject();
 
@@ -1305,7 +1305,7 @@ contract('CoreIssuance', accounts => {
           return existingVaultBalances[idx].add(requiredQuantityToRedeem);
         });
         const newVaultBalances =
-          await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, ownerAccount);
+          await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, ownerAccount);
         expect(newVaultBalances).to.eql(expectedVaultBalances);
       });
     });
@@ -1354,12 +1354,12 @@ contract('CoreIssuance', accounts => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(numComponents, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Helper.deployTokensAsync(numComponents, ownerAccount);
+      await erc20Helper.approveTransfersAsync(components, transferProxy.address);
 
       componentAddresses = _.map(components, token => token.address);
       componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -1367,9 +1367,9 @@ contract('CoreIssuance', accounts => {
         naturalUnit,
       );
 
-      await coreWrapper.issueSetTokenAsync(core, setToken.address, naturalUnit);
-      await erc20Wrapper.approveTransferAsync(setToken, transferProxy.address);
-      await coreWrapper.depositFromUser(core, setToken.address, naturalUnit);
+      await coreHelper.issueSetTokenAsync(core, setToken.address, naturalUnit);
+      await erc20Helper.approveTransferAsync(setToken, transferProxy.address);
+      await coreHelper.depositFromUser(core, setToken.address, naturalUnit);
 
       subjectCaller = ownerAccount;
       subjectQuantityToRedeem = naturalUnit;
@@ -1386,7 +1386,7 @@ contract('CoreIssuance', accounts => {
 
     it('decrements the balance of the tokens owned by set in vault', async () => {
       const existingVaultBalances =
-        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
+        await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
 
       await subject();
 
@@ -1395,7 +1395,7 @@ contract('CoreIssuance', accounts => {
         return existingVaultBalances[idx].sub(requiredQuantityToRedeem);
       });
       const newVaultBalances =
-        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
+        await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
       expect(newVaultBalances).to.eql(expectedVaultBalances);
     });
 
@@ -1427,7 +1427,7 @@ contract('CoreIssuance', accounts => {
 
     it('increments all of the component tokens to the user in the vault', async () => {
       const existingVaultBalances =
-        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectCaller);
+        await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectCaller);
 
       await subject();
 
@@ -1436,7 +1436,7 @@ contract('CoreIssuance', accounts => {
         return existingVaultBalances[idx].add(requiredQuantityToRedeem);
       });
       const newVaultBalances =
-        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectCaller);
+        await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectCaller);
       expect(newVaultBalances).to.eql(expectedVaultBalances);
     });
 
@@ -1498,12 +1498,12 @@ contract('CoreIssuance', accounts => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(numComponents, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Helper.deployTokensAsync(numComponents, ownerAccount);
+      await erc20Helper.approveTransfersAsync(components, transferProxy.address);
 
       componentAddresses = _.map(components, token => token.address);
       componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -1511,7 +1511,7 @@ contract('CoreIssuance', accounts => {
         naturalUnit,
       );
 
-      await coreWrapper.issueSetTokenAsync(core, setToken.address, naturalUnit);
+      await coreHelper.issueSetTokenAsync(core, setToken.address, naturalUnit);
 
       subjectRecipient = otherAccount;
       subjectQuantityToRedeem = naturalUnit;
@@ -1530,7 +1530,7 @@ contract('CoreIssuance', accounts => {
 
     it('decrements the balance of the tokens owned by set in vault', async () => {
       const existingVaultBalances =
-        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
+        await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
 
       await subject();
 
@@ -1539,7 +1539,7 @@ contract('CoreIssuance', accounts => {
         return existingVaultBalances[idx].sub(requiredQuantityToRedeem);
       });
       const newVaultBalances =
-        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
+        await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
       expect(newVaultBalances).to.eql(expectedVaultBalances);
     });
 
@@ -1555,7 +1555,7 @@ contract('CoreIssuance', accounts => {
 
     it('increments all of the component tokens to the recipient in the vault', async () => {
       const existingVaultBalances =
-        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectRecipient);
+        await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectRecipient);
 
       await subject();
 
@@ -1564,7 +1564,7 @@ contract('CoreIssuance', accounts => {
         return existingVaultBalances[idx].add(requiredQuantityToRedeem);
       });
       const newVaultBalances =
-        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectRecipient);
+        await coreHelper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectRecipient);
       expect(newVaultBalances).to.eql(expectedVaultBalances);
     });
 

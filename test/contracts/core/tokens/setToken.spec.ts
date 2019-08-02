@@ -17,8 +17,8 @@ import { STANDARD_COMPONENT_UNIT, STANDARD_NATURAL_UNIT, ZERO } from '@utils/con
 import { getExpectedTransferLog } from '@utils/contract_logs/setToken';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -42,8 +42,8 @@ contract('SetToken', accounts => {
   let setToken: SetTokenContract;
   let factory: SetTokenFactoryContract;
 
-  const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
-  const erc20Wrapper = new ERC20Wrapper(deployerAccount);
+  const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
+  const erc20Helper = new ERC20Helper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(SetToken.abi);
@@ -70,8 +70,8 @@ contract('SetToken', accounts => {
     const componentCount: number = 3;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(componentCount, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
+      components = await erc20Helper.deployTokensAsync(componentCount, deployerAccount);
+      factory = await coreHelper.deploySetTokenFactoryAsync(coreAccount);
 
       subjectComponentAddresses = _.map(components, token => token.address);
       subjectComponentUnits = _.map(components, () => ether(_.random(1, 4)));
@@ -79,7 +79,7 @@ contract('SetToken', accounts => {
     });
 
     async function subject(): Promise<SetTokenContract> {
-      return coreWrapper.deploySetTokenAsync(
+      return coreHelper.deploySetTokenAsync(
         factory.address,
         subjectComponentAddresses,
         subjectComponentUnits,
@@ -229,7 +229,7 @@ contract('SetToken', accounts => {
     describe('when a component does not implement decimals() and natural unit lower', async () => {
       beforeEach(async () => {
         const minNaturalUnit = 10 ** 18;
-        const noDecimalToken = await erc20Wrapper.deployTokenWithNoDecimalAsync(deployerAccount);
+        const noDecimalToken = await erc20Helper.deployTokenWithNoDecimalAsync(deployerAccount);
         subjectComponentAddresses.push(noDecimalToken.address);
         subjectComponentUnits.push(STANDARD_COMPONENT_UNIT);
 
@@ -248,12 +248,12 @@ contract('SetToken', accounts => {
     let subjectCaller: Address = coreAccount;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(3, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
+      components = await erc20Helper.deployTokensAsync(3, deployerAccount);
+      factory = await coreHelper.deploySetTokenFactoryAsync(coreAccount);
 
       const componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => ether(_.random(1, 4)));
-      setToken = await coreWrapper.deploySetTokenAsync(
+      setToken = await coreHelper.deploySetTokenAsync(
         factory.address,
         componentAddresses,
         componentUnits,
@@ -323,12 +323,12 @@ contract('SetToken', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(3, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
+      components = await erc20Helper.deployTokensAsync(3, deployerAccount);
+      factory = await coreHelper.deploySetTokenFactoryAsync(coreAccount);
 
       const componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => ether(_.random(1, 4)));
-      setToken = await coreWrapper.deploySetTokenAsync(
+      setToken = await coreHelper.deploySetTokenAsync(
         factory.address,
         componentAddresses,
         componentUnits,

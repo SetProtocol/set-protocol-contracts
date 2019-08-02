@@ -34,9 +34,9 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import { BidPlaced } from '@utils/contract_logs/rebalanceAuctionModule';
 
-import { CoreWrapper } from '@utils/wrappers/coreWrapper';
-import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -68,12 +68,12 @@ contract('RebalanceAuctionModule', accounts => {
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
   let constantAuctionPriceCurve: ConstantAuctionPriceCurveContract;
 
-  const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
-  const erc20Wrapper = new ERC20Wrapper(deployerAccount);
-  const rebalancingWrapper = new RebalancingWrapper(
+  const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
+  const erc20Helper = new ERC20Helper(deployerAccount);
+  const rebalancingHelper = new RebalancingHelper(
     deployerAccount,
-    coreWrapper,
-    erc20Wrapper,
+    coreHelper,
+    erc20Helper,
     blockchain
   );
 
@@ -90,26 +90,26 @@ contract('RebalanceAuctionModule', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    transferProxy = await coreWrapper.deployTransferProxyAsync();
-    vault = await coreWrapper.deployVaultAsync();
-    coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
-    rebalanceAuctionModuleMock = await coreWrapper.deployRebalanceAuctionModuleMockAsync(coreMock, vault);
-    await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModuleMock.address);
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    vault = await coreHelper.deployVaultAsync();
+    coreMock = await coreHelper.deployCoreMockAsync(transferProxy, vault);
+    rebalanceAuctionModuleMock = await coreHelper.deployRebalanceAuctionModuleMockAsync(coreMock, vault);
+    await coreHelper.addModuleAsync(coreMock, rebalanceAuctionModuleMock.address);
 
-    factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
-    rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
-    rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+    factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
+    rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
+    rebalancingFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
     );
-    constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(
+    constantAuctionPriceCurve = await rebalancingHelper.deployConstantAuctionPriceCurveAsync(
       DEFAULT_AUCTION_PRICE_NUMERATOR,
       DEFAULT_AUCTION_PRICE_DIVISOR,
     );
 
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
-    await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
-    await rebalancingWrapper.addPriceLibraryAsync(coreMock, constantAuctionPriceCurve);
+    await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
+    await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
+    await rebalancingHelper.addPriceLibraryAsync(coreMock, constantAuctionPriceCurve);
   });
 
   afterEach(async () => {
@@ -131,7 +131,7 @@ contract('RebalanceAuctionModule', accounts => {
     beforeEach(async () => {
       const naturalUnits = [ether(.001), ether(.0001)];
 
-      const setTokens = await rebalancingWrapper.createSetTokensAsync(
+      const setTokens = await rebalancingHelper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
@@ -143,7 +143,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -153,7 +153,7 @@ contract('RebalanceAuctionModule', accounts => {
 
       // Issue currentSetToken
       await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
-      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
       rebalancingSetTokenQuantityToIssue = ether(8);
@@ -197,7 +197,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when bid is called and token is in Proposal State', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToProposeAsync(
+        await rebalancingHelper.defaultTransitionToProposeAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -214,7 +214,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when bid is called and token is in Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingHelper.defaultTransitionToRebalanceAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -225,14 +225,14 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it('transfers the correct amount of tokens to the bidder in the Vault', async () => {
-        const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE_NUMERATOR
         );
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
-        const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const oldReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           combinedTokenArray,
           vault,
           deployerAccount
@@ -240,7 +240,7 @@ contract('RebalanceAuctionModule', accounts => {
 
         await subject();
 
-        const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           combinedTokenArray,
           vault,
           deployerAccount
@@ -253,14 +253,14 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
-        const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE_NUMERATOR
         );
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
-        const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const oldSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           combinedTokenArray,
           vault,
           rebalancingSetToken.address
@@ -268,7 +268,7 @@ contract('RebalanceAuctionModule', accounts => {
 
         await subject();
 
-        const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           combinedTokenArray,
           vault,
           rebalancingSetToken.address
@@ -362,14 +362,14 @@ contract('RebalanceAuctionModule', accounts => {
         });
 
         it('transfers the correct amount of tokens to the bidder in the Vault', async () => {
-          const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
             roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
           );
           const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
-          const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          const oldReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
             combinedTokenArray,
             vault,
             deployerAccount
@@ -377,7 +377,7 @@ contract('RebalanceAuctionModule', accounts => {
 
           await subject();
 
-          const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          const newReceiverBalances = await coreHelper.getVaultBalancesForTokensForOwner(
             combinedTokenArray,
             vault,
             deployerAccount
@@ -390,14 +390,14 @@ contract('RebalanceAuctionModule', accounts => {
         });
 
         it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
-          const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
             roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
           );
           const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
-          const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          const oldSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
             combinedTokenArray,
             vault,
             rebalancingSetToken.address
@@ -405,7 +405,7 @@ contract('RebalanceAuctionModule', accounts => {
 
           await subject();
 
-          const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          const newSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
             combinedTokenArray,
             vault,
             rebalancingSetToken.address
@@ -469,7 +469,7 @@ contract('RebalanceAuctionModule', accounts => {
     beforeEach(async () => {
       const naturalUnits = [ether(.001), ether(.0001)];
 
-      const setTokens = await rebalancingWrapper.createSetTokensAsync(
+      const setTokens = await rebalancingHelper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
@@ -481,7 +481,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -491,7 +491,7 @@ contract('RebalanceAuctionModule', accounts => {
 
       // Issue currentSetToken
       await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
-      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
       rebalancingSetTokenQuantityToIssue = ether(8);
@@ -535,7 +535,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when bid is called and token is in Proposal State', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToProposeAsync(
+        await rebalancingHelper.defaultTransitionToProposeAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -552,7 +552,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when bid is called and token is in Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingHelper.defaultTransitionToRebalanceAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -563,23 +563,23 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it("transfers the correct amount of tokens to the bidder's wallet", async () => {
-        const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE_NUMERATOR
         );
 
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
-        const tokenInstances = await erc20Wrapper.retrieveTokenInstancesAsync(combinedTokenArray);
+        const tokenInstances = await erc20Helper.retrieveTokenInstancesAsync(combinedTokenArray);
 
-        const oldReceiverBalances = await erc20Wrapper.getTokenBalances(
+        const oldReceiverBalances = await erc20Helper.getTokenBalances(
           tokenInstances,
           subjectCaller
         );
 
         await subject();
 
-        const newReceiverBalances = await erc20Wrapper.getTokenBalances(
+        const newReceiverBalances = await erc20Helper.getTokenBalances(
           tokenInstances,
           subjectCaller
         );
@@ -591,14 +591,14 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
-        const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE_NUMERATOR
         );
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
-        const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const oldSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           combinedTokenArray,
           vault,
           rebalancingSetToken.address
@@ -606,7 +606,7 @@ contract('RebalanceAuctionModule', accounts => {
 
         await subject();
 
-        const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           combinedTokenArray,
           vault,
           rebalancingSetToken.address
@@ -699,23 +699,23 @@ contract('RebalanceAuctionModule', accounts => {
         });
 
         it("transfers the correct amount of tokens to the bidder's wallet", async () => {
-          const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
             roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
           );
 
           const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
-          const tokenInstances = await erc20Wrapper.retrieveTokenInstancesAsync(combinedTokenArray);
+          const tokenInstances = await erc20Helper.retrieveTokenInstancesAsync(combinedTokenArray);
 
-          const oldReceiverBalances = await erc20Wrapper.getTokenBalances(
+          const oldReceiverBalances = await erc20Helper.getTokenBalances(
             tokenInstances,
             subjectCaller
           );
 
           await subject();
 
-          const newReceiverBalances = await erc20Wrapper.getTokenBalances(
+          const newReceiverBalances = await erc20Helper.getTokenBalances(
             tokenInstances,
             subjectCaller
           );
@@ -727,14 +727,14 @@ contract('RebalanceAuctionModule', accounts => {
         });
 
         it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
-          const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
             roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
           );
           const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
-          const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          const oldSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
             combinedTokenArray,
             vault,
             rebalancingSetToken.address
@@ -742,7 +742,7 @@ contract('RebalanceAuctionModule', accounts => {
 
           await subject();
 
-          const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          const newSenderBalances = await coreHelper.getVaultBalancesForTokensForOwner(
             combinedTokenArray,
             vault,
             rebalancingSetToken.address
@@ -801,7 +801,7 @@ contract('RebalanceAuctionModule', accounts => {
     let currentSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingWrapper.createSetTokensAsync(
+      const setTokens = await rebalancingHelper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
@@ -811,7 +811,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -838,7 +838,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when getBidPrice is called from Proposal State', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToProposeAsync(
+        await rebalancingHelper.defaultTransitionToProposeAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -857,12 +857,12 @@ contract('RebalanceAuctionModule', accounts => {
       beforeEach(async () => {
         // Issue currentSetToken
         await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
-        await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+        await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
         // Use issued currentSetToken to issue rebalancingSetToken
         await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7));
 
-        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingHelper.defaultTransitionToRebalanceAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -873,7 +873,7 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it('returns the correct UnitArrays; using price=1.374', async () => {
-        const expectedFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
+        const expectedFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -896,7 +896,7 @@ contract('RebalanceAuctionModule', accounts => {
     let currentSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingWrapper.createSetTokensAsync(
+      const setTokens = await rebalancingHelper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
@@ -906,7 +906,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -916,7 +916,7 @@ contract('RebalanceAuctionModule', accounts => {
 
       amountToIssue = ether(2);
       await coreMock.issue.sendTransactionAsync(currentSetToken.address, amountToIssue);
-      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, amountToIssue);
 
       subjectCaller = bidderAccount;
@@ -939,7 +939,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when placeBid is called from Proposal State', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToProposeAsync(
+        await rebalancingHelper.defaultTransitionToProposeAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -956,7 +956,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when placeBid is called from Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingHelper.defaultTransitionToRebalanceAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -995,7 +995,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when placeBid is called from Drawdown State', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingHelper.defaultTransitionToRebalanceAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -1015,7 +1015,7 @@ contract('RebalanceAuctionModule', accounts => {
           false
         );
 
-        await rebalancingWrapper.endFailedRebalanceAsync(
+        await rebalancingHelper.endFailedRebalanceAsync(
           rebalancingSetToken
         );
       });
@@ -1034,7 +1034,7 @@ contract('RebalanceAuctionModule', accounts => {
     let currentSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingWrapper.createSetTokensAsync(
+      const setTokens = await rebalancingHelper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
@@ -1044,7 +1044,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -1067,12 +1067,12 @@ contract('RebalanceAuctionModule', accounts => {
       beforeEach(async () => {
         // Issue currentSetToken
         await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
-        await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+        await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
         // Use issued currentSetToken to issue rebalancingSetToken
         await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7));
 
-        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingHelper.defaultTransitionToRebalanceAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -1100,7 +1100,7 @@ contract('RebalanceAuctionModule', accounts => {
     beforeEach(async () => {
       const naturalUnits = [ether(.001), ether(.0001)];
 
-      const setTokens = await rebalancingWrapper.createSetTokensAsync(
+      const setTokens = await rebalancingHelper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
@@ -1112,7 +1112,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -1122,7 +1122,7 @@ contract('RebalanceAuctionModule', accounts => {
 
       // Issue currentSetToken
       await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
-      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
       rebalancingSetTokenQuantityToIssue = ether(8);
@@ -1157,7 +1157,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when redeemFromFailedRebalance is called and token is in Proposal State', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToProposeAsync(
+        await rebalancingHelper.defaultTransitionToProposeAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -1174,7 +1174,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when redeemFromFailedRebalance is called and token is in Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingHelper.defaultTransitionToRebalanceAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -1193,7 +1193,7 @@ contract('RebalanceAuctionModule', accounts => {
       let minimumBid: BigNumber;
 
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingHelper.defaultTransitionToRebalanceAsync(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -1213,7 +1213,7 @@ contract('RebalanceAuctionModule', accounts => {
           false
         );
 
-        await rebalancingWrapper.endFailedRebalanceAsync(
+        await rebalancingHelper.endFailedRebalanceAsync(
           rebalancingSetToken
         );
       });
@@ -1224,13 +1224,13 @@ contract('RebalanceAuctionModule', accounts => {
         const receiverTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
         const setTotalSupply = await rebalancingSetToken.totalSupply.callAsync();
 
-        const collateralBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const collateralBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           combinedTokenArray,
           vault,
           rebalancingSetToken.address
         );
 
-        const oldReceiverVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const oldReceiverVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           combinedTokenArray,
           vault,
           deployerAccount
@@ -1238,7 +1238,7 @@ contract('RebalanceAuctionModule', accounts => {
 
         await subject();
 
-        const newReceiverVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newReceiverVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
           combinedTokenArray,
           vault,
           deployerAccount
@@ -1284,7 +1284,7 @@ contract('RebalanceAuctionModule', accounts => {
     let currentSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingWrapper.createSetTokensAsync(
+      const setTokens = await rebalancingHelper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
@@ -1294,7 +1294,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -1303,12 +1303,12 @@ contract('RebalanceAuctionModule', accounts => {
       );
 
       await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
-      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7));
 
-      await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+      await rebalancingHelper.defaultTransitionToRebalanceAsync(
         coreMock,
         rebalancingComponentWhiteList,
         rebalancingSetToken,

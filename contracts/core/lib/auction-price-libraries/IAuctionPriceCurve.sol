@@ -17,7 +17,7 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { RebalancingLibrary } from "../RebalancingLibrary.sol";
+import { RebalancingLibraryV2 } from "../RebalancingLibraryV2.sol";
 
 
 /**
@@ -42,7 +42,7 @@ interface IAuctionPriceCurve {
      * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      */
     function validateAuctionPriceParameters(
-        RebalancingLibrary.AuctionPriceParameters calldata _auctionPriceParameters
+        RebalancingLibraryV2.AuctionPriceParameters calldata _auctionPriceParameters
     )
         external
         view;
@@ -55,7 +55,7 @@ interface IAuctionPriceCurve {
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        RebalancingLibrary.AuctionPriceParameters calldata _auctionPriceParameters
+        RebalancingLibraryV2.AuctionPriceParameters calldata _auctionPriceParameters
     )
         external
         view

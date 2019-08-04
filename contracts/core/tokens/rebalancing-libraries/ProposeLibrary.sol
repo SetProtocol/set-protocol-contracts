@@ -24,7 +24,7 @@ import { ICore } from "../../interfaces/ICore.sol";
 import { IRebalancingSetFactory } from "../../interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
-import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
+import { RebalancingLibraryV2 } from "../../lib/RebalancingLibraryV2.sol";
 
 
 /**
@@ -62,7 +62,7 @@ library ProposeLibrary {
         address _nextSet,
         address _auctionLibrary,
         ProposalContext memory _proposalContext,
-        RebalancingLibrary.AuctionPriceParameters memory _auctionPriceParameters
+        RebalancingLibraryV2.AuctionPriceParameters memory _auctionPriceParameters
     )
         public
     {
@@ -77,8 +77,8 @@ library ProposeLibrary {
 
         // New Proposal can only be made in Default and Proposal state
         require(
-            _proposalContext.rebalanceState == uint8(RebalancingLibrary.State.Default) ||
-            _proposalContext.rebalanceState == uint8(RebalancingLibrary.State.Proposal),
+            _proposalContext.rebalanceState == uint8(RebalancingLibraryV2.State.Default) ||
+            _proposalContext.rebalanceState == uint8(RebalancingLibraryV2.State.Proposal),
             "ProposeLibrary.validateProposal: State must be in Propose or Default"
         );
 

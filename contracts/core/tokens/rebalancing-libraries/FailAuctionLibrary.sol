@@ -24,7 +24,7 @@ import { CommonMath } from "../../../lib/CommonMath.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
-import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
+import { RebalancingLibraryV2 } from "../../lib/RebalancingLibraryV2.sol";
 
 
 /**
@@ -54,8 +54,8 @@ library FailAuctionLibrary {
         uint256 _calculatedUnitShares,
         address _currentSet,
         address _coreAddress,
-        RebalancingLibrary.AuctionPriceParameters memory _auctionPriceParameters,
-        RebalancingLibrary.BiddingParameters memory _biddingParameters,
+        RebalancingLibraryV2.AuctionPriceParameters memory _auctionPriceParameters,
+        RebalancingLibraryV2.BiddingParameters memory _biddingParameters,
         uint8 _rebalanceState
     )
         public
@@ -63,7 +63,7 @@ library FailAuctionLibrary {
     {
         // Token must be in Rebalance State
         require(
-            _rebalanceState ==  uint8(RebalancingLibrary.State.Rebalance),
+            _rebalanceState ==  uint8(RebalancingLibraryV2.State.Rebalance),
             "RebalanceAuctionModule.endFailedAuction: Rebalancing Set Token must be in Rebalance State"
         );
 
@@ -97,10 +97,10 @@ library FailAuctionLibrary {
                 );
 
                 // Set Rebalance Set Token state to Default
-                newRebalanceState = uint8(RebalancingLibrary.State.Default);
+                newRebalanceState = uint8(RebalancingLibraryV2.State.Default);
             } else {
                 // Set Rebalancing Set Token to Drawdown state
-                newRebalanceState = uint8(RebalancingLibrary.State.Drawdown);
+                newRebalanceState = uint8(RebalancingLibraryV2.State.Drawdown);
             }
         } else {
             // If settleRebalance can be called then endFailedAuction can't be unless calculatedUnitShares
@@ -111,7 +111,7 @@ library FailAuctionLibrary {
             );
 
             // If calculated unitShares equals 0 set to Drawdown state
-            newRebalanceState = uint8(RebalancingLibrary.State.Drawdown);
+            newRebalanceState = uint8(RebalancingLibraryV2.State.Drawdown);
         }
 
         return newRebalanceState;

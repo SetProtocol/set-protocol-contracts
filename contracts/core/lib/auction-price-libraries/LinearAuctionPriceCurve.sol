@@ -18,7 +18,7 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { RebalancingLibrary } from "../RebalancingLibrary.sol";
+import { RebalancingLibraryV2 } from "../RebalancingLibraryV2.sol";
 
 
 /**
@@ -62,7 +62,7 @@ contract LinearAuctionPriceCurve {
      * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      */
     function validateAuctionPriceParameters(
-        RebalancingLibrary.AuctionPriceParameters memory _auctionPriceParameters
+        RebalancingLibraryV2.AuctionPriceParameters memory _auctionPriceParameters
     )
         public
         view
@@ -95,7 +95,7 @@ contract LinearAuctionPriceCurve {
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        RebalancingLibrary.AuctionPriceParameters memory _auctionPriceParameters
+        RebalancingLibraryV2.AuctionPriceParameters memory _auctionPriceParameters
     )
         public
         view

@@ -21,7 +21,7 @@ import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IAuctionPriceCurve } from "../../lib/auction-price-libraries/IAuctionPriceCurve.sol";
 import { ICore } from "../../interfaces/ICore.sol";
-import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
+import { RebalancingLibraryV2 } from "../../lib/RebalancingLibraryV2.sol";
 
 
 /**
@@ -47,7 +47,7 @@ library PlaceBidLibrary {
     function validatePlaceBid(
         uint256 _quantity,
         address _coreAddress,
-        RebalancingLibrary.BiddingParameters memory _biddingParameters
+        RebalancingLibraryV2.BiddingParameters memory _biddingParameters
     )
         public
         view
@@ -93,8 +93,8 @@ library PlaceBidLibrary {
     function getBidPrice(
         uint256 _quantity,
         address _auctionLibrary,
-        RebalancingLibrary.BiddingParameters memory _biddingParameters,
-        RebalancingLibrary.AuctionPriceParameters memory _auctionPriceParameters,
+        RebalancingLibraryV2.BiddingParameters memory _biddingParameters,
+        RebalancingLibraryV2.AuctionPriceParameters memory _auctionPriceParameters,
         uint8 _rebalanceState
     )
         public
@@ -103,7 +103,7 @@ library PlaceBidLibrary {
     {
         // Confirm in Rebalance State
         require(
-            _rebalanceState == uint8(RebalancingLibrary.State.Rebalance),
+            _rebalanceState == uint8(RebalancingLibraryV2.State.Rebalance),
             "RebalancingSetToken.getBidPrice: State must be Rebalance"
         );
 
@@ -140,7 +140,7 @@ library PlaceBidLibrary {
         uint256 _unitsMultiplier,
         uint256 _priceNumerator,
         uint256 _priceDivisor,
-        RebalancingLibrary.BiddingParameters memory _biddingParameters
+        RebalancingLibraryV2.BiddingParameters memory _biddingParameters
     )
         public
         pure

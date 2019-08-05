@@ -7,6 +7,7 @@ import {
   CoreIssuanceLibraryMockContract,
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryMockContract,
+  RebalancingLibraryMockContract,
   RebalancingSetIssuanceMockContract,
   SetTokenLibraryMockContract,
   VaultContract,
@@ -26,6 +27,8 @@ const CoreIssuanceLibraryMock = artifacts.require('CoreIssuanceLibraryMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
+const RebalancingLibrary = artifacts.require('RebalancingLibrary');
+const RebalancingLibraryMock = artifacts.require('RebalancingLibraryMock');
 const RebalancingSetIssuanceMock = artifacts.require('RebalancingSetIssuanceMock');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
 const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
@@ -114,6 +117,25 @@ export class LibraryMockHelper {
 
     return new ExchangeIssuanceLibraryMockContract(
       new web3.eth.Contract(exchangeIssuanceMockContract.abi, exchangeIssuanceMockContract.address),
+      { from },
+    );
+  }
+
+  public async deployRebalancingLibraryMockAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<RebalancingLibraryMockContract> {
+    const truffleRebalancingLibrary = await RebalancingLibrary.new(
+      { from: this._contractOwnerAddress },
+    );
+
+    await RebalancingLibraryMock.link('RebalancingLibrary', truffleRebalancingLibrary.address);
+
+    const rebalancingLibraryContract = await RebalancingLibraryMock.new(
+      { from },
+    );
+
+    return new RebalancingLibraryMockContract(
+      new web3.eth.Contract(rebalancingLibraryContract.abi, rebalancingLibraryContract.address),
       { from },
     );
   }

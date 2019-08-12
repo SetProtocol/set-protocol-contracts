@@ -442,7 +442,7 @@ contract('RebalanceAuctionModule', accounts => {
         it('emits a placeBid event', async () => {
           const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
-            subjectQuantity,
+            roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
           );
           const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
@@ -803,7 +803,7 @@ contract('RebalanceAuctionModule', accounts => {
         it('emits a placeBid event', async () => {
           const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
-            subjectQuantity,
+            roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
           );
           const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();

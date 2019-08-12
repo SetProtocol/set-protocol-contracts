@@ -453,7 +453,7 @@ contract('RebalanceAuctionModule', accounts => {
           const expectedLogs = BidPlaced(
             rebalancingSetToken.address,
             subjectCaller,
-            subjectQuantity,
+            roundedQuantity,
             combinedTokenArray,
             expectedTokenFlows['inflowArray'],
             expectedTokenFlows['outflowArray'],
@@ -814,7 +814,7 @@ contract('RebalanceAuctionModule', accounts => {
           const expectedLogs = BidPlaced(
             rebalancingSetToken.address,
             subjectCaller,
-            subjectQuantity,
+            roundedQuantity,
             combinedTokenArray,
             expectedTokenFlows['inflowArray'],
             expectedTokenFlows['outflowArray'],

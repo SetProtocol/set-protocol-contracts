@@ -15,10 +15,6 @@
 */
 
 pragma solidity 0.5.7;
-pragma experimental "ABIEncoderV2";
-
-import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
 
 /**
  * @title RebalancingLibrary
@@ -29,7 +25,6 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
  *
  */
 library RebalancingLibraryV2 {
-    using SafeMath for uint256;
 
     /* ============ Enums ============ */
 

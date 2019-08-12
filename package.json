@@ -43,7 +43,7 @@
     "transpile": "tsc",
     "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name '*.spec.js'`",
     "prepublishOnly": "yarn dist",
-    "flatten": "truffle-flattener contracts/core/tokens/*.sol"
+    "flatten": "truffle-flattener contracts/core/tokens/RebalancingSetTokenFactory.sol"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
   "author": "Felix Feng <felix@setprotocol.com>",

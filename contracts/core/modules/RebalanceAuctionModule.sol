@@ -41,8 +41,12 @@ contract RebalanceAuctionModule is
     /* ============ Events ============ */
 
     event BidPlaced(
+        address indexed rebalancingSetToken,
         address indexed bidder,
-        uint256 quantity
+        uint256 rebalancingSetQuantity,
+        address[] combinedTokenAddresses,
+        uint256[] inflowTokenUnits,
+        uint256[] outflowTokenUnits
     );
 
     /* ============ Constructor ============ */
@@ -118,8 +122,12 @@ contract RebalanceAuctionModule is
 
         // Log bid placed event
         emit BidPlaced(
+            _rebalancingSetToken,
             msg.sender,
-            executionQuantity
+            executionQuantity,
+            tokenArray,
+            inflowUnitArray,
+            outflowUnitArray
         );
     }
 
@@ -175,8 +183,12 @@ contract RebalanceAuctionModule is
 
         // Log bid placed event
         emit BidPlaced(
+            _rebalancingSetToken,
             msg.sender,
-            executionQuantity
+            executionQuantity,
+            tokenArray,
+            inflowUnitArray,
+            outflowUnitArray
         );
     }
 

@@ -4,7 +4,7 @@ import { BigNumber } from 'bignumber.js';
 export function BidPlaced(
   rebalancingSetToken: Address,
   bidder: Address,
-  rebalancingSetQuantity: BigNumber,
+  executionQuantity: BigNumber,
   combinedTokenAddresses: Address[],
   inflowTokenUnits: BigNumber[],
   outflowTokenUnits: BigNumber[],
@@ -16,7 +16,7 @@ export function BidPlaced(
     args: {
       rebalancingSetToken,
       bidder,
-      rebalancingSetQuantity,
+      executionQuantity,
       combinedTokenAddresses,
       inflowTokenUnits,
       outflowTokenUnits,

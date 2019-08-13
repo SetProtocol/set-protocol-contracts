@@ -43,7 +43,7 @@ contract RebalanceAuctionModule is
     event BidPlaced(
         address indexed rebalancingSetToken,
         address indexed bidder,
-        uint256 rebalancingSetQuantity,
+        uint256 executionQuantity,
         address[] combinedTokenAddresses,
         uint256[] inflowTokenUnits,
         uint256[] outflowTokenUnits

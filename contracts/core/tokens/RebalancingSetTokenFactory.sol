@@ -15,6 +15,7 @@
 */
 
 pragma solidity 0.5.7;
+pragma experimental "ABIEncoderV2";
 
 import { Bytes32Library } from "../../lib/Bytes32Library.sol";
 import { ICore } from "../interfaces/ICore.sol";

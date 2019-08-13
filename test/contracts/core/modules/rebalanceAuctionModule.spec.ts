@@ -293,12 +293,23 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it('emits a placeBid event', async () => {
+        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+          rebalancingSetToken,
+          subjectQuantity,
+          DEFAULT_AUCTION_PRICE_NUMERATOR
+        );
+        const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+
         const txHash = await subject();
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
         const expectedLogs = BidPlaced(
+          rebalancingSetToken.address,
           subjectCaller,
           subjectQuantity,
+          combinedTokenArray,
+          expectedTokenFlows['inflowArray'],
+          expectedTokenFlows['outflowArray'],
           rebalanceAuctionModuleMock.address,
         );
 
@@ -429,14 +440,26 @@ contract('RebalanceAuctionModule', accounts => {
         });
 
         it('emits a placeBid event', async () => {
+          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+            rebalancingSetToken,
+            roundedQuantity,
+            DEFAULT_AUCTION_PRICE_NUMERATOR
+          );
+          const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+
           const txHash = await subject();
           const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
           const expectedLogs = BidPlaced(
+            rebalancingSetToken.address,
             subjectCaller,
             roundedQuantity,
+            combinedTokenArray,
+            expectedTokenFlows['inflowArray'],
+            expectedTokenFlows['outflowArray'],
             rebalanceAuctionModuleMock.address,
           );
+
 
           await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
         });
@@ -630,12 +653,23 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it('emits a placeBid event', async () => {
+        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+          rebalancingSetToken,
+          subjectQuantity,
+          DEFAULT_AUCTION_PRICE_NUMERATOR
+        );
+        const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+
         const txHash = await subject();
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
         const expectedLogs = BidPlaced(
+          rebalancingSetToken.address,
           subjectCaller,
           subjectQuantity,
+          combinedTokenArray,
+          expectedTokenFlows['inflowArray'],
+          expectedTokenFlows['outflowArray'],
           rebalanceAuctionModuleMock.address,
         );
 
@@ -767,12 +801,23 @@ contract('RebalanceAuctionModule', accounts => {
         });
 
         it('emits a placeBid event', async () => {
+          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+            rebalancingSetToken,
+            roundedQuantity,
+            DEFAULT_AUCTION_PRICE_NUMERATOR
+          );
+          const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+
           const txHash = await subject();
           const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
           const expectedLogs = BidPlaced(
+            rebalancingSetToken.address,
             subjectCaller,
             roundedQuantity,
+            combinedTokenArray,
+            expectedTokenFlows['inflowArray'],
+            expectedTokenFlows['outflowArray'],
             rebalanceAuctionModuleMock.address,
           );
 

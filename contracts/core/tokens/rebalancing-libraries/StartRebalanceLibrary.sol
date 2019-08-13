@@ -272,7 +272,7 @@ library StartRebalanceLibrary {
 
         // Compute unit amounts of token in Set
         if (isComponent) {
-            return RebalancingLibrary.computeTransferValue(
+            return computeTransferValue(
                 _setToken.units[indexCurrent],
                 _setToken.naturalUnit,
                 _minimumBid,
@@ -318,5 +318,27 @@ library StartRebalanceLibrary {
         );
 
         return remainingCurrentSets;
+    }
+
+   /**
+     * Function to calculate the transfer value of a component given a standardized bid amount
+     * (minimumBid/priceDivisor)
+     *
+     * @param   _unit           Units of the component token
+     * @param   _naturalUnit    Natural unit of the Set token
+     * @param   _minimumBid     Minimum bid amount
+     * @return  uint256         Amount of tokens per standard bid amount (minimumBid/priceDivisor)
+     */
+    function computeTransferValue(
+        uint256 _unit,
+        uint256 _naturalUnit,
+        uint256 _minimumBid,
+        address _auctionLibrary
+    )
+        internal
+        returns (uint256)
+    {
+        uint256 priceDivisor = IAuctionPriceCurve(_auctionLibrary).priceDivisor();
+        return _minimumBid.mul(_unit).div(_naturalUnit).div(priceDivisor);
     }
 }

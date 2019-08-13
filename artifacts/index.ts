@@ -19,7 +19,6 @@ export { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
 export { PlaceBidLibrary } from "./ts/PlaceBidLibrary";
 export { ProposeLibrary } from "./ts/ProposeLibrary";
 export { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
-export { RebalancingLibrary } from "./ts/RebalancingLibrary";
 export { RebalancingSetIssuanceModule } from "./ts/RebalancingSetIssuanceModule";
 export { RebalancingSetExchangeIssuanceModule } from "./ts/RebalancingSetExchangeIssuanceModule";
 export { RebalancingSetToken } from "./ts/RebalancingSetToken";
@@ -66,7 +65,6 @@ export {
   PlaceBidLibraryContract,
   ProposeLibraryContract,
   RebalanceAuctionModuleContract,
-  RebalancingLibraryContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetIssuanceModuleContract,
   RebalancingSetTokenContract,

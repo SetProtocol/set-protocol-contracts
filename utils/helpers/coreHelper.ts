@@ -44,7 +44,6 @@ const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetEx
 const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
-const RebalancingLibrary = artifacts.require('RebalancingLibrary');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
@@ -186,16 +185,6 @@ export class CoreHelper {
   public async linkRebalancingLibrariesAsync(
     contract: any,
   ): Promise<void> {
-    const truffleRebalancingLibrary = await RebalancingLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-
-    await ProposeLibrary.link('RebalancingLibrary', truffleRebalancingLibrary.address);
-    await StartRebalanceLibrary.link('RebalancingLibrary', truffleRebalancingLibrary.address);
-    await PlaceBidLibrary.link('RebalancingLibrary', truffleRebalancingLibrary.address);
-    await SettleRebalanceLibrary.link('RebalancingLibrary', truffleRebalancingLibrary.address);
-    await FailAuctionLibrary.link('RebalancingLibrary', truffleRebalancingLibrary.address);
-
     const truffleProposeLibrary = await ProposeLibrary.new(
       { from: this._tokenOwnerAddress },
     );
@@ -212,7 +201,6 @@ export class CoreHelper {
       { from: this._tokenOwnerAddress },
     );
 
-    await contract.link('RebalancingLibrary', truffleRebalancingLibrary.address);
     await contract.link('ProposeLibrary', truffleProposeLibrary.address);
     await contract.link('StartRebalanceLibrary', truffleStartRebalanceLibrary.address);
     await contract.link('PlaceBidLibrary', trufflePlaceBidLibrary.address);

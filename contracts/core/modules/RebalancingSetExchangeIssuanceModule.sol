@@ -443,16 +443,14 @@ contract RebalancingSetExchangeIssuanceModule is
             "RebalancingSetExchangeIssuance.validateInputs: Quantity must be multiple of natural unit"
         );
 
-        // Only 1 receive token in redeem and 1 send token in issue allowed
-        require(
-            _transactTokenArray.length == 1,
-            "RebalancingSetExchangeIssuance.validateInputs: Only 1 Send/Receive Token Allowed"
-        );
-
-        require(
-            _transactTokenAddress == _transactTokenArray[0],
-            "RebalancingSetExchangeIssuance.validateInputs: Send/Receive token must match required"
-        );
+        // The transact token array tokens must match the transact token. Multiple items in the array are allowed
+        // for usage of multiple exchanges to be used.
+        for (uint256 i = 0; i < _transactTokenArray.length; i++) {
+            require(
+                _transactTokenAddress == _transactTokenArray[i],
+                "RebalancingSetExchangeIssuance.validateInputs: Send/Receive token must match transact token"
+            );
+        }
 
         // Validate that the base Set address matches the issuanceParams Set Address
         address baseSet = ISetToken(_rebalancingSetAddress).getComponents()[0];
@@ -460,7 +458,7 @@ contract RebalancingSetExchangeIssuanceModule is
             baseSet == _baseSetAddress,
             "RebalancingSetExchangeIssuance.validateInputs: Base Set addresses must match"
         );
-    } 
+    }
 
     /**
      * Issue a Rebalancing Set using a specified ERC20 payment token. The payment token is used in ExchangeIssue

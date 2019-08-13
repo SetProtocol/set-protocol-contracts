@@ -17,7 +17,7 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { RebalancingLibraryV2 } from "../lib/RebalancingLibraryV2.sol";
+import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 
 /**
  * @title IRebalancingSetToken
@@ -67,7 +67,7 @@ interface IRebalancingSetToken {
     function rebalanceState()
         external
         view
-        returns (RebalancingLibraryV2.State);
+        returns (RebalancingLibrary.State);
 
     /**
      * Gets the balance of the specified address.

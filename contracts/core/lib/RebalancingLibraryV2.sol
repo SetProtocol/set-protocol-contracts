@@ -25,7 +25,7 @@ pragma solidity 0.5.7;
  * Rebalancing Set Tokens. Removes the old calculation functions
  *
  */
-library RebalancingLibraryV2 {
+library RebalancingLibrary {
 
     /* ============ Enums ============ */
 

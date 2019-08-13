@@ -20,7 +20,7 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ICore } from "../interfaces/ICore.sol";
-import { IRebalancingSetTokenV2 } from "../interfaces/IRebalancingSetTokenV2.sol";
+import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
@@ -102,7 +102,7 @@ contract RebalanceAuctionModule is
             tokenArray,
             inflowUnitArray,
             outflowUnitArray
-        ) = IRebalancingSetTokenV2(_rebalancingSetToken).placeBid(executionQuantity);
+        ) = IRebalancingSetToken(_rebalancingSetToken).placeBid(executionQuantity);
 
         // Retrieve tokens from bidder and deposit in vault for rebalancing set token
         coreInstance.batchDepositModule(
@@ -163,7 +163,7 @@ contract RebalanceAuctionModule is
             tokenArray,
             inflowUnitArray,
             outflowUnitArray
-        ) = IRebalancingSetTokenV2(_rebalancingSetToken).placeBid(executionQuantity);
+        ) = IRebalancingSetToken(_rebalancingSetToken).placeBid(executionQuantity);
 
         // Retrieve tokens from bidder and deposit in vault for rebalancing set token
         coreInstance.batchDepositModule(
@@ -206,7 +206,7 @@ contract RebalanceAuctionModule is
         nonReentrant
     {
         // Create Rebalancing Set Token instance
-        IRebalancingSetTokenV2 rebalancingSetToken = IRebalancingSetTokenV2(_rebalancingSetToken);
+        IRebalancingSetToken rebalancingSetToken = IRebalancingSetToken(_rebalancingSetToken);
 
         // Make sure the rebalancingSetToken is tracked by Core
         require(
@@ -276,7 +276,7 @@ contract RebalanceAuctionModule is
         );
 
         // Receive bidding parameters of current auction
-        uint256[] memory biddingParameters = IRebalancingSetTokenV2(_rebalancingSetToken).getBiddingParameters();
+        uint256[] memory biddingParameters = IRebalancingSetToken(_rebalancingSetToken).getBiddingParameters();
         uint256 minimumBid = biddingParameters[0];
         uint256 remainingCurrentSets = biddingParameters[1];
 

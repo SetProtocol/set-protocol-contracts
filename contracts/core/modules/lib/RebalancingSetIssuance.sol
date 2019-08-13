@@ -20,7 +20,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
 import { ERC20Wrapper } from "../../../lib/ERC20Wrapper.sol";
-import { IRebalancingSetTokenV2 } from "../../interfaces/IRebalancingSetTokenV2.sol";
+import { IRebalancingSetToken } from "../../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { ModuleCoreState } from "./ModuleCoreState.sol";
 
@@ -104,7 +104,7 @@ contract RebalancingSetIssuance is
         view
         returns (uint256)
     {
-        IRebalancingSetTokenV2 rebalancingSet = IRebalancingSetTokenV2(_rebalancingSetAddress);
+        IRebalancingSetToken rebalancingSet = IRebalancingSetToken(_rebalancingSetAddress);
 
         uint256 unitShares = rebalancingSet.unitShares();
         uint256 naturalUnit = rebalancingSet.naturalUnit();

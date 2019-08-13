@@ -15,23 +15,17 @@
 */
 
 pragma solidity 0.5.7;
-pragma experimental "ABIEncoderV2";
 
-import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { IAuctionPriceCurve } from "./auction-price-libraries/IAuctionPriceCurve.sol";
 
 /**
  * @title RebalancingLibrary
  * @author Set Protocol
  *
  * The RebalancingLibrary contains functions for facilitating the rebalancing process for
- * Rebalancing Set Tokens.
+ * Rebalancing Set Tokens. Removes the old calculation functions
  *
  */
-
-
 library RebalancingLibrary {
-    using SafeMath for uint256;
 
     /* ============ Enums ============ */
 
@@ -52,28 +46,5 @@ library RebalancingLibrary {
         uint256[] combinedCurrentUnits;
         uint256[] combinedNextSetUnits;
         address[] combinedTokenArray;
-    }
-
-    /**
-     * Function to calculate the transfer value of a component given a standardized bid amount
-     * (minimumBid/priceDivisor)
-     *
-     * @param   _unit           Units of the component token
-     * @param   _naturalUnit    Natural unit of the Set token
-     * @param   _minimumBid     Minimum bid amount
-     * @return  uint256         Amount of tokens per standard bid amount (minimumBid/priceDivisor)
-     */
-    function computeTransferValue(
-        uint256 _unit,
-        uint256 _naturalUnit,
-        uint256 _minimumBid,
-        address _auctionLibrary
-    )
-        public
-        view
-        returns (uint256)
-    {
-        uint256 priceDivisor = IAuctionPriceCurve(_auctionLibrary).priceDivisor();
-        return _minimumBid.mul(_unit).div(_naturalUnit).div(priceDivisor);
     }
 }

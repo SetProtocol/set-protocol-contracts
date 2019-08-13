@@ -31,7 +31,6 @@ export { ProposeLibraryContract } from '../types/generated/propose_library';
 export { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 export { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
 export { RebalancingLibraryContract } from '../types/generated/rebalancing_library';
-export { RebalancingLibraryV2Contract } from '../types/generated/rebalancing_library_v2';
 export { RebalancingLibraryMockContract } from '../types/generated/rebalancing_library_mock';
 export {
   RebalancingSetExchangeIssuanceModuleContract,

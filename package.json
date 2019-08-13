@@ -1,6 +1,6 @@
 {
   "name": "set-protocol-contracts",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Smart contracts for {Set} Protocol",
   "main": "dist/artifacts/index.js",
   "typings": "dist/typings/artifacts/index.d.ts",
@@ -42,8 +42,7 @@
     "test-continuous": "yarn deploy-development && truffle test",
     "transpile": "tsc",
     "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name '*.spec.js'`",
-    "prepublishOnly": "yarn dist",
-    "flatten": "truffle-flattener contracts/core/tokens/RebalancingSetToken.sol"
+    "prepublishOnly": "yarn dist"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
   "author": "Felix Feng <felix@setprotocol.com>",
@@ -99,7 +98,6 @@
     "openzeppelin-solidity": "^2.2",
     "set-protocol-utils": "^1.0.0-beta.32",
     "tiny-promisify": "^1.0.0",
-    "truffle-flattener": "^1.4.0",
     "ts-mocha": "^6.0.0",
     "ts-node": "^8.0.2",
     "tslint-eslint-rules": "^5.3.1",

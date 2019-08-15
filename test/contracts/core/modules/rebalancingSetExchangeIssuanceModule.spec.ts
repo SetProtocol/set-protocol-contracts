@@ -1355,7 +1355,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
   });
 
-  describe.only('#redeemRebalancingSetIntoEther', async () => {
+  describe('#redeemRebalancingSetIntoEther', async () => {
     let subjectRebalancingSetAddress: Address;
     let subjectRebalancingSetQuantity: BigNumber;
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
@@ -1441,9 +1441,9 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       baseSetComponent2 = customBaseSetComponent2 || await erc20Helper.deployTokenAsync(tokenPurchaser);
 
       // Create the Set (2 component where one is WETH)
-      const componentAddresses = customComponentAddresses || 
+      const componentAddresses = customComponentAddresses ||
         [baseSetComponent.address, baseSetComponent2.address, weth.address];
-      const componentUnits = customComponentUnits || 
+      const componentUnits = customComponentUnits ||
         [new BigNumber(10 ** 18), new BigNumber(10 ** 18), new BigNumber(10 ** 18)];
       baseSetNaturalUnit = new BigNumber(10 ** 17);
       baseSetToken = await coreHelper.createSetTokenAsync(
@@ -1475,16 +1475,16 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
                                        .div(rebalancingUnitShares);
 
       wethRequiredToIssueBaseSet = customWethRequiredToIssueBaseSet ||
-        componentUnits[1].mul(baseSetRedeemQuantity).div(baseSetNaturalUnit);
+        componentUnits[2].mul(baseSetRedeemQuantity).div(baseSetNaturalUnit);
 
       // ----------------------------------------------------------------------
       // Payment / Send and Receive Token Details
-      // ----------------------------------------------------------------------      
+      // ----------------------------------------------------------------------
 
-      kyberSendTokenQuantity = ether(1);
+      kyberReceiveTokenQuantity = ether(1);
       zeroExReceiveTokenQuantity = customZeroExSendTokenQuantity || ether(1);
 
-      exchangeIssuanceReceiveTokenQuantity = zeroExReceiveTokenQuantity.plus(kyberSendTokenQuantity);
+      exchangeIssuanceReceiveTokenQuantity = zeroExReceiveTokenQuantity.plus(kyberReceiveTokenQuantity);
 
       totalEtherToReceive = exchangeIssuanceReceiveTokenQuantity.plus(wethRequiredToIssueBaseSet);
 
@@ -1498,11 +1498,11 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       exchangeRedeemSendTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX, SetUtils.EXCHANGES.KYBER];
       exchangeRedeemSendTokens = [componentAddresses[0], componentAddresses[1]];
 
-      zeroExSendTokenQuantity = customZeroExSendTokenQuantity || 
+      zeroExSendTokenQuantity = customZeroExSendTokenQuantity ||
         componentUnits[0].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
-      kyberReceiveTokenQuantity = componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
+      kyberSendTokenQuantity = componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
 
-      exchangeRedeemSendTokenAmounts = [zeroExSendTokenQuantity, kyberReceiveTokenQuantity];
+      exchangeRedeemSendTokenAmounts = [zeroExSendTokenQuantity, kyberSendTokenQuantity];
       exchangeRedeemReceiveTokens = [weth.address];
       exchangeRedeemReceiveTokenAmounts = [exchangeIssuanceReceiveTokenQuantity];
 
@@ -1523,7 +1523,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       const makerAsset = exchangeRedeemReceiveTokens[0];
       const takerAsset = exchangeRedeemSendTokens[0];
 
-      zeroExMakerAssetAmount = customZeroExReceiveTokenAmount || exchangeRedeemReceiveTokenAmounts[0];
+      zeroExMakerAssetAmount = customZeroExReceiveTokenAmount || zeroExReceiveTokenQuantity;
       zeroExTakerAssetAmount = exchangeRedeemSendTokenAmounts[0];
 
       zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
@@ -1558,7 +1558,40 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       // ----------------------------------------------------------------------
       // Kyber Trade Set up
       // ----------------------------------------------------------------------
-      
+      const maxDestinationQuantity = kyberReceiveTokenQuantity;
+
+      const destinationTokenDecimals = (await weth.decimals.callAsync()).toNumber();
+      const sourceTokenDecimals = (await baseSetComponent2.decimals.callAsync()).toNumber();
+      kyberConversionRatePower = new BigNumber(10).pow(18 + sourceTokenDecimals - destinationTokenDecimals);
+      const minimumConversionRate = maxDestinationQuantity.div(kyberSendTokenQuantity)
+                                                          .mul(kyberConversionRatePower)
+                                                          .round();
+
+      kyberTrade = {
+        sourceToken: baseSetComponent2.address,
+        destinationToken: weth.address,
+        sourceTokenQuantity: kyberSendTokenQuantity,
+        minimumConversionRate: minimumConversionRate,
+        maxDestinationQuantity: maxDestinationQuantity,
+      } as KyberTrade;
+
+      await weth.approve.sendTransactionAsync(
+        kyberNetworkHelper.kyberReserve,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        { from: kyberReserveOperator, gas: DEFAULT_GAS }
+      );
+
+      // Deposit weth
+      await weth.deposit.sendTransactionAsync(
+        { from: kyberReserveOperator, value: maxDestinationQuantity.toString(), gas: DEFAULT_GAS }
+      );
+
+      await kyberNetworkHelper.setConversionRates(
+        baseSetComponent2.address,
+        weth.address,
+        kyberSendTokenQuantity,
+        maxDestinationQuantity,
+      );
 
       // ----------------------------------------------------------------------
       // Rebalancing Set Issuance
@@ -1566,7 +1599,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
       // Approve base component to transfer proxy
       await erc20Helper.approveTransfersAsync(
-        [baseSetComponent],
+        [baseSetComponent, baseSetComponent2],
         transferProxy.address,
         tokenPurchaser
       );
@@ -1605,7 +1638,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       subjectRebalancingSetAddress = rebalancingSetToken.address;
       subjectRebalancingSetQuantity = rebalancingSetRedeemQuantity;
       subjectExchangeIssuanceParams = exchangeIssuanceParams;
-      subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
+      subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder, kyberTrade]);
       subjectKeepChangeInVault = false;
       subjectCaller = tokenPurchaser;
     });
@@ -1682,12 +1715,19 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         nonExchangedNonWethComponent = await erc20Helper.deployTokenAsync(tokenPurchaser);
 
         customBaseSetComponent = await erc20Helper.deployTokenAsync(tokenPurchaser);
+        customBaseSetComponent2 = await erc20Helper.deployTokenAsync(tokenPurchaser);
         customComponentAddresses = [
           customBaseSetComponent.address,
+          customBaseSetComponent2.address,
           weth.address,
           nonExchangedNonWethComponent.address,
         ];
-        customComponentUnits = [new BigNumber(10 ** 18), new BigNumber(10 ** 18), new BigNumber(10 ** 18)];
+        customComponentUnits = [
+          new BigNumber(10 ** 18),
+          new BigNumber(10 ** 18),
+          new BigNumber(10 ** 18),
+          new BigNumber(10 ** 18),
+        ];
 
         await erc20Helper.approveTransfersAsync(
           [nonExchangedNonWethComponent],
@@ -1715,7 +1755,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       });
     });
 
-    describe('when the quantity of weth in receive tokens is less than the amount traded for', async () => {
+    describe('when the 0x order receiveToken quantity is greater than specified', async () => {
       before(async () => {
         customZeroExReceiveTokenAmount = ether(2);
       });
@@ -1732,6 +1772,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
         const expectedEthBalance = previousEthBalance
                                      .add(totalEtherToReceive)
+                                     .add(customZeroExReceiveTokenAmount)
+                                     .sub(zeroExReceiveTokenQuantity)
                                      .sub(totalGasInEth);
         const currentEthBalance =  await web3.eth.getBalance(subjectCaller);
         expect(currentEthBalance).to.bignumber.equal(expectedEthBalance);
@@ -1905,9 +1947,10 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     describe('when the Set is only made of one component', async () => {
       before(async () => {
         customBaseSetComponent = await erc20Helper.deployTokenAsync(tokenPurchaser);
+        customBaseSetComponent2 = await erc20Helper.deployTokenAsync(tokenPurchaser);
 
-        customComponentAddresses = [customBaseSetComponent.address];
-        customComponentUnits = [new BigNumber(10 ** 18)];
+        customComponentAddresses = [customBaseSetComponent.address, customBaseSetComponent2.address];
+        customComponentUnits = [new BigNumber(10 ** 18), new BigNumber(10 ** 18)];
 
         customWethRequiredToIssueBaseSet = new BigNumber(0);
       });
@@ -1924,7 +1967,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
   });
 
-  describe('#redeemRebalancingSetIntoERC20', async () => {
+  describe.only('#redeemRebalancingSetIntoERC20', async () => {
     let subjectRebalancingSetAddress: Address;
     let subjectRebalancingSetQuantity: BigNumber;
     let subjectReceiveTokenAddress: Address;
@@ -1934,20 +1977,50 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let subjectCaller: Address;
 
     let customExchangeRedeemQuantity: BigNumber;
-    let customExchangeRedeemSendTokenAmounts: BigNumber[];
+
     let customBaseSetComponent: StandardTokenMockContract;
+    let customBaseSetComponent2: StandardTokenMockContract;
     let customComponentAddresses: Address[];
     let customComponentUnits: BigNumber[];
-    let customNonExchangedWeth: BigNumber;
 
+
+    // ----------------------------------------------------------------------
+    // Component and Rebalancing Set
+    // ----------------------------------------------------------------------
     let baseSetComponent: StandardTokenMockContract;
-    let nonExchangedWethQuantity: BigNumber;
-
+    let baseSetComponent2: StandardTokenMockContract;
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
     let rebalancingSetToken: RebalancingSetTokenContract;
     let rebalancingUnitShares: BigNumber;
 
+    // ----------------------------------------------------------------------
+    // Issuance Details
+    // ----------------------------------------------------------------------
+    let rebalancingSetRedeemQuantity: BigNumber;
+    let baseSetRedeemQuantity: BigNumber;
+
+    // ----------------------------------------------------------------------
+    // Payment / Send Token Details
+    // ----------------------------------------------------------------------
+    let wethRequiredToIssueBaseSet: BigNumber;
+
+    let zeroExReceiveTokenQuantity: BigNumber;
+    let kyberReceiveTokenQuantity: BigNumber;
+    let exchangeIssuanceReceiveTokenQuantity: BigNumber;
+
+    let zeroExSendTokenQuantity: BigNumber;
+    let kyberSendTokenQuantity: BigNumber;
+
+    let totalWrappedEtherToReceive: BigNumber;
+
+    let customZeroExSendTokenQuantity: BigNumber;
+    let customWethRequiredToIssueBaseSet: BigNumber;
+
+
+    // ----------------------------------------------------------------------
+    // Exchange Issuance Variables
+    // ----------------------------------------------------------------------
     let exchangeRedeemSetAddress: Address;
     let exchangeRedeemQuantity: BigNumber;
     let exchangeRedeemSendTokenExchangeIds: BigNumber[];
@@ -1956,21 +2029,36 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let exchangeRedeemReceiveTokens: Address[];
     let exchangeRedeemReceiveTokenAmounts: BigNumber[];
 
-    let wethQuantityToReceive: BigNumber;
-    let etherTradedFor: BigNumber;
-
+    // ----------------------------------------------------------------------
+    // 0x Order Variables
+    // ----------------------------------------------------------------------
     let zeroExOrder: ZeroExSignedFillOrder;
+    let zeroExMakerAssetAmount: BigNumber;
+    let zeroExTakerAssetAmount: BigNumber;
+
+    let customZeroExReceiveTokenAmount: BigNumber;
+
+    // ----------------------------------------------------------------------
+    // Kyber Trade Variables
+    // ----------------------------------------------------------------------
+    let kyberTrade: KyberTrade;
+    let kyberConversionRatePower: BigNumber;
 
     beforeEach(async () => {
-      wethQuantityToReceive = ether(2);
+      // ----------------------------------------------------------------------
+      // Component and Rebalancing Set Deployment
+      // ----------------------------------------------------------------------
 
       // Create component token
       baseSetComponent = customBaseSetComponent || await erc20Helper.deployTokenAsync(tokenPurchaser);
+      baseSetComponent2 = customBaseSetComponent2 || await erc20Helper.deployTokenAsync(tokenPurchaser);
 
       // Create the Set (2 component where one is WETH)
-      const componentAddresses = customComponentAddresses || [baseSetComponent.address, weth.address];
-      const componentUnits = customComponentUnits || [new BigNumber(10 ** 10), new BigNumber(10 ** 10)];
-      baseSetNaturalUnit = new BigNumber(10 ** 9);
+      const componentAddresses = customComponentAddresses ||
+        [baseSetComponent.address, baseSetComponent2.address, weth.address];
+      const componentUnits = customComponentUnits ||
+        [new BigNumber(10 ** 18), new BigNumber(10 ** 18), new BigNumber(10 ** 18)];
+      baseSetNaturalUnit = new BigNumber(10 ** 17);
       baseSetToken = await coreHelper.createSetTokenAsync(
         core,
         setTokenFactory.address,
@@ -1980,7 +2068,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       );
 
       // Create the Rebalancing Set
-      rebalancingUnitShares = new BigNumber(10 ** 10);
+      rebalancingUnitShares = new BigNumber(10 ** 18);
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
         core,
         rebalancingSetTokenFactory.address,
@@ -1990,15 +2078,46 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         rebalancingUnitShares,
       );
 
+      // ----------------------------------------------------------------------
+      // Issuance Details
+      // ----------------------------------------------------------------------
+      baseSetRedeemQuantity = new BigNumber(10 ** 18);
+
+      rebalancingSetRedeemQuantity = baseSetRedeemQuantity
+                                       .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
+                                       .div(rebalancingUnitShares);
+
+      wethRequiredToIssueBaseSet = customWethRequiredToIssueBaseSet ||
+        componentUnits[2].mul(baseSetRedeemQuantity).div(baseSetNaturalUnit);
+
+      // ----------------------------------------------------------------------
+      // Payment / Send and Receive Token Details
+      // ----------------------------------------------------------------------
+
+      kyberReceiveTokenQuantity = ether(1);
+      zeroExReceiveTokenQuantity = customZeroExSendTokenQuantity || ether(1);
+
+      exchangeIssuanceReceiveTokenQuantity = zeroExReceiveTokenQuantity.plus(kyberReceiveTokenQuantity);
+
+      totalWrappedEtherToReceive = exchangeIssuanceReceiveTokenQuantity.plus(wethRequiredToIssueBaseSet);
+
+      // ----------------------------------------------------------------------
+      // Exchange Issuance Set up
+      // ----------------------------------------------------------------------
+
       // Generate exchangeRedeem data
       exchangeRedeemSetAddress = baseSetToken.address;
-      exchangeRedeemQuantity = customExchangeRedeemQuantity || new BigNumber(10 ** 10);
-      exchangeRedeemSendTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
-      exchangeRedeemSendTokens = [componentAddresses[0]];
-      exchangeRedeemSendTokenAmounts = customExchangeRedeemSendTokenAmounts ||
-        [componentUnits[0].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit)];
+      exchangeRedeemQuantity = customExchangeRedeemQuantity || baseSetRedeemQuantity;
+      exchangeRedeemSendTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX, SetUtils.EXCHANGES.KYBER];
+      exchangeRedeemSendTokens = [componentAddresses[0], componentAddresses[1]];
+
+      zeroExSendTokenQuantity = customZeroExSendTokenQuantity ||
+        componentUnits[0].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
+      kyberSendTokenQuantity = componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
+
+      exchangeRedeemSendTokenAmounts = [zeroExSendTokenQuantity, kyberSendTokenQuantity];
       exchangeRedeemReceiveTokens = [weth.address];
-      exchangeRedeemReceiveTokenAmounts = [wethQuantityToReceive];
+      exchangeRedeemReceiveTokenAmounts = [exchangeIssuanceReceiveTokenQuantity];
 
       const exchangeIssuanceParams = {
         setAddress:             exchangeRedeemSetAddress,
@@ -2010,84 +2129,130 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         receiveTokenAmounts:    exchangeRedeemReceiveTokenAmounts,
       };
 
+      // ----------------------------------------------------------------------
+      // 0x Order Set up
+      // ----------------------------------------------------------------------
+
+      const makerAsset = exchangeRedeemReceiveTokens[0];
+      const takerAsset = exchangeRedeemSendTokens[0];
+
+      zeroExMakerAssetAmount = customZeroExReceiveTokenAmount || zeroExReceiveTokenQuantity;
+      zeroExTakerAssetAmount = exchangeRedeemSendTokenAmounts[0];
+
+      zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
+        NULL_ADDRESS,                                                         // senderAddress
+        zeroExOrderMaker,                                                     // makerAddress
+        NULL_ADDRESS,                                                         // takerAddress
+        ZERO,                                                                 // makerFee
+        ZERO,                                                                 // takerFee
+        zeroExMakerAssetAmount,                                               // makerAssetAmount
+        zeroExTakerAssetAmount,                                               // takerAssetAmount
+        makerAsset,                                                           // makerAssetAddress
+        takerAsset,                                                           // takerAssetAddress
+        SetUtils.generateSalt(),                                              // salt
+        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,                                // exchangeAddress
+        NULL_ADDRESS,                                                         // feeRecipientAddress
+        SetTestUtils.generateTimestamp(10000),                                // expirationTimeSeconds
+        zeroExTakerAssetAmount,                                               // amount of zeroExOrder to fill
+      );
+
       // Approve weth to the transfer proxy
-      const requiredEthForExchangeOrder = etherTradedFor || exchangeRedeemReceiveTokenAmounts[0];
       await weth.approve.sendTransactionAsync(
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
-        requiredEthForExchangeOrder,
+        zeroExMakerAssetAmount,
         { from: zeroExOrderMaker, gas: DEFAULT_GAS }
       );
 
       // Deposit weth
-      const requiredEthForExchangeOrderValue = requiredEthForExchangeOrder.toString();
       await weth.deposit.sendTransactionAsync(
-        { from: zeroExOrderMaker, value: requiredEthForExchangeOrderValue, gas: DEFAULT_GAS }
+        { from: zeroExOrderMaker, value: zeroExMakerAssetAmount.toString(), gas: DEFAULT_GAS }
       );
 
-      // Create 0x order for the component
-      zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
-        NULL_ADDRESS,                                               // senderAddress
-        zeroExOrderMaker,                                           // makerAddress
-        NULL_ADDRESS,                                               // takerAddress
-        ZERO,                                                       // makerFee
-        ZERO,                                                       // takerFee
-        etherTradedFor || exchangeRedeemReceiveTokenAmounts[0],     // makerAssetAmount
-        exchangeRedeemSendTokenAmounts[0],                          // takerAssetAmount
-        exchangeRedeemReceiveTokens[0],                             // makerAssetAddress
-        exchangeRedeemSendTokens[0],                                // takerAssetAddress
-        SetUtils.generateSalt(),                                    // salt
-        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,                      // exchangeAddress
-        NULL_ADDRESS,                                               // feeRecipientAddress
-        SetTestUtils.generateTimestamp(10000),                      // expirationTimeSeconds
-        exchangeRedeemSendTokenAmounts[0],                          // amount of zeroExOrder to fill
+      // ----------------------------------------------------------------------
+      // Kyber Trade Set up
+      // ----------------------------------------------------------------------
+      const maxDestinationQuantity = kyberReceiveTokenQuantity;
+
+      const destinationTokenDecimals = (await weth.decimals.callAsync()).toNumber();
+      const sourceTokenDecimals = (await baseSetComponent2.decimals.callAsync()).toNumber();
+      kyberConversionRatePower = new BigNumber(10).pow(18 + sourceTokenDecimals - destinationTokenDecimals);
+      const minimumConversionRate = maxDestinationQuantity.div(kyberSendTokenQuantity)
+                                                          .mul(kyberConversionRatePower)
+                                                          .round();
+
+      kyberTrade = {
+        sourceToken: baseSetComponent2.address,
+        destinationToken: weth.address,
+        sourceTokenQuantity: kyberSendTokenQuantity,
+        minimumConversionRate: minimumConversionRate,
+        maxDestinationQuantity: maxDestinationQuantity,
+      } as KyberTrade;
+
+      await weth.approve.sendTransactionAsync(
+        kyberNetworkHelper.kyberReserve,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        { from: kyberReserveOperator, gas: DEFAULT_GAS }
       );
+
+      // Deposit weth
+      await weth.deposit.sendTransactionAsync(
+        { from: kyberReserveOperator, value: maxDestinationQuantity.toString(), gas: DEFAULT_GAS }
+      );
+
+      await kyberNetworkHelper.setConversionRates(
+        baseSetComponent2.address,
+        weth.address,
+        kyberSendTokenQuantity,
+        maxDestinationQuantity,
+      );
+
+      // ----------------------------------------------------------------------
+      // Rebalancing Set Issuance
+      // ----------------------------------------------------------------------
 
       // Approve base component to transfer proxy
       await erc20Helper.approveTransfersAsync(
-        [baseSetComponent],
+        [baseSetComponent, baseSetComponent2],
         transferProxy.address,
         tokenPurchaser
       );
 
-      nonExchangedWethQuantity = customNonExchangedWeth ||
-        componentUnits[1].mul(exchangeRedeemQuantity).div(baseSetNaturalUnit);
-
-      if (nonExchangedWethQuantity.gt(0)) {
+      if (wethRequiredToIssueBaseSet.gt(0)) {
         // Approve Weth to the transferProxy
         await weth.approve.sendTransactionAsync(
           transferProxy.address,
-          nonExchangedWethQuantity,
+          wethRequiredToIssueBaseSet,
           { from: tokenPurchaser, gas: DEFAULT_GAS }
         );
 
         // Generate wrapped Ether for the caller
         await weth.deposit.sendTransactionAsync(
-          { from: tokenPurchaser, value: nonExchangedWethQuantity.toString(), gas: DEFAULT_GAS }
+          { from: tokenPurchaser, value: wethRequiredToIssueBaseSet.toString(), gas: DEFAULT_GAS }
         );
       }
 
       // Issue the Base Set to the vault
       await core.issueInVault.sendTransactionAsync(
         baseSetToken.address,
-        exchangeRedeemQuantity,
+        baseSetRedeemQuantity,
         { from: tokenPurchaser, gas: DEFAULT_GAS }
       );
 
-      // Issue the Rebalancing Set
-      const rebalancingSetQuantity = exchangeRedeemQuantity
-                                       .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
-                                       .div(rebalancingUnitShares);
       await core.issue.sendTransactionAsync(
         rebalancingSetToken.address,
-        rebalancingSetQuantity,
+        rebalancingSetRedeemQuantity,
         { from: tokenPurchaser, gas: DEFAULT_GAS }
       );
 
+      // ----------------------------------------------------------------------
+      // Subject Parameter Definitions
+      // ----------------------------------------------------------------------
+
       subjectRebalancingSetAddress = rebalancingSetToken.address;
-      subjectRebalancingSetQuantity = rebalancingSetQuantity;
+      subjectRebalancingSetQuantity = rebalancingSetRedeemQuantity;
       subjectReceiveTokenAddress = weth.address;
       subjectExchangeIssuanceParams = exchangeIssuanceParams;
-      subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
+      subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder, kyberTrade]);
       subjectKeepChangeInVault = false;
       subjectCaller = tokenPurchaser;
     });
@@ -2123,10 +2288,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
       await subject();
 
-      const expectedWethBalance = previousWethBalance
-                                   .add(wethQuantityToReceive)
-                                   .add(nonExchangedWethQuantity);
-      const currentWethBalance =  await weth.balanceOf.callAsync(subjectCaller);
+      const expectedWethBalance = previousWethBalance.add(totalWrappedEtherToReceive);
+      const currentWethBalance = await weth.balanceOf.callAsync(subjectCaller);
 
       expect(currentWethBalance).to.bignumber.equal(expectedWethBalance);
     });
@@ -2144,15 +2307,13 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     it('emits correct LogPayableExchangeRedeem event', async () => {
       const txHash = await subject();
 
-      const outputTokenQuantity = wethQuantityToReceive.plus(nonExchangedWethQuantity);
-
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
       const expectedLogs = LogPayableExchangeRedeem(
         subjectRebalancingSetAddress,
         subjectCaller,
-        subjectReceiveTokenAddress,
+        weth.address,
         subjectRebalancingSetQuantity,
-        outputTokenQuantity,
+        totalWrappedEtherToReceive,
         rebalancingSetExchangeIssuanceModule.address
       );
 
@@ -2166,12 +2327,19 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         nonExchangedNonWethComponent = await erc20Helper.deployTokenAsync(tokenPurchaser);
 
         customBaseSetComponent = await erc20Helper.deployTokenAsync(tokenPurchaser);
+        customBaseSetComponent2 = await erc20Helper.deployTokenAsync(tokenPurchaser);
         customComponentAddresses = [
           customBaseSetComponent.address,
+          customBaseSetComponent2.address,
           weth.address,
           nonExchangedNonWethComponent.address,
         ];
-        customComponentUnits = [new BigNumber(10 ** 10), new BigNumber(10 ** 10), new BigNumber(10 ** 10)];
+        customComponentUnits = [
+          new BigNumber(10 ** 18),
+          new BigNumber(10 ** 18),
+          new BigNumber(10 ** 18),
+          new BigNumber(10 ** 18),
+        ];
 
         await erc20Helper.approveTransfersAsync(
           [nonExchangedNonWethComponent],
@@ -2199,25 +2367,26 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       });
     });
 
-    describe('when the quantity of weth in receive tokens is less than the amount traded for', async () => {
+    describe('when the 0x order receiveToken quantity is greater than specified', async () => {
       before(async () => {
-        etherTradedFor = ether(3);
+        customZeroExReceiveTokenAmount = ether(2);
       });
 
       after(async () => {
-        etherTradedFor = undefined;
+        customZeroExReceiveTokenAmount = undefined;
       });
 
       it('should increment the users eth balance by the correct quantity', async () => {
-        const previousEthBalance = await weth.balanceOf.callAsync(subjectCaller);
+        const previousWethBalance = await weth.balanceOf.callAsync(subjectCaller);
 
         await subject();
 
-        const expectedEthBalance = previousEthBalance
-                                     .add(etherTradedFor)
-                                     .add(nonExchangedWethQuantity);
-        const currentEthBalance =  await weth.balanceOf.callAsync(subjectCaller);
-        expect(currentEthBalance).to.bignumber.equal(expectedEthBalance);
+        const expectedWethBalance = previousWethBalance
+                                     .add(totalWrappedEtherToReceive)
+                                     .add(customZeroExReceiveTokenAmount)
+                                     .sub(zeroExReceiveTokenQuantity);
+        const currentWethBalance = await weth.balanceOf.callAsync(subjectCaller);
+        expect(currentWethBalance).to.bignumber.equal(expectedWethBalance);
       });
     });
 
@@ -2225,17 +2394,17 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       let halfBaseComponentQuantity: BigNumber;
 
       before(async () => {
-        const componentUnit = new BigNumber(10 ** 10);
-        const naturalUnit = new BigNumber(10 ** 9);
-        const redeemQuantity = new BigNumber(10 ** 10);
+        const componentUnit = new BigNumber(10 ** 18);
+        const naturalUnit = new BigNumber(10 ** 17);
+        const redeemQuantity = new BigNumber(10 ** 18);
 
         halfBaseComponentQuantity =  componentUnit.mul(redeemQuantity).div(naturalUnit).div(2);
 
-        customExchangeRedeemSendTokenAmounts = [halfBaseComponentQuantity];
+        customZeroExSendTokenQuantity = halfBaseComponentQuantity;
       });
 
       after(async () => {
-        customExchangeRedeemSendTokenAmounts = undefined;
+        customZeroExSendTokenQuantity = undefined;
       });
 
       it('should send the unsold components to the caller', async () => {
@@ -2253,7 +2422,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       let excessBaseSetQuantity: BigNumber;
 
       beforeEach(async () => {
-        const excessNonExchangedWethQuantity = nonExchangedWethQuantity.mul(2);
+        const excessNonExchangedWethQuantity = wethRequiredToIssueBaseSet.mul(2);
         excessBaseSetQuantity = exchangeRedeemQuantity.mul(2);
 
         // Generate wrapped Ether for the caller
@@ -2321,7 +2490,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       });
     });
 
-    describe('when the receive tokens length is greater than 1', async () => {
+    describe('when the receive tokens length is greater than 1 and there are duplicates', async () => {
       beforeEach(async () => {
         subjectExchangeIssuanceParams.receiveTokens = [weth.address, weth.address];
         subjectExchangeIssuanceParams.receiveTokenAmounts = [new BigNumber(1), new BigNumber(1)];
@@ -2388,11 +2557,12 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     describe('when the Set is only made of one component', async () => {
       before(async () => {
         customBaseSetComponent = await erc20Helper.deployTokenAsync(tokenPurchaser);
+        customBaseSetComponent2 = await erc20Helper.deployTokenAsync(tokenPurchaser);
 
-        customComponentAddresses = [customBaseSetComponent.address];
-        customComponentUnits = [new BigNumber(10 ** 10)];
+        customComponentAddresses = [customBaseSetComponent.address, customBaseSetComponent2.address];
+        customComponentUnits = [new BigNumber(10 ** 18), new BigNumber(10 ** 18)];
 
-        customNonExchangedWeth = new BigNumber(0);
+        customWethRequiredToIssueBaseSet = new BigNumber(0);
       });
 
       it('redeems the rebalancing Set', async () => {
@@ -2405,7 +2575,5 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         expect(expectedRBSetTokenBalance).to.bignumber.equal(currentRBSetTokenBalance);
       });
     });
-
   });
-
 });

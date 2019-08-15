@@ -1967,7 +1967,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     });
   });
 
-  describe.only('#redeemRebalancingSetIntoERC20', async () => {
+  describe('#redeemRebalancingSetIntoERC20', async () => {
     let subjectRebalancingSetAddress: Address;
     let subjectRebalancingSetQuantity: BigNumber;
     let subjectReceiveTokenAddress: Address;

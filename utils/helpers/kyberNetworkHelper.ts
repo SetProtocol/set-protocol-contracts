@@ -21,6 +21,7 @@ const web3 = getWeb3();
 export class KyberNetworkHelper {
 
   public kyberNetworkProxy: Address = KYBER_CONTRACTS.KyberNetworkProxy;
+  public kyberReserve: Address = KYBER_CONTRACTS.KyberReserve;
   public defaultSlippagePercentage: BigNumber = new BigNumber(3);
 
   constructor() {}

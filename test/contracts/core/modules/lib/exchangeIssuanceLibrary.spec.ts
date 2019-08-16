@@ -38,7 +38,7 @@ const blockchain = new Blockchain(web3);
 const { ZERO } = SetUtils.CONSTANTS;
 
 
-contract('ExchangeIssuanceLibraryMock', accounts => {
+contract('ExchangeIssuanceLibrary', accounts => {
   const [
     contractDeployer,
     otherAccount,

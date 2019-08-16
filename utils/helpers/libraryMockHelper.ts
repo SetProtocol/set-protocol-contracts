@@ -29,6 +29,7 @@ const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMo
 const RebalancingSetIssuanceMock = artifacts.require('RebalancingSetIssuanceMock');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
 const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
+const TokenFlush = artifacts.require('TokenFlush');
 const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
 
 
@@ -114,6 +115,25 @@ export class LibraryMockHelper {
 
     return new ExchangeIssuanceLibraryMockContract(
       new web3.eth.Contract(exchangeIssuanceMockContract.abi, exchangeIssuanceMockContract.address),
+      { from },
+    );
+  }
+
+  public async deployTokenFlushMockAsync(
+    core: CoreContract,
+    vault: VaultContract,
+    transferProxy: TransferProxyContract,
+    from: Address = this._contractOwnerAddress
+  ): Promise<TokenFlushMockContract> {
+    const tokenFlushMockContract = await TokenFlushMock.new(
+      core.address,
+      vault.address,
+      transferProxy.address,
+      { from },
+    );
+
+    return new TokenFlushMockContract(
+      new web3.eth.Contract(tokenFlushMockContract.abi, tokenFlushMockContract.address),
       { from },
     );
   }

@@ -9,7 +9,6 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  TokenFlushMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
@@ -41,7 +40,7 @@ const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
-const TokenFlush = artifacts.require('TokenFlush');
+const TokenFlushMock = artifacts.require('TokenFlushMock');
 
 contract('TokenFlush', accounts => {
   const [
@@ -69,7 +68,7 @@ contract('TokenFlush', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(TokenFlush.abi);
+    ABIDecoder.addABI(TokenFlushMock.abi);
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -93,7 +92,7 @@ contract('TokenFlush', accounts => {
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(TokenFlush.abi);
+    ABIDecoder.removeABI(TokenFlushMock.abi);
   });
 
   beforeEach(async () => {
@@ -152,7 +151,7 @@ contract('TokenFlush', accounts => {
     async function subject(): Promise<string> {
       return tokenFlushMock.returnExcessBaseSetFromContractMock.sendTransactionAsync(
         subjectSetAddress,
-        transferProxy.address,
+        subjectCaller,
         subjectKeepChangeInVault,
         {
           from: subjectCaller,
@@ -238,6 +237,7 @@ contract('TokenFlush', accounts => {
     async function subject(): Promise<string> {
       return tokenFlushMock.returnExcessBaseSetInVaultMock.sendTransactionAsync(
         subjectSetAddress,
+        subjectCaller,
         subjectKeepChangeInVault,
         {
           from: subjectCaller,

@@ -9,6 +9,8 @@ import {
   ExchangeIssuanceLibraryMockContract,
   RebalancingSetIssuanceMockContract,
   SetTokenLibraryMockContract,
+  TransferProxyContract,
+  TokenFlushMockContract,
   VaultContract,
   ZeroExOrderLibraryMockContract
 } from '../contracts';
@@ -29,7 +31,7 @@ const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMo
 const RebalancingSetIssuanceMock = artifacts.require('RebalancingSetIssuanceMock');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
 const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
-const TokenFlush = artifacts.require('TokenFlush');
+const TokenFlushMock = artifacts.require('TokenFlushMock');
 const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
 
 
@@ -125,6 +127,10 @@ export class LibraryMockHelper {
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<TokenFlushMockContract> {
+   const truffleERC20Wrapper = await ERC20Wrapper.new({ from: this._contractOwnerAddress });
+
+    await TokenFlushMock.link('ERC20Wrapper', truffleERC20Wrapper.address);
+
     const tokenFlushMockContract = await TokenFlushMock.new(
       core.address,
       vault.address,

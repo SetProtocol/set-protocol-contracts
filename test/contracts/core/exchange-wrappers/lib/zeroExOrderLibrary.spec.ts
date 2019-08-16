@@ -25,7 +25,7 @@ const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setPr
 const blockchain = new Blockchain(web3);
 
 
-contract('ZeroExOrderLibraryMock', accounts => {
+contract('ZeroExOrderLibrary', accounts => {
   const [
     ownerAccount,
     takerAccount,

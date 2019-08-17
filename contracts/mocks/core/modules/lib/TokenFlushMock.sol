@@ -1,6 +1,7 @@
 pragma solidity 0.5.7;
 
 import { ICore } from "../../../../core/interfaces/ICore.sol";
+import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";
 import { ITransferProxy } from "../../../../core/interfaces/ITransferProxy.sol";
 import { IVault } from "../../../../core/interfaces/IVault.sol";
 import { TokenFlush } from "../../../../core/modules/lib/TokenFlush.sol";
@@ -40,21 +41,21 @@ contract TokenFlushMock is
     }
 
     function returnExcessComponentsFromContractMock(
-        address _baseSetAddress,
+        ISetToken _baseSetToken,
         address _returnAddress
     )
         external
     {
-        returnExcessComponentsFromContract(_baseSetAddress, _returnAddress);
+        returnExcessComponentsFromContract(_baseSetToken, _returnAddress);
     }
 
     function returnExcessComponentsFromVaultMock(
-        address _baseSetAddress,
+        ISetToken _baseSetToken,
         address _returnAddress
     )
         external
     {
-        returnExcessComponentsFromVault(_baseSetAddress, _returnAddress);
+        returnExcessComponentsFromVault(_baseSetToken, _returnAddress);
     }
 }
 

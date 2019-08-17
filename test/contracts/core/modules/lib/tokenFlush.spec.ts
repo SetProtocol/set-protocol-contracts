@@ -21,6 +21,7 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
+  ZERO,
 } from '@utils/constants';
 import { ether } from '@utils/units';
 
@@ -103,6 +104,7 @@ contract('TokenFlush', accounts => {
     let baseSetComponentUnit: BigNumber;
 
     let issueQuantity: BigNumber;
+    let customIssueQuantity: BigNumber;
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
@@ -123,7 +125,7 @@ contract('TokenFlush', accounts => {
         baseSetNaturalUnit,
       );
 
-      issueQuantity = ether(1);
+      issueQuantity = customIssueQuantity || ether(1);
 
       subjectSetAddress = baseSetToken.address;
 
@@ -136,6 +138,10 @@ contract('TokenFlush', accounts => {
 
       subjectKeepChangeInVault = true;
       subjectReturnAddress = subjectCaller;
+    });
+
+    after(async () => {
+      customIssueQuantity = undefined;
     });
 
     async function subject(): Promise<string> {
@@ -156,6 +162,20 @@ contract('TokenFlush', accounts => {
       const userVaultBalance = await vault.getOwnerBalance.callAsync(subjectSetAddress, subjectCaller);
 
       expect(userVaultBalance).to.bignumber.equal(issueQuantity);
+    });
+
+    describe('when the issue value is 0', async () => {
+      before(async () => {
+        customIssueQuantity = ZERO;
+      });
+
+      it('should not change the users balance', async () => {
+        await subject();
+
+        const [userBalance] = await erc20Helper.getTokenBalances([baseSetToken], subjectCaller);
+
+        expect(userBalance).to.bignumber.equal(issueQuantity);
+      });
     });
 
     describe('when the keepChangeInVault flag is false', async () => {
@@ -185,6 +205,7 @@ contract('TokenFlush', accounts => {
     let baseSetComponentUnit: BigNumber;
 
     let issueQuantity: BigNumber;
+    let customIssueQuantity: BigNumber;
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
@@ -205,7 +226,7 @@ contract('TokenFlush', accounts => {
         baseSetNaturalUnit,
       );
 
-      issueQuantity = ether(1);
+      issueQuantity = customIssueQuantity || ether(1);
 
       subjectSetAddress = baseSetToken.address;
 
@@ -226,6 +247,10 @@ contract('TokenFlush', accounts => {
       subjectReturnAddress = subjectCaller;
     });
 
+    after(async () => {
+      customIssueQuantity = undefined;
+    });
+
     async function subject(): Promise<string> {
       return tokenFlushMock.returnExcessBaseSetInVaultMock.sendTransactionAsync(
         subjectSetAddress,
@@ -244,6 +269,20 @@ contract('TokenFlush', accounts => {
       const userVaultBalance = await vault.getOwnerBalance.callAsync(subjectSetAddress, subjectCaller);
 
       expect(userVaultBalance).to.bignumber.equal(issueQuantity);
+    });
+
+    describe('when the issue value is 0', async () => {
+      before(async () => {
+        customIssueQuantity = ZERO;
+      });
+
+      it('should not change the users balance', async () => {
+        await subject();
+
+        const [userBalance] = await erc20Helper.getTokenBalances([baseSetToken], subjectCaller);
+
+        expect(userBalance).to.bignumber.equal(issueQuantity);
+      });
     });
 
     describe('when the keepChangeInVault flag is false', async () => {

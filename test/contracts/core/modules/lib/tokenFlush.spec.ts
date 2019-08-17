@@ -9,7 +9,6 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
@@ -17,22 +16,17 @@ import {
   TokenFlushMockContract,
   TransferProxyContract,
   VaultContract,
-  WethMockContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
-import { expectRevertError } from '@utils/tokenAssertions';
 import {
   DEFAULT_GAS,
-  DEFAULT_REBALANCING_NATURAL_UNIT,
-  ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import { ether } from '@utils/units';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
-import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -59,12 +53,6 @@ contract('TokenFlush', accounts => {
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
   const erc20Helper = new ERC20Helper(ownerAccount);
   const libraryHelper = new LibraryMockHelper(ownerAccount);
-  const rebalancingHelper = new RebalancingHelper(
-    ownerAccount,
-    coreHelper,
-    erc20Helper,
-    blockchain
-  );
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -106,6 +94,7 @@ contract('TokenFlush', accounts => {
   describe('#returnExcessBaseSetFromContract', async () => {
     let subjectCaller: Address;
     let subjectSetAddress: Address;
+    let subjectReturnAddress: Address;
     let subjectKeepChangeInVault: boolean;
 
     let baseSetComponent: StandardTokenMockContract;
@@ -146,12 +135,13 @@ contract('TokenFlush', accounts => {
       );
 
       subjectKeepChangeInVault = true;
+      subjectReturnAddress = subjectCaller;
     });
 
     async function subject(): Promise<string> {
       return tokenFlushMock.returnExcessBaseSetFromContractMock.sendTransactionAsync(
         subjectSetAddress,
-        subjectCaller,
+        subjectReturnAddress,
         subjectKeepChangeInVault,
         {
           from: subjectCaller,
@@ -186,6 +176,7 @@ contract('TokenFlush', accounts => {
   describe('#returnExcessBaseSetInVault', async () => {
     let subjectCaller: Address;
     let subjectSetAddress: Address;
+    let subjectReturnAddress: Address;
     let subjectKeepChangeInVault: boolean;
 
     let baseSetComponent: StandardTokenMockContract;
@@ -232,12 +223,13 @@ contract('TokenFlush', accounts => {
       );
 
       subjectKeepChangeInVault = true;
+      subjectReturnAddress = subjectCaller;
     });
 
     async function subject(): Promise<string> {
       return tokenFlushMock.returnExcessBaseSetInVaultMock.sendTransactionAsync(
         subjectSetAddress,
-        subjectCaller,
+        subjectReturnAddress,
         subjectKeepChangeInVault,
         {
           from: subjectCaller,
@@ -266,6 +258,165 @@ contract('TokenFlush', accounts => {
 
         expect(userBalance).to.bignumber.equal(issueQuantity);
       });
+    });
+  });
+
+  describe('#returnExcessComponentsFromContract', async () => {
+    let subjectCaller: Address;
+    let subjectSetAddress: Address;
+    let subjectReturnAddress: Address;
+
+    let returnQuantity: BigNumber;
+
+    let baseSetComponent: StandardTokenMockContract;
+    let baseSetComponent2: StandardTokenMockContract;
+    let baseSetToken: SetTokenContract;
+    let baseSetNaturalUnit: BigNumber;
+    let baseSetComponentUnit: BigNumber;
+
+    beforeEach(async () => {
+      subjectCaller = functionCaller;
+
+      baseSetComponent = await erc20Helper.deployTokenAsync(ownerAccount);
+      baseSetComponent2 = await erc20Helper.deployTokenAsync(ownerAccount);
+
+      // Create the Set
+      const componentAddresses = [baseSetComponent.address, baseSetComponent2.address];
+      baseSetComponentUnit = ether(1);
+      const componentUnits = [baseSetComponentUnit, ether(1)];
+      baseSetNaturalUnit = ether(1);
+      baseSetToken = await coreHelper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        baseSetNaturalUnit,
+      );
+
+      returnQuantity = ether(1);
+
+      // Send base component to contract
+      await erc20Helper.transferTokensAsync(
+        [baseSetComponent, baseSetComponent2],
+        tokenFlushMock.address,
+        returnQuantity,
+        ownerAccount,
+      );
+
+      subjectSetAddress = baseSetToken.address;
+      subjectReturnAddress = subjectCaller;
+    });
+
+    async function subject(): Promise<string> {
+      return tokenFlushMock.returnExcessComponentsFromContractMock.sendTransactionAsync(
+        subjectSetAddress,
+        subjectReturnAddress,
+        {
+          from: subjectCaller,
+          gas: DEFAULT_GAS,
+        },
+      );
+    }
+
+    it('returns the correct quantity of component 1 to the user', async () => {
+      await subject();
+
+      const userComponent1Balance = await baseSetComponent.balanceOf.callAsync(subjectReturnAddress);
+
+      expect(userComponent1Balance).to.bignumber.equal(returnQuantity);
+    });
+
+    it('returns the correct quantity of component 2 to the user', async () => {
+      await subject();
+
+      const userComponent2Balance = await baseSetComponent2.balanceOf.callAsync(subjectReturnAddress);
+
+      expect(userComponent2Balance).to.bignumber.equal(returnQuantity);
+    });
+  });
+
+  describe('#returnExcessComponentsFromVault', async () => {
+    let subjectCaller: Address;
+    let subjectSetAddress: Address;
+    let subjectReturnAddress: Address;
+
+    let returnQuantity: BigNumber;
+
+    let baseSetComponent: StandardTokenMockContract;
+    let baseSetComponent2: StandardTokenMockContract;
+    let baseSetToken: SetTokenContract;
+    let baseSetNaturalUnit: BigNumber;
+    let baseSetComponentUnit: BigNumber;
+
+    beforeEach(async () => {
+      subjectCaller = functionCaller;
+
+      baseSetComponent = await erc20Helper.deployTokenAsync(ownerAccount);
+      baseSetComponent2 = await erc20Helper.deployTokenAsync(ownerAccount);
+      await erc20Helper.approveTransferAsync(baseSetComponent, transferProxy.address, ownerAccount);
+      await erc20Helper.approveTransferAsync(baseSetComponent2, transferProxy.address, ownerAccount);
+
+      // Create the Set
+      const componentAddresses = [baseSetComponent.address, baseSetComponent2.address];
+      baseSetComponentUnit = ether(1);
+      const componentUnits = [baseSetComponentUnit, ether(1)];
+      baseSetNaturalUnit = ether(1);
+      baseSetToken = await coreHelper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        baseSetNaturalUnit,
+      );
+
+      returnQuantity = ether(1);
+
+      // Send base component to contract
+      await coreHelper.depositTo(
+        core,
+        tokenFlushMock.address,
+        baseSetComponent.address,
+        returnQuantity,
+        ownerAccount,
+      );
+
+      await coreHelper.depositTo(
+        core,
+        tokenFlushMock.address,
+        baseSetComponent2.address,
+        returnQuantity,
+        ownerAccount,
+      );
+
+      subjectSetAddress = baseSetToken.address;
+      subjectReturnAddress = subjectCaller;
+    });
+
+    async function subject(): Promise<string> {
+      return tokenFlushMock.returnExcessComponentsFromVaultMock.sendTransactionAsync(
+        subjectSetAddress,
+        subjectReturnAddress,
+        {
+          from: subjectCaller,
+          gas: DEFAULT_GAS,
+        },
+      );
+    }
+
+    it('returns the correct quantity of component 1 to the user', async () => {
+      await subject();
+
+      const userComponent1Balance = await baseSetComponent.balanceOf.callAsync(subjectReturnAddress);
+
+      expect(userComponent1Balance).to.bignumber.equal(returnQuantity);
+    });
+
+    it('returns the correct quantity of component 2 to the user', async () => {
+      await subject();
+
+      const userComponent2Balance = await baseSetComponent2.balanceOf.callAsync(subjectReturnAddress);
+
+      expect(userComponent2Balance).to.bignumber.equal(returnQuantity);
     });
   });
 });

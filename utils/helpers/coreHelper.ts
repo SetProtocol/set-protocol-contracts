@@ -626,6 +626,27 @@ export class CoreHelper {
     );
   }
 
+  public async depositTo(
+    core: CoreLikeContract,
+    to: Address,
+    token: Address,
+    quantity: BigNumber,
+    from: Address = this._contractOwnerAddress,
+  ) {
+    await core.deposit.sendTransactionAsync(
+      token,
+      quantity,
+      { from },
+    );
+
+    await core.internalTransfer.sendTransactionAsync(
+      token,
+      to,
+      quantity,
+      { from },
+    );
+  }
+
   /* ============ RebalancingToken Factory ============ */
 
   public async getRebalancingInstanceFromAddress(

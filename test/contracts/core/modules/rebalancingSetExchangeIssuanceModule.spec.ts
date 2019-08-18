@@ -162,7 +162,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     it('should contain the correct address of the transfer proxy', async () => {
       const rebalancingSetExchangeIssuanceModuleContract = await subject();
 
-      const proxyAddress = await rebalancingSetExchangeIssuanceModuleContract.transferProxy.callAsync();
+      const proxyAddress = await rebalancingSetExchangeIssuanceModuleContract.transferProxyInstance.callAsync();
 
       expect(proxyAddress).to.equal(transferProxy.address);
     });
@@ -170,9 +170,17 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     it('should contain the correct address of Core', async () => {
       const rebalancingSetExchangeIssuanceModuleContract = await subject();
 
-      const coreAddress = await rebalancingSetExchangeIssuanceModuleContract.core.callAsync();
+      const coreAddress = await rebalancingSetExchangeIssuanceModuleContract.coreInstance.callAsync();
 
       expect(coreAddress).to.equal(core.address);
+    });
+
+    it('should contain the correct address of Vault', async () => {
+      const rebalancingSetExchangeIssuanceModuleContract = await subject();
+
+      const vaultAddress = await rebalancingSetExchangeIssuanceModuleContract.vaultInstance.callAsync();
+
+      expect(vaultAddress).to.equal(vault.address);
     });
 
     it('should contain the correct address of the exchangeIssuanceModule', async () => {

@@ -215,7 +215,7 @@ contract RebalancingSetExchangeIssuanceModule is
         nonReentrant
     {
         // Deposit the erc20 to this contract. The token must be approved the caller to the transferProxy
-        core.transferModule(
+        coreInstance.transferModule(
             _paymentTokenAddress,
             _paymentTokenQuantity,
             msg.sender,
@@ -286,9 +286,9 @@ contract RebalancingSetExchangeIssuanceModule is
         // In the event that exchangeIssue returns more receiveTokens or wrappedEth than
         // specified in receiveToken quantity, those tokens are also retrieved into this contract.
         // We also call this ahead of returnRedemptionChange to allow the unwrapping of the wrappedEther
-        uint256 wethQuantityInVault = vault.getOwnerBalance(address(weth), address(this));
+        uint256 wethQuantityInVault = vaultInstance.getOwnerBalance(address(weth), address(this));
         if (wethQuantityInVault > 0) {
-            core.withdrawModule(
+            coreInstance.withdrawModule(
                 address(this),
                 address(this),
                 address(weth),
@@ -359,9 +359,9 @@ contract RebalancingSetExchangeIssuanceModule is
 
         // In the event that exchangeIssue returns more outputTokens than
         // specified in receiveToken quantity, those tokens are also retrieved into this contract.
-        uint256 outputTokenInVault = vault.getOwnerBalance(_outputTokenAddress, address(this));
+        uint256 outputTokenInVault = vaultInstance.getOwnerBalance(_outputTokenAddress, address(this));
         if (outputTokenInVault > 0) {
-            core.withdrawModule(
+            coreInstance.withdrawModule(
                 address(this),
                 address(this),
                 _outputTokenAddress,
@@ -423,7 +423,7 @@ contract RebalancingSetExchangeIssuanceModule is
     {
         // Expect rebalancing SetToken to be valid and enabled SetToken
         require(
-            core.validSets(address(_rebalancingSetAddress)),
+            coreInstance.validSets(address(_rebalancingSetAddress)),
             "RebalancingSetExchangeIssuance.validateExchangeIssuanceInputs: Invalid or disabled SetToken address"
         );
 
@@ -505,7 +505,7 @@ contract RebalancingSetExchangeIssuanceModule is
         ERC20Wrapper.ensureAllowance(
             _paymentTokenAddress,
             address(this),
-            address(transferProxy),
+            address(transferProxyInstance),
             _paymentTokenQuantity
         );
 
@@ -519,12 +519,12 @@ contract RebalancingSetExchangeIssuanceModule is
         ERC20Wrapper.ensureAllowance(
             baseSetAddress,
             address(this),
-            address(transferProxy),
+            address(transferProxyInstance),
             baseSetIssueQuantity
         );
 
         // Issue rebalancing SetToken to the caller
-        core.issueTo(
+        coreInstance.issueTo(
             msg.sender,
             _rebalancingSetAddress,
             _rebalancingSetQuantity
@@ -575,7 +575,7 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         // Redeem rebalancing Set into the base SetToken from the user to this contract in the Vault
-        core.redeemModule(
+        coreInstance.redeemModule(
             msg.sender,
             address(this),
             _rebalancingSetAddress,
@@ -583,10 +583,10 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         address baseSetAddress = _exchangeIssuanceParams.setAddress;
-        uint256 baseSetVaultQuantity = vault.getOwnerBalance(baseSetAddress, address(this));
+        uint256 baseSetVaultQuantity = vaultInstance.getOwnerBalance(baseSetAddress, address(this));
 
         // Withdraw base SetToken from Vault to this contract
-        core.withdrawModule(
+        coreInstance.withdrawModule(
             address(this),
             address(this),
             baseSetAddress,

@@ -33,13 +33,13 @@ contract ModuleCoreStateV2 {
     /* ============ State Variables ============ */
 
     // Address of core contract
-    ICore public core;
+    ICore public coreInstance;
 
     // Address of vault contract
-    IVault public vault;
+    IVault public vaultInstance;
 
     // Address of transferProxy contract
-    ITransferProxy public transferProxy;
+    ITransferProxy public transferProxyInstance;
 
     /* ============ Public Getters ============ */
 
@@ -58,12 +58,12 @@ contract ModuleCoreStateV2 {
         public
     {
         // Commit passed address to core state variable
-        core = _core;
+        coreInstance = _core;
 
         // Commit passed address to vault state variable
-        vault = _vault;
+        vaultInstance = _vault;
 
         // Commit passed address to vault state variable
-        transferProxy = _transferProxy;
+        transferProxyInstance = _transferProxy;
     }
 }

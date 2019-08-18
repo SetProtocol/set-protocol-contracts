@@ -64,12 +64,12 @@ contract TokenFlush is
                 ERC20Wrapper.ensureAllowance(
                     _baseSetAddress,
                     address(this),
-                    address(transferProxy),
+                    address(transferProxyInstance),
                     baseSetQuantity
                 );
 
                 // Deposit base SetToken to the user
-                core.depositModule(
+                coreInstance.depositModule(
                     address(this),
                     _returnAddress,
                     _baseSetAddress,
@@ -104,7 +104,7 @@ contract TokenFlush is
         internal
     {
         // Return base SetToken if any that are in the Vault
-        uint256 baseSetQuantityInVault = vault.getOwnerBalance(
+        uint256 baseSetQuantityInVault = vaultInstance.getOwnerBalance(
             _baseSetAddress,
             address(this)
         );
@@ -112,14 +112,14 @@ contract TokenFlush is
         if (baseSetQuantityInVault > 0) { 
             if (_keepChangeInVault) {
                 // Transfer ownership within the vault to the user
-                core.internalTransfer(
+                coreInstance.internalTransfer(
                     _baseSetAddress,
                     _returnAddress,
                     baseSetQuantityInVault
                 );
             } else {
                 // Transfer ownership directly to the user
-                core.withdrawModule(
+                coreInstance.withdrawModule(
                     address(this),
                     _returnAddress,
                     _baseSetAddress,
@@ -170,9 +170,9 @@ contract TokenFlush is
         // Return base Set components not used in issuance of base set
         address[] memory baseSetComponents = _baseSetToken.getComponents();
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
-            uint256 vaultQuantity = vault.getOwnerBalance(baseSetComponents[i], address(this));
+            uint256 vaultQuantity = vaultInstance.getOwnerBalance(baseSetComponents[i], address(this));
             if (vaultQuantity > 0) {
-                core.withdrawModule(
+                coreInstance.withdrawModule(
                     address(this),
                     _returnAddress,
                     baseSetComponents[i],

@@ -276,6 +276,10 @@ contract('TokenFlush', accounts => {
         customIssueQuantity = ZERO;
       });
 
+      after(async () => {
+        customIssueQuantity = undefined;
+      });
+
       it('should not change the users balance', async () => {
         await subject();
 

@@ -181,11 +181,19 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       expect(vaultAddress).to.equal(vault.address);
     });
 
+    it('should contain the correct address of Wrapped Ether', async () => {
+      const rebalancingSetExchangeIssuanceModuleContract = await subject();
+
+      const wethAddress = await rebalancingSetExchangeIssuanceModuleContract.wethInstance.callAsync();
+
+      expect(wethAddress).to.equal(weth.address);
+    });
+
     it('should contain the correct address of the exchangeIssuanceModule', async () => {
       const rebalancingSetExchangeIssuanceModuleContract = await subject();
 
       const exchangeIssuanceModuleAddress = await rebalancingSetExchangeIssuanceModuleContract
-      .exchangeIssuanceModule.callAsync();
+      .exchangeIssuanceModuleInstance.callAsync();
 
       expect(exchangeIssuanceModuleAddress).to.equal(exchangeIssuanceModule.address);
     });

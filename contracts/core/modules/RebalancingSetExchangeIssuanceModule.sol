@@ -52,10 +52,10 @@ contract RebalancingSetExchangeIssuanceModule is
     /* ============ State Variables ============ */
 
     // Address and instance of ExchangeIssuance Module contract
-    IExchangeIssuanceModule public exchangeIssuanceModule;
+    IExchangeIssuanceModule public exchangeIssuanceModuleInstance;
 
     // Address and instance of Wrapped Ether contract
-    IWETH public weth;
+    IWETH public wethInstance;
 
     /* ============ Events ============ */
 
@@ -101,10 +101,10 @@ contract RebalancingSetExchangeIssuanceModule is
         )
     {
         // Commit the instance of ExchangeIssuanceModule to state variables
-        exchangeIssuanceModule = _exchangeIssuanceModule;
+        exchangeIssuanceModuleInstance = _exchangeIssuanceModule;
 
         // Commit the address and instance of Wrapped Ether to state variables
-        weth = _wrappedEther;
+        wethInstance = _wrappedEther;
 
         // Add approvals of Wrapped Ether to the Transfer Proxy
         ERC20Wrapper.approve(
@@ -123,7 +123,7 @@ contract RebalancingSetExchangeIssuanceModule is
         payable
     {
         require(
-            msg.sender == address(weth),
+            msg.sender == address(wethInstance),
             "RebalancingSetExchangeIssuanceModule.fallback: Cannot receive ETH directly unless unwrapping WETH"
         );
     }
@@ -154,13 +154,13 @@ contract RebalancingSetExchangeIssuanceModule is
         nonReentrant
     {
         // Wrap all Ether; Wrapped Ether could be a component of the Set being issued.
-        weth.deposit.value(msg.value)();
+        wethInstance.deposit.value(msg.value)();
 
         // Perform exchange transactions, mint the base SetToken, and issue the Rebalancing Set to the sender
         issueRebalancingSetInternal(
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
-            address(weth),
+            address(wethInstance),
             msg.value,
             _exchangeIssuanceParams,
             _orderData,
@@ -168,10 +168,10 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         // unwrap any leftover WETH and transfer to sender
-        uint256 leftoverWeth = ERC20Wrapper.balanceOf(address(weth), address(this));
+        uint256 leftoverWeth = ERC20Wrapper.balanceOf(address(wethInstance), address(this));
         if (leftoverWeth > 0) {
             // Withdraw wrapped Ether
-            weth.withdraw(leftoverWeth);
+            wethInstance.withdraw(leftoverWeth);
 
             // Transfer ether to user
             msg.sender.transfer(leftoverWeth);
@@ -180,7 +180,7 @@ contract RebalancingSetExchangeIssuanceModule is
         emit LogPayableExchangeIssue(
             _rebalancingSetAddress,
             msg.sender,
-            address(weth),
+            address(wethInstance),
             _rebalancingSetQuantity,
             leftoverWeth
         );
@@ -278,7 +278,7 @@ contract RebalancingSetExchangeIssuanceModule is
         redeemRebalancingSetIntoComponentsInternal(
             _rebalancingSetAddress,
             _rebalancingSetQuantity,
-            address(weth),
+            address(wethInstance),
             _exchangeIssuanceParams,
             _orderData
         );
@@ -286,20 +286,20 @@ contract RebalancingSetExchangeIssuanceModule is
         // In the event that exchangeIssue returns more receiveTokens or wrappedEth than
         // specified in receiveToken quantity, those tokens are also retrieved into this contract.
         // We also call this ahead of returnRedemptionChange to allow the unwrapping of the wrappedEther
-        uint256 wethQuantityInVault = vaultInstance.getOwnerBalance(address(weth), address(this));
+        uint256 wethQuantityInVault = vaultInstance.getOwnerBalance(address(wethInstance), address(this));
         if (wethQuantityInVault > 0) {
             coreInstance.withdrawModule(
                 address(this),
                 address(this),
-                address(weth),
+                address(wethInstance),
                 wethQuantityInVault
             );
         }
 
         // Unwrap wrapped Ether and transfer Eth to user
-        uint256 wethBalance = ERC20Wrapper.balanceOf(address(weth), address(this));
+        uint256 wethBalance = ERC20Wrapper.balanceOf(address(wethInstance), address(this));
         if (wethBalance > 0) {
-            weth.withdraw(wethBalance);
+            wethInstance.withdraw(wethBalance);
             msg.sender.transfer(wethBalance);            
         }
 
@@ -318,7 +318,7 @@ contract RebalancingSetExchangeIssuanceModule is
         emit LogPayableExchangeRedeem(
             _rebalancingSetAddress,
             msg.sender,
-            address(weth),
+            address(wethInstance),
             _rebalancingSetQuantity,
             wethBalance
         );
@@ -440,7 +440,7 @@ contract RebalancingSetExchangeIssuanceModule is
 
         // Multiple items are allowed on the transactTokenArray. Specifically, this allows there to be
         // multiple sendToken items that are directed to the various exchangeWrappers.
-        // The receiveTokenArray is implicitly limited to a single item, as the exchangeIssuanceModule
+        // The receiveTokenArray is implicitly limited to a single item, as the exchangeIssuanceModuleInstance
         // checks that the receive tokens do not have duplicates
         for (uint256 i = 0; i < _transactTokenArray.length; i++) {
             // The transact token array tokens must match the transact token.
@@ -510,7 +510,7 @@ contract RebalancingSetExchangeIssuanceModule is
         );
 
         // Atomically trade paymentToken for base SetToken components and mint the base SetToken
-        exchangeIssuanceModule.exchangeIssue(
+        exchangeIssuanceModuleInstance.exchangeIssue(
             _exchangeIssuanceParams,
             _orderData
         );
@@ -596,7 +596,7 @@ contract RebalancingSetExchangeIssuanceModule is
         // Redeem base SetToken into components and perform trades / exchanges
         // into the receiveToken. The receiveTokens are transferred to this contract
         // as well as the remaining non-exchanged components
-        exchangeIssuanceModule.exchangeRedeem(
+        exchangeIssuanceModuleInstance.exchangeRedeem(
             _exchangeIssuanceParams,
             _orderData
         );     

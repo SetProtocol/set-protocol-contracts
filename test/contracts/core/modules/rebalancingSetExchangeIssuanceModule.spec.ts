@@ -147,15 +147,13 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
   });
 
   describe('#constructor', async () => {
-    const subjectCaller: Address = ownerAccount;
-
     async function subject(): Promise<RebalancingSetExchangeIssuanceModuleContract> {
       return await coreHelper.deployRebalancingSetExchangeIssuanceModuleAsync(
         core.address,
         transferProxy.address,
         exchangeIssuanceModule.address,
         weth.address,
-        subjectCaller,
+        vault.address,
       );
     }
 

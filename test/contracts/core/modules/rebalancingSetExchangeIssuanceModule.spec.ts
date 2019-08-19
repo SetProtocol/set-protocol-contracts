@@ -147,22 +147,20 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
   });
 
   describe('#constructor', async () => {
-    const subjectCaller: Address = ownerAccount;
-
     async function subject(): Promise<RebalancingSetExchangeIssuanceModuleContract> {
       return await coreHelper.deployRebalancingSetExchangeIssuanceModuleAsync(
         core.address,
         transferProxy.address,
         exchangeIssuanceModule.address,
         weth.address,
-        subjectCaller,
+        vault.address,
       );
     }
 
     it('should contain the correct address of the transfer proxy', async () => {
       const rebalancingSetExchangeIssuanceModuleContract = await subject();
 
-      const proxyAddress = await rebalancingSetExchangeIssuanceModuleContract.transferProxy.callAsync();
+      const proxyAddress = await rebalancingSetExchangeIssuanceModuleContract.transferProxyInstance.callAsync();
 
       expect(proxyAddress).to.equal(transferProxy.address);
     });
@@ -170,16 +168,32 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     it('should contain the correct address of Core', async () => {
       const rebalancingSetExchangeIssuanceModuleContract = await subject();
 
-      const coreAddress = await rebalancingSetExchangeIssuanceModuleContract.core.callAsync();
+      const coreAddress = await rebalancingSetExchangeIssuanceModuleContract.coreInstance.callAsync();
 
       expect(coreAddress).to.equal(core.address);
+    });
+
+    it('should contain the correct address of Vault', async () => {
+      const rebalancingSetExchangeIssuanceModuleContract = await subject();
+
+      const vaultAddress = await rebalancingSetExchangeIssuanceModuleContract.vaultInstance.callAsync();
+
+      expect(vaultAddress).to.equal(vault.address);
+    });
+
+    it('should contain the correct address of Wrapped Ether', async () => {
+      const rebalancingSetExchangeIssuanceModuleContract = await subject();
+
+      const wethAddress = await rebalancingSetExchangeIssuanceModuleContract.wethInstance.callAsync();
+
+      expect(wethAddress).to.equal(weth.address);
     });
 
     it('should contain the correct address of the exchangeIssuanceModule', async () => {
       const rebalancingSetExchangeIssuanceModuleContract = await subject();
 
       const exchangeIssuanceModuleAddress = await rebalancingSetExchangeIssuanceModuleContract
-      .exchangeIssuanceModule.callAsync();
+      .exchangeIssuanceModuleInstance.callAsync();
 
       expect(exchangeIssuanceModuleAddress).to.equal(exchangeIssuanceModule.address);
     });

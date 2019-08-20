@@ -10,6 +10,7 @@ export { CoreContract } from '../types/generated/core';
 export { CoreIssuanceLibraryContract } from '../types/generated/core_issuance_library';
 export { CoreIssuanceLibraryMockContract } from '../types/generated/core_issuance_library_mock';
 export { CoreMockContract } from '../types/generated/core_mock';
+export { ERC20ViewerContract } from '../types/generated/erc20_viewer';
 export { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 export { ERC20WrapperContract } from '../types/generated/erc20_wrapper';
 export { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
@@ -28,6 +29,7 @@ export { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return
 export { PlaceBidLibraryContract } from '../types/generated/place_bid_library';
 export { PriceFeedContract } from '../types/generated/price_feed';
 export { ProposeLibraryContract } from '../types/generated/propose_library';
+export { ProtocolViewerContract } from '../types/generated/protocol_viewer';
 export { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 export { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
 export {
@@ -37,6 +39,7 @@ export { RebalancingSetIssuanceModuleContract } from '../types/generated/rebalan
 export { RebalancingSetIssuanceMockContract } from '../types/generated/rebalancing_set_issuance_mock';
 export { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_token';
 export { RebalancingSetTokenFactoryContract } from '../types/generated/rebalancing_set_token_factory';
+export { RebalancingSetTokenViewerContract } from '../types/generated/rebalancing_set_token_viewer';
 export { SettleRebalanceLibraryContract } from '../types/generated/settle_rebalance_library';
 export { SetTokenContract } from '../types/generated/set_token';
 export { SetTokenFactoryContract } from '../types/generated/set_token_factory';

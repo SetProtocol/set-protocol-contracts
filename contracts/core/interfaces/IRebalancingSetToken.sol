@@ -30,6 +30,16 @@ import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 interface IRebalancingSetToken {
 
     /*
+     * Get the auction library contract used for the current rebalance
+     *
+     * @return address    Address of auction library used in the upcoming auction
+     */
+    function auctionLibrary()
+        external
+        view
+        returns (address);
+
+    /*
      * Get totalSupply of Rebalancing Set
      *
      * @return  totalSupply
@@ -62,12 +72,22 @@ interface IRebalancingSetToken {
     /*
      * Get rebalanceState of Rebalancing Set
      *
-     * @return  rebalanceState
+     * @return RebalancingLibrary.State    Current rebalance state of the RebalancingSetToken
      */
     function rebalanceState()
         external
         view
         returns (RebalancingLibrary.State);
+
+    /*
+     * Get the starting amount of current SetToken for the current auction
+     *
+     * @return  rebalanceState
+     */
+    function startingCurrentSetAmount()
+        external
+        view
+        returns (uint256);
 
     /**
      * Gets the balance of the specified address.
@@ -111,11 +131,21 @@ interface IRebalancingSetToken {
         returns (uint256);
 
     /**
-     * Returns the address of the current Base Set
+     * Returns the address of the current base SetToken with the current allocation
      *
-     * @return           A address representing the base Set Token
+     * @return           A address representing the base SetToken
      */
     function currentSet()
+        external
+        view
+        returns (address);
+
+    /**
+     * Returns the address of the next base SetToken with the post auction allocation
+     *
+     * @return  address    Address representing the base SetToken
+     */
+    function nextSet()
         external
         view
         returns (address);
@@ -188,9 +218,19 @@ interface IRebalancingSetToken {
         returns (address[] memory);
 
     /*
+     * Get auctionPriceParameters for current auction
+     *
+     * @return uint256[4]    AuctionPriceParameters for current rebalance auction
+     */
+    function getAuctionPriceParameters()
+        external
+        view
+        returns (uint256[] memory);
+
+    /*
      * Get biddingParameters for current auction
      *
-     * @return  biddingParameters
+     * @return uint256[2]    BiddingParameters for current rebalance auction
      */
     function getBiddingParameters()
         external

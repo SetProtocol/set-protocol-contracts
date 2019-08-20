@@ -26,7 +26,11 @@ import { IVault } from "../../interfaces/IVault.sol";
  * @author Set Protocol
  *
  * The ModuleCoreStateV2 library maintains Core-related state for modules.
- * Includes the state of TransferProxy as well.
+ *
+ * CHANGELOG
+ * - Adds transferProxy to the tracked state
+ * - Removes address variables
+ *
  */
 contract ModuleCoreStateV2 {
 

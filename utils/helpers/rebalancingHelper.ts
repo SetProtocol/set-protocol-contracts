@@ -24,6 +24,8 @@ import {
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
   DEFAULT_AUCTION_PRICE_DIVISOR,
+  DEFAULT_REBALANCE_START_PRICE,
+  DEFAULT_REBALANCE_TIME_TO_PIVOT,
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 
@@ -379,8 +381,8 @@ export class RebalancingHelper {
     caller: Address
   ): Promise<void> {
     // Generate default propose params
-    const auctionTimeToPivot = new BigNumber(100000);
-    const auctionStartPrice = new BigNumber(500);
+    const auctionTimeToPivot = DEFAULT_REBALANCE_TIME_TO_PIVOT;
+    const auctionStartPrice = DEFAULT_REBALANCE_START_PRICE;
     const auctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
 
     const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();

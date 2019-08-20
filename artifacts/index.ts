@@ -18,6 +18,7 @@ export { NoDecimalTokenMock } from "./ts/NoDecimalTokenMock";
 export { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
 export { PlaceBidLibrary } from "./ts/PlaceBidLibrary";
 export { ProposeLibrary } from "./ts/ProposeLibrary";
+export { ProtocolViewer } from "./ts/ProtocolViewer";
 export { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
 export { RebalancingSetIssuanceModule } from "./ts/RebalancingSetIssuanceModule";
 export { RebalancingSetExchangeIssuanceModule } from "./ts/RebalancingSetExchangeIssuanceModule";
@@ -64,6 +65,7 @@ export {
   NoXferReturnTokenMockContract,
   PlaceBidLibraryContract,
   ProposeLibraryContract,
+  ProtocolViewerContract,
   RebalanceAuctionModuleContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetIssuanceModuleContract,

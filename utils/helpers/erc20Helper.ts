@@ -312,6 +312,19 @@ export class ERC20Helper {
     return allowances;
   }
 
+  public async getTokenSupplies(
+    tokens: StandardTokenMockContract[]
+  ): Promise<BigNumber[]> {
+    const supplyPromises = _.map(tokens, token => token.totalSupply.callAsync());
+
+    let supplies: BigNumber[];
+    await Promise.all(supplyPromises).then(fetchedTokenSupplies => {
+      supplies = fetchedTokenSupplies;
+    });
+
+    return supplies;
+  }
+
   public async retrieveTokenInstancesAsync(
     tokens: Address[],
   ): Promise<StandardTokenMockContract[]> {

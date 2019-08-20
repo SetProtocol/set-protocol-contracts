@@ -59,4 +59,8 @@ interface IERC20 {
     )
         external
         returns (bool);
+
+    function totalSupply()
+        external
+        returns (uint256);
 }

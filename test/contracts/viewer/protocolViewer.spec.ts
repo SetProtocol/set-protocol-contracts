@@ -221,10 +221,12 @@ contract('ProtocolViewer', accounts => {
       expect(auctionLibraryAddress).to.equal(NULL_ADDRESS);
 
       const [
+        proposalStartTime,
         auctionTimeToPivot,
         auctionStartPrice,
         auctionPivotPrice,
       ] = rebalanceProposalState[2];
+      expect(proposalStartTime).to.be.bignumber.equal(ZERO);
       expect(auctionTimeToPivot).to.be.bignumber.equal(ZERO);
       expect(auctionStartPrice).to.be.bignumber.equal(ZERO);
       expect(auctionPivotPrice).to.be.bignumber.equal(ZERO);

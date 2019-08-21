@@ -46,19 +46,21 @@ contract RebalancingSetTokenViewer {
         // Fetch the RebalancingSetToken's current rebalance state
         RebalancingLibrary.State rebalanceState = _rebalancingSetToken.rebalanceState();
 
-        // Create return integer and address arrays
+        // Create return address arrays
         address[] memory auctionAddressParams = new address[](2);
-        uint256[] memory auctionIntegerParams = new uint256[](3);
-        
         // Fetch the addresses associated with the current rebalance
         auctionAddressParams[0] = _rebalancingSetToken.nextSet();
         auctionAddressParams[1] = _rebalancingSetToken.auctionLibrary();
+        
+        // Create return integer array
+        uint256[] memory auctionIntegerParams = new uint256[](4);
+        auctionIntegerParams[0] = _rebalancingSetToken.proposalStartTime();
 
         // Fetch the current rebalance's proposal parameters
         uint256[] memory auctionParameters = _rebalancingSetToken.getAuctionPriceParameters();
-        auctionIntegerParams[0] = auctionParameters[1]; // auctionTimeToPivot
-        auctionIntegerParams[1] = auctionParameters[2]; // auctionStartPrice
-        auctionIntegerParams[2] = auctionParameters[3]; // auctionPivotPrice
+        auctionIntegerParams[1] = auctionParameters[1]; // auctionTimeToPivot
+        auctionIntegerParams[2] = auctionParameters[2]; // auctionStartPrice
+        auctionIntegerParams[3] = auctionParameters[3]; // auctionPivotPrice
 
         return (rebalanceState, auctionAddressParams, auctionIntegerParams);
     }

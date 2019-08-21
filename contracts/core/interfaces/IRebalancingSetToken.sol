@@ -50,6 +50,16 @@ interface IRebalancingSetToken {
         returns (uint256);
 
     /*
+     * Get proposalTimeStamp of Rebalancing Set
+     *
+     * @return  proposalTimeStamp
+     */
+    function proposalStartTime()
+        external
+        view
+        returns (uint256);
+
+    /*
      * Get lastRebalanceTimestamp of Rebalancing Set
      *
      * @return  lastRebalanceTimestamp

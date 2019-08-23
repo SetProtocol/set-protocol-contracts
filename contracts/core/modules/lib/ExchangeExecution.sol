@@ -22,6 +22,7 @@ import { CommonMath } from "../../../lib/CommonMath.sol";
 import { ExchangeHeaderLibrary } from "../../lib/ExchangeHeaderLibrary.sol";
 import { ExchangeIssuanceLibrary } from "./ExchangeIssuanceLibrary.sol";
 import { ExchangeWrapperLibrary } from "../../lib/ExchangeWrapperLibrary.sol";
+import { ExchangeWrapperLibraryV2 } from "../../lib/ExchangeWrapperLibraryV2.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { ModuleCoreState } from "./ModuleCoreState.sol";
 
@@ -90,7 +91,7 @@ contract ExchangeExecution is
             );
 
             // Construct the Exchange Data struct for callExchange interface
-            ExchangeWrapperLibrary.ExchangeData memory exchangeData = ExchangeWrapperLibrary.ExchangeData({
+            ExchangeWrapperLibraryV2.ExchangeData memory exchangeData = ExchangeWrapperLibraryV2.ExchangeData({
                 caller: msg.sender,
                 orderCount: header.orderCount
             });

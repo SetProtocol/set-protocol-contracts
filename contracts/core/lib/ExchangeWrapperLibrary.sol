@@ -22,6 +22,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
+import { ExchangeWrapperLibraryV2 } from "./ExchangeWrapperLibraryV2.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 
 
@@ -88,14 +89,14 @@ library ExchangeWrapperLibrary {
      */
     function callExchange(
         address _core,
-        ExchangeData memory _exchangeData,
+        ExchangeWrapperLibraryV2.ExchangeData memory _exchangeData,
         address _exchangeWrapper,
         bytes memory _bodyData
     )
         internal
     {
         // Call Exchange
-        ExchangeResults memory exchangeResults = IExchangeWrapper(_exchangeWrapper).exchange(
+        ExchangeWrapperLibraryV2.ExchangeResults memory exchangeResults = IExchangeWrapper(_exchangeWrapper).exchange(
             _exchangeData,
             _bodyData
         );

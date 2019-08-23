@@ -15,7 +15,7 @@
 */
 
 pragma solidity 0.5.7;
-
+pragma experimental "ABIEncoderV2";
 
 import { IRebalancingSetToken } from "../../core/interfaces/IRebalancingSetToken.sol";
 import { RebalancingLibrary } from "../../core/lib/RebalancingLibrary.sol";

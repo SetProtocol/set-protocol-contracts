@@ -15,6 +15,7 @@
 */
 
 pragma solidity 0.5.7;
+pragma experimental "ABIEncoderV2";
 
 import { ERC20Viewer } from "./lib/ERC20Viewer.sol";
 import { RebalancingSetTokenViewer } from "./lib/RebalancingSetTokenViewer.sol";

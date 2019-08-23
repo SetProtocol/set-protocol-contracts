@@ -17,7 +17,7 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
+import { ExchangeWrapperLibraryV2 } from "../lib/ExchangeWrapperLibraryV2.sol";
 
 /**
  * @title IExchangeWrapper
@@ -43,9 +43,9 @@ interface IExchangeWrapper {
      * @param  _orderData               Arbitrary bytes data for any information to pass to the exchange
      */
     function exchange(
-        ExchangeWrapperLibrary.ExchangeData calldata _exchangeData,
+        ExchangeWrapperLibraryV2.ExchangeData calldata _exchangeData,
         bytes calldata _orderData
     )
         external
-        returns (ExchangeWrapperLibrary.ExchangeResults memory);
+        returns (ExchangeWrapperLibraryV2.ExchangeResults memory);
 }

@@ -23,10 +23,10 @@ import { CommonMath } from "../../lib/CommonMath.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
-import { IExchange as ZeroExExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";
+import { IExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
-import { LibFillResults as ZeroExFillResults } from "../../external/0x/Exchange/libs/LibFillResults.sol";
-import { LibOrder as ZeroExOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
+import { LibFillResults } from "../../external/0x/Exchange/libs/LibFillResults.sol";
+import { LibOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
 import { ZeroExOrderLibrary } from "./lib/ZeroExOrderLibrary.sol";
 
 
@@ -170,7 +170,7 @@ contract ZeroExExchangeWrapper {
         private
         returns (address, uint256)
     {
-        ZeroExOrder.Order memory order = _orderInformation.order;
+        LibOrder.Order memory order = _orderInformation.order;
         ZeroExOrderLibrary.OrderHeader memory header = _orderInformation.header;
 
         // Ensure the taker token is allowed to be transferred by ZeroEx Proxy
@@ -195,7 +195,7 @@ contract ZeroExExchangeWrapper {
         }
 
         // Fill 0x order via their Exchange contract
-        ZeroExFillResults.FillResults memory fillResults = ZeroExExchange(zeroExExchange).fillOrKillOrder(
+        LibFillResults.FillResults memory fillResults = IExchange(zeroExExchange).fillOrKillOrder(
             order,
             zeroExFillAmount,
             header.signature
@@ -271,7 +271,7 @@ contract ZeroExExchangeWrapper {
         );
 
         // Parse 0x order of current wrapper order
-        ZeroExOrder.Order memory order = ZeroExOrderLibrary.parseZeroExOrder(_ordersData, orderBodyStart);
+        LibOrder.Order memory order = ZeroExOrderLibrary.parseZeroExOrder(_ordersData, orderBodyStart);
         address makerToken = ZeroExOrderLibrary.parseMakerTokenFromZeroExOrder(_ordersData, orderBodyStart);
         address takerToken = ZeroExOrderLibrary.parseTakerTokenFromZeroExOrder(_ordersData, orderBodyStart);
 

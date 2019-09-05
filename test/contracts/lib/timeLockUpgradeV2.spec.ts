@@ -191,7 +191,6 @@ contract('TimeLockUpgradeV2', accounts => {
       });
 
       it('should revert', async () => {
-        // await subject();
         await expectRevertError(subject());
       });
     });
@@ -202,6 +201,8 @@ contract('TimeLockUpgradeV2', accounts => {
       let subjectTimeElapsedPeriod = subjectTimeLockPeriod;
 
       beforeEach(async () => {
+        subjectCaller = ownerAccount;
+
         await timeLockUpgradeMock.setTimeLockPeriod.sendTransactionAsync(
           subjectTimeLockPeriod,
           { from: subjectCaller },

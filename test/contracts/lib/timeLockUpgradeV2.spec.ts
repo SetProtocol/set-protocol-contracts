@@ -245,7 +245,7 @@ contract('TimeLockUpgradeV2', accounts => {
     });
   });
 
-  describe.only('#deregisterUpgrade', async () => {
+  describe('#deregisterUpgrade', async () => {
     let subjectHash: string;
     let subjectCaller: Address;
 
@@ -285,7 +285,7 @@ contract('TimeLockUpgradeV2', accounts => {
 
     it('emits a UpgradeUnregistered event', async () => {
       const txHash = await subject();
-      const logs = await setTestUtils.getLogsFromTxHash(txHash);      
+      const logs = await setTestUtils.getLogsFromTxHash(txHash);
 
       const expectedLogs: Log[] = [
         UpgradeUnregistered(

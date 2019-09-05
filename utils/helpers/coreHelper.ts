@@ -16,6 +16,7 @@ import {
   SetTokenContract,
   SetTokenFactoryContract,
   TimeLockUpgradeMockContract,
+  TimeLockUpgradeV2MockContract,
   TransferProxyContract,
   VaultContract,
   WethMockContract,
@@ -54,6 +55,7 @@ const ProposeLibrary = artifacts.require('ProposeLibrary');
 const SettleRebalanceLibrary = artifacts.require('SettleRebalanceLibrary');
 const StartRebalanceLibrary = artifacts.require('StartRebalanceLibrary');
 const TimeLockUpgradeMock = artifacts.require('TimeLockUpgradeMock');
+const TimeLockUpgradeV2Mock = artifacts.require('TimeLockUpgradeV2Mock');
 const TransferProxy = artifacts.require('TransferProxy');
 const Vault = artifacts.require('Vault');
 const WhiteList = artifacts.require('WhiteList');
@@ -333,6 +335,19 @@ export class CoreHelper {
 
     return new TimeLockUpgradeMockContract(
       new web3.eth.Contract(truffleTimeLockUpgradeMock.abi, truffleTimeLockUpgradeMock.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployTimeLockUpgradeV2MockAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<TimeLockUpgradeV2MockContract> {
+    const truffleTimeLockUpgradeV2Mock = await TimeLockUpgradeV2Mock.new(
+      { from },
+    );
+
+    return new TimeLockUpgradeV2MockContract(
+      new web3.eth.Contract(truffleTimeLockUpgradeV2Mock.abi, truffleTimeLockUpgradeV2Mock.address),
       { from, gas: DEFAULT_GAS },
     );
   }

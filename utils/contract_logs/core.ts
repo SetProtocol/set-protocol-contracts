@@ -67,6 +67,19 @@ export function UpgradeRegistered(
   };
 }
 
+export function UpgradeUnregistered(
+  _coreAddress: Address,
+  _upgradeHash: Bytes,
+): Log {
+  return {
+    event: 'UpgradeUnregistered',
+    address: _coreAddress,
+    args: {
+      _upgradeHash,
+    },
+  };
+}
+
 /**** Core Issuance Logs ****/
 
 export function SetIssued(

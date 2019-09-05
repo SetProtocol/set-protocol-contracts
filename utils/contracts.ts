@@ -51,6 +51,8 @@ export { StartRebalanceLibraryContract } from '../types/generated/start_rebalanc
 export { TokenFlushMockContract } from '../types/generated/token_flush_mock';
 export { TimeLockUpgradeContract } from '../types/generated/time_lock_upgrade';
 export { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrade_mock';
+export { TimeLockUpgradeV2Contract } from '../types/generated/time_lock_upgrade_v2';
+export { TimeLockUpgradeV2MockContract } from '../types/generated/time_lock_upgrade_v2_mock';
 export { TransferProxyContract } from '../types/generated/transfer_proxy';
 export { UpdatableConstantAuctionPriceCurveContract } from '../types/generated/updatable_constant_auction_price_curve';
 export { VaultContract } from '../types/generated/vault';

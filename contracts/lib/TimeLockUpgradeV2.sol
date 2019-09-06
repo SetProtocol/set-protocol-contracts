@@ -50,7 +50,7 @@ contract TimeLockUpgradeV2 is
         uint256 _timestamp
     );
 
-    event UpgradeUnregistered(
+    event RemoveRegisteredUpgrade(
         bytes32 _upgradeHash
     );
 
@@ -111,7 +111,7 @@ contract TimeLockUpgradeV2 is
      *
      * @param  _upgradeHash    Keccack256 hash that uniquely identifies function called and arguments 
      */
-    function deregisterUpgrade(
+    function removeRegisteredUpgrade(
         bytes32 _upgradeHash 
     )
         external
@@ -119,13 +119,13 @@ contract TimeLockUpgradeV2 is
     {
         require(
             timeLockedUpgrades[_upgradeHash] != 0,
-            "TimeLockUpgradeV2.deregisterUpgrade: Upgrade hash must be registered"
+            "TimeLockUpgradeV2.removeRegisteredUpgrade: Upgrade hash must be registered"
         );
 
         // Reset the timestamp to 0
         timeLockedUpgrades[_upgradeHash] = 0;
 
-        emit UpgradeUnregistered(
+        emit RemoveRegisteredUpgrade(
             _upgradeHash
         );  
     }

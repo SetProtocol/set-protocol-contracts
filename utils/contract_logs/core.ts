@@ -67,12 +67,12 @@ export function UpgradeRegistered(
   };
 }
 
-export function UpgradeUnregistered(
+export function RemoveRegisteredUpgrade(
   _coreAddress: Address,
   _upgradeHash: Bytes,
 ): Log {
   return {
-    event: 'UpgradeUnregistered',
+    event: 'RemoveRegisteredUpgrade',
     address: _coreAddress,
     args: {
       _upgradeHash,

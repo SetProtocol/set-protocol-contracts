@@ -11,7 +11,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { TimeLockUpgradeV2MockContract } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { UpgradeRegistered, UpgradeUnregistered } from '@utils/contract_logs/core';
+import { UpgradeRegistered, RemoveRegisteredUpgrade } from '@utils/contract_logs/core';
 import { ZERO, ONE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -246,7 +246,7 @@ contract('TimeLockUpgradeV2', accounts => {
     });
   });
 
-  describe('#deregisterUpgrade', async () => {
+  describe('#removeRegisteredUpgrade', async () => {
     let subjectHash: string;
     let subjectCaller: Address;
 
@@ -271,7 +271,7 @@ contract('TimeLockUpgradeV2', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return timeLockUpgradeMock.deregisterUpgrade.sendTransactionAsync(
+      return timeLockUpgradeMock.removeRegisteredUpgrade.sendTransactionAsync(
         subjectHash,
         { from: subjectCaller },
       );
@@ -284,12 +284,12 @@ contract('TimeLockUpgradeV2', accounts => {
       expect(actualTimestamp).to.bignumber.equal(ZERO);
     });
 
-    it('emits a UpgradeUnregistered event', async () => {
+    it('emits a RemoveRegisteredUpgrade event', async () => {
       const txHash = await subject();
       const logs = await setTestUtils.getLogsFromTxHash(txHash);
 
       const expectedLogs: Log[] = [
-        UpgradeUnregistered(
+        RemoveRegisteredUpgrade(
           timeLockUpgradeMock.address,
           subjectHash,
         ),

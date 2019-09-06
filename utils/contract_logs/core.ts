@@ -67,6 +67,19 @@ export function UpgradeRegistered(
   };
 }
 
+export function RemoveRegisteredUpgrade(
+  _coreAddress: Address,
+  _upgradeHash: Bytes,
+): Log {
+  return {
+    event: 'RemoveRegisteredUpgrade',
+    address: _coreAddress,
+    args: {
+      _upgradeHash,
+    },
+  };
+}
+
 /**** Core Issuance Logs ****/
 
 export function SetIssued(

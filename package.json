@@ -98,6 +98,7 @@
     "openzeppelin-solidity": "^2.2",
     "set-protocol-utils": "^1.0.0-beta.32",
     "tiny-promisify": "^1.0.0",
+    "truffle-flattener": "^1.4.0",
     "ts-mocha": "^6.0.0",
     "ts-node": "^8.0.2",
     "tslint-eslint-rules": "^5.3.1",

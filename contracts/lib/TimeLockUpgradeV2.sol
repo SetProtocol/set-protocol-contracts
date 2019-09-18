@@ -29,6 +29,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
  * CHANGELOG:
  * - Requires that the caller is the owner
  * - New function to allow deletion of existing timelocks
+ * - Added upgradeData to UpgradeRegistered event
  */
 contract TimeLockUpgradeV2 is
     Ownable
@@ -40,18 +41,19 @@ contract TimeLockUpgradeV2 is
     // Timelock Upgrade Period in seconds
     uint256 public timeLockPeriod;
 
-    // Mapping of upgradable units and initialized timelock
+    // Mapping of maps hash of registered upgrade to its registration timestam
     mapping(bytes32 => uint256) public timeLockedUpgrades;
 
     /* ============ Events ============ */
 
     event UpgradeRegistered(
-        bytes32 _upgradeHash,
-        uint256 _timestamp
+        bytes32 indexed _upgradeHash,
+        uint256 _timestamp,
+        bytes _upgradeData
     );
 
     event RemoveRegisteredUpgrade(
-        bytes32 _upgradeHash
+        bytes32 indexed _upgradeHash
     );
 
     /* ============ Modifiers ============ */
@@ -86,7 +88,8 @@ contract TimeLockUpgradeV2 is
 
             emit UpgradeRegistered(
                 upgradeHash,
-                block.timestamp
+                block.timestamp,
+                msg.data
             );
 
             return;

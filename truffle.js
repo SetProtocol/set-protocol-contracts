@@ -21,11 +21,13 @@ module.exports = {
     solc: {
       version: "0.5.7",
       docker: true,
+      parser: "solcjs",
       settings: {
         optimizer: {
           enabled: true,
           runs: 200
-        }
+        },
+        evmVersion: "byzantium"
       }
     }
   }

@@ -78,7 +78,7 @@
     "set-abi-gen": "1.1.0-beta.1",
     "solc": "^0.5.4",
     "solidity-coverage": "https://github.com/leapdao/solidity-coverage#master",
-    "truffle": "^5.0.3",
+    "truffle": "^5.0.37",
     "tslint": "^5.8.0",
     "tslint-no-unused-expression-chai": "0.0.3",
     "types-ethereumjs-util": "^0.0.5",

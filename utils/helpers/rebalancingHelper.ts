@@ -10,6 +10,7 @@ import {
   SetTokenContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
+  SuspendedAuctionPriceCurveContract,
   UpdatableConstantAuctionPriceCurveContract,
   VaultContract,
   WhiteListContract,
@@ -38,9 +39,10 @@ import { ERC20Helper } from './erc20Helper';
 const web3 = getWeb3();
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
-const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const SetToken = artifacts.require('SetToken');
 const UpdatableConstantAuctionPriceCurve = artifacts.require('UpdatableConstantAuctionPriceCurve');
+const SuspendedAuctionPriceCurve = artifacts.require('SuspendedAuctionPriceCurve');
+const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
@@ -310,6 +312,21 @@ export class RebalancingHelper {
 
     return new ConstantAuctionPriceCurveContract(
       new web3.eth.Contract(truffleConstantAuctionPriceCurve.abi, truffleConstantAuctionPriceCurve.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deploySuspendedAuctionPriceCurveAsync(
+    priceDivisor: BigNumber,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<SuspendedAuctionPriceCurveContract> {
+    const truffleSuspendedAuctionPriceCurve = await SuspendedAuctionPriceCurve.new(
+      priceDivisor,
+      { from },
+    );
+
+    return new SuspendedAuctionPriceCurveContract(
+      new web3.eth.Contract(truffleSuspendedAuctionPriceCurve.abi, truffleSuspendedAuctionPriceCurve.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -627,6 +644,39 @@ export class RebalancingHelper {
         priceNumerator = auctionPivotPrice.add(auctionPivotPrice.mul(timeIncrements.sub(1000)));
       }
     }
+    return {
+      priceNumerator,
+      priceDivisor,
+    };
+  }
+
+  public getExpectedSuspendedAuctionPrice(
+    currentTimestamp: BigNumber,
+    auctionStartTime: BigNumber,
+    auctionTimeToPivot: BigNumber,
+    auctionStartPrice: BigNumber,
+    auctionPivotPrice: BigNumber,
+    priceDivisorParam: BigNumber,
+    lastCriticalBidTime: BigNumber,
+    lastCriticalBidNumerator: BigNumber,
+    suspensionTime: BigNumber,
+  ): any {
+    let priceNumerator: BigNumber = lastCriticalBidNumerator;
+    const priceDivisor: BigNumber = priceDivisorParam;
+
+    const suspensionEndTime = lastCriticalBidTime.plus(suspensionTime);
+
+    if (currentTimestamp.greaterThan(suspensionEndTime)) {
+      const elapsedTimeSinceSuspensionEnd = currentTimestamp.sub(suspensionEndTime);
+
+      const priceDelta = auctionPivotPrice.sub(auctionStartPrice);
+      const timeDelta = auctionTimeToPivot.sub(auctionStartTime);
+
+      const elapsedNumerator = elapsedTimeSinceSuspensionEnd.mul(priceDelta).div(timeDelta);
+
+      priceNumerator = priceNumerator.plus(elapsedNumerator);
+    }
+
     return {
       priceNumerator,
       priceDivisor,

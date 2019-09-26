@@ -48,6 +48,7 @@ export { SetTokenLibraryMockContract } from '../types/generated/set_token_librar
 export { StandardTokenMockContract } from '../types/generated/standard_token_mock';
 export { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
 export { StartRebalanceLibraryContract } from '../types/generated/start_rebalance_library';
+export { SuspendedAuctionPriceCurveContract } from '../types/generated/suspended_auction_price_curve';
 export { TokenFlushMockContract } from '../types/generated/token_flush_mock';
 export { TimeLockUpgradeContract } from '../types/generated/time_lock_upgrade';
 export { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrade_mock';

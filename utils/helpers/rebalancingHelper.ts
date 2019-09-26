@@ -318,10 +318,14 @@ export class RebalancingHelper {
 
   public async deploySuspendedAuctionPriceCurveAsync(
     priceDivisor: BigNumber,
+    minFailAuctionTime: BigNumber,
+    maxFailAuctionTime: BigNumber,
     from: Address = this._tokenOwnerAddress
   ): Promise<SuspendedAuctionPriceCurveContract> {
     const truffleSuspendedAuctionPriceCurve = await SuspendedAuctionPriceCurve.new(
       priceDivisor,
+      minFailAuctionTime,
+      maxFailAuctionTime,
       { from },
     );
 

@@ -32,19 +32,26 @@ contract SuspendedAuctionPriceCurve {
     using SafeMath for uint256;
 
     uint256 public priceDivisor;
+    uint256 public minAuctionFailTime;
+    uint256 public maxAuctionFailTime;
 
     /*
      * Declare price denominator (or precision) of price curve
      *
      * @param  _priceDivisor            The priceDivisor you want this library to always return
+     * TODO: Add javadocs
      */
     constructor(
-        uint256 _priceDivisor
+        uint256 _priceDivisor,
+        uint256 _minAuctionFailTime,
+        uint256 _maxAuctionFailTime
     )
         public
     {
         // Set price to be returned by library
         priceDivisor = _priceDivisor;
+        minAuctionFailTime = _minAuctionFailTime;
+        maxAuctionFailTime = _maxAuctionFailTime;
     }
 
     /*
@@ -70,6 +77,21 @@ contract SuspendedAuctionPriceCurve {
             _auctionPriceParameters.auctionPivotPrice > _auctionPriceParameters.auctionStartPrice,
             "SuspendedAuctionPriceCurve.validateAuctionPriceParameters: Start price greater than pivot price"
         );
+
+        // Require that auction fail time is greater than the minimum auction fail time
+        require(
+            _suspendedPriceParameters.auctionFailTime >= minAuctionFailTime,
+            "SuspendedAuctionPriceCurve.validateAuctionPriceParameters: Fail time must be greater than min fail time"
+        );
+
+        // Require that auction fail time is greater than the minimum auction fail time
+        require(
+            _suspendedPriceParameters.auctionFailTime <= maxAuctionFailTime,
+            "SuspendedAuctionPriceCurve.validateAuctionPriceParameters: Fail time must be less than max fail time"
+        );
+
+        // Are there any requirements that relate to the price divisor re: the slope?
+        // We may need to check start price
     }
 
     /*
@@ -99,11 +121,12 @@ contract SuspendedAuctionPriceCurve {
             // Time since end of suspension
             uint256 timeSinceSuspensionEnd = block.timestamp.sub(suspensionEndTime);
 
+            // TODO: Are there cases where the slope doesn't work?
             (
                 uint256 priceDifference,
                 uint256 timeDifference
             ) = getNumeratorSlope(
-                _auctionPriceParameters.auctionStartPrice,
+                _auctionPriceParameters.auctionStartPrice, 
                 _auctionPriceParameters.auctionPivotPrice,           
                 _auctionPriceParameters.auctionStartTime,
                 _auctionPriceParameters.auctionTimeToPivot

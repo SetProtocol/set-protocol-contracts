@@ -13,6 +13,8 @@ import ChaiSetup from '@utils/chaiSetup';
 import {
   DEFAULT_GAS,
   DEFAULT_AUCTION_PRICE_DIVISOR,
+  DEFAULT_SUSPENDED_MIN_AUCTION_FAIL_TIME,
+  DEFAULT_SUSPENDED_MAX_AUCTION_FAIL_TIME,
   ZERO,
 } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
@@ -48,7 +50,9 @@ contract('SuspendedAuctionPriceCurve', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
     auctionCurve = await rebalancingHelper.deploySuspendedAuctionPriceCurveAsync(
-      DEFAULT_AUCTION_PRICE_DIVISOR
+      DEFAULT_AUCTION_PRICE_DIVISOR,
+      DEFAULT_SUSPENDED_MIN_AUCTION_FAIL_TIME,
+      DEFAULT_SUSPENDED_MAX_AUCTION_FAIL_TIME,
     );
   });
 
@@ -66,6 +70,8 @@ contract('SuspendedAuctionPriceCurve', accounts => {
     let lastCriticalBidNumerator: BigNumber;
     let lastCriticalBidRemainingShares: BigNumber;
     let suspensionTime: BigNumber;
+    let auctionFailTime: BigNumber;
+    let criticalThreshold: BigNumber;
 
     let subjectAuctionPriceParameters: any;
     let subjectSuspendedPriceParameters: any;
@@ -81,6 +87,9 @@ contract('SuspendedAuctionPriceCurve', accounts => {
       lastCriticalBidNumerator = new BigNumber(600);
       lastCriticalBidRemainingShares = new BigNumber(100);
       suspensionTime = new BigNumber(3600);
+      auctionFailTime = DEFAULT_SUSPENDED_MIN_AUCTION_FAIL_TIME;
+      criticalThreshold = ZERO;
+
 
       subjectAuctionPriceParameters = {
         auctionStartTime,
@@ -94,6 +103,8 @@ contract('SuspendedAuctionPriceCurve', accounts => {
         lastCriticalBidNumerator,
         lastCriticalBidRemainingShares,
         suspensionTime,
+        auctionFailTime,
+        criticalThreshold,
       };
 
       subjectCaller = ownerAccount;
@@ -130,6 +141,26 @@ contract('SuspendedAuctionPriceCurve', accounts => {
         const auctionStartRatio = new BigNumber(0.8);
         subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DIVISOR.mul(auctionPivotRatio);
         subjectAuctionPriceParameters.auctionStartPrice = DEFAULT_AUCTION_PRICE_DIVISOR.mul(auctionStartRatio);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the auctionFailTime is less than the minAuctionFailTime', async () => {
+      beforeEach(async () => {
+        subjectSuspendedPriceParameters.auctionFailTime = ZERO;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the auctionFailTime is greater than the maxAuctionFailTime', async () => {
+      beforeEach(async () => {
+        subjectSuspendedPriceParameters.auctionFailTime = DEFAULT_SUSPENDED_MAX_AUCTION_FAIL_TIME.mul(2);
       });
 
       it('should revert', async () => {
@@ -176,6 +207,8 @@ contract('SuspendedAuctionPriceCurve', accounts => {
         lastCriticalBidNumerator,
         lastCriticalBidRemainingShares,
         suspensionTime,
+        auctionFailTime: ZERO,
+        criticalThreshold: ZERO,
       };
 
       subjectCaller = ownerAccount;

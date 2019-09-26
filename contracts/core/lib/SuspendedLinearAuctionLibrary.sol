@@ -35,5 +35,7 @@ library SuspendedLinearAuctionLibrary {
         uint256 lastCriticalBidNumerator;
         uint256 lastCriticalBidRemainingShares;
         uint256 suspensionTime;
+        uint256 auctionFailTime;
+        uint256 criticalThreshold;
     }
 }

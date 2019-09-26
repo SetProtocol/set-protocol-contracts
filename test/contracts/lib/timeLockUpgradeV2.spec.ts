@@ -11,7 +11,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { TimeLockUpgradeV2MockContract } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { UpgradeRegistered, RemoveRegisteredUpgrade } from '@utils/contract_logs/core';
+import { UpgradeRegisteredV2, RemoveRegisteredUpgrade } from '@utils/contract_logs/core';
 import { ZERO, ONE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -165,7 +165,7 @@ contract('TimeLockUpgradeV2', accounts => {
         expect(currentTestUint).to.bignumber.equal(ZERO);
       });
 
-      it('emits a UpgradeRegistered event', async () => {
+      it('emits a UpgradeRegisteredV2 event', async () => {
         const txHash = await subject();
         const logs = await setTestUtils.getLogsFromTxHash(txHash);
 
@@ -174,10 +174,11 @@ contract('TimeLockUpgradeV2', accounts => {
 
         const upgradeHash = web3.utils.soliditySha3(input);
         const expectedLogs: Log[] = [
-          UpgradeRegistered(
+          UpgradeRegisteredV2(
             timeLockUpgradeMock.address,
             upgradeHash,
             timestamp.toString(),
+            input,
           ),
         ];
 

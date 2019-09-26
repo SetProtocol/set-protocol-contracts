@@ -29,6 +29,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
  * CHANGELOG:
  * - Requires that the caller is the owner
  * - New function to allow deletion of existing timelocks
+ * - Added upgradeData to UpgradeRegistered event
  */
 contract TimeLockUpgradeV2 is
     Ownable
@@ -40,18 +41,19 @@ contract TimeLockUpgradeV2 is
     // Timelock Upgrade Period in seconds
     uint256 public timeLockPeriod;
 
-    // Mapping of upgradable units and initialized timelock
+    // Mapping of maps hash of registered upgrade to its registration timestam
     mapping(bytes32 => uint256) public timeLockedUpgrades;
 
     /* ============ Events ============ */
 
     event UpgradeRegistered(
-        bytes32 _upgradeHash,
-        uint256 _timestamp
+        bytes32 indexed _upgradeHash,
+        uint256 _timestamp,
+        bytes _upgradeData
     );
 
     event RemoveRegisteredUpgrade(
-        bytes32 _upgradeHash
+        bytes32 indexed _upgradeHash
     );
 
     /* ============ Modifiers ============ */
@@ -59,46 +61,44 @@ contract TimeLockUpgradeV2 is
     modifier timeLockUpgrade() {
         require(
             isOwner(),
-            "timeLockUpgradeV2: The caller must be the owner"
+            "TimeLockUpgradeV2: The caller must be the owner"
         );
 
         // If the time lock period is 0, then allow non-timebound upgrades.
         // This is useful for initialization of the protocol and for testing.
-        if (timeLockPeriod == 0) {
-            _;
-
-            return;
-        }
-
-        // The upgrade hash is defined by the hash of the transaction call data,
-        // which uniquely identifies the function as well as the passed in arguments.
-        bytes32 upgradeHash = keccak256(
-            abi.encodePacked(
-                msg.data
-            )
-        );
-
-        uint256 registrationTime = timeLockedUpgrades[upgradeHash];
-
-        // If the upgrade hasn't been registered, register with the current time.
-        if (registrationTime == 0) {
-            timeLockedUpgrades[upgradeHash] = block.timestamp;
-
-            emit UpgradeRegistered(
-                upgradeHash,
-                block.timestamp
+        if (timeLockPeriod > 0) {
+            // The upgrade hash is defined by the hash of the transaction call data,
+            // which uniquely identifies the function as well as the passed in arguments.
+            bytes32 upgradeHash = keccak256(
+                abi.encodePacked(
+                    msg.data
+                )
             );
 
-            return;
+            uint256 registrationTime = timeLockedUpgrades[upgradeHash];
+
+            // If the upgrade hasn't been registered, register with the current time.
+            if (registrationTime == 0) {
+                timeLockedUpgrades[upgradeHash] = block.timestamp;
+
+                emit UpgradeRegistered(
+                    upgradeHash,
+                    block.timestamp,
+                    msg.data
+                );
+
+                return;
+            }
+
+            require(
+                block.timestamp >= registrationTime.add(timeLockPeriod),
+                "TimeLockUpgradeV2: Time lock period must have elapsed."
+            );
+
+            // Reset the timestamp to 0
+            timeLockedUpgrades[upgradeHash] = 0;
+
         }
-
-        require(
-            block.timestamp >= registrationTime.add(timeLockPeriod),
-            "TimeLockUpgradeV2: Time lock period must have elapsed."
-        );
-
-        // Reset the timestamp to 0
-        timeLockedUpgrades[upgradeHash] = 0;
 
         // Run the rest of the upgrades
         _;

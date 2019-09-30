@@ -13,6 +13,8 @@ import {
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
+  RebalancingSetTokenV2Contract,
+  RebalancingSetTokenV2FactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   TimeLockUpgradeMockContract,
@@ -46,6 +48,7 @@ const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceMo
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
+const RebalancingSetTokenV2Factory = artifacts.require('RebalancingSetTokenV2Factory');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
@@ -169,6 +172,32 @@ export class CoreHelper {
     );
 
     return new RebalancingSetTokenFactoryContract(
+      new web3.eth.Contract(truffleTokenFactory.abi, truffleTokenFactory.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployRebalancingSetTokenV2FactoryAsync(
+    coreAddress: Address,
+    componentWhitelistAddress: Address,
+    minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
+    minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
+    minimumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MINIMUM_NATURAL_UNIT,
+    maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingSetTokenV2FactoryContract> {
+    await this.linkRebalancingLibrariesAsync(RebalancingSetTokenV2Factory);
+    const truffleTokenFactory = await RebalancingSetTokenV2Factory.new(
+      coreAddress,
+      componentWhitelistAddress,
+      minimumRebalanceInterval,
+      minimumProposalPeriod,
+      minimumNaturalUnit,
+      maximumNaturalUnit,
+      { from },
+    );
+
+    return new RebalancingSetTokenV2FactoryContract(
       new web3.eth.Contract(truffleTokenFactory.abi, truffleTokenFactory.address),
       { from, gas: DEFAULT_GAS },
     );

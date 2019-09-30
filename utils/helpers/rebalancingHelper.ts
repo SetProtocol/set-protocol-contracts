@@ -10,6 +10,7 @@ import {
   SetTokenContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
+  RebalancingSetTokenV2Contract,
   UpdatableConstantAuctionPriceCurveContract,
   VaultContract,
   WhiteListContract,
@@ -39,6 +40,7 @@ const web3 = getWeb3();
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
+const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
 const SetToken = artifacts.require('SetToken');
 const UpdatableConstantAuctionPriceCurve = artifacts.require('UpdatableConstantAuctionPriceCurve');
 
@@ -106,6 +108,43 @@ export class RebalancingHelper {
     return rebalancingToken;
   }
 
+  public async deployRebalancingSetTokenV2Async(
+    factory: Address,
+    tokenManager: Address,
+    liquidator: Address,
+    initialSet: Address,
+    componentWhiteList: Address,
+    initialShareRatio: BigNumber,
+    initialNaturalUnit: BigNumber,
+    proposalPeriod: BigNumber,
+    rebalanceInterval: BigNumber,
+    rebalanceFailPeriod: BigNumber,
+    name: string = 'Rebalancing Set',
+    symbol: string = 'RBSET',
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingSetTokenV2Contract> {
+    const truffleRebalancingToken = await RebalancingSetTokenV2.new(
+      factory,
+      tokenManager,
+      liquidator,
+      initialSet,
+      componentWhiteList,
+      initialShareRatio,
+      initialNaturalUnit,
+      [proposalPeriod, rebalanceInterval, rebalanceFailPeriod],
+      name,
+      symbol,
+      { from, gas: DEFAULT_GAS },
+    );
+
+    const rebalancingToken = new RebalancingSetTokenV2Contract(
+      new web3.eth.Contract(truffleRebalancingToken.abi, truffleRebalancingToken.address),
+      { from, gas: DEFAULT_GAS },
+    );
+
+    return rebalancingToken;
+  }
+
   public async createRebalancingTokenAsync(
     core: CoreLikeContract,
     factory: Address,
@@ -135,6 +174,41 @@ export class RebalancingHelper {
     const setAddress = extractNewSetTokenAddressFromLogs(logs);
 
     return await RebalancingSetTokenContract.at(
+      setAddress,
+      web3,
+      { from }
+    );
+  }
+
+  public async createRebalancingTokenV2Async(
+    core: CoreLikeContract,
+    factory: Address,
+    componentAddresses: Address[],
+    units: BigNumber[],
+    naturalUnit: BigNumber,
+    callData: string = '',
+    name: string = 'Rebalancing Set Token',
+    symbol: string = 'RBSET',
+    from: Address = this._tokenOwnerAddress,
+  ): Promise<RebalancingSetTokenV2Contract> {
+    const encodedName = SetUtils.stringToBytes(name);
+    const encodedSymbol = SetUtils.stringToBytes(symbol);
+
+    const txHash = await core.createSet.sendTransactionAsync(
+      factory,
+      componentAddresses,
+      units,
+      naturalUnit,
+      encodedName,
+      encodedSymbol,
+      callData,
+      { from },
+    );
+
+    const logs = await setTestUtils.getLogsFromTxHash(txHash);
+    const setAddress = extractNewSetTokenAddressFromLogs(logs);
+
+    return await RebalancingSetTokenV2Contract.at(
       setAddress,
       web3,
       { from }
@@ -363,6 +437,37 @@ export class RebalancingHelper {
 
     // Create rebalancingSetToken
     return await this.createRebalancingTokenAsync(
+      core,
+      factory,
+      [initialSet],
+      [initialUnitShares],
+      DEFAULT_REBALANCING_NATURAL_UNIT,
+      callData,
+    );
+  }
+
+  public async createDefaultRebalancingSetTokenV2Async(
+    core: CoreLikeContract,
+    factory: Address,
+    manager: Address,
+    liquidator: Address,
+    initialSet: Address,
+    proposalPeriod: BigNumber,
+    failRebalancePeriod: BigNumber,
+    initialUnitShares: BigNumber = DEFAULT_UNIT_SHARES,
+  ): Promise<RebalancingSetTokenV2Contract> {
+    // Generate defualt rebalancingSetToken params
+    const rebalanceInterval = ONE_DAY_IN_SECONDS;
+    const callData = SetUtils.generateRebalancingSetTokenV2CallData(
+      manager,
+      liquidator,
+      proposalPeriod,
+      rebalanceInterval,
+      failRebalancePeriod,
+    );
+
+    // Create rebalancingSetToken
+    return await this.createRebalancingTokenV2Async(
       core,
       factory,
       [initialSet],

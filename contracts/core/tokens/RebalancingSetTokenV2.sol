@@ -101,6 +101,12 @@ contract RebalancingSetTokenV2 is
             "RebalancingSetTokenV2.constructor: Invalid manager address"
         );
 
+        // Require liquidator address is non-zero
+        require(
+            address(_liquidator) != address(0),
+            "RebalancingSetTokenV2.constructor: Invalid liquidator address"
+        );
+
         // Require minimum rebalance interval and proposal period from factory
         require(
             _rebalanceConfig[0] >= _factory.minimumProposalPeriod(),

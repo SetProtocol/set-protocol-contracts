@@ -64,11 +64,12 @@ contract RebalancingSetTokenV2 is
         address _manager,
         ILiquidator _liquidator,
         ISetToken _initialSet,
+        IWhiteList _componentWhiteList,
         uint256 _initialUnitShares,
         uint256 _naturalUnit,
         uint256 _proposalPeriod,
         uint256 _rebalanceInterval,
-        IWhiteList _componentWhiteList,
+        // uint256 _rebalanceFailPeriod,
         string memory _name,
         string memory _symbol
     )
@@ -113,6 +114,9 @@ contract RebalancingSetTokenV2 is
 
         // TODO: Check that the liquidator is valid
         liquidator = _liquidator;
+
+        // Set Rebalance Fail Period
+        // rebalanceFailPeriod = _rebalanceFailPeriod;
 
         core = ICore(_factory.core());
         vault = IVault(core.vault());

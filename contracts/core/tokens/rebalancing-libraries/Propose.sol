@@ -23,7 +23,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./RebalancingSetState.sol";
-
+import { RebalancingLifecycleLibrary } from "./RebalancingLifecycleLibrary.sol";
 
 /**
  * @title Propose
@@ -97,6 +97,19 @@ contract Propose is
             ) == 0,
             "Propose.validateProposal: Invalid proposed Set natural unit"
         );
+    }
+
+    function liquidatorValidateProposal(
+        ISetToken _nextSet
+    )
+        internal
+    {
+        uint256 currentSetQuantity = RebalancingLifecycleLibrary.calculateStartingSetQuantity(
+            vault,
+            currentSet
+        );
+
+        liquidator.validatePropose(currentSet, _nextSet, currentSetQuantity);
     }
 
     function transitionToProposal(

@@ -27,7 +27,11 @@ import { IVault } from "../../interfaces/IVault.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./RebalancingSetState.sol";
+import { PlaceBid } from "./PlaceBid.sol";
 import { Propose } from "./Propose.sol";
+import { StartRebalance } from "./StartRebalance.sol";
+import { RebalancingLifecycleLibrary } from "./RebalancingLifecycleLibrary.sol";
+
 
 
 /**
@@ -39,13 +43,11 @@ import { Propose } from "./Propose.sol";
 contract RebalancingSetLifecycle is
     ERC20,
     RebalancingSetState,
-    Propose
+    Propose,
+    StartRebalance,
+    PlaceBid
 {
 
-    event RebalanceStarted(
-        address oldSet,
-        address newSet
-    );
     /* ============ External Functions ============ */
 
     /**
@@ -61,41 +63,28 @@ contract RebalancingSetLifecycle is
         // Validate proposal
         validateProposal(_nextSet);
 
-        // TODO: Call liquidator's propose
+        liquidatorValidateProposal(_nextSet);
 
         transitionToProposal(_nextSet);
     }
 
-    // /*
-    //  * Initiate rebalance for the rebalancing set if the proposal period has elapsed after
-    //  * a proposal.
-    //  */
-    // function startRebalance()
-    //     external
-    // {
-    //     // Validate the correct rebalance state and time elapsed
-    //     StartRebalanceLibrary.validateStartRebalance(
-    //         proposalStartTime,
-    //         proposalPeriod,
-    //         uint8(rebalanceState)
-    //     );
+    /*
+     * Initiate rebalance for the rebalancing set if the proposal period has elapsed after
+     * a proposal.
+     */
+    function startRebalance()
+        external
+    {
+        // Validate the correct rebalance state and time elapsed
+        validateStartRebalance();
 
-    //     // Redeem currentSet and set up biddingParameters
-    //     StartRebalanceLibrary.redeemCurrentSetAndGetBiddingParameters(
-    //         currentSet,
-    //         nextSet,
-    //         auctionLibrary,
-    //         core,
-    //         vault
-    //     );
+        // Redeem currentSet
+        uint256 startingCurrentSetQuantity = redeemCurrentSet();
 
-    //     // Update state parameters
-    //     startingCurrentSetAmount = biddingParameters.remainingCurrentSets;
-    //     rebalanceStartTime = block.timestamp;
-    //     rebalanceState = RebalancingLibrary.State.Rebalance;
+        liquidatorStartRebalance(startingCurrentSetQuantity);
 
-    //     emit RebalanceStarted(currentSet, nextSet);
-    // }
+        transitionToRebalance();
+    }
 
     // /*
     //  * Initiate settlement for the rebalancing set. Full functionality now returned to
@@ -124,40 +113,34 @@ contract RebalancingSetLifecycle is
     //     clearAuctionState();
     // }
 
-    // /*
-    //  * Place bid during rebalance auction. Can only be called by Core.
-    //  *
-    //  * @param _quantity                 The amount of currentSet to be rebalanced
-    //  * @return combinedTokenArray       Array of token addresses invovled in rebalancing
-    //  * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
-    //  * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
-    //  */
-    // function placeBid(
-    //     uint256 _quantity
-    // )
-    //     external
-    //     returns (address[] memory, uint256[] memory, uint256[] memory)
-    // {
-    //     // Validate bid quantity and module is sender
-    //     PlaceBidLibrary.validatePlaceBid(
-    //         _quantity,
-    //         core,
-    //         biddingParameters
-    //     );
+    /*
+     * Place bid during rebalance auction. Can only be called by Core.
+     *
+     * @param _quantity                 The amount of currentSet to be rebalanced
+     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
+     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
+     */
+    function placeBid(
+        uint256 _quantity
+    )
+        external
+        returns (address[] memory, uint256[] memory, uint256[] memory)
+    {
+        // Validate bid quantity and module is sender
+        validatePlaceBid(_quantity);
 
-    //     // Place bid and get back inflow and outflow arrays
-    //     uint256[] memory inflowUnitArray;
-    //     uint256[] memory outflowUnitArray;
-    //     (
-    //         inflowUnitArray,
-    //         outflowUnitArray
-    //     ) = getBidPrice(_quantity);
+        // Place bid and get back inflow and outflow arrays
+        (
+            address[] memory combinedTokenArray,
+            uint256[] memory inflowUnitArray,
+            uint256[] memory outflowUnitArray
+        ) = liquidator.placeBid(_quantity);
 
-    //     // Update remainingCurrentSet figure to account for placed bid
-    //     biddingParameters.remainingCurrentSets = biddingParameters.remainingCurrentSets.sub(_quantity);
+        updateHasBiddedIfNecessary();
 
-    //     return (biddingParameters.combinedTokenArray, inflowUnitArray, outflowUnitArray);
-    // }
+        return (combinedTokenArray, inflowUnitArray, outflowUnitArray);
+    }
 
     // /*
     //  * Fail an auction that doesn't complete before reaching the pivot price. Move to Drawdown state
@@ -206,24 +189,21 @@ contract RebalancingSetLifecycle is
      * Sets that would be generated.
      *
      * @param _quantity               The amount of currentSet to be rebalanced
+     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
      * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
      * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
      */
-    // function getBidPrice(
-    //     uint256 _quantity
-    // )
-    //     public
-    //     view
-    //     returns (uint256[] memory, uint256[] memory)
-    // {
-    //     return PlaceBidLibrary.getBidPrice(
-    //         _quantity,
-    //         auctionLibrary,
-    //         biddingParameters,
-    //         auctionPriceParameters,
-    //         uint8(rebalanceState)
-    //     );
-    // }
+    function getBidPrice(
+        uint256 _quantity
+    )
+        public
+        returns (address[] memory, uint256[] memory, uint256[] memory)
+    {
+        validateGetBidPrice(_quantity);
+
+        return liquidator.getBidPrice(_quantity);
+    }
+
 
     /*
      * Mint set token for given address.

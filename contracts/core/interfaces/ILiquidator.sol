@@ -16,6 +16,7 @@
 
 pragma solidity 0.5.7;
 
+import { ISetToken } from "./ISetToken.sol";
 
 /**
  * @title ILiquidator
@@ -37,7 +38,14 @@ interface ILiquidator {
     function getBidPrice(
         uint256 _quantity
     )
-        external;
+        external
+        returns (address[] memory, uint256[] memory, uint256[] memory);
+
+    function placeBid(
+        uint256 _quantity
+    )
+        external
+        returns (address[] memory, uint256[] memory, uint256[] memory);
 
     function startRebalance(
         ISetToken _currentSet,

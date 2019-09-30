@@ -31,6 +31,7 @@ import { Issuance } from "./Issuance.sol";
 import { PlaceBid } from "./PlaceBid.sol";
 import { Propose } from "./Propose.sol";
 import { StartRebalance } from "./StartRebalance.sol";
+import { FailAuction } from "./FailAuction.sol";
 import { SettleRebalance } from "./SettleRebalance.sol";
 import { RebalancingLifecycleLibrary } from "./RebalancingLifecycleLibrary.sol";
 
@@ -49,7 +50,8 @@ contract RebalancingSetLifecycle is
     StartRebalance,
     Issuance,
     PlaceBid,
-    SettleRebalance
+    SettleRebalance,
+    FailAuction
 {
 
     /* ============ External Functions ============ */
@@ -118,7 +120,6 @@ contract RebalancingSetLifecycle is
         external
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        // Validate bid quantity and module is sender
         validatePlaceBid(_quantity);
 
         // Place bid and get back inflow and outflow arrays
@@ -133,47 +134,18 @@ contract RebalancingSetLifecycle is
         return (combinedTokenArray, inflowUnitArray, outflowUnitArray);
     }
 
-    // /*
-    //  * Fail an auction that doesn't complete before reaching the pivot price. Move to Drawdown state
-    //  * if bids have been placed. Reset to Default state if no bids placed.
-    //  *
-    //  */
-    // function endFailedAuction()
-    //     external
-    // {
-    //     uint256 calculatedUnitShares;
-    //     (
-    //         ,
-    //         calculatedUnitShares
-    //     ) = SettleRebalanceLibrary.calculateNextSetIssueQuantity(
-    //         totalSupply(),
-    //         naturalUnit,
-    //         nextSet,
-    //         vault
-    //     );
+    /*
+     * Fail an auction that doesn't complete before reaching the pivot price. Move to Drawdown state
+     * if bids have been placed. Reset to Default state if no bids placed.
+     *
+     */
+    function endFailedAuction()
+        external
+    {
+        validateFailRebalance();
 
-    //     // Fail auction and either reset to Default state or kill Rebalancing Set Token and enter Drawdown
-    //     // state
-    //     uint8 integerRebalanceState = FailAuctionLibrary.endFailedAuction(
-    //         startingCurrentSetAmount,
-    //         calculatedUnitShares,
-    //         currentSet,
-    //         core,
-    //         auctionPriceParameters,
-    //         biddingParameters,
-    //         uint8(rebalanceState)
-    //     );
-    //     rebalanceState = RebalancingLibrary.State(integerRebalanceState);
-
-    //     // Reset lastRebalanceTimestamp to now
-    //     lastRebalanceTimestamp = block.timestamp;
-
-    //     // Save combined token arrays to failedAuctionWithdrawComponents
-    //     failedAuctionWithdrawComponents = biddingParameters.combinedTokenArray;
-
-    //     // Clear auction state
-    //     clearAuctionState();
-    // }
+        handleFailedRebalance();
+    }
 
     /*
      * Get token inflows and outflows required for bid. Also the amount of Rebalancing

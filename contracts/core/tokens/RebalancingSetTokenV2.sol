@@ -52,9 +52,7 @@ contract RebalancingSetTokenV2 is
      * @param _initialSet                Initial set that collateralizes the Rebalancing set
      * @param _initialUnitShares         Units of currentSet that equals one share
      * @param _naturalUnit               The minimum multiple of Sets that can be issued or redeemed
-     * @param _proposalPeriod            Amount of time for users to inspect a rebalance proposal
-     * @param _rebalanceInterval         Minimum amount of time between rebalances
-     * @param _componentWhiteList        Address of component WhiteList contract
+
      * @param _name                      The name of the new RebalancingSetTokenV2
      * @param _symbol                    The symbol of the new RebalancingSetTokenV2
      */
@@ -67,9 +65,10 @@ contract RebalancingSetTokenV2 is
         IWhiteList _componentWhiteList,
         uint256 _initialUnitShares,
         uint256 _naturalUnit,
-        uint256 _proposalPeriod,
-        uint256 _rebalanceInterval,
-        // uint256 _rebalanceFailPeriod,
+        uint256[3] memory _rebalanceConfig, // [_proposalPeriod, _rebalanceInterval, _rebalanceFailPeriod]
+                         //  _proposalPeriod            Amount of time for users to inspect a rebalance proposal
+                         //  _rebalanceInterval         Minimum amount of time between rebalances
+                         //  _componentWhiteList        Address of component WhiteList contract
         string memory _name,
         string memory _symbol
     )
@@ -104,19 +103,16 @@ contract RebalancingSetTokenV2 is
 
         // Require minimum rebalance interval and proposal period from factory
         require(
-            _proposalPeriod >= _factory.minimumProposalPeriod(),
+            _rebalanceConfig[0] >= _factory.minimumProposalPeriod(),
             "RebalancingSetTokenV2.constructor: Proposal period too short"
         );
         require(
-            _rebalanceInterval >= _factory.minimumRebalanceInterval(),
+            _rebalanceConfig[1] >= _factory.minimumRebalanceInterval(),
             "RebalancingSetTokenV2.constructor: Rebalance interval too short"
         );
 
         // TODO: Check that the liquidator is valid
         liquidator = _liquidator;
-
-        // Set Rebalance Fail Period
-        // rebalanceFailPeriod = _rebalanceFailPeriod;
 
         core = ICore(_factory.core());
         vault = IVault(core.vault());
@@ -127,8 +123,10 @@ contract RebalancingSetTokenV2 is
         unitShares = _initialUnitShares;
         naturalUnit = _naturalUnit;
 
-        proposalPeriod = _proposalPeriod;
-        rebalanceInterval = _rebalanceInterval;
+        proposalPeriod = _rebalanceConfig[0];
+        rebalanceInterval = _rebalanceConfig[1];
+        rebalanceFailPeriod = _rebalanceConfig[2];
+
         lastRebalanceTimestamp = block.timestamp;
         rebalanceState = RebalancingLibrary.State.Default;
     }

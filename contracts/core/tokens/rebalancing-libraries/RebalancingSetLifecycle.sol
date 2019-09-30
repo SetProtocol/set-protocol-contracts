@@ -27,9 +27,11 @@ import { IVault } from "../../interfaces/IVault.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./RebalancingSetState.sol";
+import { Issuance } from "./Issuance.sol";
 import { PlaceBid } from "./PlaceBid.sol";
 import { Propose } from "./Propose.sol";
 import { StartRebalance } from "./StartRebalance.sol";
+import { SettleRebalance } from "./SettleRebalance.sol";
 import { RebalancingLifecycleLibrary } from "./RebalancingLifecycleLibrary.sol";
 
 
@@ -45,7 +47,9 @@ contract RebalancingSetLifecycle is
     RebalancingSetState,
     Propose,
     StartRebalance,
-    PlaceBid
+    Issuance,
+    PlaceBid,
+    SettleRebalance
 {
 
     /* ============ External Functions ============ */
@@ -60,7 +64,6 @@ contract RebalancingSetLifecycle is
     )
         external
     {
-        // Validate proposal
         validateProposal(_nextSet);
 
         liquidatorValidateProposal(_nextSet);
@@ -75,10 +78,8 @@ contract RebalancingSetLifecycle is
     function startRebalance()
         external
     {
-        // Validate the correct rebalance state and time elapsed
         validateStartRebalance();
 
-        // Redeem currentSet
         uint256 startingCurrentSetQuantity = redeemCurrentSet();
 
         liquidatorStartRebalance(startingCurrentSetQuantity);
@@ -86,32 +87,22 @@ contract RebalancingSetLifecycle is
         transitionToRebalance();
     }
 
-    // /*
-    //  * Initiate settlement for the rebalancing set. Full functionality now returned to
-    //  * set owners
-    //  *
-    //  */
-    // function settleRebalance()
-    //     external
-    // {
-    //     // Settle the rebalance and mint next Sets
-    //     unitShares = SettleRebalanceLibrary.settleRebalance(
-    //         totalSupply(),
-    //         biddingParameters.remainingCurrentSets,
-    //         biddingParameters.minimumBid,
-    //         naturalUnit,
-    //         nextSet,
-    //         core,
-    //         vault,
-    //         uint8(rebalanceState)
-    //     );
+    /*
+     * Initiate settlement for the rebalancing set. Full functionality now returned to
+     * set owners
+     *
+     */
+    function settleRebalance()
+        external
+    {
+        validateSettleRebalance();
 
-    //     // Update other state parameters
-    //     currentSet = nextSet;
-    //     lastRebalanceTimestamp = block.timestamp;
-    //     rebalanceState = RebalancingLibrary.State.Default;
-    //     clearAuctionState();
-    // }
+        issueNextSet();
+
+        liquidatorSettleRebalance();
+
+        transitionToDefault();
+    }
 
     /*
      * Place bid during rebalance auction. Can only be called by Core.
@@ -218,23 +209,7 @@ contract RebalancingSetLifecycle is
     )
         external
     {
-        // Check that function caller is Core
-        require(
-            msg.sender == address(core),
-            "RebalancingSetTokenV2.mint: Sender must be core"
-        );
-
-        // Check that set is not in Rebalance State
-        require(
-            rebalanceState != RebalancingLibrary.State.Rebalance,
-            "RebalancingSetTokenV2.mint: Cannot mint during Rebalance"
-        );
-
-        // Check that set is not in Drawdown State
-        require(
-            rebalanceState != RebalancingLibrary.State.Drawdown,
-            "RebalancingSetTokenV2.mint: Cannot mint during Drawdown"
-        );
+        validateMint();
 
         // Update token balance of the manager
         _mint(_issuer, _quantity);
@@ -253,40 +228,8 @@ contract RebalancingSetLifecycle is
     )
         external
     {
-        // Check that set is not in Rebalancing State
-        require(
-            rebalanceState != RebalancingLibrary.State.Rebalance,
-            "RebalancingSetTokenV2.burn: Cannot burn during Rebalance"
-        );
-
-        // Check to see if state is Drawdown
-        if (rebalanceState == RebalancingLibrary.State.Drawdown) {
-            // In Drawdown Sets can only be burned as part of the withdrawal process
-            require(
-                core.validModules(msg.sender),
-                "RebalancingSetTokenV2.burn: Set cannot be redeemed during Drawdown"
-            );
-        } else {
-            // When in non-Rebalance or Drawdown state, check that function caller is Core
-            // so that Sets can be redeemed
-            require(
-                msg.sender == address(core),
-                "RebalancingSetTokenV2.burn: Sender must be core"
-            );
-        }
+        validateBurn();
 
         _burn(_from, _quantity);
     }
-
-    /* ============ Internal Functions ============ */
-
-    // /*
-    //  * Reset auction specific state after failed or successful rebalance
-    //  */
-    // function clearAuctionState()
-    //     internal
-    // {
-    //     nextSet = address(0);
-    //     startingCurrentSetAmount = 0;
-    // }
 }

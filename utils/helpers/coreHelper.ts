@@ -182,6 +182,7 @@ export class CoreHelper {
     componentWhitelistAddress: Address,
     minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
     minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
+    minimumFailRebalancePeriod: BigNumber = ONE_DAY_IN_SECONDS,
     minimumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MINIMUM_NATURAL_UNIT,
     maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
     from: Address = this._tokenOwnerAddress
@@ -192,6 +193,7 @@ export class CoreHelper {
       componentWhitelistAddress,
       minimumRebalanceInterval,
       minimumProposalPeriod,
+      minimumFailRebalancePeriod,
       minimumNaturalUnit,
       maximumNaturalUnit,
       { from },

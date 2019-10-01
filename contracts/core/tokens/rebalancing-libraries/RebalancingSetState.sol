@@ -59,6 +59,7 @@ contract RebalancingSetState {
     uint256 public rebalanceInterval;
 
     // State to track proposal period
+    uint256 public rebalanceIndex;
     uint256 public proposalStartTime;
 
     uint256 public rebalanceStartTime;

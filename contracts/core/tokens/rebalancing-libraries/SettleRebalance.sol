@@ -91,6 +91,7 @@ contract SettleRebalance is
         rebalanceState = RebalancingLibrary.State.Default;
         nextSet = ISetToken(address(0));
         hasBidded = false;
+        rebalanceIndex = rebalanceIndex.add(1);
     }
 
     /**

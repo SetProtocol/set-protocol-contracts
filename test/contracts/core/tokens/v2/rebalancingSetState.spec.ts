@@ -239,6 +239,15 @@ contract('RebalancingSetState', accounts => {
       expect(rebalanceFailPeriod).to.be.bignumber.equal(subjectFailPeriod);
     });
 
+    it('creates a set with the correct lastRebalanceTimestamp', async () => {
+      rebalancingSetToken = await subject();
+
+      const { timestamp } = await web3.eth.getBlock('latest');
+
+      const lastRebalanceTimestamp = await rebalancingSetToken.lastRebalanceTimestamp.callAsync();
+      expect(lastRebalanceTimestamp).to.be.bignumber.equal(timestamp);
+    });
+
     it('sets the rebalancingSetToken state to Default', async () => {
       rebalancingSetToken = await subject();
 
@@ -255,64 +264,25 @@ contract('RebalancingSetState', accounts => {
       expect(JSON.stringify(withdrawComponents)).to.equal(JSON.stringify(expectedComponents));
     });
 
-    describe('when the proposal period is less than one day in seconds', async () => {
-      beforeEach(async () => {
-        subjectProposalPeriod = new BigNumber(5000);
-      });
+    it('should have rebalanceStartTime variable set to 0', async () => {
+      rebalancingSetToken = await subject();
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
+      const rebalanceStartTime = await rebalancingSetToken.rebalanceStartTime.callAsync();
+      expect(rebalanceStartTime).to.be.bignumber.equal(0);
     });
 
-    describe('when the rebalanceInterval is less than one day in seconds', async () => {
-      beforeEach(async () => {
-        subjectRebalanceInterval = new BigNumber(5000);
-      });
+    it('should have hasBidded variable set to false', async () => {
+      rebalancingSetToken = await subject();
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
+      const hasBidded = await rebalancingSetToken.hasBidded.callAsync();
+      expect(hasBidded).to.equal(false);
     });
 
-    describe('when the initial unit shares is 0', async () => {
-      beforeEach(async () => {
-        subjectInitialUnitShares = ZERO;
-      });
+    it('should have rebalanceIndex variable set to 0', async () => {
+      rebalancingSetToken = await subject();
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-   describe('when the initial natural unit is less than the minimum', async () => {
-      beforeEach(async () => {
-        subjectNaturalUnit = ZERO;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-   describe('when the initial natural unit is greater than the maximum', async () => {
-      beforeEach(async () => {
-        subjectNaturalUnit = new BigNumber(10 ** 15);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the manager address is null', async () => {
-      beforeEach(async () => {
-        subjectManager = NULL_ADDRESS;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
+      const rebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
+      expect(rebalanceIndex).to.bignumber.equal(0);
     });
   });
 

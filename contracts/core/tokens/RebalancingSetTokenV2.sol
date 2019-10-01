@@ -57,6 +57,8 @@ contract RebalancingSetTokenV2 is
      * @param _symbol                    The symbol of the new RebalancingSetTokenV2
      */
 
+     // TODO - update javadocs
+
     constructor(
         IRebalancingSetFactory _factory,
         address _manager,
@@ -79,51 +81,11 @@ contract RebalancingSetTokenV2 is
             18
         )
     {
-        // Require initial unit shares is non-zero
-        require(
-            _initialUnitShares > 0,
-            "RebalancingSetTokenV2.constructor: Unit shares must be positive"
-        );
-
-        require(
-            _naturalUnit >= _factory.minimumNaturalUnit(),
-            "RebalancingSetTokenV2.constructor: Natural Unit too low"
-        );
-
-        require(
-            _naturalUnit <= _factory.maximumNaturalUnit(),
-            "RebalancingSetTokenV2.constructor: Natural Unit too large"
-        );
-
-        // Require manager address is non-zero
-        require(
-            _manager != address(0),
-            "RebalancingSetTokenV2.constructor: Invalid manager address"
-        );
-
-        // Require liquidator address is non-zero
-        require(
-            address(_liquidator) != address(0),
-            "RebalancingSetTokenV2.constructor: Invalid liquidator address"
-        );
-
-        // Require minimum rebalance interval and proposal period from factory
-        require(
-            _rebalanceConfig[0] >= _factory.minimumProposalPeriod(),
-            "RebalancingSetTokenV2.constructor: Proposal period too short"
-        );
-        require(
-            _rebalanceConfig[1] >= _factory.minimumRebalanceInterval(),
-            "RebalancingSetTokenV2.constructor: Rebalance interval too short"
-        );
-
-        // TODO: Check that the liquidator is valid
-        liquidator = _liquidator;
-
         core = ICore(_factory.core());
         vault = IVault(core.vault());
         componentWhiteList = _componentWhiteList;
         factory = _factory;
+        liquidator = _liquidator;
         manager = _manager;
         currentSet = _initialSet;
         unitShares = _initialUnitShares;

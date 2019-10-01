@@ -53,6 +53,9 @@ contract RebalancingSetTokenV2Factory {
     // Minimum amount of time users can review proposals
     uint256 public minimumProposalPeriod;
 
+    // Maximum fail auction period
+    uint256 public minimumFailRebalancePeriod;
+
     // Minimum number for the token natural unit
     // The bounds are used for calculations of unitShares and in settlement
     uint256 public minimumNaturalUnit;
@@ -88,6 +91,7 @@ contract RebalancingSetTokenV2Factory {
         IWhiteList _componentWhitelist,
         uint256 _minimumRebalanceInterval,
         uint256 _minimumProposalPeriod,
+        uint256 _minimumFailRebalancePeriod,
         uint256 _minimumNaturalUnit,
         uint256 _maximumNaturalUnit
     )
@@ -97,6 +101,7 @@ contract RebalancingSetTokenV2Factory {
         rebalanceComponentWhitelist = _componentWhitelist;
         minimumRebalanceInterval = _minimumRebalanceInterval;
         minimumProposalPeriod = _minimumProposalPeriod;
+        minimumFailRebalancePeriod = _minimumFailRebalancePeriod;
         minimumNaturalUnit = _minimumNaturalUnit;
         maximumNaturalUnit = _maximumNaturalUnit;
     }
@@ -166,10 +171,50 @@ contract RebalancingSetTokenV2Factory {
             "RebalancingSetTokenV2Factory.create: Invalid or disabled SetToken address"
         );
 
+        require(
+            _naturalUnit >= minimumNaturalUnit,
+            "RebalancingSetTokenV2Factory.create: Natural Unit too low"
+        );
+
+        require(
+            _naturalUnit <= maximumNaturalUnit,
+            "RebalancingSetTokenV2Factory.create: Natural Unit too large"
+        );
+
         // Parse _callData for additional parameters
         InitRebalancingParameters memory parameters = parseRebalanceSetCallData(
             _callData
         );
+
+        // Require manager address is non-zero
+        require(
+            parameters.manager != address(0),
+            "RebalancingSetTokenV2Factory.create: Invalid manager address"
+        );
+
+        // Require liquidator address is non-zero
+        require(
+            address(parameters.liquidator) != address(0),
+            "RebalancingSetTokenV2Factory.create: Invalid liquidator address"
+        );
+
+        // Require minimum rebalance interval and proposal period
+        require(
+            parameters.proposalPeriod >= minimumProposalPeriod,
+            "RebalancingSetTokenV2Factory.create: Proposal period too short"
+        );
+
+        require(
+            parameters.rebalanceInterval >= minimumRebalanceInterval,
+            "RebalancingSetTokenV2Factory.create: Rebalance interval too short"
+        ); 
+
+        require(
+            parameters.rebalanceFailPeriod >= minimumFailRebalancePeriod,
+            "RebalancingSetTokenV2Factory.create: Fail Period too short"
+        );
+
+        // TODO: Check that the liquidator is valid and approved by Core
 
         // Create a new SetToken contract
         return address(

@@ -16,15 +16,22 @@
 
 pragma solidity 0.5.7;
 
-import { ISetToken } from "./ISetToken.sol";
+import { ISetToken } from "../../core/interfaces/ISetToken.sol";
+import { ILiquidator } from "../../core/interfaces/ILiquidator.sol";
 
 /**
- * @title ILiquidator
+ * @title LiquidatorMock
  * @author Set Protocol
  *
- * The ILiquidator
+ * The LiquidatorMock
  */
-interface ILiquidator {
+contract LiquidatorMock is
+    ILiquidator
+{
+
+    ISetToken public currentSet;
+    ISetToken public nextSet;
+
 
     /* ============ External Functions ============ */
 
@@ -32,7 +39,15 @@ interface ILiquidator {
         ISetToken _currentSet,
         ISetToken _nextSet
     )
-        external;
+        external
+    {
+        currentSet = _currentSet;
+        nextSet = _nextSet;
+
+        // Mock should..
+            // Set the currentSet/nextSet as needed
+            // Calculate the combinedTokenArray
+    }
 
     function getBidPrice(
         uint256 _quantity

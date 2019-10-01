@@ -279,7 +279,7 @@ contract('RebalancingSetState', accounts => {
       expect(tokenState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
     });
 
-    it('should have an empty failedAuctionWithdrawComponents', async () => {
+    it('should have an empty failedRebalanceComponents', async () => {
       rebalancingSetToken = await subject();
 
       const expectedComponents = [];

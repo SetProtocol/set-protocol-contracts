@@ -67,7 +67,7 @@ contract RebalancingSetState {
     bool public hasBidded;
 
     // To be used if token put into Drawdown State
-    address[] public failedAuctionWithdrawComponents;
+    address[] public failedRebalanceComponents;
 
     /* ============ Events ============ */
 
@@ -147,15 +147,15 @@ contract RebalancingSetState {
     }
 
     /*
-     * Get failedAuctionWithdrawComponents of Rebalancing Set
+     * Get failedRebalanceComponents of Rebalancing Set
      *
-     * @return  failedAuctionWithdrawComponents
+     * @return  failedRebalanceComponents
      */
     function getFailedAuctionWithdrawComponents()
         external
         view
         returns (address[] memory)
     {
-        return failedAuctionWithdrawComponents;
+        return failedRebalanceComponents;
     }
 }

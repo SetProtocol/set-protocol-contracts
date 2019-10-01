@@ -23,7 +23,6 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./RebalancingSetState.sol";
-import { RebalancingLifecycleLibrary } from "./RebalancingLifecycleLibrary.sol";
 
 
 /**
@@ -76,10 +75,7 @@ contract StartRebalance is
         internal
         returns (uint256)
     {
-        uint256 startingCurrentSets = RebalancingLifecycleLibrary.calculateStartingSetQuantity(
-            vault,
-            currentSet
-        );
+        uint256 startingCurrentSets = calculateStartingSetQuantity();
 
         core.redeemInVault(address(currentSet), startingCurrentSets);
 
@@ -106,5 +102,20 @@ contract StartRebalance is
         rebalanceState = RebalancingLibrary.State.Rebalance;
 
         emit RebalanceStarted(address(currentSet), address(nextSet));
+    }
+
+    function calculateStartingSetQuantity()
+        internal
+        view
+        returns (uint256)
+    {
+        // Get startingCurrentSets and make it divisible by currentSet natural unit
+        uint256 currentSetBalance = vault.getOwnerBalance(address(currentSet), address(this));
+
+        // Calculates the set's natural unit
+        uint256 currentSetNaturalUnit = currentSet.naturalUnit();
+
+        // Rounds the redemption quantity to a multiple of the current Set natural unit and sets variable
+        return currentSetBalance.div(currentSetNaturalUnit).mul(currentSetNaturalUnit);
     }
 }

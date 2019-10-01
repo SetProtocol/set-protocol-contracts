@@ -27,7 +27,6 @@ import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { IWhiteList } from "../interfaces/IWhiteList.sol";
 import { RebalancingSetState } from "./rebalancing-libraries/RebalancingSetState.sol";
-import { RebalancingSetLifecycle } from "./rebalancing-libraries/RebalancingSetLifecycle.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 import { Issuance } from "./rebalancing-libraries/Issuance.sol";
 import { PlaceBid } from "./rebalancing-libraries/PlaceBid.sol";
@@ -35,7 +34,6 @@ import { Propose } from "./rebalancing-libraries/Propose.sol";
 import { StartRebalance } from "./rebalancing-libraries/StartRebalance.sol";
 import { FailAuction } from "./rebalancing-libraries/FailAuction.sol";
 import { SettleRebalance } from "./rebalancing-libraries/SettleRebalance.sol";
-import { RebalancingLifecycleLibrary } from "./rebalancing-libraries/RebalancingLifecycleLibrary.sol";
 
 
 /**
@@ -127,7 +125,7 @@ contract RebalancingSetTokenV2 is
     {
         validateProposal(_nextSet);
 
-        liquidatorValidateProposal(_nextSet);
+        liquidatorProcessProposal(_nextSet);
 
         transitionToProposal(_nextSet);
     }
@@ -198,7 +196,7 @@ contract RebalancingSetTokenV2 is
      * if bids have been placed. Reset to Default state if no bids placed.
      *
      */
-    function endFailedAuction()
+    function endFailedRebalance()
         external
     {
         validateFailRebalance();
@@ -225,7 +223,6 @@ contract RebalancingSetTokenV2 is
 
         return liquidator.getBidPrice(_quantity);
     }
-
 
     /*
      * Mint set token for given address.

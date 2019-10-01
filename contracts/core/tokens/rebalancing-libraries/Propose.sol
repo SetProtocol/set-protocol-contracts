@@ -23,7 +23,6 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./RebalancingSetState.sol";
-import { RebalancingLifecycleLibrary } from "./RebalancingLifecycleLibrary.sol";
 
 
 /**
@@ -100,17 +99,12 @@ contract Propose is
         );
     }
 
-    function liquidatorValidateProposal(
+    function liquidatorProcessProposal(
         ISetToken _nextSet
     )
         internal
     {
-        uint256 currentSetQuantity = RebalancingLifecycleLibrary.calculateStartingSetQuantity(
-            vault,
-            currentSet
-        );
-
-        liquidator.validatePropose(currentSet, _nextSet, currentSetQuantity);
+        liquidator.processProposal(currentSet, _nextSet);
     }
 
     function transitionToProposal(

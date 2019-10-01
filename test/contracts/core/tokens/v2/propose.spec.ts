@@ -111,7 +111,7 @@ contract('Propose', accounts => {
   });
 
   describe('#propose', async () => {
-    let subjectRebalancingToken: Address;
+    let subjectNextSet: Address;
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;
     let proposalPeriod: BigNumber;
@@ -156,7 +156,7 @@ contract('Propose', accounts => {
         failPeriod,
       );
 
-      subjectRebalancingToken = nextSetToken.address;
+      subjectNextSet = nextSetToken.address;
       subjectCaller = managerAccount;
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
     });
@@ -164,7 +164,7 @@ contract('Propose', accounts => {
     async function subject(): Promise<string> {
       await blockchain.increaseTimeAsync(subjectTimeFastForward);
       return rebalancingSetToken.propose.sendTransactionAsync(
-        subjectRebalancingToken,
+        subjectNextSet,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
@@ -174,7 +174,7 @@ contract('Propose', accounts => {
         await subject();
 
         const newRebalacingSet = await rebalancingSetToken.nextSet.callAsync();
-        expect(newRebalacingSet).to.equal(subjectRebalancingToken);
+        expect(newRebalacingSet).to.equal(subjectNextSet);
       });
 
       it('updates the rebalanceState to Proposal', async () => {
@@ -192,12 +192,26 @@ contract('Propose', accounts => {
         const proposalStartTime = await rebalancingSetToken.proposalStartTime.callAsync();
         const proposalEndTime = proposalStartTime.add(proposalPeriod);
         const expectedLogs = getExpectedRebalanceProposedV2Log(
-          subjectRebalancingToken,
+          subjectNextSet,
           proposalEndTime,
           rebalancingSetToken.address,
         );
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+
+      it('sends the correct nextSet to the liquidator', async () => {
+        await subject();
+
+        const retrievedNextSet = await liquidatorMock.nextSet.callAsync();
+        expect(retrievedNextSet).to.equal(subjectNextSet);
+      });
+
+      it('sends the correct currentSet to the liquidator', async () => {
+        await subject();
+
+        const retrievedCurrentSet = await liquidatorMock.currentSet.callAsync();
+        expect(retrievedCurrentSet).to.equal(currentSetToken.address);
       });
 
       describe('when one of the components in the next set is not on the whitelist', async () => {
@@ -236,7 +250,7 @@ contract('Propose', accounts => {
 
       describe('when the proposed nextSet is not approved by Core', async () => {
         beforeEach(async () => {
-          subjectRebalancingToken = fakeTokenAccount;
+          subjectNextSet = fakeTokenAccount;
         });
 
         it('should revert', async () => {
@@ -271,7 +285,7 @@ contract('Propose', accounts => {
           managerAccount
         );
 
-        subjectRebalancingToken = reproposeRebalancingSetTokenV2.address;
+        subjectNextSet = reproposeRebalancingSetTokenV2.address;
         timeJump = new BigNumber(1000);
         await blockchain.increaseTimeAsync(timeJump);
       });
@@ -280,7 +294,7 @@ contract('Propose', accounts => {
         await subject();
 
         const newRebalancingSet = await rebalancingSetToken.nextSet.callAsync();
-        expect(newRebalancingSet).to.equal(subjectRebalancingToken);
+        expect(newRebalancingSet).to.equal(subjectNextSet);
       });
 
       it('resets the proposalStartTime', async () => {

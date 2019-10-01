@@ -33,6 +33,10 @@ contract LiquidatorMock
     ISetToken public nextSet;
 
     uint256 public startRebalanceTime;
+    uint256 public startingCurrentSetQuantity;
+
+    address public startRebalanceCurrentSet;
+    address public startRebalanceNextSet;
 
 
     /* ============ External Functions ============ */
@@ -71,6 +75,7 @@ contract LiquidatorMock
         external
     {
         startRebalanceTime = block.timestamp;
+        startingCurrentSetQuantity = _startingCurrentSetQuantity;
         
         // Do nothing
     }

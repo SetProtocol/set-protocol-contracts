@@ -6,6 +6,7 @@ import {
   ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreMockContract,
+  LinearAuctionLiquidatorContract,
   LinearAuctionPriceCurveContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
@@ -37,6 +38,7 @@ import { ERC20Helper } from './erc20Helper';
 
 const web3 = getWeb3();
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
+const LinearAuctionLiquidator = artifacts.require('LinearAuctionLiquidator');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const SetToken = artifacts.require('SetToken');
@@ -194,6 +196,34 @@ export class RebalancingHelper {
     return setTokenArray;
   }
 
+  public async createDefaultRebalancingSetTokenAsync(
+    core: CoreLikeContract,
+    factory: Address,
+    manager: Address,
+    initialSet: Address,
+    proposalPeriod: BigNumber,
+    initialUnitShares: BigNumber = DEFAULT_UNIT_SHARES,
+  ): Promise<RebalancingSetTokenContract> {
+    // Generate defualt rebalancingSetToken params
+    const rebalanceInterval = ONE_DAY_IN_SECONDS;
+    const callData = SetUtils.generateRebalancingSetTokenCallData(
+      manager,
+      proposalPeriod,
+      rebalanceInterval,
+    );
+
+    // Create rebalancingSetToken
+    return await this.createRebalancingTokenAsync(
+      core,
+      factory,
+      [initialSet],
+      [initialUnitShares],
+      DEFAULT_REBALANCING_NATURAL_UNIT,
+      callData,
+    );
+  }
+
+  /* ============ Issuance/Redemption ============ */
   public async issueRebalancingSetFromBaseComponentsAsync(
     core: CoreLikeContract,
     transferProxyAddress: Address,
@@ -277,6 +307,29 @@ export class RebalancingHelper {
 
   }
 
+  /* ============ Liquidators ============ */
+
+  public async deployLinearAuctionLiquidatorAsync(
+    coreInstance: Address,
+    priceDivisor: BigNumber,
+    auctionTimeToPivot: BigNumber,
+    auctionSpeed: BigNumber,
+    name: string,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<LinearAuctionLiquidatorContract> {
+    const truffleLinearLiquidator = await LinearAuctionLiquidator.new(
+      coreInstance,
+      priceDivisor,
+      auctionTimeToPivot,
+      auctionSpeed,
+      name
+    );
+
+    return new LinearAuctionLiquidatorContract(
+      new web3.eth.Contract(truffleLinearLiquidator.abi, truffleLinearLiquidator.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
 
   /* ============ Price Libraries ============ */
 
@@ -342,33 +395,6 @@ export class RebalancingHelper {
     await core.addPriceLibrary.sendTransactionAsync(
       priceLibrary.address,
       { from }
-    );
-  }
-
-  public async createDefaultRebalancingSetTokenAsync(
-    core: CoreLikeContract,
-    factory: Address,
-    manager: Address,
-    initialSet: Address,
-    proposalPeriod: BigNumber,
-    initialUnitShares: BigNumber = DEFAULT_UNIT_SHARES,
-  ): Promise<RebalancingSetTokenContract> {
-    // Generate defualt rebalancingSetToken params
-    const rebalanceInterval = ONE_DAY_IN_SECONDS;
-    const callData = SetUtils.generateRebalancingSetTokenCallData(
-      manager,
-      proposalPeriod,
-      rebalanceInterval,
-    );
-
-    // Create rebalancingSetToken
-    return await this.createRebalancingTokenAsync(
-      core,
-      factory,
-      [initialSet],
-      [initialUnitShares],
-      DEFAULT_REBALANCING_NATURAL_UNIT,
-      callData,
     );
   }
 

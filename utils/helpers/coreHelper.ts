@@ -7,6 +7,7 @@ import {
   CoreContract,
   CoreMockContract,
   ExchangeIssuanceModuleContract,
+  OracleWhiteListContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetIssuanceModuleContract,
   RebalanceAuctionModuleContract,
@@ -41,6 +42,7 @@ const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreMock = artifacts.require('CoreMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
+const OracleWhiteList = artifacts.require('OracleWhiteList');
 const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
 const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
@@ -362,6 +364,23 @@ export class CoreHelper {
     );
 
     return new WhiteListContract(
+      new web3.eth.Contract(truffleWhiteList.abi, truffleWhiteList.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployOracleWhiteListAsync(
+    initialTokenAddresses: Address[] = [],
+    initialOracleAddresses: Address[] = [],
+    from: Address = this._tokenOwnerAddress
+  ): Promise<OracleWhiteListContract> {
+    const truffleWhiteList = await OracleWhiteList.new(
+      initialTokenAddresses,
+      initialOracleAddresses,
+      { from },
+    );
+
+    return new OracleWhiteListContract(
       new web3.eth.Contract(truffleWhiteList.abi, truffleWhiteList.address),
       { from, gas: DEFAULT_GAS },
     );

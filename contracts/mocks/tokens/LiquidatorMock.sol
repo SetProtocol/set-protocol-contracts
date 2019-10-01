@@ -25,12 +25,14 @@ import { ILiquidator } from "../../core/interfaces/ILiquidator.sol";
  *
  * The LiquidatorMock
  */
-contract LiquidatorMock is
-    ILiquidator
+contract LiquidatorMock
+    // ILiquidator
 {
 
     ISetToken public currentSet;
     ISetToken public nextSet;
+
+    uint256 public startRebalanceTime;
 
 
     /* ============ External Functions ============ */
@@ -49,29 +51,34 @@ contract LiquidatorMock is
             // Calculate the combinedTokenArray
     }
 
-    function getBidPrice(
-        uint256 _quantity
-    )
-        external
-        returns (address[] memory, uint256[] memory, uint256[] memory);
+    // function getBidPrice(
+    //     uint256 _quantity
+    // )
+    //     external
+    //     returns (address[] memory, uint256[] memory, uint256[] memory);
 
-    function placeBid(
-        uint256 _quantity
-    )
-        external
-        returns (address[] memory, uint256[] memory, uint256[] memory);
+    // function placeBid(
+    //     uint256 _quantity
+    // )
+    //     external
+    //     returns (address[] memory, uint256[] memory, uint256[] memory);
 
     function startRebalance(
         ISetToken _currentSet,
         ISetToken _nextSet,
         uint256 _startingCurrentSetQuantity
     )
-        external;
-
-    function settleRebalance()
-        external;
-
-    function endFailedRebalance()
         external
-        returns (bool);
+    {
+        startRebalanceTime = block.timestamp;
+        
+        // Do nothing
+    }
+
+    // function settleRebalance()
+    //     external;
+
+    // function endFailedRebalance()
+    //     external
+    //     returns (bool);
 }

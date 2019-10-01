@@ -509,6 +509,28 @@ export class RebalancingHelper {
     );
   }
 
+  public async defaultTransitionToProposeV2Async(
+    core: CoreLikeContract,
+    rebalancingComponentWhiteList: WhiteListContract,
+    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    nextSetToken: SetTokenContract,
+    caller: Address
+  ): Promise<void> {
+    const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+    await this._coreHelper.addTokensToWhiteList(
+      nextSetTokenComponentAddresses,
+      rebalancingComponentWhiteList
+    );
+
+    // Transition to propose
+    await this.transitionToProposeV2Async(
+      core,
+      rebalancingSetToken,
+      nextSetToken,
+      caller,
+    );
+  }
+
   public async transitionToProposeAsync(
     core: CoreLikeContract,
     rebalancingSetToken: RebalancingSetTokenContract,
@@ -527,6 +549,20 @@ export class RebalancingHelper {
       auctionTimeToPivot,
       auctionStartPrice,
       auctionPivotPrice,
+      { from: caller, gas: DEFAULT_GAS}
+    );
+  }
+
+  public async transitionToProposeV2Async(
+    core: CoreLikeContract,
+    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    nextSetToken: SetTokenContract,
+    caller: Address
+  ): Promise<void> {
+    // Transition to propose, auctionLibrary MUST be approved priceLibrary on Core already
+    await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
+    await rebalancingSetToken.propose.sendTransactionAsync(
+      nextSetToken.address,
       { from: caller, gas: DEFAULT_GAS}
     );
   }
@@ -574,6 +610,26 @@ export class RebalancingHelper {
       auctionTimeToPivot,
       auctionStartPrice,
       auctionPivotPrice,
+      caller
+    );
+
+    // Transition to rebalance
+    await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
+    await rebalancingSetToken.startRebalance.sendTransactionAsync(
+      { from: caller, gas: DEFAULT_GAS }
+    );
+  }
+
+  public async transitionToRebalanceV2Async(
+    core: CoreLikeContract,
+    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    nextSetToken: SetTokenContract,
+    caller: Address
+  ): Promise<void> {
+    await this.transitionToProposeV2Async(
+      core,
+      rebalancingSetToken,
+      nextSetToken,
       caller
     );
 

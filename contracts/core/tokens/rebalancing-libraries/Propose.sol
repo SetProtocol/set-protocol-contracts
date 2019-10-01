@@ -112,7 +112,6 @@ contract Propose is
     )
         internal
     {
-        // Update state parameters
         nextSet = _nextSet;
         proposalStartTime = block.timestamp;
         rebalanceState = RebalancingLibrary.State.Proposal;

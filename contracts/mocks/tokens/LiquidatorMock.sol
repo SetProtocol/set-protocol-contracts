@@ -18,6 +18,7 @@ pragma solidity 0.5.7;
 
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";
 import { ILiquidator } from "../../core/interfaces/ILiquidator.sol";
+import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
 
 /**
  * @title LiquidatorMock
@@ -28,6 +29,7 @@ import { ILiquidator } from "../../core/interfaces/ILiquidator.sol";
 contract LiquidatorMock
     // ILiquidator
 {
+    using AddressArrayUtils for address[];
 
     ISetToken public currentSet;
     ISetToken public nextSet;
@@ -37,6 +39,10 @@ contract LiquidatorMock
 
     address public startRebalanceCurrentSet;
     address public startRebalanceNextSet;
+
+    address[] public combinedTokenArray;
+    uint256[] public combinedCurrentUnits;
+    uint256[] public combinedNextSetUnits;
 
 
     /* ============ External Functions ============ */
@@ -49,10 +55,6 @@ contract LiquidatorMock
     {
         currentSet = _currentSet;
         nextSet = _nextSet;
-
-        // Mock should..
-            // Set the currentSet/nextSet as needed
-            // Calculate the combinedTokenArray
     }
 
     // function getBidPrice(
@@ -76,8 +78,14 @@ contract LiquidatorMock
     {
         startRebalanceTime = block.timestamp;
         startingCurrentSetQuantity = _startingCurrentSetQuantity;
-        
-        // Do nothing
+
+        // Set the combined token array
+        address[] memory currentSetComponents = _currentSet.getComponents();
+        address[] memory nextSetComponents = _nextSet.getComponents();
+        combinedTokenArray = currentSetComponents.union(nextSetComponents);
+
+        combinedCurrentUnits = getCombinedUnitsArray(_currentSet, combinedTokenArray);
+        combinedNextSetUnits = getCombinedUnitsArray(_nextSet, combinedTokenArray);
     }
 
     // function settleRebalance()
@@ -86,4 +94,48 @@ contract LiquidatorMock
     // function endFailedRebalance()
     //     external
     //     returns (bool);
+
+    function getCombinedTokenArray()
+        external
+        view
+        returns (address[] memory)
+    {
+        return combinedTokenArray;
+    }
+
+    function getCombinedCurrentUnits()
+        external
+        view
+        returns (uint256[] memory)
+    {
+        return combinedCurrentUnits;
+    }
+
+    function getCombinedNextSetUnits()
+        external
+        view
+        returns (uint256[] memory)
+    {
+        return combinedNextSetUnits;
+    }
+
+    function getCombinedUnitsArray(
+        ISetToken _setToken,
+        address[] memory _combinedTokenArray
+    )
+        private
+        returns (uint256[] memory)
+    {
+        uint256[] memory combinedUnits = new uint256[](_combinedTokenArray.length);
+
+        for (uint256 i = 0; i < _combinedTokenArray.length; i++) {
+            address currentComponent = _combinedTokenArray[i];
+
+            (uint256 indexCurrent, bool isComponent) = _setToken.getComponents().indexOf(currentComponent);
+
+            combinedUnits[i] = isComponent ? _setToken.getUnits()[indexCurrent] : 0;
+        }
+
+        return combinedUnits;
+    }
 }

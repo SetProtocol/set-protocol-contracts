@@ -198,6 +198,15 @@ contract('StartRebalance', accounts => {
         expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.REBALANCE);
       });
 
+      it('updates the rebalanceStartTime to the latest timestamp', async () => {
+        await subject();
+
+        const { timestamp } = await web3.eth.getBlock('latest');
+
+        const rebalanceStartTime = await rebalancingSetToken.rebalanceStartTime.callAsync();
+        expect(rebalanceStartTime).to.be.bignumber.equal(timestamp);
+      });
+
       it('emits the correct RebalanceProposed event', async () => {
         const txHash = await subject();
 

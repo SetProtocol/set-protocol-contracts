@@ -22,6 +22,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 
+
 /**
  * @title RebalancingLifecycleLibrary
  * @author Set Protocol

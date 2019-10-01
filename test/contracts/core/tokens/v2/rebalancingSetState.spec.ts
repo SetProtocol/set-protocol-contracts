@@ -11,35 +11,26 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
-  SetTokenContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
-  UpdatableConstantAuctionPriceCurveContract,
   VaultContract,
   WhiteListContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
-import { ether } from '@utils/units';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
   DEFAULT_UNIT_SHARES,
-  ZERO,
-  DEFAULT_AUCTION_PRICE_NUMERATOR,
-  DEFAULT_AUCTION_PRICE_DIVISOR,
   DEFAULT_REBALANCING_NATURAL_UNIT,
 } from '@utils/constants';
 import {
-  getExpectedTransferLog,
   getExpectedNewManagerAddedLog,
-  getExpectedRebalanceProposedLog,
-  getExpectedRebalanceStartedLog,
 } from '@utils/contract_logs/rebalancingSetToken';
-import { expectRevertError, assertTokenBalanceAsync } from '@utils/tokenAssertions';
+import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
@@ -64,7 +55,6 @@ contract('RebalancingSetState', accounts => {
     managerAccount,
     otherAccount,
     fakeTokenAccount,
-    invalidAccount,
     fakeModuleAccount,
   ] = accounts;
 
@@ -78,7 +68,6 @@ contract('RebalancingSetState', accounts => {
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenV2FactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
-  let constantAuctionPriceCurve: UpdatableConstantAuctionPriceCurveContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -190,6 +179,27 @@ contract('RebalancingSetState', accounts => {
       expect(tokenFactory).to.equal(subjectFactory);
     });
 
+    it('creates a set with the correct core', async () => {
+      rebalancingSetToken = await subject();
+
+      const coreAddress = await rebalancingSetToken.core.callAsync();
+      expect(coreAddress).to.equal(coreMock.address);
+    });
+
+    it('creates a set with the correct vault', async () => {
+      rebalancingSetToken = await subject();
+
+      const vaultAddress = await rebalancingSetToken.vault.callAsync();
+      expect(vaultAddress).to.equal(vault.address);
+    });
+
+    it('creates a set with the correct whitelist', async () => {
+      rebalancingSetToken = await subject();
+
+      const whitelistAddress = await rebalancingSetToken.componentWhiteList.callAsync();
+      expect(whitelistAddress).to.equal(rebalancingComponentWhiteList.address);
+    });
+
     it('creates a set with the correct manager', async () => {
       rebalancingSetToken = await subject();
 
@@ -211,11 +221,25 @@ contract('RebalancingSetState', accounts => {
       expect(tokenInitialSet).to.equal(subjectInitialSet);
     });
 
+    it('creates a set with an empty nextSet', async () => {
+      rebalancingSetToken = await subject();
+
+      const tokenNextlSet = await rebalancingSetToken.nextSet.callAsync();
+      expect(tokenNextlSet).to.equal(NULL_ADDRESS);
+    });
+
     it('creates a set with the correct initial unit shares', async () => {
       rebalancingSetToken = await subject();
 
       const tokenInitialUnitShares = await rebalancingSetToken.unitShares.callAsync();
       expect(tokenInitialUnitShares).to.be.bignumber.equal(subjectInitialUnitShares);
+    });
+
+    it('creates a set with the correct naturalUnit', async () => {
+      rebalancingSetToken = await subject();
+
+      const returnedNaturalUnit = await rebalancingSetToken.naturalUnit.callAsync();
+      expect(returnedNaturalUnit).to.be.bignumber.equal(subjectNaturalUnit);
     });
 
     it('creates a set with the correct proposal period', async () => {
@@ -269,6 +293,13 @@ contract('RebalancingSetState', accounts => {
 
       const rebalanceStartTime = await rebalancingSetToken.rebalanceStartTime.callAsync();
       expect(rebalanceStartTime).to.be.bignumber.equal(0);
+    });
+
+    it('should have proposalStartTime variable set to 0', async () => {
+      rebalancingSetToken = await subject();
+
+      const proposalStartTime = await rebalancingSetToken.proposalStartTime.callAsync();
+      expect(proposalStartTime).to.be.bignumber.equal(0);
     });
 
     it('should have hasBidded variable set to false', async () => {
@@ -387,7 +418,7 @@ contract('RebalancingSetState', accounts => {
 
       const initialSet = components[0].address;
       const manager = managerAccount;
-      const liquidator = fakeModuleAccount;      
+      const liquidator = fakeModuleAccount;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       const proposalPeriod = ONE_DAY_IN_SECONDS;

@@ -17,6 +17,7 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
+import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 
 import { ICore } from "../interfaces/ICore.sol";
@@ -28,6 +29,13 @@ import { IWhiteList } from "../interfaces/IWhiteList.sol";
 import { RebalancingSetState } from "./rebalancing-libraries/RebalancingSetState.sol";
 import { RebalancingSetLifecycle } from "./rebalancing-libraries/RebalancingSetLifecycle.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
+import { Issuance } from "./rebalancing-libraries/Issuance.sol";
+import { PlaceBid } from "./rebalancing-libraries/PlaceBid.sol";
+import { Propose } from "./rebalancing-libraries/Propose.sol";
+import { StartRebalance } from "./rebalancing-libraries/StartRebalance.sol";
+import { FailAuction } from "./rebalancing-libraries/FailAuction.sol";
+import { SettleRebalance } from "./rebalancing-libraries/SettleRebalance.sol";
+import { RebalancingLifecycleLibrary } from "./rebalancing-libraries/RebalancingLifecycleLibrary.sol";
 
 
 /**
@@ -37,9 +45,15 @@ import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
  * Implementation of Rebalancing Set token.
  */
 contract RebalancingSetTokenV2 is
+    ERC20,
     ERC20Detailed,
     RebalancingSetState,
-    RebalancingSetLifecycle
+    Propose,
+    StartRebalance,
+    Issuance,
+    PlaceBid,
+    SettleRebalance,
+    FailAuction
 {
 
     /* ============ Constructor ============ */
@@ -97,5 +111,156 @@ contract RebalancingSetTokenV2 is
 
         lastRebalanceTimestamp = block.timestamp;
         rebalanceState = RebalancingLibrary.State.Default;
+    }
+
+   /* ============ External Functions ============ */
+
+    /**
+     * Function used to set the terms of the next rebalance and start the proposal period
+     *
+     * @param _nextSet                      The Set to rebalance into
+     */
+    function propose(
+        ISetToken _nextSet
+    )
+        external
+    {
+        validateProposal(_nextSet);
+
+        liquidatorValidateProposal(_nextSet);
+
+        transitionToProposal(_nextSet);
+    }
+
+    /*
+     * Initiate rebalance for the rebalancing set if the proposal period has elapsed after
+     * a proposal.
+     */
+    function startRebalance()
+        external
+    {
+        validateStartRebalance();
+
+        uint256 startingCurrentSetQuantity = redeemCurrentSet();
+
+        liquidatorStartRebalance(startingCurrentSetQuantity);
+
+        transitionToRebalance();
+    }
+
+    /*
+     * Initiate settlement for the rebalancing set. Full functionality now returned to
+     * set owners
+     *
+     */
+    function settleRebalance()
+        external
+    {
+        validateSettleRebalance();
+
+        issueNextSet();
+
+        liquidatorSettleRebalance();
+
+        transitionToDefault();
+    }
+
+    /*
+     * Place bid during rebalance auction. Can only be called by Core.
+     *
+     * @param _quantity                 The amount of currentSet to be rebalanced
+     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
+     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
+     */
+    function placeBid(
+        uint256 _quantity
+    )
+        external
+        returns (address[] memory, uint256[] memory, uint256[] memory)
+    {
+        validatePlaceBid(_quantity);
+
+        // Place bid and get back inflow and outflow arrays
+        (
+            address[] memory combinedTokenArray,
+            uint256[] memory inflowUnitArray,
+            uint256[] memory outflowUnitArray
+        ) = liquidator.placeBid(_quantity);
+
+        updateHasBiddedIfNecessary();
+
+        return (combinedTokenArray, inflowUnitArray, outflowUnitArray);
+    }
+
+    /*
+     * Fail an auction that doesn't complete before reaching the pivot price. Move to Drawdown state
+     * if bids have been placed. Reset to Default state if no bids placed.
+     *
+     */
+    function endFailedAuction()
+        external
+    {
+        validateFailRebalance();
+
+        handleFailedRebalance();
+    }
+
+    /*
+     * Get token inflows and outflows required for bid. Also the amount of Rebalancing
+     * Sets that would be generated.
+     *
+     * @param _quantity               The amount of currentSet to be rebalanced
+     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
+     * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
+     */
+    function getBidPrice(
+        uint256 _quantity
+    )
+        public
+        returns (address[] memory, uint256[] memory, uint256[] memory)
+    {
+        validateGetBidPrice(_quantity);
+
+        return liquidator.getBidPrice(_quantity);
+    }
+
+
+    /*
+     * Mint set token for given address.
+     * Can only be called by Core contract.
+     *
+     * @param  _issuer      The address of the issuing account
+     * @param  _quantity    The number of sets to attribute to issuer
+     */
+    function mint(
+        address _issuer,
+        uint256 _quantity
+    )
+        external
+    {
+        validateMint();
+
+        // Update token balance of the manager
+        _mint(_issuer, _quantity);
+    }
+
+    /*
+     * Burn set token for given address.
+     * Can only be called by authorized contracts.
+     *
+     * @param  _from        The address of the redeeming account
+     * @param  _quantity    The number of sets to burn from redeemer
+     */
+    function burn(
+        address _from,
+        uint256 _quantity
+    )
+        external
+    {
+        validateBurn();
+
+        _burn(_from, _quantity);
     }
 }

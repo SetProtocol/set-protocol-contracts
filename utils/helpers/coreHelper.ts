@@ -13,7 +13,6 @@ import {
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
-  RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,

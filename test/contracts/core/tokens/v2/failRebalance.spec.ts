@@ -17,7 +17,6 @@ import {
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
-  StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
   WhiteListContract,
@@ -28,9 +27,6 @@ import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
-import {
-  getExpectedRebalanceStartedLog,
-} from '@utils/contract_logs/rebalancingSetToken';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -45,7 +41,6 @@ const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
-const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
@@ -53,8 +48,6 @@ contract('FailRebalance', accounts => {
   const [
     deployerAccount,
     managerAccount,
-    otherAccount,
-    fakeTokenAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -118,15 +111,10 @@ contract('FailRebalance', accounts => {
   describe('#failRebalance', async () => {
     let subjectCaller: Address;
 
-    let proposalPeriod: BigNumber;
-
     let nextSetToken: SetTokenContract;
     let currentSetToken: SetTokenContract;
 
-    let baseSetQuantityToIssue: BigNumber;
     let rebalancingSetQuantityToIssue: BigNumber = ether(7);
-    let setTokenNaturalUnits: BigNumber[];
-    let rebalancingSetUnitShares: BigNumber;
     let currentSetIssueQuantity: BigNumber;
 
     let failPeriod: BigNumber;
@@ -138,7 +126,6 @@ contract('FailRebalance', accounts => {
         factory.address,
         transferProxy.address,
         setTokensToDeploy,
-        undefined || setTokenNaturalUnits
       );
 
       currentSetToken = setTokens[0];
@@ -202,7 +189,7 @@ contract('FailRebalance', accounts => {
       });
     });
 
-    describe.only('when endFailedAuction is called from Rebalance State', async () => {
+    describe('when endFailedAuction is called from Rebalance State', async () => {
       beforeEach(async () => {
         await rebalancingHelper.transitionToRebalanceV2Async(
           coreMock,
@@ -259,6 +246,25 @@ contract('FailRebalance', accounts => {
           const expectedNextSet = 0;
 
           expect(nextSet).to.be.bignumber.equal(expectedNextSet);
+        });
+
+        it('clears the hasBidded variable', async () => {
+          await subject();
+
+          const hasBidded = await rebalancingSetToken.hasBidded.callAsync();
+
+          expect(hasBidded).to.equal(false);
+        });
+
+        it('increments the rebalanceIndex variable', async () => {
+          const previousRebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
+
+          await subject();
+
+          const expectedRebalanceIndex = previousRebalanceIndex.plus(1);
+          const rebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
+
+          expect(rebalanceIndex).to.bignumber.equal(expectedRebalanceIndex);
         });
       });
 
@@ -347,9 +353,6 @@ contract('FailRebalance', accounts => {
         });
       });
     });
-
-
-
   });
 
 });

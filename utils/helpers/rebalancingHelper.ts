@@ -884,7 +884,7 @@ export class RebalancingHelper {
     const components = await nextSetToken.getComponents.callAsync();
     const units = await nextSetToken.getUnits.callAsync();
 
-    for (var i = 0; i < components.length; i++) {
+    for (let i = 0; i < components.length; i++) {
       const componentVaultBalance = await vault.getOwnerBalance.callAsync(
         rebalancingSetToken.address,
         components[i],

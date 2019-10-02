@@ -14,6 +14,7 @@ import {
   SetTokenContract,
   LiquidatorMockContract,
   PlaceBidMockContract,
+  RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
@@ -65,6 +66,7 @@ contract('PlaceBid', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let factory: SetTokenFactoryContract;
+  let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let rebalancingFactory: RebalancingSetTokenV2FactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorMock: LiquidatorMockContract;
@@ -104,6 +106,9 @@ contract('PlaceBid', accounts => {
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
     coreMock = await coreHelper.deployCoreMockAsync(transferProxy, vault);
+
+    rebalanceAuctionModule = await coreHelper.deployRebalanceAuctionModuleAsync(coreMock, vault);
+    await coreHelper.addModuleAsync(coreMock, rebalanceAuctionModule.address);
 
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
@@ -263,6 +268,23 @@ contract('PlaceBid', accounts => {
         it('should revert', async () => {
           await expectRevertError(subject());
         });
+      });
+    });
+
+    describe('when placeBid is called from Drawdown State', async () => {
+      beforeEach(async () => {
+        await rebalancingHelper.transitionToDrawdownV2Async(
+          coreMock,
+          rebalancingSetToken,
+          rebalanceAuctionModule,
+          liquidatorMock,
+          nextSetToken,
+          managerAccount,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

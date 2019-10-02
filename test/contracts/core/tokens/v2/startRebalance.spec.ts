@@ -13,6 +13,7 @@ import {
   CoreMockContract,
   SetTokenContract,
   LiquidatorMockContract,
+  RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
@@ -62,6 +63,7 @@ contract('StartRebalance', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let factory: SetTokenFactoryContract;
+  let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let rebalancingFactory: RebalancingSetTokenV2FactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorMock: LiquidatorMockContract;
@@ -92,6 +94,9 @@ contract('StartRebalance', accounts => {
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
     coreMock = await coreHelper.deployCoreMockAsync(transferProxy, vault);
+
+    rebalanceAuctionModule = await coreHelper.deployRebalanceAuctionModuleAsync(coreMock, vault);
+    await coreHelper.addModuleAsync(coreMock, rebalanceAuctionModule.address);
 
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
@@ -233,14 +238,14 @@ contract('StartRebalance', accounts => {
         await subject();
 
         const startRebalanceCurrentSet = await liquidatorMock.startRebalanceCurrentSet.callAsync();
-        expect(startRebalanceCurrentSet).to.be.bignumber.equal(currentSetToken.address);
+        expect(startRebalanceCurrentSet).to.equal(currentSetToken.address);
       });
 
       it('sends the correct nextSet to the liquidator', async () => {
         await subject();
 
         const startRebalanceNextSet = await liquidatorMock.startRebalanceNextSet.callAsync();
-        expect(startRebalanceNextSet).to.be.bignumber.equal(nextSetToken.address);
+        expect(startRebalanceNextSet).to.equal(nextSetToken.address);
       });
 
       it('redeemsInVault the currentSet', async () => {
@@ -350,36 +355,22 @@ contract('StartRebalance', accounts => {
       });
     });
 
-    // describe('when startRebalance is called from Drawdown State', async () => {
-    //   beforeEach(async () => {
-    //     await rebalancingHelper.defaultTransitionToRebalanceAsync(
-    //       coreMock,
-    //       rebalancingComponentWhiteList,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       constantAuctionPriceCurve.address,
-    //       managerAccount
-    //     );
+    describe('when startRebalance is called from Drawdown State', async () => {
+      beforeEach(async () => {
+        await rebalancingHelper.transitionToDrawdownV2Async(
+          coreMock,
+          rebalancingSetToken,
+          rebalanceAuctionModule,
+          liquidatorMock,
+          nextSetToken,
+          managerAccount,
+        );
+      });
 
-    //     const defaultTimeToPivot = new BigNumber(100000);
-    //     await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
-
-    //     const [bidQuantity] = await rebalancingSetToken.getBiddingParameters.callAsync();
-    //     await rebalancingHelper.placeBidAsync(
-    //       rebalanceAuctionModule,
-    //       rebalancingSetToken.address,
-    //       bidQuantity,
-    //     );
-
-    //     await rebalancingHelper.endFailedRebalanceAsync(
-    //       rebalancingSetToken
-    //     );
-    //   });
-
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
 });

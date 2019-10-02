@@ -200,7 +200,7 @@ contract('SettleRebalance', accounts => {
       });
     });
 
-    describe.only('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
+    describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
       beforeEach(async () => {
         await rebalancingHelper.transitionToRebalanceV2Async(
           coreMock,
@@ -381,36 +381,22 @@ contract('SettleRebalance', accounts => {
     //   });
     // });
 
-    // describe('when settleRebalance is called from Drawdown State', async () => {
-    //   beforeEach(async () => {
-    //     await rebalancingHelper.defaultTransitionToRebalanceAsync(
-    //       coreMock,
-    //       rebalancingComponentWhiteList,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       constantAuctionPriceCurve.address,
-    //       managerAccount
-    //     );
+    describe('when settleRebalance is called from Drawdown State', async () => {
+      beforeEach(async () => {
+        await rebalancingHelper.transitionToDrawdownV2Async(
+          coreMock,
+          rebalancingSetToken,
+          rebalanceAuctionModule,
+          liquidatorMock,
+          nextSetToken,
+          managerAccount,
+        );
+      });
 
-    //     const defaultTimeToPivot = new BigNumber(100000);
-    //     await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
-
-    //     const [bidQuantity] = await rebalancingSetToken.biddingParameters.callAsync();
-    //     await rebalancingHelper.placeBidAsync(
-    //       rebalanceAuctionModule,
-    //       rebalancingSetToken.address,
-    //       bidQuantity,
-    //     );
-
-    //     await rebalancingHelper.endFailedRebalanceAsync(
-    //       rebalancingSetToken
-    //     );
-    //   });
-
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
 });

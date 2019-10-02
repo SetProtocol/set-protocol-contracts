@@ -47,8 +47,8 @@ contract LiquidatorMock
     uint256 public startingCurrentSetQuantity;
     uint256 public remainingCurrentSets;
 
-    address public startRebalanceCurrentSet;
-    address public startRebalanceNextSet;
+    ISetToken public startRebalanceCurrentSet;
+    ISetToken public startRebalanceNextSet;
 
     address[] public combinedTokenArray;
     uint256[] public combinedCurrentUnits;
@@ -118,6 +118,9 @@ contract LiquidatorMock
     )
         external
     {
+        startRebalanceNextSet = _nextSet;
+        startRebalanceCurrentSet = _currentSet;
+
         startRebalanceTime = block.timestamp;
         startingCurrentSetQuantity = _startingCurrentSetQuantity;
         remainingCurrentSets = startingCurrentSetQuantity;

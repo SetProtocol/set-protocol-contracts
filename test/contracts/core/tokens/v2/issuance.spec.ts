@@ -11,6 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  LiquidatorMockContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
@@ -45,6 +46,7 @@ import { getWeb3 } from '@utils/web3Helper';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
+import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -65,7 +67,6 @@ contract('RebalancingSetState', accounts => {
     otherAccount,
     fakeTokenAccount,
     invalidAccount,
-    fakeModuleAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -78,7 +79,7 @@ contract('RebalancingSetState', accounts => {
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenV2FactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
-  let constantAuctionPriceCurve: UpdatableConstantAuctionPriceCurveContract;
+  let liquidatorMock: LiquidatorMockContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -88,6 +89,7 @@ contract('RebalancingSetState', accounts => {
     erc20Helper,
     blockchain
   );
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -117,6 +119,8 @@ contract('RebalancingSetState', accounts => {
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
+
+    liquidatorMock = await liquidatorHelper.deployLiquidatorMock();
   });
 
   afterEach(async () => {
@@ -139,7 +143,7 @@ contract('RebalancingSetState', accounts => {
       const currentSetToken = setTokens[0];
 
       const manager = managerAccount;
-      const liquidator = fakeModuleAccount;
+      const liquidator = liquidatorMock.address;
       const initialSet = currentSetToken.address;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
@@ -206,7 +210,7 @@ contract('RebalancingSetState', accounts => {
       currentSetToken = setTokens[0];
       nextSetToken = setTokens[1];
 
-      const liquidator = fakeModuleAccount;
+      const liquidator = liquidatorMock.address;
       const failPeriod = ONE_DAY_IN_SECONDS;
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
@@ -267,70 +271,59 @@ contract('RebalancingSetState', accounts => {
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
-    // describe('when mint is called from Rebalance state', async () => {
-    //   beforeEach(async () => {
-    //     // Issue currentSetToken
-    //     await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
-    //     await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
+    describe('when mint is called from Rebalance state', async () => {
+      beforeEach(async () => {
+        // Issue currentSetToken
+        await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
+        await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
-    //     // Use issued currentSetToken to issue rebalancingSetToken
-    //     const rebalancingSetQuantityToIssue = ether(7);
-    //     await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+        // Use issued currentSetToken to issue rebalancingSetToken
+        const rebalancingSetQuantityToIssue = ether(7);
+        await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
-    //     await rebalancingHelper.defaultTransitionToRebalanceAsync(
-    //       coreMock,
-    //       rebalancingComponentWhiteList,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       constantAuctionPriceCurve.address,
-    //       managerAccount
-    //     );
-    //   });
+        const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+        await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
 
-    //    it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
+        await rebalancingHelper.transitionToRebalanceV2Async(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken,
+          managerAccount
+        );
+      });
 
-    //  describe('when mint is called from Drawdown State', async () => {
-    //   beforeEach(async () => {
-    //   // Issue currentSetToken
-    //   await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
-    //   await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
+       it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
 
-    //   // Use issued currentSetToken to issue rebalancingSetToken
-    //   const rebalancingSetQuantityToIssue = ether(7);
-    //   await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+     describe('when mint is called from Drawdown State', async () => {
+      beforeEach(async () => {
+        // Issue currentSetToken
+        await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+        await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
-    //     await rebalancingHelper.defaultTransitionToRebalanceAsync(
-    //       coreMock,
-    //       rebalancingComponentWhiteList,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       constantAuctionPriceCurve.address,
-    //       managerAccount
-    //     );
+        // Use issued currentSetToken to issue rebalancingSetToken
+        const rebalancingSetQuantityToIssue = ether(7);
+        await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
-    //     const defaultTimeToPivot = new BigNumber(100000);
-    //     await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
+        const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+        await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
 
+        await rebalancingHelper.transitionToDrawdownV2Async(
+          coreMock,
+          rebalancingSetToken,
+          rebalanceAuctionModule,
+          liquidatorMock,
+          nextSetToken,
+          managerAccount,
+        );
+      });
 
-    //     const [bidQuantity] = await rebalancingSetToken.getBiddingParameters.callAsync();
-    //     await rebalancingHelper.placeBidAsync(
-    //       rebalanceAuctionModule,
-    //       rebalancingSetToken.address,
-    //       bidQuantity,
-    //     );
-
-    //     await rebalancingHelper.endFailedRebalanceAsync(
-    //       rebalancingSetToken
-    //     );
-    //   });
-
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#burn: Called on Rebalancing Token', async () => {
@@ -349,7 +342,7 @@ contract('RebalancingSetState', accounts => {
       );
       currentSetToken = setTokens[0];
 
-      const liquidator = fakeModuleAccount;
+      const liquidator = liquidatorMock.address;
       const failPeriod = ONE_DAY_IN_SECONDS;
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
@@ -398,7 +391,7 @@ contract('RebalancingSetState', accounts => {
     let nextSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      await coreHelper.addModuleAsync(coreMock, fakeModuleAccount);
+      await coreHelper.addModuleAsync(coreMock, managerAccount);
 
       const setTokens = await rebalancingHelper.createSetTokensAsync(
         coreMock,
@@ -409,104 +402,7 @@ contract('RebalancingSetState', accounts => {
       currentSetToken = setTokens[0];
       nextSetToken = setTokens[1];
 
-      const liquidator = fakeModuleAccount;
-      const failPeriod = ONE_DAY_IN_SECONDS;
-
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
-        coreMock,
-        rebalancingFactory.address,
-        managerAccount,
-        liquidator,
-        currentSetToken.address,
-        proposalPeriod,
-        failPeriod,
-      );
-
-      const mintedQuantity = ether(5);
-      subjectBurner = deployerAccount,
-      subjectQuantity = ether(5);
-      subjectCaller = fakeModuleAccount;
-
-      // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(5), {from: deployerAccount});
-      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
-
-      // Use issued currentSetToken to issue rebalancingSetToken
-      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, mintedQuantity);
-    });
-
-    async function subject(): Promise<string> {
-      return rebalancingSetToken.burn.sendTransactionAsync(
-        subjectBurner,
-        subjectQuantity,
-        { from: subjectCaller, gas: DEFAULT_GAS}
-      );
-    }
-
-    it('should revert because its not called through core during non-Drawdown state', async () => {
-      await expectRevertError(subject());
-    });
-
-    // describe('when Module calls burn from Drawdown State', async () => {
-    //   beforeEach(async () => {
-    //     await rebalancingHelper.defaultTransitionToRebalanceAsync(
-    //       coreMock,
-    //       rebalancingComponentWhiteList,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       constantAuctionPriceCurve.address,
-    //       managerAccount
-    //     );
-
-    //     const defaultTimeToPivot = new BigNumber(100000);
-    //     await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
-
-    //     const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
-    //     const bidQuantity = biddingParameters[0];
-    //     await rebalancingHelper.placeBidAsync(
-    //       rebalanceAuctionModule,
-    //       rebalancingSetToken.address,
-    //       bidQuantity,
-    //     );
-
-    //     await rebalancingHelper.endFailedRebalanceAsync(
-    //       rebalancingSetToken
-    //     );
-    //   });
-
-    //   it('updates the totalSupply_ correctly', async () => {
-    //     const existingTokenSupply = await rebalancingSetToken.totalSupply.callAsync();
-
-    //     await subject();
-
-    //     const expectedTokenSupply = existingTokenSupply.sub(subjectQuantity);
-    //     const newTokenSupply = await rebalancingSetToken.totalSupply.callAsync();
-    //     expect(newTokenSupply).to.be.bignumber.equal(expectedTokenSupply);
-    //   });
-    // });
-  });
-
-  describe('#burn: Called from CoreMock', async () => {
-    let rebalancingSetToken: RebalancingSetTokenV2Contract;
-    let subjectBurner: Address;
-    let subjectQuantity: BigNumber;
-    let subjectCaller: Address;
-
-    let nextSetToken: SetTokenContract;
-    let currentSetToken: SetTokenContract;
-
-    beforeEach(async () => {
-      const setTokens = await rebalancingHelper.createSetTokensAsync(
-        coreMock,
-        factory.address,
-        transferProxy.address,
-        2
-      );
-      currentSetToken = setTokens[0];
-      nextSetToken = setTokens[1];
-
-      const liquidator = fakeModuleAccount;
+      const liquidator = liquidatorMock.address;
       const failPeriod = ONE_DAY_IN_SECONDS;
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
@@ -531,6 +427,94 @@ contract('RebalancingSetState', accounts => {
 
       // Use issued currentSetToken to issue rebalancingSetToken
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, mintedQuantity);
+
+      const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+      await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingSetToken.burn.sendTransactionAsync(
+        subjectBurner,
+        subjectQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('should revert because its not called through core during non-Drawdown state', async () => {
+      await expectRevertError(subject());
+    });
+
+    describe('when Module calls burn from Drawdown State', async () => {
+      beforeEach(async () => {
+        await rebalancingHelper.transitionToDrawdownV2Async(
+          coreMock,
+          rebalancingSetToken,
+          rebalanceAuctionModule,
+          liquidatorMock,
+          nextSetToken,
+          managerAccount,
+        );
+      });
+
+      it('updates the totalSupply_ correctly', async () => {
+        const existingTokenSupply = await rebalancingSetToken.totalSupply.callAsync();
+
+        await subject();
+
+        const expectedTokenSupply = existingTokenSupply.sub(subjectQuantity);
+        const newTokenSupply = await rebalancingSetToken.totalSupply.callAsync();
+        expect(newTokenSupply).to.be.bignumber.equal(expectedTokenSupply);
+      });
+    });
+  });
+
+  describe('#burn: Called from CoreMock', async () => {
+    let rebalancingSetToken: RebalancingSetTokenV2Contract;
+    let subjectBurner: Address;
+    let subjectQuantity: BigNumber;
+    let subjectCaller: Address;
+
+    let nextSetToken: SetTokenContract;
+    let currentSetToken: SetTokenContract;
+
+    beforeEach(async () => {
+      const setTokens = await rebalancingHelper.createSetTokensAsync(
+        coreMock,
+        factory.address,
+        transferProxy.address,
+        2
+      );
+      currentSetToken = setTokens[0];
+      nextSetToken = setTokens[1];
+
+      const liquidator = liquidatorMock.address;
+      const failPeriod = ONE_DAY_IN_SECONDS;
+
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
+        coreMock,
+        rebalancingFactory.address,
+        managerAccount,
+        liquidator,
+        currentSetToken.address,
+        proposalPeriod,
+        failPeriod,
+      );
+
+      const mintedQuantity = ether(5);
+      subjectBurner = deployerAccount,
+      subjectQuantity = ether(5);
+      subjectCaller = managerAccount;
+
+      // Issue currentSetToken
+      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(5), {from: deployerAccount});
+      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, mintedQuantity);
+
+      const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+      await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
     });
 
     async function subject(): Promise<string> {
@@ -585,62 +569,37 @@ contract('RebalancingSetState', accounts => {
       });
     });
 
-    // describe('when burn is called from Rebalance state', async () => {
-    //   beforeEach(async () => {
-    //     await rebalancingHelper.defaultTransitionToRebalanceAsync(
-    //       coreMock,
-    //       rebalancingComponentWhiteList,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       constantAuctionPriceCurve.address,
-    //       managerAccount
-    //     );
-    //   });
+    describe('when burn is called from Rebalance state', async () => {
+      beforeEach(async () => {
+        await rebalancingHelper.transitionToRebalanceV2Async(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken,
+          managerAccount
+        );
+      });
 
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
 
-    // describe('when Core calls burn from Drawdown State', async () => {
-    //   beforeEach(async () => {
-    //     // Issue currentSetToken
-    //     await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
-    //     await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
+    describe('when Core calls burn from Drawdown State', async () => {
+      beforeEach(async () => {
+        await rebalancingHelper.transitionToDrawdownV2Async(
+          coreMock,
+          rebalancingSetToken,
+          rebalanceAuctionModule,
+          liquidatorMock,
+          nextSetToken,
+          managerAccount,
+        );
+      });
 
-    //     // Use issued currentSetToken to issue rebalancingSetToken
-    //     const rebalancingSetQuantityToIssue = ether(7);
-    //     await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
-
-    //     await rebalancingHelper.defaultTransitionToRebalanceAsync(
-    //       coreMock,
-    //       rebalancingComponentWhiteList,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       constantAuctionPriceCurve.address,
-    //       managerAccount
-    //     );
-
-    //     const defaultTimeToPivot = new BigNumber(100000);
-    //     await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
-
-    //     const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
-    //     const bidQuantity = biddingParameters[0];
-    //     await rebalancingHelper.placeBidAsync(
-    //       rebalanceAuctionModule,
-    //       rebalancingSetToken.address,
-    //       bidQuantity,
-    //     );
-
-    //     await rebalancingHelper.endFailedRebalanceAsync(
-    //       rebalancingSetToken
-    //     );
-    //   });
-
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
 

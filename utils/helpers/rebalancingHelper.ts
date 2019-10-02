@@ -7,6 +7,7 @@ import {
   CoreContract,
   CoreMockContract,
   LinearAuctionPriceCurveContract,
+  LiquidatorMockContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
@@ -636,6 +637,36 @@ export class RebalancingHelper {
     // Transition to rebalance
     await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
     await rebalancingSetToken.startRebalance.sendTransactionAsync(
+      { from: caller, gas: DEFAULT_GAS }
+    );
+  }
+
+  public async transitionToDrawdownV2Async(
+    core: CoreLikeContract,
+    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    rebalanceAuctionModule: RebalanceAuctionModuleContract,
+    liquidatorMock: LiquidatorMockContract,
+    nextSetToken: SetTokenContract,
+    manager: Address,
+    caller: Address = this._tokenOwnerAddress,
+  ): Promise<void> {
+    await this.transitionToRebalanceV2Async(
+      core,
+      rebalancingSetToken,
+      nextSetToken,
+      manager
+    );
+
+    const minimumBid = await liquidatorMock.minimumBid.callAsync();
+    await this.placeBidAsync(
+      rebalanceAuctionModule,
+      rebalancingSetToken.address,
+      minimumBid,
+    );
+
+    // Transition to rebalance
+    await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
+    await rebalancingSetToken.endFailedRebalance.sendTransactionAsync(
       { from: caller, gas: DEFAULT_GAS }
     );
   }

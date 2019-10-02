@@ -48,7 +48,6 @@ contract FailRebalance is
      */
     function validateFailRebalance()
         internal
-        view
     {
         // Token must be in Rebalance State
         require(
@@ -117,7 +116,7 @@ contract FailRebalance is
         internal
     {
         if (_newRebalanceState ==  RebalancingLibrary.State.Default) {
-            (uint256 issueQuantity) = calculateNextSetIssueQuantity();
+            (uint256 issueQuantity, ) = calculateNextSetIssueQuantity();
 
             // If bid not placed, reissue current Set
             core.issueInVault(

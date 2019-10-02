@@ -20,6 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./RebalancingSetState.sol";
@@ -27,16 +28,17 @@ import { SettleRebalance } from "./SettleRebalance.sol";
 
 
 /**
- * @title FailAuction
+ * @title FailRebalance
  * @author Set Protocol
  *
  * Default implementation of Rebalancing Set Token propose function
  */
-contract FailAuction is 
+contract FailRebalance is 
     RebalancingSetState,
     SettleRebalance
 {
     using SafeMath for uint256;
+    using AddressArrayUtils for address[];
 
     /* ============ Internal Functions ============ */
 
@@ -51,28 +53,24 @@ contract FailAuction is
         // Token must be in Rebalance State
         require(
             rebalanceState ==  RebalancingLibrary.State.Rebalance,
-            "RebalanceAuctionModule.endFailedAuction: Rebalancing Set Token must be in Rebalance State"
+            "FailRebalance: Rebalancing Set Token must be in Rebalance State"
+        );
+
+        bool triggersBreached = failTriggersBreached();
+        require(
+            failTriggersBreached(),
+            "FailRebalance: Fail triggers have not been breached"
         );
     }
 
     function handleFailedRebalance()
         internal
     {
-        bool triggersBreached = failTriggersBreached();
-
-        (
-            uint256 issueAmount,
-            uint256 calculatedUnitShares
-        ) = calculateNextSetIssueQuantity();
-
         // Fail auction and either reset to Default state or kill Rebalancing Set Token and enter Drawdown
         // state
-        RebalancingLibrary.State newRebalanceState = getNewRebalanceState(
-            triggersBreached,
-            calculatedUnitShares
-        );
+        RebalancingLibrary.State newRebalanceState = getNewRebalanceState();
 
-        reissueSetIfRevertToDefault(newRebalanceState, issueAmount);
+        reissueSetIfRevertToDefault(newRebalanceState);
 
         setWithdrawComponentsIfDrawdown(newRebalanceState);
 
@@ -106,52 +104,25 @@ contract FailAuction is
         return block.timestamp >= rebalanceFailTime;
     }
 
-
-
-    function getNewRebalanceState(
-        bool _auctionFailed,
-        uint256 _calculatedUnitShares
-    )
+    function getNewRebalanceState()
         internal
         returns (RebalancingLibrary.State)
     {
-        RebalancingLibrary.State newRebalanceState;
-        /**
-         * If not enough sets have been bid on then allow auction to fail where no bids being registered
-         * returns the rebalancing set token to pre-auction state and some bids being registered puts the
-         * rebalancing set token in Drawdown mode.
-         *
-         * However, if enough sets have been bid on. Then allow auction to fail and enter Drawdown state if
-         * and only if the calculated post-auction unitShares is equal to 0.
-         */
-        if (_auctionFailed) {
-            newRebalanceState = hasBidded ? RebalancingLibrary.State.Drawdown : RebalancingLibrary.State.Default;
-        } else {
-            // If settleRebalance can be called then endFailedAuction can't be unless calculatedUnitShares
-            // equals 0
-            require(
-                _calculatedUnitShares == 0,
-                "RebalancingSetToken.endFailedAuction: Cannot be called if rebalance is viably completed"
-            );
-
-            // If calculated unitShares equals 0 set to Drawdown state
-            newRebalanceState = RebalancingLibrary.State.Drawdown;
-        }
-
-        return newRebalanceState;
+        return hasBidded ? RebalancingLibrary.State.Drawdown : RebalancingLibrary.State.Default;
     }
 
     function reissueSetIfRevertToDefault(
-        RebalancingLibrary.State _newRebalanceState,
-        uint256 _issueQuantity
+        RebalancingLibrary.State _newRebalanceState
     )
         internal
     {
         if (_newRebalanceState ==  RebalancingLibrary.State.Default) {
+            (uint256 issueQuantity) = calculateNextSetIssueQuantity();
+
             // If bid not placed, reissue current Set
             core.issueInVault(
                 address(currentSet),
-                _issueQuantity
+                issueQuantity
             );
         }
     }
@@ -162,9 +133,10 @@ contract FailAuction is
         internal
     {
         if (_newRebalanceState ==  RebalancingLibrary.State.Drawdown) {
-            // TODO: Set drawdown components and calculate it
-            // Save combined token arrays to failedAuctionWithdrawComponents
-            // failedAuctionWithdrawComponents = [];
+            address[] memory currentSetComponents = currentSet.getComponents();
+            address[] memory nextSetComponents = nextSet.getComponents();
+
+            failedRebalanceComponents = currentSetComponents.union(nextSetComponents);
         }
     }
 

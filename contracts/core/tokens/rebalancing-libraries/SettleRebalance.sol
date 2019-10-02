@@ -117,8 +117,9 @@ contract SettleRebalance is
         uint256 maxIssueAmount = calculateMaxIssueAmount(nextSetToken);
 
         // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding
+        uint256 rebalancingSetTotalSupply = totalSupply();
         uint256 rebalancingSetNaturalUnit = naturalUnit;
-        uint256 naturalUnitsOutstanding = totalSupply().div(rebalancingSetNaturalUnit);
+        uint256 naturalUnitsOutstanding = rebalancingSetTotalSupply.div(rebalancingSetNaturalUnit);
 
         // Issue amount of Sets that is closest multiple of nextNaturalUnit to the maxIssueAmount
         // Since the initial division will round down to the nearest whole number when we multiply

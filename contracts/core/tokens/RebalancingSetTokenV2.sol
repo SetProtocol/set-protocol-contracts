@@ -33,7 +33,7 @@ import { BackwardsCompatability } from "./rebalancing-libraries/BackwardsCompata
 import { PlaceBid } from "./rebalancing-libraries/PlaceBid.sol";
 import { Propose } from "./rebalancing-libraries/Propose.sol";
 import { StartRebalance } from "./rebalancing-libraries/StartRebalance.sol";
-import { FailAuction } from "./rebalancing-libraries/FailAuction.sol";
+import { FailRebalance } from "./rebalancing-libraries/FailRebalance.sol";
 import { SettleRebalance } from "./rebalancing-libraries/SettleRebalance.sol";
 
 
@@ -53,7 +53,7 @@ contract RebalancingSetTokenV2 is
     Issuance,
     PlaceBid,
     SettleRebalance,
-    FailAuction
+    FailRebalance
 {
 
     /* ============ Constructor ============ */

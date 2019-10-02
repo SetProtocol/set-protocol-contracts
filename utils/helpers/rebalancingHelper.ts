@@ -855,6 +855,51 @@ export class RebalancingHelper {
     };
   }
 
+  public async getNextSetIssueQuantity(
+    nextSetToken: SetTokenContract,
+    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    vault: VaultContract,
+  ): Promise<BigNumber> {
+    // Calculate max Set issue amount
+    const maxIssueAmount = await this.calculateMaxIssueAmount(
+      nextSetToken,
+      rebalancingSetToken,
+      vault,
+    );
+
+    const nextSetTokenNaturalUnit = await nextSetToken.naturalUnit.callAsync();
+
+    return maxIssueAmount.div(nextSetTokenNaturalUnit);
+  }
+
+  public async calculateMaxIssueAmount(
+    nextSetToken: SetTokenContract,
+    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    vault: VaultContract,
+  ): Promise<BigNumber> {
+    // Start with a big number
+    let maxIssueAmount = UNLIMITED_ALLOWANCE_IN_BASE_UNITS;
+
+    const naturalUnit = await nextSetToken.naturalUnit.callAsync();
+    const components = await nextSetToken.getComponents.callAsync();
+    const units = await nextSetToken.getUnits.callAsync();
+
+    for (var i = 0; i < components.length; i++) {
+      const componentVaultBalance = await vault.getOwnerBalance.callAsync(
+        rebalancingSetToken.address,
+        components[i],
+      );
+
+      const impliedIssueAmount = componentVaultBalance.div(units[i]).mul(naturalUnit);
+
+      if (impliedIssueAmount.lt(maxIssueAmount)) {
+        maxIssueAmount = impliedIssueAmount;
+      }
+    }
+
+    return maxIssueAmount;
+  }
+
   public async getExpectedGeneralAuctionParameters(
     tokenOnePrice: BigNumber,
     tokenTwoPrice: BigNumber,

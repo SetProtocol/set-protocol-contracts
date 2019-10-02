@@ -187,7 +187,7 @@ contract('SettleRebalance', accounts => {
 
     describe('when settleRebalance is called from Proposal State', async () => {
       beforeEach(async () => {
-        await rebalancingHelper.transitionToRebalanceV2Async(
+        await rebalancingHelper.transitionToProposeV2Async(
           coreMock,
           rebalancingSetToken,
           nextSetToken,

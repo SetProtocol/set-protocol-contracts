@@ -40,19 +40,14 @@ const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
-const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
 contract('BackwardsCompatability', accounts => {
   const [
     deployerAccount,
     managerAccount,
-    otherAccount,
-    fakeTokenAccount,
-    fakeModuleAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -114,7 +109,6 @@ contract('BackwardsCompatability', accounts => {
   });
 
   describe('#getFailedAuctionWithdrawComponents', async () => {
-    let subjectCaller: Address;
 
     beforeEach(async () => {
       components = await erc20Helper.deployTokensAsync(1, deployerAccount);
@@ -140,8 +134,6 @@ contract('BackwardsCompatability', accounts => {
         rebalanceInterval,
         failPeriod,
       );
-
-      subjectCaller = managerAccount;
     });
 
     async function subject(): Promise<Address[]> {
@@ -157,8 +149,6 @@ contract('BackwardsCompatability', accounts => {
   });
 
   describe('#getBiddingParameters', async () => {
-    let subjectCaller: Address;
-
     beforeEach(async () => {
       components = await erc20Helper.deployTokensAsync(1, deployerAccount);
 

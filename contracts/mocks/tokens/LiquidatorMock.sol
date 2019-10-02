@@ -35,10 +35,12 @@ contract LiquidatorMock
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
 
+    uint256 constant public priceDivisor = 1000;
+
     ISetToken public currentSet;
     ISetToken public nextSet;
 
-    uint256 public priceDivisor;
+    
     uint256 public minimumBid;
 
     uint256 public startRebalanceTime;
@@ -55,6 +57,8 @@ contract LiquidatorMock
     uint256 public placeBidQuantity;
 
     bool public hasSettled;
+    bool public hasFailed;
+    bool public endFailedRebalanceHasBeenCalled;
 
     /* ============ External Functions ============ */
 
@@ -135,9 +139,20 @@ contract LiquidatorMock
         hasSettled = true;
     }
 
-    // function endFailedRebalance()
-    //     external
-    //     returns (bool);
+    function setHasFailed(bool _hasFailed)
+        external
+    {
+        hasFailed = _hasFailed;
+    }
+
+    function endFailedRebalance()
+        external
+        returns (bool)
+    {
+        endFailedRebalanceHasBeenCalled = true;
+
+        return hasFailed;
+    }
 
     function getCombinedTokenArray()
         external

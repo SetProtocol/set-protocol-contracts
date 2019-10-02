@@ -29,6 +29,7 @@ import { IWhiteList } from "../interfaces/IWhiteList.sol";
 import { RebalancingSetState } from "./rebalancing-libraries/RebalancingSetState.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 import { Issuance } from "./rebalancing-libraries/Issuance.sol";
+import { BackwardsCompatability } from "./rebalancing-libraries/BackwardsCompatability.sol";
 import { PlaceBid } from "./rebalancing-libraries/PlaceBid.sol";
 import { Propose } from "./rebalancing-libraries/Propose.sol";
 import { StartRebalance } from "./rebalancing-libraries/StartRebalance.sol";
@@ -46,6 +47,7 @@ contract RebalancingSetTokenV2 is
     ERC20,
     ERC20Detailed,
     RebalancingSetState,
+    BackwardsCompatability,
     Propose,
     StartRebalance,
     Issuance,
@@ -156,11 +158,11 @@ contract RebalancingSetTokenV2 is
     {
         validateSettleRebalance();
 
-        issueNextSet();
+        uint256 newUnitShares = issueNextSet();
 
         liquidatorSettleRebalance();
 
-        transitionToDefault();
+        transitionToDefault(newUnitShares);
     }
 
     /*

@@ -147,11 +147,11 @@ contract RebalancingSetState {
     }
 
     /*
-     * Get failedRebalanceComponents of Rebalancing Set
+     * Get failedAuctionWithdrawComponents of Rebalancing Set
      *
      * @return  failedRebalanceComponents
      */
-    function getFailedAuctionWithdrawComponents()
+    function getFailedRebalanceComponents()
         external
         view
         returns (address[] memory)

@@ -16,6 +16,7 @@
 
 pragma solidity 0.5.7;
 
+import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";
@@ -37,9 +38,12 @@ contract LiquidatorMock
     ISetToken public currentSet;
     ISetToken public nextSet;
 
+    uint256 public priceDivisor;
+    uint256 public minimumBid;
+
     uint256 public startRebalanceTime;
     uint256 public startingCurrentSetQuantity;
-    uint256 public remainingCurrentSetQuantity;
+    uint256 public remainingCurrentSets;
 
     address public startRebalanceCurrentSet;
     address public startRebalanceNextSet;
@@ -49,6 +53,8 @@ contract LiquidatorMock
     uint256[] public combinedNextSetUnits;
 
     uint256 public placeBidQuantity;
+
+    bool public hasSettled;
 
     /* ============ External Functions ============ */
 
@@ -88,7 +94,7 @@ contract LiquidatorMock
         placeBidQuantity = _quantity;
 
         // Subtract remaining Sets
-        remainingCurrentSetQuantity = remainingCurrentSetQuantity.sub(_quantity);
+        remainingCurrentSets = remainingCurrentSets.sub(_quantity);
 
         // Inflow = quantity (currentSet) * units / naturalUnit
         uint256[] memory inflowUnits = getTransferValues(nextSet, _quantity, combinedNextSetUnits);
@@ -110,7 +116,9 @@ contract LiquidatorMock
     {
         startRebalanceTime = block.timestamp;
         startingCurrentSetQuantity = _startingCurrentSetQuantity;
-        remainingCurrentSetQuantity = startingCurrentSetQuantity;
+        remainingCurrentSets = startingCurrentSetQuantity;
+
+        minimumBid = calculateMinimumBid(currentSet, nextSet);
 
         // Set the combined token array
         address[] memory currentSetComponents = _currentSet.getComponents();
@@ -121,8 +129,11 @@ contract LiquidatorMock
         combinedNextSetUnits = getCombinedUnitsArray(_nextSet, combinedTokenArray);
     }
 
-    // function settleRebalance()
-    //     external;
+    function settleRebalance()
+        external
+    {
+        hasSettled = true;
+    }
 
     // function endFailedRebalance()
     //     external
@@ -190,5 +201,22 @@ contract LiquidatorMock
         }
 
         return transferValues;
+    }
+
+    function calculateMinimumBid(
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        private
+        view
+        returns (uint256)
+    {
+        uint256 currentSetNaturalUnit = _currentSet.naturalUnit();
+        uint256 nextSetNaturalUnit = _nextSet.naturalUnit();
+
+        return Math.max(
+            currentSetNaturalUnit.mul(priceDivisor),
+            nextSetNaturalUnit.mul(priceDivisor)
+        );
     }
 }

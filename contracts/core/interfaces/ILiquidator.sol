@@ -60,4 +60,14 @@ interface ILiquidator {
     function endFailedRebalance()
         external
         returns (bool);
+
+    function minimumBid()
+        external
+        view
+        returns (uint256);
+
+    function remainingCurrentSets()
+        external
+        view
+        returns (uint256);
 }

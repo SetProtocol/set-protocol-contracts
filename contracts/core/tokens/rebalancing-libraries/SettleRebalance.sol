@@ -54,6 +54,7 @@ contract SettleRebalance is
 
     function issueNextSet()
         internal
+        returns(uint256)
     {
         // Calculate next Set quantities
         uint256 issueAmount;
@@ -73,6 +74,8 @@ contract SettleRebalance is
             address(nextSet),
             issueAmount
         );
+
+        return nextUnitShares;
     }
 
     function liquidatorSettleRebalance()
@@ -82,10 +85,13 @@ contract SettleRebalance is
     }
 
 
-    function transitionToDefault()
+    function transitionToDefault(
+        uint256 _newUnitShares
+    )
         internal
     {
         // Update other state parameters
+        unitShares = _newUnitShares;
         currentSet = nextSet;
         lastRebalanceTimestamp = block.timestamp;
         rebalanceState = RebalancingLibrary.State.Default;
@@ -111,7 +117,8 @@ contract SettleRebalance is
         uint256 maxIssueAmount = calculateMaxIssueAmount(nextSetToken);
 
         // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding
-        uint256 naturalUnitsOutstanding = totalSupply().div(naturalUnit);
+        uint256 rebalancingSetNaturalUnit = naturalUnit;
+        uint256 naturalUnitsOutstanding = totalSupply().div(rebalancingSetNaturalUnit);
 
         // Issue amount of Sets that is closest multiple of nextNaturalUnit to the maxIssueAmount
         // Since the initial division will round down to the nearest whole number when we multiply

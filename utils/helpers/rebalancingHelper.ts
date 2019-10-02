@@ -732,7 +732,7 @@ export class RebalancingHelper {
 
   public async getExpectedUnitSharesAndIssueAmount(
     core: CoreMockContract,
-    rebalancingSetToken: RebalancingSetTokenContract,
+    rebalancingSetToken: (RebalancingSetTokenContract | RebalancingSetTokenV2Contract),
     newSet: SetTokenContract,
     vault: VaultContract
   ): Promise<any> {

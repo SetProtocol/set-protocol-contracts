@@ -4850,9 +4850,10 @@ set-immediate-shim@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz#4b2b1b27eb808a9f8dcc481a58e5e56f599f3f61"
 
-set-protocol-utils@^1.0.0-beta.32:
-  version "1.0.0-beta.32"
-  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-1.0.0-beta.32.tgz#8f4d630987655a1b67fb5bf302d8a5789109b166"
+set-protocol-utils@^1.0.0-beta.40:
+  version "1.0.0-beta.40"
+  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-1.0.0-beta.40.tgz#8023ce4d5d0493899f170c97c5e6890deffe96e6"
+  integrity sha512-mOTB6D5Tszl9VK2yoP1HzihjIMVaTCpQ0WexLY62I3AOmwfO2L1aY95bM802zHqkwK0N0sKKlWoB+tPq0QwZ2Q==
   dependencies:
     "@0xproject/base-contract" "^1.0.4"
     "@0xproject/order-utils" "^1.0.1"

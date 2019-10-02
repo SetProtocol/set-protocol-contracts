@@ -26,6 +26,7 @@ import { ether } from '@utils/units';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
+  ZERO,
 } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
@@ -353,6 +354,129 @@ contract('FailRebalance', accounts => {
         });
       });
     });
+  });
+
+  describe('#RebalanceAuctionModule.redeemFromFailedRebalance', async () => {
+    let subjectCaller: Address;
+
+    let proposalPeriod: BigNumber;
+
+    let nextSetToken: SetTokenContract;
+    let currentSetToken: SetTokenContract;
+
+    let baseSetQuantityToIssue: BigNumber;
+    let rebalancingSetQuantityToIssue: BigNumber = ether(7);
+    let setTokenNaturalUnits: BigNumber[];
+    let rebalancingSetUnitShares: BigNumber;
+    let currentSetIssueQuantity: BigNumber;
+
+    beforeEach(async () => {
+      const setTokensToDeploy = 2;
+      const setTokens = await rebalancingHelper.createSetTokensAsync(
+        coreMock,
+        factory.address,
+        transferProxy.address,
+        setTokensToDeploy,
+        undefined || setTokenNaturalUnits
+      );
+
+      currentSetToken = setTokens[0];
+      nextSetToken = setTokens[1];
+
+      const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+      await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
+
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      const failPeriod = ONE_DAY_IN_SECONDS;
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
+        coreMock,
+        rebalancingFactory.address,
+        managerAccount,
+        liquidatorMock.address,
+        currentSetToken.address,
+        proposalPeriod,
+        failPeriod,
+      );
+
+      // Issue currentSetToken
+      currentSetIssueQuantity = ether(8);
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        currentSetIssueQuantity,
+        {from: deployerAccount}
+      );
+      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      rebalancingSetQuantityToIssue = ether(7);
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+
+      await rebalancingHelper.transitionToDrawdownV2Async(
+        coreMock,
+        rebalancingSetToken,
+        rebalanceAuctionModule,
+        liquidatorMock,
+        nextSetToken,
+        managerAccount,
+      );      
+
+      subjectCaller = deployerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return rebalanceAuctionModule.redeemFromFailedRebalance.sendTransactionAsync(
+        rebalancingSetToken.address,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('transfers the correct amount of tokens to the bidder in the Vault', async () => {
+      const currentSetComponents = await currentSetToken.getComponents.callAsync();
+      const nextSetComponents = await nextSetToken.getComponents.callAsync();
+
+      const combinedTokenArray = _.union(currentSetComponents, nextSetComponents);
+
+      const receiverTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
+      const setTotalSupply = await rebalancingSetToken.totalSupply.callAsync();
+
+      const collateralBalances = await coreHelper.getVaultBalancesForTokensForOwner(
+        combinedTokenArray,
+        vault,
+        rebalancingSetToken.address
+      );
+
+      const oldReceiverVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
+        combinedTokenArray,
+        vault,
+        deployerAccount
+      );
+
+      await subject();
+
+      const newReceiverVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
+        combinedTokenArray,
+        vault,
+        deployerAccount
+      );
+      const expectedReceiverBalances = _.map(collateralBalances, (balance, index) =>
+        oldReceiverVaultBalances[index].add(
+          balance.mul(receiverTokenBalance).div(setTotalSupply).round(0, 3)
+        )
+      );
+
+      expect(JSON.stringify(newReceiverVaultBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
+    });
+
+    it("zeros out the caller's balance", async () => {
+      const currentBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
+      expect(currentBalance).to.be.bignumber.not.equal(ZERO);
+
+      await subject();
+
+      const newBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
+      expect(newBalance).to.be.bignumber.equal(ZERO);
+    });
+
   });
 
 });

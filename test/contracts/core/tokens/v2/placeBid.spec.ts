@@ -13,6 +13,7 @@ import {
   CoreMockContract,
   SetTokenContract,
   LiquidatorMockContract,
+  PlaceBidMockContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
@@ -26,6 +27,7 @@ import { ether } from '@utils/units';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
+  ZERO,
 } from '@utils/constants';
 import {
   getExpectedRebalanceStartedLog,
@@ -37,6 +39,7 @@ import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -48,7 +51,7 @@ const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
-contract('StartRebalance', accounts => {
+contract('PlaceBid', accounts => {
   const [
     deployerAccount,
     managerAccount,
@@ -65,6 +68,7 @@ contract('StartRebalance', accounts => {
   let rebalancingFactory: RebalancingSetTokenV2FactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorMock: LiquidatorMockContract;
+  let placeBidMock: PlaceBidMockContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -75,6 +79,14 @@ contract('StartRebalance', accounts => {
     blockchain
   );
   const liquidatorHelper = new LiquidatorHelper(deployerAccount);
+  const libraryMockHelper = new LibraryMockHelper(deployerAccount);
+
+  let currentSetToken: SetTokenContract;
+  let nextSetToken: SetTokenContract;
+  let rebalancingSetQuantityToIssue: BigNumber;
+  let setTokenNaturalUnits: BigNumber[];
+
+  let startingCurrentSetAmount: BigNumber;
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -104,80 +116,81 @@ contract('StartRebalance', accounts => {
     await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
 
     liquidatorMock = await liquidatorHelper.deployLiquidatorMock();
+    placeBidMock = await libraryMockHelper.deployPlaceBidMockAsync();
+
+    const setTokensToDeploy = 2;
+    const setTokens = await rebalancingHelper.createSetTokensAsync(
+      coreMock,
+      factory.address,
+      transferProxy.address,
+      setTokensToDeploy,
+      undefined || setTokenNaturalUnits
+    );
+
+    currentSetToken = setTokens[0];
+    nextSetToken = setTokens[1];
+
+    const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+    await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
+
+    const proposalPeriod = ONE_DAY_IN_SECONDS;
+    const failPeriod = ONE_DAY_IN_SECONDS;
+    rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
+      coreMock,
+      rebalancingFactory.address,
+      managerAccount,
+      liquidatorMock.address,
+      currentSetToken.address,
+      proposalPeriod,
+      failPeriod,
+    );
+
+    // Issue currentSetToken
+    await coreMock.issue.sendTransactionAsync(
+      currentSetToken.address,
+      ether(8),
+      {from: deployerAccount}
+    );
+    await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+    // Use issued currentSetToken to issue rebalancingSetToken
+    rebalancingSetQuantityToIssue = ether(7);
+    await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
   });
 
   afterEach(async () => {
     blockchain.revertAsync();
   });
 
-  describe('#settleRebalance', async () => {
+  describe('#PlaceBid', async () => {
     let subjectCaller: Address;
-
-    let proposalPeriod: BigNumber;
-
-    let nextSetToken: SetTokenContract;
-    let currentSetToken: SetTokenContract;
-
-    let baseSetQuantityToIssue: BigNumber;
-    let rebalancingSetQuantityToIssue: BigNumber = ether(7);
-    let setTokenNaturalUnits: BigNumber[];
-    let rebalancingSetUnitShares: BigNumber;
+    let subjectBidQuantity: BigNumber;
 
     beforeEach(async () => {
-      const setTokensToDeploy = 2;
-      const setTokens = await rebalancingHelper.createSetTokensAsync(
-        coreMock,
-        factory.address,
-        transferProxy.address,
-        setTokensToDeploy,
-        undefined || setTokenNaturalUnits,
-      );
-      currentSetToken = setTokens[0];
-      nextSetToken = setTokens[1];
-
-      proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
-        coreMock,
-        rebalancingFactory.address,
-        managerAccount,
-        currentSetToken.address,
-        proposalPeriod,
-        undefined || rebalancingSetUnitShares,
-      );
-
-      // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(
-        currentSetToken.address,
-        baseSetQuantityToIssue || ether(9),
-        {from: deployerAccount},
-      );
-      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
-
-      // Use issued currentSetToken to issue rebalancingSetToken
-      await coreMock.issue.sendTransactionAsync(
-        rebalancingSetToken.address,
-        rebalancingSetQuantityToIssue,
-        {from: deployerAccount}
-      );
+      subjectBidQuantity = rebalancingSetQuantityToIssue;
 
       subjectCaller = managerAccount;
+
+      // Add caller as a module
+      await coreHelper.addModuleAsync(coreMock, subjectCaller);
     });
 
     async function subject(): Promise<string> {
-      return rebalancingSetToken.settleRebalance.sendTransactionAsync(
+      return rebalancingSetToken.placeBid.sendTransactionAsync(
+        subjectBidQuantity,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
 
-    describe('when settleRebalance is called from Default State', async () => {
+    describe('when placeBid is called from Default State', async () => {
       it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe('when settleRebalance is called from Proposal State', async () => {
+    describe('when placeBid is called from Proposal State', async () => {
       beforeEach(async () => {
-        await rebalancingHelper.defaultTransitionToProposeV2Async(
+        await rebalancingHelper.transitionToProposeV2Async(
           coreMock,
           rebalancingSetToken,
           nextSetToken,
@@ -190,241 +203,167 @@ contract('StartRebalance', accounts => {
       });
     });
 
-    describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
+    describe('when placeBid is called from Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingHelper.defaultTransitionToRebalanceAsync(
+        await rebalancingHelper.transitionToRebalanceV2Async(
           coreMock,
-          rebalancingComponentWhiteList,
           rebalancingSetToken,
           nextSetToken,
-          constantAuctionPriceCurve.address,
           managerAccount
-        );
-
-        const bidQuantity = rebalancingSetQuantityToIssue;
-        await rebalancingHelper.placeBidAsync(
-          rebalanceAuctionModule,
-          rebalancingSetToken.address,
-          bidQuantity,
         );
       });
 
-      // it('updates the rebalanceState to Default', async () => {
-      //   await subject();
+      it('should update hasBidded to true', async () => {
+        await subject();
 
-      //   const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
-      //   expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
-      // });
+        const hasBidded = await rebalancingSetToken.hasBidded.callAsync();
+        expect(hasBidded).to.equal(true);
+      });
 
-      // it('updates the currentSet to rebalancing set', async () => {
-      //   await subject();
+      it('should send the correct bidQuantity to the liquidator', async () => {
+        await subject();
 
-      //   const newCurrentSet = await rebalancingSetToken.currentSet.callAsync();
-      //   expect(newCurrentSet).to.equal(nextSetToken.address);
-      // });
+        const liquidatorPlaceBidQuantity = await liquidatorMock.placeBidQuantity.callAsync();
+        expect(liquidatorPlaceBidQuantity).to.bignumber.equal(subjectBidQuantity);
+      });
 
-      // it('issues the nextSet to the rebalancingSetToken', async () => {
-      //   const existingBalance = await vault.balances.callAsync(
-      //     nextSetToken.address,
-      //     rebalancingSetToken.address
-      //   );
-      //   const settlementAmounts = await rebalancingHelper.getExpectedUnitSharesAndIssueAmount(
-      //     coreMock,
-      //     rebalancingSetToken,
-      //     nextSetToken,
-      //     vault
-      //   );
+      describe('when a bid has already been made', async () => {
+        beforeEach(async () => {
+          await rebalancingSetToken.placeBid.sendTransactionAsync(
+            subjectBidQuantity.div(2),
+            { from: subjectCaller, gas: DEFAULT_GAS}
+          );
 
-      //   await subject();
+          subjectBidQuantity = subjectBidQuantity.div(2);
+        });
 
-      //   const expectedBalance = existingBalance.add(settlementAmounts['issueAmount']);
-      //   const newBalance = await vault.balances.callAsync(nextSetToken.address, rebalancingSetToken.address);
-      //   expect(newBalance).to.be.bignumber.equal(expectedBalance);
-      // });
+        it('should not make any modifications to hasBidded', async () => {
+          await subject();
 
-      // it('decrements component balance for the rebalancingSetToken by the correct amount', async () => {
-      //   const componentAddresses = await nextSetToken.getComponents.callAsync();
-      //   const setNaturalUnit = await nextSetToken.naturalUnit.callAsync();
-      //   const setComponentUnits = await nextSetToken.getUnits.callAsync();
+          const hasBidded = await rebalancingSetToken.hasBidded.callAsync();
+          expect(hasBidded).to.equal(true);
+        });
+      });
 
-      //   const existingVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
-      //     componentAddresses,
-      //     vault,
-      //     rebalancingSetToken.address
-      //   );
+      describe('when the caller is not a module', async () => {
+        beforeEach(async () => {
+          subjectCaller = otherAccount;
+        });
 
-      //   const settlementAmounts = await rebalancingHelper.getExpectedUnitSharesAndIssueAmount(
-      //     coreMock,
-      //     rebalancingSetToken,
-      //     nextSetToken,
-      //     vault
-      //   );
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
 
-      //   await subject();
+      describe('when the quantity is 0', async () => {
+        beforeEach(async () => {
+          subjectBidQuantity = ZERO;
+        });
 
-      //   const quantityToIssue = settlementAmounts['issueAmount'];
-      //   const expectedVaultBalances: BigNumber[] = [];
-      //   setComponentUnits.forEach((component, idx) => {
-      //     const requiredQuantityToIssue = quantityToIssue.div(setNaturalUnit).mul(component);
-      //     expectedVaultBalances.push(existingVaultBalances[idx].sub(requiredQuantityToIssue));
-      //   });
-
-      //   const newVaultBalances = await coreHelper.getVaultBalancesForTokensForOwner(
-      //     componentAddresses,
-      //     vault,
-      //     rebalancingSetToken.address
-      //   );
-      //   expect(JSON.stringify(newVaultBalances)).to.equal(JSON.stringify(expectedVaultBalances));
-      // });
-
-      // it('updates the unitShares amount correctly', async () => {
-      //   const settlementAmounts = await rebalancingHelper.getExpectedUnitSharesAndIssueAmount(
-      //     coreMock,
-      //     rebalancingSetToken,
-      //     nextSetToken,
-      //     vault
-      //   );
-
-      //   await subject();
-
-      //   const newUnitShares = await rebalancingSetToken.unitShares.callAsync();
-      //   expect(newUnitShares).to.be.bignumber.equal(settlementAmounts['unitShares']);
-      // });
-
-      // it('clears the nextSet variable', async () => {
-      //   await subject();
-
-      //   const nextSet = await rebalancingSetToken.nextSet.callAsync();
-      //   const expectedNextSet = 0;
-
-      //   expect(nextSet).to.be.bignumber.equal(expectedNextSet);
-      // });
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
     });
-
-    // describe('when settleRebalance is called and there are more than minimumBid amount of sets left', async () => {
-    //   beforeEach(async () => {
-    //     await rebalancingHelper.defaultTransitionToRebalanceAsync(
-    //       coreMock,
-    //       rebalancingComponentWhiteList,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       constantAuctionPriceCurve.address,
-    //       managerAccount
-    //     );
-    //   });
-
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
-
-    // describe("when settleRebalance is called but issuable amount is less than nextSet's natural unit", async () => {
-    //   before(async () => {
-    //     setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
-    //   });
-
-    //   after(async () => {
-    //     setTokenNaturalUnits = undefined;
-    //   });
-
-    //   beforeEach(async () => {
-    //     await rebalancingHelper.defaultTransitionToRebalanceAsync(
-    //       coreMock,
-    //       rebalancingComponentWhiteList,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       constantAuctionPriceCurve.address,
-    //       managerAccount
-    //     );
-
-    //     const newPrice = new BigNumber(8 * 10 ** 7);
-    //     await constantAuctionPriceCurve.updatePrice.sendTransactionAsync(newPrice);
-
-    //     const bidQuantity = rebalancingSetQuantityToIssue;
-    //     await rebalancingHelper.placeBidAsync(
-    //       rebalanceAuctionModule,
-    //       rebalancingSetToken.address,
-    //       bidQuantity,
-    //     );
-    //   });
-
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
-
-    // describe('when settleRebalance is called but unitShares is 0', async () => {
-    //   before(async () => {
-    //     rebalancingSetUnitShares = new BigNumber(1);
-    //     setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
-    //     baseSetQuantityToIssue = new BigNumber(10 ** 27);
-    //     rebalancingSetQuantityToIssue = new BigNumber(10 ** 27);
-    //   });
-
-    //   after(async () => {
-    //     rebalancingSetUnitShares = undefined;
-    //     setTokenNaturalUnits = undefined;
-    //     baseSetQuantityToIssue = undefined;
-    //     rebalancingSetQuantityToIssue = ether(7);
-    //   });
-
-    //   beforeEach(async () => {
-    //     await rebalancingHelper.defaultTransitionToRebalanceAsync(
-    //       coreMock,
-    //       rebalancingComponentWhiteList,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       constantAuctionPriceCurve.address,
-    //       managerAccount
-    //     );
-
-    //     const newPrice = new BigNumber(1001);
-    //     await constantAuctionPriceCurve.updatePrice.sendTransactionAsync(newPrice);
-
-    //     const bidQuantity = rebalancingSetQuantityToIssue.div(10 ** 10);
-    //     await rebalancingHelper.placeBidAsync(
-    //       rebalanceAuctionModule,
-    //       rebalancingSetToken.address,
-    //       bidQuantity,
-    //     );
-    //   });
-
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
-
-    // describe('when settleRebalance is called from Drawdown State', async () => {
-    //   beforeEach(async () => {
-    //     await rebalancingHelper.defaultTransitionToRebalanceAsync(
-    //       coreMock,
-    //       rebalancingComponentWhiteList,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       constantAuctionPriceCurve.address,
-    //       managerAccount
-    //     );
-
-    //     const defaultTimeToPivot = new BigNumber(100000);
-    //     await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
-
-    //     const [bidQuantity] = await rebalancingSetToken.biddingParameters.callAsync();
-    //     await rebalancingHelper.placeBidAsync(
-    //       rebalanceAuctionModule,
-    //       rebalancingSetToken.address,
-    //       bidQuantity,
-    //     );
-
-    //     await rebalancingHelper.endFailedRebalanceAsync(
-    //       rebalancingSetToken
-    //     );
-    //   });
-
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
   });
 
+  describe('#PlaceBid from placeBidMock', async () => {
+    let subjectCaller: Address;
+    let subjectBidQuantity: BigNumber;
 
+    beforeEach(async () => {
+      subjectBidQuantity = rebalancingSetQuantityToIssue;
+
+      subjectCaller = deployerAccount;
+
+      await coreHelper.addModuleAsync(coreMock, placeBidMock.address);
+
+      await rebalancingHelper.transitionToRebalanceV2Async(
+        coreMock,
+        rebalancingSetToken,
+        nextSetToken,
+        managerAccount
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return placeBidMock.mockPlaceBid.sendTransactionAsync(
+        rebalancingSetToken.address,
+        subjectBidQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('should return the correct combinedTokenArray', async () => {
+      await subject();
+
+      const storedCombinedTokenArray = await placeBidMock.getCombinedTokenArray.callAsync();
+      const liquidatorCombinedTokenArray = await liquidatorMock.getCombinedTokenArray.callAsync();
+      expect(JSON.stringify(storedCombinedTokenArray)).to.equal(JSON.stringify(liquidatorCombinedTokenArray));
+    });
+
+    it('should return the correct inflow units', async () => {
+      await subject();
+
+      const returnedInflowUnits = await placeBidMock.getInflowUnits.callAsync();
+      const liquidatorNextSetUnits = await liquidatorMock.getCombinedNextSetUnits.callAsync();
+      expect(JSON.stringify(returnedInflowUnits)).to.equal(JSON.stringify(liquidatorNextSetUnits));
+    });
+
+    it('should return the correct outflow units', async () => {
+      await subject();
+
+      const returnedOutflow = await placeBidMock.getOutflowUnits.callAsync();
+      const liquidatorOutflow = await liquidatorMock.getCombinedCurrentUnits.callAsync();
+      expect(JSON.stringify(returnedOutflow)).to.equal(JSON.stringify(liquidatorOutflow));
+    });
+  });
+
+  describe('#getBidPrice', async () => {
+    let subjectCaller: Address;
+    let subjectBidQuantity: BigNumber;
+
+    beforeEach(async () => {
+      subjectBidQuantity = rebalancingSetQuantityToIssue;
+
+      subjectCaller = deployerAccount;
+
+      await coreHelper.addModuleAsync(coreMock, placeBidMock.address);
+
+      await rebalancingHelper.transitionToRebalanceV2Async(
+        coreMock,
+        rebalancingSetToken,
+        nextSetToken,
+        managerAccount
+      );
+    });
+
+    async function subject(): Promise<any> {
+      return rebalancingSetToken.getBidPrice.callAsync(
+        subjectBidQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('should return the correct combinedTokenArray', async () => {
+      const [combinedTokenArray] = await subject();
+
+      const liquidatorCombinedTokenArray = await liquidatorMock.getCombinedTokenArray.callAsync();
+      expect(JSON.stringify(combinedTokenArray)).to.equal(JSON.stringify(liquidatorCombinedTokenArray));
+    });
+
+    it('should return the correct inflow units', async () => {
+      const [,inflowUnits] = await subject();
+
+      const liquidatorNextSetUnits = await liquidatorMock.getCombinedNextSetUnits.callAsync();
+      expect(JSON.stringify(inflowUnits)).to.equal(JSON.stringify(liquidatorNextSetUnits));
+    });
+
+    it('should return the correct outflow units', async () => {
+      const [,,outflowUnits] = await subject();
+
+      const liquidatorOutflow = await liquidatorMock.getCombinedCurrentUnits.callAsync();
+      expect(JSON.stringify(outflowUnits)).to.equal(JSON.stringify(liquidatorOutflow));
+    });
+  });
 });

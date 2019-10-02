@@ -7,6 +7,7 @@ import {
   CoreIssuanceLibraryMockContract,
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryMockContract,
+  PlaceBidMockContract,
   RebalancingSetIssuanceMockContract,
   SetTokenLibraryMockContract,
   TransferProxyContract,
@@ -28,6 +29,7 @@ const CoreIssuanceLibraryMock = artifacts.require('CoreIssuanceLibraryMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
+const PlaceBidMock = artifacts.require('PlaceBidMock');
 const RebalancingSetIssuanceMock = artifacts.require('RebalancingSetIssuanceMock');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
 const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
@@ -208,6 +210,19 @@ export class LibraryMockHelper {
 
     return new ZeroExOrderLibraryMockContract(
       new web3.eth.Contract(zeroExExchangeWrapperInstance.abi, zeroExExchangeWrapperInstance.address),
+      { from },
+    );
+  }
+
+  public async deployPlaceBidMockAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<PlaceBidMockContract> {
+    const placeBidMockContract = await PlaceBidMock.new(
+      { from },
+    );
+
+    return new PlaceBidMockContract(
+      new web3.eth.Contract(placeBidMockContract.abi, placeBidMockContract.address),
       { from },
     );
   }

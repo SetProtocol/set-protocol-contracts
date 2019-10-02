@@ -44,6 +44,7 @@ contract LiquidatorMock
     uint256[] public combinedCurrentUnits;
     uint256[] public combinedNextSetUnits;
 
+    uint256 public placeBidQuantity;
 
     /* ============ External Functions ============ */
 
@@ -57,17 +58,36 @@ contract LiquidatorMock
         nextSet = _nextSet;
     }
 
-    // function getBidPrice(
-    //     uint256 _quantity
-    // )
-    //     external
-    //     returns (address[] memory, uint256[] memory, uint256[] memory);
+    function getBidPrice(
+        uint256 _quantity
+    )
+        external
+        view
+        returns (address[] memory, uint256[] memory, uint256[] memory)
+    {
+        // TODO take into account quantity when bidding
+        return (
+            combinedTokenArray,
+            combinedNextSetUnits,
+            combinedCurrentUnits
+        );        
+    }
 
-    // function placeBid(
-    //     uint256 _quantity
-    // )
-    //     external
-    //     returns (address[] memory, uint256[] memory, uint256[] memory);
+    function placeBid(
+        uint256 _quantity
+    )
+        external
+        returns (address[] memory, uint256[] memory, uint256[] memory)
+    {
+        placeBidQuantity = _quantity;
+
+        // TODO take into account quantity when bidding
+        return (
+            combinedTokenArray,
+            combinedNextSetUnits,
+            combinedCurrentUnits
+        );
+    }
 
     function startRebalance(
         ISetToken _currentSet,
@@ -102,7 +122,7 @@ contract LiquidatorMock
     {
         return combinedTokenArray;
     }
-
+ 
     function getCombinedCurrentUnits()
         external
         view

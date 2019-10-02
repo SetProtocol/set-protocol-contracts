@@ -217,6 +217,7 @@ contract RebalancingSetTokenV2 is
         uint256 _quantity
     )
         public
+        view
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
         validateGetBidPrice(_quantity);

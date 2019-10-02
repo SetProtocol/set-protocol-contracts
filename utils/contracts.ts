@@ -28,6 +28,7 @@ export { MedianContract } from '../types/generated/median';
 export { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 export { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 export { PlaceBidLibraryContract } from '../types/generated/place_bid_library';
+export { PlaceBidMockContract } from '../types/generated/place_bid_mock';
 export { PriceFeedContract } from '../types/generated/price_feed';
 export { ProposeLibraryContract } from '../types/generated/propose_library';
 export { ProtocolViewerContract } from '../types/generated/protocol_viewer';

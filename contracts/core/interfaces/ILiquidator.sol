@@ -38,6 +38,7 @@ interface ILiquidator {
         uint256 _quantity
     )
         external
+        view
         returns (address[] memory, uint256[] memory, uint256[] memory);
 
     function placeBid(

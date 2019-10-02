@@ -22,6 +22,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ICore } from "../interfaces/ICore.sol";
 import { ILiquidator } from "../interfaces/ILiquidator.sol";
+import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 
 
@@ -53,6 +54,7 @@ contract LinearAuctionLiquidator is
 
     /* ============ State Variables ============ */
     ICore public coreInstance;
+    IOracleWhiteList public oracleWhiteListInstance;
     string public name;
 
     uint256 public priceDivisor;
@@ -62,6 +64,7 @@ contract LinearAuctionLiquidator is
 
     constructor(
         ICore _coreInstance,
+        IOracleWhiteList _oracleWhiteListInstance,
         uint256 _priceDivisor,
         uint256 _auctionTimeToPivot,
         uint256 _auctionSpeed,
@@ -70,6 +73,7 @@ contract LinearAuctionLiquidator is
         public
     {
         coreInstance = _coreInstance;
+        oracleWhiteListInstance = _oracleWhiteListInstance;
         priceDivisor = _priceDivisor;
         auctionTimeToPivot = _auctionTimeToPivot;
         auctionSpeed = _auctionSpeed;
@@ -106,7 +110,7 @@ contract LinearAuctionLiquidator is
     function startRebalance(
         address _currentSet,
         address _nextSet,
-        uint256 _startingCurrentSet
+        uint256 _startingCurrentSetQuantity
     )
         external
     {}

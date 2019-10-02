@@ -57,6 +57,7 @@ export { TimeLockUpgradeV2Contract } from '../types/generated/time_lock_upgrade_
 export { TimeLockUpgradeV2MockContract } from '../types/generated/time_lock_upgrade_v2_mock';
 export { TransferProxyContract } from '../types/generated/transfer_proxy';
 export { UpdatableConstantAuctionPriceCurveContract } from '../types/generated/updatable_constant_auction_price_curve';
+export { UpdatableOracleMockContract } from '../types/generated/updatable_oracle_mock';
 export { VaultContract } from '../types/generated/vault';
 export { WethMockContract } from '../types/generated/weth_mock';
 export { WhiteListContract } from '../types/generated/white_list';

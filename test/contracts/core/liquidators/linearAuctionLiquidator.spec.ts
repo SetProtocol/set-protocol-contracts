@@ -10,6 +10,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
   LinearAuctionLiquidatorContract,
+  OracleWhiteListContract,
   RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
   TransferProxyContract,
@@ -17,6 +18,7 @@ import {
   WhiteListContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
+import { ether } from '@utils/units';
 import {
   DEFAULT_AUCTION_PRICE_DIVISOR,
   ONE_HOUR_IN_SECONDS,
@@ -46,6 +48,7 @@ contract('LinearAuctionLiquidator', accounts => {
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
+  let oracleWhiteList: OracleWhiteListContract;
   let linearAuctionLiquidator: LinearAuctionLiquidatorContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
@@ -77,6 +80,19 @@ contract('LinearAuctionLiquidator', accounts => {
       rebalancingComponentWhiteList.address,
     );
 
+    const tokens = await erc20Helper.deployTokensAsync(2, deployerAccount);
+    const oracleOne = await rebalancingHelper.deployUpdatableOracleMockAsync(
+      ether(100)
+    );
+    const oracleTwo = await rebalancingHelper.deployUpdatableOracleMockAsync(
+      ether(1)
+    );
+
+    oracleWhiteList = await coreHelper.deployOracleWhiteListAsync(
+      [tokens[0].address, tokens[1].address],
+      [oracleOne.address, oracleTwo.address]
+    );
+
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
   });
@@ -85,8 +101,9 @@ contract('LinearAuctionLiquidator', accounts => {
     blockchain.revertAsync();
   });
 
-  describe('#constructor', async () => {
+  describe.only('#constructor', async () => {
     let subjectCoreInstance: Address;
+    let subjectOracleWhiteListInstance: Address;
     let subjectPriceDivisor: BigNumber;
     let subjectAuctionTimeToPivot: BigNumber;
     let subjectAuctionSpeed: BigNumber;
@@ -94,6 +111,7 @@ contract('LinearAuctionLiquidator', accounts => {
 
     beforeEach(async () => {
       subjectCoreInstance = coreMock.address;
+      subjectOracleWhiteListInstance = oracleWhiteList.address;
       subjectPriceDivisor = DEFAULT_AUCTION_PRICE_DIVISOR;
       subjectAuctionTimeToPivot = ONE_HOUR_IN_SECONDS.mul(4);
       subjectAuctionSpeed = ONE_HOUR_IN_SECONDS.div(3);
@@ -103,6 +121,7 @@ contract('LinearAuctionLiquidator', accounts => {
     async function subject(): Promise<LinearAuctionLiquidatorContract> {
       return rebalancingHelper.deployLinearAuctionLiquidatorAsync(
         subjectCoreInstance,
+        subjectOracleWhiteListInstance,
         subjectPriceDivisor,
         subjectAuctionTimeToPivot,
         subjectAuctionSpeed,
@@ -115,6 +134,13 @@ contract('LinearAuctionLiquidator', accounts => {
 
       const actualCoreInstance = await linearAuctionLiquidator.coreInstance.callAsync();
       expect(actualCoreInstance).to.equal(subjectCoreInstance);
+    });
+
+    it('creates a liquidator with the correct oracleWhiteList instance', async () => {
+      linearAuctionLiquidator = await subject();
+
+      const actualOracleWhiteList = await linearAuctionLiquidator.oracleWhiteListInstance.callAsync();
+      expect(actualOracleWhiteList).to.equal(subjectOracleWhiteListInstance);
     });
 
     it('creates a liquidator with the correct price divisor', async () => {

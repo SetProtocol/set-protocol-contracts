@@ -263,7 +263,7 @@ contract('OracleWhiteList', accounts => {
     });
   });
 
-  describe.only('#editTokenOraclePair', async () => {
+  describe('#editTokenOraclePair', async () => {
     let subjectTokenToAdd: Address;
     let subjectOracleToAdd: Address;
     let subjectCaller: Address;
@@ -339,7 +339,7 @@ contract('OracleWhiteList', accounts => {
     });
   });
 
-  describe.only('#areValidAddresses', async () => {
+  describe('#areValidAddresses', async () => {
     let subjectAddressesToVerify: Address[];
 
     beforeEach(async () => {
@@ -374,7 +374,7 @@ contract('OracleWhiteList', accounts => {
     });
   });
 
-  describe.only('#getOracleAddressesByToken', async () => {
+  describe('#getOracleAddressesByToken', async () => {
     let subjectAddressesToVerify: Address[];
 
     beforeEach(async () => {

@@ -47,7 +47,7 @@ interface ILiquidator {
     function startRebalance(
         address _currentSet,
         address _nextSet,
-        uint256 _startingCurrentSet
+        uint256 _startingCurrentSetQuantity
     )
         external;
 

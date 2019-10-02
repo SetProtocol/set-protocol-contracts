@@ -12,6 +12,7 @@ import {
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   UpdatableConstantAuctionPriceCurveContract,
+  UpdatableOracleMockContract,
   VaultContract,
   WhiteListContract,
 } from '../contracts';
@@ -43,6 +44,7 @@ const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const SetToken = artifacts.require('SetToken');
 const UpdatableConstantAuctionPriceCurve = artifacts.require('UpdatableConstantAuctionPriceCurve');
+const UpdatableOracleMock = artifacts.require('UpdatableOracleMock');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
@@ -311,6 +313,7 @@ export class RebalancingHelper {
 
   public async deployLinearAuctionLiquidatorAsync(
     coreInstance: Address,
+    oracleWhiteList: Address,
     priceDivisor: BigNumber,
     auctionTimeToPivot: BigNumber,
     auctionSpeed: BigNumber,
@@ -319,6 +322,7 @@ export class RebalancingHelper {
   ): Promise<LinearAuctionLiquidatorContract> {
     const truffleLinearLiquidator = await LinearAuctionLiquidator.new(
       coreInstance,
+      oracleWhiteList,
       priceDivisor,
       auctionTimeToPivot,
       auctionSpeed,
@@ -327,6 +331,23 @@ export class RebalancingHelper {
 
     return new LinearAuctionLiquidatorContract(
       new web3.eth.Contract(truffleLinearLiquidator.abi, truffleLinearLiquidator.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  /* ============ Price Libraries ============ */
+
+  public async deployUpdatableOracleMockAsync(
+    startingPrice: BigNumber,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<UpdatableOracleMockContract> {
+    const truffleOracleMock = await UpdatableOracleMock.new(
+      startingPrice,
+      { from }
+    );
+
+    return new UpdatableOracleMockContract(
+      new web3.eth.Contract(truffleOracleMock.abi, truffleOracleMock.address),
       { from, gas: DEFAULT_GAS },
     );
   }

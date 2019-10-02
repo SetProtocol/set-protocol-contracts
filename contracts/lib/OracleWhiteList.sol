@@ -196,7 +196,8 @@ contract OracleWhiteList is
     /**
      * Return array of oracle addresses based on passed in token addresses 
      *
-     * @return address[]      Array of addresses
+     * @param  _tokenAddresses    Array of token addresses to get oracle addresses for
+     * @return address[]          Array of oracle addresses
      */
     function getOracleAddressesByToken(
         address[] calldata _tokenAddresses
@@ -247,7 +248,8 @@ contract OracleWhiteList is
     /**
      * Return oracle address associated with a passed token address 
      *
-     * @return address[]      Array of addresses
+     * @param  _tokenAddress    Address of token
+     * @return address          Address of oracle associated with token
      */
     function getOracleAddressByTokenInternal(
         address _tokenAddress

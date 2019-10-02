@@ -1,7 +1,8 @@
 import * as _ from 'lodash';
 import { Address } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
 
-import { LiquidatorMockContract } from '../contracts';
+import { LiquidatorMockContract, SetTokenContract } from '../contracts';
 import { getWeb3 } from '../web3Helper';
 
 const web3 = getWeb3();
@@ -29,4 +30,17 @@ export class LiquidatorHelper {
       { from },
     );
   }
+
+  /* ============ Bid-Related ============ */
+
+  // Get bid transfer values
+  public async getBidPriceValues(
+    setToken: SetTokenContract,
+    quantity: BigNumber,
+    combinedUnits: BigNumber[]
+  ): Promise<BigNumber[]> {
+    const naturalUnit = await setToken.naturalUnit.callAsync();
+    return combinedUnits.map(unit => unit.mul(quantity).div(naturalUnit));
+  }
+
 }

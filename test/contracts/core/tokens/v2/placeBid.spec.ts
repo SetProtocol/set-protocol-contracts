@@ -306,16 +306,29 @@ contract('PlaceBid', accounts => {
       await subject();
 
       const returnedInflowUnits = await placeBidMock.getInflowUnits.callAsync();
+
       const liquidatorNextSetUnits = await liquidatorMock.getCombinedNextSetUnits.callAsync();
-      expect(JSON.stringify(returnedInflowUnits)).to.equal(JSON.stringify(liquidatorNextSetUnits));
+      const expectedInflowUnits = await liquidatorHelper.getBidPriceValues(
+        nextSetToken,
+        subjectBidQuantity,
+        liquidatorNextSetUnits,
+      );
+
+      expect(JSON.stringify(returnedInflowUnits)).to.equal(JSON.stringify(expectedInflowUnits));
     });
 
     it('should return the correct outflow units', async () => {
       await subject();
 
       const returnedOutflow = await placeBidMock.getOutflowUnits.callAsync();
-      const liquidatorOutflow = await liquidatorMock.getCombinedCurrentUnits.callAsync();
-      expect(JSON.stringify(returnedOutflow)).to.equal(JSON.stringify(liquidatorOutflow));
+
+      const liquidatorCurrentUnits = await liquidatorMock.getCombinedCurrentUnits.callAsync();
+      const expectedOutflowUnits = await liquidatorHelper.getBidPriceValues(
+        currentSetToken,
+        subjectBidQuantity,
+        liquidatorCurrentUnits,
+      );      
+      expect(JSON.stringify(returnedOutflow)).to.equal(JSON.stringify(expectedOutflowUnits));
     });
   });
 
@@ -356,14 +369,25 @@ contract('PlaceBid', accounts => {
       const [,inflowUnits] = await subject();
 
       const liquidatorNextSetUnits = await liquidatorMock.getCombinedNextSetUnits.callAsync();
-      expect(JSON.stringify(inflowUnits)).to.equal(JSON.stringify(liquidatorNextSetUnits));
+      const expectedInflowUnits = await liquidatorHelper.getBidPriceValues(
+        nextSetToken,
+        subjectBidQuantity,
+        liquidatorNextSetUnits,
+      );
+
+      expect(JSON.stringify(inflowUnits)).to.equal(JSON.stringify(expectedInflowUnits));
     });
 
     it('should return the correct outflow units', async () => {
       const [,,outflowUnits] = await subject();
 
-      const liquidatorOutflow = await liquidatorMock.getCombinedCurrentUnits.callAsync();
-      expect(JSON.stringify(outflowUnits)).to.equal(JSON.stringify(liquidatorOutflow));
+      const liquidatorCurrentUnits = await liquidatorMock.getCombinedCurrentUnits.callAsync();
+      const expectedOutflowUnits = await liquidatorHelper.getBidPriceValues(
+        currentSetToken,
+        subjectBidQuantity,
+        liquidatorCurrentUnits,
+      );
+      expect(JSON.stringify(outflowUnits)).to.equal(JSON.stringify(expectedOutflowUnits));
     });
   });
 });

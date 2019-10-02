@@ -16,6 +16,8 @@
 
 pragma solidity 0.5.7;
 
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";
 import { ILiquidator } from "../../core/interfaces/ILiquidator.sol";
 import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
@@ -29,6 +31,7 @@ import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
 contract LiquidatorMock
     // ILiquidator
 {
+    using SafeMath for uint256;
     using AddressArrayUtils for address[];
 
     ISetToken public currentSet;
@@ -36,6 +39,7 @@ contract LiquidatorMock
 
     uint256 public startRebalanceTime;
     uint256 public startingCurrentSetQuantity;
+    uint256 public remainingCurrentSetQuantity;
 
     address public startRebalanceCurrentSet;
     address public startRebalanceNextSet;
@@ -65,11 +69,13 @@ contract LiquidatorMock
         view
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        // TODO take into account quantity when bidding
+        uint256[] memory inflowUnits = getTransferValues(nextSet, _quantity, combinedNextSetUnits);
+        uint256[] memory outflowUnits = getTransferValues(currentSet, _quantity, combinedCurrentUnits);
+
         return (
             combinedTokenArray,
-            combinedNextSetUnits,
-            combinedCurrentUnits
+            inflowUnits,
+            outflowUnits
         );        
     }
 
@@ -81,11 +87,17 @@ contract LiquidatorMock
     {
         placeBidQuantity = _quantity;
 
-        // TODO take into account quantity when bidding
+        // Subtract remaining Sets
+        remainingCurrentSetQuantity = remainingCurrentSetQuantity.sub(_quantity);
+
+        // Inflow = quantity (currentSet) * units / naturalUnit
+        uint256[] memory inflowUnits = getTransferValues(nextSet, _quantity, combinedNextSetUnits);
+        uint256[] memory outflowUnits = getTransferValues(currentSet, _quantity, combinedCurrentUnits);
+
         return (
             combinedTokenArray,
-            combinedNextSetUnits,
-            combinedCurrentUnits
+            inflowUnits,
+            outflowUnits
         );
     }
 
@@ -98,6 +110,7 @@ contract LiquidatorMock
     {
         startRebalanceTime = block.timestamp;
         startingCurrentSetQuantity = _startingCurrentSetQuantity;
+        remainingCurrentSetQuantity = startingCurrentSetQuantity;
 
         // Set the combined token array
         address[] memory currentSetComponents = _currentSet.getComponents();
@@ -157,5 +170,25 @@ contract LiquidatorMock
         }
 
         return combinedUnits;
+    }
+
+    function getTransferValues(
+        ISetToken _setToken,
+        uint256 _quantity,
+        uint256[] memory _combinedUnits
+    ) 
+        private
+        view
+        returns (uint256[] memory)
+    {
+        uint256 naturalUnit = _setToken.naturalUnit();
+
+        uint256[] memory transferValues = new uint256[](_combinedUnits.length);
+
+        for (uint256 i = 0; i < _combinedUnits.length; i++) {
+            transferValues[i] = _quantity.mul(_combinedUnits[i]).div(naturalUnit);
+        }
+
+        return transferValues;
     }
 }

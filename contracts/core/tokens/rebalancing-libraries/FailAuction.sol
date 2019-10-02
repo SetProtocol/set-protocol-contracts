@@ -180,5 +180,6 @@ contract FailAuction is
 
         nextSet = ISetToken(address(0));
         hasBidded = false;
+        rebalanceIndex = rebalanceIndex.add(1);
     }
 }

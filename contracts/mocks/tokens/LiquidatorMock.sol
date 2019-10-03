@@ -73,6 +73,13 @@ contract LiquidatorMock
         nextSet = _nextSet;
     }
 
+    function cancelProposal()
+        external
+    {
+        currentSet = ISetToken(address(0));
+        nextSet = ISetToken(address(0));
+    }
+
     function getBidPrice(
         uint256 _quantity
     )

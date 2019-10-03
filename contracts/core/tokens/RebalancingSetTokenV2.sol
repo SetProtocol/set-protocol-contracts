@@ -46,19 +46,19 @@ import { SettleRebalance } from "./rebalancing-v2/SettleRebalance.sol";
  *   This allows us to rapidly iterate and build new liquidation mechanisms for rebalances.
  * - RebalanceAuctionModule execution should be backwards compatible with V1. 
  * - Bidding and auction parameters state no longer live on this contract. They live on the liquidator
- *
+ * - Re-proposals are no longer allowed. Instead, one would cancel a proposal and then propose again
  */
 contract RebalancingSetTokenV2 is
-    BackwardsCompatability,
     ERC20,
     ERC20Detailed,
-    FailRebalance,
-    Issuance,
-    PlaceBid,
-    Propose,
     RebalancingSetState,
+    BackwardsCompatability,
+    Issuance,
+    Propose,
+    StartRebalance,
+    PlaceBid,
     SettleRebalance,
-    StartRebalance
+    FailRebalance
 {
 
     /* ============ Constructor ============ */
@@ -121,14 +121,16 @@ contract RebalancingSetTokenV2 is
    /* ============ External Functions ============ */
 
     /**
-     * Function used to set the terms of the next rebalance and start the proposal period
-     *
+     * Set the terms of the next rebalance and transitions the Set to the proposal period.
+     * Can only be called after the rebalance interval has elapsed since the last rebalance.
+     * 
      * @param _nextSet                      The Set to rebalance into
      */
     function propose(
         ISetToken _nextSet
     )
         external
+        onlyManager
     {
         validateProposal(_nextSet);
 
@@ -137,9 +139,26 @@ contract RebalancingSetTokenV2 is
         transitionToProposal(_nextSet);
     }
 
+    /**
+     * Reverts an existing proposal. Can only be called by the manager during the 
+     * proposal phase.
+     */
+    function cancelProposal()
+        external
+        onlyManager
+    {
+        validateCancelProposal();
+
+        liquidatorCancelProposal();
+
+        revertProposal();
+    }
+
     /*
-     * Initiate rebalance for the rebalancing set if the proposal period has elapsed after
+     * Initiates the rebalance. Can only be called if the proposal period has elapsed after
      * a proposal.
+     *
+     * Anyone can call this function.
      */
     function startRebalance()
         external
@@ -154,25 +173,24 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Initiate settlement for the rebalancing set. Full functionality now returned to
-     * set owners
+     * Get token inflows and outflows required for bid. Also the amount of Rebalancing
+     * Sets that would be generated.
      *
+     * @param _quantity               The amount of currentSet to be rebalanced
+     * @return combinedTokenArray     Array of token addresses invovled in rebalancing
+     * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
      */
-    function settleRebalance()
-        external
+    function getBidPrice(
+        uint256 _quantity
+    )
+        public
+        view
+        returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        (
-            uint256 issueQuantity,
-            uint256 newUnitShares
-        ) = calculateNextSetIssueQuantity();
+        validateGetBidPrice(_quantity);
 
-        validateSettleRebalance(newUnitShares);
-
-        issueNextSet(issueQuantity);
-
-        liquidatorSettleRebalance();
-
-        transitionToDefault(newUnitShares);
+        return liquidator.getBidPrice(_quantity);
     }
 
     /*
@@ -204,6 +222,29 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
+     * Initiate settlement for the rebalancing set. Full functionality now returned to
+     * set owners
+     *
+     * * Anyone can call this function.
+     */
+    function settleRebalance()
+        external
+    {
+        (
+            uint256 issueQuantity,
+            uint256 newUnitShares
+        ) = calculateNextSetIssueQuantity();
+
+        validateSettleRebalance(newUnitShares);
+
+        issueNextSet(issueQuantity);
+
+        liquidatorSettleRebalance();
+
+        transitionToDefault(newUnitShares);
+    }
+
+    /*
      * Fail an auction that doesn't complete before reaching the pivot price. Move to Drawdown state
      * if bids have been placed. Reset to Default state if no bids placed.
      *
@@ -214,27 +255,6 @@ contract RebalancingSetTokenV2 is
         validateFailRebalance();
 
         handleFailedRebalance();
-    }
-
-    /*
-     * Get token inflows and outflows required for bid. Also the amount of Rebalancing
-     * Sets that would be generated.
-     *
-     * @param _quantity               The amount of currentSet to be rebalanced
-     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
-     * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
-     * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
-     */
-    function getBidPrice(
-        uint256 _quantity
-    )
-        public
-        view
-        returns (address[] memory, uint256[] memory, uint256[] memory)
-    {
-        validateGetBidPrice(_quantity);
-
-        return liquidator.getBidPrice(_quantity);
     }
 
     /*
@@ -252,7 +272,6 @@ contract RebalancingSetTokenV2 is
     {
         validateMint();
 
-        // Update token balance of the manager
         _mint(_issuer, _quantity);
     }
 

@@ -29,7 +29,7 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
  * @title Propose
  * @author Set Protocol
  *
- * Default implementation of Rebalancing Set Token propose function
+ * Implementation of Rebalancing Set Token V2 proposal-related functionality.
  */
 contract Propose is 
     RebalancingSetState
@@ -43,10 +43,23 @@ contract Propose is
         uint256 indexed proposalPeriodEndTime
     );
 
+    /* ============ Modifier ============ */
+
+    /**
+     * Throws if called by any account other than the manager.
+     */
+    modifier onlyManager() {
+        require(
+            msg.sender == manager,
+            "Propose: Sender must be manager"
+        );
+        _;
+    }
+
     /* ============ Internal Functions ============ */
 
     /**
-     * Function used to validate inputs to propose function
+     * Validates inputs to propose function
      *
      * @param _nextSet                    The Set to rebalance into
      */
@@ -55,26 +68,19 @@ contract Propose is
     )
         public
     {
-        // Make sure it is manager that is proposing the rebalance
+        // New Proposal can only be made in Default state
         require(
-            msg.sender == manager,
-            "Propose.validateProposal: Sender must be manager"
+            rebalanceState == RebalancingLibrary.State.Default,
+            "Propose.validateProposal: State must be in Default"
         );
 
-        // New Proposal can only be made in Default and Proposal state
-        require(
-            rebalanceState == RebalancingLibrary.State.Default ||
-            rebalanceState == RebalancingLibrary.State.Proposal,
-            "Propose.validateProposal: State must be in Propose or Default"
-        );
-
-        // Make sure enough time has passed from last rebalance to start a new proposal
+        // Enough time must have passed from last rebalance to start a new proposal
         require(
             block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
             "Propose.validateProposal: Rebalance interval not elapsed"
         );
 
-        // Check that new proposed Set is valid Set created by Core
+        // New proposed Set must be a valid Set created by Core
         require(
             core.validSets(address(_nextSet)),
             "Propose.validateProposal: Invalid or disabled proposed SetToken address"
@@ -89,16 +95,27 @@ contract Propose is
 
         // Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.
         // Done to make sure that when calculating token units there will are no rounding errors.
-        uint256 currentNaturalUnit = currentSet.naturalUnit();
-        uint256 nextSetNaturalUnit = _nextSet.naturalUnit();
         require(
-            Math.max(currentNaturalUnit, nextSetNaturalUnit).mod(
-                Math.min(currentNaturalUnit, nextSetNaturalUnit)
-            ) == 0,
+            naturalUnitsAreValid(currentSet, _nextSet),
             "Propose.validateProposal: Invalid proposed Set natural unit"
         );
     }
 
+    /**
+     * Cancel propose can only be called when the state is Proposal
+     */
+    function validateCancelProposal()
+        internal
+    {
+        require(
+            rebalanceState == RebalancingLibrary.State.Proposal,
+            "Propose.validateCancelProposal: State must be in Proposal"
+        );
+    }
+
+    /**
+     * Sends the currentSet and nextSet to the liquidator.
+     */
     function liquidatorProcessProposal(
         ISetToken _nextSet
     )
@@ -107,6 +124,20 @@ contract Propose is
         liquidator.processProposal(currentSet, _nextSet);
     }
 
+    /**
+     * Informs the liquidator that the proposal has been canceled
+     */
+    function liquidatorCancelProposal()
+        internal
+    {
+        liquidator.cancelProposal();
+    }
+
+    /**
+     * Following a valid proposal, updates the relevant state.
+     *
+     * @param _nextSet                    The Set to rebalance into
+     */
     function transitionToProposal(
         ISetToken _nextSet
     )
@@ -120,5 +151,40 @@ contract Propose is
             address(_nextSet),
             proposalStartTime.add(proposalPeriod)
         );
+    }
+
+    /**
+     * Resets any proposal-related state. Note: it is not neccessary to reset the proposalStartTime
+     */
+    function revertProposal()
+        internal
+    {
+        nextSet = ISetToken(address(0));
+        rebalanceState = RebalancingLibrary.State.Default;
+    }
+
+    /* ============ Private Functions ============ */
+
+    /**
+     * Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.
+     * Done to make sure that when calculating token units there will are no rounding errors.
+     *
+     * @param _currentSet                 The current base SetToken
+     * @param _nextSet                    The proposed SetToken
+     */
+    function naturalUnitsAreValid(
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        private
+        view
+        returns (bool)
+    {
+        uint256 currentNaturalUnit = _currentSet.naturalUnit();
+        uint256 nextSetNaturalUnit = _nextSet.naturalUnit();
+
+        return Math.max(currentNaturalUnit, nextSetNaturalUnit).mod(
+            Math.min(currentNaturalUnit, nextSetNaturalUnit)
+        ) == 0;
     }
 }

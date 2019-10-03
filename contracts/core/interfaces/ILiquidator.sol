@@ -34,6 +34,9 @@ interface ILiquidator {
     )
         external;
 
+    function cancelProposal()
+        external;
+
     function getBidPrice(
         uint256 _quantity
     )

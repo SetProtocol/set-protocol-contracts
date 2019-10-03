@@ -179,6 +179,7 @@ export class CoreHelper {
   public async deployRebalancingSetTokenV2FactoryAsync(
     coreAddress: Address,
     componentWhitelistAddress: Address,
+    liquidatorWhitelistAddress: Address,
     minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
     minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
     minimumFailRebalancePeriod: BigNumber = ONE_DAY_IN_SECONDS,
@@ -190,6 +191,7 @@ export class CoreHelper {
     const truffleTokenFactory = await RebalancingSetTokenV2Factory.new(
       coreAddress,
       componentWhitelistAddress,
+      liquidatorWhitelistAddress,
       minimumRebalanceInterval,
       minimumProposalPeriod,
       minimumFailRebalancePeriod,
@@ -608,6 +610,17 @@ export class CoreHelper {
   }
 
   public async addTokenToWhiteList(
+    address: Address,
+    whiteList: WhiteListContract,
+    from: Address = this._contractOwnerAddress,
+  ): Promise<void> {
+    await whiteList.addAddress.sendTransactionAsync(
+      address,
+      { from },
+    );
+  }
+
+  public async addAddressToWhiteList(
     address: Address,
     whiteList: WhiteListContract,
     from: Address = this._contractOwnerAddress,

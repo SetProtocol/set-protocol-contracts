@@ -60,6 +60,7 @@ contract('FailRebalance', accounts => {
   let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let rebalancingFactory: RebalancingSetTokenV2FactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
+  let liquidatorWhitelist: WhiteListContract;
   let liquidatorMock: LiquidatorMockContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
@@ -94,15 +95,18 @@ contract('FailRebalance', accounts => {
 
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
+    liquidatorWhitelist = await coreHelper.deployWhiteListAsync();
     rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
+      liquidatorWhitelist.address
     );
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
 
     liquidatorMock = await liquidatorHelper.deployLiquidatorMock();
+    await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
   });
 
   afterEach(async () => {

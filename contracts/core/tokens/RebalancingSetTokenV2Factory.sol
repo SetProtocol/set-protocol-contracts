@@ -47,6 +47,9 @@ contract RebalancingSetTokenV2Factory {
     // Address of the WhiteList contract used to verify the tokens in a rebalance proposal
     IWhiteList public rebalanceComponentWhitelist;
 
+    // Whitelist contract for approved liquidators
+    IWhiteList public liquidatorWhitelist;
+
     // Minimum amount of time between rebalances in seconds
     uint256 public minimumRebalanceInterval;
 
@@ -80,7 +83,8 @@ contract RebalancingSetTokenV2Factory {
      * on RebalancingSetTokenV2
      *
      * @param  _core                       Address of deployed core contract
-     * @param  _componentWhitelist         Address of deployed whitelist contract
+     * @param  _componentWhitelist         Address of component whitelist contract
+     * @param  _liquidatorWhitelist        Address of liquidator whitelist contract
      * @param  _minimumRebalanceInterval   Minimum amount of time between rebalances in seconds
      * @param  _minimumProposalPeriod      Minimum amount of time users can review proposals in seconds
      * @param  _minimumNaturalUnit         Minimum number for the token natural unit
@@ -89,6 +93,7 @@ contract RebalancingSetTokenV2Factory {
     constructor(
         ICore _core,
         IWhiteList _componentWhitelist,
+        IWhiteList _liquidatorWhitelist,
         uint256 _minimumRebalanceInterval,
         uint256 _minimumProposalPeriod,
         uint256 _minimumFailRebalancePeriod,
@@ -99,6 +104,7 @@ contract RebalancingSetTokenV2Factory {
     {
         core = _core;
         rebalanceComponentWhitelist = _componentWhitelist;
+        liquidatorWhitelist = _liquidatorWhitelist;
         minimumRebalanceInterval = _minimumRebalanceInterval;
         minimumProposalPeriod = _minimumProposalPeriod;
         minimumFailRebalancePeriod = _minimumFailRebalancePeriod;
@@ -198,6 +204,12 @@ contract RebalancingSetTokenV2Factory {
             "RebalancingSetTokenV2Factory.create: Invalid liquidator address"
         );
 
+        // Require that liquidator is whitelisted by the liquidatorWhitelist
+        require(
+            isValidLiquidator(address(parameters.liquidator)),
+            "RebalancingSetTokenV2Factory.create: Liquidator not whitelisted"
+        );
+
         // Require minimum rebalance interval and proposal period
         require(
             parameters.proposalPeriod >= minimumProposalPeriod,
@@ -213,8 +225,6 @@ contract RebalancingSetTokenV2Factory {
             parameters.rebalanceFailPeriod >= minimumFailRebalancePeriod,
             "RebalancingSetTokenV2Factory.create: Fail Period too short"
         );
-
-        // TODO: Check that the liquidator is valid and approved by Core
 
         // Create a new SetToken contract
         return address(
@@ -253,5 +263,19 @@ contract RebalancingSetTokenV2Factory {
         }
 
         return parameters;
+    }
+
+    function isValidLiquidator(
+        address _liquidator
+    )
+        private
+        view
+        returns (bool)
+    {
+        // Require that liquidator is whitelisted by the liquidatorWhitelist
+        address[] memory liquidatorArray = new address[](1);
+        liquidatorArray[0] = _liquidator;
+
+        return liquidatorWhitelist.areValidAddresses(liquidatorArray);
     }
 }

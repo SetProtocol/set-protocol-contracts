@@ -62,6 +62,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
   let setToken: SetTokenContract;
   let setTokenFactory: SetTokenFactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
+  let liquidatorWhiteList: WhiteListContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -100,6 +101,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     );
 
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
+    liquidatorWhiteList = await coreHelper.deployWhiteListAsync();
   });
 
   afterEach(async () => {
@@ -108,7 +110,8 @@ contract('RebalancingSetTokenV2Factory', accounts => {
 
   describe('#constructor', async () => {
     let subjectCoreAddress: Address;
-    let subjectWhiteListAddress: Address;
+    let subjectComponentWhitelist: Address;
+    let subjectLiquidatorWhitelist: Address;
     let subjectMinimumRebalanceInterval: BigNumber;
     let subjectMinimumProposalPeriod: BigNumber;
     let subjectMinimumFailRebalancePeriod: BigNumber;
@@ -117,7 +120,8 @@ contract('RebalancingSetTokenV2Factory', accounts => {
 
     beforeEach(async () => {
       subjectCoreAddress = core.address;
-      subjectWhiteListAddress = rebalancingComponentWhiteList.address;
+      subjectComponentWhitelist = rebalancingComponentWhiteList.address;
+      subjectLiquidatorWhitelist = liquidatorWhiteList.address;
       subjectMinimumRebalanceInterval = ONE_DAY_IN_SECONDS;
       subjectMinimumProposalPeriod = ONE_DAY_IN_SECONDS;
       subjectMinimumFailRebalancePeriod = ONE_DAY_IN_SECONDS;
@@ -128,7 +132,8 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     async function subject(): Promise<RebalancingSetTokenV2FactoryContract> {
       return await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
         subjectCoreAddress,
-        subjectWhiteListAddress,
+        subjectComponentWhitelist,
+        subjectLiquidatorWhitelist,
         subjectMinimumRebalanceInterval,
         subjectMinimumProposalPeriod,
         subjectMinimumFailRebalancePeriod,
@@ -144,11 +149,18 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       expect(coreAddress).to.equal(subjectCoreAddress);
     });
 
-    it('should have the correct whitelist address', async () => {
+    it('should have the correct component whitelist address', async () => {
       const rebalancingTokenFactory = await subject();
 
       const whiteListAddress = await rebalancingTokenFactory.rebalanceComponentWhitelist.callAsync();
-      expect(whiteListAddress).to.equal(subjectWhiteListAddress);
+      expect(whiteListAddress).to.equal(subjectComponentWhitelist);
+    });
+
+    it('should have the correct liquidator whitelist address', async () => {
+      const rebalancingTokenFactory = await subject();
+
+      const liquidatorWhiteList = await rebalancingTokenFactory.liquidatorWhitelist.callAsync();
+      expect(liquidatorWhiteList).to.equal(subjectLiquidatorWhitelist);
     });
 
     it('should have the correct minimum rebalance interval', async () => {
@@ -204,9 +216,11 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     beforeEach(async () => {
       rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
         core.address,
-        rebalancingComponentWhiteList.address
+        rebalancingComponentWhiteList.address,
+        liquidatorWhiteList.address,
       );
       await coreHelper.addFactoryAsync(core, rebalancingSetTokenFactory);
+      await coreHelper.addAddressToWhiteList(liquidatorAccount, liquidatorWhiteList);
 
       subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];
@@ -405,6 +419,24 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       });
     });
 
+    describe('when the liquidator address is not whitelisted', async () => {
+      beforeEach(async () => {
+        callDataLiquidator = notSetTokenCreatedByCore;
+
+        subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
+          callDataManagerAddress,
+          callDataLiquidator,
+          callDataProposalPeriod,
+          callDataRebalanceInterval,
+          callDataFailAuctionPeriod,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe('when the fail auction period is less than the minimum', async () => {
       beforeEach(async () => {
         callDataFailAuctionPeriod = new BigNumber(5000);
@@ -490,7 +522,8 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     beforeEach(async () => {
       rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
         core.address,
-        rebalancingComponentWhiteList.address
+        rebalancingComponentWhiteList.address,
+        liquidatorWhiteList.address,
       );
       await coreHelper.addFactoryAsync(core, rebalancingSetTokenFactory);
 
@@ -502,7 +535,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       subjectSymbol = SetUtils.stringToBytes('REBAL');
 
       const managerAddress = rebalancingTokenManagerAccount;
-      const liquidator = liquidatorAccount;
+      const liquidator = liquidatorWhiteList.address;
       const proposalPeriod = new BigNumber(86400);
       const rebalanceInterval = new BigNumber(86400).mul(2);
       const failAuctionPeriod = new BigNumber(86400).mul(3);

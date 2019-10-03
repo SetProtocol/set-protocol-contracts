@@ -36,6 +36,7 @@ contract LiquidatorMock
     using AddressArrayUtils for address[];
 
     uint256 constant public priceDivisor = 1000;
+    uint256 public priceNumerator = 1000;
 
     ISetToken public currentSet;
     ISetToken public nextSet;
@@ -79,7 +80,7 @@ contract LiquidatorMock
         view
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        uint256[] memory inflowUnits = getTransferValues(nextSet, _quantity, combinedNextSetUnits);
+        uint256[] memory inflowUnits = getInflowTokenTransferValues(nextSet, _quantity, combinedNextSetUnits);
         uint256[] memory outflowUnits = getTransferValues(currentSet, _quantity, combinedCurrentUnits);
 
         return (
@@ -101,7 +102,7 @@ contract LiquidatorMock
         remainingCurrentSets = remainingCurrentSets.sub(_quantity);
 
         // Inflow = quantity (currentSet) * units / naturalUnit
-        uint256[] memory inflowUnits = getTransferValues(nextSet, _quantity, combinedNextSetUnits);
+        uint256[] memory inflowUnits = getInflowTokenTransferValues(nextSet, _quantity, combinedNextSetUnits);
         uint256[] memory outflowUnits = getTransferValues(currentSet, _quantity, combinedCurrentUnits);
 
         return (
@@ -142,10 +143,20 @@ contract LiquidatorMock
         hasSettled = true;
     }
 
-    function setHasFailed(bool _hasFailed)
+    function setHasFailed(
+        bool _hasFailed
+    )
         external
     {
         hasFailed = _hasFailed;
+    }
+
+    function setPriceNumerator(
+        uint256 _priceNumerator
+    )
+        external
+    {
+        priceNumerator = _priceNumerator;
     }
 
     function endFailedRebalance()
@@ -199,6 +210,28 @@ contract LiquidatorMock
         }
 
         return combinedUnits;
+    }
+
+    function getInflowTokenTransferValues(
+        ISetToken _setToken,
+        uint256 _quantity,
+        uint256[] memory _combinedUnits        
+    )
+        private
+        view
+        returns(uint256[] memory)
+    {
+        uint256[] memory unpricedInflowTokens = getTransferValues(
+            _setToken,
+            _quantity,
+            _combinedUnits
+        );
+
+        for (uint256 i = 0; i < unpricedInflowTokens.length; i++) {
+            unpricedInflowTokens[i] = unpricedInflowTokens[i].mul(priceNumerator).div(priceDivisor);
+        }
+
+        return unpricedInflowTokens;
     }
 
     function getTransferValues(

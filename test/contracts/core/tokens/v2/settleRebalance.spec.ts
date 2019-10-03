@@ -17,7 +17,6 @@ import {
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
-  StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
   WhiteListContract,
@@ -28,9 +27,6 @@ import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
-import {
-  getExpectedRebalanceStartedLog,
-} from '@utils/contract_logs/rebalancingSetToken';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -44,8 +40,7 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
-const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
-const setTestUtils = new SetTestUtils(web3);
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
@@ -53,8 +48,6 @@ contract('SettleRebalance', accounts => {
   const [
     deployerAccount,
     managerAccount,
-    otherAccount,
-    fakeTokenAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -118,16 +111,16 @@ contract('SettleRebalance', accounts => {
   describe('#settleRebalance', async () => {
     let subjectCaller: Address;
 
-    let proposalPeriod: BigNumber;
-
     let nextSetToken: SetTokenContract;
     let currentSetToken: SetTokenContract;
 
-    let baseSetQuantityToIssue: BigNumber;
-    let rebalancingSetQuantityToIssue: BigNumber = ether(7);
+    let rebalancingSetQuantityToIssue: BigNumber;
     let setTokenNaturalUnits: BigNumber[];
     let rebalancingSetUnitShares: BigNumber;
     let currentSetIssueQuantity: BigNumber;
+
+    let customRebalancingSetQuantityToIssue: BigNumber;
+    let customBaseSetQuantityToIssue: BigNumber;
 
     beforeEach(async () => {
       const setTokensToDeploy = 2;
@@ -155,10 +148,11 @@ contract('SettleRebalance', accounts => {
         currentSetToken.address,
         proposalPeriod,
         failPeriod,
+        rebalancingSetUnitShares,
       );
 
       // Issue currentSetToken
-      currentSetIssueQuantity = ether(8);
+      currentSetIssueQuantity = customBaseSetQuantityToIssue || ether(8);
       await coreMock.issue.sendTransactionAsync(
         currentSetToken.address,
         currentSetIssueQuantity,
@@ -167,7 +161,7 @@ contract('SettleRebalance', accounts => {
       await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      rebalancingSetQuantityToIssue = ether(7);
+      rebalancingSetQuantityToIssue = customRebalancingSetQuantityToIssue || ether(7);
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
       subjectCaller = managerAccount;
@@ -325,7 +319,7 @@ contract('SettleRebalance', accounts => {
           nextSetToken,
           vault
         );
-        
+
         await subject();
 
         const newUnitShares = await rebalancingSetToken.unitShares.callAsync();
@@ -342,44 +336,47 @@ contract('SettleRebalance', accounts => {
       });
     });
 
-    // describe('when settleRebalance is called but unitShares is 0', async () => {
-    //   before(async () => {
-    //     rebalancingSetUnitShares = new BigNumber(1);
-    //     setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
-    //     baseSetQuantityToIssue = new BigNumber(10 ** 27);
-    //     rebalancingSetQuantityToIssue = new BigNumber(10 ** 27);
-    //   });
+    describe('when settleRebalance is called but unitShares is 0', async () => {
+      before(async () => {
+        rebalancingSetUnitShares = new BigNumber(1);
+        setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
+        customBaseSetQuantityToIssue = new BigNumber(10 ** 27);
+        customRebalancingSetQuantityToIssue = new BigNumber(10 ** 27);
+      });
 
-    //   after(async () => {
-    //     rebalancingSetUnitShares = undefined;
-    //     setTokenNaturalUnits = undefined;
-    //     baseSetQuantityToIssue = undefined;
-    //     rebalancingSetQuantityToIssue = ether(7);
-    //   });
+      after(async () => {
+        rebalancingSetUnitShares = undefined;
+        setTokenNaturalUnits = undefined;
+        customBaseSetQuantityToIssue = undefined;
+        customRebalancingSetQuantityToIssue = undefined;
+      });
 
-    //   beforeEach(async () => {
-    //     await rebalancingHelper.transitionToRebalanceV2Async(
-    //       coreMock,
-    //       rebalancingSetToken,
-    //       nextSetToken,
-    //       managerAccount
-    //     );
+      beforeEach(async () => {
+        await rebalancingHelper.transitionToRebalanceV2Async(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken,
+          managerAccount
+        );
 
-    //     const newPrice = new BigNumber(1001);
-    //     await constantAuctionPriceCurve.updatePrice.sendTransactionAsync(newPrice);
+        // Create a price that is REALLY bad, where nothing is returned
+        await liquidatorMock.setPriceNumerator.sendTransactionAsync(
+          new BigNumber(1000),
+          { from: deployerAccount},
+        );
 
-    //     const bidQuantity = rebalancingSetQuantityToIssue.div(10 ** 10);
-    //     await rebalancingHelper.placeBidAsync(
-    //       rebalanceAuctionModule,
-    //       rebalancingSetToken.address,
-    //       bidQuantity,
-    //     );
-    //   });
+        const bidQuantity = rebalancingSetQuantityToIssue.div(10 ** 10);
+        await rebalancingHelper.placeBidAsync(
+          rebalanceAuctionModule,
+          rebalancingSetToken.address,
+          bidQuantity,
+        );
+      });
 
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
 
     describe('when settleRebalance is called from Drawdown State', async () => {
       beforeEach(async () => {

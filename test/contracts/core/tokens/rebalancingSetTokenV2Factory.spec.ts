@@ -423,6 +423,24 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       });
     });
 
+    describe('when the proposalPeriod is less than the minimum', async () => {
+      beforeEach(async () => {
+        callDataProposalPeriod = new BigNumber(5000);
+
+        subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
+          callDataManagerAddress,
+          callDataLiquidator,
+          callDataProposalPeriod,
+          callDataRebalanceInterval,
+          callDataFailAuctionPeriod,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe('when the rebalanceInterval is less than the minimum', async () => {
       beforeEach(async () => {
         callDataRebalanceInterval = new BigNumber(5000);

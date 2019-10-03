@@ -42,7 +42,9 @@ contract SettleRebalance is
     using SafeMath for uint256;
 
     /* ============ Internal Functions ============ */
-    function validateSettleRebalance()
+    function validateSettleRebalance(
+        uint256 _nextUnitShares
+    )
         internal
     {
         // Must be in Rebalance state to call settlement
@@ -50,32 +52,24 @@ contract SettleRebalance is
             rebalanceState == RebalancingLibrary.State.Rebalance,
             "RebalancingSetToken.settleRebalance: State must be Rebalance"
         );
+
+        require(
+            _nextUnitShares > 0,
+            "RebalancingSetToken.settleRebalance: Failed rebalance, unitshares equals 0. Call endFailedAuction."
+        );
     }
 
-    function issueNextSet()
+    function issueNextSet(
+        uint256 _issueQuantity
+    )
         internal
         returns(uint256)
     {
-        // Calculate next Set quantities
-        uint256 issueAmount;
-        uint256 nextUnitShares;
-        (
-            issueAmount,
-            nextUnitShares
-        ) = calculateNextSetIssueQuantity();
-
-        require(
-            nextUnitShares > 0,
-            "RebalancingSetToken.settleRebalance: Failed rebalance, unitshares equals 0. Call endFailedAuction."
-        );
-
         // Issue nextSet to RebalancingSetToken
         core.issueInVault(
             address(nextSet),
-            issueAmount
+            _issueQuantity
         );
-
-        return nextUnitShares;
     }
 
     function liquidatorSettleRebalance()

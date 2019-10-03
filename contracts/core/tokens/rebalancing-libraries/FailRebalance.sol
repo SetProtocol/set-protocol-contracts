@@ -55,7 +55,6 @@ contract FailRebalance is
             "FailRebalance: Rebalancing Set Token must be in Rebalance State"
         );
 
-        bool triggersBreached = failTriggersBreached();
         require(
             failTriggersBreached(),
             "FailRebalance: Fail triggers have not been breached"
@@ -80,7 +79,16 @@ contract FailRebalance is
         internal
         returns(bool)
     {
-        return liquidatorTriggersBreached() || failPeriodBreached();
+        return liquidatorTriggersBreached() || failPeriodBreached() || newUnitSharesIsZero();
+    }
+
+    function newUnitSharesIsZero()
+        internal
+        returns (bool)
+    {
+        (, uint256 newUnitShares) = calculateNextSetIssueQuantity();
+
+        return newUnitShares == 0;
     }
 
     function liquidatorTriggersBreached()

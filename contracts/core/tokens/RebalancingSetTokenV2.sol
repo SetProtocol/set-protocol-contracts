@@ -156,9 +156,14 @@ contract RebalancingSetTokenV2 is
     function settleRebalance()
         external
     {
-        validateSettleRebalance();
+        (
+            uint256 issueQuantity,
+            uint256 newUnitShares
+        ) = calculateNextSetIssueQuantity();
 
-        uint256 newUnitShares = issueNextSet();
+        validateSettleRebalance(newUnitShares);
+
+        issueNextSet(issueQuantity);
 
         liquidatorSettleRebalance();
 

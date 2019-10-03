@@ -9,7 +9,6 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  LiquidatorMockContract,
   SetTokenFactoryContract,
   TransferProxyContract,
   VaultContract

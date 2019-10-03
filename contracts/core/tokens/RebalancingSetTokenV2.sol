@@ -26,34 +26,39 @@ import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { IWhiteList } from "../interfaces/IWhiteList.sol";
-import { RebalancingSetState } from "./rebalancing-libraries/RebalancingSetState.sol";
+import { RebalancingSetState } from "./rebalancing-v2/RebalancingSetState.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
-import { Issuance } from "./rebalancing-libraries/Issuance.sol";
-import { BackwardsCompatability } from "./rebalancing-libraries/BackwardsCompatability.sol";
-import { PlaceBid } from "./rebalancing-libraries/PlaceBid.sol";
-import { Propose } from "./rebalancing-libraries/Propose.sol";
-import { StartRebalance } from "./rebalancing-libraries/StartRebalance.sol";
-import { FailRebalance } from "./rebalancing-libraries/FailRebalance.sol";
-import { SettleRebalance } from "./rebalancing-libraries/SettleRebalance.sol";
+import { Issuance } from "./rebalancing-v2/Issuance.sol";
+import { BackwardsCompatability } from "./rebalancing-v2/BackwardsCompatability.sol";
+import { PlaceBid } from "./rebalancing-v2/PlaceBid.sol";
+import { Propose } from "./rebalancing-v2/Propose.sol";
+import { StartRebalance } from "./rebalancing-v2/StartRebalance.sol";
+import { FailRebalance } from "./rebalancing-v2/FailRebalance.sol";
+import { SettleRebalance } from "./rebalancing-v2/SettleRebalance.sol";
 
 
 /**
  * @title RebalancingSetTokenV2
  * @author Set Protocol
  *
- * Implementation of Rebalancing Set token.
+ * Implementation of Rebalancing Set token V2. Major improvements vs. V1 include:
+ * - Decouple the Rebalancing Set state and rebalance state from the rebalance execution (e.g. auction)
+ *   This allows us to rapidly iterate and build new liquidation mechanisms for rebalances.
+ * - RebalanceAuctionModule execution should be backwards compatible with V1. 
+ * - Bidding and auction parameters state no longer live on this contract. They live on the liquidator
+ *
  */
 contract RebalancingSetTokenV2 is
+    BackwardsCompatability,
     ERC20,
     ERC20Detailed,
-    RebalancingSetState,
-    BackwardsCompatability,
-    Propose,
-    StartRebalance,
+    FailRebalance,
     Issuance,
     PlaceBid,
+    Propose,
+    RebalancingSetState,
     SettleRebalance,
-    FailRebalance
+    StartRebalance
 {
 
     /* ============ Constructor ============ */
@@ -62,17 +67,20 @@ contract RebalancingSetTokenV2 is
      * Constructor function for Rebalancing Set Token
      *
      * @param _factory                   Factory used to create the Rebalancing Set
-     * @param _manager                   Manager of the Rebalancing Set
+     * @param _manager                   Address that is able to propose the next Set
+     * @param _liquidator                Address of the liquidator contract
      * @param _initialSet                Initial set that collateralizes the Rebalancing set
+     * @param _componentWhiteList        Whitelist that nextSet components are checked against during propose
      * @param _initialUnitShares         Units of currentSet that equals one share
      * @param _naturalUnit               The minimum multiple of Sets that can be issued or redeemed
-
+     * @param _rebalanceConfig           [_proposalPeriod, _rebalanceInterval, _rebalanceFailPeriod]
+     *                                   _proposalPeriod: Time for users to inspect a rebalance proposal
+     *                                   _rebalanceInterval: Minimum amount of time between rebalances
+     *                                   _rebalanceFailPeriod: Time after auctionStart 
+     *                                      where something in the rebalance has ovviously gone wrong
      * @param _name                      The name of the new RebalancingSetTokenV2
      * @param _symbol                    The symbol of the new RebalancingSetTokenV2
      */
-
-     // TODO - update javadocs
-
     constructor(
         IRebalancingSetFactory _factory,
         address _manager,
@@ -81,10 +89,7 @@ contract RebalancingSetTokenV2 is
         IWhiteList _componentWhiteList,
         uint256 _initialUnitShares,
         uint256 _naturalUnit,
-        uint256[3] memory _rebalanceConfig, // [_proposalPeriod, _rebalanceInterval, _rebalanceFailPeriod]
-                         //  _proposalPeriod            Amount of time for users to inspect a rebalance proposal
-                         //  _rebalanceInterval         Minimum amount of time between rebalances
-                         //  _componentWhiteList        Address of component WhiteList contract
+        uint256[3] memory _rebalanceConfig,
         string memory _name,
         string memory _symbol
     )

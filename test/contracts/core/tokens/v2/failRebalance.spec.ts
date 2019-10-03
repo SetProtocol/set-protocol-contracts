@@ -33,7 +33,7 @@ import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
+import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 
 BigNumberSetup.configure();
@@ -41,7 +41,7 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
-const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
@@ -64,7 +64,7 @@ contract('FailRebalance', accounts => {
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
-  const rebalancingHelper = new RebalancingHelper(
+  const rebalancingHelper = new RebalancingSetV2Helper(
     deployerAccount,
     coreHelper,
     erc20Helper,
@@ -359,15 +359,10 @@ contract('FailRebalance', accounts => {
   describe('#RebalanceAuctionModule.redeemFromFailedRebalance', async () => {
     let subjectCaller: Address;
 
-    let proposalPeriod: BigNumber;
-
     let nextSetToken: SetTokenContract;
     let currentSetToken: SetTokenContract;
 
-    let baseSetQuantityToIssue: BigNumber;
-    let rebalancingSetQuantityToIssue: BigNumber = ether(7);
-    let setTokenNaturalUnits: BigNumber[];
-    let rebalancingSetUnitShares: BigNumber;
+    let rebalancingSetQuantityToIssue: BigNumber;
     let currentSetIssueQuantity: BigNumber;
 
     beforeEach(async () => {
@@ -377,7 +372,6 @@ contract('FailRebalance', accounts => {
         factory.address,
         transferProxy.address,
         setTokensToDeploy,
-        undefined || setTokenNaturalUnits
       );
 
       currentSetToken = setTokens[0];
@@ -418,7 +412,7 @@ contract('FailRebalance', accounts => {
         liquidatorMock,
         nextSetToken,
         managerAccount,
-      );      
+      );
 
       subjectCaller = deployerAccount;
     });

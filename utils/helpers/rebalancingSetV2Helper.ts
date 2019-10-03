@@ -5,8 +5,12 @@ import { Address } from 'set-protocol-utils';
 import {
   CoreContract,
   CoreMockContract,
+  LiquidatorMockContract,
   SetTokenContract,
+  RebalanceAuctionModuleContract,
+  RebalancingSetTokenContract,
   RebalancingSetTokenV2Contract,
+  VaultContract,
   WhiteListContract,
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
@@ -16,14 +20,13 @@ import {
   DEFAULT_REBALANCING_NATURAL_UNIT,
   DEFAULT_UNIT_SHARES,
   ONE_DAY_IN_SECONDS,
+  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 
-import { Blockchain } from '../blockchain';
 import { getWeb3 } from '../web3Helper';
 
-import { CoreHelper } from './coreHelper';
-import { ERC20Helper } from './erc20Helper';
+import { RebalancingHelper } from './rebalancingHelper';
 
 const web3 = getWeb3();
 const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
@@ -32,24 +35,7 @@ declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 
-export class RebalancingSetV2Helper {
-  private _tokenOwnerAddress: Address;
-  private _coreHelper: CoreHelper;
-  private _erc20Helper: ERC20Helper;
-  private _blockchain: Blockchain;
-
-  constructor(
-    tokenOwnerAddress: Address,
-    coreHelper: CoreHelper,
-    erc20Helper: ERC20Helper,
-    blockchain: Blockchain,
-  ) {
-    this._tokenOwnerAddress = tokenOwnerAddress;
-
-    this._coreHelper = coreHelper;
-    this._erc20Helper = erc20Helper;
-    this._blockchain = blockchain;
-  }
+export class RebalancingSetV2Helper extends RebalancingHelper {
 
   /* ============ Deployment ============ */
 
@@ -210,5 +196,104 @@ export class RebalancingSetV2Helper {
     await rebalancingSetToken.startRebalance.sendTransactionAsync(
       { from: caller, gas: DEFAULT_GAS }
     );
+  }
+
+  public async transitionToDrawdownV2Async(
+    core: CoreLikeContract,
+    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    rebalanceAuctionModule: RebalanceAuctionModuleContract,
+    liquidatorMock: LiquidatorMockContract,
+    nextSetToken: SetTokenContract,
+    manager: Address,
+    caller: Address = this._tokenOwnerAddress,
+  ): Promise<void> {
+    await this.transitionToRebalanceV2Async(
+      core,
+      rebalancingSetToken,
+      nextSetToken,
+      manager
+    );
+
+    const minimumBid = await liquidatorMock.minimumBid.callAsync();
+    await this.placeBidAsync(
+      rebalanceAuctionModule,
+      rebalancingSetToken.address,
+      minimumBid,
+    );
+
+    // Transition to rebalance
+    await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
+    await rebalancingSetToken.endFailedRebalance.sendTransactionAsync(
+      { from: caller, gas: DEFAULT_GAS }
+    );
+  }
+
+  public async placeBidAsync(
+    rebalanceAuctionModule: RebalanceAuctionModuleContract,
+    rebalancingSetTokenAddress: Address,
+    bidQuantity: BigNumber,
+    allowPartialFill: boolean = false,
+    caller: Address = this._tokenOwnerAddress,
+  ): Promise<void> {
+    await rebalanceAuctionModule.bid.sendTransactionAsync(
+      rebalancingSetTokenAddress,
+      bidQuantity,
+      allowPartialFill,
+      { from: caller, gas: DEFAULT_GAS }
+    );
+  }
+
+  public async endFailedRebalanceAsync(
+    rebalancingSetToken: RebalancingSetTokenContract,
+    caller: Address = this._tokenOwnerAddress,
+  ): Promise<void> {
+    await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
+      { gas: DEFAULT_GAS },
+    );
+  }
+
+  public async getNextSetIssueQuantity(
+    nextSetToken: SetTokenContract,
+    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    vault: VaultContract,
+  ): Promise<BigNumber> {
+    // Calculate max Set issue amount
+    const maxIssueAmount = await this.calculateMaxIssueAmount(
+      nextSetToken,
+      rebalancingSetToken,
+      vault,
+    );
+
+    const nextSetTokenNaturalUnit = await nextSetToken.naturalUnit.callAsync();
+
+    return maxIssueAmount.div(nextSetTokenNaturalUnit);
+  }
+
+  public async calculateMaxIssueAmount(
+    nextSetToken: SetTokenContract,
+    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    vault: VaultContract,
+  ): Promise<BigNumber> {
+    // Start with a big number
+    let maxIssueAmount = UNLIMITED_ALLOWANCE_IN_BASE_UNITS;
+
+    const naturalUnit = await nextSetToken.naturalUnit.callAsync();
+    const components = await nextSetToken.getComponents.callAsync();
+    const units = await nextSetToken.getUnits.callAsync();
+
+    for (let i = 0; i < components.length; i++) {
+      const componentVaultBalance = await vault.getOwnerBalance.callAsync(
+        rebalancingSetToken.address,
+        components[i],
+      );
+
+      const impliedIssueAmount = componentVaultBalance.div(units[i]).mul(naturalUnit);
+
+      if (impliedIssueAmount.lt(maxIssueAmount)) {
+        maxIssueAmount = impliedIssueAmount;
+      }
+    }
+
+    return maxIssueAmount;
   }
 }

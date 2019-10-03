@@ -17,9 +17,7 @@ import {
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
-  StandardTokenMockContract,
   TransferProxyContract,
-  UpdatableConstantAuctionPriceCurveContract,
   VaultContract,
   WhiteListContract,
 } from '@utils/contracts';
@@ -29,23 +27,17 @@ import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
   DEFAULT_UNIT_SHARES,
-  ZERO,
-  DEFAULT_AUCTION_PRICE_NUMERATOR,
-  DEFAULT_AUCTION_PRICE_DIVISOR,
   DEFAULT_REBALANCING_NATURAL_UNIT,
 } from '@utils/constants';
 import {
   getExpectedTransferLog,
-  getExpectedNewManagerAddedLog,
-  getExpectedRebalanceProposedLog,
-  getExpectedRebalanceStartedLog,
 } from '@utils/contract_logs/rebalancingSetToken';
 import { expectRevertError, assertTokenBalanceAsync } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
+import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 
 BigNumberSetup.configure();
@@ -64,13 +56,9 @@ contract('RebalancingSetState', accounts => {
   const [
     deployerAccount,
     managerAccount,
-    otherAccount,
-    fakeTokenAccount,
-    invalidAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
-  let components: StandardTokenMockContract[] = [];
 
   let coreMock: CoreMockContract;
   let transferProxy: TransferProxyContract;
@@ -83,7 +71,7 @@ contract('RebalancingSetState', accounts => {
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
-  const rebalancingHelper = new RebalancingHelper(
+  const rebalancingHelper = new RebalancingSetV2Helper(
     deployerAccount,
     coreHelper,
     erc20Helper,

@@ -53,10 +53,10 @@ const {
 } = SetUtils.CONSTANTS;
 
 export class RebalancingHelper {
-  private _tokenOwnerAddress: Address;
-  private _coreHelper: CoreHelper;
-  private _erc20Helper: ERC20Helper;
-  private _blockchain: Blockchain;
+  public _tokenOwnerAddress: Address;
+  public _coreHelper: CoreHelper;
+  public _erc20Helper: ERC20Helper;
+  public _blockchain: Blockchain;
 
   constructor(
     tokenOwnerAddress: Address,

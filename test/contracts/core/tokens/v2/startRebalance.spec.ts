@@ -17,7 +17,6 @@ import {
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
-  StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
   WhiteListContract,
@@ -36,7 +35,7 @@ import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
+import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 
 BigNumberSetup.configure();
@@ -53,8 +52,6 @@ contract('StartRebalance', accounts => {
   const [
     deployerAccount,
     managerAccount,
-    otherAccount,
-    fakeTokenAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -70,7 +67,7 @@ contract('StartRebalance', accounts => {
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
-  const rebalancingHelper = new RebalancingHelper(
+  const rebalancingHelper = new RebalancingSetV2Helper(
     deployerAccount,
     coreHelper,
     erc20Helper,
@@ -125,9 +122,6 @@ contract('StartRebalance', accounts => {
     let currentSetToken: SetTokenContract;
     let nextSetToken: SetTokenContract;
     let rebalancingSetQuantityToIssue: BigNumber;
-    let setTokenNaturalUnits: BigNumber[];
-
-    let startingCurrentSetAmount: BigNumber;
 
     beforeEach(async () => {
       const setTokensToDeploy = 2;
@@ -136,7 +130,6 @@ contract('StartRebalance', accounts => {
         factory.address,
         transferProxy.address,
         setTokensToDeploy,
-        undefined || setTokenNaturalUnits
       );
 
       currentSetToken = setTokens[0];

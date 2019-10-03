@@ -88,7 +88,7 @@ contract FailRebalance is
     {
         (, uint256 newUnitShares) = calculateNextSetIssueQuantity();
 
-        return newUnitShares == 0;
+        return hasBidded && liquidatorTriggersBreached() && newUnitShares == 0;
     }
 
     function liquidatorTriggersBreached()

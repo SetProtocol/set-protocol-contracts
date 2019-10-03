@@ -35,7 +35,7 @@ import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
+import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -71,7 +71,7 @@ contract('RebalancingSetState', accounts => {
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
-  const rebalancingHelper = new RebalancingHelper(
+  const rebalancingHelper = new RebalancingSetV2Helper(
     deployerAccount,
     coreHelper,
     erc20Helper,

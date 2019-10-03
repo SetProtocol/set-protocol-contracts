@@ -3,7 +3,6 @@ require('module-alias/register');
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
-import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
@@ -18,7 +17,6 @@ import {
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
-  StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
   WhiteListContract,
@@ -30,15 +28,12 @@ import {
   ONE_DAY_IN_SECONDS,
   ZERO,
 } from '@utils/constants';
-import {
-  getExpectedRebalanceStartedLog,
-} from '@utils/contract_logs/rebalancingSetToken';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
+import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 
@@ -47,8 +42,6 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
-const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
-const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
@@ -57,7 +50,6 @@ contract('PlaceBid', accounts => {
     deployerAccount,
     managerAccount,
     otherAccount,
-    fakeTokenAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -74,7 +66,7 @@ contract('PlaceBid', accounts => {
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
-  const rebalancingHelper = new RebalancingHelper(
+  const rebalancingHelper = new RebalancingSetV2Helper(
     deployerAccount,
     coreHelper,
     erc20Helper,
@@ -86,9 +78,6 @@ contract('PlaceBid', accounts => {
   let currentSetToken: SetTokenContract;
   let nextSetToken: SetTokenContract;
   let rebalancingSetQuantityToIssue: BigNumber;
-  let setTokenNaturalUnits: BigNumber[];
-
-  let startingCurrentSetAmount: BigNumber;
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -129,7 +118,6 @@ contract('PlaceBid', accounts => {
       factory.address,
       transferProxy.address,
       setTokensToDeploy,
-      undefined || setTokenNaturalUnits
     );
 
     currentSetToken = setTokens[0];
@@ -349,7 +337,7 @@ contract('PlaceBid', accounts => {
         currentSetToken,
         subjectBidQuantity,
         liquidatorCurrentUnits,
-      );      
+      );
       expect(JSON.stringify(returnedOutflow)).to.equal(JSON.stringify(expectedOutflowUnits));
     });
   });
@@ -388,7 +376,7 @@ contract('PlaceBid', accounts => {
     });
 
     it('should return the correct inflow units', async () => {
-      const [,inflowUnits] = await subject();
+      const [, inflowUnits] = await subject();
 
       const liquidatorNextSetUnits = await liquidatorMock.getCombinedNextSetUnits.callAsync();
       const expectedInflowUnits = await liquidatorHelper.getBidPriceValues(
@@ -401,7 +389,7 @@ contract('PlaceBid', accounts => {
     });
 
     it('should return the correct outflow units', async () => {
-      const [,,outflowUnits] = await subject();
+      const [, , outflowUnits] = await subject();
 
       const liquidatorCurrentUnits = await liquidatorMock.getCombinedCurrentUnits.callAsync();
       const expectedOutflowUnits = await liquidatorHelper.getBidPriceValues(

@@ -29,7 +29,7 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
  * @title StartRebalance
  * @author Set Protocol
  *
- * Default implementation of Rebalancing Set Token propose function
+ * Implementation of Rebalancing Set Token V2 start rebalance functionality
  */
 contract StartRebalance is 
     RebalancingSetState
@@ -46,19 +46,18 @@ contract StartRebalance is
     /* ============ Internal Functions ============ */
 
     /**
-     * Function used to validate time passed to start a rebalance
-     *
+     * Validate that start rebalance can be called
      */
     function validateStartRebalance()
         internal
     {
-        // Must be in "Proposal" state before going into "Rebalance" state
+        // Must be in "Proposal" state
         require(
             rebalanceState == RebalancingLibrary.State.Proposal,
             "StartRebalance.validateStartRebalance: State must be Proposal"
         );
 
-        // Be sure the full proposal period has elapsed
+        // The full proposal period must have elapsed
         require(
             block.timestamp >= proposalStartTime.add(proposalPeriod),
             "StartRebalance.validateStartRebalance: Proposal period not elapsed"
@@ -66,44 +65,11 @@ contract StartRebalance is
     }
 
     /**
-     * Calculates the maximum redemption quantity and redeems the Set into the vault.
-     * Also updates startingCurrentSets state variable
+     * Calculates the maximum quantity of the currentSet that can be redeemed. This is defined
+     * by how many naturalUnits worth of the Set there are.
      *
-     * @return                      Amount of currentSets remaining
+     * @return   Maximum quantity of the current Set that can be redeemed
      */
-    function redeemCurrentSet()
-        internal
-        returns (uint256)
-    {
-        uint256 startingCurrentSets = calculateStartingSetQuantity();
-
-        core.redeemInVault(address(currentSet), startingCurrentSets);
-
-        return startingCurrentSets;
-    }
-
-    function liquidatorStartRebalance(
-        uint256 _startingCurrentSetQuantity
-    )
-        internal
-    {
-        liquidator.startRebalance(
-            currentSet,
-            nextSet,
-            _startingCurrentSetQuantity
-        );
-    }
-
-    function transitionToRebalance()
-        internal
-    {
-        // Update state parameters
-        rebalanceStartTime = block.timestamp;
-        rebalanceState = RebalancingLibrary.State.Rebalance;
-
-        emit RebalanceStarted(address(currentSet), address(nextSet));
-    }
-
     function calculateStartingSetQuantity()
         internal
         view
@@ -117,5 +83,47 @@ contract StartRebalance is
 
         // Rounds the redemption quantity to a multiple of the current Set natural unit and sets variable
         return currentSetBalance.div(currentSetNaturalUnit).mul(currentSetNaturalUnit);
+    }
+
+    /**
+     * Redeems the current SetToken into the vault.
+     *
+     * @param _startingCurrentSetQuantity      Amount of currentSets the rebalance is initiated with
+     */
+    function redeemCurrentSet(
+        uint256 _startingCurrentSetQuantity
+    )
+        internal
+    {
+        core.redeemInVault(address(currentSet), _startingCurrentSetQuantity);
+    }
+
+    /**
+     * Signals to the Liquidator to initiate the rebalance.
+     *
+     * @param _startingCurrentSetQuantity      Amount of currentSets the rebalance is initiated with
+     */
+    function liquidatorStartRebalance(
+        uint256 _startingCurrentSetQuantity
+    )
+        internal
+    {
+        liquidator.startRebalance(
+            currentSet,
+            nextSet,
+            _startingCurrentSetQuantity
+        );
+    }
+
+    /**
+     * Updates rebalance-related state parameters.
+     */
+    function transitionToRebalance()
+        internal
+    {
+        rebalanceStartTime = block.timestamp;
+        rebalanceState = RebalancingLibrary.State.Rebalance;
+
+        emit RebalanceStarted(address(currentSet), address(nextSet));
     }
 }

@@ -29,7 +29,7 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
  * @title PlaceBid
  * @author Set Protocol
  *
- * Default implementation of Rebalancing Set Token propose function
+ * Implementation of Rebalancing Set Token V2 bidding-related functionality.
  */
 contract PlaceBid is 
     RebalancingSetState
@@ -39,7 +39,31 @@ contract PlaceBid is
     /* ============ Internal Functions ============ */
 
     /*
-     * Validate Place bid during rebalance auction. Can only be called by Core.
+     * Validates conditions to retrieve a Bid Price.
+     *
+     * @param _quantity                 The amount of currentSet to be rebalanced
+     */
+    function validateGetBidPrice(
+        uint256 _quantity
+    )
+        internal
+        view
+    {
+        // Must be in Rebalance State
+        require(
+            rebalanceState == RebalancingLibrary.State.Rebalance,
+            "RebalancingSetToken.getBidPrice: State must be Rebalance"
+        );
+
+        // Bid amount must be greater than zero
+        require(
+            _quantity > 0,
+            "RebalancingSetToken.getBidPrice: Bid must be > 0"
+        );
+    }
+
+    /*
+     * Validates that the conditions to retrieve a bid. Can only be
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
      */
@@ -56,30 +80,6 @@ contract PlaceBid is
         );
 
         validateGetBidPrice(_quantity);
-    }
-
-    /*
-     * Place bid during rebalance auction. Can only be called by Core.
-     *
-     * @param _quantity                 The amount of currentSet to be rebalanced
-     */
-    function validateGetBidPrice(
-        uint256 _quantity
-    )
-        internal
-        view
-    {
-        // Make sure that bid amount is greater than zero
-        require(
-            _quantity > 0,
-            "RebalancingSetToken.placeBid: Bid must be > 0"
-        );
-
-        // Confirm in Rebalance State
-        require(
-            rebalanceState == RebalancingLibrary.State.Rebalance,
-            "RebalancingSetToken.getBidPrice: State must be Rebalance"
-        );
     }
 
     function updateHasBiddedIfNecessary()

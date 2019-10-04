@@ -155,8 +155,10 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Initiates the rebalance. Can only be called if the proposal period has elapsed after
-     * a proposal.
+     * Initiates the rebalance through coordination with the Liquidator contract.
+     *
+     * Can only be called if the proposal period has elapsed after
+     * a proposal. 
      *
      * Anyone can call this function.
      */
@@ -165,7 +167,9 @@ contract RebalancingSetTokenV2 is
     {
         validateStartRebalance();
 
-        uint256 startingCurrentSetQuantity = redeemCurrentSet();
+        uint256 startingCurrentSetQuantity = calculateStartingSetQuantity();
+
+        redeemCurrentSet(startingCurrentSetQuantity);
 
         liquidatorStartRebalance(startingCurrentSetQuantity);
 
@@ -173,11 +177,10 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Get token inflows and outflows required for bid. Also the amount of Rebalancing
-     * Sets that would be generated.
+     * Get token inflows and outflows required for bid from the Liquidator.
      *
      * @param _quantity               The amount of currentSet to be rebalanced
-     * @return combinedTokenArray     Array of token addresses invovled in rebalancing
+     * @return combinedTokenArray     Array of token addresses involved in rebalancing
      * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
      * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
      */
@@ -194,10 +197,10 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Place bid during rebalance auction. Can only be called by Core.
+     * Place bid during rebalance auction. Can only be called by an approved module.
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
-     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
+     * @return combinedTokenArray       Array of token addresses involved in rebalancing
      * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
      * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
      */

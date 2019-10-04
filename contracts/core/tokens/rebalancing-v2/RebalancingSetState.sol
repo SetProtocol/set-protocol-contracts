@@ -35,34 +35,82 @@ contract RebalancingSetState {
 
     /* ============ State Variables ============ */
 
-    // System related
+    // ----------------------------------------------------------------------
+    // System Related
+    // ----------------------------------------------------------------------
+
+    // Set Protocol's Core Contract
     ICore public core;
+
+    // The Factory that created this Set
     IRebalancingSetFactory public factory;
+
+    // Set Protocol's Vault contract
     IVault public vault;
+
+    // The token whitelist that is checked against during proposals
     IWhiteList public componentWhiteList;
+
+    // Contract holding the state and logic required for rebalance liquidation
+    // The Liquidator interacts closely with the Set during rebalances.
     ILiquidator public liquidator;
+
+    // The account that is allowed to make proposals
     address public manager;
 
+    // ----------------------------------------------------------------------
     // Rebalance configuration
-    uint256 public proposalPeriod;
+    // ----------------------------------------------------------------------
+
+    // Time in seconds that must elapsed from last rebalance to propose
     uint256 public rebalanceInterval;
+
+    // Time in seconds that must elapse after proposal before rebalance can be initiated
+    uint256 public proposalPeriod;
+
+    // Time in seconds after rebalanceStartTime before the Set believes the auction has failed
     uint256 public rebalanceFailPeriod;
 
-    // Current state
+    // ----------------------------------------------------------------------
+    // Current State
+    // ----------------------------------------------------------------------
+
+    // The Set currently collateralizing the Rebalancing Set
     ISetToken public currentSet;
+
+    // The number of currentSet per naturalUnit of the Rebalancing Set
     uint256 public unitShares;
+
+    // The minimum issuable value of a Set
     uint256 public naturalUnit;
+
+    // The current state of the Set (e.g. Default, Proposal, Rebalance, Drawdown)
     RebalancingLibrary.State public rebalanceState;
+
+    // The number of rebalances in the Set's history; starts at index 0
     uint256 public rebalanceIndex;
+
+    // The timestamp of the last completed rebalance
     uint256 public lastRebalanceTimestamp;
 
+    // ----------------------------------------------------------------------
     // Live Rebalance State
+    // ----------------------------------------------------------------------
+
+    // The proposal's SetToken to rebalance into
     ISetToken public nextSet;
+
+    // The timestamp of the last valid proposal
     uint256 public proposalStartTime;
+
+    // The timestamp of the last rebalance was initiated at
     uint256 public rebalanceStartTime;
+
+    // Whether a successful bid has been made during the rebalance
     bool public hasBidded;
 
-    // To be used if token put into Drawdown State
+    // In the event a rebalance has failed, these are the list of components
+    // that can be withdrawn by users
     address[] internal failedRebalanceComponents;
 
     /* ============ Modifier ============ */

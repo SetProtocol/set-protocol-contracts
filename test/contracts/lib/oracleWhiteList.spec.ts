@@ -372,10 +372,20 @@ contract('OracleWhiteList', accounts => {
         expect(validity).to.be.false;
       });
     });
+
+    describe('when passed array has no addresses', async () => {
+      beforeEach(async () => {
+        subjectAddressesToVerify = [];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#getOracleAddressesByToken', async () => {
-    let subjectAddressesToVerify: Address[];
+    let subjectTokenAddresses: Address[];
 
     beforeEach(async () => {
       oracleWhiteList = await coreHelper.deployOracleWhiteListAsync(
@@ -383,11 +393,11 @@ contract('OracleWhiteList', accounts => {
         [firstOracleAddress, secondOracleAddress, thirdOracleAddress]
       );
 
-      subjectAddressesToVerify = [firstTokenAddress, secondTokenAddress, thirdTokenAddress];
+      subjectTokenAddresses = [firstTokenAddress, secondTokenAddress, thirdTokenAddress];
     });
 
     async function subject(): Promise<Address[]> {
-      return await oracleWhiteList.getOracleAddressesByToken.callAsync(subjectAddressesToVerify);
+      return await oracleWhiteList.getOracleAddressesByToken.callAsync(subjectTokenAddresses);
     }
 
     it('returns array of oracle addresses', async () => {
@@ -398,7 +408,17 @@ contract('OracleWhiteList', accounts => {
 
     describe('when one of the tokens is not whitelisted', async () => {
       beforeEach(async () => {
-        subjectAddressesToVerify = [firstTokenAddress, secondTokenAddress, thirdTokenAddress, fourthTokenAddress];
+        subjectTokenAddresses = [firstTokenAddress, secondTokenAddress, thirdTokenAddress, fourthTokenAddress];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when passed array has no addresses', async () => {
+      beforeEach(async () => {
+        subjectTokenAddresses = [];
       });
 
       it('should revert', async () => {

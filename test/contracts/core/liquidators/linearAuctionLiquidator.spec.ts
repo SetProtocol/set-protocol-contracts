@@ -1,6 +1,7 @@
 require('module-alias/register');
 
 import * as _ from 'lodash';
+import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
@@ -12,8 +13,10 @@ import {
   LinearAuctionLiquidatorContract,
   OracleWhiteListContract,
   RebalancingSetTokenFactoryContract,
+  SetTokenContract,
   SetTokenFactoryContract,
   TransferProxyContract,
+  UpdatableOracleMockContract,
   VaultContract,
   WhiteListContract,
 } from '@utils/contracts';
@@ -23,15 +26,18 @@ import {
   DEFAULT_AUCTION_PRICE_DIVISOR,
   ONE_HOUR_IN_SECONDS,
 } from '@utils/constants';
+import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
+const CoreMock = artifacts.require('CoreMock');
 // const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 // const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
@@ -51,6 +57,11 @@ contract('LinearAuctionLiquidator', accounts => {
   let oracleWhiteList: OracleWhiteListContract;
   let linearAuctionLiquidator: LinearAuctionLiquidatorContract;
 
+  let currentSet: SetTokenContract;
+  let nextSet: SetTokenContract;
+  let tokens: Address[];
+  let oracleMocks: UpdatableOracleMockContract[];
+
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
   const rebalancingHelper = new RebalancingHelper(
@@ -60,10 +71,19 @@ contract('LinearAuctionLiquidator', accounts => {
     blockchain
   );
 
+  const liquidatorHelper = new LiquidatorHelper(
+    deployerAccount,
+    coreHelper,
+    erc20Helper,
+    blockchain
+  );
+
   before(async () => {
+    ABIDecoder.addABI(CoreMock.abi);
   });
 
   after(async () => {
+    ABIDecoder.removeABI(CoreMock.abi);
   });
 
   beforeEach(async () => {
@@ -74,37 +94,43 @@ contract('LinearAuctionLiquidator', accounts => {
     coreMock = await coreHelper.deployCoreMockAsync(transferProxy, vault);
 
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
+
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
     rebalancingFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
     );
+    await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
+    await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
 
-    const tokens = await erc20Helper.deployTokensAsync(2, deployerAccount);
-    const oracleOne = await rebalancingHelper.deployUpdatableOracleMockAsync(
-      ether(100)
+    [currentSet, nextSet] = await rebalancingHelper.createSetTokensAsync(
+      coreMock,
+      factory.address,
+      transferProxy.address,
+      2
     );
-    const oracleTwo = await rebalancingHelper.deployUpdatableOracleMockAsync(
-      ether(1)
+
+    const currentSetComponents = await currentSet.getComponents.callAsync();
+    const nextSetComponents = await nextSet.getComponents.callAsync();
+    tokens = _.union(currentSetComponents, nextSetComponents);
+    oracleMocks = await liquidatorHelper.deployUpdatableOracleMocksAsync(
+      [ether(100), ether(1), ether(75)]
     );
 
     oracleWhiteList = await coreHelper.deployOracleWhiteListAsync(
-      [tokens[0].address, tokens[1].address],
-      [oracleOne.address, oracleTwo.address]
+      tokens,
+      [oracleMocks[0].address, oracleMocks[1].address, oracleMocks[2].address]
     );
-
-    await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
-    await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
   });
 
   afterEach(async () => {
     blockchain.revertAsync();
   });
 
-  describe.only('#constructor', async () => {
+  describe('#constructor', async () => {
     let subjectCoreInstance: Address;
     let subjectOracleWhiteListInstance: Address;
-    let subjectPriceDivisor: BigNumber;
+    let subjectPricePrecision: BigNumber;
     let subjectAuctionTimeToPivot: BigNumber;
     let subjectAuctionSpeed: BigNumber;
     let subjectName: string;
@@ -112,17 +138,17 @@ contract('LinearAuctionLiquidator', accounts => {
     beforeEach(async () => {
       subjectCoreInstance = coreMock.address;
       subjectOracleWhiteListInstance = oracleWhiteList.address;
-      subjectPriceDivisor = DEFAULT_AUCTION_PRICE_DIVISOR;
+      subjectPricePrecision = DEFAULT_AUCTION_PRICE_DIVISOR;
       subjectAuctionTimeToPivot = ONE_HOUR_IN_SECONDS.mul(4);
       subjectAuctionSpeed = ONE_HOUR_IN_SECONDS.div(3);
       subjectName = 'LinearAuctionLiquidator';
     });
 
     async function subject(): Promise<LinearAuctionLiquidatorContract> {
-      return rebalancingHelper.deployLinearAuctionLiquidatorAsync(
+      return liquidatorHelper.deployLinearAuctionLiquidatorAsync(
         subjectCoreInstance,
         subjectOracleWhiteListInstance,
-        subjectPriceDivisor,
+        subjectPricePrecision,
         subjectAuctionTimeToPivot,
         subjectAuctionSpeed,
         subjectName
@@ -146,14 +172,14 @@ contract('LinearAuctionLiquidator', accounts => {
     it('creates a liquidator with the correct price divisor', async () => {
       linearAuctionLiquidator = await subject();
 
-      const actualPriceDivisor = await linearAuctionLiquidator.priceDivisor.callAsync();
-      expect(actualPriceDivisor).to.be.bignumber.equal(subjectPriceDivisor);
+      const actualPricePrecision = await linearAuctionLiquidator.pricePrecision.callAsync();
+      expect(actualPricePrecision).to.be.bignumber.equal(subjectPricePrecision);
     });
 
     it('creates a liquidator with the correct auction time to pivot', async () => {
       linearAuctionLiquidator = await subject();
 
-      const actualAuctionTimeToPivot = await linearAuctionLiquidator.auctionTimeToPivot.callAsync();
+      const actualAuctionTimeToPivot = await linearAuctionLiquidator.timeToPivot.callAsync();
       expect(actualAuctionTimeToPivot).to.be.bignumber.equal(subjectAuctionTimeToPivot);
     });
 
@@ -172,38 +198,231 @@ contract('LinearAuctionLiquidator', accounts => {
     });
   });
 
-  // describe('#processProposal', async () => {
-  //   let subjectCurrentSet: Address;
-  //   let subjectNextSet: Address;
+  describe('#processProposal', async () => {
+    let subjectCurrentSet: Address;
+    let subjectNextSet: Address;
+    let subjectCaller: Address;
 
-  //   let auctionTimeToPivot: BigNumber;
-  //   let auctionSpeed: BigNumber;
+    let auctionTimeToPivot: BigNumber;
+    let auctionSpeed: BigNumber;
+    let pricePrecision: BigNumber;
 
-  //   beforeEach(async () => {
-  //     auctionTimeToPivot = ONE_HOUR_IN_SECONDS.mul(4);
-  //     auctionSpeed = ONE_HOUR_IN_SECONDS.div(3);
-  //     const name = "LinearAuctionLiquidator";
-  //     linearAuctionLiquidator = await rebalancingHelper.deployLinearAuctionLiquidatorAsync(
-  //       coreMock.address,
-  //       DEFAULT_AUCTION_PRICE_DIVISOR,
-  //       auctionTimeToPivot,
-  //       auctionSpeed,
-  //       name
-  //     );
-  //   });
+    beforeEach(async () => {
+      auctionTimeToPivot = ONE_HOUR_IN_SECONDS.mul(4);
+      auctionSpeed = ONE_HOUR_IN_SECONDS.div(3);
+      pricePrecision = DEFAULT_AUCTION_PRICE_DIVISOR;
+      const name = 'LinearAuctionLiquidator';
+      linearAuctionLiquidator = await liquidatorHelper.deployLinearAuctionLiquidatorAsync(
+        coreMock.address,
+        oracleWhiteList.address,
+        pricePrecision,
+        auctionTimeToPivot,
+        auctionSpeed,
+        name
+      );
 
-  //   async function subject(): Promise<LinearAuctionLiquidatorContract> {
-  //     return linearAuctionLiquidator.processProposal.sendTransaction(
-  //       subjectCurrentSet,
-  //       subjectNextSet
-  //     );
-  //   }
+      subjectCurrentSet = currentSet.address;
+      subjectNextSet = nextSet.address;
+      subjectCaller = deployerAccount;
+    });
 
-  //   it('creates a liquidator with the correct core instance', async () => {
-  //     linearAuctionLiquidator = await subject();
+    async function subject(): Promise<string> {
+      return linearAuctionLiquidator.processProposal.sendTransactionAsync(
+        subjectCurrentSet,
+        subjectNextSet,
+        { from: subjectCaller }
+      );
+    }
 
-  //     const actualCoreInstance = await linearAuctionLiquidator.coreInstance.callAsync();
-  //     expect(actualCoreInstance).to.equal(subjectCoreInstance);
-  //   });
-  // });
+    it('sets the correct combinedTokenArray', async () => {
+      await subject();
+
+      const actualCombinedTokenArray =  await linearAuctionLiquidator.getCombinedTokenArray.callAsync();
+      expect(actualCombinedTokenArray).to.deep.equal(tokens);
+    });
+
+    it('calculates the correct startPrice', async () => {
+      await subject();
+
+      const currentSetValue = await liquidatorHelper.calculateSetTokenValueAsync(currentSet, oracleWhiteList);
+      const nextSetValue = await liquidatorHelper.calculateSetTokenValueAsync(nextSet, oracleWhiteList);
+      const auctionParams = liquidatorHelper.calculateLinearAuctionParameters(
+        currentSetValue,
+        nextSetValue,
+        pricePrecision,
+        auctionTimeToPivot,
+        auctionSpeed,
+      );
+
+      const [, actualStartPrice, ] = await linearAuctionLiquidator.linearAuctionDetails.callAsync(subjectCaller);
+      expect(actualStartPrice).to.be.bignumber.equal(auctionParams['auctionStartPrice']);
+    });
+
+    it('calculates the correct pivotPrice', async () => {
+      await subject();
+
+      const currentSetValue = await liquidatorHelper.calculateSetTokenValueAsync(currentSet, oracleWhiteList);
+      const nextSetValue = await liquidatorHelper.calculateSetTokenValueAsync(nextSet, oracleWhiteList);
+      const auctionParams = liquidatorHelper.calculateLinearAuctionParameters(
+        currentSetValue,
+        nextSetValue,
+        pricePrecision,
+        auctionTimeToPivot,
+        auctionSpeed,
+      );
+
+      const [, , actualPivotPrice] = await linearAuctionLiquidator.linearAuctionDetails.callAsync(subjectCaller);
+      expect(actualPivotPrice).to.be.bignumber.equal(auctionParams['auctionPivotPrice']);
+    });
+
+    describe('when a token is passed that does not have a matching oracle', async () => {
+      beforeEach(async () => {
+        await oracleWhiteList.removeTokenOraclePair.sendTransactionAsync(tokens[0]);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe.only('#startRebalance', async () => {
+    let subjectCurrentSet: Address;
+    let subjectNextSet: Address;
+    let subjectStartingCurrentSetQuantity;
+    let subjectCaller: Address;
+
+    let auctionTimeToPivot: BigNumber;
+    let auctionSpeed: BigNumber;
+    let pricePrecision: BigNumber;
+
+    beforeEach(async () => {
+      auctionTimeToPivot = ONE_HOUR_IN_SECONDS.mul(4);
+      auctionSpeed = ONE_HOUR_IN_SECONDS.div(3);
+      pricePrecision = DEFAULT_AUCTION_PRICE_DIVISOR;
+      const name = 'LinearAuctionLiquidator';
+      linearAuctionLiquidator = await liquidatorHelper.deployLinearAuctionLiquidatorAsync(
+        coreMock.address,
+        oracleWhiteList.address,
+        pricePrecision,
+        auctionTimeToPivot,
+        auctionSpeed,
+        name
+      );
+
+      await linearAuctionLiquidator.processProposal.sendTransactionAsync(
+        currentSet.address,
+        nextSet.address,
+        { from: subjectCaller},
+      );
+
+      subjectCurrentSet = currentSet.address;
+      subjectNextSet = nextSet.address;
+      subjectStartingCurrentSetQuantity = ether(100);
+      subjectCaller = deployerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return linearAuctionLiquidator.startRebalance.sendTransactionAsync(
+        subjectCurrentSet,
+        subjectNextSet,
+        subjectStartingCurrentSetQuantity,
+        { from: subjectCaller }
+      );
+    }
+
+    it('sets the correct starting time', async () => {
+      await subject();
+      const block = await web3.eth.getBlock('latest');
+
+      const [actualStartTime, , ] = await linearAuctionLiquidator.linearAuctionDetails.callAsync(subjectCaller);
+      expect(actualStartTime).to.be.bignumber.equal(new BigNumber(block.timestamp));
+    });
+
+    it('sets the correct minimumBid', async () => {
+      await subject();
+
+      const expectedMinimumBid = await liquidatorHelper.calculateMinimumBidAsync(
+        currentSet,
+        nextSet,
+        pricePrecision
+      );
+      const [actualMinimumBid, , ] = await linearAuctionLiquidator.generalAuctionDetails.callAsync(subjectCaller);
+      expect(actualMinimumBid).to.be.bignumber.equal(expectedMinimumBid);
+    });
+
+    it('sets the correct startingCurrentSets', async () => {
+      await subject();
+
+      const [, actualStartingCurrentSets, ] = await linearAuctionLiquidator.generalAuctionDetails.callAsync(
+        subjectCaller
+      );
+      expect(actualStartingCurrentSets).to.be.bignumber.equal(subjectStartingCurrentSetQuantity);
+    });
+
+    it('sets the correct remainingCurrentSets', async () => {
+      await subject();
+
+      const [, , actualRemainingCurrentSets] =  await linearAuctionLiquidator.generalAuctionDetails.callAsync(
+        subjectCaller
+      );
+      expect(actualRemainingCurrentSets).to.be.bignumber.equal(subjectStartingCurrentSetQuantity);
+    });
+
+    it('sets the correct combinedCurrentSetUnits', async () => {
+      await subject();
+
+      const minimumBid = await liquidatorHelper.calculateMinimumBidAsync(
+        currentSet,
+        nextSet,
+        pricePrecision
+      );
+
+      const expectedCurrentSetUnits = await liquidatorHelper.constructCombinedUnitArrayAsync(
+        currentSet,
+        tokens,
+        minimumBid,
+        pricePrecision,
+      );
+
+      const actualCurrentSetUnits =  await linearAuctionLiquidator.getCombinedCurrentSetUnits.callAsync(subjectCaller);
+      expect(actualCurrentSetUnits).to.deep.equal(expectedCurrentSetUnits);
+    });
+
+    it('sets the correct combinedNextSetUnits', async () => {
+      await subject();
+
+      const minimumBid = await liquidatorHelper.calculateMinimumBidAsync(
+        currentSet,
+        nextSet,
+        pricePrecision
+      );
+
+      const expectedNextSetUnits = await liquidatorHelper.constructCombinedUnitArrayAsync(
+        nextSet,
+        tokens,
+        minimumBid,
+        pricePrecision,
+      );
+
+      const actualNextSetUnits =  await linearAuctionLiquidator.getCombinedNextSetUnits.callAsync(subjectCaller);
+      expect(actualNextSetUnits).to.deep.equal(expectedNextSetUnits);
+    });
+
+    describe('when less than a minimumBid amount of Sets are collateralizing the RebalancingSet', async () => {
+      beforeEach(async () => {
+        const minimumBid = await liquidatorHelper.calculateMinimumBidAsync(
+          currentSet,
+          nextSet,
+          pricePrecision
+        );
+
+        subjectStartingCurrentSetQuantity = minimumBid.div(10);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
 });

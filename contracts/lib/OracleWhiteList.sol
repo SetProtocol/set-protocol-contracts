@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 Set Labs Inc.
+    Copyright 2019 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import { AddressArrayUtils } from "./AddressArrayUtils.sol";
  * @title OracleWhiteList
  * @author Set Protocol
  *
- * Whitelist that matches whitelisted tokens to their on chain price oracle
+ * WhiteList that matches whitelisted tokens to their on chain price oracle
  */
 contract OracleWhiteList is
     Ownable,
@@ -55,7 +55,7 @@ contract OracleWhiteList is
     /* ============ Constructor ============ */
 
     /**
-     * Constructor function for OracleWhitelist
+     * Constructor function for OracleWhiteList
      *
      * Allow initial addresses to be passed in so a separate transaction is not required for each.
      * Each token address passed is matched with a corresponding oracle address at the same index.
@@ -73,7 +73,7 @@ contract OracleWhiteList is
         // Require that token and oracle address arrays are of equal length
         require(
             _initialTokenAddresses.length == _initialOracleAddresses.length,
-            "OracleWhitelist.constructor: Token and Oracle array lengths must match."
+            "OracleWhiteList.constructor: Token and Oracle array lengths must match."
         );
 
         // Add each of initial addresses to state
@@ -206,8 +206,16 @@ contract OracleWhiteList is
         view
         returns (address[] memory)
     {
-        // Create oracle addresses array
+        // Get length of passed array
         uint256 arrayLength = _tokenAddresses.length;
+
+        // Check that passed array length is greater than 0
+        require(
+            arrayLength > 0,
+            "OracleWhiteList.areValidAddresses: Array length must be greater than 0."
+        );
+
+        // Instantiate oracle addresses array
         address[] memory oracleAddresses = new address[](arrayLength);
 
         for (uint256 i = 0; i < arrayLength; i++) {
@@ -233,7 +241,16 @@ contract OracleWhiteList is
         view
         returns (bool)
     {
-        for (uint256 i = 0; i < _tokenAddresses.length; i++) {
+        // Get length of passed array
+        uint256 arrayLength = _tokenAddresses.length;
+
+        // Check that passed array length is greater than 0
+        require(
+            arrayLength > 0,
+            "OracleWhiteList.areValidAddresses: Array length must be greater than 0."
+        );
+
+        for (uint256 i = 0; i < arrayLength; i++) {
             // Return false if token address doesn't have matching oracle address
             if (oracleWhiteList[_tokenAddresses[i]] == address(0)) {
                 return false;

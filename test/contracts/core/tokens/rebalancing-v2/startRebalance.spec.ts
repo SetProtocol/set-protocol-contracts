@@ -227,7 +227,7 @@ contract('StartRebalance', accounts => {
 
         const startingCurrentSetAmount = rebalancingSetQuantityToIssue;
 
-        const actualStartingCurrentSetAmount = await liquidatorMock.startingCurrentSetQuantity.callAsync();
+        const actualStartingCurrentSetAmount = await liquidatorMock.startingCurrentSetAmount.callAsync();
         expect(actualStartingCurrentSetAmount).to.be.bignumber.equal(startingCurrentSetAmount);
       });
 
@@ -276,7 +276,7 @@ contract('StartRebalance', accounts => {
 
         await subject();
 
-        const actualStartingCurrentSetAmount = await liquidatorMock.startingCurrentSetQuantity.callAsync();
+        const actualStartingCurrentSetAmount = await liquidatorMock.startingCurrentSetAmount.callAsync();
         const expectedVaultBalances = _.map(components, (component, idx) => {
           const requiredQuantityToRedeem = actualStartingCurrentSetAmount.div(naturalUnit).mul(componentUnits[idx]);
           return existingVaultBalances[idx].add(requiredQuantityToRedeem);

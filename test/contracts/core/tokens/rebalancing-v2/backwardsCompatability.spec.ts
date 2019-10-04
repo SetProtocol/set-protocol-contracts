@@ -15,16 +15,20 @@ import {
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
+  SetTokenContract,
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
   WhiteListContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
+import { ether } from '@utils/units';
 import {
   ONE_DAY_IN_SECONDS,
+  DEFAULT_GAS,
   DEFAULT_UNIT_SHARES,
   DEFAULT_REBALANCING_NATURAL_UNIT,
+  NULL_ADDRESS,
 } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -46,6 +50,7 @@ contract('BackwardsCompatability', accounts => {
   const [
     deployerAccount,
     managerAccount,
+    auctionLibrary,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -70,6 +75,10 @@ contract('BackwardsCompatability', accounts => {
     blockchain
   );
   const liquidatorHelper = new LiquidatorHelper(deployerAccount);
+
+  let currentSetToken: SetTokenContract;
+  let nextSetToken: SetTokenContract;
+  let rebalancingSetQuantityToIssue: BigNumber;
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -104,40 +113,174 @@ contract('BackwardsCompatability', accounts => {
 
     liquidatorMock = await liquidatorHelper.deployLiquidatorMock();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
+
+    const setTokensToDeploy = 2;
+    const setTokens = await rebalancingHelper.createSetTokensAsync(
+      coreMock,
+      factory.address,
+      transferProxy.address,
+      setTokensToDeploy,
+    );
+
+    currentSetToken = setTokens[0];
+    nextSetToken = setTokens[1];
+
+    const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+    await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
+
+    const proposalPeriod = ONE_DAY_IN_SECONDS;
+    const failPeriod = ONE_DAY_IN_SECONDS;
+    rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
+      coreMock,
+      rebalancingFactory.address,
+      managerAccount,
+      liquidatorMock.address,
+      currentSetToken.address,
+      proposalPeriod,
+      failPeriod,
+    );
+
+    await coreMock.issue.sendTransactionAsync(
+      currentSetToken.address,
+      ether(8),
+      {from: deployerAccount}
+    );
+    await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+    rebalancingSetQuantityToIssue = ether(7);
+    await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+
+    await rebalancingHelper.transitionToRebalanceV2Async(
+      coreMock,
+      rebalancingSetToken,
+      nextSetToken,
+      managerAccount,
+    )
   });
 
   afterEach(async () => {
     blockchain.revertAsync();
   });
 
-  describe('#getFailedAuctionWithdrawComponents', async () => {
+  describe('#getAuctionPriceParameters', async () => {
+    async function subject(): Promise<BigNumber[]> {
+      return rebalancingSetToken.getAuctionPriceParameters.callAsync();
+    }
 
-    beforeEach(async () => {
-      components = await erc20Helper.deployTokensAsync(1, deployerAccount);
+    it('returns the correct getAuctionPriceParameters', async () => {
+      const retrievedResult = await subject();
 
-      const initialSet = components[0].address;
-      const manager = managerAccount;
-      const liquidator = liquidatorMock.address;
-      const initialUnitShares = DEFAULT_UNIT_SHARES;
-      const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const failPeriod = ONE_DAY_IN_SECONDS;
-
-      rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
-        rebalancingFactory.address,
-        manager,
-        liquidator,
-        initialSet,
-        rebalancingComponentWhiteList.address,
-        initialUnitShares,
-        initialNaturalUnit,
-        proposalPeriod,
-        rebalanceInterval,
-        failPeriod,
-      );
+      const expectedResult =  await liquidatorMock.getAuctionPriceParameters.callAsync();
+      expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
     });
+  });
 
+  describe('#getCombinedCurrentUnits', async () => {
+    async function subject(): Promise<BigNumber[]> {
+      return rebalancingSetToken.getCombinedCurrentUnits.callAsync();
+    }
+
+    it('returns the correct getCombinedCurrentUnits', async () => {
+      const retrievedResult = await subject();
+
+      const expectedResult =  await liquidatorMock.getCombinedCurrentUnits.callAsync();
+      expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
+    });
+  });
+
+  describe('#getCombinedNextSetUnits', async () => {
+    async function subject(): Promise<BigNumber[]> {
+      return rebalancingSetToken.getCombinedNextSetUnits.callAsync();
+    }
+
+    it('returns the correct getCombinedNextSetUnits', async () => {
+      const retrievedResult = await subject();
+
+      const expectedResult =  await liquidatorMock.getCombinedNextSetUnits.callAsync();
+      expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
+    });
+  });
+
+  describe('#getCombinedTokenArray', async () => {
+    async function subject(): Promise<Address[]> {
+      return rebalancingSetToken.getCombinedTokenArray.callAsync();
+    }
+
+    it('returns the correct getCombinedTokenArray', async () => {
+      const retrievedResult = await subject();
+
+      const expectedResult =  await liquidatorMock.getCombinedTokenArray.callAsync();
+      expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
+    });
+  });
+
+
+  describe('#getCombinedTokenArrayLength', async () => {
+    async function subject(): Promise<BigNumber> {
+      return rebalancingSetToken.getCombinedTokenArrayLength.callAsync();
+    }
+
+    it('returns the correct getCombinedTokenArrayLength', async () => {
+      const retrievedResult = await subject();
+
+      const expectedResult =  await liquidatorMock.getCombinedTokenArray.callAsync();
+      expect(retrievedResult).to.bignumber.equal(expectedResult.length);
+    });
+  });
+
+  describe('#startingCurrentSetAmount', async () => {
+    async function subject(): Promise<BigNumber> {
+      return rebalancingSetToken.startingCurrentSetAmount.callAsync();
+    }
+
+    it('returns the correct startingCurrentSetAmount', async () => {
+      const retrievedResult = await subject();
+
+      const expectedResult =  await liquidatorMock.startingCurrentSetAmount.callAsync();
+      expect(retrievedResult).to.bignumber.equal(expectedResult);
+    });
+  });
+
+  describe.only('#auctionPriceParameters', async () => {
+    async function subject(): Promise<any> {
+      return rebalancingSetToken.auctionPriceParameters.callAsync();
+    }
+
+    it('returns the correct auctionPriceParameters', async () => {
+      const retrievedResult = await subject();
+
+      const expectedResult =  await liquidatorMock.auctionPriceParameters.callAsync();
+      expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
+    });
+  });
+
+  describe.only('#biddingParameters', async () => {
+    async function subject(): Promise<any> {
+      return rebalancingSetToken.biddingParameters.callAsync();
+    }
+
+    it('returns the correct biddingParameters', async () => {
+      const retrievedResult = await subject();
+
+      const expectedResult =  await liquidatorMock.biddingParameters.callAsync();
+      expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
+    });
+  });
+
+  describe('#auctionLibrary', async () => {
+    async function subject(): Promise<Address> {
+      return rebalancingSetToken.auctionLibrary.callAsync();
+    }
+
+    it('returns the correct auctionLibrary', async () => {
+      const retrievedAuctionLibrary = await subject();
+
+      const auctionLibrary =  await liquidatorMock.auctionLibrary.callAsync();
+      expect(retrievedAuctionLibrary).to.equal(auctionLibrary);
+    });
+  });
+
+  describe('#getFailedAuctionWithdrawComponents', async () => {
     async function subject(): Promise<Address[]> {
       return rebalancingSetToken.getFailedAuctionWithdrawComponents.callAsync();
     }
@@ -151,32 +294,6 @@ contract('BackwardsCompatability', accounts => {
   });
 
   describe('#getBiddingParameters', async () => {
-    beforeEach(async () => {
-      components = await erc20Helper.deployTokensAsync(1, deployerAccount);
-
-      const initialSet = components[0].address;
-      const manager = managerAccount;
-      const liquidator = liquidatorMock.address;
-      const initialUnitShares = DEFAULT_UNIT_SHARES;
-      const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const failPeriod = ONE_DAY_IN_SECONDS;
-
-      rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
-        rebalancingFactory.address,
-        manager,
-        liquidator,
-        initialSet,
-        rebalancingComponentWhiteList.address,
-        initialUnitShares,
-        initialNaturalUnit,
-        proposalPeriod,
-        rebalanceInterval,
-        failPeriod,
-      );
-    });
-
     async function subject(): Promise<BigNumber[]> {
       return rebalancingSetToken.getBiddingParameters.callAsync();
     }

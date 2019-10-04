@@ -15,8 +15,10 @@
 */
 
 pragma solidity 0.5.7;
+pragma experimental "ABIEncoderV2";
 
 import { ISetToken } from "./ISetToken.sol";
+import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 
 /**
  * @title ILiquidator
@@ -77,4 +79,62 @@ interface ILiquidator {
         external
         view
         returns (uint256);
+
+    /* ============ Backwards Compatability ============ */
+
+    /*
+     * Get auctionPriceParameters of Rebalancing Set
+     *
+     * @return  auctionParams       Object with auction information
+     */
+    function getAuctionPriceParameters()
+        external
+        view
+        returns (uint256[] memory);
+
+
+    function getCombinedCurrentUnits()
+        external
+        view
+        returns (uint256[] memory);
+    function getCombinedNextSetUnits()
+        external
+        view
+        returns (uint256[] memory);
+
+    /*
+     * Get combinedTokenArray of Rebalancing Set
+     *
+     * @return  combinedTokenArray
+     */
+    function getCombinedTokenArray()
+        external
+        view
+        returns (address[] memory);
+
+    /*
+     * Get combinedTokenArray length of Rebalancing Set
+     *
+     * @return  combinedTokenArray length
+     */
+    function getCombinedTokenArrayLength()
+        external
+        view
+        returns (uint256);
+    function startingCurrentSetAmount()
+        external
+        view
+        returns (uint256);
+    function auctionPriceParameters()
+        external
+        view
+        returns (RebalancingLibrary.AuctionPriceParameters memory);
+    function biddingParameters()
+        external
+        view
+        returns (RebalancingLibrary.BiddingParameters memory);
+    function auctionLibrary()
+        external
+        view
+        returns (address);
 }

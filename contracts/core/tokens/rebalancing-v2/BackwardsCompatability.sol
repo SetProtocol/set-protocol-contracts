@@ -17,6 +17,7 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
+import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./RebalancingSetState.sol";
 
 
@@ -29,6 +30,107 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
 contract BackwardsCompatability is 
     RebalancingSetState
 {
+
+    /**
+     * Note Old interface for RebalancingSetTokenV1 propose function will automatically reverts.
+     */
+
+    /*
+     * If supported in Liquidator, return auctionPriceParameters.
+     *
+     * @return  auctionParams       Object with auction information
+     */
+    function getAuctionPriceParameters()
+        external
+        view
+        returns (uint256[] memory)
+    {
+        return liquidator.getAuctionPriceParameters();
+    }
+
+    /*
+     * If supported in Liquidator, return combinedCurrentUnits.
+     *
+     * @return       uint256 Array of the currentSet units
+     */
+    function getCombinedCurrentUnits()
+        external
+        view
+        returns (uint256[] memory)
+    {
+        return liquidator.getCombinedCurrentUnits();
+    }
+
+    /*
+     * If supported in Liquidator, return combinedNextSetUnits.
+     *
+     * @return       uint256 Array of the nextSet units
+     */
+    function getCombinedNextSetUnits()
+        external
+        view
+        returns (uint256[] memory)
+    {
+        return liquidator.getCombinedNextSetUnits();
+    }
+
+    /*
+     * Get combinedTokenArray of Rebalancing Set
+     *
+     * @return  combinedTokenArray
+     */
+    function getCombinedTokenArray()
+        external
+        view
+        returns (address[] memory)
+    {
+        return liquidator.getCombinedTokenArray();
+    }
+
+    /*
+     * Get combinedTokenArray length of Rebalancing Set
+     *
+     * @return  combinedTokenArray length
+     */
+    function getCombinedTokenArrayLength()
+        external
+        view
+        returns (uint256)
+    {
+        return liquidator.getCombinedTokenArray().length;
+    }
+
+    function startingCurrentSetAmount()
+        external
+        view
+        returns (uint256)
+    {
+        return liquidator.startingCurrentSetAmount();
+    }
+
+    function auctionPriceParameters()
+        external
+        view
+        returns (RebalancingLibrary.AuctionPriceParameters memory)
+    {
+        return liquidator.auctionPriceParameters();
+    }
+
+    function biddingParameters()
+        external
+        view
+        returns (RebalancingLibrary.BiddingParameters memory)
+    {
+        return liquidator.biddingParameters();
+    }
+
+    function auctionLibrary()
+        external
+        view
+        returns (address)
+    {
+        return liquidator.auctionLibrary();
+    }
 
     /*
      * Get biddingParameters of Rebalancing Set for backwards compatability

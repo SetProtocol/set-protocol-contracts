@@ -170,7 +170,8 @@ contract FailRebalance is
     }
 
     /*
-     * If the determination is Drawdown State, set the drawdown components.
+     * If the determination is Drawdown State, set the drawdown components which is the union of
+     * the current and next Set components.
      *
      * @param  _newRebalanceState      The new State to transition to
      */

@@ -21,6 +21,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";
 import { ILiquidator } from "../../core/interfaces/ILiquidator.sol";
+import { RebalancingLibrary } from "../../core/lib/RebalancingLibrary.sol";
 import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
 
 /**
@@ -35,6 +36,11 @@ contract LiquidatorMock
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
 
+    // Legacy Data
+    address public auctionLibrary;
+    RebalancingLibrary.AuctionPriceParameters public auctionPriceParameters;
+    RebalancingLibrary.BiddingParameters public biddingParameters;
+
     uint256 constant public priceDivisor = 1000;
     uint256 public priceNumerator = 1000;
 
@@ -45,7 +51,7 @@ contract LiquidatorMock
     uint256 public minimumBid;
 
     uint256 public startRebalanceTime;
-    uint256 public startingCurrentSetQuantity;
+    uint256 public startingCurrentSetAmount;
     uint256 public remainingCurrentSets;
 
     ISetToken public startRebalanceCurrentSet;
@@ -122,7 +128,7 @@ contract LiquidatorMock
     function startRebalance(
         ISetToken _currentSet,
         ISetToken _nextSet,
-        uint256 _startingCurrentSetQuantity
+        uint256 _startingCurrentSetAmount
     )
         external
     {
@@ -130,8 +136,8 @@ contract LiquidatorMock
         startRebalanceCurrentSet = _currentSet;
 
         startRebalanceTime = block.timestamp;
-        startingCurrentSetQuantity = _startingCurrentSetQuantity;
-        remainingCurrentSets = startingCurrentSetQuantity;
+        startingCurrentSetAmount = _startingCurrentSetAmount;
+        remainingCurrentSets = startingCurrentSetAmount;
 
         minimumBid = calculateMinimumBid(currentSet, nextSet);
 
@@ -178,6 +184,18 @@ contract LiquidatorMock
         external
     {
         endFailedRebalanceHasBeenCalled = true;
+    }
+
+    function getAuctionPriceParameters()
+        external
+        returns (uint256[] memory)
+    {
+        uint256[] memory auctionParams = new uint256[](4);
+        auctionParams[0] = auctionPriceParameters.auctionStartTime;
+        auctionParams[1] = auctionPriceParameters.auctionTimeToPivot;
+        auctionParams[2] = auctionPriceParameters.auctionStartPrice;
+        auctionParams[3] = auctionPriceParameters.auctionPivotPrice;
+        return auctionParams;
     }
 
     function getCombinedTokenArray()

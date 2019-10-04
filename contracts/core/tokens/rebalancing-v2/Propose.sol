@@ -53,7 +53,7 @@ contract Propose is
     function validateProposal(
         ISetToken _nextSet
     )
-        public
+        internal
         view
     {
         // New Proposal can only be made in Default state

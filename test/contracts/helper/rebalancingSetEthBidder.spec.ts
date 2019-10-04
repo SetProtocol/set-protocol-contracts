@@ -193,10 +193,10 @@ contract('RebalancingSetEthBidder', accounts => {
       defaultBaseSetComponent2 = await erc20Helper.deployTokenAsync(deployerAccount);
 
       // Create the Set (default is 2 components)
-      const currentComponentAddresses = [
+      const defaultComponentAddresses = [
         defaultBaseSetComponent.address, defaultBaseSetComponent2.address,
       ];
-      const currentComponentUnits = [
+      const defaultComponentUnits = [
         ether(0.01), ether(0.01),
       ];
 
@@ -204,8 +204,8 @@ contract('RebalancingSetEthBidder', accounts => {
       defaultSetToken = await coreHelper.createSetTokenAsync(
         coreMock,
         factory.address,
-        currentComponentAddresses,
-        currentComponentUnits,
+        defaultComponentAddresses,
+        defaultComponentUnits,
         defaultBaseSetNaturalUnit,
       );
 
@@ -250,7 +250,7 @@ contract('RebalancingSetEthBidder', accounts => {
       beforeEach(async () => {
         // Create the Rebalancing Set without WETH component
         proposalPeriod = ONE_DAY_IN_SECONDS;
-        rebalancingUnitShares = new BigNumber(10 ** 18);
+        rebalancingUnitShares = ether(1);
         rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
           coreMock,
           rebalancingFactory.address,
@@ -393,53 +393,6 @@ contract('RebalancingSetEthBidder', accounts => {
         expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
       });
 
-      describe('when submitted ETH quantity is higher than required inflow', async () => {
-        beforeEach(async () => {
-          subjectEthQuantity = ether(10);
-        });
-
-        it("transfers the correct amount of tokens to the bidder's wallet", async () => {
-          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
-            rebalancingSetToken,
-            subjectQuantity,
-            DEFAULT_AUCTION_PRICE_NUMERATOR
-          );
-
-          const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
-
-          const tokenInstances = await erc20Helper.retrieveTokenInstancesAsync(combinedTokenArray);
-
-          const oldEthBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
-          const oldReceiverTokenBalances = await erc20Helper.getTokenBalances(
-            tokenInstances,
-            subjectCaller
-          );
-          // Replace WETH balance with ETH balance
-          const oldReceiverTokenAndEthBalances = _.map(oldReceiverTokenBalances, (balance, index) =>
-            combinedTokenArray[index] === weth.address ? new BigNumber(oldEthBalance) : balance
-          );
-
-          const txHash = await subject();
-
-          const newEthBalance =  await web3.eth.getBalance(subjectCaller);
-          const newReceiverTokenBalances = await erc20Helper.getTokenBalances(
-            tokenInstances,
-            subjectCaller
-          );
-          // Replace WETH balance with ETH balance and factor in gas paid
-          const totalGasInEth = await getGasUsageInEth(txHash);
-          const newReceiverTokenAndEthBalances = _.map(newReceiverTokenBalances, (balance, index) =>
-            combinedTokenArray[index] === weth.address ? totalGasInEth.add(newEthBalance) : balance
-          );
-
-          const expectedReceiverBalances = _.map(oldReceiverTokenAndEthBalances, (balance, index) =>
-            balance.add(expectedTokenFlows['outflowArray'][index]).sub(expectedTokenFlows['inflowArray'][index])
-          );
-
-          expect(JSON.stringify(newReceiverTokenAndEthBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
-        });
-      });
-
       describe('but quantity is zero', async () => {
         beforeEach(async () => {
           subjectQuantity = ZERO;
@@ -578,7 +531,54 @@ contract('RebalancingSetEthBidder', accounts => {
         });
       });
 
-      describe('but ETH input quantity is not enough', async () => {
+      describe('when submitted ETH quantity is higher than required inflow', async () => {
+        beforeEach(async () => {
+          subjectEthQuantity = ether(10);
+        });
+
+        it("transfers the correct amount of tokens and ETH to the bidder's wallet", async () => {
+          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+            rebalancingSetToken,
+            subjectQuantity,
+            DEFAULT_AUCTION_PRICE_NUMERATOR
+          );
+
+          const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+
+          const tokenInstances = await erc20Helper.retrieveTokenInstancesAsync(combinedTokenArray);
+
+          const oldEthBalance = new BigNumber(await web3.eth.getBalance(subjectCaller));
+          const oldReceiverTokenBalances = await erc20Helper.getTokenBalances(
+            tokenInstances,
+            subjectCaller
+          );
+          // Replace WETH balance with ETH balance
+          const oldReceiverTokenAndEthBalances = _.map(oldReceiverTokenBalances, (balance, index) =>
+            combinedTokenArray[index] === weth.address ? new BigNumber(oldEthBalance) : balance
+          );
+
+          const txHash = await subject();
+
+          const newEthBalance =  await web3.eth.getBalance(subjectCaller);
+          const newReceiverTokenBalances = await erc20Helper.getTokenBalances(
+            tokenInstances,
+            subjectCaller
+          );
+          // Replace WETH balance with ETH balance and factor in gas paid
+          const totalGasInEth = await getGasUsageInEth(txHash);
+          const newReceiverTokenAndEthBalances = _.map(newReceiverTokenBalances, (balance, index) =>
+            combinedTokenArray[index] === weth.address ? totalGasInEth.add(newEthBalance) : balance
+          );
+
+          const expectedReceiverBalances = _.map(oldReceiverTokenAndEthBalances, (balance, index) =>
+            balance.add(expectedTokenFlows['outflowArray'][index]).sub(expectedTokenFlows['inflowArray'][index])
+          );
+
+          expect(JSON.stringify(newReceiverTokenAndEthBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
+        });
+      });
+
+      describe('but ETH input quantity is lower than required inflow', async () => {
         beforeEach(async () => {
           subjectEthQuantity = ZERO;
         });
@@ -621,7 +621,7 @@ contract('RebalancingSetEthBidder', accounts => {
       beforeEach(async () => {
         // Create the Rebalancing Set with the WETH component
         proposalPeriod = ONE_DAY_IN_SECONDS;
-        rebalancingUnitShares = new BigNumber(10 ** 18);
+        rebalancingUnitShares = ether(1);
         rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
           coreMock,
           rebalancingFactory.address,
@@ -718,6 +718,108 @@ contract('RebalancingSetEthBidder', accounts => {
         );
 
         expect(JSON.stringify(newReceiverTokenAndEthBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
+      });
+    });
+
+    describe('when WETH is neither inflow nor outflow in a bid', async () => {
+      beforeEach(async () => {
+        // Create the Rebalancing Set with the default component
+        proposalPeriod = ONE_DAY_IN_SECONDS;
+        rebalancingUnitShares = ether(1);
+        rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+          coreMock,
+          rebalancingFactory.address,
+          managerAccount,
+          defaultSetToken.address,
+          proposalPeriod,
+          rebalancingUnitShares
+        );
+
+        // Approve tokens and issue defaultSetToken
+        const baseSetIssueQuantity = ether(1);
+        const requiredWrappedEther = baseSetIssueQuantity.mul(wethComponentUnits).div(wethBaseSetNaturalUnit);
+        await weth.deposit.sendTransactionAsync(
+          { from: deployerAccount, value: requiredWrappedEther.toString() }
+        );
+
+        await erc20Helper.approveTransfersAsync([
+          defaultBaseSetComponent,
+          defaultBaseSetComponent2,
+        ], transferProxy.address);
+        await coreMock.issue.sendTransactionAsync(
+          defaultSetToken.address,
+          baseSetIssueQuantity,
+          {from: deployerAccount}
+        );
+
+        // Use issued defaultSetToken to issue rebalancingSetToken
+        await erc20Helper.approveTransfersAsync([defaultSetToken], transferProxy.address);
+
+        rebalancingSetTokenQuantityToIssue = baseSetIssueQuantity
+          .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
+          .div(rebalancingUnitShares);
+
+        await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetTokenQuantityToIssue);
+
+        // Determine minimum bid
+        const decOne = await defaultSetToken.naturalUnit.callAsync();
+        const decTwo = await wethSetToken.naturalUnit.callAsync();
+        minBid = new BigNumber(Math.max(decOne.toNumber(), decTwo.toNumber()) * 1000);
+
+        subjectCaller = deployerAccount;
+        subjectQuantity = minBid;
+        subjectRebalancingSetToken = rebalancingSetToken.address;
+        subjectExecutePartialQuantity = false;
+
+        // Create new next Set with no weth component
+        const defaultNextBaseSetComponent = await erc20Helper.deployTokenAsync(deployerAccount);
+        const defaultNextBaseSetComponent2 = await erc20Helper.deployTokenAsync(deployerAccount);
+        const defaultNextComponentAddresses = [
+          defaultNextBaseSetComponent.address, defaultNextBaseSetComponent2.address,
+        ];
+        const defaultNextComponentUnits = [
+          ether(0.01), ether(0.01),
+        ];
+        const defaultBaseSetNaturalUnit = ether(0.001);
+        const defaultNextSetToken = await coreHelper.createSetTokenAsync(
+          coreMock,
+          factory.address,
+          defaultNextComponentAddresses,
+          defaultNextComponentUnits,
+          defaultBaseSetNaturalUnit,
+        );
+
+        // Transition to rebalance
+        await rebalancingHelper.defaultTransitionToRebalanceAsync(
+          coreMock,
+          rebalancingComponentWhiteList,
+          rebalancingSetToken,
+          defaultNextSetToken,
+          constantAuctionPriceCurve.address,
+          managerAccount
+        );
+
+        // Approve tokens to rebalancingSetEthBidder contract
+        await erc20Helper.approveTransfersAsync([
+          defaultNextBaseSetComponent,
+          defaultNextBaseSetComponent2,
+        ], rebalancingSetEthBidder.address);
+
+        subjectEthQuantity = ether(10);
+      });
+
+      it('returns the amount of ETH minus gas cost', async () => {
+        const previousEthBalance: BigNumber = new BigNumber(await web3.eth.getBalance(subjectCaller));
+
+        const txHash = await subject();
+
+        const currentEthBalance =  await web3.eth.getBalance(subjectCaller);
+
+        const totalGasInEth = await getGasUsageInEth(txHash);
+
+        const expectedEthBalance = previousEthBalance.sub(totalGasInEth);
+
+        expect(expectedEthBalance).to.bignumber.equal(currentEthBalance);
       });
     });
   });

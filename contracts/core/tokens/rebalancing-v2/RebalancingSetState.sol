@@ -30,44 +30,53 @@ import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
  * @title RebalancingSetState
  * @author Set Protocol
  *
- * The RebalancingSetState 
  */
 contract RebalancingSetState {
 
     /* ============ State Variables ============ */
 
-    // Dependency variables
+    // System related
     ICore public core;
     IRebalancingSetFactory public factory;
     IVault public vault;
     IWhiteList public componentWhiteList;
-
-    address public manager;
     ILiquidator public liquidator;
+    address public manager;
 
-    // State updated after every rebalance
-    ISetToken public currentSet;
-    ISetToken public nextSet;
-    uint256 public unitShares;
-    uint256 public naturalUnit;
-
-    RebalancingLibrary.State public rebalanceState;
-    uint256 public lastRebalanceTimestamp;
-
-    // State governing rebalance cycle
+    // Rebalance configuration
     uint256 public proposalPeriod;
     uint256 public rebalanceInterval;
-
-    // State to track proposal period
-    uint256 public rebalanceIndex;
-    uint256 public proposalStartTime;
-
-    uint256 public rebalanceStartTime;
     uint256 public rebalanceFailPeriod;
+
+    // Current state
+    ISetToken public currentSet;
+    uint256 public unitShares;
+    uint256 public naturalUnit;
+    RebalancingLibrary.State public rebalanceState;
+    uint256 public rebalanceIndex;
+    uint256 public lastRebalanceTimestamp;
+
+    // Live Rebalance State
+    ISetToken public nextSet;
+    uint256 public proposalStartTime;
+    uint256 public rebalanceStartTime;
     bool public hasBidded;
 
     // To be used if token put into Drawdown State
-    address[] public failedRebalanceComponents;
+    address[] internal failedRebalanceComponents;
+
+    /* ============ Modifier ============ */
+
+    /**
+     * Throws if called by any account other than the manager.
+     */
+    modifier onlyManager() {
+        require(
+            msg.sender == manager,
+            "Propose: Sender must be manager"
+        );
+        _;
+    }
 
     /* ============ Events ============ */
 
@@ -87,12 +96,8 @@ contract RebalancingSetState {
         address _newManager
     )
         external
+        onlyManager
     {
-        require(
-            msg.sender == manager,
-            "RebalancingSetToken.setManager: Sender must be the manager"
-        );
-
         emit NewManagerAdded(_newManager, manager);
         manager = _newManager;
     }
@@ -100,7 +105,7 @@ contract RebalancingSetState {
     /* ============ Getter Functions ============ */
 
     /*
-     * Get addresses of setToken underlying the Rebalancing Set
+     * Function for compatability with ISetToken interface. Returns currentSet.
      *
      * @return  componentAddresses       Array of currentSet
      */
@@ -115,7 +120,7 @@ contract RebalancingSetState {
     }
 
     /*
-     * Get unitShares of Rebalancing Set
+     * Function for compatability with ISetToken interface. Returns unitShares.
      *
      * @return  units       Array of component unit
      */
@@ -147,7 +152,7 @@ contract RebalancingSetState {
     }
 
     /*
-     * Get failedAuctionWithdrawComponents of Rebalancing Set
+     * Get array version of failedAuctionWithdrawComponents
      *
      * @return  failedRebalanceComponents
      */

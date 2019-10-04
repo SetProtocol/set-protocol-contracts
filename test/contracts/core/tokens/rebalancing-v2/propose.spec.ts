@@ -441,7 +441,7 @@ contract('Propose', accounts => {
         expect(retrievedNextSet).to.equal(NULL_ADDRESS);
       });
 
-      describe('when not by the manager', async () => {
+      describe('when not called by the manager', async () => {
         beforeEach(async () => {
           subjectCaller = otherAccount;
         });

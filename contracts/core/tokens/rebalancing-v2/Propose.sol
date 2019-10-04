@@ -43,19 +43,6 @@ contract Propose is
         uint256 indexed proposalPeriodEndTime
     );
 
-    /* ============ Modifier ============ */
-
-    /**
-     * Throws if called by any account other than the manager.
-     */
-    modifier onlyManager() {
-        require(
-            msg.sender == manager,
-            "Propose: Sender must be manager"
-        );
-        _;
-    }
-
     /* ============ Internal Functions ============ */
 
     /**

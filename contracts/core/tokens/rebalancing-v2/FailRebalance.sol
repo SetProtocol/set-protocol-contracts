@@ -31,7 +31,6 @@ import { SettleRebalance } from "./SettleRebalance.sol";
  * @title FailRebalance
  * @author Set Protocol
  *
- * Default implementation of Rebalancing Set Token propose function
  */
 contract FailRebalance is 
     RebalancingSetState,
@@ -43,11 +42,11 @@ contract FailRebalance is
     /* ============ Internal Functions ============ */
 
     /*
-     * 
-     *
+     * Validate that a rebalance has failed.
      */
     function validateFailRebalance()
         internal
+        view
     {
         // Token must be in Rebalance State
         require(
@@ -55,74 +54,109 @@ contract FailRebalance is
             "FailRebalance: Rebalancing Set Token must be in Rebalance State"
         );
 
+        // Failure triggers must be met
         require(
             failTriggersBreached(),
             "FailRebalance: Fail triggers have not been breached"
         );
     }
 
-    function handleFailedRebalance()
-        internal
-    {
-        // Fail auction and either reset to Default state or kill Rebalancing Set Token and enter Drawdown
-        // state
-        RebalancingLibrary.State newRebalanceState = getNewRebalanceState();
-
-        reissueSetIfRevertToDefault(newRebalanceState);
-
-        setWithdrawComponentsIfDrawdown(newRebalanceState);
-
-        transitionToNewState(newRebalanceState);
-    }
-
-    function failTriggersBreached()
-        internal
-        returns(bool)
-    {
-        return liquidatorTriggersBreached() || failPeriodBreached() || newUnitSharesIsZero();
-    }
-
-    function newUnitSharesIsZero()
-        internal
-        returns (bool)
-    {
-        uint256 issueQuantity = calculateNextSetIssueQuantity();
-        uint256 newUnitShares = calculateNextSetNewUnitShares(issueQuantity);
-
-        return hasBidded && liquidatorTriggersBreached() && newUnitShares == 0;
-    }
-
-    function liquidatorTriggersBreached()
-        internal
-        returns (bool)
-    {
-        bool hasFailed = liquidator.endFailedRebalance();
-
-        return hasFailed;
-    }
-
-    function failPeriodBreached()
-        internal
-        view
-        returns(bool)
-    {
-        // Calculate timestamp when pivot is reached
-        uint256 rebalanceFailTime = rebalanceStartTime.add(rebalanceFailPeriod);
-
-        return block.timestamp >= rebalanceFailTime;
-    }
-
+    /*
+     * Determine the new Rebalance State. If there has been a bid, then we put it to 
+     * Drawdown, where the Set is effectively killed. If no bids, we reissue the currentSet.
+     */
     function getNewRebalanceState()
         internal
+        view
         returns (RebalancingLibrary.State)
     {
         return hasBidded ? RebalancingLibrary.State.Drawdown : RebalancingLibrary.State.Default;
     }
 
-    function reissueSetIfRevertToDefault(
+    /*
+     * Pings the liquidator to settle the rebalance.
+     */ 
+    function liquidatorEndFailedRebalance()
+        internal
+    {
+        liquidator.endFailedRebalance();
+    }
+
+    /*
+     * Update state based on new Rebalance State.
+     *
+     * @param  _newRebalanceState      The new State to transition to
+     */
+    function transitionToNewState(
         RebalancingLibrary.State _newRebalanceState
     )
         internal
+    {
+        reissueSetIfRevertToDefault(_newRebalanceState);
+
+        setWithdrawComponentsIfDrawdown(_newRebalanceState);
+
+        rebalanceState = _newRebalanceState;
+        rebalanceIndex = rebalanceIndex.add(1);
+        lastRebalanceTimestamp = block.timestamp;
+
+        nextSet = ISetToken(address(0));
+        hasBidded = false;
+    }
+
+    /* ============ Private Functions ============ */
+
+    /*
+     * Returns whether the conditions for a failed rebalance has been met.
+     *
+     * @return Boolean whether the rebalance has failed
+     */
+    function failTriggersBreached()
+        private
+        view
+        returns(bool)
+    {
+        return liquidatorBreached() || failPeriodBreached();
+    }
+
+    /*
+     * Returns whether the liquidator believes the rebalance has failed.
+     *
+     * @return Boolean whether the rebalance has failed
+     */
+    function liquidatorBreached()
+        private
+        view
+        returns (bool)
+    {
+        return liquidator.hasRebalanceFailed();
+    }
+
+    /*
+     * Returns whether the the fail time has elapsed, which means that a period
+     * of time where the auction should have succeeded has not.
+     *
+     * @return Boolean whether the rebalance has failed
+     */
+    function failPeriodBreached()
+        private
+        view
+        returns(bool)
+    {
+        uint256 rebalanceFailTime = rebalanceStartTime.add(rebalanceFailPeriod);
+
+        return block.timestamp >= rebalanceFailTime;
+    }
+
+    /*
+     * If the determination is Default State, reissue the Set.
+     *
+     * @param  _newRebalanceState      The new State to transition to
+     */
+    function reissueSetIfRevertToDefault(
+        RebalancingLibrary.State _newRebalanceState
+    )
+        private
     {
         if (_newRebalanceState ==  RebalancingLibrary.State.Default) {
             uint256 issueQuantity = calculateNextSetIssueQuantity();
@@ -135,10 +169,15 @@ contract FailRebalance is
         }
     }
 
+    /*
+     * If the determination is Drawdown State, set the drawdown components.
+     *
+     * @param  _newRebalanceState      The new State to transition to
+     */
     function setWithdrawComponentsIfDrawdown(
         RebalancingLibrary.State _newRebalanceState
     )
-        internal
+        private
     {
         if (_newRebalanceState ==  RebalancingLibrary.State.Drawdown) {
             address[] memory currentSetComponents = currentSet.getComponents();
@@ -146,20 +185,5 @@ contract FailRebalance is
 
             failedRebalanceComponents = currentSetComponents.union(nextSetComponents);
         }
-    }
-
-    function transitionToNewState(
-        RebalancingLibrary.State _newRebalanceState
-    )
-        internal
-    {
-        rebalanceState = _newRebalanceState;
-
-        // Reset lastRebalanceTimestamp to now
-        lastRebalanceTimestamp = block.timestamp;
-
-        nextSet = ISetToken(address(0));
-        hasBidded = false;
-        rebalanceIndex = rebalanceIndex.add(1);
     }
 }

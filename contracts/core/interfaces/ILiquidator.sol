@@ -60,9 +60,13 @@ interface ILiquidator {
     function settleRebalance()
         external;
 
-    function endFailedRebalance()
+    function hasRebalanceFailed()
         external
-        returns (bool);
+        view
+        returns (bool);        
+
+    function endFailedRebalance()
+        external;
 
     function minimumBid()
         external

@@ -248,16 +248,23 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Fail an auction that doesn't complete before reaching the pivot price. Move to Drawdown state
-     * if bids have been placed. Reset to Default state if no bids placed.
-     *
+     * Ends a rebalance if there are any signs that there is a failure. 
+     * Possible failure reasons:
+     * 1. The rebalance has elapsed the failRebalancePeriod
+     * 2. The liquidator responds that the rebalance has failed
+     * 
+     * Move to Drawdown state if bids have been placed. Reset to Default state if no bids placed.
      */
     function endFailedRebalance()
         external
     {
         validateFailRebalance();
 
-        handleFailedRebalance();
+        RebalancingLibrary.State newRebalanceState = getNewRebalanceState();
+
+        liquidatorEndFailedRebalance();
+
+        transitionToNewState(newRebalanceState);
     }
 
     /*

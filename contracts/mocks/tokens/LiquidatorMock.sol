@@ -166,13 +166,18 @@ contract LiquidatorMock
         priceNumerator = _priceNumerator;
     }
 
-    function endFailedRebalance()
+    function hasRebalanceFailed()
         external
+        view
         returns (bool)
     {
-        endFailedRebalanceHasBeenCalled = true;
-
         return hasFailed;
+    }
+
+    function endFailedRebalance()
+        external
+    {
+        endFailedRebalanceHasBeenCalled = true;
     }
 
     function getCombinedTokenArray()

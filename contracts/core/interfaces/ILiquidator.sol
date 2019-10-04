@@ -121,18 +121,17 @@ interface ILiquidator {
         external
         view
         returns (uint256);
+
     function startingCurrentSetAmount()
         external
         view
         returns (uint256);
+
     function auctionPriceParameters()
         external
         view
         returns (RebalancingLibrary.AuctionPriceParameters memory);
-    function biddingParameters()
-        external
-        view
-        returns (RebalancingLibrary.BiddingParameters memory);
+
     function auctionLibrary()
         external
         view

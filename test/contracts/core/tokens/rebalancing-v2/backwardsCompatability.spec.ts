@@ -16,7 +16,6 @@ import {
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
   SetTokenContract,
-  StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
   WhiteListContract,
@@ -25,10 +24,6 @@ import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import {
   ONE_DAY_IN_SECONDS,
-  DEFAULT_GAS,
-  DEFAULT_UNIT_SHARES,
-  DEFAULT_REBALANCING_NATURAL_UNIT,
-  NULL_ADDRESS,
 } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -50,11 +45,9 @@ contract('BackwardsCompatability', accounts => {
   const [
     deployerAccount,
     managerAccount,
-    auctionLibrary,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
-  let components: StandardTokenMockContract[] = [];
 
   let coreMock: CoreMockContract;
   let transferProxy: TransferProxyContract;
@@ -155,7 +148,7 @@ contract('BackwardsCompatability', accounts => {
       rebalancingSetToken,
       nextSetToken,
       managerAccount,
-    )
+    );
   });
 
   afterEach(async () => {
@@ -250,20 +243,10 @@ contract('BackwardsCompatability', accounts => {
       const retrievedResult = await subject();
 
       const expectedResult =  await liquidatorMock.auctionPriceParameters.callAsync();
-      expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
-    });
-  });
-
-  describe.only('#biddingParameters', async () => {
-    async function subject(): Promise<any> {
-      return rebalancingSetToken.biddingParameters.callAsync();
-    }
-
-    it('returns the correct biddingParameters', async () => {
-      const retrievedResult = await subject();
-
-      const expectedResult =  await liquidatorMock.biddingParameters.callAsync();
-      expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
+      expect(retrievedResult[0]).to.equal(expectedResult[0]);
+      expect(retrievedResult[1]).to.equal(expectedResult[1]);
+      expect(retrievedResult[2]).to.equal(expectedResult[2]);
+      expect(retrievedResult[3]).to.equal(expectedResult[3]);
     });
   });
 

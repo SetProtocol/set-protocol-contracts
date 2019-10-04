@@ -39,7 +39,6 @@ contract LiquidatorMock
     // Legacy Data
     address public auctionLibrary;
     RebalancingLibrary.AuctionPriceParameters public auctionPriceParameters;
-    RebalancingLibrary.BiddingParameters public biddingParameters;
 
     uint256 constant public priceDivisor = 1000;
     uint256 public priceNumerator = 1000;

@@ -25,16 +25,18 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
  * @title BackwardsCompatability
  * @author Set Protocol
  *
- * Exposes state
+ * This module allows full backwards compatability with RebalancingSetTokenV1. It implements
+ * all the same functions to allow upstream applications to make minimized changes
+ * to support the new version.
+ *
+ * The following interfaces are not included:
+ * - propose(address, address, uint256, uint256, uint256): Implementation would have
+ *.    been a revert.
+ * - biddingParameters: RebalancingSetToken V1 biddingParameters reverts on call
  */
 contract BackwardsCompatability is 
     RebalancingSetState
 {
-
-    /**
-     * Note Old interface for RebalancingSetTokenV1 propose function will automatically reverts.
-     */
-
     /*
      * If supported in Liquidator, return auctionPriceParameters.
      *
@@ -114,14 +116,6 @@ contract BackwardsCompatability is
         returns (RebalancingLibrary.AuctionPriceParameters memory)
     {
         return liquidator.auctionPriceParameters();
-    }
-
-    function biddingParameters()
-        external
-        view
-        returns (RebalancingLibrary.BiddingParameters memory)
-    {
-        return liquidator.biddingParameters();
     }
 
     function auctionLibrary()

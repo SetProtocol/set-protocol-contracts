@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 Set Labs Inc.
+    Copyright 2019 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -28,10 +28,9 @@ import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
  * @title LiquidatorMock
  * @author Set Protocol
  *
- * The LiquidatorMock
  */
-contract LiquidatorMock
-    // ILiquidator
+contract LiquidatorMock is
+    ILiquidator
 {
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
@@ -46,7 +45,6 @@ contract LiquidatorMock
     ISetToken public currentSet;
     ISetToken public nextSet;
 
-    
     uint256 public minimumBid;
 
     uint256 public startRebalanceTime;
@@ -149,44 +147,33 @@ contract LiquidatorMock
         combinedNextSetUnits = getCombinedUnitsArray(_nextSet, combinedTokenArray);
     }
 
-    function settleRebalance()
-        external
-    {
+    function settleRebalance() external {
         hasSettled = true;
     }
 
-    function setHasFailed(
-        bool _hasFailed
-    )
-        external
-    {
-        hasFailed = _hasFailed;
-    }
-
-    function setPriceNumerator(
-        uint256 _priceNumerator
-    )
-        external
-    {
-        priceNumerator = _priceNumerator;
-    }
-
-    function hasRebalanceFailed()
-        external
-        view
-        returns (bool)
-    {
+    function hasRebalanceFailed() external view returns (bool) {
         return hasFailed;
     }
 
-    function endFailedRebalance()
-        external
-    {
+    function endFailedRebalance() external {
         endFailedRebalanceHasBeenCalled = true;
     }
 
+    /* ============ Setter Functions ============ */
+
+    function setHasFailed(bool _hasFailed) external {
+        hasFailed = _hasFailed;
+    }
+
+    function setPriceNumerator(uint256 _priceNumerator) external {
+        priceNumerator = _priceNumerator;
+    }
+
+    /* ============ Getter Functions ============ */
+
     function getAuctionPriceParameters()
         external
+        view
         returns (uint256[] memory)
     {
         uint256[] memory auctionParams = new uint256[](4);
@@ -197,35 +184,26 @@ contract LiquidatorMock
         return auctionParams;
     }
 
-    function getCombinedTokenArray()
-        external
-        view
-        returns (address[] memory)
-    {
+    function getCombinedTokenArray() external view returns (address[] memory) {
         return combinedTokenArray;
     }
  
-    function getCombinedCurrentUnits()
-        external
-        view
-        returns (uint256[] memory)
-    {
+    function getCombinedCurrentUnits() external view returns (uint256[] memory) {
         return combinedCurrentUnits;
     }
 
-    function getCombinedNextSetUnits()
-        external
-        view
-        returns (uint256[] memory)
-    {
+    function getCombinedNextSetUnits() external view returns (uint256[] memory) {
         return combinedNextSetUnits;
     }
+
+    /* ============ Private Functions ============ */
 
     function getCombinedUnitsArray(
         ISetToken _setToken,
         address[] memory _combinedTokenArray
     )
         private
+        view
         returns (uint256[] memory)
     {
         uint256[] memory combinedUnits = new uint256[](_combinedTokenArray.length);

@@ -76,9 +76,7 @@ contract LiquidatorMock is
         nextSet = _nextSet;
     }
 
-    function cancelProposal()
-        external
-    {
+    function cancelProposal() external {
         currentSet = ISetToken(address(0));
         nextSet = ISetToken(address(0));
     }

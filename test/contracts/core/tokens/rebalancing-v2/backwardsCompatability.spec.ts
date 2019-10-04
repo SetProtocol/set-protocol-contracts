@@ -234,7 +234,7 @@ contract('BackwardsCompatability', accounts => {
     });
   });
 
-  describe.only('#auctionPriceParameters', async () => {
+  describe('#auctionPriceParameters', async () => {
     async function subject(): Promise<any> {
       return rebalancingSetToken.auctionPriceParameters.callAsync();
     }

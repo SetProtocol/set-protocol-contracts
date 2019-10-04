@@ -137,7 +137,7 @@ contract RebalancingSetEthBidder is
             inflowArray
         );
 
-        // // Bid in auction
+        // Bid in auction
         rebalanceAuctionModule.bidAndWithdraw(
             _rebalancingSetToken,
             _quantity,

@@ -33,7 +33,6 @@ import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
  * @title SettleRebalance
  * @author Set Protocol
  *
- * Default implementation of Rebalancing Set Token propose function
  */
 contract SettleRebalance is 
     ERC20,
@@ -42,10 +41,17 @@ contract SettleRebalance is
     using SafeMath for uint256;
 
     /* ============ Internal Functions ============ */
+
+    /*
+     * Validates that the settle function can be called.
+     *
+     * @param  _nextUnitShares   The new implied unit shares
+     */    
     function validateSettleRebalance(
         uint256 _nextUnitShares
     )
         internal
+        view
     {
         // Must be in Rebalance state to call settlement
         require(
@@ -53,76 +59,122 @@ contract SettleRebalance is
             "RebalancingSetToken.settleRebalance: State must be Rebalance"
         );
 
+        // A rebalance can not have completed without a successful bid
+        require(
+            hasBidded,
+            "RebalancingSetToken.settleRebalance: No bids made"
+        );
+
+        // The unit shares must result in a quantity greater than the number of natural units outstanding
         require(
             _nextUnitShares > 0,
             "RebalancingSetToken.settleRebalance: Failed rebalance, unitshares equals 0. Call endFailedAuction."
         );
     }
 
+    /*
+     * Issue nextSet to RebalancingSetToken; The issued Set is held in the Vault
+     *
+     * @param  _issueQuantity   Quantity of next Set to issue
+     */ 
     function issueNextSet(
         uint256 _issueQuantity
     )
         internal
-        returns(uint256)
     {
-        // Issue nextSet to RebalancingSetToken
         core.issueInVault(
             address(nextSet),
             _issueQuantity
         );
     }
 
+    /*
+     * Pings the liquidator to settle the rebalance.
+     */ 
     function liquidatorSettleRebalance()
         internal
     {
         liquidator.settleRebalance();
     }
 
-
+    /*
+     * Updates state post-settlement.
+     *
+     * @param  _nextUnitShares   The new implied unit shares
+     */        
     function transitionToDefault(
         uint256 _newUnitShares
     )
         internal
     {
-        // Update other state parameters
-        unitShares = _newUnitShares;
         currentSet = nextSet;
-        lastRebalanceTimestamp = block.timestamp;
+        unitShares = _newUnitShares;
         rebalanceState = RebalancingLibrary.State.Default;
+        rebalanceIndex = rebalanceIndex.add(1);
+        lastRebalanceTimestamp = block.timestamp;
+        
         nextSet = ISetToken(address(0));
         hasBidded = false;
-        rebalanceIndex = rebalanceIndex.add(1);
     }
 
     /**
      * Calculate the amount of nextSets to issue by using the component amounts in the
-     * vault, unitShares following from this calculation.
+     * vault.
      *
      * @return  uint256             Amount of nextSets to issue
-     * @return  uint256             New unitShares for the rebalancingSetToken
      */
     function calculateNextSetIssueQuantity()
         internal
         view
-        returns (uint256, uint256)
+        returns (uint256)
     {
         // Collect data necessary to compute issueAmounts
         SetTokenLibrary.SetDetails memory nextSetToken = SetTokenLibrary.getSetDetails(address(nextSet));
         uint256 maxIssueAmount = calculateMaxIssueAmount(nextSetToken);
-
-        // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding
-        uint256 rebalancingSetTotalSupply = totalSupply();
-        uint256 rebalancingSetNaturalUnit = naturalUnit;
-        uint256 naturalUnitsOutstanding = rebalancingSetTotalSupply.div(rebalancingSetNaturalUnit);
 
         // Issue amount of Sets that is closest multiple of nextNaturalUnit to the maxIssueAmount
         // Since the initial division will round down to the nearest whole number when we multiply
         // by that same number we will return the closest multiple less than the maxIssueAmount
         uint256 issueAmount = maxIssueAmount.div(nextSetToken.naturalUnit).mul(nextSetToken.naturalUnit);
 
+        return issueAmount;
+    }
+
+    /**
+     * Calculates the new unitShares, defined as issueQuantity / naturalUnitsOutstanding
+     *
+     * @param  _issueQuantity   Amount of nextSets to issue
+     *
+     * @return  uint256             New unitShares for the rebalancingSetToken
+     */
+    function calculateNextSetNewUnitShares(
+        uint256 _issueQuantity
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 naturalUnitsOutstanding = calculateNaturalUnitsOutstanding();
+
         // Divide final issueAmount by naturalUnitsOutstanding to get newUnitShares
-        uint256 newUnitShares = issueAmount.div(naturalUnitsOutstanding);
-        return (issueAmount, newUnitShares);
+        return _issueQuantity.div(naturalUnitsOutstanding);
+    }
+
+    /* ============ Private Functions ============ */
+
+    /**
+     * Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding.
+     * 
+     * NaturalUnitsOutstanding = totalSupply / naturalUnit
+     *
+     * @return  uint256             New unitShares for the rebalancingSetToken
+     */
+    function calculateNaturalUnitsOutstanding()
+        private
+        view
+        returns (uint256)
+    {
+        return totalSupply().div(naturalUnit);
     }
 
     /**
@@ -135,7 +187,7 @@ contract SettleRebalance is
     function calculateMaxIssueAmount(
         SetTokenLibrary.SetDetails memory _setToken
     )
-        internal
+        private
         view
         returns (uint256)
     {

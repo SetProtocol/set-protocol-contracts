@@ -63,7 +63,7 @@ contract PlaceBid is
     }
 
     /*
-     * Validates that the conditions to retrieve a bid. Can only be
+     * The caller should be the RebalanceAuctionModule.
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
      */
@@ -82,6 +82,9 @@ contract PlaceBid is
         validateGetBidPrice(_quantity);
     }
 
+    /*
+     * If a successful bid has been made, flip the hasBidded boolean. 
+     */
     function updateHasBiddedIfNecessary()
         internal
     {

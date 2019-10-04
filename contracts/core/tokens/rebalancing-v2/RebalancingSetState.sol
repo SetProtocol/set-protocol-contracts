@@ -48,7 +48,7 @@ contract RebalancingSetState {
     // Set Protocol's Vault contract
     IVault public vault;
 
-    // The token whitelist that is checked against during proposals
+    // The token whitelist that components are checked against during proposals
     IWhiteList public componentWhiteList;
 
     // Contract holding the state and logic required for rebalance liquidation
@@ -106,10 +106,12 @@ contract RebalancingSetState {
     // The timestamp of the last rebalance was initiated at
     uint256 public rebalanceStartTime;
 
-    // Whether a successful bid has been made during the rebalance
+    // Whether a successful bid has been made during the rebalance.
+    // In the case that the rebalance has failed, hasBidded is used
+    // to determine whether the Set should be put into Drawdown or Default state.
     bool public hasBidded;
 
-    // In the event a rebalance has failed, these are the list of components
+    // In the event a Set is put into the Drawdown state, these components
     // that can be withdrawn by users
     address[] internal failedRebalanceComponents;
 

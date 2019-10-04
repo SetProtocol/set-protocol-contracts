@@ -340,6 +340,22 @@ contract('SettleRebalance', accounts => {
       });
     });
 
+    describe('when settleRebalance is called but no bids are made', async () => {
+
+      beforeEach(async () => {
+        await rebalancingHelper.transitionToRebalanceV2Async(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken,
+          managerAccount
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe('when settleRebalance is called but unitShares is 0', async () => {
       before(async () => {
         rebalancingSetUnitShares = new BigNumber(1);

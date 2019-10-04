@@ -54,6 +54,7 @@ contract Propose is
         ISetToken _nextSet
     )
         public
+        view
     {
         // New Proposal can only be made in Default state
         require(
@@ -93,6 +94,7 @@ contract Propose is
      */
     function validateCancelProposal()
         internal
+        view
     {
         require(
             rebalanceState == RebalancingLibrary.State.Proposal,
@@ -130,9 +132,10 @@ contract Propose is
     )
         internal
     {
+        rebalanceState = RebalancingLibrary.State.Proposal;
+
         nextSet = _nextSet;
         proposalStartTime = block.timestamp;
-        rebalanceState = RebalancingLibrary.State.Proposal;
 
         emit RebalanceProposed(
             address(_nextSet),

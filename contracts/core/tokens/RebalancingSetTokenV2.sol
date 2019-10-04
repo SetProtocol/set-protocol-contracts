@@ -197,7 +197,9 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Place bid during rebalance auction. Can only be called by an approved module.
+     * Place bid during rebalance auction. 
+     * 
+     * The intended caller is the RebalanceAuctionModule, which must be approved by Core.
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
      * @return combinedTokenArray       Array of token addresses involved in rebalancing
@@ -225,18 +227,16 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Initiate settlement for the rebalancing set. Full functionality now returned to
-     * set owners
+     * After a successful rebalance, the new Set is issued. 
+     * Full issuance functionality is now returned to set owners.
      *
-     * * Anyone can call this function.
+     * Anyone can call this function.
      */
     function settleRebalance()
         external
     {
-        (
-            uint256 issueQuantity,
-            uint256 newUnitShares
-        ) = calculateNextSetIssueQuantity();
+        uint256 issueQuantity = calculateNextSetIssueQuantity();
+        uint256 newUnitShares = calculateNextSetNewUnitShares(issueQuantity);
 
         validateSettleRebalance(newUnitShares);
 

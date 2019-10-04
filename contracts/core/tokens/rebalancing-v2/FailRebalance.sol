@@ -86,7 +86,8 @@ contract FailRebalance is
         internal
         returns (bool)
     {
-        (, uint256 newUnitShares) = calculateNextSetIssueQuantity();
+        uint256 issueQuantity = calculateNextSetIssueQuantity();
+        uint256 newUnitShares = calculateNextSetNewUnitShares(issueQuantity);
 
         return hasBidded && liquidatorTriggersBreached() && newUnitShares == 0;
     }
@@ -124,7 +125,7 @@ contract FailRebalance is
         internal
     {
         if (_newRebalanceState ==  RebalancingLibrary.State.Default) {
-            (uint256 issueQuantity, ) = calculateNextSetIssueQuantity();
+            uint256 issueQuantity = calculateNextSetIssueQuantity();
 
             // If bid not placed, reissue current Set
             core.issueInVault(

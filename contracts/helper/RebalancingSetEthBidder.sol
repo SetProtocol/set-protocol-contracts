@@ -117,11 +117,11 @@ contract RebalancingSetEthBidder is
         payable
         nonReentrant
     {
+        // Wrap all Ether sent to the contract
+        weth.deposit.value(msg.value)();
+
         // Get token addresses
         address[] memory combinedTokenArray = IRebalancingSetToken(_rebalancingSetToken).getCombinedTokenArray();
-
-        // Wrap all ETH sent to the contract
-        weth.deposit.value(msg.value)();
 
         // Get inflow and outflow arrays for the given bid quantity
         uint256[] memory inflowArray;
@@ -131,7 +131,7 @@ contract RebalancingSetEthBidder is
             outflowArray
         ) = IRebalancingSetToken(_rebalancingSetToken).getBidPrice(_quantity);
 
-        // Ensure allowances and transfer non-weth tokens
+        // Ensure allowances and transfer non-weth tokens from user
         depositComponents(
             combinedTokenArray,
             inflowArray
@@ -144,12 +144,12 @@ contract RebalancingSetEthBidder is
             _allowPartialFill
         );
 
-        // Withdraw returned tokens
+        // Withdraw non-weth tokens to user
         withdrawComponentsToSender(
             combinedTokenArray
         );
 
-        // Unwrap wrapped Ether and transfer Eth to user
+        // Unwrap all remaining Ether and transfer to user
         uint256 wethBalance = ERC20Wrapper.balanceOf(address(weth), address(this));
         if (wethBalance > 0) {
             weth.withdraw(wethBalance);
@@ -160,7 +160,7 @@ contract RebalancingSetEthBidder is
     /* ============ Private Functions ============ */
 
     /**
-     * Before bidding, calculate the required amount of inflow tokens, wrap Ether, and deposit components
+     * Before bidding, calculate the required amount of inflow tokens and deposit token components
      * into this helper contract.
      *
      * @param  _combinedTokenArray            Array of token addresses
@@ -187,7 +187,7 @@ contract RebalancingSetEthBidder is
                     currentComponentQuantity
                 );
 
-                // If not WETH transfer tokens from user to contract
+                // If not WETH, transfer tokens from user to contract
                 if (currentComponent != address(weth)) {
                     // Transfer tokens to contract
                     ERC20Wrapper.transferFrom(
@@ -202,8 +202,8 @@ contract RebalancingSetEthBidder is
     }
 
      /**
-     * After bidding, loop through token address array, unwrap Ether, and withdraw
-     * components to the sender
+     * After bidding, loop through token address array and transfer
+     * token components except wrapped ether to the sender
      *
      * @param  _combinedTokenArray           Array of token addresses
      */

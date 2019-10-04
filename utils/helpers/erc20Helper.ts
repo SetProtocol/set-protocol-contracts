@@ -200,6 +200,8 @@ export class ERC20Helper {
     initialAccount: Address,
     initialTokenAmount: BigNumber = DEPLOYED_TOKEN_QUANTITY,
   ): Promise<WethMockContract> {
+    // WARNING!!!!!: Even though the intialAccount has Wrapped Ether tokens,
+    // the smart contract is not collateralized by the initialTokenAmount
     const truffleMockToken = await WethMock.new(
       initialAccount,
       initialTokenAmount,

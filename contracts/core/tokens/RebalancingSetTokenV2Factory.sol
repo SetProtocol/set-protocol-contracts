@@ -188,9 +188,7 @@ contract RebalancingSetTokenV2Factory {
         );
 
         // Parse _callData for additional parameters
-        InitRebalancingParameters memory parameters = parseRebalanceSetCallData(
-            _callData
-        );
+        InitRebalancingParameters memory parameters = parseRebalanceSetCallData(_callData);
 
         // Require manager address is non-zero
         require(

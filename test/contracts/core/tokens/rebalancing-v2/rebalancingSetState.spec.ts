@@ -59,7 +59,6 @@ contract('RebalancingSetState', accounts => {
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
-  let components: StandardTokenMockContract[] = [];
 
   let coreMock: CoreMockContract;
   let transferProxy: TransferProxyContract;
@@ -68,7 +67,7 @@ contract('RebalancingSetState', accounts => {
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenV2FactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
-let liquidatorWhitelist: WhiteListContract;
+  let liquidatorWhitelist: WhiteListContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -78,6 +77,16 @@ let liquidatorWhitelist: WhiteListContract;
     erc20Helper,
     blockchain
   );
+
+  let components: StandardTokenMockContract[];
+  let initialSet: Address;
+  let manager: Address;
+  let liquidator: Address;
+  let initialUnitShares: BigNumber;
+  let initialNaturalUnit: BigNumber;
+  let proposalPeriod: BigNumber;
+  let rebalanceInterval: BigNumber;
+  let failPeriod: BigNumber;
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -109,6 +118,30 @@ let liquidatorWhitelist: WhiteListContract;
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
+
+    components = await erc20Helper.deployTokensAsync(1, deployerAccount);
+
+    initialSet = components[0].address;
+    manager = managerAccount;
+    liquidator = fakeModuleAccount;
+    initialUnitShares = DEFAULT_UNIT_SHARES;
+    initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
+    proposalPeriod = ONE_DAY_IN_SECONDS;
+    rebalanceInterval = ONE_DAY_IN_SECONDS;
+    failPeriod = ONE_DAY_IN_SECONDS;
+
+    rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
+      rebalancingFactory.address,
+      manager,
+      liquidator,
+      initialSet,
+      rebalancingComponentWhiteList.address,
+      initialUnitShares,
+      initialNaturalUnit,
+      proposalPeriod,
+      rebalanceInterval,
+      failPeriod,
+    );
   });
 
   afterEach(async () => {
@@ -130,7 +163,7 @@ let liquidatorWhitelist: WhiteListContract;
     const subjectSymbol: string = 'RBSET';
 
     beforeEach(async () => {
-      components = await erc20Helper.deployTokensAsync(1, deployerAccount);
+      const components = await erc20Helper.deployTokensAsync(1, deployerAccount);
 
       subjectFactory = rebalancingFactory.address;
       subjectManager = managerAccount;
@@ -175,13 +208,6 @@ let liquidatorWhitelist: WhiteListContract;
       expect(tokenSymbol).to.equal(subjectSymbol);
     });
 
-    it('creates a set with the correct factory', async () => {
-      rebalancingSetToken = await subject();
-
-      const tokenFactory = await rebalancingSetToken.factory.callAsync();
-      expect(tokenFactory).to.equal(subjectFactory);
-    });
-
     it('creates a set with the correct core', async () => {
       rebalancingSetToken = await subject();
 
@@ -203,11 +229,11 @@ let liquidatorWhitelist: WhiteListContract;
       expect(whitelistAddress).to.equal(rebalancingComponentWhiteList.address);
     });
 
-    it('creates a set with the correct manager', async () => {
+    it('creates a set with the correct factory', async () => {
       rebalancingSetToken = await subject();
 
-      const tokenManager = await rebalancingSetToken.manager.callAsync();
-      expect(tokenManager).to.equal(subjectManager);
+      const tokenFactory = await rebalancingSetToken.factory.callAsync();
+      expect(tokenFactory).to.equal(subjectFactory);
     });
 
     it('creates a set with the correct liquidator', async () => {
@@ -217,18 +243,18 @@ let liquidatorWhitelist: WhiteListContract;
       expect(liquidator).to.equal(subjectLiquidator);
     });
 
+    it('creates a set with the correct manager', async () => {
+      rebalancingSetToken = await subject();
+
+      const tokenManager = await rebalancingSetToken.manager.callAsync();
+      expect(tokenManager).to.equal(subjectManager);
+    });
+
     it('creates a set with the correct initialSet', async () => {
       rebalancingSetToken = await subject();
 
       const tokenInitialSet = await rebalancingSetToken.currentSet.callAsync();
       expect(tokenInitialSet).to.equal(subjectInitialSet);
-    });
-
-    it('creates a set with an empty nextSet', async () => {
-      rebalancingSetToken = await subject();
-
-      const tokenNextlSet = await rebalancingSetToken.nextSet.callAsync();
-      expect(tokenNextlSet).to.equal(NULL_ADDRESS);
     });
 
     it('creates a set with the correct initial unit shares', async () => {
@@ -282,20 +308,18 @@ let liquidatorWhitelist: WhiteListContract;
       expect(tokenState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
     });
 
-    it('should have an empty failedRebalanceComponents', async () => {
+    it('should have rebalanceIndex variable set to 0', async () => {
       rebalancingSetToken = await subject();
 
-      const expectedComponents = [];
-
-      const withdrawComponents = await rebalancingSetToken.getFailedAuctionWithdrawComponents.callAsync();
-      expect(JSON.stringify(withdrawComponents)).to.equal(JSON.stringify(expectedComponents));
+      const rebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
+      expect(rebalanceIndex).to.bignumber.equal(0);
     });
 
-    it('should have rebalanceStartTime variable set to 0', async () => {
+    it('creates a set with an empty nextSet', async () => {
       rebalancingSetToken = await subject();
 
-      const rebalanceStartTime = await rebalancingSetToken.rebalanceStartTime.callAsync();
-      expect(rebalanceStartTime).to.be.bignumber.equal(0);
+      const tokenNextlSet = await rebalancingSetToken.nextSet.callAsync();
+      expect(tokenNextlSet).to.equal(NULL_ADDRESS);
     });
 
     it('should have proposalStartTime variable set to 0', async () => {
@@ -305,206 +329,26 @@ let liquidatorWhitelist: WhiteListContract;
       expect(proposalStartTime).to.be.bignumber.equal(0);
     });
 
+    it('should have rebalanceStartTime variable set to 0', async () => {
+      rebalancingSetToken = await subject();
+
+      const rebalanceStartTime = await rebalancingSetToken.rebalanceStartTime.callAsync();
+      expect(rebalanceStartTime).to.be.bignumber.equal(0);
+    });
+
     it('should have hasBidded variable set to false', async () => {
       rebalancingSetToken = await subject();
 
       const hasBidded = await rebalancingSetToken.hasBidded.callAsync();
       expect(hasBidded).to.equal(false);
     });
-
-    it('should have rebalanceIndex variable set to 0', async () => {
-      rebalancingSetToken = await subject();
-
-      const rebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
-      expect(rebalanceIndex).to.bignumber.equal(0);
-    });
-  });
-
-  describe('#getComponents', async () => {
-    let subjectCaller: Address;
-    let initialSet: Address;
-
-    beforeEach(async () => {
-      components = await erc20Helper.deployTokensAsync(1, deployerAccount);
-
-      initialSet = components[0].address;
-      const manager = managerAccount;
-      const liquidator = fakeModuleAccount;
-      const initialUnitShares = DEFAULT_UNIT_SHARES;
-      const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const failPeriod = ONE_DAY_IN_SECONDS;
-
-      rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
-        rebalancingFactory.address,
-        manager,
-        liquidator,
-        initialSet,
-        rebalancingComponentWhiteList.address,
-        initialUnitShares,
-        initialNaturalUnit,
-        proposalPeriod,
-        rebalanceInterval,
-        failPeriod,
-      );
-
-      subjectCaller = managerAccount;
-    });
-
-    async function subject(): Promise<string[]> {
-      return rebalancingSetToken.getComponents.callAsync(
-        { from: subjectCaller, gas: DEFAULT_GAS}
-      );
-    }
-
-    it('returns the correct component array', async () => {
-      const components = await subject();
-
-      expect([initialSet]).to.deep.equal(components);
-    });
-  });
-
-  describe('#getUnits', async () => {
-    let subjectCaller: Address;
-    let initialUnitShares: BigNumber;
-
-    beforeEach(async () => {
-      components = await erc20Helper.deployTokensAsync(1, deployerAccount);
-
-      const initialSet = components[0].address;
-      const manager = managerAccount;
-      const liquidator = fakeModuleAccount;
-      initialUnitShares = DEFAULT_UNIT_SHARES;
-      const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const failPeriod = ONE_DAY_IN_SECONDS;
-
-      rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
-        rebalancingFactory.address,
-        manager,
-        liquidator,
-        initialSet,
-        rebalancingComponentWhiteList.address,
-        initialUnitShares,
-        initialNaturalUnit,
-        proposalPeriod,
-        rebalanceInterval,
-        failPeriod,
-      );
-
-      subjectCaller = managerAccount;
-    });
-
-    async function subject(): Promise<BigNumber[]> {
-      return rebalancingSetToken.getUnits.callAsync(
-        { from: subjectCaller, gas: DEFAULT_GAS}
-      );
-    }
-
-    it('returns the correct unit array', async () => {
-      const units = await subject();
-
-      expect(units).to.be.instanceof(Array);
-      expect(1).to.equal(units.length);
-      expect(initialUnitShares).to.be.bignumber.equal(units[0]);
-    });
-  });
-
-  describe('#tokenIsComponent', async () => {
-    let subjectCaller: Address;
-    let subjectComponent: Address;
-
-    beforeEach(async () => {
-      components = await erc20Helper.deployTokensAsync(1, deployerAccount);
-
-      const initialSet = components[0].address;
-      const manager = managerAccount;
-      const liquidator = fakeModuleAccount;
-      const initialUnitShares = DEFAULT_UNIT_SHARES;
-      const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const failPeriod = ONE_DAY_IN_SECONDS;
-
-      rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
-        rebalancingFactory.address,
-        manager,
-        liquidator,
-        initialSet,
-        rebalancingComponentWhiteList.address,
-        initialUnitShares,
-        initialNaturalUnit,
-        proposalPeriod,
-        rebalanceInterval,
-        failPeriod,
-      );
-
-      subjectCaller = managerAccount;
-      subjectComponent = subjectComponent || initialSet;
-    });
-
-    async function subject(): Promise<boolean> {
-      return rebalancingSetToken.tokenIsComponent.callAsync(
-        subjectComponent,
-        { from: subjectCaller, gas: DEFAULT_GAS}
-      );
-    }
-
-    it('returns true', async () => {
-      const isComponentOfSet = await subject();
-
-      expect(isComponentOfSet);
-    });
-
-    describe('when the subject token is not a component', async () => {
-      before(async () => {
-        subjectComponent = fakeTokenAccount;
-      });
-
-      after(async () => {
-        subjectComponent = undefined;
-      });
-
-      it('returns false', async () => {
-        const isComponentOfSet = await subject();
-
-        expect(!isComponentOfSet);
-      });
-    });
   });
 
   describe('#setManager', async () => {
-    let rebalancingSetToken: RebalancingSetTokenV2Contract;
     let subjectNewManager: Address;
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      components = await erc20Helper.deployTokensAsync(1, deployerAccount);
-
-      const initialSet = components[0].address;
-      const manager = managerAccount;
-      const liquidator = fakeModuleAccount;
-      const initialUnitShares = DEFAULT_UNIT_SHARES;
-      const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const failPeriod = ONE_DAY_IN_SECONDS;
-
-      rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
-        rebalancingFactory.address,
-        manager,
-        liquidator,
-        initialSet,
-        rebalancingComponentWhiteList.address,
-        initialUnitShares,
-        initialNaturalUnit,
-        proposalPeriod,
-        rebalanceInterval,
-        failPeriod,
-      );
-
       subjectNewManager = otherAccount,
       subjectCaller = managerAccount;
     });
@@ -544,6 +388,104 @@ let liquidatorWhitelist: WhiteListContract;
       it('should revert', async () => {
         await expectRevertError(subject());
       });
+    });
+  });
+
+  describe('#getComponents', async () => {
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      subjectCaller = managerAccount;
+    });
+
+    async function subject(): Promise<string[]> {
+      return rebalancingSetToken.getComponents.callAsync(
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('returns the correct component array', async () => {
+      const components = await subject();
+
+      expect([initialSet]).to.deep.equal(components);
+    });
+  });
+
+  describe('#getUnits', async () => {
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      subjectCaller = managerAccount;
+    });
+
+    async function subject(): Promise<BigNumber[]> {
+      return rebalancingSetToken.getUnits.callAsync(
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('returns the correct unit array', async () => {
+      const units = await subject();
+
+      expect(1).to.equal(units.length);
+      expect(initialUnitShares).to.be.bignumber.equal(units[0]);
+    });
+  });
+
+  describe('#tokenIsComponent', async () => {
+    let subjectCaller: Address;
+    let subjectComponent: Address;
+
+    beforeEach(async () => {
+      subjectCaller = managerAccount;
+      subjectComponent = initialSet;
+    });
+
+    async function subject(): Promise<boolean> {
+      return rebalancingSetToken.tokenIsComponent.callAsync(
+        subjectComponent,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('returns true', async () => {
+      const isComponentOfSet = await subject();
+
+      expect(isComponentOfSet).to.equal(true);
+    });
+
+    describe('when the subject token is not a component', async () => {
+      beforeEach(async () => {
+        subjectComponent = fakeTokenAccount;
+      });
+
+      it('returns false', async () => {
+        const isComponentOfSet = await subject();
+
+        expect(isComponentOfSet).to.equal(false);
+      });
+    });
+  });
+
+  describe('#getFailedRebalanceComponents', async () => {
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      subjectCaller = managerAccount;
+    });
+
+    async function subject(): Promise<Address[]> {
+      return rebalancingSetToken.getFailedRebalanceComponents.callAsync(
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('should have an empty failedRebalanceComponents', async () => {
+      const failedRebalanceComponents = await subject();
+
+      const expectedComponents = [];
+
+      expect(JSON.stringify(failedRebalanceComponents)).to.equal(JSON.stringify(expectedComponents));
     });
   });
 });

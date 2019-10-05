@@ -52,6 +52,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     notCoreAccount,
     notSetTokenCreatedByCore,
     liquidatorAccount,
+    nonApprovedLiquidator,
   ] = accounts;
 
   let rebalancingSetTokenFactory: RebalancingSetTokenV2FactoryContract;
@@ -256,6 +257,27 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     }
 
     describe('when it successfully creates a rebalancing token', async () => {
+      it('should have the correct core address', async () => {
+        const rebalancingToken = await subject();
+
+        const resultName = await rebalancingToken.core.callAsync();
+        expect(resultName).to.equal(core.address);
+      });
+
+      it('should have the correct vault address', async () => {
+        const rebalancingToken = await subject();
+
+        const resultName = await rebalancingToken.vault.callAsync();
+        expect(resultName).to.equal(vault.address);
+      });
+
+      it('should have the correct componentWhiteList address', async () => {
+        const rebalancingToken = await subject();
+
+        const resultName = await rebalancingToken.componentWhiteList.callAsync();
+        expect(resultName).to.equal(rebalancingComponentWhiteList.address);
+      });
+
       it('should have the correct name', async () => {
         const rebalancingToken = await subject();
 
@@ -263,7 +285,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         expect(resultName).to.equal(subjectName);
       });
 
-      it('should have the correct name', async () => {
+      it('should have the correct symbol', async () => {
         const rebalancingToken = await subject();
 
         const resultSymbol = await rebalancingToken.symbol.callAsync();
@@ -298,6 +320,13 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         expect(rebalanceInterval).to.bignumber.equal(callDataRebalanceInterval);
       });
 
+      it('should have the correct unitShares', async () => {
+        const rebalancingToken = await subject();
+
+        const unitShares = await rebalancingToken.unitShares.callAsync();
+        expect(unitShares).to.bignumber.equal(subjectUnits[0]);
+      });
+
       it('should have the correct natural unit', async () => {
         const rebalancingToken = await subject();
 
@@ -310,16 +339,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
 
         const failPeriod = await rebalancingToken.rebalanceFailPeriod.callAsync();
         expect(failPeriod).to.bignumber.equal(callDataFailAuctionPeriod);
-      });
-    });
-
-    describe('when the set was not created through core', async () => {
-      beforeEach(async () => {
-        subjectComponents = [notSetTokenCreatedByCore];
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
       });
     });
 
@@ -353,6 +372,16 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       });
     });
 
+    describe('when the set was not created through core', async () => {
+      beforeEach(async () => {
+        subjectComponents = [notSetTokenCreatedByCore];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
    describe('when the initial natural unit is less than the minimum', async () => {
       beforeEach(async () => {
         subjectNaturalUnit = ZERO;
@@ -366,16 +395,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
    describe('when the initial natural unit is greater than the maximum', async () => {
       beforeEach(async () => {
         subjectNaturalUnit = new BigNumber(10 ** 15);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the initial unit shares is 0', async () => {
-      beforeEach(async () => {
-        subjectUnits = [ZERO];
       });
 
       it('should revert', async () => {
@@ -421,25 +440,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
 
     describe('when the liquidator address is not whitelisted', async () => {
       beforeEach(async () => {
-        callDataLiquidator = notSetTokenCreatedByCore;
-
-        subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
-          callDataManagerAddress,
-          callDataLiquidator,
-          callDataProposalPeriod,
-          callDataRebalanceInterval,
-          callDataFailAuctionPeriod,
-        );
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the fail auction period is less than the minimum', async () => {
-      beforeEach(async () => {
-        callDataFailAuctionPeriod = new BigNumber(5000);
+        callDataLiquidator = nonApprovedLiquidator;
 
         subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
           callDataManagerAddress,
@@ -491,9 +492,9 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       });
     });
 
-    describe('when the rebalanceInterval is less than the minimum', async () => {
+    describe('when the fail auction period is less than the minimum', async () => {
       beforeEach(async () => {
-        callDataRebalanceInterval = new BigNumber(5000);
+        callDataFailAuctionPeriod = new BigNumber(5000);
 
         subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
           callDataManagerAddress,

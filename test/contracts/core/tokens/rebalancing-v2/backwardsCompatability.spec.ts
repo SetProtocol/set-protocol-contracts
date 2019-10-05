@@ -3,6 +3,7 @@ require('module-alias/register');
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
@@ -23,6 +24,7 @@ import {
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import {
+  DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
@@ -37,6 +39,7 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
@@ -293,6 +296,57 @@ contract('BackwardsCompatability', accounts => {
 
       const liquidatorRemaininCurrentSets = await liquidatorMock.remainingCurrentSets.callAsync();
       expect(remaininCurrentSets).to.be.bignumber.equal(liquidatorRemaininCurrentSets);
+    });
+  });
+
+  describe('#biddingParameters', async () => {
+    async function subject(): Promise<BigNumber[]> {
+      return rebalancingSetToken.biddingParameters.callAsync();
+    }
+
+    it('returns the correct minimumBid', async () => {
+      const [minimumBid] = await subject();
+
+      const liquidatorMinimumBid = await liquidatorMock.minimumBid.callAsync();
+      expect(minimumBid).to.be.bignumber.equal(liquidatorMinimumBid);
+    });
+
+    it('returns the correct remainingCurrentSets', async () => {
+      const [, remaininCurrentSets] = await subject();
+
+      const liquidatorRemaininCurrentSets = await liquidatorMock.remainingCurrentSets.callAsync();
+      expect(remaininCurrentSets).to.be.bignumber.equal(liquidatorRemaininCurrentSets);
+    });
+  });
+
+  describe('#endFailedAuction', async () => {
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      const failPeriod = new BigNumber(100000);
+      await blockchain.increaseTimeAsync(failPeriod.add(1));
+
+      const minimumBid = await liquidatorMock.minimumBid.callAsync();
+      await rebalancingHelper.placeBidAsync(
+        rebalanceAuctionModule,
+        rebalancingSetToken.address,
+        minimumBid,
+      );
+
+      subjectCaller = deployerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingSetToken.endFailedAuction.sendTransactionAsync(
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('updates the rebalanceState to Drawdown', async () => {
+      await subject();
+
+      const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+      expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DRAWDOWN);
     });
   });
 });

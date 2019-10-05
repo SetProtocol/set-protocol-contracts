@@ -256,7 +256,7 @@ contract RebalancingSetTokenV2 is
      * Move to Drawdown state if bids have been placed. Reset to Default state if no bids placed.
      */
     function endFailedRebalance()
-        external
+        public
     {
         validateFailRebalance();
 
@@ -301,5 +301,14 @@ contract RebalancingSetTokenV2 is
         validateBurn();
 
         _burn(_from, _quantity);
+    }
+
+    /* ============ Backwards Compatability ============ */
+
+    /*
+     * Alias for endFailedRebalance
+     */
+    function endFailedAuction() external {
+        endFailedRebalance();
     }
 }

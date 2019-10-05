@@ -37,6 +37,8 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
 contract BackwardsCompatability is 
     RebalancingSetState
 {
+    /* ============ Getters ============ */
+
     function getAuctionPriceParameters() external view returns (uint256[] memory) {
         return liquidator.getAuctionPriceParameters();
     }
@@ -80,11 +82,15 @@ contract BackwardsCompatability is
      *
      * @return  biddingParams       Array with minimumBid and remainingCurrentSets
      */
-    function getBiddingParameters() external view returns (uint256[] memory) {
+    function getBiddingParameters() public view returns (uint256[] memory) {
         uint256[] memory biddingParams = new uint256[](2);
         biddingParams[0] = liquidator.minimumBid();
         biddingParams[1] = liquidator.remainingCurrentSets();
         return biddingParams;
+    }
+
+    function biddingParameters() external view returns (uint256[] memory) {
+        return getBiddingParameters();
     }
 
     function getFailedAuctionWithdrawComponents() external view returns (address[] memory) {

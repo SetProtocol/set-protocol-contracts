@@ -204,6 +204,41 @@ export class LiquidatorHelper {
     return combinedSetTokenUnits;
   }
 
+  public async constructInflowOutflowArraysAsync(
+    liquidatorContract: LinearAuctionLiquidatorContract,
+    quantity: BigNumber,
+    priceNumerator: BigNumber,
+    priceDenominator: BigNumber,
+    caller: Address
+  ): Promise<any> {
+    const inflowArray: string[] = [];
+    const outflowArray: string[] = [];
+
+    // Get unit arrays
+    const combinedCurrentUnits = await liquidatorContract.getCombinedCurrentSetUnits.callAsync( {from: caller} );
+    const combinedRebalanceUnits = await liquidatorContract.getCombinedNextSetUnits.callAsync( {from: caller} );
+    const pricePrecision = await liquidatorContract.pricePrecision.callAsync();
+
+    // Calculate the inflows and outflow arrays;
+    const [minimumBid, , ] = await liquidatorContract.generalAuctionDetails.callAsync(caller);
+    const coefficient = new BigNumber(minimumBid).div(pricePrecision);
+    const effectiveQuantity = quantity.div(priceNumerator);
+
+    for (let i = 0; i < combinedCurrentUnits.length; i++) {
+      const flow = combinedRebalanceUnits[i].mul(priceDenominator).sub(combinedCurrentUnits[i].mul(priceNumerator));
+      if (flow.greaterThan(0)) {
+        inflowArray.push(effectiveQuantity.mul(flow).div(coefficient).round(0, 3).toString());
+        outflowArray.push('0');
+      } else {
+        outflowArray.push(
+          flow.mul(new BigNumber(-1)).mul(effectiveQuantity).div(coefficient).round(0, 3).toString()
+        );
+        inflowArray.push('0');
+      }
+    }
+    return {inflowArray, outflowArray};
+  }
+
   /* ============ Getters ============ */
 
   public async getComponentPricesAsync(

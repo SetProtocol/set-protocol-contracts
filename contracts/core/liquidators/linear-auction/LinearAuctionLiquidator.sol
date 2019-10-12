@@ -42,6 +42,17 @@ contract LinearAuctionLiquidator is
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
 
+    /* ============ Modifier ============ */
+    modifier callerValidSet() {
+        // Check that calling address is a valid set
+        require(
+            coreInstance.validSets(msg.sender),
+            "LinearAuctionLiquidator: Invalid or disabled proposed SetToken address"
+        );
+
+        _;
+    }
+
     /**
      * LinearAuctionLiquidator constructor
      *
@@ -80,13 +91,8 @@ contract LinearAuctionLiquidator is
         address _nextSet
     )
         external
+        // callerValidSet
     {
-        // Check that calling address is a valid set
-        // require(
-        //     coreInstance.validSets(msg.sender),
-        //     "ProposeLibrary.validateProposal: Invalid or disabled proposed SetToken address"
-        // );
-
         // Get set details for currentSet and nextSet (units, components, natural units)
         SetTokenLibrary.SetDetails memory currentSetDetails = SetTokenLibrary.getSetDetails(_currentSet);
         SetTokenLibrary.SetDetails memory nextSetDetails = SetTokenLibrary.getSetDetails(_nextSet);
@@ -141,19 +147,21 @@ contract LinearAuctionLiquidator is
         generalAuctionDetails[msg.sender].combinedTokenArray = memCombinedTokenArray;
     }
 
+    function cancelProposal()
+        external
+        // callerValidSet
+    {
+        clearAuctionState();
+    }
+
     function startRebalance(
         address _currentSet,
         address _nextSet,
         uint256 _startingCurrentSetQuantity
     )
         external
+        // callerValidSet
     {
-        // Check that calling address is a valid set
-        // require(
-        //     coreInstance.validSets(msg.sender),
-        //     "ProposeLibrary.validateProposal: Invalid or disabled proposed SetToken address"
-        // );
-
         // Get set details for currentSet and nextSet (units, components, natural units)
         SetTokenLibrary.SetDetails memory currentSet = SetTokenLibrary.getSetDetails(_currentSet);
         SetTokenLibrary.SetDetails memory nextSet = SetTokenLibrary.getSetDetails(_nextSet);
@@ -168,13 +176,13 @@ contract LinearAuctionLiquidator is
         // be allowed
         require(
             _startingCurrentSetQuantity >= minimumBid,
-            "RebalancingSetToken.setUpBiddingParameters: Not enough collateral to rebalance"
+            "LinearAuctionLiquidator.startRebalance: Not enough collateral to rebalance"
         );
 
         // Commit minimumBid to storage to use in future calculations
         generalAuctionDetails[msg.sender].minimumBid = minimumBid;
 
-        // Create combinedNextSetUnits and combinedCurrentUnits
+        // Create combinedNextSetUnits and combinedCurrentUnits and save to storage
         calculateCombinedUnitArrays(
             currentSet,
             nextSet
@@ -189,13 +197,23 @@ contract LinearAuctionLiquidator is
         uint256 _quantity
     )
         external
+        // callerValidSet
         returns (address[] memory, uint256[] memory, uint256[] memory)
-    {}
+    {
+        validateBidQuantity(_quantity);
+
+        // Update remainingCurrentSet figure to account for placed bid
+        generalAuctionDetails[msg.sender].remainingCurrentSets = 
+            generalAuctionDetails[msg.sender].remainingCurrentSets.sub(_quantity);
+
+        return getBidPrice(_quantity);
+    }
 
     function getBidPrice(
         uint256 _quantity
     )
-        external
+        public
+        // callerValidSet
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
         // Get bid conversion price, currently static placeholder for calling auctionlibrary
@@ -217,11 +235,46 @@ contract LinearAuctionLiquidator is
 
     function settleRebalance()
         external
-    {}
+        // callerValidSet
+    {
+        // Make sure all currentSets have been rebalanced
+        require(
+            generalAuctionDetails[msg.sender].remainingCurrentSets <
+            generalAuctionDetails[msg.sender].minimumBid,
+            "LinearAuctionLiquidator.settleRebalance: Rebalance not completed"
+        );
+
+        clearAuctionState();
+    }
 
     function endFailedRebalance()
         external
-    {}
+        // callerValidSet
+    {
+        clearAuctionState();
+    }
+
+    function hasRebalanceFailed()
+        external
+        view
+        // callerValidSet
+        returns (bool)    
+    {
+        // Calculate timestamp when pivot is reached
+        uint256 revertAuctionTime = linearAuctionDetails[msg.sender].startTime.add(
+            timeToPivot
+        );
+
+        // Make sure auction has gone past pivot point
+        bool pivotTimeExceeded = block.timestamp >= revertAuctionTime;
+
+        // Make sure more than minimumBid amount of currentSets remains
+        bool setsNotAuctioned = generalAuctionDetails[msg.sender].remainingCurrentSets >=
+            generalAuctionDetails[msg.sender].minimumBid;
+
+        // Make sure auction has gone past pivot point
+        return (pivotTimeExceeded && setsNotAuctioned);
+    }
 
     /* ============ Getters Functions ============ */
     function getCombinedTokenArray()
@@ -249,4 +302,10 @@ contract LinearAuctionLiquidator is
     }
 
     /* ============ Internal Functions ============ */
+    function clearAuctionState()
+        internal
+    {
+        delete generalAuctionDetails[msg.sender];
+        delete linearAuctionDetails[msg.sender];
+    }
 }

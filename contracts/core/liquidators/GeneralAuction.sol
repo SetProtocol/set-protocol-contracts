@@ -102,6 +102,30 @@ contract GeneralAuction {
         );
     }
 
+    /*
+     * Validate bid quantity
+     *
+     * @param _quantity               Amount of currentSets bidder is seeking to rebalance
+     */
+    function validateBidQuantity(
+        uint256 _quantity
+    )
+        internal
+        view
+    {
+        // Make sure that bid amount is multiple of minimum bid amount
+        require(
+            _quantity.mod(generalAuctionDetails[msg.sender].minimumBid) == 0,
+            "GeneralAuction.validateBidQuantity: Must bid multiple of minimum bid"
+        );
+
+        // Make sure that bid Amount is less than remainingCurrentSets
+        require(
+            _quantity <= generalAuctionDetails[msg.sender].remainingCurrentSets,
+            "GeneralAuction.validateBidQuantity: Bid exceeds remaining current sets"
+        );
+    }
+
     /* ============ Bid Price Helpers ============ */
 
     /*
@@ -119,7 +143,7 @@ contract GeneralAuction {
         uint256 _priceNumerator,
         uint256 _priceDivisor
     )
-        public
+        internal
         view
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
@@ -459,7 +483,7 @@ contract GeneralAuction {
 
         require(
             allocationUSDValue > 0,
-            "FlexibleTimingManagerLibrary.calculateTokenAllocationAmountUSD: Value must be > 0"
+            "GeneralAuction.calculateTokenAllocationAmountUSD: Value must be > 0"
         );
 
         return allocationUSDValue;

@@ -120,7 +120,7 @@ contract LinearAuction {
         uint256 pivotPrice = linearAuctionDetails[msg.sender].pivotPrice;
 
         // Initialize numerator and denominator
-        uint256 priceNumerator;
+        uint256 priceNumerator = pivotPrice;
         uint256 currentPriceDivisor = _pricePrecision;
 
         /*
@@ -172,7 +172,6 @@ contract LinearAuction {
             uint256 thirtySecondPeriods = elapsed
                 .sub(timeToPivot)
                 .div(THIRTY_SECONDS);
-
             // Because after 1000 thirtySecondPeriods the priceDivisor would be 0 (causes revert)
             if (thirtySecondPeriods < MAX_30_SECOND_PERIODS) {
                 // Calculate new denominator where the denominator decays at a rate of 0.1% of the ORIGINAL

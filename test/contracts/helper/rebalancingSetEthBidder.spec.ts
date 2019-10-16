@@ -117,7 +117,7 @@ contract('RebalancingSetEthBidder', accounts => {
 
   after(async () => {
     ABIDecoder.removeABI(CoreMock.abi);
-    ABIDecoder.removeABI(rebalanceAuctionModuleMock.abi);
+    ABIDecoder.removeABI(RebalanceAuctionModuleMock.abi);
     ABIDecoder.removeABI(RebalancingSetEthBidder.abi);
   });
 

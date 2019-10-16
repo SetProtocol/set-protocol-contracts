@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 Set Labs Inc.
+    Copyright 2019 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ interface IRebalanceAuctionModule {
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance
      * @param  _allowPartialFill       Set to true if want to partially fill bid when quantity
-                                       is greater than currentRemainingSets
+     *                                 is greater than currentRemainingSets
      */
     function bidAndWithdraw(
         address _rebalancingSetToken,

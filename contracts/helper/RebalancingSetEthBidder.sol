@@ -132,7 +132,7 @@ contract RebalancingSetEthBidder is
         ) = IRebalancingSetToken(_rebalancingSetToken).getBidPrice(_quantity);
 
         // Ensure allowances and transfer non-weth tokens from user
-        depositComponents(
+        depositNonWethComponents(
             combinedTokenArray,
             inflowArray
         );
@@ -145,7 +145,7 @@ contract RebalancingSetEthBidder is
         );
 
         // Withdraw non-weth tokens to user
-        withdrawComponentsToSender(
+        withdrawNonWethComponentsToSender(
             combinedTokenArray
         );
 
@@ -164,9 +164,9 @@ contract RebalancingSetEthBidder is
      * into this helper contract.
      *
      * @param  _combinedTokenArray            Array of token addresses
-     * @param  _inflowArray                   Address of the rebalancing Set token
+     * @param  _inflowArray                   Array of inflow token units
      */
-    function depositComponents(
+    function depositNonWethComponents(
         address[] memory _combinedTokenArray,
         uint256[] memory _inflowArray
     )
@@ -207,7 +207,7 @@ contract RebalancingSetEthBidder is
      *
      * @param  _combinedTokenArray           Array of token addresses
      */
-    function withdrawComponentsToSender(
+    function withdrawNonWethComponentsToSender(
         address[] memory _combinedTokenArray
     )
         private

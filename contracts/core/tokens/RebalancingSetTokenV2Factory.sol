@@ -112,18 +112,20 @@ contract RebalancingSetTokenV2Factory {
         maximumNaturalUnit = _maximumNaturalUnit;
     }
 
-    /* ============ Public Functions ============ */
+    /* ============ External Functions ============ */
 
     /**
      * Deploys a new RebalancingSetTokenV2 contract, conforming to IFactory
      * Can only be called by core contracts.
      *
-     *
-     * | Data                       | Location                      |
+     * 
+     * | CallData                   | Location                      |
      * |----------------------------|-------------------------------|
      * | manager                    | 32                            |
-     * | proposalPeriod             | 64                            |
-     * | rebalanceInterval          | 96                            |
+     * | liquidator                 | 64                            |
+     * | proposalPeriod             | 96                            |
+     * | rebalanceInterval          | 128                           |
+     * | rebalanceFailPeriod        | 160                           |
      *
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
@@ -131,6 +133,7 @@ contract RebalancingSetTokenV2Factory {
      * @param  _name           The bytes32 encoded name of the new RebalancingSetTokenV2
      * @param  _symbol         The bytes32 encoded symbol of the new RebalancingSetTokenV2
      * @param  _callData       Byte string containing additional call parameters
+     * 
      * @return setToken        The address of the newly created SetToken
      */
     function createSet(
@@ -208,17 +211,19 @@ contract RebalancingSetTokenV2Factory {
             "RebalancingSetTokenV2Factory.create: Liquidator not whitelisted"
         );
 
-        // Require minimum rebalance interval and proposal period
+        // Require that the proposal period is greater than the minimum
         require(
             parameters.proposalPeriod >= minimumProposalPeriod,
             "RebalancingSetTokenV2Factory.create: Proposal period too short"
         );
 
+        // Require that the rebalance interval is greater than the minimum
         require(
             parameters.rebalanceInterval >= minimumRebalanceInterval,
             "RebalancingSetTokenV2Factory.create: Rebalance interval too short"
         ); 
 
+        // Require that the fail rebalance period is greater than the minimum
         require(
             parameters.rebalanceFailPeriod >= minimumFailRebalancePeriod,
             "RebalancingSetTokenV2Factory.create: Fail Period too short"
@@ -257,7 +262,7 @@ contract RebalancingSetTokenV2Factory {
             mstore(add(parameters, 32),  mload(add(_callData, 64)))   // liquidator
             mstore(add(parameters, 64),  mload(add(_callData, 96)))   // proposalPeriod
             mstore(add(parameters, 96),  mload(add(_callData, 128)))  // rebalanceInterval
-            mstore(add(parameters, 128),  mload(add(_callData, 160))) // rebalanceFailPeriod
+            mstore(add(parameters, 128), mload(add(_callData, 160)))  // rebalanceFailPeriod
         }
 
         return parameters;

@@ -20,21 +20,21 @@ pragma experimental "ABIEncoderV2";
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 
+import { BackwardsCompatability } from "./rebalancing-v2/BackwardsCompatability.sol";
+import { FailRebalance } from "./rebalancing-v2/FailRebalance.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { ILiquidator } from "../interfaces/ILiquidator.sol";
 import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
+import { Issuance } from "./rebalancing-v2/Issuance.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { IWhiteList } from "../interfaces/IWhiteList.sol";
-import { RebalancingSetState } from "./rebalancing-v2/RebalancingSetState.sol";
-import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
-import { Issuance } from "./rebalancing-v2/Issuance.sol";
-import { BackwardsCompatability } from "./rebalancing-v2/BackwardsCompatability.sol";
 import { PlaceBid } from "./rebalancing-v2/PlaceBid.sol";
 import { Propose } from "./rebalancing-v2/Propose.sol";
-import { StartRebalance } from "./rebalancing-v2/StartRebalance.sol";
-import { FailRebalance } from "./rebalancing-v2/FailRebalance.sol";
+import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
+import { RebalancingSetState } from "./rebalancing-v2/RebalancingSetState.sol";
 import { SettleRebalance } from "./rebalancing-v2/SettleRebalance.sol";
+import { StartRebalance } from "./rebalancing-v2/StartRebalance.sol";
 
 
 /**
@@ -44,9 +44,11 @@ import { SettleRebalance } from "./rebalancing-v2/SettleRebalance.sol";
  * Implementation of Rebalancing Set token V2. Major improvements vs. V1 include:
  * - Decouple the Rebalancing Set state and rebalance state from the rebalance execution (e.g. auction)
  *   This allows us to rapidly iterate and build new liquidation mechanisms for rebalances.
+ * - The Set retains ability to fail an auction if the minimum fail time has elapsed.
  * - RebalanceAuctionModule execution should be backwards compatible with V1. 
  * - Bidding and auction parameters state no longer live on this contract. They live on the liquidator
- * - Re-proposals are no longer allowed. Instead, one would cancel a proposal and then propose again
+ *   BackwardsComptability is used to allow retrieving of previous supported states.
+ * - Re-proposals are no longer allowed. Instead, managers cancel proposals and then propose again
  */
 contract RebalancingSetTokenV2 is
     ERC20,
@@ -155,10 +157,11 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Initiates the rebalance through coordination with the Liquidator contract.
+     * Initiates the rebalance in coordination with the Liquidator contract. 
+     * In this step, we redeem the currentSet and pass relevant information
+     * to the liquidator.
      *
-     * Can only be called if the proposal period has elapsed after
-     * a proposal. 
+     * Can only be called if the proposal period has elapsed.
      *
      * Anyone can call this function.
      */
@@ -200,6 +203,8 @@ contract RebalancingSetTokenV2 is
      * Place bid during rebalance auction. 
      * 
      * The intended caller is the RebalanceAuctionModule, which must be approved by Core.
+     * Call Flow:
+     * RebalanceAuctionModule -> RebalancingSetTokenV2 -> Liquidator
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
      * @return combinedTokenArray       Array of token addresses involved in rebalancing

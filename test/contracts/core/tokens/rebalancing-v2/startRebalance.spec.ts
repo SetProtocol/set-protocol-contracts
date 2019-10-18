@@ -302,7 +302,7 @@ contract('StartRebalance', accounts => {
           );
         });
 
-        it('redeemsInVault the currentSet', async () => {
+        it('redeemsInVault the currentSet properly', async () => {
           const supply = await vault.getOwnerBalance.callAsync(currentSetToken.address, rebalancingSetToken.address);
           const currentSetNaturalUnit = await currentSetToken.naturalUnit.callAsync();
           const currentSetTokenBalance = await vault.balances.callAsync(

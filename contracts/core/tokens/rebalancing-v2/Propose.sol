@@ -59,33 +59,33 @@ contract Propose is
         // New Proposal can only be made in Default state
         require(
             rebalanceState == RebalancingLibrary.State.Default,
-            "Propose.validateProposal: State must be in Default"
+            "ValidateProposal: State must be in Default"
         );
 
         // Enough time must have passed from last rebalance to start a new proposal
         require(
             block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
-            "Propose.validateProposal: Rebalance interval not elapsed"
+            "ValidateProposal: Rebalance interval not elapsed"
         );
 
         // New proposed Set must be a valid Set created by Core
         require(
             core.validSets(address(_nextSet)),
-            "Propose.validateProposal: Invalid or disabled proposed SetToken address"
+            "ValidateProposal: Invalid or disabled proposed SetToken address"
         );
 
         // Check proposed components on whitelist. This is to ensure managers are unable to add contract addresses
         // to a propose that prohibit the set from carrying out an auction i.e. a token that only the manager possesses
         require(
             componentWhiteList.areValidAddresses(_nextSet.getComponents()),
-            "Propose.validateProposal: Proposed set contains invalid component token"
+            "ValidateProposal: Proposed set contains invalid component token"
         );
 
         // Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.
         // Done to make sure that when calculating token units there will are no rounding errors.
         require(
             naturalUnitsAreValid(currentSet, _nextSet),
-            "Propose.validateProposal: Invalid proposed Set natural unit"
+            "ValidateProposal: Invalid proposed Set natural unit"
         );
     }
 
@@ -98,7 +98,7 @@ contract Propose is
     {
         require(
             rebalanceState == RebalancingLibrary.State.Proposal,
-            "Propose.validateCancelProposal: State must be in Proposal"
+            "ValidateCancelProposal: State must be in Proposal"
         );
     }
 
@@ -133,7 +133,6 @@ contract Propose is
         internal
     {
         rebalanceState = RebalancingLibrary.State.Proposal;
-
         nextSet = _nextSet;
         proposalStartTime = block.timestamp;
 
@@ -149,8 +148,8 @@ contract Propose is
     function revertProposal()
         internal
     {
-        nextSet = ISetToken(address(0));
         rebalanceState = RebalancingLibrary.State.Default;
+        nextSet = ISetToken(address(0));
     }
 
     /* ============ Private Functions ============ */

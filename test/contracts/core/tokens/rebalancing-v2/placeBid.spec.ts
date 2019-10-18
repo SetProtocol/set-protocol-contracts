@@ -281,7 +281,7 @@ contract('PlaceBid', accounts => {
     });
   });
 
-  describe('#PlaceBid from placeBidMock', async () => {
+  describe('#PlaceBid from placeBidMock to retrieve function return values', async () => {
     let subjectCaller: Address;
     let subjectBidQuantity: BigNumber;
 
@@ -402,6 +402,16 @@ contract('PlaceBid', accounts => {
         liquidatorCurrentUnits,
       );
       expect(JSON.stringify(outflowUnits)).to.equal(JSON.stringify(expectedOutflowUnits));
+    });
+
+    describe('when the quantity is 0', async () => {
+      beforeEach(async () => {
+        subjectBidQuantity = ZERO;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
     });
   });
 });

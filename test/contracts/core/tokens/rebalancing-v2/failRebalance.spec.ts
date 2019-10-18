@@ -204,117 +204,121 @@ contract('FailRebalance', accounts => {
         );
       });
 
-      describe('and no bids have been placed', async () => {
-        beforeEach(async () => {
-          const failRebalancePeriod = new BigNumber(100000);
-          await blockchain.increaseTimeAsync(failRebalancePeriod.add(1));
+      describe('when the failAuctionTime has been breached', async () => {
+        describe('and no bids have been placed', async () => {
+          beforeEach(async () => {
+            const failRebalancePeriod = new BigNumber(100000);
+            await blockchain.increaseTimeAsync(failRebalancePeriod.add(1));
+          });
+
+          it('updates the rebalanceState to Default', async () => {
+            await subject();
+
+            const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+            expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
+          });
+
+          it('reissues the currentSet to the rebalancingSetToken', async () => {
+            const existingBalance = await vault.balances.callAsync(
+              currentSetToken.address,
+              rebalancingSetToken.address
+            );
+            const nextSetIssueQuantity = await rebalancingHelper.getNextSetIssueQuantity(
+              nextSetToken,
+              rebalancingSetToken,
+              vault,
+            );
+
+            await subject();
+
+            const expectedBalance = existingBalance.add(nextSetIssueQuantity);
+            const newBalance = await vault.balances.callAsync(currentSetToken.address, rebalancingSetToken.address);
+            expect(newBalance).to.be.bignumber.equal(expectedBalance);
+          });
+
+          it('sets lastRebalanceTimestamp to block timestamp', async () => {
+            const txHash = await subject();
+            const txReceipt = await web3.eth.getTransactionReceipt(txHash);
+            const blockData = await web3.eth.getBlock(txReceipt.blockHash);
+
+            const newLastRebalanceTimestamp = await rebalancingSetToken.lastRebalanceTimestamp.callAsync();
+            expect(newLastRebalanceTimestamp).to.be.bignumber.equal(blockData.timestamp);
+          });
+
+          it('clears the nextSet variable', async () => {
+            await subject();
+
+            const nextSet = await rebalancingSetToken.nextSet.callAsync();
+            const expectedNextSet = 0;
+
+            expect(nextSet).to.be.bignumber.equal(expectedNextSet);
+          });
+
+          it('clears the hasBidded variable', async () => {
+            await subject();
+
+            const hasBidded = await rebalancingSetToken.hasBidded.callAsync();
+
+            expect(hasBidded).to.equal(false);
+          });
+
+          it('increments the rebalanceIndex variable', async () => {
+            const previousRebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
+
+            await subject();
+
+            const expectedRebalanceIndex = previousRebalanceIndex.plus(1);
+            const rebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
+
+            expect(rebalanceIndex).to.bignumber.equal(expectedRebalanceIndex);
+          });
         });
 
-        it('updates the rebalanceState to Default', async () => {
-          await subject();
+        describe('and bids have been placed', async () => {
+          beforeEach(async () => {
+            const failPeriod = new BigNumber(100000);
+            await blockchain.increaseTimeAsync(failPeriod.add(1));
 
-          const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
-          expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
+            const minimumBid = await liquidatorMock.minimumBid.callAsync();
+            await rebalancingHelper.placeBidAsync(
+              rebalanceAuctionModule,
+              rebalancingSetToken.address,
+              minimumBid,
+            );
+          });
+
+          it('updates the rebalanceState to Drawdown', async () => {
+            await subject();
+
+            const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+            expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DRAWDOWN);
+          });
+
+          it('clears the nextSet variable', async () => {
+            await subject();
+
+            const nextSet = await rebalancingSetToken.nextSet.callAsync();
+            const expectedNextSet = 0;
+
+            expect(nextSet).to.be.bignumber.equal(expectedNextSet);
+          });
+
+          it('updates the failedRebalanceComponents property', async () => {
+            const currentSetComponents = await currentSetToken.getComponents.callAsync();
+            const nextSetComponents = await nextSetToken.getComponents.callAsync();
+
+            const expectedWithdrawComponents = _.union(currentSetComponents, nextSetComponents);
+
+            await subject();
+
+            const withdrawComponents = await rebalancingSetToken.getFailedAuctionWithdrawComponents.callAsync();
+
+            expect(withdrawComponents).to.deep.equal(expectedWithdrawComponents);
+          });
         });
 
-        it('reissues the currentSet to the rebalancingSetToken', async () => {
-          const existingBalance = await vault.balances.callAsync(
-            currentSetToken.address,
-            rebalancingSetToken.address
-          );
-          const nextSetIssueQuantity = await rebalancingHelper.getNextSetIssueQuantity(
-            nextSetToken,
-            rebalancingSetToken,
-            vault,
-          );
-
-          await subject();
-
-          const expectedBalance = existingBalance.add(nextSetIssueQuantity);
-          const newBalance = await vault.balances.callAsync(currentSetToken.address, rebalancingSetToken.address);
-          expect(newBalance).to.be.bignumber.equal(expectedBalance);
-        });
-
-        it('sets lastRebalanceTimestamp to block timestamp', async () => {
-          const txHash = await subject();
-          const txReceipt = await web3.eth.getTransactionReceipt(txHash);
-          const blockData = await web3.eth.getBlock(txReceipt.blockHash);
-
-          const newLastRebalanceTimestamp = await rebalancingSetToken.lastRebalanceTimestamp.callAsync();
-          expect(newLastRebalanceTimestamp).to.be.bignumber.equal(blockData.timestamp);
-        });
-
-        it('clears the nextSet variable', async () => {
-          await subject();
-
-          const nextSet = await rebalancingSetToken.nextSet.callAsync();
-          const expectedNextSet = 0;
-
-          expect(nextSet).to.be.bignumber.equal(expectedNextSet);
-        });
-
-        it('clears the hasBidded variable', async () => {
-          await subject();
-
-          const hasBidded = await rebalancingSetToken.hasBidded.callAsync();
-
-          expect(hasBidded).to.equal(false);
-        });
-
-        it('increments the rebalanceIndex variable', async () => {
-          const previousRebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
-
-          await subject();
-
-          const expectedRebalanceIndex = previousRebalanceIndex.plus(1);
-          const rebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
-
-          expect(rebalanceIndex).to.bignumber.equal(expectedRebalanceIndex);
-        });
       });
 
-      describe('and bids have been placed', async () => {
-        beforeEach(async () => {
-          const failPeriod = new BigNumber(100000);
-          await blockchain.increaseTimeAsync(failPeriod.add(1));
-
-          const minimumBid = await liquidatorMock.minimumBid.callAsync();
-          await rebalancingHelper.placeBidAsync(
-            rebalanceAuctionModule,
-            rebalancingSetToken.address,
-            minimumBid,
-          );
-        });
-
-        it('updates the rebalanceState to Drawdown', async () => {
-          await subject();
-
-          const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
-          expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DRAWDOWN);
-        });
-
-        it('clears the nextSet variable', async () => {
-          await subject();
-
-          const nextSet = await rebalancingSetToken.nextSet.callAsync();
-          const expectedNextSet = 0;
-
-          expect(nextSet).to.be.bignumber.equal(expectedNextSet);
-        });
-
-        it('moves combinedTokenArray to failedAuctionWithdrawComponents', async () => {
-          const currentSetComponents = await currentSetToken.getComponents.callAsync();
-          const nextSetComponents = await nextSetToken.getComponents.callAsync();
-
-          const expectedWithdrawComponents = _.union(currentSetComponents, nextSetComponents);
-
-          await subject();
-
-          const withdrawComponents = await rebalancingSetToken.getFailedAuctionWithdrawComponents.callAsync();
-
-          expect(withdrawComponents).to.deep.equal(expectedWithdrawComponents);
-        });
-      });
 
       describe('when auctionFailPoint has not been reached and auction has not failed', async () => {
         it('should revert', async () => {
@@ -356,6 +360,23 @@ contract('FailRebalance', accounts => {
             expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DRAWDOWN);
           });
         });
+      });
+    });
+
+    describe('when settleRebalance is called from Drawdown State', async () => {
+      beforeEach(async () => {
+        await rebalancingHelper.transitionToDrawdownV2Async(
+          coreMock,
+          rebalancingSetToken,
+          rebalanceAuctionModule,
+          liquidatorMock,
+          nextSetToken,
+          managerAccount,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

@@ -179,11 +179,19 @@ contract('Propose', accounts => {
     }
 
     describe('when propose is called from the Default state', async () => {
-      it('updates to the new rebalancing set correctly', async () => {
+      it('updates to the nextSet correctly', async () => {
         await subject();
 
         const newRebalacingSet = await rebalancingSetToken.nextSet.callAsync();
         expect(newRebalacingSet).to.equal(subjectNextSet);
+      });
+
+      it('updates the proposalStartTime properly', async () => {
+        await subject();
+        const { timestamp } = await web3.eth.getBlock('latest');
+
+        const newRebalanceState = await rebalancingSetToken.proposalStartTime.callAsync();
+        expect(newRebalanceState).to.be.bignumber.equal(timestamp);
       });
 
       it('updates the rebalanceState to Proposal', async () => {
@@ -378,7 +386,7 @@ contract('Propose', accounts => {
 
       const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
       const reproposeRebalancingSetComponentAddresses = await reproposeRebalancingSetTokenV2.getComponents.callAsync();
-      const componentsToWhiteList = _.uniq(
+      const componentsToWhiteList: Address[] = _.uniq(
         nextSetTokenComponentAddresses.concat(reproposeRebalancingSetComponentAddresses)
       );
       await coreHelper.addTokensToWhiteList(componentsToWhiteList, rebalancingComponentWhiteList);
@@ -420,7 +428,7 @@ contract('Propose', accounts => {
         );
       });
 
-      it('updates to the new rebalancing set correctly', async () => {
+      it('sets the nextSet correctly', async () => {
         await subject();
 
         const newRebalacingSet = await rebalancingSetToken.nextSet.callAsync();

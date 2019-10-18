@@ -52,13 +52,13 @@ contract PlaceBid is
         // Must be in Rebalance State
         require(
             rebalanceState == RebalancingLibrary.State.Rebalance,
-            "RebalancingSetToken.getBidPrice: State must be Rebalance"
+            "GetBidPrice: State must be Rebalance"
         );
 
         // Bid amount must be greater than zero
         require(
             _quantity > 0,
-            "RebalancingSetToken.getBidPrice: Bid must be > 0"
+            "GetBidPrice: Bid must be > 0"
         );
     }
 
@@ -76,7 +76,7 @@ contract PlaceBid is
         // Make sure sender is a module
         require(
             core.validModules(msg.sender),
-            "RebalancingSetToken.placeBid: Sender must be approved module"
+            "PlaceBid: Sender must be approved module"
         );
 
         validateGetBidPrice(_quantity);

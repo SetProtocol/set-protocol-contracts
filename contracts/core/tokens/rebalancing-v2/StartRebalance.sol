@@ -54,13 +54,13 @@ contract StartRebalance is
         // Must be in "Proposal" state
         require(
             rebalanceState == RebalancingLibrary.State.Proposal,
-            "StartRebalance.validateStartRebalance: State must be Proposal"
+            "ValidateStartRebalance: State must be Proposal"
         );
 
         // The full proposal period must have elapsed
         require(
             block.timestamp >= proposalStartTime.add(proposalPeriod),
-            "StartRebalance.validateStartRebalance: Proposal period not elapsed"
+            "ValidateStartRebalance: Proposal period not elapsed"
         );
     }
 
@@ -121,8 +121,8 @@ contract StartRebalance is
     function transitionToRebalance()
         internal
     {
-        rebalanceStartTime = block.timestamp;
         rebalanceState = RebalancingLibrary.State.Rebalance;
+        rebalanceStartTime = block.timestamp;
 
         emit RebalanceStarted(address(currentSet), address(nextSet));
     }

@@ -56,19 +56,19 @@ contract SettleRebalance is
         // Must be in Rebalance state to call settlement
         require(
             rebalanceState == RebalancingLibrary.State.Rebalance,
-            "RebalancingSetToken.settleRebalance: State must be Rebalance"
+            "ValidateSettleRebalance: State must be Rebalance"
         );
 
         // A rebalance can not have completed without a successful bid
         require(
             hasBidded,
-            "RebalancingSetToken.settleRebalance: No bids made"
+            "ValidateSettleRebalance: No bids made"
         );
 
         // The unit shares must result in a quantity greater than the number of natural units outstanding
         require(
             _nextUnitShares > 0,
-            "RebalancingSetToken.settleRebalance: Failed rebalance, unitshares equals 0. Call endFailedAuction."
+            "ValidateSettleRebalance: Failed rebalance, unitshares equals 0. Call endFailedRebalance."
         );
     }
 
@@ -107,11 +107,11 @@ contract SettleRebalance is
     )
         internal
     {
+        rebalanceState = RebalancingLibrary.State.Default;
+        lastRebalanceTimestamp = block.timestamp;
         currentSet = nextSet;
         unitShares = _newUnitShares;
-        rebalanceState = RebalancingLibrary.State.Default;
         rebalanceIndex = rebalanceIndex.add(1);
-        lastRebalanceTimestamp = block.timestamp;
         
         nextSet = ISetToken(address(0));
         hasBidded = false;

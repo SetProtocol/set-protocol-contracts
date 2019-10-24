@@ -22,10 +22,11 @@ import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
 
-import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
-import { ICore } from "../interfaces/ICore.sol";
-import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
-import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
+import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
+import { ICore } from "../../interfaces/ICore.sol";
+import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
+import { ISetToken } from "../../interfaces/ISetToken.sol";
+import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 
 /**
@@ -60,7 +61,7 @@ contract Auction {
      * @param _pricePrecision               Price precision used in auctions
      */
     constructor(
-        uint256 _pricePrecision,
+        uint256 _pricePrecision
     )
         public
         
@@ -80,7 +81,7 @@ contract Auction {
         SetTokenLibrary.SetDetails memory currentSetDetails = SetTokenLibrary.getSetDetails(_currentSet);
         SetTokenLibrary.SetDetails memory nextSetDetails = SetTokenLibrary.getSetDetails(_nextSet);
 
-        _auction.minimumBid = calculateMinimumBid(currentSet, nextSet);
+        _auction.minimumBid = calculateMinimumBid(currentSetDetails, nextSetDetails);
         // Require remainingCurrentSets to be greater than minimumBid otherwise no bidding would
         // be allowed
         require(
@@ -88,7 +89,7 @@ contract Auction {
             "LinearAuctionLiquidator.startRebalance: Not enough collateral to rebalance"
         );
 
-        _auction.combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
+        _auction.combinedTokenArray = getCombinedTokenArray(currentSetDetails, nextSetDetails);
 
         (
             uint256[] memory combinedCurrentSetUnits,
@@ -102,11 +103,18 @@ contract Auction {
         _auction.startTime = block.timestamp;
     }
 
+    function reduceRemainingCurrentSets(
+        Auction storage _auction,
+        uint256 _quantity
+    )
+        internal
+    {
+        _auction.remainingCurrentSets = _auction.remainingCurrentSets.sub(_quantity);
+    }
+
     /**
      * Calculate the minimumBid allowed for the rebalance
      *
-     * @param _currentSetNaturalUnit    Natural unit of currentSet
-     * @param _nextSetNaturalUnit       Natural of nextSet
      * @return                          Minimum bid amount
      */
     function calculateMinimumBid(
@@ -152,6 +160,17 @@ contract Auction {
     }
 
     /* ============ Bid Price Helpers ============ */
+
+    function getCombinedTokenArray(
+        SetTokenLibrary.SetDetails memory _currentSet,
+        SetTokenLibrary.SetDetails memory _nextSet
+    )
+        internal
+        view
+        returns(address[] memory)
+    {
+        return _currentSet.components.union(_nextSet.components);
+    }
 
     /*
      * Creates arrays of token inflows and outflows

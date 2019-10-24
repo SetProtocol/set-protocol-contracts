@@ -22,10 +22,11 @@ import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
 
-import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
-import { ICore } from "../interfaces/ICore.sol";
-import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
-import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
+import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
+import { ICore } from "../../interfaces/ICore.sol";
+import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
+import { ISetToken } from "../../interfaces/ISetToken.sol";
+import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 
 /**

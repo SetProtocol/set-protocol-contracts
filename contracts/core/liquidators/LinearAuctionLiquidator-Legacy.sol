@@ -36,18 +36,14 @@
 //  * down linear auction rebalances for RebalancingSetTokens.
 //  */
 // contract LinearAuctionLiquidator is
+//     GeneralAuction,
 //     LinearAuction
 // {
 //     using SafeMath for uint256;
 //     using AddressArrayUtils for address[];
 
-//     ICore public coreInstance;
-//     IOracleWhiteList public oracleWhiteListInstance;
-//     string public name;
-//     mapping(address => LinearAuction) public auctions;
-
 //     /* ============ Modifier ============ */
-//     modifier isValidSet() {
+//     modifier callerValidSet() {
 //         // Check that calling address is a valid set
 //         require(
 //             coreInstance.validSets(msg.sender),
@@ -76,72 +72,139 @@
 //         string memory _name
 //     )
 //         public
+//         GeneralAuction(
+//             _coreInstance,
+//             _oracleWhiteListInstance,
+//             _pricePrecision,
+//             _name
+//         )
 //         LinearAuction(
 //             _timeToPivot,
-//             _auctionSpeed,
-//             _pricePrecision
+//             _auctionSpeed
 //         )
-//     {
-//         // TODO: Add % above fair value, % below fair value
-//         // Set name
-//         // Set core instance
-//         // set oraclewhitelist
-//     }
+//     {}
 
 //     /* ============ External Functions ============ */
 
 //     function processProposal(
-//         ISetToken _currentSet,
-//         ISetToken _nextSet
+//         address _currentSet,
+//         address _nextSet
 //     )
 //         external
-//         // isValidSet
+//         // callerValidSet
 //     {
+//         // Get set details for currentSet and nextSet (units, components, natural units)
+//         SetTokenLibrary.SetDetails memory currentSetDetails = SetTokenLibrary.getSetDetails(_currentSet);
+//         SetTokenLibrary.SetDetails memory nextSetDetails = SetTokenLibrary.getSetDetails(_nextSet);
+
+//         // Create combinedTokenArray in memory
+//         address[] memory memCombinedTokenArray = currentSetDetails.components.union(
+//             nextSetDetails.components
+//         );
+
 //         // Check that all components in the rebalance have a matching oracle
-//         address[] memory combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
 //         require(
-//             oracleWhiteListInstance.areValidAddresses(combinedTokenArray),
+//             oracleWhiteListInstance.areValidAddresses(memCombinedTokenArray),
 //             "LinearAuctionLiquidator.processProposal: Passed token does not have matching oracle."
 //         );
 
-//         // Check that prices are valid?
+//         // Retrieve component prices of each SetToken
+//         uint256[] memory currentSetComponentPrices = getComponentPrices(
+//             currentSetDetails.components
+//         );
+//         uint256[] memory nextSetComponentPrices = getComponentPrices(
+//             nextSetDetails.components
+//         );
+
+//         // Retrieve component decimals of each SetToken
+//         uint256[] memory currentSetComponentDecimals = getComponentDecimals(
+//             currentSetDetails.components
+//         );
+//         uint256[] memory nextSetComponentDecimals = getComponentDecimals(
+//             nextSetDetails.components
+//         );
+
+//         // Get dollar value of both collateral SetTokens
+//         uint256 currentSetDollarValue = calculateSetTokenDollarValue(
+//             currentSetDetails,
+//             currentSetComponentPrices,
+//             currentSetComponentDecimals
+//         );
+//         uint256 nextSetDollarValue = calculateSetTokenDollarValue(
+//             nextSetDetails,
+//             nextSetComponentPrices,
+//             nextSetComponentDecimals
+//         );
+
+//         // Calculate and set auction startPrice and pivotPrice
+//         calculateAuctionPriceParameters(
+//             currentSetDollarValue,
+//             nextSetDollarValue,
+//             pricePrecision
+//         );
+
+//         // Set combinedTokenArray
+//         generalAuctionDetails[msg.sender].combinedTokenArray = memCombinedTokenArray;
 //     }
 
-//     // Can only be called during proposal
-//     // Should we place safeguards as to when it can be called?
 //     function cancelProposal()
 //         external
-//         // isValidSet
-//     {}
+//         // callerValidSet
+//     {
+//         clearAuctionState();
+//     }
 
-//     // Should we place safeguards as to when this can be called?
 //     function startRebalance(
 //         address _currentSet,
 //         address _nextSet,
 //         uint256 _startingCurrentSetQuantity
 //     )
 //         external
-//         // isValidSet
+//         // callerValidSet
 //     {
-//         initializeLinearAuction(
-//             auctions[msg.sender],
-//             _currentSet,
-//             _nextSet,
-//             _startingCurrentSetQuantity
+//         // Get set details for currentSet and nextSet (units, components, natural units)
+//         SetTokenLibrary.SetDetails memory currentSet = SetTokenLibrary.getSetDetails(_currentSet);
+//         SetTokenLibrary.SetDetails memory nextSet = SetTokenLibrary.getSetDetails(_nextSet);
+
+//         // Calcualate minimumBid and keep in memory
+//         uint256 minimumBid = calculateMinimumBid(
+//             currentSet.naturalUnit,
+//             nextSet.naturalUnit
 //         );
+
+//         // Require remainingCurrentSets to be greater than minimumBid otherwise no bidding would
+//         // be allowed
+//         require(
+//             _startingCurrentSetQuantity >= minimumBid,
+//             "LinearAuctionLiquidator.startRebalance: Not enough collateral to rebalance"
+//         );
+
+//         // Commit minimumBid to storage to use in future calculations
+//         generalAuctionDetails[msg.sender].minimumBid = minimumBid;
+
+//         // Create combinedNextSetUnits and combinedCurrentUnits and save to storage
+//         calculateCombinedUnitArrays(
+//             currentSet,
+//             nextSet
+//         );
+
+//         generalAuctionDetails[msg.sender].startingCurrentSets = _startingCurrentSetQuantity;
+//         generalAuctionDetails[msg.sender].remainingCurrentSets = _startingCurrentSetQuantity;
+//         linearAuctionDetails[msg.sender].startTime = block.timestamp;
 //     }
 
 //     function placeBid(
 //         uint256 _quantity
 //     )
 //         external
-//         // isValidSet
+//         // callerValidSet
 //         returns (address[] memory, uint256[] memory, uint256[] memory)
 //     {
 //         validateBidQuantity(_quantity);
 
 //         // Update remainingCurrentSet figure to account for placed bid
-//         reduceRemainingCurrentSets(auctions[msg.sender], _quantity);
+//         generalAuctionDetails[msg.sender].remainingCurrentSets = 
+//             generalAuctionDetails[msg.sender].remainingCurrentSets.sub(_quantity);
 
 //         return getBidPrice(_quantity);
 //     }
@@ -150,7 +213,7 @@
 //         uint256 _quantity
 //     )
 //         public
-//         // isValidSet
+//         // callerValidSet
 //         returns (address[] memory, uint256[] memory, uint256[] memory)
 //     {
 //         // Get bid conversion price, currently static placeholder for calling auctionlibrary
@@ -172,11 +235,12 @@
 
 //     function settleRebalance()
 //         external
-//         // isValidSet
+//         // callerValidSet
 //     {
 //         // Make sure all currentSets have been rebalanced
 //         require(
-//             !hasBiddableQuantity(auctions[msg.sender]),
+//             generalAuctionDetails[msg.sender].remainingCurrentSets <
+//             generalAuctionDetails[msg.sender].minimumBid,
 //             "LinearAuctionLiquidator.settleRebalance: Rebalance not completed"
 //         );
 
@@ -185,7 +249,7 @@
 
 //     function endFailedRebalance()
 //         external
-//         // isValidSet
+//         // callerValidSet
 //     {
 //         clearAuctionState();
 //     }
@@ -193,10 +257,23 @@
 //     function hasRebalanceFailed()
 //         external
 //         view
-//         // isValidSet
+//         // callerValidSet
 //         returns (bool)    
 //     {
-//         return hasAuctionFailed(auctions[msg.sender]);
+//         // Calculate timestamp when pivot is reached
+//         uint256 revertAuctionTime = linearAuctionDetails[msg.sender].startTime.add(
+//             timeToPivot
+//         );
+
+//         // Make sure auction has gone past pivot point
+//         bool pivotTimeExceeded = block.timestamp >= revertAuctionTime;
+
+//         // Make sure more than minimumBid amount of currentSets remains
+//         bool setsNotAuctioned = generalAuctionDetails[msg.sender].remainingCurrentSets >=
+//             generalAuctionDetails[msg.sender].minimumBid;
+
+//         // Make sure auction has gone past pivot point
+//         return (pivotTimeExceeded && setsNotAuctioned);
 //     }
 
 //     /* ============ Getters Functions ============ */
@@ -205,7 +282,7 @@
 //         view
 //         returns (address[] memory)
 //     {
-//         return auctions[msg.sender].combinedTokenArray;
+//         return generalAuctionDetails[msg.sender].combinedTokenArray;
 //     }
 
 //     function getCombinedCurrentSetUnits()
@@ -213,7 +290,7 @@
 //         view
 //         returns (uint256[] memory)
 //     {
-//         return auctions[msg.sender].combinedCurrentSetUnits;
+//         return generalAuctionDetails[msg.sender].combinedCurrentSetUnits;
 //     }
 
 //     function getCombinedNextSetUnits()
@@ -221,13 +298,14 @@
 //         view
 //         returns (uint256[] memory)
 //     {
-//         return auctions[msg.sender].combinedNextSetUnits;
+//         return generalAuctionDetails[msg.sender].combinedNextSetUnits;
 //     }
 
 //     /* ============ Internal Functions ============ */
 //     function clearAuctionState()
-//         private
+//         internal
 //     {
-//         delete auctions[msg.sender];
+//         delete generalAuctionDetails[msg.sender];
+//         delete linearAuctionDetails[msg.sender];
 //     }
 // }

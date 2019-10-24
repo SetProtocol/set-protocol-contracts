@@ -96,6 +96,8 @@ contract LinearAuction is Auction {
         _linearAuction.endPrice = calculatePivotPrice(fairValue);
     }
 
+    /* ============ Internal View Functions ============ */
+
     function calculateStartPrice()
         internal
         view
@@ -131,6 +133,19 @@ contract LinearAuction is Auction {
         uint256 nextSetUSDValue = calculateSetTokenDollarValue(_nextSet, oracleWhiteList);
 
         return nextSetUSDValue.mul(pricePrecision).div(currentSetUSDValue);
+    }
+
+    function getCurrentPriceRatio(
+        LinearAuction storage _linearAuction
+    )
+        internal
+        view
+        returns (uint256, uint256)
+    {
+        return (
+            getNumerator(_linearAuction),
+            pricePrecision
+        );
     }
 
     /*

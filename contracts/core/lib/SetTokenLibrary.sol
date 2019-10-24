@@ -19,6 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { ICore} from "../interfaces/ICore.sol";
 import { ISetToken} from "../interfaces/ISetToken.sol";
 
 
@@ -30,6 +31,7 @@ library SetTokenLibrary {
         address[] components;
         uint256[] units;
     }
+
 
     /**
      * Validates that passed in tokens are all components of the Set

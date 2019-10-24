@@ -26,7 +26,6 @@ import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
-import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 
 /**
@@ -42,7 +41,7 @@ contract Auction {
     using AddressArrayUtils for address[];
 
     /* ============ Structs ============ */
-    struct Auction {
+    struct Setup {
         uint256 minimumBid;
         uint256 startTime;
         uint256 startingCurrentSets;
@@ -60,28 +59,19 @@ contract Auction {
      *
      * @param _pricePrecision               Price precision used in auctions
      */
-    constructor(
-        uint256 _pricePrecision
-    )
-        public
-        
-    {
+    constructor(uint256 _pricePrecision) public {
         pricePrecision = _pricePrecision;
     }
 
     function initializeAuction(
-        Auction storage _auction,
+        Setup storage _auction,
         ISetToken _currentSet,
         ISetToken _nextSet,
         uint256 _startingCurrentSetQuantity
     )
         internal
     {
-        // Get set details for currentSet and nextSet (units, components, natural units)
-        SetTokenLibrary.SetDetails memory currentSetDetails = SetTokenLibrary.getSetDetails(_currentSet);
-        SetTokenLibrary.SetDetails memory nextSetDetails = SetTokenLibrary.getSetDetails(_nextSet);
-
-        _auction.minimumBid = calculateMinimumBid(currentSetDetails, nextSetDetails);
+        _auction.minimumBid = calculateMinimumBid(_currentSet, _nextSet);
         // Require remainingCurrentSets to be greater than minimumBid otherwise no bidding would
         // be allowed
         require(
@@ -89,22 +79,22 @@ contract Auction {
             "LinearAuctionLiquidator.startRebalance: Not enough collateral to rebalance"
         );
 
-        _auction.combinedTokenArray = getCombinedTokenArray(currentSetDetails, nextSetDetails);
+        _auction.combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
 
         (
             uint256[] memory combinedCurrentSetUnits,
             uint256[] memory combinedNextSetUnits
-        ) = calculateCombinedUnitArrays(_auction, currentSetDetails, nextSetDetails);
+        ) = calculateCombinedUnitArrays(_auction, _currentSet, _nextSet);
+
         _auction.combinedCurrentSetUnits = combinedCurrentSetUnits;
         _auction.combinedNextSetUnits = combinedNextSetUnits;
-
         _auction.startingCurrentSets = _startingCurrentSetQuantity;
         _auction.remainingCurrentSets = _startingCurrentSetQuantity;
         _auction.startTime = block.timestamp;
     }
 
     function reduceRemainingCurrentSets(
-        Auction storage _auction,
+        Setup storage _auction,
         uint256 _quantity
     )
         internal
@@ -118,15 +108,15 @@ contract Auction {
      * @return                          Minimum bid amount
      */
     function calculateMinimumBid(
-        SetTokenLibrary.SetDetails memory _currentSet,
-        SetTokenLibrary.SetDetails memory _nextSet
+        ISetToken _currentSet,
+        ISetToken _nextSet
     )
         internal
         view
         returns (uint256)
     {
-        uint256 currentSetNaturalUnit = _currentSet.naturalUnit;
-        uint256 nextNaturalUnit = _nextSet.naturalUnit;
+        uint256 currentSetNaturalUnit = _currentSet.naturalUnit();
+        uint256 nextNaturalUnit = _nextSet.naturalUnit();
         
         return Math.max(
             currentSetNaturalUnit.mul(pricePrecision),
@@ -140,7 +130,7 @@ contract Auction {
      * @param _quantity               Amount of currentSets bidder is seeking to rebalance
      */
     function validateBidQuantity(
-        Auction storage _auction,
+        Setup storage _auction,
         uint256 _quantity
     )
         internal
@@ -162,14 +152,16 @@ contract Auction {
     /* ============ Bid Price Helpers ============ */
 
     function getCombinedTokenArray(
-        SetTokenLibrary.SetDetails memory _currentSet,
-        SetTokenLibrary.SetDetails memory _nextSet
+        ISetToken _currentSet,
+        ISetToken _nextSet
     )
         internal
         view
         returns(address[] memory)
     {
-        return _currentSet.components.union(_nextSet.components);
+        address[] memory currentSetComponents = _currentSet.getComponents();
+        address[] memory nextSetComponents = _nextSet.getComponents();
+        return currentSetComponents.union(nextSetComponents);
     }
 
     /*
@@ -183,7 +175,7 @@ contract Auction {
      * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
      */
     function createTokenFlowArrays(
-        Auction storage _auction,
+        Setup storage _auction,
         uint256 _quantity,
         uint256 _priceNumerator,
         uint256 _priceDivisor
@@ -306,9 +298,9 @@ contract Auction {
      * @param _nextSet                  Information on nextSet
      */
     function calculateCombinedUnitArrays(
-        Auction storage _auction,
-        SetTokenLibrary.SetDetails memory _currentSet,
-        SetTokenLibrary.SetDetails memory _nextSet
+        Setup storage _auction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
     )
         internal
         view
@@ -353,25 +345,25 @@ contract Auction {
      * @return                          Unit inflow/outflow
      */
     function calculateCombinedUnit(
-        SetTokenLibrary.SetDetails memory _setToken,
+        ISetToken _setToken,
         uint256 _minimumBid,
         uint256 _pricePrecision,
         address _component
     )
-        internal
-        pure
+        private
+        view
         returns (uint256)
     {
         // Check if component in arrays and get index if it is
         uint256 indexCurrent;
         bool isComponent;
-        (indexCurrent, isComponent) = _setToken.components.indexOf(_component);
+        (indexCurrent, isComponent) = _setToken.getComponents().indexOf(_component);
 
         // Compute unit amounts of token in Set
         if (isComponent) {
             return computeTransferValue(
-                _setToken.units[indexCurrent],
-                _setToken.naturalUnit,
+                _setToken.getUnits()[indexCurrent],
+                _setToken.naturalUnit(),
                 _minimumBid,
                 _pricePrecision
             );
@@ -396,7 +388,7 @@ contract Auction {
         uint256 _minimumBid,
         uint256 _pricePrecision
     )
-        internal
+        private
         pure
         returns (uint256)
     {

@@ -25,19 +25,16 @@ import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfac
 import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
+import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
-import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 
 /**
  * @title SetValuation
  * @author Set Protocol
  *
- * Contract containing utility functions for liquidators that use auctions processes. Contains
- * helper functions to value collateral SetTokens and determine parameters used in bidding
- * processes. Meant to be inherited.
  */
-contract SetValuation {
+library SetValuation {
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
 
@@ -52,27 +49,31 @@ contract SetValuation {
      */
     function calculateSetTokenDollarValue(
         ISetToken _set,
-        IOracleWhitelist _oracleWhitelist
+        IOracleWhiteList _oracleWhitelist
     )
         internal
-        pure
+        view
         returns (uint256)
     {
         uint256 setDollarAmount = 0;
 
-        SetTokenLibrary.SetDetails memory setDetails = SetTokenLibrary.getSetDetails(address(_set));
+        address[] memory components = _set.getComponents();
+        uint256[] memory units = _set.getUnits();
+        uint256 naturalUnit = _set.naturalUnit();
 
         // Loop through assets
         for (uint256 i = 0; i < components.length; i++) {
-            address oracle = _oracleWhitelist.getOracle(address(_component));
+            address currentComponent = components[i];
+
+            IOracle oracle = _oracleWhitelist.getOracle(currentComponent);
             uint256 price = oracle.read();
-            uint256 decimals = _component.decimals();
+            uint256 decimals = ERC20Detailed(currentComponent).decimals();
 
             // Calculate dollar value of single component in Set
             uint256 tokenDollarValue = calculateTokenAllocationAmountUSD(
                 price,
-                setDetails.naturalUnit,
-                setDetails.units[i],
+                naturalUnit,
+                units[i],
                 decimals
             );
 

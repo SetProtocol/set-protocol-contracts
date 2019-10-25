@@ -294,4 +294,63 @@ contract('Auction', accounts => {
       expect(auctionSetup.remainingCurrentSets).to.bignumber.equal(expectedRemainingCurrentSets);
     });
   });
+
+  describe('#validateBidQuantity', async () => {
+    let subjectCaller: Address;
+
+    let currentSet: Address;
+    let nextSet: Address;
+    let startingCurrentSetQuantity: BigNumber;
+
+    let subjectQuantity: BigNumber;
+
+    beforeEach(async () => {
+      subjectCaller = functionCaller;
+      startingCurrentSetQuantity = ether(10);
+
+      await auctionMock.initializeAuction.sendTransactionAsync(
+        set1.address,
+        set2.address,
+        startingCurrentSetQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+
+      subjectQuantity = ether(5);
+    });
+
+    async function subject(): Promise<string> {
+      return auctionMock.validateBidQuantity.sendTransactionAsync(
+        subjectQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+    }
+
+    it('does not revert', async () => {
+      await subject();
+    });
+
+    describe('when the quantity is not a multiple of the minimumBid', async () => {
+      beforeEach(async () => {
+        const pricePrecision = await auctionMock.pricePrecision.callAsync();
+        const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
+                                            .mul(pricePrecision)
+                                            .div(2);
+        subjectQuantity = gWei(10).plus(halfMinimumBid);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the quantity is more than the remainingCurrentsets', async () => {
+      beforeEach(async () => {
+        subjectQuantity = startingCurrentSetQuantity.plus(ether(1));
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
 });

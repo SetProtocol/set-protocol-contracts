@@ -32,6 +32,14 @@ contract AuctionMock is Auction {
         super.reduceRemainingCurrentSets(auction, _quantity);
     }
 
+    function validateBidQuantity(
+        uint256 _quantity
+    )
+        external
+    {
+        super.validateBidQuantity(auction, _quantity);
+    }
+
     function combinedTokenArray() external view returns(address[] memory) {
         return auction.combinedTokenArray;
     }

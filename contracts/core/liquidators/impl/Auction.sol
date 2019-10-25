@@ -103,28 +103,6 @@ contract Auction {
         _auction.remainingCurrentSets = _auction.remainingCurrentSets.sub(_quantity);
     }
 
-    /**
-     * Calculate the minimumBid allowed for the rebalance
-     *
-     * @return                          Minimum bid amount
-     */
-    function calculateMinimumBid(
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 currentSetNaturalUnit = _currentSet.naturalUnit();
-        uint256 nextNaturalUnit = _nextSet.naturalUnit();
-        
-        return Math.max(
-            currentSetNaturalUnit.mul(pricePrecision),
-            nextNaturalUnit.mul(pricePrecision)
-        );
-    }
-
     /*
      * Validate bid quantity
      *
@@ -149,6 +127,29 @@ contract Auction {
             "Auction.validateBidQuantity: Bid exceeds remaining current sets"
         );
     }
+
+    /**
+     * Calculate the minimumBid allowed for the rebalance
+     *
+     * @return                          Minimum bid amount
+     */
+    function calculateMinimumBid(
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 currentSetNaturalUnit = _currentSet.naturalUnit();
+        uint256 nextNaturalUnit = _nextSet.naturalUnit();
+        
+        return Math.max(
+            currentSetNaturalUnit.mul(pricePrecision),
+            nextNaturalUnit.mul(pricePrecision)
+        );
+    }
+
 
     /* ============ Bid Price Helpers ============ */
 

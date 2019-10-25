@@ -23,7 +23,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
-import { LinearAuction } from "./linear-auction/LinearAuction.sol";
+import { LinearAuction } from "./impl/LinearAuction.sol";
 
 
 /**

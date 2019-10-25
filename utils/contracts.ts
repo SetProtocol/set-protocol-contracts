@@ -1,3 +1,4 @@
+export { AuctionMockContract } from '../types/generated/auction_mock';
 export { AuthorizableContract } from '../types/generated/authorizable';
 export { BadTokenMockContract } from '../types/generated/bad_token_mock';
 export { BaseContract } from '../types/base_contract';

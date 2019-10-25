@@ -1,0 +1,297 @@
+require('module-alias/register');
+
+import * as ABIDecoder from 'abi-decoder';
+import * as _ from 'lodash';
+import * as chai from 'chai';
+import { BigNumber } from 'bignumber.js';
+import { Address } from 'set-protocol-utils';
+
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
+import {
+  CoreContract,
+  RebalancingSetTokenFactoryContract,
+  SetTokenContract,
+  SetTokenFactoryContract,
+  StandardTokenMockContract,
+  AuctionMockContract,
+  TransferProxyContract,
+  VaultContract,
+} from '@utils/contracts';
+import { expectRevertError } from '@utils/tokenAssertions';
+import { Blockchain } from '@utils/blockchain';
+import { getWeb3 } from '@utils/web3Helper';
+import {
+  DEFAULT_GAS,
+  ZERO,
+} from '@utils/constants';
+import { ether, gWei } from '@utils/units';
+
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+
+BigNumberSetup.configure();
+ChaiSetup.configure();
+const web3 = getWeb3();
+const { expect } = chai;
+const blockchain = new Blockchain(web3);
+const Core = artifacts.require('Core');
+const AuctionMock = artifacts.require('AuctionMock');
+
+contract('Auction', accounts => {
+  const [
+    ownerAccount,
+    functionCaller,
+    whitelist,
+  ] = accounts;
+
+  let core: CoreContract;
+  let transferProxy: TransferProxyContract;
+  let vault: VaultContract;
+  let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
+  let setTokenFactory: SetTokenFactoryContract;
+  let auctionMock: AuctionMockContract;
+
+  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const erc20Helper = new ERC20Helper(ownerAccount);
+  const liquidatorHelper = new LiquidatorHelper(ownerAccount);
+
+  let component1: StandardTokenMockContract;
+  let component2: StandardTokenMockContract;
+  let component3: StandardTokenMockContract;
+
+  let set1: SetTokenContract;
+  let set2: SetTokenContract;
+
+  let set1Components: Address[];
+  let set2Components: Address[];
+
+  let set1Units: BigNumber[];
+  let set2Units: BigNumber[];
+
+  let set1NaturalUnit: BigNumber;
+  let set2NaturalUnit: BigNumber;
+
+  before(async () => {
+    ABIDecoder.addABI(Core.abi);
+    ABIDecoder.addABI(AuctionMock.abi);
+
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    vault = await coreHelper.deployVaultAsync();
+    core = await coreHelper.deployCoreAsync(transferProxy, vault);
+
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
+
+    await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    auctionMock = await liquidatorHelper.deployAuctionMockAsync();
+
+    component1 = await erc20Helper.deployTokenAsync(ownerAccount);
+    component2 = await erc20Helper.deployTokenAsync(ownerAccount);
+    component3 = await erc20Helper.deployTokenAsync(ownerAccount);
+
+    set1Components = [component1.address, component2.address];
+    set1Units = [gWei(1), gWei(1)];
+    set1NaturalUnit = gWei(1);
+    set1 = await coreHelper.createSetTokenAsync(
+      core,
+      setTokenFactory.address,
+      set1Components,
+      set1Units,
+      set1NaturalUnit,
+    );
+
+    set2Components = [component2.address, component3.address];
+    set2Units = [gWei(1), gWei(1)];
+    set2NaturalUnit = gWei(2);
+    set2 = await coreHelper.createSetTokenAsync(
+      core,
+      setTokenFactory.address,
+      set2Components,
+      set2Units,
+      set2NaturalUnit,
+    );
+
+  });
+
+  after(async () => {
+    ABIDecoder.removeABI(Core.abi);
+    ABIDecoder.removeABI(AuctionMock.abi);
+  });
+
+  beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
+  });
+
+  describe('#constructor', async () => {
+    async function subject(): Promise<any> {
+      return liquidatorHelper.deployAuctionMockAsync();
+    }
+
+    it('sets the correct pricePrecision', async () => {
+      await subject();
+      const pricePrecision = await auctionMock.pricePrecision.callAsync();
+      const defaultPricePrecision = await auctionMock.defaultPricePrecision.callAsync();
+      expect(pricePrecision).to.bignumber.equal(defaultPricePrecision);
+    });    
+  });
+
+  describe('#initializeAuction', async () => {
+    let subjectCaller: Address;
+    let subjectCurrentSet: Address;
+    let subjectNextSet: Address;
+    let subjectStartingCurrentSetQuantity: BigNumber;
+
+    beforeEach(async () => {
+      subjectCaller = functionCaller;
+      subjectCurrentSet = set1.address;
+      subjectNextSet = set2.address;
+      subjectStartingCurrentSetQuantity = ether(10);
+    });
+
+    after(async () => {
+    });
+
+    async function subject(): Promise<string> {
+      return auctionMock.initializeAuction.sendTransactionAsync(
+        subjectCurrentSet,
+        subjectNextSet,
+        subjectStartingCurrentSetQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+    }
+
+    it('sets the correct minimumBid', async () => {
+      await subject();
+
+      const auctionSetup: any = await auctionMock.auction.callAsync();
+
+      const pricePrecision = await auctionMock.pricePrecision.callAsync();
+      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
+                                          .mul(pricePrecision);
+      expect(auctionSetup.minimumBid).to.bignumber.equal(expectedMinimumBid);
+    });
+
+    it('sets the correct startTime', async () => {
+      await subject();
+
+      const auctionSetup: any = await auctionMock.auction.callAsync();
+
+      const { timestamp } = await web3.eth.getBlock('latest');
+      expect(auctionSetup.startTime).to.bignumber.equal(timestamp);
+    });
+
+    it('sets the correct startingCurrentSets', async () => {
+      await subject();
+
+      const auctionSetup: any = await auctionMock.auction.callAsync();
+      expect(auctionSetup.startingCurrentSets).to.bignumber.equal(subjectStartingCurrentSetQuantity);
+    });
+
+    it('sets the correct remainingCurrentSets', async () => {
+      await subject();
+
+      const auctionSetup: any = await auctionMock.auction.callAsync();
+      expect(auctionSetup.remainingCurrentSets).to.bignumber.equal(subjectStartingCurrentSetQuantity);
+    });
+
+    it('sets the correct combinedTokenArray', async () => {
+      await subject();
+
+      const combinedTokenArray = await auctionMock.combinedTokenArray.callAsync();
+      const expectedResult = _.union(set1Components, set2Components);
+
+      expect(JSON.stringify(combinedTokenArray)).to.equal(JSON.stringify(expectedResult));
+    });
+
+    it('sets the correct combinedCurrentSetUnits', async () => {
+      await subject();
+
+      const combinedCurrentSetUnits = await auctionMock.combinedCurrentSetUnits.callAsync();
+
+      const combinedTokenArray = await auctionMock.combinedTokenArray.callAsync();
+      const auctionSetup: any = await auctionMock.auction.callAsync();
+      const pricePrecision = await auctionMock.pricePrecision.callAsync();      
+
+      const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
+        set1,
+        combinedTokenArray,
+        new BigNumber(auctionSetup.minimumBid),
+        pricePrecision
+      );
+
+      expect(JSON.stringify(combinedCurrentSetUnits)).to.equal(JSON.stringify(expectedResult));
+    });
+
+    it('sets the correct combinedNextSetUnits', async () => {
+      await subject();
+
+      const combinedNextSetUnits = await auctionMock.combinedNextSetUnits.callAsync();
+      const combinedTokenArray = await auctionMock.combinedTokenArray.callAsync();
+      const auctionSetup: any = await auctionMock.auction.callAsync();
+      const pricePrecision = await auctionMock.pricePrecision.callAsync();      
+
+      const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
+        set2,
+        combinedTokenArray,
+        new BigNumber(auctionSetup.minimumBid),
+        pricePrecision
+      );
+
+      expect(JSON.stringify(combinedNextSetUnits)).to.equal(JSON.stringify(expectedResult));
+    });
+
+    describe('when there is insufficient collateral to rebalance', async () => {
+      beforeEach(async () => {
+        subjectStartingCurrentSetQuantity = gWei(10);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#reduceRemainingCurrentSets', async () => {
+    let subjectCaller: Address;
+
+    let currentSet: Address;
+    let nextSet: Address;
+    let startingCurrentSetQuantity: BigNumber;
+
+    let subjectReductionQuantity: BigNumber;
+
+    beforeEach(async () => {
+      subjectCaller = functionCaller;
+      startingCurrentSetQuantity = ether(10);
+
+      await auctionMock.initializeAuction.sendTransactionAsync(
+        set1.address,
+        set2.address,
+        startingCurrentSetQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+
+      subjectReductionQuantity = ether(5);
+    });
+
+    async function subject(): Promise<string> {
+      return auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
+        subjectReductionQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+    }
+
+    it('calculates the correct new remainingCurrentSets', async () => {
+      await subject();
+
+      const auctionSetup: any = await auctionMock.auction.callAsync();
+      const expectedRemainingCurrentSets = startingCurrentSetQuantity.sub(subjectReductionQuantity);
+      expect(auctionSetup.remainingCurrentSets).to.bignumber.equal(expectedRemainingCurrentSets);
+    });
+  });
+});

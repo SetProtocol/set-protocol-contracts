@@ -46,9 +46,9 @@ contract Auction {
         uint256 startTime;
         uint256 startingCurrentSets;
         uint256 remainingCurrentSets;
+        address[] combinedTokenArray;
         uint256[] combinedCurrentSetUnits;
         uint256[] combinedNextSetUnits;
-        address[] combinedTokenArray;
     }
 
     /* ============ State Variables ============ */
@@ -71,26 +71,27 @@ contract Auction {
     )
         internal
     {
-        _auction.minimumBid = calculateMinimumBid(_currentSet, _nextSet);
+        uint256 minimumBid = calculateMinimumBid(_currentSet, _nextSet);
+        
         // Require remainingCurrentSets to be greater than minimumBid otherwise no bidding would
         // be allowed
         require(
-            _startingCurrentSetQuantity >= _auction.minimumBid,
-            "LinearAuctionLiquidator.startRebalance: Not enough collateral to rebalance"
+            _startingCurrentSetQuantity >= minimumBid,
+            "Auction.initializeAuction: Not enough collateral to rebalance"
         );
 
+        _auction.minimumBid = minimumBid;
+        _auction.startingCurrentSets = _startingCurrentSetQuantity;
+        _auction.remainingCurrentSets = _startingCurrentSetQuantity;
+        _auction.startTime = block.timestamp;
         _auction.combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
 
         (
             uint256[] memory combinedCurrentSetUnits,
             uint256[] memory combinedNextSetUnits
         ) = calculateCombinedUnitArrays(_auction, _currentSet, _nextSet);
-
         _auction.combinedCurrentSetUnits = combinedCurrentSetUnits;
         _auction.combinedNextSetUnits = combinedNextSetUnits;
-        _auction.startingCurrentSets = _startingCurrentSetQuantity;
-        _auction.remainingCurrentSets = _startingCurrentSetQuantity;
-        _auction.startTime = block.timestamp;
     }
 
     function reduceRemainingCurrentSets(

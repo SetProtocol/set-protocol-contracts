@@ -70,7 +70,7 @@ contract('BackwardsCompatability', accounts => {
     erc20Helper,
     blockchain
   );
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper)
 
   let currentSetToken: SetTokenContract;
   let nextSetToken: SetTokenContract;

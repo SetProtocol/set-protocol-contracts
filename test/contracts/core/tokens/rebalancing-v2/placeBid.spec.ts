@@ -73,7 +73,7 @@ contract('PlaceBid', accounts => {
     erc20Helper,
     blockchain
   );
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper)
   const libraryMockHelper = new LibraryMockHelper(deployerAccount);
 
   let currentSetToken: SetTokenContract;

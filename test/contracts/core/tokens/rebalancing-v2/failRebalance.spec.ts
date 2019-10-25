@@ -71,7 +71,7 @@ contract('FailRebalance', accounts => {
     erc20Helper,
     blockchain
   );
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper)
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);

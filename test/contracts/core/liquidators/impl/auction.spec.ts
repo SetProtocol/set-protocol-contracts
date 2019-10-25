@@ -55,7 +55,7 @@ contract('Auction', accounts => {
 
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
   const erc20Helper = new ERC20Helper(ownerAccount);
-  const liquidatorHelper = new LiquidatorHelper(ownerAccount);
+  const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper);
 
   let component1: StandardTokenMockContract;
   let component2: StandardTokenMockContract;

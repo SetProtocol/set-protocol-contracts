@@ -25,8 +25,8 @@ import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfac
 import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
-import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
+import { SetMath } from "../../lib/SetMath.sol";
 
 
 /**
@@ -65,8 +65,8 @@ library SetValuation {
         for (uint256 i = 0; i < components.length; i++) {
             address currentComponent = components[i];
 
-            IOracle oracle = _oracleWhitelist.getOracle(currentComponent);
-            uint256 price = oracle.read();
+            address oracle = _oracleWhitelist.getOracleAddressByToken(currentComponent);
+            uint256 price = IOracle(oracle).read();
             uint256 decimals = ERC20Detailed(currentComponent).decimals();
 
             // Calculate dollar value of single component in Set
@@ -103,17 +103,20 @@ library SetValuation {
         pure
         returns (uint256)
     {
-        uint256 SET_TOKEN_DECIMALS = 18;
+        uint256 SET_FULL_UNIT = 10 ** 18;
+        uint256 tokenFullUnit = 10 ** _tokenDecimal;
 
         // Calculate the amount of component base units are in one full set token
-        uint256 componentUnitsInFullToken = _unit
-            .mul(10 ** SET_TOKEN_DECIMALS)
-            .div(_naturalUnit);
+        uint256 componentUnitsInFullToken = SetMath.setToComponent(
+            SET_FULL_UNIT,
+            _unit,
+            _naturalUnit
+        );
         
         // Return value of component token in one full set token, to 18 decimals
         uint256 allocationUSDValue = _tokenPrice
             .mul(componentUnitsInFullToken)
-            .div(10 ** _tokenDecimal);
+            .div(tokenFullUnit);
 
         require(
             allocationUSDValue > 0,

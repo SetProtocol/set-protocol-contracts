@@ -67,10 +67,10 @@ interface IOracleWhiteList {
         view
         returns (address[] memory);
 
-    function getOracle(
+    function getOracleAddressByToken(
         address _token
     )
         external
         view
-        returns (IOracle);
+        returns (address);
 }

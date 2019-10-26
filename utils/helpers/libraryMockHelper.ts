@@ -10,6 +10,7 @@ import {
   ExchangeIssuanceLibraryMockContract,
   PlaceBidMockContract,
   RebalancingSetIssuanceMockContract,
+  SetMathMockContract,
   SetTokenLibraryMockContract,
   SetValuationMockContract,
   TransferProxyContract,
@@ -34,6 +35,7 @@ const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
 const PlaceBidMock = artifacts.require('PlaceBidMock');
 const RebalancingSetIssuanceMock = artifacts.require('RebalancingSetIssuanceMock');
+const SetMathMock = artifacts.require('SetMathMock');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
 const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
 const SetValuationMock = artifacts.require('SetValuationMock');
@@ -183,6 +185,17 @@ export class LibraryMockHelper {
 
     return new ERC20WrapperMockContract(
       getContractInstance(erc20WrapperMockContract),
+      { from },
+    );
+  }
+
+  public async deploySetMathAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<SetMathMockContract> {
+    const setMathMockContract = await SetMathMock.new({ from });
+
+    return new SetMathMockContract(
+      getContractInstance(setMathMockContract),
       { from },
     );
   }

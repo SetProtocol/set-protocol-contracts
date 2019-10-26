@@ -47,6 +47,7 @@ export { RebalancingSetTokenFactoryContract } from '../types/generated/rebalanci
 export { RebalancingSetTokenV2FactoryContract } from '../types/generated/rebalancing_set_token_v2_factory';
 export { RebalancingSetTokenViewerContract } from '../types/generated/rebalancing_set_token_viewer';
 export { SettleRebalanceLibraryContract } from '../types/generated/settle_rebalance_library';
+export { SetMathMockContract } from '../types/generated/set_math_mock';
 export { SetTokenContract } from '../types/generated/set_token';
 export { SetTokenFactoryContract } from '../types/generated/set_token_factory';
 export { SetTokenLibraryContract } from '../types/generated/set_token_library';

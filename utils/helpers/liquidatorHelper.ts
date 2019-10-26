@@ -5,7 +5,9 @@ import * as setProtocolUtils from 'set-protocol-utils';
 
 import {
   AuctionMockContract,
+  ExponentialPivotAuctionMockContract,
   OracleWhiteListContract,
+  LinearAuctionMockContract,
   LiquidatorMockContract,
   SetTokenContract,
   UpdatableOracleMockContract,
@@ -15,9 +17,14 @@ import {
   DEFAULT_GAS,
   ZERO,
 } from '../constants';
+import {
+  LinearAuction
+} from '../auction';
 
 const web3 = getWeb3();
 const AuctionMock = artifacts.require('AuctionMock');
+const ExponentialPivotAuctionMock = artifacts.require('ExponentialPivotAuctionMock');
+const LinearAuctionMock = artifacts.require('LinearAuctionMock');
 const LiquidatorMock = artifacts.require('LiquidatorMock');
 
 import { ERC20Helper } from './erc20Helper';
@@ -44,27 +51,57 @@ export class LiquidatorHelper {
   public async deployAuctionMockAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<AuctionMockContract> {
-    const auctionMock = await AuctionMock.new(
-      { from },
+    const auctionMock = await AuctionMock.new({ from });
+
+    return new AuctionMockContract(getContractInstance(auctionMock), { from });
+  }
+
+  public async deployLinearAuctionMockAsync(
+    oracleWhiteList: Address,
+    pricePrecision: BigNumber,
+    auctionPeriod: BigNumber,
+    rangeStart: BigNumber,
+    rangeEnd: BigNumber,
+    from: Address = this._contractOwnerAddress
+  ): Promise<LinearAuctionMockContract> {
+    const linearAuctionMock = await LinearAuctionMock.new(
+      oracleWhiteList,
+      pricePrecision,
+      auctionPeriod,
+      rangeStart,
+      rangeEnd,
+      { from }
     );
 
-    return new AuctionMockContract(
-      new web3.eth.Contract(auctionMock.abi, auctionMock.address),
-      { from },
+    return new LinearAuctionMockContract(getContractInstance(linearAuctionMock), { from });
+  }
+
+  public async deployExponentialPivotAuctionMockAsync(
+    oracleWhiteList: Address,
+    pricePrecision: BigNumber,
+    auctionPeriod: BigNumber,
+    rangeStart: BigNumber,
+    rangeEnd: BigNumber,
+    from: Address = this._contractOwnerAddress
+  ): Promise<ExponentialPivotAuctionMockContract> {
+    const exponentialAuctionMock = await ExponentialPivotAuctionMock.new(
+      oracleWhiteList,
+      pricePrecision,
+      auctionPeriod,
+      rangeStart,
+      rangeEnd,
+      { from }
     );
+
+    return new ExponentialPivotAuctionMockContract(getContractInstance(exponentialAuctionMock), { from });
   }
 
   public async deployLiquidatorMockAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<LiquidatorMockContract> {
-    const liquidatorMock = await LiquidatorMock.new(
-      { from },
-    );
+    const liquidatorMock = await LiquidatorMock.new({ from });
 
-    return new LiquidatorMockContract(
-      new web3.eth.Contract(liquidatorMock.abi, liquidatorMock.address),
-      { from },
-    );
+    return new LiquidatorMockContract(getContractInstance(liquidatorMock), { from });
   }
 
   /* ============ Bid-Related ============ */
@@ -104,6 +141,47 @@ export class LiquidatorHelper {
       }
     });
     return combinedSetTokenUnits;
+  }
+
+  public calculateCurrentPrice(
+    linearAuction: LinearAuction,
+    timestamp: BigNumber,
+    auctionPeriod: BigNumber
+  ): BigNumber {
+    const elapsed = timestamp.sub(linearAuction.auction.startTime);
+    const priceRange = new BigNumber(linearAuction.endPrice).sub(linearAuction.startPrice);
+    const elapsedPrice = elapsed.mul(priceRange).div(auctionPeriod).round(0, 3);
+
+    return new BigNumber(linearAuction.startPrice).add(elapsedPrice);
+  }
+
+  public calculateStartPrice(
+    fairValue: BigNumber,
+    rangeStart: BigNumber,
+  ): BigNumber {
+    const negativeRange = fairValue.mul(rangeStart).div(100).round(0, 3);
+    return fairValue.sub(negativeRange);
+  }
+
+  public calculateEndPrice(
+    fairValue: BigNumber,
+    rangeEnd: BigNumber,
+  ): BigNumber {
+    const positiveRange = fairValue.mul(rangeEnd).div(100).round(0, 3);
+    return fairValue.add(positiveRange);
+  }
+
+  public async calculateFairValueAsync(
+    currentSetToken: SetTokenContract,
+    nextSetToken: SetTokenContract,
+    oracleWhiteList: OracleWhiteListContract,
+    pricePrecision: BigNumber,
+    from: Address = this._contractOwnerAddress,
+  ): Promise<BigNumber> {
+    const currentSetUSDValue = await this.calculateSetTokenValueAsync(currentSetToken, oracleWhiteList);
+    const nextSetUSDValue = await this.calculateSetTokenValueAsync(nextSetToken, oracleWhiteList);
+
+    return nextSetUSDValue.mul(pricePrecision).div(currentSetUSDValue).round(0, 3);
   }
 
   public async calculateSetTokenValueAsync(

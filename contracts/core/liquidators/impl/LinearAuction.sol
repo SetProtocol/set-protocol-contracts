@@ -91,7 +91,7 @@ contract LinearAuction is Auction {
 
         uint256 fairValue = calculateFairValue(_currentSet, _nextSet);
         _linearAuction.startPrice = calculateStartPrice(fairValue);
-        _linearAuction.endPrice = calculatePivotPrice(fairValue);
+        _linearAuction.endPrice = calculateEndPrice(fairValue);
     }
 
     function validateBidQuantity(
@@ -134,7 +134,7 @@ contract LinearAuction is Auction {
         return _fairValue.sub(startRange);
     }
 
-    function calculatePivotPrice(uint256 _fairValue) internal view returns(uint256) {
+    function calculateEndPrice(uint256 _fairValue) internal view returns(uint256) {
         uint256 endRange = _fairValue.mul(rangeEnd).div(100);
         return _fairValue.add(endRange);
     }
@@ -153,7 +153,7 @@ contract LinearAuction is Auction {
     }
 
     function hasAuctionFailed(State storage _linearAuction) internal view returns(bool) {
-        uint256 revertAuctionTime = _linearAuction.auction.startTime.add(auctionPeriod);
+        uint256 revertAuctionTime = _linearAuction.endTime;
 
         bool endTimeExceeded = block.timestamp >= revertAuctionTime;
         bool setsNotAuctioned = !hasBiddableQuantity(_linearAuction);

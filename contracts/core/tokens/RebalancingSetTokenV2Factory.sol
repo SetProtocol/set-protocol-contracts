@@ -56,8 +56,11 @@ contract RebalancingSetTokenV2Factory {
     // Minimum amount of time users can review proposals
     uint256 public minimumProposalPeriod;
 
-    // Maximum fail auction period
+    // Minimum fail auction period
     uint256 public minimumFailRebalancePeriod;
+
+    // Maximum fail auction period
+    uint256 public maximumFailRebalancePeriod;
 
     // Minimum number for the token natural unit
     // The bounds are used for calculations of unitShares and in settlement
@@ -97,6 +100,7 @@ contract RebalancingSetTokenV2Factory {
         uint256 _minimumRebalanceInterval,
         uint256 _minimumProposalPeriod,
         uint256 _minimumFailRebalancePeriod,
+        uint256 _maximumFailRebalancePeriod,
         uint256 _minimumNaturalUnit,
         uint256 _maximumNaturalUnit
     )
@@ -108,6 +112,7 @@ contract RebalancingSetTokenV2Factory {
         minimumRebalanceInterval = _minimumRebalanceInterval;
         minimumProposalPeriod = _minimumProposalPeriod;
         minimumFailRebalancePeriod = _minimumFailRebalancePeriod;
+        maximumFailRebalancePeriod = _maximumFailRebalancePeriod;
         minimumNaturalUnit = _minimumNaturalUnit;
         maximumNaturalUnit = _maximumNaturalUnit;
     }
@@ -227,6 +232,12 @@ contract RebalancingSetTokenV2Factory {
         require(
             parameters.rebalanceFailPeriod >= minimumFailRebalancePeriod,
             "RebalancingSetTokenV2Factory.create: Fail Period too short"
+        );
+
+        // Require that the fail rebalance period is greater than the minimum
+        require(
+            parameters.rebalanceFailPeriod <= maximumFailRebalancePeriod,
+            "RebalancingSetTokenV2Factory.create: Fail Period too long"
         );
 
         // Create a new SetToken contract

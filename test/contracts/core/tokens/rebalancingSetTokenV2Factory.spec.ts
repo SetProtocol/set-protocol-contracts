@@ -116,6 +116,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     let subjectMinimumRebalanceInterval: BigNumber;
     let subjectMinimumProposalPeriod: BigNumber;
     let subjectMinimumFailRebalancePeriod: BigNumber;
+    let subjectMaximumFailRebalancePeriod: BigNumber;
     let subjectMinimumNaturalUnit: BigNumber;
     let subjectMaximumNaturalUnit: BigNumber;
 
@@ -126,6 +127,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       subjectMinimumRebalanceInterval = ONE_DAY_IN_SECONDS;
       subjectMinimumProposalPeriod = ONE_DAY_IN_SECONDS;
       subjectMinimumFailRebalancePeriod = ONE_DAY_IN_SECONDS;
+      subjectMaximumFailRebalancePeriod = ONE_DAY_IN_SECONDS.mul(30);
       subjectMinimumNaturalUnit = DEFAULT_REBALANCING_MINIMUM_NATURAL_UNIT;
       subjectMaximumNaturalUnit = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT;
     });
@@ -138,6 +140,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         subjectMinimumRebalanceInterval,
         subjectMinimumProposalPeriod,
         subjectMinimumFailRebalancePeriod,
+        subjectMaximumFailRebalancePeriod,
         subjectMinimumNaturalUnit,
         subjectMaximumNaturalUnit,
       );
@@ -495,6 +498,24 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     describe('when the fail auction period is less than the minimum', async () => {
       beforeEach(async () => {
         callDataFailAuctionPeriod = new BigNumber(5000);
+
+        subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
+          callDataManagerAddress,
+          callDataLiquidator,
+          callDataProposalPeriod,
+          callDataRebalanceInterval,
+          callDataFailAuctionPeriod,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the fail auction period is more than the maximum', async () => {
+      beforeEach(async () => {
+        callDataFailAuctionPeriod = ONE_DAY_IN_SECONDS.mul(60);
 
         subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
           callDataManagerAddress,

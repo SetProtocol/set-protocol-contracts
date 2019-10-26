@@ -183,6 +183,7 @@ export class CoreHelper {
     minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
     minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
     minimumFailRebalancePeriod: BigNumber = ONE_DAY_IN_SECONDS,
+    maximumFailRebalancePeriod: BigNumber = ONE_DAY_IN_SECONDS.mul(30),
     minimumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MINIMUM_NATURAL_UNIT,
     maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
     from: Address = this._tokenOwnerAddress
@@ -195,6 +196,7 @@ export class CoreHelper {
       minimumRebalanceInterval,
       minimumProposalPeriod,
       minimumFailRebalancePeriod,
+      maximumFailRebalancePeriod,
       minimumNaturalUnit,
       maximumNaturalUnit,
       { from },

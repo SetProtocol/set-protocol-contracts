@@ -88,6 +88,9 @@ contract('ExponentialPivotAuction', accounts => {
   let component2Oracle: UpdatableOracleMockContract;
   let component3Oracle: UpdatableOracleMockContract;
 
+  let subjectCaller: Address;
+  let startingCurrentSetQuantity: BigNumber;
+
   before(async () => {
     ABIDecoder.addABI(Core.abi);
 
@@ -149,6 +152,16 @@ contract('ExponentialPivotAuction', accounts => {
       rangeStart,
       rangeEnd,
     );
+
+    subjectCaller = functionCaller;
+    startingCurrentSetQuantity = ether(10);
+
+    await auctionMock.initializeLinearAuction.sendTransactionAsync(
+      set1.address,
+      set2.address,
+      startingCurrentSetQuantity,
+      { from: subjectCaller, gas: DEFAULT_GAS },
+    );
   });
 
   after(async () => {
@@ -163,110 +176,92 @@ contract('ExponentialPivotAuction', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('[CONTEXT] Initialized auction', async () => {
-    let subjectCaller: Address;
+  describe('#getCurrentPriceRatio', async () => {
+    async function subject(): Promise<[BigNumber, BigNumber]> {
+      return auctionMock.getCurrentPriceRatio.callAsync();
+    }
 
-    let startingCurrentSetQuantity: BigNumber;
-
-    beforeEach(async () => {
-      subjectCaller = functionCaller;
-      startingCurrentSetQuantity = ether(10);
-
-      await auctionMock.initializeLinearAuction.sendTransactionAsync(
-        set1.address,
-        set2.address,
-        startingCurrentSetQuantity,
-        { from: subjectCaller, gas: DEFAULT_GAS },
+    async function getNumerator(): Promise<BigNumber> {
+      const { timestamp } = await web3.eth.getBlock('latest');
+      const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
+      return await liquidatorHelper.calculateExponentialPivotNumerator(
+        linearAuction,
+        new BigNumber(timestamp),
+        auctionPeriod,
+        pricePrecision,
       );
+    }
+
+    async function getDenominator(): Promise<BigNumber> {
+      const { timestamp } = await web3.eth.getBlock('latest');
+      const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
+      return await liquidatorHelper.calculateExponentialPivotDenominator(
+        linearAuction,
+        new BigNumber(timestamp),
+        auctionPeriod,
+        pricePrecision,
+      );
+    }
+
+    describe('at the beginning of the auction', async () => {
+      it('returns the correct numerator', async () => {
+        const [result] = await subject();
+        const numerator = await getNumerator();
+        expect(result).to.bignumber.equal(numerator);
+      });
+
+      it('returns the correct denominator', async () => {
+        const [, result] = await subject();
+        const denominator = await getDenominator();
+        expect(result).to.bignumber.equal(denominator);
+      });
     });
 
-    describe('#getCurrentPriceRatio', async () => {
-      async function subject(): Promise<[BigNumber, BigNumber]> {
-        return auctionMock.getCurrentPriceRatio.callAsync();
-      }
-
-      async function getNumerator(): Promise<BigNumber> {
-        const { timestamp } = await web3.eth.getBlock('latest');
-        const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
-        return await liquidatorHelper.calculateExponentialPivotNumerator(
-          linearAuction,
-          new BigNumber(timestamp),
-          auctionPeriod,
-          pricePrecision,
+    describe('halfway through the auctionPeriod', async () => {
+      beforeEach(async () => {
+        await blockchain.increaseTimeAsync(auctionPeriod.div(2));
+        // Do dummy transaction to advance the block
+        await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
+          startingCurrentSetQuantity.div(2),
+          { from: subjectCaller, gas: DEFAULT_GAS },
         );
-      }
-
-      async function getDenominator(): Promise<BigNumber> {
-        const { timestamp } = await web3.eth.getBlock('latest');
-        const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
-        return await liquidatorHelper.calculateExponentialPivotDenominator(
-          linearAuction,
-          new BigNumber(timestamp),
-          auctionPeriod,
-          pricePrecision,
-        );
-      }
-
-      describe('at the beginning of the auction', async () => {
-        it('returns the correct numerator', async () => {
-          const [result] = await subject();
-          const numerator = await getNumerator();
-          expect(result).to.bignumber.equal(numerator);
-        });
-
-        it('returns the correct denominator', async () => {
-          const [, result] = await subject();
-          const denominator = await getDenominator();
-          expect(result).to.bignumber.equal(denominator);
-        });
       });
 
-      describe('halfway through the auctionPeriod', async () => {
-        beforeEach(async () => {
-          await blockchain.increaseTimeAsync(auctionPeriod.div(2));
-          // Do dummy transaction to advance the block
-          await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
-            startingCurrentSetQuantity.div(2),
-            { from: subjectCaller, gas: DEFAULT_GAS },
-          );
-        });
+      it('returns the correct numerator', async () => {
+        const [result] = await subject();
 
-        it('returns the correct numerator', async () => {
-          const [result] = await subject();
-
-          const numerator = await getNumerator();
-          expect(result).to.bignumber.equal(numerator);
-        });
-
-        it('returns the correct denominator', async () => {
-          const [, result] = await subject();
-          const denominator = await getDenominator();
-          expect(result).to.bignumber.equal(denominator);
-        });
+        const numerator = await getNumerator();
+        expect(result).to.bignumber.equal(numerator);
       });
 
-      describe('after the auctionPeriod', async () => {
-        beforeEach(async () => {
-          await blockchain.increaseTimeAsync(auctionPeriod.plus(ONE_HOUR_IN_SECONDS));
-          // Do dummy transaction to advance the block
-          await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
-            startingCurrentSetQuantity.div(2),
-            { from: subjectCaller, gas: DEFAULT_GAS },
-          );
-        });
+      it('returns the correct denominator', async () => {
+        const [, result] = await subject();
+        const denominator = await getDenominator();
+        expect(result).to.bignumber.equal(denominator);
+      });
+    });
 
-        it('returns the correct numerator', async () => {
-          const [result] = await subject();
+    describe('after the auctionPeriod', async () => {
+      beforeEach(async () => {
+        await blockchain.increaseTimeAsync(auctionPeriod.plus(ONE_HOUR_IN_SECONDS));
+        // Do dummy transaction to advance the block
+        await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
+          startingCurrentSetQuantity.div(2),
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      });
 
-          const numerator = await getNumerator();
-          expect(result).to.bignumber.equal(numerator);
-        });
+      it('returns the correct numerator', async () => {
+        const [result] = await subject();
 
-        it('returns the correct denominator', async () => {
-          const [, result] = await subject();
-          const denominator = await getDenominator();
-          expect(result).to.bignumber.equal(denominator);
-        });
+        const numerator = await getNumerator();
+        expect(result).to.bignumber.equal(numerator);
+      });
+
+      it('returns the correct denominator', async () => {
+        const [, result] = await subject();
+        const denominator = await getDenominator();
+        expect(result).to.bignumber.equal(denominator);
       });
     });
   });

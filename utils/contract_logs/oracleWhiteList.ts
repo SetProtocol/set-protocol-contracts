@@ -28,4 +28,4 @@ export function TokenOraclePairRemoved(
       _oracleAddress,
     },
   }];
-} 
+}

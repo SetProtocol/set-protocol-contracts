@@ -17,6 +17,7 @@ export const KYBER_RESERVE_CONFIGURED_RATE: BigNumber = new BigNumber('321556325
 export const NULL_ADDRESS: string = '0x0000000000000000000000000000000000000000';
 export const ONE: BigNumber = new BigNumber(1);
 export const ONE_DAY_IN_SECONDS = new BigNumber(86400);
+export const ONE_HOUR_IN_SECONDS = new BigNumber(3600);
 export const STANDARD_COMPONENT_UNIT = ether(1);
 export const STANDARD_NATURAL_UNIT = ether(1);
 export const STANDARD_QUANTITY_ISSUED: BigNumber = ether(10);

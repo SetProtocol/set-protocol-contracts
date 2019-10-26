@@ -10,18 +10,15 @@ import {
   LinearAuctionMockContract,
   LiquidatorMockContract,
   SetTokenContract,
-  UpdatableOracleMockContract,
 } from '../contracts';
-import { getWeb3, getContractInstance } from '../web3Helper';
+import { getContractInstance } from '../web3Helper';
 import {
-  DEFAULT_GAS,
   ZERO,
 } from '../constants';
 import {
   LinearAuction
 } from '../auction';
 
-const web3 = getWeb3();
 const AuctionMock = artifacts.require('AuctionMock');
 const ExponentialPivotAuctionMock = artifacts.require('ExponentialPivotAuctionMock');
 const LinearAuctionMock = artifacts.require('LinearAuctionMock');
@@ -153,6 +150,53 @@ export class LiquidatorHelper {
     const elapsedPrice = elapsed.mul(priceRange).div(auctionPeriod).round(0, 3);
 
     return new BigNumber(linearAuction.startPrice).add(elapsedPrice);
+  }
+
+  public calculateExponentialPivotNumerator(
+    linearAuction: LinearAuction,
+    timestamp: BigNumber,
+    auctionPeriod: BigNumber,
+    pricePrecision: BigNumber,
+  ): BigNumber {
+    const MAX_THIRTY_SECOND_PERIODS = new BigNumber(1000);
+    const THIRTY_SECONDS = new BigNumber(30);
+
+    const { endPrice, auction } = linearAuction;
+    const elapsed = timestamp.sub(auction.startTime);
+    const thirtySecondPeriods = elapsed.sub(auctionPeriod).div(THIRTY_SECONDS).round(0, 3);
+
+    if (elapsed.lte(auctionPeriod)) {
+      return this.calculateCurrentPrice(linearAuction, timestamp, auctionPeriod);
+    } else if (thirtySecondPeriods.lt(MAX_THIRTY_SECOND_PERIODS)) {
+      return endPrice;
+    } else {
+      const extension = endPrice.mul(thirtySecondPeriods).sub(MAX_THIRTY_SECOND_PERIODS);
+      return endPrice.add(extension);
+    }
+  }
+
+  public calculateExponentialPivotDenominator(
+    linearAuction: LinearAuction,
+    timestamp: BigNumber,
+    auctionPeriod: BigNumber,
+    pricePrecision: BigNumber,
+  ): BigNumber {
+    const MAX_THIRTY_SECOND_PERIODS = new BigNumber(1000);
+    const THIRTY_SECONDS = new BigNumber(30);
+
+    const elapsed = timestamp.sub(linearAuction.auction.startTime);
+    const thirtySecondPeriods = elapsed.sub(auctionPeriod).div(THIRTY_SECONDS);
+
+    if (elapsed.lte(auctionPeriod)) {
+      return pricePrecision;
+    } else if (thirtySecondPeriods.lt(MAX_THIRTY_SECOND_PERIODS)) {
+      return pricePrecision
+              .sub(thirtySecondPeriods)
+              .mul(pricePrecision)
+              .div(MAX_THIRTY_SECOND_PERIODS);
+    } else {
+      return new BigNumber(1);
+    }
   }
 
   public calculateStartPrice(

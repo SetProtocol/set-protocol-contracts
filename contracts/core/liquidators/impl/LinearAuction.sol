@@ -167,6 +167,32 @@ contract LinearAuction is Auction {
         return _fairValue.add(endRange);
     }
 
+    function getPricedTokenFlows(
+        State storage _linearAuction
+    )
+        internal
+        view
+        returns (address[] memory, uint256[] memory, uint256[] memory)
+    {
+        // Get bid conversion price, currently static placeholder for calling auctionlibrary
+        (
+            uint256 currentPriceRatioNumerator,
+            uint256 currentPriceRatioDenominator
+        ) = getCurrentPriceRatio(
+            _linearAuction
+        );
+
+        // Return arrays reprsenting token inflows and outflows required to complete bid at current
+        // price for passed in quantity
+        return createTokenFlowArrays(
+            _linearAuction.auction,
+            _quantity,
+            currentPriceRatioNumerator,
+            currentPriceRatioDenominator
+        );        
+    }
+
+
     function getCurrentPriceRatio(
         State storage _linearAuction
     )

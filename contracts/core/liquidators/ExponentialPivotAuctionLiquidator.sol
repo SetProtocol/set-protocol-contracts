@@ -135,25 +135,11 @@ contract ExponentialPivotAuctionLiquidator is
         uint256 _quantity
     )
         public
+        view
         isValidSet
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        // Get bid conversion price, currently static placeholder for calling auctionlibrary
-        (
-            uint256 currentPriceRatioNumerator,
-            uint256 currentPriceRatioDenominator
-        ) = getCurrentPriceRatio(
-            auctions[msg.sender]
-        );
-
-        // Return arrays reprsenting token inflows and outflows required to complete bid at current
-        // price for passed in quantity
-        return createTokenFlowArrays(
-            auctions[msg.sender].auction,
-            _quantity,
-            currentPriceRatioNumerator,
-            currentPriceRatioDenominator
-        );
+        return getPricedTokenFlows(auctions[msg.sender]);
     }
 
     function settleRebalance()

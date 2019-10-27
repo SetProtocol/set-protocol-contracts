@@ -6,6 +6,7 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import {
   AuctionMockContract,
   ExponentialPivotAuctionMockContract,
+  ExponentialPivotAuctionLiquidatorContract,
   OracleWhiteListContract,
   LinearAuctionMockContract,
   LiquidatorMockContract,
@@ -21,6 +22,7 @@ import {
 
 const AuctionMock = artifacts.require('AuctionMock');
 const ExponentialPivotAuctionMock = artifacts.require('ExponentialPivotAuctionMock');
+const ExponentialPivotAuctionLiquidator = artifacts.require('ExponentialPivotAuctionLiquidator');
 const LinearAuctionMock = artifacts.require('LinearAuctionMock');
 const LiquidatorMock = artifacts.require('LiquidatorMock');
 
@@ -71,6 +73,33 @@ export class LiquidatorHelper {
     );
 
     return new LinearAuctionMockContract(getContractInstance(linearAuctionMock), { from });
+  }
+
+  public async deployExponentialPivotAuctionLiquidatorAsync(
+    core: Address,
+    oracleWhiteList: Address,
+    pricePrecision: BigNumber,
+    auctionPeriod: BigNumber,
+    rangeStart: BigNumber,
+    rangeEnd: BigNumber,
+    name: string,
+    from: Address = this._contractOwnerAddress
+  ): Promise<ExponentialPivotAuctionLiquidatorContract> {
+    const exponentialAuctionLiquidator = await ExponentialPivotAuctionLiquidator.new(
+      core,
+      oracleWhiteList,
+      pricePrecision,
+      auctionPeriod,
+      rangeStart,
+      rangeEnd,
+      name,
+      { from }
+    );
+
+    return new ExponentialPivotAuctionLiquidatorContract(
+      getContractInstance(exponentialAuctionLiquidator),
+      { from }
+    );
   }
 
   public async deployExponentialPivotAuctionMockAsync(

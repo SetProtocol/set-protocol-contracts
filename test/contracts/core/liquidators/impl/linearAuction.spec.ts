@@ -505,8 +505,29 @@ contract('LinearAuction', accounts => {
         const [, result] = await subject();
         expect(result).to.bignumber.equal(pricePrecision);
       });
+    });
 
-      
+    describe.only('#getPricedTokenFlows', async () => {
+      async function subject(): Promise<[Address[], BigNumber[], BigNumber[]]> {
+        return auctionMock.getPricedTokenFlows.callAsync();
+      }
+
+      it('returns the correct numerator', async () => {
+        const [result] = await subject();
+        const { timestamp } = await web3.eth.getBlock('latest');
+        const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
+        const currentPrice = await liquidatorHelper.calculateCurrentPrice(
+          linearAuction,
+          new BigNumber(timestamp),
+          auctionPeriod,
+        );
+        expect(result).to.bignumber.equal(currentPrice);
+      });
+
+      it('returns the correct denominator', async () => {
+        const [, result] = await subject();
+        expect(result).to.bignumber.equal(pricePrecision);
+      });
     });
 
     describe('#hasAuctionFailed', async () => {

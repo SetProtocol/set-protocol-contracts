@@ -54,5 +54,15 @@ contract CoreMock is Core {
             _quantity
         );
     }
+
+    function addSet(
+        address _set
+    )
+        external
+    {
+        state.setTokens = state.setTokens.append(_set);
+
+        state.validSets[_set] = true;
+    }
 }
 

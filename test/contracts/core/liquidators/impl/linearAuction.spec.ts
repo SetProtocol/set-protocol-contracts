@@ -198,6 +198,48 @@ contract('LinearAuction', accounts => {
     });
   });
 
+  describe('#validateSets', async () => {
+    let subjectCaller: Address;
+    let subjectCurrentSet: Address;
+    let subjectNextSet: Address;
+    let subjectStartingCurrentSetQuantity: BigNumber;
+
+    beforeEach(async () => {
+      subjectCaller = functionCaller;
+      subjectCurrentSet = set1.address;
+      subjectNextSet = set2.address;
+      subjectStartingCurrentSetQuantity = ether(10);
+    });
+
+    after(async () => {
+    });
+
+    async function subject(): Promise<string> {
+      return auctionMock.validateSets.sendTransactionAsync(
+        subjectCurrentSet,
+        subjectNextSet,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+    }
+
+    it('does not revert', async () => {
+      await subject();
+    });
+
+    describe('when component does not have an associated oracle', async () => {
+      beforeEach(async () => {
+        await oracleWhiteList.removeTokenOraclePair.sendTransactionAsync(
+          component3.address,
+          { from: ownerAccount, gas: DEFAULT_GAS }
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
   describe('#initializeLinearAuction', async () => {
     let subjectCaller: Address;
     let subjectCurrentSet: Address;
@@ -317,6 +359,43 @@ contract('LinearAuction', accounts => {
         const auction: any = await auctionMock.auction.callAsync();
         const expectedRemainingCurrentSets = startingCurrentSetQuantity.sub(subjectReductionQuantity);
         expect(auction.auction.remainingCurrentSets).to.bignumber.equal(expectedRemainingCurrentSets);
+      });
+    });
+
+    describe('#validateAuctionCompletion', async () => {
+      let reductionQuantity: BigNumber;
+      let customReductionQuantity: BigNumber;
+
+      beforeEach(async () => {
+        reductionQuantity = customReductionQuantity || startingCurrentSetQuantity;        
+        await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
+          reductionQuantity,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      });
+
+      async function subject(): Promise<string> {
+        return auctionMock.validateAuctionCompletion.sendTransactionAsync(
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      it('should not revert', async () => {
+        await subject();
+      });
+
+      describe('when the auction is not complete', async () => {
+        before(async () => {
+          customReductionQuantity = startingCurrentSetQuantity.div(2);
+        });
+
+        after(async () => {
+          customReductionQuantity = undefined;
+        })
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
     });
 

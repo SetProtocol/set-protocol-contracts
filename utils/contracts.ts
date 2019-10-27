@@ -18,6 +18,7 @@ export { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock'
 export { ExchangeIssuanceLibraryContract } from '../types/generated/exchange_issuance_library';
 export { ExchangeIssuanceLibraryMockContract } from '../types/generated/exchange_issuance_library_mock';
 export { ExchangeIssuanceModuleContract } from '../types/generated/exchange_issuance_module';
+export { ExponentialPivotAuctionLiquidatorContract } from '../types/generated/exponential_pivot_auction_liquidator';
 export { ExponentialPivotAuctionMockContract } from '../types/generated/exponential_pivot_auction_mock';
 export { FailAuctionLibraryContract } from '../types/generated/fail_auction_library';
 export { FeedFactoryContract } from '../types/generated/feed_factory';

@@ -25,6 +25,15 @@ contract LinearAuctionMock is LinearAuction {
         )
     {}
 
+    function validateSets(
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        external
+    {
+        super.validateSets(auction, _currentSet, _nextSet);
+    }
+
     function initializeLinearAuction(
         ISetToken _currentSet,
         ISetToken _nextSet,
@@ -41,6 +50,10 @@ contract LinearAuctionMock is LinearAuction {
 
     function reduceRemainingCurrentSets(uint256 _quantity) external {
         super.reduceRemainingCurrentSets(auction, _quantity);
+    }
+
+    function validateAuctionCompletion() external {
+        super.validateAuctionCompletion(auction);
     }
 
     function hasAuctionFailed() external view returns(bool) {

@@ -72,6 +72,21 @@ contract LinearAuction is Auction {
 
     /* ============ Internal Functions ============ */
 
+    function validateSets(
+        State storage _linearAuction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+    {
+        // Check that all components in the rebalance have a matching oracle
+        address[] memory combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
+        require(
+            oracleWhiteList.areValidAddresses(combinedTokenArray),
+            "LinearAuctionLiquidator.processProposal: Passed token does not have matching oracle."
+        );
+    }
+
     function initializeLinearAuction(
         State storage _linearAuction,
         ISetToken _currentSet,
@@ -111,6 +126,19 @@ contract LinearAuction is Auction {
         internal
     {
         super.reduceRemainingCurrentSets(_linearAuction.auction, _quantity);
+    }
+
+    function validateAuctionCompletion(
+        State storage _linearAuction
+    )
+        internal
+        view
+    {
+        // Make sure all currentSets have been rebalanced
+        require(
+            !hasBiddableQuantity(_linearAuction),
+            "LinearAuctionLiquidator.settleRebalance: Rebalance not completed"
+        );
     }
 
     /* ============ Internal View Functions ============ */

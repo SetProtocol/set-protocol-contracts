@@ -17,24 +17,24 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ICore } from "../interfaces/ICore.sol";
 import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { LinearAuction } from "./impl/LinearAuction.sol";
+import { ExponentialPivotAuction } from "./impl/ExponentialPivotAuction.sol";
 
 
 /**
- * @title LinearAuctionLiquidator
+ * @title ExponentialPivotAuctionLiquidator
  * @author Set Protocol
  *
  * Contract that holds all the state and functionality required for setting up, returning prices, and tearing
  * down linear auction rebalances for RebalancingSetTokens.
  */
-contract LinearAuctionLiquidator is
-    LinearAuction
+contract ExponentialPivotAuctionLiquidator is
+    ExponentialPivotAuction
 {
     using SafeMath for uint256;
 
@@ -44,20 +44,16 @@ contract LinearAuctionLiquidator is
 
     /* ============ Modifier ============ */
     modifier isValidSet() {
-        // Check that calling address is a valid set
-        require(
-            core.validSets(msg.sender),
-            "LinearAuctionLiquidator: Invalid or disabled proposed SetToken address"
-        );
+        requireValidSet(msg.sender);
 
         _;
     }
 
     /**
-     * LinearAuctionLiquidator constructor
+     * ExponentialPivotAuctionLiquidator constructor
      *
-     * @param _core                 Core instance
-     * @param _oracleWhiteList      Oracle WhiteList instance
+     * @param _core                         Core instance
+     * @param _oracleWhiteList              Oracle WhiteList instance
      * @param _pricePrecision               Price precision used in auctions
      * @param _name                         Descriptive name of Liquidator
      */
@@ -71,7 +67,7 @@ contract LinearAuctionLiquidator is
         string memory _name
     )
         public
-        LinearAuction(
+        ExponentialPivotAuction(
             _pricePrecision,
             _auctionPeriod,
             _rangeStart,
@@ -90,14 +86,9 @@ contract LinearAuctionLiquidator is
         ISetToken _nextSet
     )
         external
-        // isValidSet
+        isValidSet
     {
-        // Check that all components in the rebalance have a matching oracle
-        address[] memory combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
-        require(
-            oracleWhiteList.areValidAddresses(combinedTokenArray),
-            "LinearAuctionLiquidator.processProposal: Passed token does not have matching oracle."
-        );
+        validateSets(auctions[msg.sender], _currentSet, _nextSet);
 
         // Check that prices are valid?
     }
@@ -106,7 +97,7 @@ contract LinearAuctionLiquidator is
     // Should we place safeguards as to when it can be called?
     function cancelProposal()
         external
-        // isValidSet
+        isValidSet
     {}
 
     // Should we place safeguards as to when this can be called?
@@ -116,7 +107,7 @@ contract LinearAuctionLiquidator is
         uint256 _startingCurrentSetQuantity
     )
         external
-        // isValidSet
+        isValidSet
     {
         initializeLinearAuction(
             auctions[msg.sender],
@@ -130,7 +121,7 @@ contract LinearAuctionLiquidator is
         uint256 _quantity
     )
         external
-        // isValidSet
+        isValidSet
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
         validateBidQuantity(auctions[msg.sender], _quantity);
@@ -144,7 +135,7 @@ contract LinearAuctionLiquidator is
         uint256 _quantity
     )
         public
-        // isValidSet
+        isValidSet
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
         // Get bid conversion price, currently static placeholder for calling auctionlibrary
@@ -167,50 +158,51 @@ contract LinearAuctionLiquidator is
 
     function settleRebalance()
         external
-        // isValidSet
+        isValidSet
     {
-        // Make sure all currentSets have been rebalanced
-        require(
-            !hasBiddableQuantity(auctions[msg.sender]),
-            "LinearAuctionLiquidator.settleRebalance: Rebalance not completed"
-        );
+        validateAuctionCompletion(auctions[msg.sender]);
 
-        clearAuctionState();
+        clearAuctionState(msg.sender);
     }
 
     function endFailedRebalance()
         external
-        // isValidSet
+        isValidSet
     {
-        clearAuctionState();
+        clearAuctionState(msg.sender);
     }
 
     function hasRebalanceFailed()
         external
         view
-        // isValidSet
+        isValidSet
         returns (bool)    
     {
         return hasAuctionFailed(auctions[msg.sender]);
     }
 
     /* ============ Getters Functions ============ */
-    function getCombinedTokenArray() external view returns (address[] memory) {
+    function getCombinedTokenArray() external view isValidSet returns (address[] memory) {
         return auctions[msg.sender].auction.combinedTokenArray;
     }
 
-    function getCombinedCurrentSetUnits() external view returns (uint256[] memory) {
+    function getCombinedCurrentSetUnits() external view isValidSet returns (uint256[] memory) {
         return auctions[msg.sender].auction.combinedCurrentSetUnits;
     }
 
-    function getCombinedNextSetUnits() external view returns (uint256[] memory) {
+    function getCombinedNextSetUnits() external view isValidSet returns (uint256[] memory) {
         return auctions[msg.sender].auction.combinedNextSetUnits;
     }
 
     /* ============ Internal Functions ============ */
-    function clearAuctionState()
-        private
-    {
-        delete auctions[msg.sender];
+    function clearAuctionState(address _sender) private {
+        delete auctions[_sender];
     }
+
+    function requireValidSet(address _sender) private view {
+        require(
+            core.validSets(_sender),
+            "ExponentialPivotAuctionLiquidator: Invalid or disabled proposed SetToken address"
+        );       
+    } 
 }

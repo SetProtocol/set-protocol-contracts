@@ -139,7 +139,7 @@ contract ExponentialPivotAuctionLiquidator is
         isValidSet
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        return getPricedTokenFlows(auctions[msg.sender]);
+        return getPricedTokenFlows(auctions[msg.sender], _quantity);
     }
 
     function settleRebalance()

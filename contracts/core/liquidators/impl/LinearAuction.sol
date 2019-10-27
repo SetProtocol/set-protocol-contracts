@@ -168,7 +168,8 @@ contract LinearAuction is Auction {
     }
 
     function getPricedTokenFlows(
-        State storage _linearAuction
+        State storage _linearAuction,
+        uint256 _quantity
     )
         internal
         view

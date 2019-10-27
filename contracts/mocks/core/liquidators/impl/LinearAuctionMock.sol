@@ -64,6 +64,12 @@ contract LinearAuctionMock is LinearAuction {
         return super.getCurrentPriceRatio(auction);
     }
 
+    function getPricedTokenFlows(
+        uint256 _quantity
+    ) external view returns (address[] memory, uint256[] memory, uint256[] memory) {
+        return super.getPricedTokenFlows(auction, _quantity);
+    }
+
     function getLinearPrice() external view returns(uint256) {
         return super.getLinearPrice(auction);
     }

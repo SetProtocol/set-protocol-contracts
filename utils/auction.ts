@@ -14,8 +14,14 @@ export interface LinearAuction {
   endPrice: BigNumber;
 }
 
+export interface TokenFlows {
+  addresses: Address[];
+  inflow: BigNumber[];
+  outflow: BigNumber[];
+}
+
 export interface Auction {
-  minimumBid: Auction;
+  minimumBid: BigNumber;
   startTime: BigNumber;
   startingCurrentSets: BigNumber;
   remainingCurrentSets: BigNumber;
@@ -25,18 +31,27 @@ export interface Auction {
 }
 
 export function getLinearAuction(input: any): LinearAuction {
+  const {
+    minimumBid,
+    startTime,
+    startingCurrentSets,
+    remainingCurrentSets,
+    combinedCurrentSetUnits,
+    combinedNextSetUnits,
+  } = input.auction;
+
   return {
     auction: {
-      minimumBid: input.auction.minimumBid,
-      startTime: input.auction.startTime,
-      startingCurrentSets: input.auction.startingCurrentSets,
-      remainingCurrentSets: input.auction.remainingCurrentSets,
+      minimumBid: new BigNumber(minimumBid),
+      startTime: new BigNumber(startTime),
+      startingCurrentSets: new BigNumber(startingCurrentSets),
+      remainingCurrentSets: new BigNumber(remainingCurrentSets),
       combinedTokenArray: input.auction.combinedTokenArray,
-      combinedCurrentSetUnits: input.auction.combinedCurrentSetUnits,
-      combinedNextSetUnits: input.auction.combinedNextSetUnits,
+      combinedCurrentSetUnits: combinedCurrentSetUnits.map(v => new BigNumber(v)),
+      combinedNextSetUnits: combinedNextSetUnits.map(v => new BigNumber(v)),
     },
-    endTime: input.endTime,
-    startPrice: input.startPrice,
-    endPrice: input.endPrice,
+    endTime: new BigNumber(input.endTime),
+    startPrice: new BigNumber(input.startPrice),
+    endPrice: new BigNumber(input.endPrice),
   }
 }

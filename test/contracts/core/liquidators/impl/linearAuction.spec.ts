@@ -29,7 +29,7 @@ import {
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
-import { LinearAuction, getLinearAuction } from '@utils/auction';
+import { LinearAuction, getLinearAuction, TokenFlows } from '@utils/auction';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
@@ -507,26 +507,49 @@ contract('LinearAuction', accounts => {
       });
     });
 
-    describe.only('#getPricedTokenFlows', async () => {
-      async function subject(): Promise<[Address[], BigNumber[], BigNumber[]]> {
-        return auctionMock.getPricedTokenFlows.callAsync();
-      }
+    describe('#getPricedTokenFlows', async () => {
+      let subjectQuantity: BigNumber;
 
-      it('returns the correct numerator', async () => {
-        const [result] = await subject();
-        const { timestamp } = await web3.eth.getBlock('latest');
+      let tokenFlows: TokenFlows;
+
+      beforeEach(async () => {
+        subjectQuantity = startingCurrentSetQuantity;
+
         const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
+        const { timestamp } = await web3.eth.getBlock('latest');
+
         const currentPrice = await liquidatorHelper.calculateCurrentPrice(
           linearAuction,
           new BigNumber(timestamp),
           auctionPeriod,
         );
-        expect(result).to.bignumber.equal(currentPrice);
+
+        tokenFlows = liquidatorHelper.constructTokenFlows(
+          linearAuction,
+          pricePrecision,
+          startingCurrentSetQuantity,
+          currentPrice,
+          pricePrecision,
+        );
       });
 
-      it('returns the correct denominator', async () => {
+      async function subject(): Promise<[Address[], BigNumber[], BigNumber[]]> {
+        return auctionMock.getPricedTokenFlows.callAsync(subjectQuantity);
+      }
+
+      it('returns the token array', async () => {
+        const [result] = await subject();
+        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.addresses));
+      });
+
+      it('returns the correct inflow', async () => {
         const [, result] = await subject();
-        expect(result).to.bignumber.equal(pricePrecision);
+        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.inflow));
+      });
+
+      it('returns the correct outflow', async () => {
+        const [,, result] = await subject();
+        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
       });
     });
 

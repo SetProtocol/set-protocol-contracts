@@ -17,7 +17,8 @@ import {
   ZERO,
 } from '../constants';
 import {
-  LinearAuction
+  LinearAuction,
+  TokenFlows
 } from '../auction';
 
 const AuctionMock = artifacts.require('AuctionMock');
@@ -328,6 +329,45 @@ export class LiquidatorHelper {
              .mul(unitsInFullSet)
              .div(10 ** tokenDecimals.toNumber())
              .round(0, 3);
+  }
+
+  public constructTokenFlows(
+    linearAuction: LinearAuction,
+    pricePrecision: BigNumber,
+    quantity: BigNumber,
+    priceNumerator: BigNumber,
+    priceDenominator: BigNumber,
+  ): TokenFlows {
+    const inflow: BigNumber[] = [];
+    const outflow: BigNumber[] = [];
+
+    // Calculate the inflows and outflow arrays;
+    const { 
+      combinedTokenArray,
+      combinedCurrentSetUnits,
+      combinedNextSetUnits,
+      minimumBid,
+    } = linearAuction.auction; 
+    const coefficient = minimumBid.div(pricePrecision);
+    const effectiveQuantity = quantity.div(priceNumerator);
+
+    for (let i = 0; i < combinedCurrentSetUnits.length; i++) {
+      const flow = combinedNextSetUnits[i].mul(priceDenominator).sub(combinedCurrentSetUnits[i].mul(priceNumerator));
+      if (flow.greaterThan(0)) {
+        inflow.push(effectiveQuantity.mul(flow).div(coefficient).round(0, 3));
+        outflow.push(ZERO);
+      } else {
+        outflow.push(
+          flow.mul(effectiveQuantity).div(coefficient).round(0, 3).mul(new BigNumber(-1))
+        );
+        inflow.push(ZERO);
+      }
+    }
+    return {
+      addresses: combinedTokenArray,
+      inflow,
+      outflow,
+    };
   }
 
 }

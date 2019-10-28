@@ -170,17 +170,17 @@ contract ExponentialPivotAuctionLiquidator is
     }
 
     /* ============ Getters Functions ============ */
-    // function getCombinedTokenArray() external view returns (address[] memory) {
-    //     return auctions[msg.sender].auction.combinedTokenArray;
-    // }
+    function getCombinedTokenArray(address _set) external view returns (address[] memory) {
+        return auctions[_set].auction.combinedTokenArray;
+    }
 
-    // function getCombinedCurrentSetUnits() external view returns (uint256[] memory) {
-    //     return auctions[msg.sender].auction.combinedCurrentSetUnits;
-    // }
+    function getCombinedCurrentSetUnits(address _set) external view returns (uint256[] memory) {
+        return auctions[_set].auction.combinedCurrentSetUnits;
+    }
 
-    // function getCombinedNextSetUnits() external view returns (uint256[] memory) {
-    //     return auctions[msg.sender].auction.combinedNextSetUnits;
-    // }
+    function getCombinedNextSetUnits(address _set) external view returns (uint256[] memory) {
+        return auctions[_set].auction.combinedNextSetUnits;
+    }
 
     /* ============ Private Functions ============ */
     function clearAuctionState(address _sender) private {

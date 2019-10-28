@@ -403,11 +403,29 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       );
     });
 
-    describe('#placeBid', async () => {
+    describe.only('#placeBid', async () => {
       let subjectQuantity: BigNumber;
+      let tokenFlows: TokenFlows;
 
       beforeEach(async () => {
         subjectQuantity = ether(5);
+
+        // const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectCaller));
+        // const { timestamp } = await web3.eth.getBlock('latest');
+
+        // const currentPrice = await liquidatorHelper.calculateCurrentPrice(
+        //   linearAuction,
+        //   new BigNumber(timestamp),
+        //   auctionPeriod,
+        // );
+
+        // tokenFlows = liquidatorHelper.constructTokenFlows(
+        //   linearAuction,
+        //   pricePrecision,
+        //   subjectQuantity,
+        //   currentPrice,
+        //   pricePrecision,
+        // );
       });
 
       async function subject(): Promise<string> {
@@ -423,6 +441,27 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         const auction: any = await liquidator.auctions.callAsync(subjectCaller);
         const expectedRemainingCurrentSets = startingCurrentSetQuantity.sub(subjectQuantity);
         expect(auction.auction.remainingCurrentSets).to.bignumber.equal(expectedRemainingCurrentSets);
+      });
+
+      it('returns the correct combinedTokenArray', async () => {
+        await subject();
+
+        const combinedTokenArray = await liquidatorProxy.getCombinedTokenArray.callAsync();
+        expect(JSON.stringify(combinedTokenArray)).to.equal(JSON.stringify(tokenFlows.addresses));
+      });
+
+      it('returns the correct inflow', async () => {
+        await subject();
+
+        const inflow = await liquidatorProxy.getInflow.callAsync();
+        expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
+      });
+
+      it('returns the correct outflow', async () => {
+        await subject();
+
+        const outflow = await liquidatorProxy.getOutflow.callAsync();
+        expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
       });
 
       describe('when the quantity is not a multiple of the minimumBid', async () => {
@@ -448,11 +487,9 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
           await expectRevertError(subject());
         });
       });
-
-      // TODO Add tests to check bidPrice
     });
 
-    describe.only('#getBidPrice', async () => {
+    describe('#getBidPrice', async () => {
       let subjectSet: Address;
       let subjectQuantity: BigNumber;
 

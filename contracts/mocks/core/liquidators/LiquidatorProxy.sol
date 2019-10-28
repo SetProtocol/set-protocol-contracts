@@ -8,7 +8,7 @@ contract LiquidatorProxy {
 
     uint256[] private inflow;
     uint256[] private outflow;
-    address[] private tokens;
+    address[] private combinedTokenArray;
 
     constructor(
         ILiquidator _liquidator
@@ -29,7 +29,7 @@ contract LiquidatorProxy {
             uint256[] memory outflowArray
         ) = liquidator.placeBid(_quantity);
 
-        tokens = combinedTokens;
+        combinedTokenArray = combinedTokens;
         inflow = inflowArray;
         outflow = outflowArray;
     }
@@ -51,8 +51,8 @@ contract LiquidatorProxy {
     function getOutflow() external view returns(uint256[] memory) {
         return outflow;
     }
-    function getTokens() external view returns(address[] memory) {
-        return tokens;
+    function getCombinedTokenArray() external view returns(address[] memory) {
+        return combinedTokenArray;
     }
 }
 

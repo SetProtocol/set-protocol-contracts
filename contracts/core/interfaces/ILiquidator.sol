@@ -48,7 +48,6 @@ interface ILiquidator {
         returns (address[] memory, uint256[] memory, uint256[] memory);
 
     function placeBid(
-        address _set,
         uint256 _quantity
     )
         external

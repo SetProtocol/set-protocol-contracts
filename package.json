@@ -41,7 +41,7 @@
     "test-nocompile": "yarn transpile && yarn truffle-test-contracts",
     "test-continuous": "yarn deploy-development && truffle test",
     "transpile": "tsc",
-    "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name 'linearAuction.spec.js'`",
+    "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name 'exponentialPivotAuctionLiquidator.spec.js'`",
     "prepublishOnly": "yarn dist"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",

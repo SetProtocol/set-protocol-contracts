@@ -10,6 +10,7 @@ import {
   OracleWhiteListContract,
   LinearAuctionMockContract,
   LiquidatorMockContract,
+  LiquidatorProxyContract,
   SetTokenContract,
 } from '../contracts';
 import { getContractInstance } from '../web3Helper';
@@ -26,6 +27,7 @@ const ExponentialPivotAuctionMock = artifacts.require('ExponentialPivotAuctionMo
 const ExponentialPivotAuctionLiquidator = artifacts.require('ExponentialPivotAuctionLiquidator');
 const LinearAuctionMock = artifacts.require('LinearAuctionMock');
 const LiquidatorMock = artifacts.require('LiquidatorMock');
+const LiquidatorProxy = artifacts.require('LiquidatorProxy');
 
 import { ERC20Helper } from './erc20Helper';
 import { LibraryMockHelper } from './libraryMockHelper';
@@ -54,6 +56,15 @@ export class LiquidatorHelper {
     const auctionMock = await AuctionMock.new({ from });
 
     return new AuctionMockContract(getContractInstance(auctionMock), { from });
+  }
+
+  public async deployLiquidatorProxyAsync(
+    liquidator: Address,
+    from: Address = this._contractOwnerAddress
+  ): Promise<LiquidatorProxyContract> {
+    const liquidatorProxy = await LiquidatorProxy.new(liquidator, { from });
+
+    return new LiquidatorProxyContract(getContractInstance(liquidatorProxy), { from });
   }
 
   public async deployLinearAuctionMockAsync(
@@ -348,18 +359,24 @@ export class LiquidatorHelper {
       combinedNextSetUnits,
       minimumBid,
     } = linearAuction.auction; 
-    const coefficient = minimumBid.div(pricePrecision);
-    const effectiveQuantity = quantity.div(priceNumerator);
+    // const coefficient = minimumBid.div(pricePrecision);
+    // const effectiveQuantity = quantity.div(priceNumerator);
+
+    const unitsMultiplier = quantity.div(minimumBid).round(0, 3).mul(pricePrecision);
 
     for (let i = 0; i < combinedCurrentSetUnits.length; i++) {
       const flow = combinedNextSetUnits[i].mul(priceDenominator).sub(combinedCurrentSetUnits[i].mul(priceNumerator));
       if (flow.greaterThan(0)) {
-        inflow.push(effectiveQuantity.mul(flow).div(coefficient).round(0, 3));
+        const inflowUnit = unitsMultiplier.mul(
+          combinedNextSetUnits[i].mul(priceDenominator).sub(combinedCurrentSetUnits[i].mul(priceNumerator))
+        ).div(priceNumerator).round(0, 3);
+        inflow.push(inflowUnit);
         outflow.push(ZERO);
       } else {
-        outflow.push(
-          flow.mul(effectiveQuantity).div(coefficient).round(0, 3).mul(new BigNumber(-1))
-        );
+        const outflowUnit = unitsMultiplier.mul(
+          combinedCurrentSetUnits[i].mul(priceNumerator).sub(combinedNextSetUnits[i].mul(priceDenominator))
+        ).div(priceNumerator).round(0, 3);
+        outflow.push(outflowUnit);
         inflow.push(ZERO);
       }
     }

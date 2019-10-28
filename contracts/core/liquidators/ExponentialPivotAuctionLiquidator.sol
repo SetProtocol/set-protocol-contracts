@@ -128,18 +128,20 @@ contract ExponentialPivotAuctionLiquidator is
 
         reduceRemainingCurrentSets(auctions[msg.sender], _quantity);
 
-        return getBidPrice(_quantity);
+        return getBidPrice(msg.sender, _quantity);
     }
 
     function getBidPrice(
+        address _set,
         uint256 _quantity
     )
         public
         view
-        isValidSet
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        return getPricedTokenFlows(auctions[msg.sender], _quantity);
+        // Validate auction has started
+
+        return getPricedTokenFlows(auctions[_set], _quantity);
     }
 
     function settleRebalance()
@@ -168,19 +170,19 @@ contract ExponentialPivotAuctionLiquidator is
     }
 
     /* ============ Getters Functions ============ */
-    function getCombinedTokenArray() external view isValidSet returns (address[] memory) {
-        return auctions[msg.sender].auction.combinedTokenArray;
-    }
+    // function getCombinedTokenArray() external view returns (address[] memory) {
+    //     return auctions[msg.sender].auction.combinedTokenArray;
+    // }
 
-    function getCombinedCurrentSetUnits() external view isValidSet returns (uint256[] memory) {
-        return auctions[msg.sender].auction.combinedCurrentSetUnits;
-    }
+    // function getCombinedCurrentSetUnits() external view returns (uint256[] memory) {
+    //     return auctions[msg.sender].auction.combinedCurrentSetUnits;
+    // }
 
-    function getCombinedNextSetUnits() external view isValidSet returns (uint256[] memory) {
-        return auctions[msg.sender].auction.combinedNextSetUnits;
-    }
+    // function getCombinedNextSetUnits() external view returns (uint256[] memory) {
+    //     return auctions[msg.sender].auction.combinedNextSetUnits;
+    // }
 
-    /* ============ Internal Functions ============ */
+    /* ============ Private Functions ============ */
     function clearAuctionState(address _sender) private {
         delete auctions[_sender];
     }

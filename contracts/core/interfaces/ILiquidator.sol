@@ -48,6 +48,7 @@ interface ILiquidator {
         returns (address[] memory, uint256[] memory, uint256[] memory);
 
     function placeBid(
+        address _set,
         uint256 _quantity
     )
         external
@@ -97,33 +98,10 @@ interface ILiquidator {
     // Bidding Parameters
     // ----------------------------------------------------------------------
 
-    function minimumBid(address _set)
-        external
-        view
-        returns (uint256);
-
-    function remainingCurrentSets(address _set)
-        external
-        view
-        returns (uint256);
-
-    function getCombinedCurrentUnits(address _set)
-        external
-        view
-        returns (uint256[] memory);
-
-    function getCombinedNextSetUnits(address _set)
-        external
-        view
-        returns (uint256[] memory);
-
-    function getCombinedTokenArray(address _set)
-        external
-        view
-        returns (address[] memory);
-
-    function startingCurrentSetAmount(address _set)
-        external
-        view
-        returns (uint256);
+    function minimumBid(address _set) external view returns (uint256);
+    function remainingCurrentSets(address _set) external view returns (uint256);
+    function getCombinedCurrentUnits(address _set) external view returns (uint256[] memory);
+    function getCombinedNextSetUnits(address _set) external view returns (uint256[] memory);
+    function getCombinedTokenArray(address _set) external view returns (address[] memory);
+    function startingCurrentSetAmount(address _set) external view returns (uint256);
 }

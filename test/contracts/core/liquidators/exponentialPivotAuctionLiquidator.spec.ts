@@ -10,6 +10,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  LiquidatorProxyContract,
   OracleWhiteListContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
@@ -29,7 +30,7 @@ import {
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
-import { LinearAuction, getLinearAuction } from '@utils/auction';
+import { LinearAuction, getLinearAuction, TokenFlows } from '@utils/auction';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
@@ -58,6 +59,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let liquidator: ExponentialPivotAuctionLiquidatorContract;
+  let liquidatorProxy: LiquidatorProxyContract;
 
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
   const erc20Helper = new ERC20Helper(ownerAccount);
@@ -166,6 +168,12 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       { from: ownerAccount, gas: DEFAULT_GAS },
     );
 
+    liquidatorProxy = await liquidatorHelper.deployLiquidatorProxyAsync(liquidator.address);
+
+    await core.addSet.sendTransactionAsync(
+      liquidatorProxy.address,
+      { from: ownerAccount, gas: DEFAULT_GAS },
+    );
   });
 
   after(async () => {
@@ -403,7 +411,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       });
 
       async function subject(): Promise<string> {
-        return liquidator.placeBid.sendTransactionAsync(
+        return liquidatorProxy.placeBid.sendTransactionAsync(
           subjectQuantity,
           { from: subjectCaller, gas: DEFAULT_GAS },
         );
@@ -444,159 +452,75 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       // TODO Add tests to check bidPrice
     });
 
-    // describe('#validateAuctionCompletion', async () => {
-    //   let reductionQuantity: BigNumber;
-    //   let customReductionQuantity: BigNumber;
+    describe.only('#getBidPrice', async () => {
+      let subjectSet: Address;
+      let subjectQuantity: BigNumber;
 
-    //   beforeEach(async () => {
-    //     reductionQuantity = customReductionQuantity || startingCurrentSetQuantity;        
-    //     await liquidator.reduceRemainingCurrentSets.sendTransactionAsync(
-    //       reductionQuantity,
-    //       { from: subjectCaller, gas: DEFAULT_GAS },
-    //     );
-    //   });
+      let tokenFlows: TokenFlows;
 
-    //   async function subject(): Promise<string> {
-    //     return liquidator.validateAuctionCompletion.sendTransactionAsync(
-    //       { from: subjectCaller, gas: DEFAULT_GAS },
-    //     );
-    //   }
+      beforeEach(async () => {
+        subjectSet = functionCaller;
+        subjectQuantity = startingCurrentSetQuantity;
 
-    //   it('should not revert', async () => {
-    //     await subject();
-    //   });
+        await liquidator.startRebalance.sendTransactionAsync(
+          set1.address,
+          set2.address,
+          startingCurrentSetQuantity,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
 
-    //   describe('when the auction is not complete', async () => {
-    //     before(async () => {
-    //       customReductionQuantity = startingCurrentSetQuantity.div(2);
-    //     });
+        const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectCaller));
+        const { timestamp } = await web3.eth.getBlock('latest');
 
-    //     after(async () => {
-    //       customReductionQuantity = undefined;
-    //     })
+        const currentPrice = await liquidatorHelper.calculateCurrentPrice(
+          linearAuction,
+          new BigNumber(timestamp),
+          auctionPeriod,
+        );
 
-    //     it('should revert', async () => {
-    //       await expectRevertError(subject());
-    //     });
-    //   });
-    // });
+        tokenFlows = liquidatorHelper.constructTokenFlows(
+          linearAuction,
+          pricePrecision,
+          subjectQuantity,
+          currentPrice,
+          pricePrecision,
+        );
+      });
 
-    // describe('#getLinearPrice', async () => {
-    //   async function subject(): Promise<BigNumber> {
-    //     return liquidator.getLinearPrice.callAsync();
-    //   }
+      async function subject(): Promise<[Address[], BigNumber[], BigNumber[]]> {
+        return liquidatorProxy.getBidPrice.callAsync(subjectSet, subjectQuantity);
+      }
 
-    //   it('returns the correct result', async () => {
-    //     const result = await subject();
-    //     const { timestamp } = await web3.eth.getBlock('latest');
-    //     const linearAuction = getLinearAuction(await liquidator.auction.callAsync());
-    //     const currentPrice = await liquidatorHelper.calculateCurrentPrice(
-    //       linearAuction,
-    //       new BigNumber(timestamp),
-    //       auctionPeriod,
-    //     );
-    //     expect(result).to.bignumber.equal(currentPrice);
-    //   });
+      it('returns the token array', async () => {
+        const [result] = await subject();
+        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.addresses));
+      });
 
-    //   describe('when the auction has elapsed half the period', async () => {
-    //     beforeEach(async () => {
-    //       await blockchain.increaseTimeAsync(auctionPeriod.div(2));        
-    //       // Do dummy transaction to advance the block
-    //       await liquidator.reduceRemainingCurrentSets.sendTransactionAsync(
-    //         startingCurrentSetQuantity.div(2),
-    //         { from: subjectCaller, gas: DEFAULT_GAS },
-    //       );
-    //     });
+      it('returns the correct inflow', async () => {
+        const [, result] = await subject();
+        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.inflow));
+      });
 
-    //     it('returns the correct result', async () => {
-    //       const result = await subject();
-          
-    //       const { timestamp } = await web3.eth.getBlock('latest');
-    //       const linearAuction = getLinearAuction(await liquidator.auction.callAsync());
-    //       const currentPrice = await liquidatorHelper.calculateCurrentPrice(
-    //         linearAuction,
-    //         new BigNumber(timestamp),
-    //         auctionPeriod,
-    //       );
-    //       expect(result).to.bignumber.equal(currentPrice);
-    //     });
-    //   });
-    // });
+      it('returns the correct outflow', async () => {
+        const [,, result] = await subject();
+        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
+      });
+    });
 
-    // describe('#getCurrentPriceRatio', async () => {
-    //   async function subject(): Promise<[BigNumber, BigNumber]> {
-    //     return liquidator.getCurrentPriceRatio.callAsync();
-    //   }
+    describe('[CONTEXT] with bid', async () => {
+      let bidQuantity: BigNumber;
 
-    //   it('returns the correct numerator', async () => {
-    //     const [result] = await subject();
-    //     const { timestamp } = await web3.eth.getBlock('latest');
-    //     const linearAuction = getLinearAuction(await liquidator.auction.callAsync());
-    //     const currentPrice = await liquidatorHelper.calculateCurrentPrice(
-    //       linearAuction,
-    //       new BigNumber(timestamp),
-    //       auctionPeriod,
-    //     );
-    //     expect(result).to.bignumber.equal(currentPrice);
-    //   });
+      // beforeEach(async () => {
+      //   bidQuantity = startingCurrentSetQuantity;
 
-    //   it('returns the correct denominator', async () => {
-    //     const [, result] = await subject();
-    //     expect(result).to.bignumber.equal(pricePrecision);
-    //   });      
-    // });
-
-    // describe('#hasAuctionFailed', async () => {
-    //   async function subject(): Promise<boolean> {
-    //     return liquidator.hasAuctionFailed.callAsync();
-    //   }
-
-    //   it('returns false', async () => {
-    //     const hasAuctionFailed = await subject();
-    //     expect(hasAuctionFailed).to.equal(false);
-    //   });
-
-    //   describe('when the timestamp has exceeded the endTime', async () => {
-    //     beforeEach(async () => {
-    //       await blockchain.increaseTimeAsync(auctionPeriod.add(1));        
-    //     });
-
-    //     it('should return false', async () => {
-    //       const hasAuctionFailed = await subject();
-    //       expect(hasAuctionFailed).to.equal(false);
-    //     });
-    //   });
-
-    //   describe('when the auction has been completed', async () => {
-    //     beforeEach(async () => {
-    //       await liquidator.reduceRemainingCurrentSets.sendTransactionAsync(
-    //         startingCurrentSetQuantity,
-    //         { from: subjectCaller, gas: DEFAULT_GAS },
-    //       );
-    //     });
-
-    //     it('should return false', async () => {
-    //       const hasAuctionFailed = await subject();
-    //       expect(hasAuctionFailed).to.equal(false);
-    //     });
-    //   });
-
-    //   describe('when the timestamp has exceeded endTime and there is a biddable quantity', async () => {
-    //     beforeEach(async () => {
-    //       await blockchain.increaseTimeAsync(auctionPeriod.add(1));        
-
-    //       await liquidator.reduceRemainingCurrentSets.sendTransactionAsync(
-    //         startingCurrentSetQuantity,
-    //         { from: subjectCaller, gas: DEFAULT_GAS },
-    //       );
-    //     });
-
-    //     it('should true', async () => {
-    //       const hasAuctionFailed = await subject();
-    //       expect(hasAuctionFailed).to.equal(true);
-    //     });
-    //   });
-    // });
+      //   await liquidator.placeBid.sendTransactionAsync(
+      //     set1.address,
+      //     set2.address,
+      //     startingCurrentSetQuantity,
+      //     { from: subjectCaller, gas: DEFAULT_GAS },
+      //   );
+      // });
+    });
   });
 
 });

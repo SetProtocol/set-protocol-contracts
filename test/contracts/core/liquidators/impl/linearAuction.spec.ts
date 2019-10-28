@@ -527,7 +527,7 @@ contract('LinearAuction', accounts => {
         tokenFlows = liquidatorHelper.constructTokenFlows(
           linearAuction,
           pricePrecision,
-          startingCurrentSetQuantity,
+          subjectQuantity,
           currentPrice,
           pricePrecision,
         );
@@ -550,6 +550,51 @@ contract('LinearAuction', accounts => {
       it('returns the correct outflow', async () => {
         const [,, result] = await subject();
         expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
+      });
+
+      describe('when the auction has elapsed half the period', async () => {
+        beforeEach(async () => {
+          await blockchain.increaseTimeAsync(auctionPeriod.div(2));        
+          // Do dummy transaction to advance the block
+          await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
+            startingCurrentSetQuantity.div(2),
+            { from: subjectCaller, gas: DEFAULT_GAS },
+          );
+
+          subjectQuantity = startingCurrentSetQuantity.div(2);
+
+          const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
+          const { timestamp } = await web3.eth.getBlock('latest');
+
+          const currentPrice = await liquidatorHelper.calculateCurrentPrice(
+            linearAuction,
+            new BigNumber(timestamp),
+            auctionPeriod,
+          );
+
+          tokenFlows = liquidatorHelper.constructTokenFlows(
+            linearAuction,
+            pricePrecision,
+            subjectQuantity,
+            currentPrice,
+            pricePrecision,
+          );
+        });
+
+        it('returns the token array', async () => {
+          const [result] = await subject();
+          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.addresses));
+        });
+
+        it('returns the correct inflow', async () => {
+          const [, result] = await subject();
+          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.inflow));
+        });
+
+        it('returns the correct outflow', async () => {
+          const [,, result] = await subject();
+          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
+        });
       });
     });
 

@@ -28,6 +28,7 @@ export { KyberNetworkWrapperContract } from '../types/generated/kyber_network_wr
 export { LinearAuctionMockContract } from '../types/generated/linear_auction_mock';
 export { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
 export { LiquidatorMockContract } from '../types/generated/liquidator_mock';
+export { LiquidatorProxyContract } from '../types/generated/liquidator_proxy';
 export { MedianContract } from '../types/generated/median';
 export { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 export { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';

@@ -68,7 +68,7 @@ export {
   ProposeLibraryContract,
   ProtocolViewerContract,
   RebalanceAuctionModuleContract,
-  RebalancingSetEthBidder,
+  RebalancingSetEthBidderContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetIssuanceModuleContract,
   RebalancingSetTokenContract,

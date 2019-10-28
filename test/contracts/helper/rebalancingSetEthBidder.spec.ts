@@ -3,7 +3,7 @@ require('module-alias/register');
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
-import { Address } from 'set-protocol-utils';
+import { Address, SetProtocolTestUtils as SetTestUtils } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
@@ -36,6 +36,7 @@ import {
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3, getGasUsageInEth } from '@utils/web3Helper';
+import { BidPlacedWithEth } from '@utils/contract_logs/rebalancingSetEthBidder';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
@@ -49,6 +50,7 @@ const CoreMock = artifacts.require('CoreMock');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingSetEthBidder = artifacts.require('RebalancingSetEthBidder');
 const blockchain = new Blockchain(web3);
+const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 
 contract('RebalancingSetEthBidder', accounts => {
@@ -393,6 +395,19 @@ contract('RebalancingSetEthBidder', accounts => {
         expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
       });
 
+      it('emits a BidPlacedWithEth event', async () => {
+        const txHash = await subject();
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+        const expectedLogs = BidPlacedWithEth(
+          rebalancingSetToken.address,
+          subjectCaller,
+          rebalancingSetEthBidder.address
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+
       describe('but quantity is zero', async () => {
         beforeEach(async () => {
           subjectQuantity = ZERO;
@@ -528,6 +543,19 @@ contract('RebalancingSetEthBidder', accounts => {
           const newBiddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
           const newRemainingSets = new BigNumber(newBiddingParameters[1]);
           expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
+        });
+
+        it('emits a BidPlacedWithEth event', async () => {
+          const txHash = await subject();
+          const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+          const expectedLogs = BidPlacedWithEth(
+            rebalancingSetToken.address,
+            subjectCaller,
+            rebalancingSetEthBidder.address
+          );
+
+          await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
         });
       });
 

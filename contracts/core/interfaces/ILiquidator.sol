@@ -40,6 +40,7 @@ interface ILiquidator {
         external;
 
     function getBidPrice(
+        address _set,
         uint256 _quantity
     )
         external
@@ -71,7 +72,9 @@ interface ILiquidator {
 
     /* ============ Backwards Compatability Getters ============ */
 
-    function auctionLibrary()
+    function auctionLibrary(
+        address _set
+    )
         external
         view
         returns (address);
@@ -80,12 +83,12 @@ interface ILiquidator {
     // Auction Price Parameters
     // ----------------------------------------------------------------------
 
-    function getAuctionPriceParameters()
+    function getAuctionPriceParameters(address _set)
         external
         view
         returns (uint256[] memory);
 
-    function auctionPriceParameters()
+    function auctionPriceParameters(address _set)
         external
         view
         returns (RebalancingLibrary.AuctionPriceParameters memory);
@@ -94,32 +97,32 @@ interface ILiquidator {
     // Bidding Parameters
     // ----------------------------------------------------------------------
 
-    function minimumBid()
+    function minimumBid(address _set)
         external
         view
         returns (uint256);
 
-    function remainingCurrentSets()
+    function remainingCurrentSets(address _set)
         external
         view
         returns (uint256);
 
-    function getCombinedCurrentUnits()
+    function getCombinedCurrentUnits(address _set)
         external
         view
         returns (uint256[] memory);
 
-    function getCombinedNextSetUnits()
+    function getCombinedNextSetUnits(address _set)
         external
         view
         returns (uint256[] memory);
 
-    function getCombinedTokenArray()
+    function getCombinedTokenArray(address _set)
         external
         view
         returns (address[] memory);
 
-    function startingCurrentSetAmount()
+    function startingCurrentSetAmount(address _set)
         external
         view
         returns (uint256);

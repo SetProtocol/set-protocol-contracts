@@ -15,6 +15,7 @@
 */
 
 pragma solidity 0.5.7;
+pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -36,8 +37,8 @@ contract LiquidatorMock is
     using AddressArrayUtils for address[];
 
     // Legacy Data
-    address public auctionLibrary;
-    RebalancingLibrary.AuctionPriceParameters public auctionPriceParameters;
+    address private _auctionLibrary;
+    RebalancingLibrary.AuctionPriceParameters private auctionPriceParams;
 
     uint256 constant public priceDivisor = 1000;
     uint256 public priceNumerator = 1000;
@@ -45,18 +46,18 @@ contract LiquidatorMock is
     ISetToken public currentSet;
     ISetToken public nextSet;
 
-    uint256 public minimumBid;
+    uint256 private _minimumBid;
 
     uint256 public startRebalanceTime;
-    uint256 public startingCurrentSetAmount;
-    uint256 public remainingCurrentSets;
+    uint256 private _startingCurrentSetAmount;
+    uint256 private _remainingCurrentSets;
 
     ISetToken public startRebalanceCurrentSet;
     ISetToken public startRebalanceNextSet;
 
-    address[] public combinedTokenArray;
-    uint256[] public combinedCurrentUnits;
-    uint256[] public combinedNextSetUnits;
+    address[] private _combinedTokenArray;
+    uint256[] private _combinedCurrentUnits;
+    uint256[] private _combinedNextSetUnits;
 
     uint256 public placeBidQuantity;
 
@@ -82,17 +83,18 @@ contract LiquidatorMock is
     }
 
     function getBidPrice(
+        address _set,
         uint256 _quantity
     )
         external
         view
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        uint256[] memory inflowUnits = getInflowTokenTransferValues(nextSet, _quantity, combinedNextSetUnits);
-        uint256[] memory outflowUnits = getTransferValues(currentSet, _quantity, combinedCurrentUnits);
+        uint256[] memory inflowUnits = getInflowTokenTransferValues(nextSet, _quantity, _combinedNextSetUnits);
+        uint256[] memory outflowUnits = getTransferValues(currentSet, _quantity, _combinedCurrentUnits);
 
         return (
-            combinedTokenArray,
+            _combinedTokenArray,
             inflowUnits,
             outflowUnits
         );        
@@ -107,14 +109,14 @@ contract LiquidatorMock is
         placeBidQuantity = _quantity;
 
         // Subtract remaining Sets
-        remainingCurrentSets = remainingCurrentSets.sub(_quantity);
+        _remainingCurrentSets = _remainingCurrentSets.sub(_quantity);
 
         // Inflow = quantity (currentSet) * units / naturalUnit
-        uint256[] memory inflowUnits = getInflowTokenTransferValues(nextSet, _quantity, combinedNextSetUnits);
-        uint256[] memory outflowUnits = getTransferValues(currentSet, _quantity, combinedCurrentUnits);
+        uint256[] memory inflowUnits = getInflowTokenTransferValues(nextSet, _quantity, _combinedNextSetUnits);
+        uint256[] memory outflowUnits = getTransferValues(currentSet, _quantity, _combinedCurrentUnits);
 
         return (
-            combinedTokenArray,
+            _combinedTokenArray,
             inflowUnits,
             outflowUnits
         );
@@ -123,7 +125,7 @@ contract LiquidatorMock is
     function startRebalance(
         ISetToken _currentSet,
         ISetToken _nextSet,
-        uint256 _startingCurrentSetAmount
+        uint256 startingCurrentSetAmount_
     )
         external
     {
@@ -131,18 +133,18 @@ contract LiquidatorMock is
         startRebalanceCurrentSet = _currentSet;
 
         startRebalanceTime = block.timestamp;
-        startingCurrentSetAmount = _startingCurrentSetAmount;
-        remainingCurrentSets = startingCurrentSetAmount;
+        _startingCurrentSetAmount = startingCurrentSetAmount_;
+        _remainingCurrentSets = _startingCurrentSetAmount;
 
-        minimumBid = calculateMinimumBid(currentSet, nextSet);
+        _minimumBid = calculateMinimumBid(currentSet, nextSet);
 
         // Set the combined token array
         address[] memory currentSetComponents = _currentSet.getComponents();
         address[] memory nextSetComponents = _nextSet.getComponents();
-        combinedTokenArray = currentSetComponents.union(nextSetComponents);
+        _combinedTokenArray = currentSetComponents.union(nextSetComponents);
 
-        combinedCurrentUnits = getCombinedUnitsArray(_currentSet, combinedTokenArray);
-        combinedNextSetUnits = getCombinedUnitsArray(_nextSet, combinedTokenArray);
+        _combinedCurrentUnits = getCombinedUnitsArray(_currentSet, _combinedTokenArray);
+        _combinedNextSetUnits = getCombinedUnitsArray(_nextSet, _combinedTokenArray);
     }
 
     function settleRebalance() external {
@@ -169,29 +171,53 @@ contract LiquidatorMock is
 
     /* ============ Getter Functions ============ */
 
-    function getAuctionPriceParameters()
+    function auctionPriceParameters(address _set)
+        external
+        view
+        returns (RebalancingLibrary.AuctionPriceParameters memory)
+    {
+        return auctionPriceParams;
+    }
+
+    function getAuctionPriceParameters(address _set)
         external
         view
         returns (uint256[] memory)
     {
         uint256[] memory auctionParams = new uint256[](4);
-        auctionParams[0] = auctionPriceParameters.auctionStartTime;
-        auctionParams[1] = auctionPriceParameters.auctionTimeToPivot;
-        auctionParams[2] = auctionPriceParameters.auctionStartPrice;
-        auctionParams[3] = auctionPriceParameters.auctionPivotPrice;
+        auctionParams[0] = auctionPriceParams.auctionStartTime;
+        auctionParams[1] = auctionPriceParams.auctionTimeToPivot;
+        auctionParams[2] = auctionPriceParams.auctionStartPrice;
+        auctionParams[3] = auctionPriceParams.auctionPivotPrice;
         return auctionParams;
     }
 
-    function getCombinedTokenArray() external view returns (address[] memory) {
-        return combinedTokenArray;
-    }
- 
-    function getCombinedCurrentUnits() external view returns (uint256[] memory) {
-        return combinedCurrentUnits;
+    function auctionLibrary(address _set) external view returns (address) {
+        return _auctionLibrary;
     }
 
-    function getCombinedNextSetUnits() external view returns (uint256[] memory) {
-        return combinedNextSetUnits;
+    function minimumBid(address _set) external view returns (uint256) {
+        return _minimumBid;
+    }
+
+    function remainingCurrentSets(address _set) external view returns (uint256) {
+        return _remainingCurrentSets;
+    }
+
+    function startingCurrentSetAmount(address _set) external view returns (uint256) {
+        return _startingCurrentSetAmount;
+    }
+
+    function getCombinedTokenArray(address _set) external view returns (address[] memory) {
+        return _combinedTokenArray;
+    }
+ 
+    function getCombinedCurrentUnits(address _set) external view returns (uint256[] memory) {
+        return _combinedCurrentUnits;
+    }
+
+    function getCombinedNextSetUnits(address _set) external view returns (uint256[] memory) {
+        return _combinedNextSetUnits;
     }
 
     /* ============ Private Functions ============ */

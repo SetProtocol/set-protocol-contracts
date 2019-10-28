@@ -196,7 +196,7 @@ contract RebalancingSetTokenV2 is
     {
         validateGetBidPrice(_quantity);
 
-        return liquidator.getBidPrice(_quantity);
+        return liquidator.getBidPrice(address(this), _quantity);
     }
 
     /*

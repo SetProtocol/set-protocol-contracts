@@ -657,7 +657,7 @@ export class RebalancingHelper {
       manager
     );
 
-    const minimumBid = await liquidatorMock.minimumBid.callAsync();
+    const minimumBid = await liquidatorMock.minimumBid.callAsync(rebalancingSetToken.address);
     await this.placeBidAsync(
       rebalanceAuctionModule,
       rebalancingSetToken.address,

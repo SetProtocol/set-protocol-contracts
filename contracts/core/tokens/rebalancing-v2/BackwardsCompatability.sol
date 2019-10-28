@@ -40,40 +40,40 @@ contract BackwardsCompatability is
     /* ============ Getters ============ */
 
     function getAuctionPriceParameters() external view returns (uint256[] memory) {
-        return liquidator.getAuctionPriceParameters();
+        return liquidator.getAuctionPriceParameters(address(this));
     }
 
     function getCombinedCurrentUnits() external view returns (uint256[] memory) {
-        return liquidator.getCombinedCurrentUnits();
+        return liquidator.getCombinedCurrentUnits(address(this));
     }
 
     function getCombinedNextSetUnits() external view returns (uint256[] memory) {
-        return liquidator.getCombinedNextSetUnits();
+        return liquidator.getCombinedNextSetUnits(address(this));
     }
 
     function getCombinedTokenArray() external view returns (address[] memory) {
-        return liquidator.getCombinedTokenArray();
+        return liquidator.getCombinedTokenArray(address(this));
     }
 
     /*
      * Retrieves the combinedTokenArray from Liquidator and returns the length
      */    
     function getCombinedTokenArrayLength() external view returns (uint256) {
-        return liquidator.getCombinedTokenArray().length;
+        return liquidator.getCombinedTokenArray(address(this)).length;
     }
 
     function startingCurrentSetAmount() external view returns (uint256) {
-        return liquidator.startingCurrentSetAmount();
+        return liquidator.startingCurrentSetAmount(address(this));
     }
 
     function auctionPriceParameters() external view
         returns (RebalancingLibrary.AuctionPriceParameters memory)
     {
-        return liquidator.auctionPriceParameters();
+        return liquidator.auctionPriceParameters(address(this));
     }
 
     function auctionLibrary() external view returns (address) {
-        return liquidator.auctionLibrary();
+        return liquidator.auctionLibrary(address(this));
     }
 
     /*
@@ -84,8 +84,8 @@ contract BackwardsCompatability is
      */
     function getBiddingParameters() public view returns (uint256[] memory) {
         uint256[] memory biddingParams = new uint256[](2);
-        biddingParams[0] = liquidator.minimumBid();
-        biddingParams[1] = liquidator.remainingCurrentSets();
+        biddingParams[0] = liquidator.minimumBid(address(this));
+        biddingParams[1] = liquidator.remainingCurrentSets(address(this));
         return biddingParams;
     }
 

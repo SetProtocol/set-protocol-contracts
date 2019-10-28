@@ -166,7 +166,9 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct getAuctionPriceParameters', async () => {
       const retrievedResult = await subject();
 
-      const expectedResult =  await liquidatorMock.getAuctionPriceParameters.callAsync();
+      const expectedResult =  await liquidatorMock.getAuctionPriceParameters.callAsync(
+        rebalancingSetToken.address
+      );
       expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
     });
   });
@@ -179,7 +181,9 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct getCombinedCurrentUnits', async () => {
       const retrievedResult = await subject();
 
-      const expectedResult =  await liquidatorMock.getCombinedCurrentUnits.callAsync();
+      const expectedResult =  await liquidatorMock.getCombinedCurrentUnits.callAsync(
+        rebalancingSetToken.address
+      );
       expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
     });
   });
@@ -192,7 +196,9 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct getCombinedNextSetUnits', async () => {
       const retrievedResult = await subject();
 
-      const expectedResult =  await liquidatorMock.getCombinedNextSetUnits.callAsync();
+      const expectedResult =  await liquidatorMock.getCombinedNextSetUnits.callAsync(
+        rebalancingSetToken.address
+      );
       expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
     });
   });
@@ -205,7 +211,9 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct getCombinedTokenArray', async () => {
       const retrievedResult = await subject();
 
-      const expectedResult =  await liquidatorMock.getCombinedTokenArray.callAsync();
+      const expectedResult =  await liquidatorMock.getCombinedTokenArray.callAsync(
+        rebalancingSetToken.address
+      );
       expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
     });
   });
@@ -219,7 +227,9 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct getCombinedTokenArrayLength', async () => {
       const retrievedResult = await subject();
 
-      const expectedResult =  await liquidatorMock.getCombinedTokenArray.callAsync();
+      const expectedResult =  await liquidatorMock.getCombinedTokenArray.callAsync(
+        rebalancingSetToken.address
+      );
       expect(retrievedResult).to.bignumber.equal(expectedResult.length);
     });
   });
@@ -232,7 +242,9 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct startingCurrentSetAmount', async () => {
       const retrievedResult = await subject();
 
-      const expectedResult =  await liquidatorMock.startingCurrentSetAmount.callAsync();
+      const expectedResult =  await liquidatorMock.startingCurrentSetAmount.callAsync(
+        rebalancingSetToken.address
+      );
       expect(retrievedResult).to.bignumber.equal(expectedResult);
     });
   });
@@ -245,7 +257,9 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct auctionPriceParameters', async () => {
       const retrievedResult = await subject();
 
-      const expectedResult =  await liquidatorMock.auctionPriceParameters.callAsync();
+      const expectedResult =  await liquidatorMock.auctionPriceParameters.callAsync(
+        rebalancingSetToken.address
+      );
       expect(retrievedResult[0]).to.equal(expectedResult[0]);
       expect(retrievedResult[1]).to.equal(expectedResult[1]);
       expect(retrievedResult[2]).to.equal(expectedResult[2]);
@@ -261,7 +275,9 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct auctionLibrary', async () => {
       const retrievedAuctionLibrary = await subject();
 
-      const auctionLibrary =  await liquidatorMock.auctionLibrary.callAsync();
+      const auctionLibrary =  await liquidatorMock.auctionLibrary.callAsync(
+        rebalancingSetToken.address
+      );
       expect(retrievedAuctionLibrary).to.equal(auctionLibrary);
     });
   });
@@ -274,7 +290,9 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct getFailedAuctionWithdrawComponents', async () => {
       const auctionWithdrawComponents = await subject();
 
-      const failedComponents =  await rebalancingSetToken.getFailedRebalanceComponents.callAsync();
+      const failedComponents =  await rebalancingSetToken.getFailedRebalanceComponents.callAsync(
+        rebalancingSetToken.address
+      );
       expect(JSON.stringify(auctionWithdrawComponents)).to.equal(JSON.stringify(failedComponents));
     });
   });
@@ -287,14 +305,16 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct minimumBid', async () => {
       const [minimumBid] = await subject();
 
-      const liquidatorMinimumBid = await liquidatorMock.minimumBid.callAsync();
+      const liquidatorMinimumBid = await liquidatorMock.minimumBid.callAsync(rebalancingSetToken.address);
       expect(minimumBid).to.be.bignumber.equal(liquidatorMinimumBid);
     });
 
     it('returns the correct remainingCurrentSets', async () => {
       const [, remaininCurrentSets] = await subject();
 
-      const liquidatorRemaininCurrentSets = await liquidatorMock.remainingCurrentSets.callAsync();
+      const liquidatorRemaininCurrentSets = await liquidatorMock.remainingCurrentSets.callAsync(
+        rebalancingSetToken.address
+      );
       expect(remaininCurrentSets).to.be.bignumber.equal(liquidatorRemaininCurrentSets);
     });
   });
@@ -307,14 +327,18 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct minimumBid', async () => {
       const [minimumBid] = await subject();
 
-      const liquidatorMinimumBid = await liquidatorMock.minimumBid.callAsync();
+      const liquidatorMinimumBid = await liquidatorMock.minimumBid.callAsync(
+        rebalancingSetToken.address
+      );
       expect(minimumBid).to.be.bignumber.equal(liquidatorMinimumBid);
     });
 
     it('returns the correct remainingCurrentSets', async () => {
       const [, remaininCurrentSets] = await subject();
 
-      const liquidatorRemaininCurrentSets = await liquidatorMock.remainingCurrentSets.callAsync();
+      const liquidatorRemaininCurrentSets = await liquidatorMock.remainingCurrentSets.callAsync(
+        rebalancingSetToken.address
+      );
       expect(remaininCurrentSets).to.be.bignumber.equal(liquidatorRemaininCurrentSets);
     });
   });
@@ -326,7 +350,7 @@ contract('BackwardsCompatability', accounts => {
       const failPeriod = new BigNumber(100000);
       await blockchain.increaseTimeAsync(failPeriod.add(1));
 
-      const minimumBid = await liquidatorMock.minimumBid.callAsync();
+      const minimumBid = await liquidatorMock.minimumBid.callAsync(rebalancingSetToken.address);
       await rebalancingHelper.placeBidAsync(
         rebalanceAuctionModule,
         rebalancingSetToken.address,

@@ -279,7 +279,7 @@ contract('FailRebalance', accounts => {
             const failPeriod = new BigNumber(100000);
             await blockchain.increaseTimeAsync(failPeriod.add(1));
 
-            const minimumBid = await liquidatorMock.minimumBid.callAsync();
+            const minimumBid = await liquidatorMock.minimumBid.callAsync(rebalancingSetToken.address);
             await rebalancingHelper.placeBidAsync(
               rebalanceAuctionModule,
               rebalancingSetToken.address,
@@ -345,7 +345,7 @@ contract('FailRebalance', accounts => {
             const failPeriod = new BigNumber(100000);
             await blockchain.increaseTimeAsync(failPeriod.add(1));
 
-            const minimumBid = await liquidatorMock.minimumBid.callAsync();
+            const minimumBid = await liquidatorMock.minimumBid.callAsync(rebalancingSetToken.address);
             await rebalancingHelper.placeBidAsync(
               rebalanceAuctionModule,
               rebalancingSetToken.address,

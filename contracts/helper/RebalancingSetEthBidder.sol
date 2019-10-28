@@ -49,6 +49,13 @@ contract RebalancingSetEthBidder is
     // Address and instance of Wrapped Ether contract
     IWETH public weth;
 
+    /* ============ Events ============ */
+
+    event BidPlacedWithEth(
+        address indexed rebalancingSetToken,
+        address indexed bidder
+    );
+
     /* ============ Constructor ============ */
 
     /**
@@ -102,14 +109,14 @@ contract RebalancingSetEthBidder is
      * Bid on rebalancing a given quantity of sets held by a rebalancing token wrapping or unwrapping
      * any ETH involved. The tokens are returned to the user.
      *
-     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
+     * @param  _rebalancingSetToken    Instance of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance
      * @param  _allowPartialFill       Set to true if want to partially fill bid when quantity
                                        is greater than currentRemainingSets
      */
 
     function bidAndWithdrawWithEther(
-        address _rebalancingSetToken,
+        IRebalancingSetToken _rebalancingSetToken,
         uint256 _quantity,
         bool _allowPartialFill
     )
@@ -121,7 +128,7 @@ contract RebalancingSetEthBidder is
         weth.deposit.value(msg.value)();
 
         // Get token addresses
-        address[] memory combinedTokenArray = IRebalancingSetToken(_rebalancingSetToken).getCombinedTokenArray();
+        address[] memory combinedTokenArray = _rebalancingSetToken.getCombinedTokenArray();
 
         // Get inflow and outflow arrays for the given bid quantity
         uint256[] memory inflowArray;
@@ -129,7 +136,7 @@ contract RebalancingSetEthBidder is
         (
             inflowArray,
             outflowArray
-        ) = IRebalancingSetToken(_rebalancingSetToken).getBidPrice(_quantity);
+        ) = _rebalancingSetToken.getBidPrice(_quantity);
 
         // Ensure allowances and transfer non-weth tokens from user
         depositNonWethComponents(
@@ -139,7 +146,7 @@ contract RebalancingSetEthBidder is
 
         // Bid in auction
         rebalanceAuctionModule.bidAndWithdraw(
-            _rebalancingSetToken,
+            address(_rebalancingSetToken),
             _quantity,
             _allowPartialFill
         );
@@ -155,6 +162,12 @@ contract RebalancingSetEthBidder is
             weth.withdraw(wethBalance);
             msg.sender.transfer(wethBalance);            
         }
+
+        // Log bid placed with Eth event
+        emit BidPlacedWithEth(
+            address(_rebalancingSetToken),
+            msg.sender
+        );
     }
 
     /* ============ Private Functions ============ */

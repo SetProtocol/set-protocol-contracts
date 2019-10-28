@@ -247,4 +247,19 @@ interface IRebalancingSetToken {
         view
         returns (uint256[] memory);
 
+    /*
+     * Get token inflows and outflows required for bid. Also the amount of Rebalancing
+     * Sets that would be generated.
+     *
+     * @param _quantity               The amount of currentSet to be rebalanced
+     * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
+     */
+    function getBidPrice(
+        uint256 _quantity
+    )
+        external
+        view
+        returns (uint256[] memory, uint256[] memory);
+
 }

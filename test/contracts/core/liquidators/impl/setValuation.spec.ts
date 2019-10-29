@@ -11,7 +11,6 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   OracleWhiteListContract,
-  RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
@@ -23,10 +22,6 @@ import {
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
-import {
-  DEFAULT_GAS,
-  ZERO,
-} from '@utils/constants';
 import { ether, gWei } from '@utils/units';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
@@ -44,14 +39,11 @@ const Core = artifacts.require('Core');
 contract('SetValuation', accounts => {
   const [
     ownerAccount,
-    functionCaller,
-    whitelist,
   ] = accounts;
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let setValuationMock: SetValuationMockContract;
   let oracleWhiteList: OracleWhiteListContract;
@@ -89,8 +81,6 @@ contract('SetValuation', accounts => {
   describe('#calculateSetTokenDollarValue', async () => {
     let subjectSet: Address;
     let subjectOracle: Address;
-    let subjectUnit: BigNumber;
-    let subjectTokenDecimal: BigNumber;
 
     let component1: StandardTokenMockContract;
     let component2: StandardTokenMockContract;
@@ -152,7 +142,7 @@ contract('SetValuation', accounts => {
       );
 
       expect(result).to.bignumber.equal(expectedResult);
-    });    
+    });
   });
 
   describe('#calculateTokenAllocationAmountUSD', async () => {
@@ -198,8 +188,8 @@ contract('SetValuation', accounts => {
 
     describe('when the value is not greater than 0', async () => {
       beforeEach(async () => {
-        subjectTokenDecimal = ether(1);
-        subjectNaturalUnit = ether(1)
+        subjectTokenDecimal = new BigNumber(100);
+        subjectTokenPrice = ether(1);
       });
 
       it('should revert', async () => {

@@ -17,12 +17,7 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
-
-
-contract UpdatableOracleMock is 
-    IOracle
-{
+contract UpdatableOracleMock {
     /* ============ State Variables ============ */
     uint256 public price;
 

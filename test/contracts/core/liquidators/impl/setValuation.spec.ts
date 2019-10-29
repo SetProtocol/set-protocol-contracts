@@ -14,7 +14,7 @@ import {
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
-  SetValuationMockContract,
+  SetUSDValuationMockContract,
   TransferProxyContract,
   UpdatableOracleMockContract,
   VaultContract,
@@ -45,7 +45,7 @@ contract('SetValuation', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let setValuationMock: SetValuationMockContract;
+  let setValuationMock: SetUSDValuationMockContract;
   let oracleWhiteList: OracleWhiteListContract;
 
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
@@ -63,7 +63,7 @@ contract('SetValuation', accounts => {
     setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(core.address);
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-    setValuationMock = await libraryMockHelper.deploySetValuationMockAsync();
+    setValuationMock = await libraryMockHelper.deploySetUSDValuationMockAsync();
   });
 
   after(async () => {

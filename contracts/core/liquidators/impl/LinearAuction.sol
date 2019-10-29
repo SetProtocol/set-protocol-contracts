@@ -22,7 +22,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { Auction } from "./Auction.sol";
-import { SetValuation } from "./SetValuation.sol";
+import { SetUSDValuation } from "./SetUSDValuation.sol";
 
 
 /**
@@ -152,8 +152,8 @@ contract LinearAuction is Auction {
         view
         returns (uint256)
     {
-        uint256 currentSetUSDValue = SetValuation.calculateSetTokenDollarValue(_currentSet, oracleWhiteList);
-        uint256 nextSetUSDValue = SetValuation.calculateSetTokenDollarValue(_nextSet, oracleWhiteList);
+        uint256 currentSetUSDValue = SetUSDValuation.calculateSetTokenDollarValue(_currentSet, oracleWhiteList);
+        uint256 nextSetUSDValue = SetUSDValuation.calculateSetTokenDollarValue(_nextSet, oracleWhiteList);
 
         return nextSetUSDValue.mul(pricePrecision).div(currentSetUSDValue);
     }

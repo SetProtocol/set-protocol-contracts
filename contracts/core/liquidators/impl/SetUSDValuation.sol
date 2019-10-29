@@ -30,21 +30,24 @@ import { SetMath } from "../../lib/SetMath.sol";
 
 
 /**
- * @title SetValuation
+ * @title SetUSDValuation
  * @author Set Protocol
  *
+ * Utility functions to derive the USD value of a Set and its components
  */
-library SetValuation {
+library SetUSDValuation {
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
+
+    uint256 constant public SET_FULL_UNIT = 10 ** 18;
 
     /* ============ SetToken Valuation Helpers ============ */
 
     /*
-     * Calculates the USD Value of a Set Token
+     * Calculates the USD Value of a full unit Set Token
      *
-     * @param  _setDetails          Struct containing pertinent details of Set
-     * @param  _componentPrices     Array of prices for SetToken components
+     * @param  _set                 Instance of SetToken
+     * @param  _oracleWhiteList     Instance of oracle whitelist
      * @return uint256              The USD value of the Set (in cents)
      */
     function calculateSetTokenDollarValue(
@@ -103,7 +106,6 @@ library SetValuation {
         pure
         returns (uint256)
     {
-        uint256 SET_FULL_UNIT = 10 ** 18;
         uint256 tokenFullUnit = 10 ** _tokenDecimal;
 
         // Calculate the amount of component base units are in one full set token
@@ -120,7 +122,7 @@ library SetValuation {
 
         require(
             allocationUSDValue > 0,
-            "SetValuation.calculateTokenAllocationAmountUSD: Value must be > 0"
+            "SetUSDValuation.calculateTokenAllocationAmountUSD: Value must be > 0"
         );
 
         return allocationUSDValue;

@@ -23,6 +23,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
 
 import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
+import { SetMath } from "../../lib/SetMath.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
@@ -63,6 +64,16 @@ contract Auction {
         pricePrecision = _pricePrecision;
     }
 
+    /* ============ Auction Struct Methods ============ */
+
+    /*
+     * Sets the Auction Setup struct variables.
+     *
+     * @param _auction                      Auction Setup object
+     * @param _currentSet                   The Set to rebalance from
+     * @param _nextSet                      The Set to rebalance to
+     * @param _startingCurrentSetQuantity   Quantity of currentSet to rebalance
+     */
     function initializeAuction(
         Setup storage _auction,
         ISetToken _currentSet,
@@ -73,8 +84,7 @@ contract Auction {
     {
         uint256 minimumBid = calculateMinimumBid(_currentSet, _nextSet);
         
-        // Require remainingCurrentSets to be greater than minimumBid otherwise no bidding would
-        // be allowed
+        // remainingCurrentSets must be greater than minimumBid or no bidding would be allowed
         require(
             _startingCurrentSetQuantity >= minimumBid,
             "Auction.initializeAuction: Not enough collateral to rebalance"
@@ -85,36 +95,27 @@ contract Auction {
         _auction.remainingCurrentSets = _startingCurrentSetQuantity;
         _auction.startTime = block.timestamp;
         _auction.combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
-
-        (
-            uint256[] memory combinedCurrentSetUnits,
-            uint256[] memory combinedNextSetUnits
-        ) = calculateCombinedUnitArrays(_auction, _currentSet, _nextSet);
-        _auction.combinedCurrentSetUnits = combinedCurrentSetUnits;
-        _auction.combinedNextSetUnits = combinedNextSetUnits;
+        _auction.combinedCurrentSetUnits = calculateCombinedUnitArray(_auction, _currentSet);
+        _auction.combinedNextSetUnits = calculateCombinedUnitArray(_auction, _nextSet);
     }
 
-    function reduceRemainingCurrentSets(
-        Setup storage _auction,
-        uint256 _quantity
-    )
-        internal
-    {
+    /*
+     * Sets the Auction Setup struct variables.
+     *
+     * @param _auction          Auction Setup object
+     * @param _quantity         Quantity to reduce
+     */
+    function reduceRemainingCurrentSets(Setup storage _auction, uint256 _quantity) internal {
         _auction.remainingCurrentSets = _auction.remainingCurrentSets.sub(_quantity);
     }
 
     /*
      * Validate bid quantity
      *
-     * @param _quantity               Amount of currentSets bidder is seeking to rebalance
+     * @param _auction          Auction Setup object
+     * @param _quantity         Amount of currentSets bidder is seeking to rebalance
      */
-    function validateBidQuantity(
-        Setup storage _auction,
-        uint256 _quantity
-    )
-        internal
-        view
-    {
+    function validateBidQuantity(Setup storage _auction, uint256 _quantity) internal view {
         // Make sure that bid amount is multiple of minimum bid amount
         require(
             _quantity.mod(_auction.minimumBid) == 0,
@@ -128,51 +129,14 @@ contract Auction {
         );
     }
 
-    /**
-     * Calculate the minimumBid allowed for the rebalance
-     *
-     * @return                          Minimum bid amount
-     */
-    function calculateMinimumBid(
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 currentSetNaturalUnit = _currentSet.naturalUnit();
-        uint256 nextNaturalUnit = _nextSet.naturalUnit();
-        
-        return Math.max(
-            currentSetNaturalUnit.mul(pricePrecision),
-            nextNaturalUnit.mul(pricePrecision)
-        );
-    }
-
-
-    /* ============ Bid Price Helpers ============ */
-
-    function getCombinedTokenArray(
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        internal
-        view
-        returns(address[] memory)
-    {
-        address[] memory currentSetComponents = _currentSet.getComponents();
-        address[] memory nextSetComponents = _nextSet.getComponents();
-        return currentSetComponents.union(nextSetComponents);
-    }
-
     /*
      * Creates arrays of token inflows and outflows
      *
+     * @param _auction                Auction Setup object
      * @param _quantity               Amount of currentSets bidder is seeking to rebalance
      * @param _priceNumerator         The numerator of the price ratio
      * @param _priceDivisor           The denominator of the price ratio
-     * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
+     * @return combinedTokenArray     Array of tokens
      * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
      * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
      */
@@ -213,6 +177,47 @@ contract Auction {
         }
 
         return (memCombinedTokenArray, inflowUnitArray, outflowUnitArray);
+    }
+
+    /**
+     * Calculate the minimumBid allowed for the rebalance
+     *
+     * @param _currentSet               The Set to rebalance from
+     * @param _nextSet                  The Set to rebalance to
+     * @return                          Minimum bid amount
+     */
+    function calculateMinimumBid(
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 currentSetNaturalUnit = _currentSet.naturalUnit();
+        uint256 nextNaturalUnit = _nextSet.naturalUnit();
+        return Math.max(currentSetNaturalUnit, nextNaturalUnit)
+            .mul(pricePrecision);
+    }
+
+    /**
+     * Computes the union of the currentSet and nextSet components
+     *
+     * @param _currentSet               The Set to rebalance from
+     * @param _nextSet                  The Set to rebalance to
+     * @return                          Aggregated components array
+     */
+    function getCombinedTokenArray(
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+        returns(address[] memory)
+    {
+        address[] memory currentSetComponents = _currentSet.getComponents();
+        address[] memory nextSetComponents = _nextSet.getComponents();
+        return currentSetComponents.union(nextSetComponents);
     }
 
     /*
@@ -292,52 +297,35 @@ contract Auction {
     /* ============ Token Array Creation Helpers ============ */
 
     /**
-     * Create arrays that represents all components in currentSet and nextSet.
+     * Create uint256 arrays that represents all components in currentSet and nextSet.
      * Calcualate unit difference between both sets relative to the largest natural
      * unit of the two sets.
      *
-     * @param _currentSet               Information on currentSet
-     * @param _nextSet                  Information on nextSet
-     * @return combinedCurrentSetUnits  
-     * @return combinedNextSetUnits     
+     * @param _auction           Auction Setup object
+     * @param _set               The Set to generate units for
+     * @return combinedUnits     
      */
-    function calculateCombinedUnitArrays(
+    function calculateCombinedUnitArray(
         Setup storage _auction,
-        ISetToken _currentSet,
-        ISetToken _nextSet
+        ISetToken _set
     )
         internal
         view
-        returns (uint256[] memory, uint256[] memory)
+        returns (uint256[] memory)
     {
-        uint256 minimumBid = _auction.minimumBid;
         address[] memory combinedTokenArray = _auction.combinedTokenArray;
-
-        // Create memory version of combinedNextSetUnits and combinedCurrentUnits to only make one
-        // call to storage once arrays have been created
-        uint256[] memory memoryCombinedCurrentSetUnits = new uint256[](combinedTokenArray.length);
-        uint256[] memory memoryCombinedNextSetUnits = new uint256[](combinedTokenArray.length);
-
-
+        uint256[] memory combinedUnits = new uint256[](combinedTokenArray.length);
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
-            memoryCombinedCurrentSetUnits[i] = calculateCombinedUnit(
-                _currentSet,
-                minimumBid,
-                pricePrecision,
-                combinedTokenArray[i]
-            );
-
-            memoryCombinedNextSetUnits[i] = calculateCombinedUnit(
-                _nextSet,
-                minimumBid,
+            combinedUnits[i] = calculateCombinedUnit(
+                _set,
+                _auction.minimumBid,
                 pricePrecision,
                 combinedTokenArray[i]
             );
         }
 
-        return (memoryCombinedCurrentSetUnits, memoryCombinedNextSetUnits);
+        return combinedUnits;
     }
-
 
     /**
      * Calculations the unit amount of Token to include in the the combined Set units.
@@ -396,6 +384,7 @@ contract Auction {
         pure
         returns (uint256)
     {
-        return _minimumBid.mul(_unit).div(_naturalUnit).div(_pricePrecision);
+        return SetMath.setToComponent(_minimumBid, _unit, _naturalUnit)
+            .div(_pricePrecision);
     }
 }

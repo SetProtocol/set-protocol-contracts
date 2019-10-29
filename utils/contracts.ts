@@ -56,7 +56,7 @@ export { SetTokenContract } from '../types/generated/set_token';
 export { SetTokenFactoryContract } from '../types/generated/set_token_factory';
 export { SetTokenLibraryContract } from '../types/generated/set_token_library';
 export { SetTokenLibraryMockContract } from '../types/generated/set_token_library_mock';
-export { SetValuationMockContract } from '../types/generated/set_valuation_mock';
+export { SetUSDValuationMockContract } from '../types/generated/set_u_s_d_valuation_mock';
 export { StandardTokenMockContract } from '../types/generated/standard_token_mock';
 export { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
 export { StartRebalanceLibraryContract } from '../types/generated/start_rebalance_library';

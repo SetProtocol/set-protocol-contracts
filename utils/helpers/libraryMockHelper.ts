@@ -12,7 +12,7 @@ import {
   RebalancingSetIssuanceMockContract,
   SetMathMockContract,
   SetTokenLibraryMockContract,
-  SetValuationMockContract,
+  SetUSDValuationMockContract,
   TransferProxyContract,
   TokenFlushMockContract,
   UpdatableOracleMockContract,
@@ -38,7 +38,7 @@ const RebalancingSetIssuanceMock = artifacts.require('RebalancingSetIssuanceMock
 const SetMathMock = artifacts.require('SetMathMock');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
 const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
-const SetValuationMock = artifacts.require('SetValuationMock');
+const SetUSDValuationMock = artifacts.require('SetUSDValuationMock');
 const TokenFlushMock = artifacts.require('TokenFlushMock');
 const UpdatableOracleMock = artifacts.require('UpdatableOracleMock');
 const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
@@ -219,12 +219,12 @@ export class LibraryMockHelper {
     );
   }
 
-  public async deploySetValuationMockAsync(
+  public async deploySetUSDValuationMockAsync(
     from: Address = this._contractOwnerAddress
-  ): Promise<SetValuationMockContract> {
-    const setValuationMockContract = await SetValuationMock.new({ from });
+  ): Promise<SetUSDValuationMockContract> {
+    const setValuationMockContract = await SetUSDValuationMock.new({ from });
 
-    return new SetValuationMockContract(
+    return new SetUSDValuationMockContract(
       getContractInstance(setValuationMockContract),
       { from },
     );

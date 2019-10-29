@@ -1,10 +1,10 @@
 pragma solidity 0.5.7;
 
-import { SetValuation } from "../../../../core/liquidators/impl/SetValuation.sol";
+import { SetUSDValuation } from "../../../../core/liquidators/impl/SetUSDValuation.sol";
 import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";
 import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.sol";
 
-contract SetValuationMock {
+contract SetUSDValuationMock {
 
     function calculateSetTokenDollarValue(
         ISetToken _set,
@@ -13,7 +13,7 @@ contract SetValuationMock {
         external
         returns(uint256)
     {
-        return SetValuation.calculateSetTokenDollarValue(_set, _oracleWhitelist);
+        return SetUSDValuation.calculateSetTokenDollarValue(_set, _oracleWhitelist);
     }
 
     function calculateTokenAllocationAmountUSD(
@@ -25,7 +25,7 @@ contract SetValuationMock {
         external
         returns(uint256)
     {
-        return SetValuation.calculateTokenAllocationAmountUSD(
+        return SetUSDValuation.calculateTokenAllocationAmountUSD(
             _tokenPrice,
             _naturalUnit,
             _unit,

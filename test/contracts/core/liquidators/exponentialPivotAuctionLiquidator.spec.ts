@@ -549,6 +549,33 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         return liquidatorProxy.getBidPrice.callAsync(subjectSet, subjectQuantity);
       }
 
+      async function setTokenFlows(): Promise<void> {
+        const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectCaller));
+        const { timestamp } = await web3.eth.getBlock('latest');
+
+        const currentPrice = await liquidatorHelper.calculateExponentialPivotNumerator(
+          linearAuction,
+          new BigNumber(timestamp),
+          auctionPeriod,
+          pricePrecision,
+        );
+
+        const currentDenominator = await liquidatorHelper.calculateExponentialPivotDenominator(
+          linearAuction,
+          new BigNumber(timestamp),
+          auctionPeriod,
+          pricePrecision,
+        );
+
+        tokenFlows = liquidatorHelper.constructTokenFlows(
+          linearAuction,
+          pricePrecision,
+          subjectQuantity,
+          currentPrice,
+          currentDenominator,
+        );
+      }
+
       it('returns the token array', async () => {
         const [result] = await subject();
         expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.addresses));
@@ -574,30 +601,37 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
             { from: ownerAccount, gas: DEFAULT_GAS },
           );
 
-          const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectCaller));
-          const { timestamp } = await web3.eth.getBlock('latest');
+          await setTokenFlows();
+        });
 
-          const currentPrice = await liquidatorHelper.calculateExponentialPivotNumerator(
-            linearAuction,
-            new BigNumber(timestamp),
-            auctionPeriod,
-            pricePrecision,
+        it('returns the token array', async () => {
+          const [result] = await subject();
+          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.addresses));
+        });
+
+        it('returns the correct inflow', async () => {
+          const [, result] = await subject();
+          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.inflow));
+        });
+
+        it('returns the correct outflow', async () => {
+          const [, , result] = await subject();
+          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
+        });
+      });
+
+      describe('after the max 30 second period', async () => {
+        beforeEach(async () => {
+          const max30seconds = new BigNumber(30 * 1000).plus(1);
+          await blockchain.increaseTimeAsync(auctionPeriod.plus(max30seconds));
+
+          // Advance the block
+          await core.addSet.sendTransactionAsync(
+            whitelist,
+            { from: ownerAccount, gas: DEFAULT_GAS },
           );
 
-          const currentDenominator = await liquidatorHelper.calculateExponentialPivotDenominator(
-            linearAuction,
-            new BigNumber(timestamp),
-            auctionPeriod,
-            pricePrecision,
-          );
-
-          tokenFlows = liquidatorHelper.constructTokenFlows(
-            linearAuction,
-            pricePrecision,
-            subjectQuantity,
-            currentPrice,
-            currentDenominator,
-          );
+          await setTokenFlows();
         });
 
         it('returns the token array', async () => {

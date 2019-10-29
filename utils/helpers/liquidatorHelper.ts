@@ -211,7 +211,7 @@ export class LiquidatorHelper {
     } else if (thirtySecondPeriods.lt(MAX_THIRTY_SECOND_PERIODS)) {
       return endPrice;
     } else {
-      const extension = endPrice.mul(thirtySecondPeriods).sub(MAX_THIRTY_SECOND_PERIODS);
+      const extension = endPrice.mul(thirtySecondPeriods.sub(MAX_THIRTY_SECOND_PERIODS));
       return endPrice.add(extension);
     }
   }

@@ -719,5 +719,79 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         });
       });
     });
+
+    describe('#hasRebalanceFailed', async () => {
+      let subjectSet: Address;
+
+      beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+      });
+
+      async function subject(): Promise<boolean> {
+        return liquidator.hasRebalanceFailed.callAsync(subjectSet);
+      }
+
+      it('should return the correct value', async () => {
+        const result = await subject();
+        expect(result).to.equal(false);
+      });
+    });
+
+    describe('#getCombinedTokenArray', async () => {
+      let subjectSet: Address;
+
+      beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+      });
+
+      async function subject(): Promise<Address[]> {
+        return liquidator.getCombinedTokenArray.callAsync(subjectSet);
+      }
+
+      it('should return the correct value', async () => {
+        const result = await subject();
+
+        const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectSet));
+        expect(JSON.stringify(result)).to.equal(JSON.stringify(linearAuction.auction.combinedTokenArray));
+      });
+    });
+
+    describe('#getCombinedCurrentSetUnits', async () => {
+      let subjectSet: Address;
+
+      beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+      });
+
+      async function subject(): Promise<BigNumber[]> {
+        return liquidator.getCombinedCurrentSetUnits.callAsync(subjectSet);
+      }
+
+      it('should return the correct value', async () => {
+        const result = await subject();
+
+        const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectSet));
+        expect(JSON.stringify(result)).to.equal(JSON.stringify(linearAuction.auction.combinedCurrentSetUnits));
+      });
+    });
+
+    describe('#getCombinedNextSetUnits', async () => {
+      let subjectSet: Address;
+
+      beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+      });
+
+      async function subject(): Promise<BigNumber[]> {
+        return liquidator.getCombinedNextSetUnits.callAsync(subjectSet);
+      }
+
+      it('should return the correct value', async () => {
+        const result = await subject();
+
+        const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectSet));
+        expect(JSON.stringify(result)).to.equal(JSON.stringify(linearAuction.auction.combinedNextSetUnits));
+      });
+    });
   });
 });

@@ -129,7 +129,7 @@ contract FailRebalance is
         view
         returns (bool)
     {
-        return liquidator.hasRebalanceFailed(msg.sender);
+        return liquidator.hasRebalanceFailed(address(this));
     }
 
     /*

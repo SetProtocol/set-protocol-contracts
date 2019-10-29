@@ -12,7 +12,6 @@ import {
   CoreMockContract,
   LiquidatorProxyContract,
   OracleWhiteListContract,
-  RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
@@ -30,7 +29,7 @@ import {
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
-import { LinearAuction, getLinearAuction, TokenFlows } from '@utils/auction';
+import { getLinearAuction, TokenFlows } from '@utils/auction';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
@@ -56,7 +55,6 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
   let core: CoreMockContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let liquidator: ExponentialPivotAuctionLiquidatorContract;
   let liquidatorProxy: LiquidatorProxyContract;
@@ -193,12 +191,12 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
     it('sets the correct pricePrecision', async () => {
       const result = await liquidator.pricePrecision.callAsync();
       expect(result).to.bignumber.equal(pricePrecision);
-    }); 
+    });
 
     it('sets the correct pricePrecision', async () => {
       const result = await liquidator.pricePrecision.callAsync();
       expect(result).to.bignumber.equal(pricePrecision);
-    }); 
+    });
 
     it('sets the correct auctionPeriod', async () => {
       const result = await liquidator.auctionPeriod.callAsync();
@@ -225,13 +223,11 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
     let subjectCaller: Address;
     let subjectCurrentSet: Address;
     let subjectNextSet: Address;
-    let subjectStartingCurrentSetQuantity: BigNumber;
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
       subjectCurrentSet = set1.address;
       subjectNextSet = set2.address;
-      subjectStartingCurrentSetQuantity = ether(10);
     });
 
     after(async () => {
@@ -382,20 +378,28 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
       expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
     });
+
+    describe('when the caller is not a valid Set', async () => {
+      beforeEach(async () => {
+        subjectCaller = nonSet;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
-  describe.only('[CONTEXT] Initialized auction', async () => {
+  describe('[CONTEXT] Initialized auction', async () => {
     let subjectCaller: Address;
 
-    let currentSet: Address;
-    let nextSet: Address;
     let startingCurrentSetQuantity: BigNumber;
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
       startingCurrentSetQuantity = ether(10);
 
-      await liquidator.startRebalance.sendTransactionAsync(
+      await liquidatorProxy.startRebalance.sendTransactionAsync(
         set1.address,
         set2.address,
         startingCurrentSetQuantity,
@@ -403,33 +407,40 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       );
     });
 
-    describe.only('#placeBid', async () => {
+    describe('#placeBid', async () => {
       let subjectQuantity: BigNumber;
       let tokenFlows: TokenFlows;
 
       beforeEach(async () => {
         subjectQuantity = ether(5);
-
-        // const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectCaller));
-        // const { timestamp } = await web3.eth.getBlock('latest');
-
-        // const currentPrice = await liquidatorHelper.calculateCurrentPrice(
-        //   linearAuction,
-        //   new BigNumber(timestamp),
-        //   auctionPeriod,
-        // );
-
-        // tokenFlows = liquidatorHelper.constructTokenFlows(
-        //   linearAuction,
-        //   pricePrecision,
-        //   subjectQuantity,
-        //   currentPrice,
-        //   pricePrecision,
-        // );
       });
 
       async function subject(): Promise<string> {
+        const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(liquidatorProxy.address));
+        const { timestamp } = await web3.eth.getBlock('latest');
+
+        const currentPrice = await liquidatorHelper.calculateCurrentPrice(
+          linearAuction,
+          new BigNumber(timestamp),
+          auctionPeriod,
+        );
+
+        tokenFlows = liquidatorHelper.constructTokenFlows(
+          linearAuction,
+          pricePrecision,
+          subjectQuantity,
+          currentPrice,
+          pricePrecision,
+        );
+
         return liquidatorProxy.placeBid.sendTransactionAsync(
+          subjectQuantity,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      async function directCallSubject(): Promise<string> {
+        return liquidator.placeBid.sendTransactionAsync(
           subjectQuantity,
           { from: subjectCaller, gas: DEFAULT_GAS },
         );
@@ -438,7 +449,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       it('calculates the correct new remainingCurrentSets', async () => {
         await subject();
 
-        const auction: any = await liquidator.auctions.callAsync(subjectCaller);
+        const auction: any = await liquidator.auctions.callAsync(liquidatorProxy.address);
         const expectedRemainingCurrentSets = startingCurrentSetQuantity.sub(subjectQuantity);
         expect(auction.auction.remainingCurrentSets).to.bignumber.equal(expectedRemainingCurrentSets);
       });
@@ -485,6 +496,16 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
         it('should revert', async () => {
           await expectRevertError(subject());
+        });
+      });
+
+      describe('when the caller is not a valid Set', async () => {
+        beforeEach(async () => {
+          subjectCaller = nonSet;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(directCallSubject());
         });
       });
     });
@@ -539,25 +560,164 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       });
 
       it('returns the correct outflow', async () => {
-        const [,, result] = await subject();
+        const [, , result] = await subject();
         expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
+      });
+
+      describe('after the pivot time', async () => {
+        beforeEach(async () => {
+          await blockchain.increaseTimeAsync(auctionPeriod.plus(90));
+
+          // Advance the block
+          await core.addSet.sendTransactionAsync(
+            whitelist,
+            { from: ownerAccount, gas: DEFAULT_GAS },
+          );
+
+          const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectCaller));
+          const { timestamp } = await web3.eth.getBlock('latest');
+
+          const currentPrice = await liquidatorHelper.calculateExponentialPivotNumerator(
+            linearAuction,
+            new BigNumber(timestamp),
+            auctionPeriod,
+            pricePrecision,
+          );
+
+          const currentDenominator = await liquidatorHelper.calculateExponentialPivotDenominator(
+            linearAuction,
+            new BigNumber(timestamp),
+            auctionPeriod,
+            pricePrecision,
+          );
+
+          tokenFlows = liquidatorHelper.constructTokenFlows(
+            linearAuction,
+            pricePrecision,
+            subjectQuantity,
+            currentPrice,
+            currentDenominator,
+          );
+        });
+
+        it('returns the token array', async () => {
+          const [result] = await subject();
+          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.addresses));
+        });
+
+        it('returns the correct inflow', async () => {
+          const [, result] = await subject();
+          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.inflow));
+        });
+
+        it('returns the correct outflow', async () => {
+          const [, , result] = await subject();
+          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
+        });
       });
     });
 
-    describe('[CONTEXT] with bid', async () => {
+    describe('#settleRebalance', async () => {
       let bidQuantity: BigNumber;
+      let customBidQuantity: BigNumber;
 
-      // beforeEach(async () => {
-      //   bidQuantity = startingCurrentSetQuantity;
 
-      //   await liquidator.placeBid.sendTransactionAsync(
-      //     set1.address,
-      //     set2.address,
-      //     startingCurrentSetQuantity,
-      //     { from: subjectCaller, gas: DEFAULT_GAS },
-      //   );
-      // });
+      beforeEach(async () => {
+        bidQuantity = customBidQuantity || startingCurrentSetQuantity;
+
+        return liquidatorProxy.placeBid.sendTransactionAsync(
+          bidQuantity,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      });
+
+      async function subject(): Promise<string> {
+        return liquidatorProxy.settleRebalance.sendTransactionAsync(
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      async function directCallSubject(): Promise<string> {
+        return liquidator.settleRebalance.sendTransactionAsync(
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      it('clears the auction state', async () => {
+        await subject();
+
+        const auction: any = await liquidator.auctions.callAsync(subjectCaller);
+        expect(auction.auction.minimumBid).to.bignumber.equal(ZERO);
+        expect(auction.auction.startTime).to.bignumber.equal(ZERO);
+        expect(auction.auction.startingCurrentSets).to.bignumber.equal(ZERO);
+        expect(auction.auction.remainingCurrentSets).to.bignumber.equal(ZERO);
+        expect(JSON.stringify(auction.auction.combinedTokenArray)).to.equal(JSON.stringify([]));
+        expect(JSON.stringify(auction.auction.combinedCurrentSetUnits)).to.equal(JSON.stringify([]));
+        expect(JSON.stringify(auction.auction.combinedNextSetUnits)).to.equal(JSON.stringify([]));
+        expect(auction.endTime).to.bignumber.equal(ZERO);
+        expect(auction.startPrice).to.bignumber.equal(ZERO);
+        expect(auction.endPrice).to.bignumber.equal(ZERO);
+      });
+
+      describe('when there is a biddable quantity', async () => {
+        before(async () => {
+          customBidQuantity = ether(5);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when the caller is not a valid Set', async () => {
+        beforeEach(async () => {
+          subjectCaller = nonSet;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(directCallSubject());
+        });
+      });
+    });
+
+    describe('#endFailedRebalance', async () => {
+      async function subject(): Promise<string> {
+        return liquidatorProxy.endFailedRebalance.sendTransactionAsync(
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      async function directCallSubject(): Promise<string> {
+        return liquidator.endFailedRebalance.sendTransactionAsync(
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      it('clears the auction state', async () => {
+        await subject();
+
+        const auction: any = await liquidator.auctions.callAsync(subjectCaller);
+        expect(auction.auction.minimumBid).to.bignumber.equal(ZERO);
+        expect(auction.auction.startTime).to.bignumber.equal(ZERO);
+        expect(auction.auction.startingCurrentSets).to.bignumber.equal(ZERO);
+        expect(auction.auction.remainingCurrentSets).to.bignumber.equal(ZERO);
+        expect(JSON.stringify(auction.auction.combinedTokenArray)).to.equal(JSON.stringify([]));
+        expect(JSON.stringify(auction.auction.combinedCurrentSetUnits)).to.equal(JSON.stringify([]));
+        expect(JSON.stringify(auction.auction.combinedNextSetUnits)).to.equal(JSON.stringify([]));
+        expect(auction.endTime).to.bignumber.equal(ZERO);
+        expect(auction.startPrice).to.bignumber.equal(ZERO);
+        expect(auction.endPrice).to.bignumber.equal(ZERO);
+      });
+
+      describe('when the caller is not a valid Set', async () => {
+        beforeEach(async () => {
+          subjectCaller = nonSet;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(directCallSubject());
+        });
+      });
     });
   });
-
 });

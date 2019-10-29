@@ -226,15 +226,15 @@ export class LiquidatorHelper {
     const THIRTY_SECONDS = new BigNumber(30);
 
     const elapsed = timestamp.sub(linearAuction.auction.startTime);
-    const thirtySecondPeriods = elapsed.sub(auctionPeriod).div(THIRTY_SECONDS);
+    const thirtySecondPeriods = elapsed.sub(auctionPeriod).div(THIRTY_SECONDS).round(0, 3);
 
     if (elapsed.lte(auctionPeriod)) {
       return pricePrecision;
     } else if (thirtySecondPeriods.lt(MAX_THIRTY_SECOND_PERIODS)) {
       return pricePrecision
-              .sub(thirtySecondPeriods)
-              .mul(pricePrecision)
-              .div(MAX_THIRTY_SECOND_PERIODS);
+              .sub(
+                thirtySecondPeriods.mul(pricePrecision).div(MAX_THIRTY_SECOND_PERIODS)
+              );
     } else {
       return new BigNumber(1);
     }
@@ -353,14 +353,12 @@ export class LiquidatorHelper {
     const outflow: BigNumber[] = [];
 
     // Calculate the inflows and outflow arrays;
-    const { 
+    const {
       combinedTokenArray,
       combinedCurrentSetUnits,
       combinedNextSetUnits,
       minimumBid,
-    } = linearAuction.auction; 
-    // const coefficient = minimumBid.div(pricePrecision);
-    // const effectiveQuantity = quantity.div(priceNumerator);
+    } = linearAuction.auction;
 
     const unitsMultiplier = quantity.div(minimumBid).round(0, 3).mul(pricePrecision);
 

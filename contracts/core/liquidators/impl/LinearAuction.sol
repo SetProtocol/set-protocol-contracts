@@ -24,6 +24,7 @@ import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { Auction } from "./Auction.sol";
 import { SetValuation } from "./SetValuation.sol";
 
+
 /**
  * @title LinearAuction
  * @author Set Protocol

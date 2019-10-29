@@ -63,30 +63,19 @@ interface ILiquidator {
     function settleRebalance()
         external;
 
-    function hasRebalanceFailed()
-        external
-        view
-        returns (bool);        
+    function hasRebalanceFailed(address _set) external view returns (bool);        
 
     function endFailedRebalance() external;
 
     /* ============ Backwards Compatability Getters ============ */
 
-    function auctionLibrary(
-        address _set
-    )
-        external
-        view
-        returns (address);
+    function auctionLibrary(address _set) external view returns (address);
 
     // ----------------------------------------------------------------------
     // Auction Price Parameters
     // ----------------------------------------------------------------------
 
-    function getAuctionPriceParameters(address _set)
-        external
-        view
-        returns (uint256[] memory);
+    function getAuctionPriceParameters(address _set) external view returns (uint256[] memory);
 
     function auctionPriceParameters(address _set)
         external

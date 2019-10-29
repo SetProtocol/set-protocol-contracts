@@ -151,7 +151,7 @@ contract LiquidatorMock is
         hasSettled = true;
     }
 
-    function hasRebalanceFailed() external view returns (bool) {
+    function hasRebalanceFailed(address _set) external view returns (bool) {
         return hasFailed;
     }
 

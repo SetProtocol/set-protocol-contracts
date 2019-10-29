@@ -109,7 +109,7 @@ contract ExponentialPivotAuctionLiquidator is
         external
         isValidSet
     {
-        initializeLinearAuction(
+        LinearAuction.initializeLinearAuction(
             auctions[msg.sender],
             _currentSet,
             _nextSet,
@@ -124,9 +124,9 @@ contract ExponentialPivotAuctionLiquidator is
         isValidSet
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        validateBidQuantity(auctions[msg.sender], _quantity);
+        LinearAuction.validateBidQuantity(auctions[msg.sender], _quantity);
 
-        reduceRemainingCurrentSets(auctions[msg.sender], _quantity);
+        LinearAuction.reduceRemainingCurrentSets(auctions[msg.sender], _quantity);
 
         return getBidPrice(msg.sender, _quantity);
     }
@@ -141,14 +141,14 @@ contract ExponentialPivotAuctionLiquidator is
     {
         // Validate auction has started
 
-        return getPricedTokenFlows(auctions[_set], _quantity);
+        return LinearAuction.getPricedTokenFlows(auctions[_set], _quantity);
     }
 
     function settleRebalance()
         external
         isValidSet
     {
-        validateAuctionCompletion(auctions[msg.sender]);
+        LinearAuction.validateAuctionCompletion(auctions[msg.sender]);
 
         clearAuctionState(msg.sender);
     }
@@ -160,13 +160,8 @@ contract ExponentialPivotAuctionLiquidator is
         clearAuctionState(msg.sender);
     }
 
-    function hasRebalanceFailed()
-        external
-        view
-        isValidSet
-        returns (bool)    
-    {
-        return hasAuctionFailed(auctions[msg.sender]);
+    function hasRebalanceFailed(address _set) external view returns (bool) {
+        return LinearAuction.hasAuctionFailed(auctions[_set]);
     }
 
     /* ============ Getters Functions ============ */

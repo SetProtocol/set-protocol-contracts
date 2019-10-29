@@ -18,6 +18,7 @@ pragma solidity 0.5.7;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+
 /**
  * @title SetMath
  * @author Set Protocol

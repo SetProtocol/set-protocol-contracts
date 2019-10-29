@@ -1,6 +1,7 @@
 pragma solidity 0.5.7;
 
 import { ILiquidator } from "../../../core/interfaces/ILiquidator.sol";
+import { ISetToken } from "../../../core/interfaces/ISetToken.sol";
 
 // Mock contract implementation of Auction with extra functions for testing
 contract LiquidatorProxy {
@@ -16,6 +17,28 @@ contract LiquidatorProxy {
         public
     {
         liquidator = _liquidator;
+    }
+
+    function startRebalance(
+        ISetToken _currentSet,
+        ISetToken _nextSet,
+        uint256 _startingCurrentSetQuantity
+    )
+        external
+    {
+        liquidator.startRebalance(
+            _currentSet,
+            _nextSet,
+            _startingCurrentSetQuantity
+        );
+    }
+
+    function settleRebalance() external {
+        liquidator.settleRebalance();
+    }
+
+    function endFailedRebalance() external {
+        liquidator.endFailedRebalance();
     }
 
     function placeBid(

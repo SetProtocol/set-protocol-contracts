@@ -298,6 +298,8 @@ contract Auction {
      *
      * @param _currentSet               Information on currentSet
      * @param _nextSet                  Information on nextSet
+     * @return combinedCurrentSetUnits  
+     * @return combinedNextSetUnits     
      */
     function calculateCombinedUnitArrays(
         Setup storage _auction,
@@ -306,7 +308,7 @@ contract Auction {
     )
         internal
         view
-        returns (uint256[] memory combinedCurrentSetUnits, uint256[] memory combinedNextSetUnits)
+        returns (uint256[] memory, uint256[] memory)
     {
         uint256 minimumBid = _auction.minimumBid;
         address[] memory combinedTokenArray = _auction.combinedTokenArray;

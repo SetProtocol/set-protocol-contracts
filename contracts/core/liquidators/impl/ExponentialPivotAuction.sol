@@ -22,6 +22,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { LinearAuction } from "./LinearAuction.sol";
 
+
 /**
  * @title ExponentialPivotAuction
  * @author Set Protocol

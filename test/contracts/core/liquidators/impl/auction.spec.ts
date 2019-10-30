@@ -10,7 +10,6 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
@@ -23,7 +22,6 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
-  ZERO,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
 
@@ -43,13 +41,11 @@ contract('Auction', accounts => {
   const [
     ownerAccount,
     functionCaller,
-    whitelist,
   ] = accounts;
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let auctionMock: AuctionMockContract;
 
@@ -137,7 +133,7 @@ contract('Auction', accounts => {
       const pricePrecision = await auctionMock.pricePrecision.callAsync();
       const defaultPricePrecision = await auctionMock.defaultPricePrecision.callAsync();
       expect(pricePrecision).to.bignumber.equal(defaultPricePrecision);
-    });    
+    });
   });
 
   describe('#initializeAuction', async () => {
@@ -215,7 +211,7 @@ contract('Auction', accounts => {
 
       const combinedTokenArray = await auctionMock.combinedTokenArray.callAsync();
       const auctionSetup: any = await auctionMock.auction.callAsync();
-      const pricePrecision = await auctionMock.pricePrecision.callAsync();      
+      const pricePrecision = await auctionMock.pricePrecision.callAsync();
 
       const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
         set1,
@@ -233,7 +229,7 @@ contract('Auction', accounts => {
       const combinedNextSetUnits = await auctionMock.combinedNextSetUnits.callAsync();
       const combinedTokenArray = await auctionMock.combinedTokenArray.callAsync();
       const auctionSetup: any = await auctionMock.auction.callAsync();
-      const pricePrecision = await auctionMock.pricePrecision.callAsync();      
+      const pricePrecision = await auctionMock.pricePrecision.callAsync();
 
       const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
         set2,
@@ -259,8 +255,6 @@ contract('Auction', accounts => {
   describe('#reduceRemainingCurrentSets', async () => {
     let subjectCaller: Address;
 
-    let currentSet: Address;
-    let nextSet: Address;
     let startingCurrentSetQuantity: BigNumber;
 
     let subjectReductionQuantity: BigNumber;
@@ -298,8 +292,6 @@ contract('Auction', accounts => {
   describe('#validateBidQuantity', async () => {
     let subjectCaller: Address;
 
-    let currentSet: Address;
-    let nextSet: Address;
     let startingCurrentSetQuantity: BigNumber;
 
     let subjectQuantity: BigNumber;
@@ -346,6 +338,56 @@ contract('Auction', accounts => {
     describe('when the quantity is more than the remainingCurrentsets', async () => {
       beforeEach(async () => {
         subjectQuantity = startingCurrentSetQuantity.plus(ether(1));
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#validateAuctionCompletion', async () => {
+    let subjectCaller: Address;
+
+    let startingCurrentSetQuantity: BigNumber;
+    let reductionQuantity: BigNumber;
+    let customReductionQuantity: BigNumber;
+
+    beforeEach(async () => {
+      subjectCaller = functionCaller;
+      startingCurrentSetQuantity = ether(10);
+
+      await auctionMock.initializeAuction.sendTransactionAsync(
+        set1.address,
+        set2.address,
+        startingCurrentSetQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+
+      reductionQuantity = customReductionQuantity || startingCurrentSetQuantity;
+      await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
+        reductionQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return auctionMock.validateAuctionCompletion.sendTransactionAsync(
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+    }
+
+    it('should not revert', async () => {
+      await subject();
+    });
+
+    describe('when the auction is not complete', async () => {
+      before(async () => {
+        customReductionQuantity = startingCurrentSetQuantity.div(2);
+      });
+
+      after(async () => {
+        customReductionQuantity = undefined;
       });
 
       it('should revert', async () => {

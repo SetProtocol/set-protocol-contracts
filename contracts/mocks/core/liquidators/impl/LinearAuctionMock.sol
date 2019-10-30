@@ -46,16 +46,12 @@ contract LinearAuctionMock is LinearAuction {
         super.initializeLinearAuction(auction, _currentSet, _nextSet, _startingCurrentSetQuantity);
     }
 
-    function validateBidQuantity(uint256 _quantity) external {
-        super.validateBidQuantity(auction, _quantity);
-    }
-
-    function reduceRemainingCurrentSets(uint256 _quantity) external {
-        super.reduceRemainingCurrentSets(auction, _quantity);
-    }
-
-    function validateAuctionCompletion() external {
-        super.validateAuctionCompletion(auction);
+    function reduceRemainingCurrentSets(
+        uint256 _quantity
+    )
+        external
+    {
+        super.reduceRemainingCurrentSets(auction.auction, _quantity);
     }
 
     function hasAuctionFailed() external view returns(bool) {

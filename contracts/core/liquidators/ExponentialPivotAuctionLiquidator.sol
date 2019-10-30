@@ -90,7 +90,7 @@ contract ExponentialPivotAuctionLiquidator is
         external
         isValidSet
     {
-        validateSets(auctions[msg.sender], _currentSet, _nextSet);
+        validateSets(linearAuction(msg.sender), _currentSet, _nextSet);
 
         // Check that prices are valid?
     }
@@ -112,7 +112,7 @@ contract ExponentialPivotAuctionLiquidator is
         isValidSet
     {
         LinearAuction.initializeLinearAuction(
-            auctions[msg.sender],
+            linearAuction(msg.sender),
             _currentSet,
             _nextSet,
             _startingCurrentSetQuantity
@@ -126,9 +126,9 @@ contract ExponentialPivotAuctionLiquidator is
         isValidSet
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        LinearAuction.validateBidQuantity(auctions[msg.sender], _quantity);
+        Auction.validateBidQuantity(auction(msg.sender), _quantity);
 
-        Auction.reduceRemainingCurrentSets(auctions[msg.sender].auction, _quantity);
+        Auction.reduceRemainingCurrentSets(auction(msg.sender), _quantity);
 
         return getBidPrice(msg.sender, _quantity);
     }
@@ -145,7 +145,7 @@ contract ExponentialPivotAuctionLiquidator is
 
         // TODO figure out the API
         return Rebalance.decomposeTokenFlow(
-            LinearAuction.getPricedTokenFlow(auctions[_set], _quantity)
+            LinearAuction.getPricedTokenFlow(linearAuction(_set), _quantity)
         );
     }
 
@@ -153,7 +153,7 @@ contract ExponentialPivotAuctionLiquidator is
         external
         isValidSet
     {
-        LinearAuction.validateAuctionCompletion(auctions[msg.sender]);
+        Auction.validateAuctionCompletion(auction(msg.sender));
 
         clearAuctionState(msg.sender);
     }
@@ -166,20 +166,20 @@ contract ExponentialPivotAuctionLiquidator is
     }
 
     function hasRebalanceFailed(address _set) external view returns (bool) {
-        return LinearAuction.hasAuctionFailed(auctions[_set]);
+        return LinearAuction.hasAuctionFailed(linearAuction(_set));
     }
 
     /* ============ Getters Functions ============ */
     function getCombinedTokenArray(address _set) external view returns (address[] memory) {
-        return auctions[_set].auction.combinedTokenArray;
+        return auction(_set).combinedTokenArray;
     }
 
     function getCombinedCurrentSetUnits(address _set) external view returns (uint256[] memory) {
-        return auctions[_set].auction.combinedCurrentSetUnits;
+        return auction(_set).combinedCurrentSetUnits;
     }
 
     function getCombinedNextSetUnits(address _set) external view returns (uint256[] memory) {
-        return auctions[_set].auction.combinedNextSetUnits;
+        return auction(_set).combinedNextSetUnits;
     }
 
     /* ============ Private Functions ============ */
@@ -192,5 +192,14 @@ contract ExponentialPivotAuctionLiquidator is
             core.validSets(_sender),
             "ExponentialPivotAuctionLiquidator: Invalid or disabled proposed SetToken address"
         );       
-    } 
+    }
+
+    function auction(address _set) private view returns(Auction.Setup storage) {
+        return linearAuction(_set).auction;
+    }
+
+    function linearAuction(address _set) private view returns(LinearAuction.State storage) {
+        return auctions[_set];
+    }
+
 }

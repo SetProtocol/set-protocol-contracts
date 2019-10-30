@@ -128,56 +128,6 @@ contract LinearAuction is Auction {
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
 
-    /*
-     * Passes the Auction struct to the Auction module to validateBidQuantity.
-     *
-     * @param _linearAuction    Linear Auction State object
-     * @param _quantity         Amount of currentSets bidder is seeking to rebalance
-     */
-    function validateBidQuantity(
-        State storage _linearAuction,
-        uint256 _quantity
-    )
-        internal
-        view
-    {
-        super.validateBidQuantity(_linearAuction.auction, _quantity);
-    }
-
-    /*
-     * Passes the Auction struct to the Auction module to reduceRemainingCurrentSets.
-     *
-     * @param _linearAuction    Linear Auction State object
-     * @param _quantity         Quantity of remainingCurrentSets
-     */
-    function reduceRemainingCurrentSets(
-        State storage _linearAuction,
-        uint256 _quantity
-    )
-        internal
-    {
-        super.reduceRemainingCurrentSets(_linearAuction.auction, _quantity);
-    }
-
-    /*
-     * Returns whether the linear auction has been completed, which is when all currentSets have been
-     * rebalanced.
-     *
-     * @param _linearAuction    Linear Auction State object
-     */
-    function validateAuctionCompletion(
-        State storage _linearAuction
-    )
-        internal
-        view
-    {
-        // Make sure all currentSets have been rebalanced
-        require(
-            !hasBiddableQuantity(_linearAuction),
-            "LinearAuctionLiquidator.settleRebalance: Rebalance not completed"
-        );
-    }
-
     /* ============ Internal View Functions ============ */
 
     /**
@@ -277,18 +227,8 @@ contract LinearAuction is Auction {
      */
     function hasAuctionFailed(State storage _linearAuction) internal view returns(bool) {
         bool endTimeExceeded = block.timestamp >= _linearAuction.endTime;
-        bool setsNotAuctioned = !hasBiddableQuantity(_linearAuction);
+        bool setsNotAuctioned = !hasBiddableQuantity(_linearAuction.auction);
         return (endTimeExceeded && setsNotAuctioned);        
-    }
-
-    /**
-     * Returns whether the reminingSets is still a quantity equal or greater than the minimum bid
-     *
-     * @param _linearAuction            Linear Auction State object
-     * @return hasBiddableQuantity      Boolean whether there is a biddable quantity
-     */
-    function hasBiddableQuantity(State storage _linearAuction) internal view returns(bool) {
-        return _linearAuction.auction.remainingCurrentSets >= _linearAuction.auction.minimumBid;
     }
 
     /**

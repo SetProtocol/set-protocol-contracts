@@ -132,6 +132,35 @@ contract Auction {
     }
 
     /*
+     * Returns whether the auction has been completed, which is when all currentSets have been
+     * rebalanced.
+     *
+     * @param _auction                Auction Setup object
+     */
+    function validateAuctionCompletion(
+        Setup storage _auction
+    )
+        internal
+        view
+    {
+        // Make sure all currentSets have been rebalanced
+        require(
+            !hasBiddableQuantity(_auction),
+            "Auction.settleRebalance: Rebalance not completed"
+        );
+    }
+
+    /**
+     * Returns whether the reminingSets is still a quantity equal or greater than the minimum bid
+     *
+     * @param _auction                Auction Setup object
+     * @return hasBiddableQuantity      Boolean whether there is a biddable quantity
+     */
+    function hasBiddableQuantity(Setup storage _auction) internal view returns(bool) {
+        return _auction.remainingCurrentSets >= _auction.minimumBid;
+    }
+
+    /*
      * Creates arrays of token inflows and outflows
      *
      * @param _auction                Auction Setup object

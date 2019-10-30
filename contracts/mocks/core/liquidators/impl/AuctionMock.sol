@@ -40,6 +40,10 @@ contract AuctionMock is Auction {
         super.validateBidQuantity(auction, _quantity);
     }
 
+    function validateAuctionCompletion() external {
+        super.validateAuctionCompletion(auction);
+    }
+
     function combinedTokenArray() external view returns(address[] memory) {
         return auction.combinedTokenArray;
     }

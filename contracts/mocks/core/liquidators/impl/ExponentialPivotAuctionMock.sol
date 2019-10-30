@@ -39,7 +39,7 @@ contract ExponentialPivotAuctionMock is ExponentialPivotAuction {
     }
 
     function reduceRemainingCurrentSets(uint256 _quantity) external {
-        super.reduceRemainingCurrentSets(auction, _quantity);
+        super.reduceRemainingCurrentSets(auction.auction, _quantity);
     }
 
     function getCurrentPrice() external view returns(Rebalance.Price memory) {

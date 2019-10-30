@@ -1,10 +1,12 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
+import { Auction } from "../../../../core/liquidators/impl/Auction.sol";
 import { LinearAuction } from "../../../../core/liquidators/impl/LinearAuction.sol";
 import { ExponentialPivotAuction } from "../../../../core/liquidators/impl/ExponentialPivotAuction.sol";
 import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";
+import { Rebalance } from "../../../../core/lib/Rebalance.sol";
 
 contract ExponentialPivotAuctionMock is ExponentialPivotAuction {
     LinearAuction.State public auction;
@@ -40,8 +42,8 @@ contract ExponentialPivotAuctionMock is ExponentialPivotAuction {
         super.reduceRemainingCurrentSets(auction, _quantity);
     }
 
-    function getCurrentPriceRatio() external view returns(uint256, uint256) {
-        return super.getCurrentPriceRatio(auction);
+    function getCurrentPrice() external view returns(Rebalance.Price memory) {
+        return super.getCurrentPrice(auction);
     }
 }
 

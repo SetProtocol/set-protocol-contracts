@@ -27,6 +27,8 @@ import { SetMath } from "../../lib/SetMath.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
+import { Rebalance } from "../../lib/Rebalance.sol";
+
 
 
 /**
@@ -143,12 +145,11 @@ contract Auction {
     function createTokenFlowArrays(
         Setup storage _auction,
         uint256 _quantity,
-        uint256 _priceNumerator,
-        uint256 _priceDivisor
+        Rebalance.Price memory _price
     )
         internal
         view
-        returns (address[] memory, uint256[] memory, uint256[] memory)
+        returns (Rebalance.TokenFlow memory)
     {
         // Normalized quantity amount
         uint256 unitsMultiplier = _quantity.div(_auction.minimumBid).mul(pricePrecision);
@@ -167,16 +168,15 @@ contract Auction {
             (
                 inflowUnitArray[i],
                 outflowUnitArray[i]
-            ) = calculateTokenFlows(
-                _auction.combinedCurrentSetUnits[i], // Not loaded into memory cause stackTooDeep
-                _auction.combinedNextSetUnits[i], // Not loaded into memory cause stackTooDeep
+            ) = calculateTokenFlow(
+                _auction.combinedCurrentSetUnits[i],
+                _auction.combinedNextSetUnits[i],
                 unitsMultiplier,
-                _priceNumerator,
-                _priceDivisor
+                _price
             );
         }
 
-        return (memCombinedTokenArray, inflowUnitArray, outflowUnitArray);
+        return Rebalance.composeTokenFlow(memCombinedTokenArray, inflowUnitArray, outflowUnitArray);
     }
 
     /**
@@ -231,12 +231,11 @@ contract Auction {
      * @return inflowUnit           Amount of token i transferred into the system
      * @return outflowUnit          Amount of token i transferred to the bidder
      */
-    function calculateTokenFlows(
+    function calculateTokenFlow(
         uint256 _currentUnit,
         uint256 _nextSetUnit,
         uint256 _unitsMultiplier,
-        uint256 _priceNumerator,
-        uint256 _priceDivisor
+        Rebalance.Price memory _price
     )
         internal
         pure
@@ -273,19 +272,19 @@ contract Auction {
         uint256 outflowUnit;
 
         // Use if statement to check if token inflow or outflow
-        if (_nextSetUnit.mul(_priceDivisor) > _currentUnit.mul(_priceNumerator)) {
+        if (_nextSetUnit.mul(_price.denominator) > _currentUnit.mul(_price.numerator)) {
             // Calculate inflow amount
             inflowUnit = _unitsMultiplier.mul(
-                _nextSetUnit.mul(_priceDivisor).sub(_currentUnit.mul(_priceNumerator))
-            ).div(_priceNumerator);
+                _nextSetUnit.mul(_price.denominator).sub(_currentUnit.mul(_price.numerator))
+            ).div(_price.numerator);
 
             // Set outflow amount to 0 for component i, since tokens need to be injected in rebalance
             outflowUnit = 0;
         } else {
             // Calculate outflow amount
             outflowUnit = _unitsMultiplier.mul(
-                _currentUnit.mul(_priceNumerator).sub(_nextSetUnit.mul(_priceDivisor))
-            ).div(_priceNumerator);
+                _currentUnit.mul(_price.numerator).sub(_nextSetUnit.mul(_price.denominator))
+            ).div(_price.numerator);
 
             // Set inflow amount to 0 for component i, since tokens need to be returned in rebalance
             inflowUnit = 0;

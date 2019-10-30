@@ -29,7 +29,7 @@ import {
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
-import { getLinearAuction, TokenFlows } from '@utils/auction';
+import { getLinearAuction, TokenFlow } from '@utils/auction';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
@@ -409,7 +409,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
     describe('#placeBid', async () => {
       let subjectQuantity: BigNumber;
-      let tokenFlows: TokenFlows;
+      let tokenFlows: TokenFlow;
 
       beforeEach(async () => {
         subjectQuantity = ether(5);
@@ -425,7 +425,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
           auctionPeriod,
         );
 
-        tokenFlows = liquidatorHelper.constructTokenFlows(
+        tokenFlows = liquidatorHelper.constructTokenFlow(
           linearAuction,
           pricePrecision,
           subjectQuantity,
@@ -514,7 +514,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       let subjectSet: Address;
       let subjectQuantity: BigNumber;
 
-      let tokenFlows: TokenFlows;
+      let tokenFlows: TokenFlow;
 
       beforeEach(async () => {
         subjectSet = functionCaller;
@@ -536,7 +536,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
           auctionPeriod,
         );
 
-        tokenFlows = liquidatorHelper.constructTokenFlows(
+        tokenFlows = liquidatorHelper.constructTokenFlow(
           linearAuction,
           pricePrecision,
           subjectQuantity,
@@ -549,7 +549,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         return liquidatorProxy.getBidPrice.callAsync(subjectSet, subjectQuantity);
       }
 
-      async function setTokenFlows(): Promise<void> {
+      async function setTokenFlow(): Promise<void> {
         const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectCaller));
         const { timestamp } = await web3.eth.getBlock('latest');
 
@@ -567,7 +567,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
           pricePrecision,
         );
 
-        tokenFlows = liquidatorHelper.constructTokenFlows(
+        tokenFlows = liquidatorHelper.constructTokenFlow(
           linearAuction,
           pricePrecision,
           subjectQuantity,
@@ -601,7 +601,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
             { from: ownerAccount, gas: DEFAULT_GAS },
           );
 
-          await setTokenFlows();
+          await setTokenFlow();
         });
 
         it('returns the token array', async () => {
@@ -631,7 +631,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
             { from: ownerAccount, gas: DEFAULT_GAS },
           );
 
-          await setTokenFlows();
+          await setTokenFlow();
         });
 
         it('returns the token array', async () => {

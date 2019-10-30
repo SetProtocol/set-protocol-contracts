@@ -1,10 +1,7 @@
 import * as _ from 'lodash';
-import * as ethUtil from 'ethereumjs-util';
 import { BigNumber } from 'bignumber.js';
 import {
-  SetProtocolUtils,
   Address,
-  Bytes,
 }  from 'set-protocol-utils';
 
 export interface LinearAuction {
@@ -14,7 +11,12 @@ export interface LinearAuction {
   endPrice: BigNumber;
 }
 
-export interface TokenFlows {
+export interface Price {
+  numerator: BigNumber;
+  denominator: BigNumber;
+}
+
+export interface TokenFlow {
   addresses: Address[];
   inflow: BigNumber[];
   outflow: BigNumber[];
@@ -53,5 +55,5 @@ export function getLinearAuction(input: any): LinearAuction {
     endTime: new BigNumber(input.endTime),
     startPrice: new BigNumber(input.startPrice),
     endPrice: new BigNumber(input.endPrice),
-  }
+  };
 }

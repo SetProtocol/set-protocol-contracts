@@ -176,9 +176,9 @@ contract('ExponentialPivotAuction', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#getCurrentPriceRatio', async () => {
-    async function subject(): Promise<[BigNumber, BigNumber]> {
-      return auctionMock.getCurrentPriceRatio.callAsync();
+  describe('#getCurrentPrice', async () => {
+    async function subject(): Promise<any> {
+      return auctionMock.getCurrentPrice.callAsync();
     }
 
     async function getNumerator(): Promise<BigNumber> {
@@ -205,15 +205,15 @@ contract('ExponentialPivotAuction', accounts => {
 
     describe('at the beginning of the auction', async () => {
       it('returns the correct numerator', async () => {
-        const [result] = await subject();
-        const numerator = await getNumerator();
-        expect(result).to.bignumber.equal(numerator);
+        const { numerator } = await subject();
+        const expected = await getNumerator();
+        expect(numerator).to.bignumber.equal(expected);
       });
 
       it('returns the correct denominator', async () => {
-        const [, result] = await subject();
-        const denominator = await getDenominator();
-        expect(result).to.bignumber.equal(denominator);
+        const { denominator } = await subject();
+        const expected = await getDenominator();
+        expect(denominator).to.bignumber.equal(expected);
       });
     });
 
@@ -228,16 +228,15 @@ contract('ExponentialPivotAuction', accounts => {
       });
 
       it('returns the correct numerator', async () => {
-        const [result] = await subject();
-
-        const numerator = await getNumerator();
-        expect(result).to.bignumber.equal(numerator);
+        const { numerator } = await subject();
+        const expected = await getNumerator();
+        expect(numerator).to.bignumber.equal(expected);
       });
 
       it('returns the correct denominator', async () => {
-        const [, result] = await subject();
-        const denominator = await getDenominator();
-        expect(result).to.bignumber.equal(denominator);
+        const { denominator } = await subject();
+        const expected = await getDenominator();
+        expect(denominator).to.bignumber.equal(expected);
       });
     });
 
@@ -252,16 +251,15 @@ contract('ExponentialPivotAuction', accounts => {
       });
 
       it('returns the correct numerator', async () => {
-        const [result] = await subject();
-
-        const numerator = await getNumerator();
-        expect(result).to.bignumber.equal(numerator);
+        const { numerator } = await subject();
+        const expected = await getNumerator();
+        expect(numerator).to.bignumber.equal(expected);
       });
 
       it('returns the correct denominator', async () => {
-        const [, result] = await subject();
-        const denominator = await getDenominator();
-        expect(result).to.bignumber.equal(denominator);
+        const { denominator } = await subject();
+        const expected = await getDenominator();
+        expect(denominator).to.bignumber.equal(expected);
       });
     });
   });

@@ -22,8 +22,10 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
+import { Auction } from "./impl/Auction.sol";
 import { LinearAuction } from "./impl/LinearAuction.sol";
 import { ExponentialPivotAuction } from "./impl/ExponentialPivotAuction.sol";
+import { Rebalance } from "../lib/Rebalance.sol";
 
 
 /**
@@ -126,7 +128,7 @@ contract ExponentialPivotAuctionLiquidator is
     {
         LinearAuction.validateBidQuantity(auctions[msg.sender], _quantity);
 
-        LinearAuction.reduceRemainingCurrentSets(auctions[msg.sender], _quantity);
+        Auction.reduceRemainingCurrentSets(auctions[msg.sender].auction, _quantity);
 
         return getBidPrice(msg.sender, _quantity);
     }
@@ -141,7 +143,10 @@ contract ExponentialPivotAuctionLiquidator is
     {
         // Validate auction has started
 
-        return LinearAuction.getPricedTokenFlows(auctions[_set], _quantity);
+        // TODO figure out the API
+        return Rebalance.decomposeTokenFlow(
+            LinearAuction.getPricedTokenFlow(auctions[_set], _quantity)
+        );
     }
 
     function settleRebalance()

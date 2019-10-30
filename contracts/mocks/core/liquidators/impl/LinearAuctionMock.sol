@@ -1,9 +1,11 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
+import { Auction } from "../../../../core/liquidators/impl/Auction.sol";
 import { LinearAuction } from "../../../../core/liquidators/impl/LinearAuction.sol";
 import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";
+import { Rebalance } from "../../../../core/lib/Rebalance.sol";
 
 contract LinearAuctionMock is LinearAuction {
     LinearAuction.State public auction;
@@ -60,18 +62,18 @@ contract LinearAuctionMock is LinearAuction {
         return super.hasAuctionFailed(auction);
     }
 
-    function getCurrentPriceRatio() external view returns(uint256, uint256) {
-        return super.getCurrentPriceRatio(auction);
+    function getCurrentPrice() external view returns(Rebalance.Price memory) {
+        return super.getCurrentPrice(auction);
     }
 
-    function getPricedTokenFlows(
+    function getPricedTokenFlow(
         uint256 _quantity
-    ) external view returns (address[] memory, uint256[] memory, uint256[] memory) {
-        return super.getPricedTokenFlows(auction, _quantity);
+    ) external view returns (Rebalance.TokenFlow memory) {
+        return super.getPricedTokenFlow(auction, _quantity);
     }
 
-    function getLinearPrice() external view returns(uint256) {
-        return super.getLinearPrice(auction);
+    function getLinearNumerator() external view returns(uint256) {
+        return super.getLinearNumerator(auction);
     }
 }
 

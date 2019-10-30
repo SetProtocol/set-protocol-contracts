@@ -11,7 +11,6 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   OracleWhiteListContract,
-  RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
@@ -25,11 +24,10 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
-  ZERO,
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
-import { LinearAuction, getLinearAuction, TokenFlows } from '@utils/auction';
+import { getLinearAuction, TokenFlow } from '@utils/auction';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
@@ -48,13 +46,11 @@ contract('LinearAuction', accounts => {
   const [
     ownerAccount,
     functionCaller,
-    whitelist,
   ] = accounts;
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let auctionMock: LinearAuctionMockContract;
 
@@ -175,7 +171,7 @@ contract('LinearAuction', accounts => {
     it('sets the correct pricePrecision', async () => {
       const result = await auctionMock.pricePrecision.callAsync();
       expect(result).to.bignumber.equal(pricePrecision);
-    }); 
+    });
 
     it('sets the correct auctionPeriod', async () => {
       const result = await auctionMock.auctionPeriod.callAsync();
@@ -202,13 +198,11 @@ contract('LinearAuction', accounts => {
     let subjectCaller: Address;
     let subjectCurrentSet: Address;
     let subjectNextSet: Address;
-    let subjectStartingCurrentSetQuantity: BigNumber;
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
       subjectCurrentSet = set1.address;
       subjectNextSet = set2.address;
-      subjectStartingCurrentSetQuantity = ether(10);
     });
 
     after(async () => {
@@ -323,8 +317,6 @@ contract('LinearAuction', accounts => {
   describe('[CONTEXT] Initialized auction', async () => {
     let subjectCaller: Address;
 
-    let currentSet: Address;
-    let nextSet: Address;
     let startingCurrentSetQuantity: BigNumber;
 
     beforeEach(async () => {
@@ -367,7 +359,7 @@ contract('LinearAuction', accounts => {
       let customReductionQuantity: BigNumber;
 
       beforeEach(async () => {
-        reductionQuantity = customReductionQuantity || startingCurrentSetQuantity;        
+        reductionQuantity = customReductionQuantity || startingCurrentSetQuantity;
         await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
           reductionQuantity,
           { from: subjectCaller, gas: DEFAULT_GAS },
@@ -391,7 +383,7 @@ contract('LinearAuction', accounts => {
 
         after(async () => {
           customReductionQuantity = undefined;
-        })
+        });
 
         it('should revert', async () => {
           await expectRevertError(subject());
@@ -442,9 +434,9 @@ contract('LinearAuction', accounts => {
       });
     });
 
-    describe('#getLinearPrice', async () => {
+    describe('#getLinearNumerator', async () => {
       async function subject(): Promise<BigNumber> {
-        return auctionMock.getLinearPrice.callAsync();
+        return auctionMock.getLinearNumerator.callAsync();
       }
 
       it('returns the correct result', async () => {
@@ -461,7 +453,7 @@ contract('LinearAuction', accounts => {
 
       describe('when the auction has elapsed half the period', async () => {
         beforeEach(async () => {
-          await blockchain.increaseTimeAsync(auctionPeriod.div(2));        
+          await blockchain.increaseTimeAsync(auctionPeriod.div(2));
           // Do dummy transaction to advance the block
           await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
             startingCurrentSetQuantity.div(2),
@@ -471,7 +463,7 @@ contract('LinearAuction', accounts => {
 
         it('returns the correct result', async () => {
           const result = await subject();
-          
+
           const { timestamp } = await web3.eth.getBlock('latest');
           const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
           const currentPrice = await liquidatorHelper.calculateCurrentPrice(
@@ -484,13 +476,13 @@ contract('LinearAuction', accounts => {
       });
     });
 
-    describe('#getCurrentPriceRatio', async () => {
-      async function subject(): Promise<[BigNumber, BigNumber]> {
-        return auctionMock.getCurrentPriceRatio.callAsync();
+    describe('#getCurrentPrice', async () => {
+      async function subject(): Promise<any> {
+        return auctionMock.getCurrentPrice.callAsync();
       }
 
       it('returns the correct numerator', async () => {
-        const [result] = await subject();
+        const { numerator } = await subject();
         const { timestamp } = await web3.eth.getBlock('latest');
         const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
         const currentPrice = await liquidatorHelper.calculateCurrentPrice(
@@ -498,19 +490,19 @@ contract('LinearAuction', accounts => {
           new BigNumber(timestamp),
           auctionPeriod,
         );
-        expect(result).to.bignumber.equal(currentPrice);
+        expect(numerator).to.bignumber.equal(currentPrice);
       });
 
       it('returns the correct denominator', async () => {
-        const [, result] = await subject();
-        expect(result).to.bignumber.equal(pricePrecision);
+        const { denominator } = await subject();
+        expect(denominator).to.bignumber.equal(pricePrecision);
       });
     });
 
-    describe('#getPricedTokenFlows', async () => {
+    describe('#getPricedTokenFlow', async () => {
       let subjectQuantity: BigNumber;
 
-      let tokenFlows: TokenFlows;
+      let tokenFlows: TokenFlow;
 
       beforeEach(async () => {
         subjectQuantity = startingCurrentSetQuantity;
@@ -524,7 +516,7 @@ contract('LinearAuction', accounts => {
           auctionPeriod,
         );
 
-        tokenFlows = liquidatorHelper.constructTokenFlows(
+        tokenFlows = liquidatorHelper.constructTokenFlow(
           linearAuction,
           pricePrecision,
           subjectQuantity,
@@ -533,28 +525,28 @@ contract('LinearAuction', accounts => {
         );
       });
 
-      async function subject(): Promise<[Address[], BigNumber[], BigNumber[]]> {
-        return auctionMock.getPricedTokenFlows.callAsync(subjectQuantity);
+      async function subject(): Promise<any> {
+        return auctionMock.getPricedTokenFlow.callAsync(subjectQuantity);
       }
 
       it('returns the token array', async () => {
-        const [result] = await subject();
-        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.addresses));
+        const { addresses } = await subject();
+        expect(JSON.stringify(addresses)).to.equal(JSON.stringify(tokenFlows.addresses));
       });
 
       it('returns the correct inflow', async () => {
-        const [, result] = await subject();
-        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.inflow));
+        const { inflow } = await subject();
+        expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
       });
 
       it('returns the correct outflow', async () => {
-        const [,, result] = await subject();
-        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
+        const { outflow } = await subject();
+        expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
       });
 
       describe('when the auction has elapsed half the period', async () => {
         beforeEach(async () => {
-          await blockchain.increaseTimeAsync(auctionPeriod.div(2));        
+          await blockchain.increaseTimeAsync(auctionPeriod.div(2));
           // Do dummy transaction to advance the block
           await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
             startingCurrentSetQuantity.div(2),
@@ -572,7 +564,7 @@ contract('LinearAuction', accounts => {
             auctionPeriod,
           );
 
-          tokenFlows = liquidatorHelper.constructTokenFlows(
+          tokenFlows = liquidatorHelper.constructTokenFlow(
             linearAuction,
             pricePrecision,
             subjectQuantity,
@@ -582,18 +574,18 @@ contract('LinearAuction', accounts => {
         });
 
         it('returns the token array', async () => {
-          const [result] = await subject();
-          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.addresses));
+          const { addresses } = await subject();
+          expect(JSON.stringify(addresses)).to.equal(JSON.stringify(tokenFlows.addresses));
         });
 
         it('returns the correct inflow', async () => {
-          const [, result] = await subject();
-          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.inflow));
+          const { inflow } = await subject();
+          expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
         });
 
         it('returns the correct outflow', async () => {
-          const [,, result] = await subject();
-          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
+          const { outflow } = await subject();
+          expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
         });
       });
     });
@@ -610,7 +602,7 @@ contract('LinearAuction', accounts => {
 
       describe('when the timestamp has exceeded the endTime', async () => {
         beforeEach(async () => {
-          await blockchain.increaseTimeAsync(auctionPeriod.add(1));        
+          await blockchain.increaseTimeAsync(auctionPeriod.add(1));
         });
 
         it('should return false', async () => {
@@ -635,7 +627,7 @@ contract('LinearAuction', accounts => {
 
       describe('when the timestamp has exceeded endTime and there is a biddable quantity', async () => {
         beforeEach(async () => {
-          await blockchain.increaseTimeAsync(auctionPeriod.add(1));        
+          await blockchain.increaseTimeAsync(auctionPeriod.add(1));
 
           await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
             startingCurrentSetQuantity,

@@ -22,6 +22,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { Auction } from "./Auction.sol";
+import { Rebalance } from "../../lib/Rebalance.sol";
 import { SetUSDValuation } from "./SetUSDValuation.sol";
 
 
@@ -29,8 +30,7 @@ import { SetUSDValuation } from "./SetUSDValuation.sol";
  * @title LinearAuction
  * @author Set Protocol
  *
- * Library containing utility functions for calculating auction parameters and auction prices for
- * linear auctions.
+ * Library containing utility functions for computing and auction prices for a linearly improving price auction.
  */
 contract LinearAuction is Auction {
     using SafeMath for uint256;
@@ -44,15 +44,19 @@ contract LinearAuction is Auction {
     }
 
     /* ============ State Variables ============ */
-    uint256 public auctionPeriod;
+    uint256 public auctionPeriod; // Length in seconds of auction
     uint256 public rangeStart; // Percentage above FairValue to begin auction at
     uint256 public rangeEnd;  // Percentage below FairValue to end auction at
-
-    IOracleWhiteList public oracleWhiteList;
+    IOracleWhiteList public oracleWhiteList; // Instance of the oracle list
 
     /**
      * LinearAuction constructor
      *
+     * @param _pricePrecision         Price precision used in auctions
+     * @param _auctionPeriod          Length of auction
+     * @param _rangeStart             Percentage above FairValue to begin auction at
+     * @param _rangeEnd               Percentage below FairValue to end auction at
+     * @param _oracleWhiteList        Price precision used in auctions
      */
     constructor(
         uint256 _pricePrecision,
@@ -73,6 +77,13 @@ contract LinearAuction is Auction {
 
     /* ============ Internal Functions ============ */
 
+    /**
+     * Validates the Sets are supposed by the oracle.
+     *
+     * @param _linearAuction                LinearAuction State object
+     * @param _currentSet                   The Set to rebalance from
+     * @param _nextSet                      The Set to rebalance to
+     */
     function validateSets(
         State storage _linearAuction,
         ISetToken _currentSet,
@@ -88,6 +99,14 @@ contract LinearAuction is Auction {
         );
     }
 
+    /**
+     * Populates the linear auction struct following an auction initiation.
+     *
+     * @param _linearAuction                LinearAuction State object
+     * @param _currentSet                   The Set to rebalance from
+     * @param _nextSet                      The Set to rebalance to
+     * @param _startingCurrentSetQuantity   Quantity of currentSet to rebalance
+     */
     function initializeLinearAuction(
         State storage _linearAuction,
         ISetToken _currentSet,
@@ -103,13 +122,18 @@ contract LinearAuction is Auction {
             _startingCurrentSetQuantity
         );
 
-        _linearAuction.endTime = block.timestamp.add(auctionPeriod);
-
         uint256 fairValue = calculateFairValue(_currentSet, _nextSet);
         _linearAuction.startPrice = calculateStartPrice(fairValue);
         _linearAuction.endPrice = calculateEndPrice(fairValue);
+        _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
 
+    /*
+     * Passes the Auction struct to the Auction module to validateBidQuantity.
+     *
+     * @param _linearAuction    Linear Auction State object
+     * @param _quantity         Amount of currentSets bidder is seeking to rebalance
+     */
     function validateBidQuantity(
         State storage _linearAuction,
         uint256 _quantity
@@ -120,6 +144,12 @@ contract LinearAuction is Auction {
         super.validateBidQuantity(_linearAuction.auction, _quantity);
     }
 
+    /*
+     * Passes the Auction struct to the Auction module to reduceRemainingCurrentSets.
+     *
+     * @param _linearAuction    Linear Auction State object
+     * @param _quantity         Quantity of remainingCurrentSets
+     */
     function reduceRemainingCurrentSets(
         State storage _linearAuction,
         uint256 _quantity
@@ -129,6 +159,12 @@ contract LinearAuction is Auction {
         super.reduceRemainingCurrentSets(_linearAuction.auction, _quantity);
     }
 
+    /*
+     * Returns whether the linear auction has been completed, which is when all currentSets have been
+     * rebalanced.
+     *
+     * @param _linearAuction    Linear Auction State object
+     */
     function validateAuctionCompletion(
         State storage _linearAuction
     )
@@ -144,6 +180,14 @@ contract LinearAuction is Auction {
 
     /* ============ Internal View Functions ============ */
 
+    /**
+     * Calculates the fair value based on the USD values of the next and current Sets.
+     * TODO: Add formula for fair value
+     *
+     * @param _currentSet             The Set to rebalance from
+     * @param _nextSet                The Set to rebalance to
+     * @return fairValue              USD value
+     */
     function calculateFairValue(
         ISetToken _currentSet,
         ISetToken _nextSet
@@ -158,69 +202,102 @@ contract LinearAuction is Auction {
         return nextSetUSDValue.mul(pricePrecision).div(currentSetUSDValue);
     }
 
+    /**
+     * Calculates the linear auction start price
+     *
+     * @param _fairValue              Fair value figure
+     * @return startPrice             Value to start auction at
+     */
     function calculateStartPrice(uint256 _fairValue) internal view returns(uint256) {
         uint256 startRange = _fairValue.mul(rangeStart).div(100);
         return _fairValue.sub(startRange);
     }
 
+    /**
+     * Calculates the linear auction end price
+     *
+     * @param _fairValue              Fair value figure
+     * @return startPrice             Value to start auction at
+     */
     function calculateEndPrice(uint256 _fairValue) internal view returns(uint256) {
         uint256 endRange = _fairValue.mul(rangeEnd).div(100);
         return _fairValue.add(endRange);
     }
 
-    function getPricedTokenFlows(
+    /**
+     * 
+     *
+     * @param _linearAuction    Linear Auction State object
+     * @return combinedTokenArray     Array of tokens
+     * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray       Array of amount of tokens taken out of system in bid     
+     */
+    function getPricedTokenFlow(
         State storage _linearAuction,
         uint256 _quantity
     )
         internal
         view
-        returns (address[] memory, uint256[] memory, uint256[] memory)
+        returns (Rebalance.TokenFlow memory)
     {
-        // Get bid conversion price, currently static placeholder for calling auctionlibrary
-        (
-            uint256 currentPriceRatioNumerator,
-            uint256 currentPriceRatioDenominator
-        ) = getCurrentPriceRatio(
-            _linearAuction
-        );
-
         // Return arrays reprsenting token inflows and outflows required to complete bid at current
         // price for passed in quantity
-        return createTokenFlowArrays(
+        return Auction.createTokenFlowArrays(
             _linearAuction.auction,
             _quantity,
-            currentPriceRatioNumerator,
-            currentPriceRatioDenominator
+            getCurrentPrice(_linearAuction)
         );        
     }
 
-
-    function getCurrentPriceRatio(
+    /**
+     * Returns the linear price based on the current timestamp
+     *
+     * @param _linearAuction            Linear Auction State object
+     * @return price                    uint representing the current price
+     */
+    function getCurrentPrice(
         State storage _linearAuction
     )
         internal
         view
-        returns (uint256, uint256)
+        returns (Rebalance.Price memory)
     {
-        return (
-            getLinearPrice(_linearAuction),
+        return Rebalance.composePrice(
+            getLinearNumerator(_linearAuction),
             pricePrecision
         );
     }
 
+    /**
+     * Auction failed is defined the timestamp breacnhing the auction end time and
+     * the auction not being complete
+     *
+     * @param _linearAuction    Linear Auction State object
+     * @return hasFailed        Boolean whether the auction has failed
+     */
     function hasAuctionFailed(State storage _linearAuction) internal view returns(bool) {
-        uint256 revertAuctionTime = _linearAuction.endTime;
-
-        bool endTimeExceeded = block.timestamp >= revertAuctionTime;
+        bool endTimeExceeded = block.timestamp >= _linearAuction.endTime;
         bool setsNotAuctioned = !hasBiddableQuantity(_linearAuction);
         return (endTimeExceeded && setsNotAuctioned);        
     }
 
+    /**
+     * Returns whether the reminingSets is still a quantity equal or greater than the minimum bid
+     *
+     * @param _linearAuction            Linear Auction State object
+     * @return hasBiddableQuantity      Boolean whether there is a biddable quantity
+     */
     function hasBiddableQuantity(State storage _linearAuction) internal view returns(bool) {
         return _linearAuction.auction.remainingCurrentSets >= _linearAuction.auction.minimumBid;
     }
 
-    function getLinearPrice(State storage _linearAuction) internal view returns (uint256) {
+    /**
+     * Returns the linear price based on the current timestamp
+     *
+     * @param _linearAuction            Linear Auction State object
+     * @return price                    uint representing the current price
+     */
+    function getLinearNumerator(State storage _linearAuction) internal view returns (uint256) {
         uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
         uint256 range = _linearAuction.endPrice.sub(_linearAuction.startPrice);
         uint256 elapsedPrice = elapsed.mul(range).div(auctionPeriod);

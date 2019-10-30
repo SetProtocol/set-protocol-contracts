@@ -19,7 +19,7 @@ import {
 } from '../constants';
 import {
   LinearAuction,
-  TokenFlows
+  TokenFlow
 } from '../auction';
 
 const AuctionMock = artifacts.require('AuctionMock');
@@ -342,13 +342,13 @@ export class LiquidatorHelper {
              .round(0, 3);
   }
 
-  public constructTokenFlows(
+  public constructTokenFlow(
     linearAuction: LinearAuction,
     pricePrecision: BigNumber,
     quantity: BigNumber,
     priceNumerator: BigNumber,
     priceDenominator: BigNumber,
-  ): TokenFlows {
+  ): TokenFlow {
     const inflow: BigNumber[] = [];
     const outflow: BigNumber[] = [];
 

@@ -21,6 +21,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { LinearAuction } from "./LinearAuction.sol";
+import { Rebalance } from "../../lib/Rebalance.sol";
 
 
 /**
@@ -39,7 +40,7 @@ contract ExponentialPivotAuction is LinearAuction {
 
     /* ============ Constructor ============ */
     /**
-     * LinearAuction constructor
+     * ExponentialPivotAuction constructor
      *
      */
     constructor(
@@ -67,15 +68,13 @@ contract ExponentialPivotAuction is LinearAuction {
      * @param _startTime            Starting timestamp of auction
      * @param _auctionPeriod          Amount of time to reach pivot price from start of auction
      * @param _pricePrecision       Starting price ratio denominator
-     * @return uint256              The price ratio numerator
-     * @return uint256              The price ratio denominator
      */
-    function getCurrentPriceRatio(
+    function getCurrentPrice(
         LinearAuction.State storage _linearAuction
     )
         internal
         view
-        returns (uint256, uint256)
+        returns (Rebalance.Price memory)
     {
         // Calculate how much time has elapsed since start of auction
         uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
@@ -126,7 +125,7 @@ contract ExponentialPivotAuction is LinearAuction {
         if (elapsed <= auctionPeriod) {
             // Calculate the priceNumerator as a linear function of time between _startPrice and
             // _auctionPivotPrice
-            priceNumerator = getLinearPrice(_linearAuction);
+            priceNumerator = LinearAuction.getLinearNumerator(_linearAuction);
         } else {
             // Calculate how many 30 second increments have passed since pivot was reached
             uint256 thirtySecondPeriods = elapsed
@@ -152,6 +151,6 @@ contract ExponentialPivotAuction is LinearAuction {
             }
         }
 
-        return (priceNumerator, currentPriceDivisor);
+        return Rebalance.composePrice(priceNumerator, currentPriceDivisor);
     }
 }

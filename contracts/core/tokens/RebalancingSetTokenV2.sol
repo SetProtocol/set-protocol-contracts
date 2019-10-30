@@ -183,9 +183,6 @@ contract RebalancingSetTokenV2 is
      * Get token inflows and outflows required for bid from the Liquidator.
      *
      * @param _quantity               The amount of currentSet to be rebalanced
-     * @return combinedTokenArray     Array of token addresses involved in rebalancing
-     * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
-     * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
      */
     function getBidPrice(
         uint256 _quantity
@@ -207,9 +204,6 @@ contract RebalancingSetTokenV2 is
      * RebalanceAuctionModule -> RebalancingSetTokenV2 -> Liquidator
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
-     * @return combinedTokenArray       Array of token addresses involved in rebalancing
-     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
-     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
      */
     function placeBid(
         uint256 _quantity

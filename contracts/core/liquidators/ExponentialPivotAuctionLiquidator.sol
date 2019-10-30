@@ -109,12 +109,9 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
         );
     }
 
-    // Can only be called during proposal
-    // Should we place safeguards as to when it can be called?
     /**
      * Validates that the Liquidator can generate a valid auction.
      * Can only be called by a SetToken.
-     *
      */
     function cancelProposal()
         external
@@ -123,7 +120,14 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
         requireAuctionInactive(auction(msg.sender));
     }
 
-    // Should we place safeguards as to when this can be called?
+    /**
+     * Initiates a linear auction.
+     * Can only be called by a SetToken.
+     *
+     * @param _currentSet                   The Set to rebalance from
+     * @param _nextSet                      The Set to rebalance to
+     * @param _startingCurrentSetQuantity   The currentSet quantity to rebalance
+     */
     function startRebalance(
         ISetToken _currentSet,
         ISetToken _nextSet,
@@ -142,6 +146,13 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
         );
     }
 
+    /**
+     * Reduces the remainingCurrentSet quantity and retrieves the current
+     * bid price.
+     * Can only be called by a SetToken during an active auction
+     *
+     * @param _quantity               The currentSetQuantity to rebalance
+     */
     function placeBid(
         uint256 _quantity
     )
@@ -158,7 +169,12 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
         return getBidPrice(msg.sender, _quantity);
     }
 
-    // Validate auction has started?
+    /**
+     * Retrieves the current auction price for the particular Set
+     *
+     * @param _quantity               The currentSetQuantity to rebalance
+     * @param _quantity               The currentSetQuantity to rebalance
+     */
     function getBidPrice(
         address _set,
         uint256 _quantity

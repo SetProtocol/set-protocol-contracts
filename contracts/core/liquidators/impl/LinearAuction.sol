@@ -147,7 +147,7 @@ contract LinearAuction is Auction {
     {
         // Return arrays reprsenting token inflows and outflows required to complete bid at current
         // price for passed in quantity
-        return Auction.composeTokenFlow(
+        return Auction.calculateTokenFlow(
             _linearAuction.auction,
             _quantity,
             getPrice(_linearAuction)

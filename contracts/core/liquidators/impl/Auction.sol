@@ -161,7 +161,7 @@ contract Auction {
     }
 
     /*
-     * Creates arrays of token inflows and outflows
+     * Calculates TokenFlows
      *
      * @param _auction                Auction Setup object
      * @param _quantity               Amount of currentSets bidder is seeking to rebalance
@@ -171,7 +171,7 @@ contract Auction {
      * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
      * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
      */
-    function composeTokenFlow(
+    function calculateTokenFlow(
         Setup storage _auction,
         uint256 _quantity,
         Rebalance.Price memory _price

@@ -176,9 +176,9 @@ contract('ExponentialPivotAuction', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#getCurrentPrice', async () => {
+  describe('#getPrice', async () => {
     async function subject(): Promise<any> {
-      return auctionMock.getCurrentPrice.callAsync();
+      return auctionMock.getPrice.callAsync();
     }
 
     async function getNumerator(): Promise<BigNumber> {

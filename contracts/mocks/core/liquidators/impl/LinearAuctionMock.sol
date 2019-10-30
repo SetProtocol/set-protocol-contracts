@@ -58,18 +58,18 @@ contract LinearAuctionMock is LinearAuction {
         return super.hasAuctionFailed(auction);
     }
 
-    function getCurrentPrice() external view returns(Rebalance.Price memory) {
-        return super.getCurrentPrice(auction);
+    function getPrice() external view returns(Rebalance.Price memory) {
+        return super.getPrice(auction);
     }
 
-    function getPricedTokenFlow(
+    function getTokenFlow(
         uint256 _quantity
     ) external view returns (Rebalance.TokenFlow memory) {
-        return super.getPricedTokenFlow(auction, _quantity);
+        return super.getTokenFlow(auction, _quantity);
     }
 
-    function getLinearNumerator() external view returns(uint256) {
-        return super.getLinearNumerator(auction);
+    function getNumerator() external view returns(uint256) {
+        return super.getNumerator(auction);
     }
 }
 

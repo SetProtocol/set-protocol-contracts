@@ -171,7 +171,7 @@ contract Auction {
      * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
      * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
      */
-    function createTokenFlowArrays(
+    function composeTokenFlow(
         Setup storage _auction,
         uint256 _quantity,
         Rebalance.Price memory _price
@@ -381,7 +381,7 @@ contract Auction {
 
         // Compute unit amounts of token in Set
         if (isComponent) {
-            return computeTransferValue(
+            return calculateTransferValue(
                 _setToken.getUnits()[indexCurrent],
                 _setToken.naturalUnit(),
                 _minimumBid,
@@ -402,7 +402,7 @@ contract Auction {
      * @param   _pricePrecision     Price Divisor used in Liquidator contract 
      * @return  uint256             Amount of tokens per standard bid amount (minimumBid/priceDivisor)
      */
-    function computeTransferValue(
+    function calculateTransferValue(
         uint256 _unit,
         uint256 _naturalUnit,
         uint256 _minimumBid,

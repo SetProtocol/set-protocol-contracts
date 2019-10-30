@@ -331,9 +331,9 @@ contract('LinearAuction', accounts => {
       );
     });
 
-    describe('#getLinearNumerator', async () => {
+    describe('#getNumerator', async () => {
       async function subject(): Promise<BigNumber> {
-        return auctionMock.getLinearNumerator.callAsync();
+        return auctionMock.getNumerator.callAsync();
       }
 
       it('returns the correct result', async () => {
@@ -373,9 +373,9 @@ contract('LinearAuction', accounts => {
       });
     });
 
-    describe('#getCurrentPrice', async () => {
+    describe('#getPrice', async () => {
       async function subject(): Promise<any> {
-        return auctionMock.getCurrentPrice.callAsync();
+        return auctionMock.getPrice.callAsync();
       }
 
       it('returns the correct numerator', async () => {
@@ -396,7 +396,7 @@ contract('LinearAuction', accounts => {
       });
     });
 
-    describe('#getPricedTokenFlow', async () => {
+    describe('#getTokenFlow', async () => {
       let subjectQuantity: BigNumber;
 
       let tokenFlows: TokenFlow;
@@ -423,7 +423,7 @@ contract('LinearAuction', accounts => {
       });
 
       async function subject(): Promise<any> {
-        return auctionMock.getPricedTokenFlow.callAsync(subjectQuantity);
+        return auctionMock.getTokenFlow.callAsync(subjectQuantity);
       }
 
       it('returns the token array', async () => {

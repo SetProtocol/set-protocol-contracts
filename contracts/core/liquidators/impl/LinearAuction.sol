@@ -90,6 +90,7 @@ contract LinearAuction is Auction {
         ISetToken _nextSet
     )
         internal
+        view
     {
         // Check that all components in the rebalance have a matching oracle
         address[] memory combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
@@ -131,6 +132,72 @@ contract LinearAuction is Auction {
     /* ============ Internal View Functions ============ */
 
     /**
+     * Returns the TokenFlow based on the current price
+     *
+     * @param _linearAuction          Linear Auction State object
+     * @return TokenFlow              Object struct containing tokens, inflow, and outflow
+     */
+    function getTokenFlow(
+        State storage _linearAuction,
+        uint256 _quantity
+    )
+        internal
+        view
+        returns (Rebalance.TokenFlow memory)
+    {
+        // Return arrays reprsenting token inflows and outflows required to complete bid at current
+        // price for passed in quantity
+        return Auction.composeTokenFlow(
+            _linearAuction.auction,
+            _quantity,
+            getPrice(_linearAuction)
+        );        
+    }
+
+    /**
+     * Returns the linear price based on the current timestamp
+     *
+     * @param _linearAuction            Linear Auction State object
+     * @return price                    uint representing the current price
+     */
+    function getPrice(
+        State storage _linearAuction
+    )
+        internal
+        view
+        returns (Rebalance.Price memory)
+    {
+        return Rebalance.composePrice(getNumerator(_linearAuction), Auction.pricePrecision);
+    }
+
+    /**
+     * Auction failed is defined the timestamp breacnhing the auction end time and
+     * the auction not being complete
+     *
+     * @param _linearAuction    Linear Auction State object
+     * @return hasFailed        Boolean whether the auction has failed
+     */
+    function hasAuctionFailed(State storage _linearAuction) internal view returns(bool) {
+        bool endTimeExceeded = block.timestamp >= _linearAuction.endTime;
+        bool setsNotAuctioned = !hasBiddableQuantity(_linearAuction.auction);
+        return (endTimeExceeded && setsNotAuctioned);        
+    }
+
+    /**
+     * Returns the linear price based on the current timestamp
+     *
+     * @param _linearAuction            Linear Auction State object
+     * @return price                    uint representing the current price
+     */
+    function getNumerator(State storage _linearAuction) internal view returns (uint256) {
+        uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
+        uint256 range = _linearAuction.endPrice.sub(_linearAuction.startPrice);
+        uint256 elapsedPrice = elapsed.mul(range).div(auctionPeriod);
+
+        return _linearAuction.startPrice.add(elapsedPrice);
+    }
+
+    /**
      * Calculates the fair value based on the USD values of the next and current Sets.
      * TODO: Add formula for fair value
      *
@@ -149,7 +216,7 @@ contract LinearAuction is Auction {
         uint256 currentSetUSDValue = SetUSDValuation.calculateSetTokenDollarValue(_currentSet, oracleWhiteList);
         uint256 nextSetUSDValue = SetUSDValuation.calculateSetTokenDollarValue(_nextSet, oracleWhiteList);
 
-        return nextSetUSDValue.mul(pricePrecision).div(currentSetUSDValue);
+        return nextSetUSDValue.mul(Auction.pricePrecision).div(currentSetUSDValue);
     }
 
     /**
@@ -172,76 +239,5 @@ contract LinearAuction is Auction {
     function calculateEndPrice(uint256 _fairValue) internal view returns(uint256) {
         uint256 endRange = _fairValue.mul(rangeEnd).div(100);
         return _fairValue.add(endRange);
-    }
-
-    /**
-     * 
-     *
-     * @param _linearAuction    Linear Auction State object
-     * @return combinedTokenArray     Array of tokens
-     * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
-     * @return outflowUnitArray       Array of amount of tokens taken out of system in bid     
-     */
-    function getPricedTokenFlow(
-        State storage _linearAuction,
-        uint256 _quantity
-    )
-        internal
-        view
-        returns (Rebalance.TokenFlow memory)
-    {
-        // Return arrays reprsenting token inflows and outflows required to complete bid at current
-        // price for passed in quantity
-        return Auction.createTokenFlowArrays(
-            _linearAuction.auction,
-            _quantity,
-            getCurrentPrice(_linearAuction)
-        );        
-    }
-
-    /**
-     * Returns the linear price based on the current timestamp
-     *
-     * @param _linearAuction            Linear Auction State object
-     * @return price                    uint representing the current price
-     */
-    function getCurrentPrice(
-        State storage _linearAuction
-    )
-        internal
-        view
-        returns (Rebalance.Price memory)
-    {
-        return Rebalance.composePrice(
-            getLinearNumerator(_linearAuction),
-            pricePrecision
-        );
-    }
-
-    /**
-     * Auction failed is defined the timestamp breacnhing the auction end time and
-     * the auction not being complete
-     *
-     * @param _linearAuction    Linear Auction State object
-     * @return hasFailed        Boolean whether the auction has failed
-     */
-    function hasAuctionFailed(State storage _linearAuction) internal view returns(bool) {
-        bool endTimeExceeded = block.timestamp >= _linearAuction.endTime;
-        bool setsNotAuctioned = !hasBiddableQuantity(_linearAuction.auction);
-        return (endTimeExceeded && setsNotAuctioned);        
-    }
-
-    /**
-     * Returns the linear price based on the current timestamp
-     *
-     * @param _linearAuction            Linear Auction State object
-     * @return price                    uint representing the current price
-     */
-    function getLinearNumerator(State storage _linearAuction) internal view returns (uint256) {
-        uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
-        uint256 range = _linearAuction.endPrice.sub(_linearAuction.startPrice);
-        uint256 elapsedPrice = elapsed.mul(range).div(auctionPeriod);
-
-        return _linearAuction.startPrice.add(elapsedPrice);
     }
 }

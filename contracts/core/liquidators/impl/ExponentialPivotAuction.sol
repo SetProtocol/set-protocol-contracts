@@ -69,7 +69,7 @@ contract ExponentialPivotAuction is LinearAuction {
      * @param _auctionPeriod          Amount of time to reach pivot price from start of auction
      * @param _pricePrecision       Starting price ratio denominator
      */
-    function getCurrentPrice(
+    function getPrice(
         LinearAuction.State storage _linearAuction
     )
         internal
@@ -125,7 +125,7 @@ contract ExponentialPivotAuction is LinearAuction {
         if (elapsed <= auctionPeriod) {
             // Calculate the priceNumerator as a linear function of time between _startPrice and
             // _auctionPivotPrice
-            priceNumerator = LinearAuction.getLinearNumerator(_linearAuction);
+            priceNumerator = LinearAuction.getNumerator(_linearAuction);
         } else {
             // Calculate how many 30 second increments have passed since pivot was reached
             uint256 thirtySecondPeriods = elapsed

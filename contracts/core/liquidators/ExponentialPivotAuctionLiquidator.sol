@@ -145,7 +145,7 @@ contract ExponentialPivotAuctionLiquidator is
 
         // TODO figure out the API
         return Rebalance.decomposeTokenFlow(
-            LinearAuction.getPricedTokenFlow(linearAuction(_set), _quantity)
+            LinearAuction.getTokenFlow(linearAuction(_set), _quantity)
         );
     }
 

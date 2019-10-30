@@ -42,8 +42,8 @@ contract ExponentialPivotAuctionMock is ExponentialPivotAuction {
         super.reduceRemainingCurrentSets(auction.auction, _quantity);
     }
 
-    function getCurrentPrice() external view returns(Rebalance.Price memory) {
-        return super.getCurrentPrice(auction);
+    function getPrice() external view returns(Rebalance.Price memory) {
+        return super.getPrice(auction);
     }
 }
 

@@ -19,6 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { Auction } from "./Auction.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { LinearAuction } from "./LinearAuction.sol";
 import { Rebalance } from "../../lib/Rebalance.sol";
@@ -42,32 +43,31 @@ contract ExponentialPivotAuction is LinearAuction {
     /**
      * ExponentialPivotAuction constructor
      *
+     * @param _pricePrecision         Price precision used in auctions
+     * @param _auctionPeriod          Length of auction
+     * @param _rangeStart             Percentage above FairValue to begin auction at
+     * @param _rangeEnd               Percentage below FairValue to end auction at
      */
     constructor(
         uint256 _pricePrecision,
         uint256 _auctionPeriod,
         uint256 _rangeStart,
-        uint256 _rangeEnd,
-        IOracleWhiteList _oracleWhiteList
+        uint256 _rangeEnd
     )
         public
         LinearAuction(
             _pricePrecision,
             _auctionPeriod,
             _rangeStart,
-            _rangeEnd,
-            _oracleWhiteList
+            _rangeEnd
         )
     {}
 
     /*
-     * Calculate the current priceRatio for an auction given defined price and time parameters
+     * Calculate the Price for an auction given defined price and time parameters
      *
-     * @param _startPrice           Starting price of auction
-     * @param _endPrice           Pivot price of auction
-     * @param _startTime            Starting timestamp of auction
-     * @param _auctionPeriod          Amount of time to reach pivot price from start of auction
-     * @param _pricePrecision       Starting price ratio denominator
+     * @param _linearAuction        LinearAuction State object
+     * @returns Price               Struct denoting price numeartor and denominator
      */
     function getPrice(
         LinearAuction.State storage _linearAuction
@@ -78,12 +78,12 @@ contract ExponentialPivotAuction is LinearAuction {
     {
         // Calculate how much time has elapsed since start of auction
         uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
-        uint256 startPrice = _linearAuction.startPrice;
-        uint256 endPrice = _linearAuction.endPrice;
+        uint256 startNumerator = _linearAuction.startNumerator;
+        uint256 endNumerator = _linearAuction.endNumerator;
 
         // Initialize numerator and denominator
-        uint256 priceNumerator = endPrice;
-        uint256 currentPriceDivisor = pricePrecision;
+        uint256 priceNumerator = endNumerator;
+        uint256 currentPriceDenominator = Auction.pricePrecision;
 
         /*
          * This price curve can be broken down into three stages, 1) set up to allow a portion where managers
@@ -99,7 +99,7 @@ contract ExponentialPivotAuction is LinearAuction {
          * and terminates at the passed pivot price. The length of time it takes for the auction to reach the pivot
          * price is defined by the manager too, thus resulting in the following equation for the slope of the line:
          *
-         * PriceNumerator(x) = startPrice + (auctionPivotPrice-startPrice)*(x/auctionTimeToPivot),
+         * PriceNumerator(x) = startNumerator + (auctionPivotPrice-startNumerator)*(x/auctionTimeToPivot),
          * where x is amount of time from auction start
          *
          * 2) Stage 2 the protocol takes over to attempt to hasten/guarantee finality, this unfortunately decreases
@@ -123,7 +123,7 @@ contract ExponentialPivotAuction is LinearAuction {
 
         // If time hasn't passed to pivot use the user-defined curve
         if (elapsed <= auctionPeriod) {
-            // Calculate the priceNumerator as a linear function of time between _startPrice and
+            // Calculate the priceNumerator as a linear function of time between _startNumerator and
             // _auctionPivotPrice
             priceNumerator = LinearAuction.getNumerator(_linearAuction);
         } else {
@@ -135,22 +135,22 @@ contract ExponentialPivotAuction is LinearAuction {
             if (thirtySecondPeriods < MAX_30_SECOND_PERIODS) {
                 // Calculate new denominator where the denominator decays at a rate of 0.1% of the ORIGINAL
                 // priceDivisor per time increment (hence divide by 1000)
-                currentPriceDivisor = pricePrecision
+                currentPriceDenominator = Auction.pricePrecision
                     .sub(thirtySecondPeriods
-                        .mul(pricePrecision)
+                        .mul(Auction.pricePrecision)
                         .div(MAX_30_SECOND_PERIODS)
                     );
             } else {
                 // Once denominator has fully decayed, fix it at 1
-                currentPriceDivisor = 1;
+                currentPriceDenominator = 1;
 
                 // Now priceNumerator just changes linearly, but with slope equal to the pivot price
-                priceNumerator = endPrice.add(
-                    endPrice.mul(thirtySecondPeriods.sub(MAX_30_SECOND_PERIODS))
+                priceNumerator = endNumerator.add(
+                    endNumerator.mul(thirtySecondPeriods.sub(MAX_30_SECOND_PERIODS))
                 );
             }
         }
 
-        return Rebalance.composePrice(priceNumerator, currentPriceDivisor);
+        return Rebalance.composePrice(priceNumerator, currentPriceDenominator);
     }
 }

@@ -32,7 +32,6 @@ library SetTokenLibrary {
         uint256[] units;
     }
 
-
     /**
      * Validates that passed in tokens are all components of the Set
      *
@@ -60,7 +59,7 @@ library SetTokenLibrary {
      * Validates that passed in quantity is a multiple of the natural unit of the Set.
      *
      * @param _set                      Address of the Set
-     * @param _quantity                   Quantity to validate
+     * @param _quantity                 Quantity to validate
      */
     function isMultipleOfSetNaturalUnit(
         address _set,
@@ -103,4 +102,3 @@ library SetTokenLibrary {
         });
     }
 }
-

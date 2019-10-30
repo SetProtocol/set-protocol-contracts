@@ -267,6 +267,21 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the auction is active', async () => {
+      beforeEach(async () => {
+        await liquidator.startRebalance.sendTransactionAsync(
+          set1.address,
+          set2.address,
+          ether(1),
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#cancelProposal', async () => {
@@ -292,6 +307,21 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
     describe('when the caller is not a valid Set', async () => {
       beforeEach(async () => {
         subjectCaller = nonSet;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the auction is active', async () => {
+      beforeEach(async () => {
+        await liquidator.startRebalance.sendTransactionAsync(
+          set1.address,
+          set2.address,
+          ether(1),
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
       });
 
       it('should revert', async () => {
@@ -347,7 +377,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       expect(auction.endTime).to.bignumber.equal(expectedEndTime);
     });
 
-    it('sets the correct startPrice', async () => {
+    it('sets the correct startNumerator', async () => {
       await subject();
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
@@ -360,10 +390,10 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       );
       const rangeStart = await liquidator.rangeStart.callAsync();
       const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
-      expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
+      expect(auction.startNumerator).to.bignumber.equal(expectedStartPrice);
     });
 
-    it('sets the correct endPrice', async () => {
+    it('sets the correct endNumerator', async () => {
       await subject();
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
@@ -376,12 +406,27 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       );
       const rangeEnd = await liquidator.rangeEnd.callAsync();
       const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
-      expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
+      expect(auction.endNumerator).to.bignumber.equal(expectedEndPrice);
     });
 
     describe('when the caller is not a valid Set', async () => {
       beforeEach(async () => {
         subjectCaller = nonSet;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the auction is active', async () => {
+      beforeEach(async () => {
+        await liquidator.startRebalance.sendTransactionAsync(
+          set1.address,
+          set2.address,
+          ether(1),
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
       });
 
       it('should revert', async () => {
@@ -506,6 +551,20 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
         it('should revert', async () => {
           await expectRevertError(directCallSubject());
+        });
+      });
+
+      describe('when the auction is inactive', async () => {
+        beforeEach(async () => {
+          await blockchain.increaseTimeAsync(auctionPeriod.plus(1));
+
+          await liquidatorProxy.endFailedRebalance.sendTransactionAsync(
+            { from: subjectCaller, gas: DEFAULT_GAS },
+          );
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
         });
       });
     });
@@ -649,6 +708,20 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
           expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
         });
       });
+
+      describe('when the auction is inactive', async () => {
+        beforeEach(async () => {
+          await blockchain.increaseTimeAsync(auctionPeriod.plus(1));
+
+          await liquidatorProxy.endFailedRebalance.sendTransactionAsync(
+            { from: subjectCaller, gas: DEFAULT_GAS },
+          );
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
     });
 
     describe('#settleRebalance', async () => {
@@ -689,8 +762,8 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         expect(JSON.stringify(auction.auction.combinedCurrentSetUnits)).to.equal(JSON.stringify([]));
         expect(JSON.stringify(auction.auction.combinedNextSetUnits)).to.equal(JSON.stringify([]));
         expect(auction.endTime).to.bignumber.equal(ZERO);
-        expect(auction.startPrice).to.bignumber.equal(ZERO);
-        expect(auction.endPrice).to.bignumber.equal(ZERO);
+        expect(auction.startNumerator).to.bignumber.equal(ZERO);
+        expect(auction.endNumerator).to.bignumber.equal(ZERO);
       });
 
       describe('when there is a biddable quantity', async () => {
@@ -710,6 +783,20 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
         it('should revert', async () => {
           await expectRevertError(directCallSubject());
+        });
+      });
+
+      describe('when the auction is inactive', async () => {
+        beforeEach(async () => {
+          await blockchain.increaseTimeAsync(auctionPeriod.plus(1));
+
+          await liquidatorProxy.endFailedRebalance.sendTransactionAsync(
+            { from: subjectCaller, gas: DEFAULT_GAS },
+          );
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
         });
       });
     });
@@ -739,8 +826,8 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         expect(JSON.stringify(auction.auction.combinedCurrentSetUnits)).to.equal(JSON.stringify([]));
         expect(JSON.stringify(auction.auction.combinedNextSetUnits)).to.equal(JSON.stringify([]));
         expect(auction.endTime).to.bignumber.equal(ZERO);
-        expect(auction.startPrice).to.bignumber.equal(ZERO);
-        expect(auction.endPrice).to.bignumber.equal(ZERO);
+        expect(auction.startNumerator).to.bignumber.equal(ZERO);
+        expect(auction.endNumerator).to.bignumber.equal(ZERO);
       });
 
       describe('when the caller is not a valid Set', async () => {
@@ -750,6 +837,20 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
         it('should revert', async () => {
           await expectRevertError(directCallSubject());
+        });
+      });
+
+      describe('when the auction is inactive', async () => {
+        beforeEach(async () => {
+          await blockchain.increaseTimeAsync(auctionPeriod.plus(1));
+
+          await liquidatorProxy.endFailedRebalance.sendTransactionAsync(
+            { from: subjectCaller, gas: DEFAULT_GAS },
+          );
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
         });
       });
     });

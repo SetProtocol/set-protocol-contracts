@@ -6,9 +6,11 @@ import { LinearAuction } from "../../../../core/liquidators/impl/LinearAuction.s
 import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";
 import { Rebalance } from "../../../../core/lib/Rebalance.sol";
+import { SetUSDValuation } from "../../../../core/liquidators/impl/SetUSDValuation.sol";
 
 contract LinearAuctionMock is LinearAuction {
     LinearAuction.State public auction;
+    IOracleWhiteList public oracleWhiteList; // Instance of the oracle list
 
     constructor(
         IOracleWhiteList _oracleWhiteList,
@@ -22,18 +24,10 @@ contract LinearAuctionMock is LinearAuction {
             _pricePrecision,
             _auctionPeriod,
             _rangeStart,
-            _rangeEnd,
-            _oracleWhiteList            
+            _rangeEnd
         )
-    {}
-
-    function validateSets(
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        external
     {
-        super.validateSets(auction, _currentSet, _nextSet);
+        oracleWhiteList = _oracleWhiteList;
     }
 
     function initializeLinearAuction(
@@ -70,6 +64,10 @@ contract LinearAuctionMock is LinearAuction {
 
     function getNumerator() external view returns(uint256) {
         return super.getNumerator(auction);
+    }
+
+    function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
+        return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
     }
 }
 

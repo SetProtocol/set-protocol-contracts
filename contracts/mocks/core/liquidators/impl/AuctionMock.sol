@@ -44,6 +44,10 @@ contract AuctionMock is Auction {
         super.validateAuctionCompletion(auction);
     }
 
+    function isAuctionActive() external view returns(bool) {
+        return super.isAuctionActive(auction);
+    }
+
     function combinedTokenArray() external view returns(address[] memory) {
         return auction.combinedTokenArray;
     }

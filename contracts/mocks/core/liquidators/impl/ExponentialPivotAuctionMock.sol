@@ -7,9 +7,11 @@ import { ExponentialPivotAuction } from "../../../../core/liquidators/impl/Expon
 import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";
 import { Rebalance } from "../../../../core/lib/Rebalance.sol";
+import { SetUSDValuation } from "../../../../core/liquidators/impl/SetUSDValuation.sol";
 
 contract ExponentialPivotAuctionMock is ExponentialPivotAuction {
     LinearAuction.State public auction;
+    IOracleWhiteList public oracleWhiteList; // Instance of the oracle list
 
     constructor(
         IOracleWhiteList _oracleWhiteList,
@@ -23,10 +25,11 @@ contract ExponentialPivotAuctionMock is ExponentialPivotAuction {
             _pricePrecision,
             _auctionPeriod,
             _rangeStart,
-            _rangeEnd,
-            _oracleWhiteList            
+            _rangeEnd
         )
-    {}
+    {
+        oracleWhiteList = _oracleWhiteList;
+    }
 
     function initializeLinearAuction(
         ISetToken _currentSet,
@@ -44,6 +47,10 @@ contract ExponentialPivotAuctionMock is ExponentialPivotAuction {
 
     function getPrice() external view returns(Rebalance.Price memory) {
         return super.getPrice(auction);
+    }
+
+    function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
+        return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
     }
 }
 

@@ -137,13 +137,7 @@ contract Auction {
      *
      * @param _auction                Auction Setup object
      */
-    function validateAuctionCompletion(
-        Setup storage _auction
-    )
-        internal
-        view
-    {
-        // Make sure all currentSets have been rebalanced
+    function validateAuctionCompletion(Setup storage _auction) internal view {
         require(
             !hasBiddableQuantity(_auction),
             "Auction.settleRebalance: Rebalance not completed"
@@ -151,13 +145,23 @@ contract Auction {
     }
 
     /**
-     * Returns whether the reminingSets is still a quantity equal or greater than the minimum bid
+     * Returns whether the remainingSets is still a quantity equal or greater than the minimum bid
      *
      * @param _auction                Auction Setup object
-     * @return hasBiddableQuantity      Boolean whether there is a biddable quantity
+     * @return hasBiddableQuantity    Boolean whether there is a biddable quantity
      */
     function hasBiddableQuantity(Setup storage _auction) internal view returns(bool) {
         return _auction.remainingCurrentSets >= _auction.minimumBid;
+    }
+
+    /**
+     * Returns whether the auction is active
+     *
+     * @param _auction                Auction Setup object
+     * @return hasBiddableQuantity    Boolean whether the auction is active
+     */
+    function isAuctionActive(Setup storage _auction) internal view returns(bool) {
+        return _auction.startTime > 0;
     }
 
     /*

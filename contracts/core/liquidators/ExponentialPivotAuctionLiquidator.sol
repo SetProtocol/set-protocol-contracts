@@ -26,6 +26,7 @@ import { Auction } from "./impl/Auction.sol";
 import { LinearAuction } from "./impl/LinearAuction.sol";
 import { ExponentialPivotAuction } from "./impl/ExponentialPivotAuction.sol";
 import { Rebalance } from "../lib/Rebalance.sol";
+import { SetUSDValuation } from "./impl/SetUSDValuation.sol";
 
 
 /**
@@ -33,31 +34,33 @@ import { Rebalance } from "../lib/Rebalance.sol";
  * @author Set Protocol
  *
  * Contract that holds all the state and functionality required for setting up, returning prices, and tearing
- * down linear auction rebalances for RebalancingSetTokens.
+ * down exponential pivot auction rebalances for RebalancingSetTokens.
  */
-contract ExponentialPivotAuctionLiquidator is
-    ExponentialPivotAuction
-{
+contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
     using SafeMath for uint256;
 
     ICore public core;
     string public name;
+    IOracleWhiteList public oracleWhiteList; // Instance of the oracle list
     mapping(address => LinearAuction.State) public auctions;
 
     /* ============ Modifier ============ */
     modifier isValidSet() {
         requireValidSet(msg.sender);
-
         _;
     }
 
     /**
      * ExponentialPivotAuctionLiquidator constructor
      *
-     * @param _core                         Core instance
-     * @param _oracleWhiteList              Oracle WhiteList instance
-     * @param _pricePrecision               Price precision used in auctions
-     * @param _name                         Descriptive name of Liquidator
+     * @param _core                   Core instance
+     * @param _oracleWhiteList        Oracle WhiteList instance
+     * @param _pricePrecision         Price precision used in auctions
+     * @param _pricePrecision         Price precision used in auctions
+     * @param _auctionPeriod          Length of auction
+     * @param _rangeStart             Percentage above FairValue to begin auction at
+     * @param _rangeEnd               Percentage below FairValue to end auction at     
+     * @param _name                   Descriptive name of Liquidator
      */
     constructor(
         ICore _core,
@@ -73,16 +76,23 @@ contract ExponentialPivotAuctionLiquidator is
             _pricePrecision,
             _auctionPeriod,
             _rangeStart,
-            _rangeEnd,
-            _oracleWhiteList            
+            _rangeEnd
         )
     {
         core = _core;
         name = _name;
+        oracleWhiteList = _oracleWhiteList;
     }
 
     /* ============ External Functions ============ */
 
+    /**
+     * Validates that the Liquidator can generate a valid auction.
+     * Can only be called by a SetToken.
+     *
+     * @param _currentSet                   The Set to rebalance from
+     * @param _nextSet                      The Set to rebalance to
+     */
     function processProposal(
         ISetToken _currentSet,
         ISetToken _nextSet
@@ -90,17 +100,28 @@ contract ExponentialPivotAuctionLiquidator is
         external
         isValidSet
     {
-        validateSets(linearAuction(msg.sender), _currentSet, _nextSet);
+        requireAuctionInactive(auction(msg.sender));
 
-        // Check that prices are valid?
+        address[] memory combinedTokenArray = Auction.getCombinedTokenArray(_currentSet, _nextSet);
+        require(
+            oracleWhiteList.areValidAddresses(combinedTokenArray),
+            "ExponentialPivotAuctionLiquidator.processProposal: Passed token does not have matching oracle."
+        );
     }
 
     // Can only be called during proposal
     // Should we place safeguards as to when it can be called?
+    /**
+     * Validates that the Liquidator can generate a valid auction.
+     * Can only be called by a SetToken.
+     *
+     */
     function cancelProposal()
         external
         isValidSet
-    {}
+    {
+        requireAuctionInactive(auction(msg.sender));
+    }
 
     // Should we place safeguards as to when this can be called?
     function startRebalance(
@@ -111,6 +132,8 @@ contract ExponentialPivotAuctionLiquidator is
         external
         isValidSet
     {
+        requireAuctionInactive(auction(msg.sender));
+
         LinearAuction.initializeLinearAuction(
             linearAuction(msg.sender),
             _currentSet,
@@ -126,6 +149,8 @@ contract ExponentialPivotAuctionLiquidator is
         isValidSet
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
+        requireAuctionActive(auction(msg.sender));
+
         Auction.validateBidQuantity(auction(msg.sender), _quantity);
 
         Auction.reduceRemainingCurrentSets(auction(msg.sender), _quantity);
@@ -133,6 +158,7 @@ contract ExponentialPivotAuctionLiquidator is
         return getBidPrice(msg.sender, _quantity);
     }
 
+    // Validate auction has started?
     function getBidPrice(
         address _set,
         uint256 _quantity
@@ -141,9 +167,8 @@ contract ExponentialPivotAuctionLiquidator is
         view
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        // Validate auction has started
+        requireAuctionActive(auction(msg.sender));
 
-        // TODO figure out the API
         return Rebalance.decomposeTokenFlow(
             LinearAuction.getTokenFlow(linearAuction(_set), _quantity)
         );
@@ -153,6 +178,8 @@ contract ExponentialPivotAuctionLiquidator is
         external
         isValidSet
     {
+        requireAuctionActive(auction(msg.sender));
+
         Auction.validateAuctionCompletion(auction(msg.sender));
 
         clearAuctionState(msg.sender);
@@ -162,14 +189,17 @@ contract ExponentialPivotAuctionLiquidator is
         external
         isValidSet
     {
+        requireAuctionActive(auction(msg.sender));
+
         clearAuctionState(msg.sender);
     }
+
+    /* ============ Getters Functions ============ */
 
     function hasRebalanceFailed(address _set) external view returns (bool) {
         return LinearAuction.hasAuctionFailed(linearAuction(_set));
     }
 
-    /* ============ Getters Functions ============ */
     function getCombinedTokenArray(address _set) external view returns (address[] memory) {
         return auction(_set).combinedTokenArray;
     }
@@ -182,16 +212,15 @@ contract ExponentialPivotAuctionLiquidator is
         return auction(_set).combinedNextSetUnits;
     }
 
-    /* ============ Private Functions ============ */
-    function clearAuctionState(address _sender) private {
-        delete auctions[_sender];
+    /* ============ Implementing LinearAuction Function  ============ */
+    function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
+        return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
     }
 
-    function requireValidSet(address _sender) private view {
-        require(
-            core.validSets(_sender),
-            "ExponentialPivotAuctionLiquidator: Invalid or disabled proposed SetToken address"
-        );       
+    /* ============ Private Functions ============ */
+
+    function clearAuctionState(address _sender) private {
+        delete auctions[_sender];
     }
 
     function auction(address _set) private view returns(Auction.Setup storage) {
@@ -202,4 +231,24 @@ contract ExponentialPivotAuctionLiquidator is
         return auctions[_set];
     }
 
+    function requireValidSet(address _set) private view {
+        require(
+            core.validSets(_set),
+            "ExponentialPivotAuctionLiquidator: Invalid or disabled proposed SetToken address"
+        );       
+    }
+
+    function requireAuctionInactive(Auction.Setup storage _auction) private view {
+        require(
+            !Auction.isAuctionActive(_auction),
+            "ExponentialPivotAuctionLiquidator: Auction must be inactive"
+        );       
+    }
+
+    function requireAuctionActive(Auction.Setup storage _auction) private view {
+        require(
+            Auction.isAuctionActive(_auction),
+            "ExponentialPivotAuctionLiquidator: Auction must be active"
+        );       
+    }
 }

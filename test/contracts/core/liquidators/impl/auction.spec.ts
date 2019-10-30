@@ -395,4 +395,44 @@ contract('Auction', accounts => {
       });
     });
   });
+
+  describe('#isAuctionActive', async () => {
+    let subjectCaller: Address;
+    let startingCurrentSetQuantity: BigNumber;
+
+    beforeEach(async () => {
+      subjectCaller = functionCaller;
+    });
+
+    async function subject(): Promise<boolean> {
+      return auctionMock.isAuctionActive.callAsync(
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+    }
+
+    it('should return false', async () => {
+      const result = await subject();
+      expect(result).to.equal(false);
+    });
+
+    describe('when the auction has begun', async () => {
+      beforeEach(async () => {
+        startingCurrentSetQuantity = ether(10);
+
+        await blockchain.increaseTimeAsync(new BigNumber(1000));
+
+        await auctionMock.initializeAuction.sendTransactionAsync(
+          set1.address,
+          set2.address,
+          startingCurrentSetQuantity,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      });
+
+      it('should return true', async () => {
+        const result = await subject();
+        expect(result).to.equal(true);
+      });
+    });
+  });
 });

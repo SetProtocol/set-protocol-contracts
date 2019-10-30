@@ -187,10 +187,10 @@ export class LiquidatorHelper {
     auctionPeriod: BigNumber
   ): BigNumber {
     const elapsed = timestamp.sub(linearAuction.auction.startTime);
-    const priceRange = new BigNumber(linearAuction.endPrice).sub(linearAuction.startPrice);
+    const priceRange = new BigNumber(linearAuction.endNumerator).sub(linearAuction.startNumerator);
     const elapsedPrice = elapsed.mul(priceRange).div(auctionPeriod).round(0, 3);
 
-    return new BigNumber(linearAuction.startPrice).add(elapsedPrice);
+    return new BigNumber(linearAuction.startNumerator).add(elapsedPrice);
   }
 
   public calculateExponentialPivotNumerator(
@@ -202,17 +202,17 @@ export class LiquidatorHelper {
     const MAX_THIRTY_SECOND_PERIODS = new BigNumber(1000);
     const THIRTY_SECONDS = new BigNumber(30);
 
-    const { endPrice, auction } = linearAuction;
+    const { endNumerator, auction } = linearAuction;
     const elapsed = timestamp.sub(auction.startTime);
     const thirtySecondPeriods = elapsed.sub(auctionPeriod).div(THIRTY_SECONDS).round(0, 3);
 
     if (elapsed.lte(auctionPeriod)) {
       return this.calculateCurrentPrice(linearAuction, timestamp, auctionPeriod);
     } else if (thirtySecondPeriods.lt(MAX_THIRTY_SECOND_PERIODS)) {
-      return endPrice;
+      return endNumerator;
     } else {
-      const extension = endPrice.mul(thirtySecondPeriods.sub(MAX_THIRTY_SECOND_PERIODS));
-      return endPrice.add(extension);
+      const extension = endNumerator.mul(thirtySecondPeriods.sub(MAX_THIRTY_SECOND_PERIODS));
+      return endNumerator.add(extension);
     }
   }
 

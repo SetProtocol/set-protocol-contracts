@@ -19,7 +19,6 @@ import {
   UpdatableOracleMockContract,
   VaultContract,
 } from '@utils/contracts';
-import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import {
@@ -194,46 +193,6 @@ contract('LinearAuction', accounts => {
     });
   });
 
-  describe('#validateSets', async () => {
-    let subjectCaller: Address;
-    let subjectCurrentSet: Address;
-    let subjectNextSet: Address;
-
-    beforeEach(async () => {
-      subjectCaller = functionCaller;
-      subjectCurrentSet = set1.address;
-      subjectNextSet = set2.address;
-    });
-
-    after(async () => {
-    });
-
-    async function subject(): Promise<string> {
-      return auctionMock.validateSets.sendTransactionAsync(
-        subjectCurrentSet,
-        subjectNextSet,
-        { from: subjectCaller, gas: DEFAULT_GAS },
-      );
-    }
-
-    it('does not revert', async () => {
-      await subject();
-    });
-
-    describe('when component does not have an associated oracle', async () => {
-      beforeEach(async () => {
-        await oracleWhiteList.removeTokenOraclePair.sendTransactionAsync(
-          component3.address,
-          { from: ownerAccount, gas: DEFAULT_GAS }
-        );
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
   describe('#initializeLinearAuction', async () => {
     let subjectCaller: Address;
     let subjectCurrentSet: Address;
@@ -281,7 +240,7 @@ contract('LinearAuction', accounts => {
       expect(auction.endTime).to.bignumber.equal(expectedEndTime);
     });
 
-    it('sets the correct startPrice', async () => {
+    it('sets the correct startNumerator', async () => {
       await subject();
 
       const auction: any = await auctionMock.auction.callAsync();
@@ -294,10 +253,10 @@ contract('LinearAuction', accounts => {
       );
       const rangeStart = await auctionMock.rangeStart.callAsync();
       const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
-      expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
+      expect(auction.startNumerator).to.bignumber.equal(expectedStartPrice);
     });
 
-    it('sets the correct endPrice', async () => {
+    it('sets the correct endNumerator', async () => {
       await subject();
 
       const auction: any = await auctionMock.auction.callAsync();
@@ -310,7 +269,7 @@ contract('LinearAuction', accounts => {
       );
       const rangeEnd = await auctionMock.rangeEnd.callAsync();
       const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
-      expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
+      expect(auction.endNumerator).to.bignumber.equal(expectedEndPrice);
     });
   });
 

@@ -41,11 +41,7 @@ contract LiquidatorProxy {
         liquidator.endFailedRebalance();
     }
 
-    function placeBid(
-        uint256 _quantity
-    )
-        external
-    {
+    function placeBid(uint256 _quantity) external {
         (
             address[] memory combinedTokens, 
             uint256[] memory inflowArray, 

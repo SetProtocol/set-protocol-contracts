@@ -23,14 +23,13 @@ import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { Auction } from "./Auction.sol";
 import { Rebalance } from "../../lib/Rebalance.sol";
-import { SetUSDValuation } from "./SetUSDValuation.sol";
 
 
 /**
  * @title LinearAuction
  * @author Set Protocol
  *
- * Library containing utility functions for computing and auction prices for a linearly improving price auction.
+ * Library containing utility functions for computing auction Price for a linear price auction.
  */
 contract LinearAuction is Auction {
     using SafeMath for uint256;
@@ -39,15 +38,14 @@ contract LinearAuction is Auction {
     struct State {
         Auction.Setup auction;
         uint256 endTime;
-        uint256 startPrice;
-        uint256 endPrice;
+        uint256 startNumerator;
+        uint256 endNumerator;
     }
 
     /* ============ State Variables ============ */
     uint256 public auctionPeriod; // Length in seconds of auction
     uint256 public rangeStart; // Percentage above FairValue to begin auction at
     uint256 public rangeEnd;  // Percentage below FairValue to end auction at
-    IOracleWhiteList public oracleWhiteList; // Instance of the oracle list
 
     /**
      * LinearAuction constructor
@@ -56,14 +54,12 @@ contract LinearAuction is Auction {
      * @param _auctionPeriod          Length of auction
      * @param _rangeStart             Percentage above FairValue to begin auction at
      * @param _rangeEnd               Percentage below FairValue to end auction at
-     * @param _oracleWhiteList        Price precision used in auctions
      */
     constructor(
         uint256 _pricePrecision,
         uint256 _auctionPeriod,
         uint256 _rangeStart,
-        uint256 _rangeEnd,
-        IOracleWhiteList _oracleWhiteList
+        uint256 _rangeEnd
     )
         public
         Auction(_pricePrecision)
@@ -72,33 +68,9 @@ contract LinearAuction is Auction {
         auctionPeriod = _auctionPeriod;
         rangeStart = _rangeStart;
         rangeEnd = _rangeEnd;
-        oracleWhiteList = _oracleWhiteList;
     }
 
     /* ============ Internal Functions ============ */
-
-    /**
-     * Validates the Sets are supposed by the oracle.
-     *
-     * @param _linearAuction                LinearAuction State object
-     * @param _currentSet                   The Set to rebalance from
-     * @param _nextSet                      The Set to rebalance to
-     */
-    function validateSets(
-        State storage _linearAuction,
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        internal
-        view
-    {
-        // Check that all components in the rebalance have a matching oracle
-        address[] memory combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
-        require(
-            oracleWhiteList.areValidAddresses(combinedTokenArray),
-            "LinearAuctionLiquidator.processProposal: Passed token does not have matching oracle."
-        );
-    }
 
     /**
      * Populates the linear auction struct following an auction initiation.
@@ -124,8 +96,8 @@ contract LinearAuction is Auction {
         );
 
         uint256 fairValue = calculateFairValue(_currentSet, _nextSet);
-        _linearAuction.startPrice = calculateStartPrice(fairValue);
-        _linearAuction.endPrice = calculateEndPrice(fairValue);
+        _linearAuction.startNumerator = calculateStartNumerator(fairValue);
+        _linearAuction.endNumerator = calculateEndNumerator(fairValue);
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
 
@@ -145,8 +117,6 @@ contract LinearAuction is Auction {
         view
         returns (Rebalance.TokenFlow memory)
     {
-        // Return arrays reprsenting token inflows and outflows required to complete bid at current
-        // price for passed in quantity
         return Auction.calculateTokenFlow(
             _linearAuction.auction,
             _quantity,
@@ -191,15 +161,14 @@ contract LinearAuction is Auction {
      */
     function getNumerator(State storage _linearAuction) internal view returns (uint256) {
         uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
-        uint256 range = _linearAuction.endPrice.sub(_linearAuction.startPrice);
+        uint256 range = _linearAuction.endNumerator.sub(_linearAuction.startNumerator);
         uint256 elapsedPrice = elapsed.mul(range).div(auctionPeriod);
 
-        return _linearAuction.startPrice.add(elapsedPrice);
+        return _linearAuction.startNumerator.add(elapsedPrice);
     }
 
     /**
      * Calculates the fair value based on the USD values of the next and current Sets.
-     * TODO: Add formula for fair value
      *
      * @param _currentSet             The Set to rebalance from
      * @param _nextSet                The Set to rebalance to
@@ -213,8 +182,8 @@ contract LinearAuction is Auction {
         view
         returns (uint256)
     {
-        uint256 currentSetUSDValue = SetUSDValuation.calculateSetTokenDollarValue(_currentSet, oracleWhiteList);
-        uint256 nextSetUSDValue = SetUSDValuation.calculateSetTokenDollarValue(_nextSet, oracleWhiteList);
+        uint256 currentSetUSDValue = calculateUSDValueOfSet(_currentSet);
+        uint256 nextSetUSDValue = calculateUSDValueOfSet(_nextSet);
 
         return nextSetUSDValue.mul(Auction.pricePrecision).div(currentSetUSDValue);
     }
@@ -223,9 +192,9 @@ contract LinearAuction is Auction {
      * Calculates the linear auction start price
      *
      * @param _fairValue              Fair value figure
-     * @return startPrice             Value to start auction at
+     * @return startNumerator             Value to start auction at
      */
-    function calculateStartPrice(uint256 _fairValue) internal view returns(uint256) {
+    function calculateStartNumerator(uint256 _fairValue) internal view returns(uint256) {
         uint256 startRange = _fairValue.mul(rangeStart).div(100);
         return _fairValue.sub(startRange);
     }
@@ -234,10 +203,18 @@ contract LinearAuction is Auction {
      * Calculates the linear auction end price
      *
      * @param _fairValue              Fair value figure
-     * @return startPrice             Value to start auction at
+     * @return startNumerator             Value to start auction at
      */
-    function calculateEndPrice(uint256 _fairValue) internal view returns(uint256) {
+    function calculateEndNumerator(uint256 _fairValue) internal view returns(uint256) {
         uint256 endRange = _fairValue.mul(rangeEnd).div(100);
         return _fairValue.add(endRange);
     }
+
+    /**
+     * Unimplemented calculateUSDValue function.
+     *
+     * @param _set              Instance of SetToken
+     * @return USDValue         USD Value of the Set Token
+     */
+    function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256);
 }

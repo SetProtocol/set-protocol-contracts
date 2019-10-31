@@ -74,7 +74,7 @@ contract('StartRebalance', accounts => {
     erc20Helper,
     blockchain
   );
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper)
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -108,7 +108,7 @@ contract('StartRebalance', accounts => {
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
 
-    liquidatorMock = await liquidatorHelper.deployLiquidatorMock();
+    liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
   });
 

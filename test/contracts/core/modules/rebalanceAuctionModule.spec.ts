@@ -225,7 +225,7 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it('transfers the correct amount of tokens to the bidder in the Vault', async () => {
-        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -246,14 +246,14 @@ contract('RebalanceAuctionModule', accounts => {
           deployerAccount
         );
         const expectedReceiverBalances = _.map(oldReceiverBalances, (balance, index) =>
-          balance.add(expectedTokenFlows['outflowArray'][index])
+          balance.add(expectedTokenFlow['outflowArray'][index])
         );
 
         expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
       });
 
       it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
-        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -274,7 +274,7 @@ contract('RebalanceAuctionModule', accounts => {
           rebalancingSetToken.address
         );
         const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
-          balance.add(expectedTokenFlows['inflowArray'][index]).sub(expectedTokenFlows['outflowArray'][index])
+          balance.add(expectedTokenFlow['inflowArray'][index]).sub(expectedTokenFlow['outflowArray'][index])
         );
 
         expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
@@ -293,7 +293,7 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it('emits a placeBid event', async () => {
-        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -308,8 +308,8 @@ contract('RebalanceAuctionModule', accounts => {
           subjectCaller,
           subjectQuantity,
           combinedTokenArray,
-          expectedTokenFlows['inflowArray'],
-          expectedTokenFlows['outflowArray'],
+          expectedTokenFlow['inflowArray'],
+          expectedTokenFlow['outflowArray'],
           rebalanceAuctionModuleMock.address,
         );
 
@@ -373,7 +373,7 @@ contract('RebalanceAuctionModule', accounts => {
         });
 
         it('transfers the correct amount of tokens to the bidder in the Vault', async () => {
-          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+          const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
             roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -394,14 +394,14 @@ contract('RebalanceAuctionModule', accounts => {
             deployerAccount
           );
           const expectedReceiverBalances = _.map(oldReceiverBalances, (balance, index) =>
-            balance.add(expectedTokenFlows['outflowArray'][index])
+            balance.add(expectedTokenFlow['outflowArray'][index])
           );
 
           expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
         });
 
         it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
-          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+          const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
             roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -422,7 +422,7 @@ contract('RebalanceAuctionModule', accounts => {
             rebalancingSetToken.address
           );
           const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
-            balance.add(expectedTokenFlows['inflowArray'][index]).sub(expectedTokenFlows['outflowArray'][index])
+            balance.add(expectedTokenFlow['inflowArray'][index]).sub(expectedTokenFlow['outflowArray'][index])
           );
           expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
         });
@@ -440,7 +440,7 @@ contract('RebalanceAuctionModule', accounts => {
         });
 
         it('emits a placeBid event', async () => {
-          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+          const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
             roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -455,8 +455,8 @@ contract('RebalanceAuctionModule', accounts => {
             subjectCaller,
             roundedQuantity,
             combinedTokenArray,
-            expectedTokenFlows['inflowArray'],
-            expectedTokenFlows['outflowArray'],
+            expectedTokenFlow['inflowArray'],
+            expectedTokenFlow['outflowArray'],
             rebalanceAuctionModuleMock.address,
           );
 
@@ -586,7 +586,7 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it("transfers the correct amount of tokens to the bidder's wallet", async () => {
-        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -607,14 +607,14 @@ contract('RebalanceAuctionModule', accounts => {
           subjectCaller
         );
         const expectedReceiverBalances = _.map(oldReceiverBalances, (balance, index) =>
-          balance.add(expectedTokenFlows['outflowArray'][index]).sub(expectedTokenFlows['inflowArray'][index])
+          balance.add(expectedTokenFlow['outflowArray'][index]).sub(expectedTokenFlow['inflowArray'][index])
         );
 
         expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
       });
 
       it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
-        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -635,7 +635,7 @@ contract('RebalanceAuctionModule', accounts => {
           rebalancingSetToken.address
         );
         const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
-          balance.add(expectedTokenFlows['inflowArray'][index]).sub(expectedTokenFlows['outflowArray'][index])
+          balance.add(expectedTokenFlow['inflowArray'][index]).sub(expectedTokenFlow['outflowArray'][index])
         );
         expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
       });
@@ -653,7 +653,7 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it('emits a placeBid event', async () => {
-        const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -668,8 +668,8 @@ contract('RebalanceAuctionModule', accounts => {
           subjectCaller,
           subjectQuantity,
           combinedTokenArray,
-          expectedTokenFlows['inflowArray'],
-          expectedTokenFlows['outflowArray'],
+          expectedTokenFlow['inflowArray'],
+          expectedTokenFlow['outflowArray'],
           rebalanceAuctionModuleMock.address,
         );
 
@@ -733,7 +733,7 @@ contract('RebalanceAuctionModule', accounts => {
         });
 
         it("transfers the correct amount of tokens to the bidder's wallet", async () => {
-          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+          const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
             roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -754,14 +754,14 @@ contract('RebalanceAuctionModule', accounts => {
             subjectCaller
           );
           const expectedReceiverBalances = _.map(oldReceiverBalances, (balance, index) =>
-            balance.add(expectedTokenFlows['outflowArray'][index]).sub(expectedTokenFlows['inflowArray'][index])
+            balance.add(expectedTokenFlow['outflowArray'][index]).sub(expectedTokenFlow['inflowArray'][index])
           );
 
           expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
         });
 
         it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
-          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+          const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
             roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -782,7 +782,7 @@ contract('RebalanceAuctionModule', accounts => {
             rebalancingSetToken.address
           );
           const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
-            balance.add(expectedTokenFlows['inflowArray'][index]).sub(expectedTokenFlows['outflowArray'][index])
+            balance.add(expectedTokenFlow['inflowArray'][index]).sub(expectedTokenFlow['outflowArray'][index])
           );
 
           expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
@@ -801,7 +801,7 @@ contract('RebalanceAuctionModule', accounts => {
         });
 
         it('emits a placeBid event', async () => {
-          const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(
+          const expectedTokenFlow = await rebalancingHelper.constructInflowOutflowArraysAsync(
             rebalancingSetToken,
             roundedQuantity,
             DEFAULT_AUCTION_PRICE_NUMERATOR
@@ -816,8 +816,8 @@ contract('RebalanceAuctionModule', accounts => {
             subjectCaller,
             roundedQuantity,
             combinedTokenArray,
-            expectedTokenFlows['inflowArray'],
-            expectedTokenFlows['outflowArray'],
+            expectedTokenFlow['inflowArray'],
+            expectedTokenFlow['outflowArray'],
             rebalanceAuctionModuleMock.address,
           );
 

@@ -1,4 +1,5 @@
 import { Address } from 'set-protocol-utils';
+import * as _ from 'lodash';
 import {
   CommonValidationsLibraryMockContract,
   CoreContract,
@@ -9,15 +10,18 @@ import {
   ExchangeIssuanceLibraryMockContract,
   PlaceBidMockContract,
   RebalancingSetIssuanceMockContract,
+  SetMathMockContract,
   SetTokenLibraryMockContract,
+  SetUSDValuationMockContract,
   TransferProxyContract,
   TokenFlushMockContract,
+  UpdatableOracleMockContract,
   VaultContract,
   ZeroExOrderLibraryMockContract
 } from '../contracts';
-import {
-  getWeb3,
-} from '../web3Helper';
+import { BigNumber } from 'bignumber.js';
+import { getWeb3, getContractInstance } from '../web3Helper';
+import { DEFAULT_GAS } from '@utils/constants';
 
 const web3 = getWeb3();
 const Bytes32LibraryMock = artifacts.require('Bytes32LibraryMock');
@@ -31,9 +35,12 @@ const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
 const PlaceBidMock = artifacts.require('PlaceBidMock');
 const RebalancingSetIssuanceMock = artifacts.require('RebalancingSetIssuanceMock');
+const SetMathMock = artifacts.require('SetMathMock');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
 const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
+const SetUSDValuationMock = artifacts.require('SetUSDValuationMock');
 const TokenFlushMock = artifacts.require('TokenFlushMock');
+const UpdatableOracleMock = artifacts.require('UpdatableOracleMock');
 const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
 
 
@@ -60,7 +67,7 @@ export class LibraryMockHelper {
     );
 
     return new CommonValidationsLibraryMockContract(
-      new web3.eth.Contract(commonValidationsMockContract.abi, commonValidationsMockContract.address),
+      getContractInstance(commonValidationsMockContract),
       { from },
     );
   }
@@ -73,7 +80,7 @@ export class LibraryMockHelper {
     );
 
     return new Bytes32LibraryMockContract(
-      new web3.eth.Contract(bytes32MockContract.abi, bytes32MockContract.address),
+      getContractInstance(bytes32MockContract),
       { from },
     );
   }
@@ -86,7 +93,7 @@ export class LibraryMockHelper {
     );
 
     return new CommonMathMockContract(
-      new web3.eth.Contract(truffleCommonMathLibrary.abi, truffleCommonMathLibrary.address),
+      getContractInstance(truffleCommonMathLibrary),
       { from },
     );
   }
@@ -105,7 +112,7 @@ export class LibraryMockHelper {
     );
 
     return new CoreIssuanceLibraryMockContract(
-      new web3.eth.Contract(truffleCoreIssuanceLibraryMock.abi, truffleCoreIssuanceLibraryMock.address),
+      getContractInstance(truffleCoreIssuanceLibraryMock),
       { from },
     );
   }
@@ -118,7 +125,7 @@ export class LibraryMockHelper {
     );
 
     return new ExchangeIssuanceLibraryMockContract(
-      new web3.eth.Contract(exchangeIssuanceMockContract.abi, exchangeIssuanceMockContract.address),
+      getContractInstance(exchangeIssuanceMockContract),
       { from },
     );
   }
@@ -141,7 +148,7 @@ export class LibraryMockHelper {
     );
 
     return new TokenFlushMockContract(
-      new web3.eth.Contract(tokenFlushMockContract.abi, tokenFlushMockContract.address),
+      getContractInstance(tokenFlushMockContract),
       { from },
     );
   }
@@ -164,7 +171,7 @@ export class LibraryMockHelper {
     );
 
     return new RebalancingSetIssuanceMockContract(
-      new web3.eth.Contract(rebalancingSetIssuanceMockContract.abi, rebalancingSetIssuanceMockContract.address),
+      getContractInstance(rebalancingSetIssuanceMockContract),
       { from },
     );
   }
@@ -177,7 +184,18 @@ export class LibraryMockHelper {
     );
 
     return new ERC20WrapperMockContract(
-      new web3.eth.Contract(erc20WrapperMockContract.abi, erc20WrapperMockContract.address),
+      getContractInstance(erc20WrapperMockContract),
+      { from },
+    );
+  }
+
+  public async deploySetMathAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<SetMathMockContract> {
+    const setMathMockContract = await SetMathMock.new({ from });
+
+    return new SetMathMockContract(
+      getContractInstance(setMathMockContract),
       { from },
     );
   }
@@ -196,8 +214,65 @@ export class LibraryMockHelper {
     );
 
     return new SetTokenLibraryMockContract(
-      new web3.eth.Contract(setTokenLibraryMockContract.abi, setTokenLibraryMockContract.address),
+      getContractInstance(setTokenLibraryMockContract),
       { from },
+    );
+  }
+
+  public async deploySetUSDValuationMockAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<SetUSDValuationMockContract> {
+    const setValuationMockContract = await SetUSDValuationMock.new({ from });
+
+    return new SetUSDValuationMockContract(
+      getContractInstance(setValuationMockContract),
+      { from },
+    );
+  }
+
+  public async deployUpdatableOracleMocksAsync(
+    startingPrices: BigNumber[],
+    from: Address = this._contractOwnerAddress
+  ): Promise<UpdatableOracleMockContract[]> {
+    const mockOracles: UpdatableOracleMockContract[] = [];
+    const oraclePromises = _.map(startingPrices, async price => {
+      return await UpdatableOracleMock.new(
+        price,
+        { from }
+      );
+    });
+
+    await Promise.all(oraclePromises).then(oracles => {
+      _.each(oracles, oracleMock => {
+        mockOracles.push(new UpdatableOracleMockContract(
+          new web3.eth.Contract(oracleMock.abi, oracleMock.address),
+          { from }
+        ));
+      });
+    });
+
+    return mockOracles;
+  }
+
+  public async deployUpdatableOracleMockAsync(
+    price: BigNumber,
+    from: Address = this._contractOwnerAddress
+  ): Promise<UpdatableOracleMockContract> {
+    const oracleMock = await UpdatableOracleMock.new(price, { from });
+
+    return new UpdatableOracleMockContract(
+      getContractInstance(oracleMock),
+      { from }
+    );
+  }
+
+  public getUpdatableOracleMockInstance(
+     oracleAddress: Address,
+     from: Address = this._contractOwnerAddress,
+  ): UpdatableOracleMockContract {
+    return new UpdatableOracleMockContract(
+      getContractInstance(UpdatableOracleMock, oracleAddress),
+      { from, gas: DEFAULT_GAS },
     );
   }
 
@@ -209,7 +284,7 @@ export class LibraryMockHelper {
     );
 
     return new ZeroExOrderLibraryMockContract(
-      new web3.eth.Contract(zeroExExchangeWrapperInstance.abi, zeroExExchangeWrapperInstance.address),
+      getContractInstance(zeroExExchangeWrapperInstance),
       { from },
     );
   }
@@ -222,7 +297,7 @@ export class LibraryMockHelper {
     );
 
     return new PlaceBidMockContract(
-      new web3.eth.Contract(placeBidMockContract.abi, placeBidMockContract.address),
+      getContractInstance(placeBidMockContract),
       { from },
     );
   }

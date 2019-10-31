@@ -70,7 +70,7 @@ contract('BackwardsCompatability', accounts => {
     erc20Helper,
     blockchain
   );
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper)
 
   let currentSetToken: SetTokenContract;
   let nextSetToken: SetTokenContract;
@@ -107,7 +107,7 @@ contract('BackwardsCompatability', accounts => {
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
 
-    liquidatorMock = await liquidatorHelper.deployLiquidatorMock();
+    liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
 
     const setTokensToDeploy = 2;

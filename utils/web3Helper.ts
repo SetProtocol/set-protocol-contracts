@@ -8,12 +8,9 @@ export const getWeb3 = () => {
 };
 
 // assumes passed-in web3 is v1.0 and creates a function to receive contract name
-export const getContractInstance = contractName => {
+export const getContractInstance = (artifact: any, oracleAddress: string = artifact.address) => {
   const web3 = getWeb3();
-  const artifact = artifacts.require(contractName); // globally injected artifacts helper
-  const deployedAddress = artifact.networks[artifact.network_id].address;
-  const instance = new web3.eth.Contract(artifact.abi, deployedAddress);
-  return instance;
+  return new web3.eth.Contract(artifact.abi, oracleAddress);
 };
 
 export const getGasUsageInEth = async txHash => {

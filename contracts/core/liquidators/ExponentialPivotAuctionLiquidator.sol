@@ -212,7 +212,7 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
      * Validates whether the rebalance has failed. 
      *
      * @param _set                    Address of the SetToken
-     * @returns boolean               Boolean whether the rebalance has failed
+     * @return boolean               Boolean whether the rebalance has failed
      */
     function hasRebalanceFailed(address _set) external view returns (bool) {
         return LinearAuction.hasAuctionFailed(linearAuction(_set));
@@ -245,7 +245,7 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
      * Retrieves the current auction price for the particular Set
      *
      * @param _set                    Address of the SetToken
-     * @returns                       The USD value of the Set
+     * @return                       The USD value of the Set
      */
     function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
         return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);

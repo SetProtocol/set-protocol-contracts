@@ -67,7 +67,7 @@ contract ExponentialPivotAuction is LinearAuction {
      * Calculate the Price for an auction given defined price and time parameters
      *
      * @param _linearAuction        LinearAuction State object
-     * @returns Price               Struct denoting price numeartor and denominator
+     * @return Price               Struct denoting price numeartor and denominator
      */
     function getPrice(
         LinearAuction.State storage _linearAuction

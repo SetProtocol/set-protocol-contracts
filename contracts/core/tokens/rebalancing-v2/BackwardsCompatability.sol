@@ -40,11 +40,21 @@ contract BackwardsCompatability is
     /* ============ Getters ============ */
 
     function getAuctionPriceParameters() external view returns (uint256[] memory) {
-        return liquidator.getAuctionPriceParameters(address(this));
+        RebalancingLibrary.AuctionPriceParameters memory params = liquidator.auctionPriceParameters(
+            address(this)
+        );
+
+        uint256[] memory auctionPriceParams = new uint256[](4);
+        auctionPriceParams[0] = params.auctionStartTime;
+        auctionPriceParams[1] = params.auctionTimeToPivot;
+        auctionPriceParams[2] = params.auctionStartPrice;
+        auctionPriceParams[2] = params.auctionPivotPrice;
+
+        return auctionPriceParams;
     }
 
     function getCombinedCurrentUnits() external view returns (uint256[] memory) {
-        return liquidator.getCombinedCurrentUnits(address(this));
+        return liquidator.getCombinedCurrentSetUnits(address(this));
     }
 
     function getCombinedNextSetUnits() external view returns (uint256[] memory) {
@@ -63,7 +73,7 @@ contract BackwardsCompatability is
     }
 
     function startingCurrentSetAmount() external view returns (uint256) {
-        return liquidator.startingCurrentSetAmount(address(this));
+        return liquidator.startingCurrentSets(address(this));
     }
 
     function auctionPriceParameters() external view
@@ -73,7 +83,7 @@ contract BackwardsCompatability is
     }
 
     function auctionLibrary() external view returns (address) {
-        return liquidator.auctionLibrary(address(this));
+        return address(liquidator);
     }
 
     /*

@@ -39,6 +39,13 @@ interface ILiquidator {
     function cancelProposal()
         external;
 
+    function startRebalance(
+        ISetToken _currentSet,
+        ISetToken _nextSet,
+        uint256 _startingCurrentSetQuantity
+    )
+        external;
+
     function getBidPrice(
         address _set,
         uint256 _quantity
@@ -53,29 +60,15 @@ interface ILiquidator {
         external
         returns (address[] memory, uint256[] memory, uint256[] memory);
 
-    function startRebalance(
-        ISetToken _currentSet,
-        ISetToken _nextSet,
-        uint256 _startingCurrentSetQuantity
-    )
-        external;
 
     function settleRebalance()
         external;
 
-    function hasRebalanceFailed(address _set) external view returns (bool);        
-
     function endFailedRebalance() external;
-
-    /* ============ Backwards Compatability Getters ============ */
-
-    function auctionLibrary(address _set) external view returns (address);
 
     // ----------------------------------------------------------------------
     // Auction Price Parameters
     // ----------------------------------------------------------------------
-
-    function getAuctionPriceParameters(address _set) external view returns (uint256[] memory);
 
     function auctionPriceParameters(address _set)
         external
@@ -83,13 +76,14 @@ interface ILiquidator {
         returns (RebalancingLibrary.AuctionPriceParameters memory);
 
     // ----------------------------------------------------------------------
-    // Bidding Parameters
+    // Auction Parameters
     // ----------------------------------------------------------------------
 
+    function hasRebalanceFailed(address _set) external view returns (bool);        
     function minimumBid(address _set) external view returns (uint256);
+    function startingCurrentSets(address _set) external view returns (uint256);
     function remainingCurrentSets(address _set) external view returns (uint256);
-    function getCombinedCurrentUnits(address _set) external view returns (uint256[] memory);
+    function getCombinedCurrentSetUnits(address _set) external view returns (uint256[] memory);
     function getCombinedNextSetUnits(address _set) external view returns (uint256[] memory);
     function getCombinedTokenArray(address _set) external view returns (address[] memory);
-    function startingCurrentSetAmount(address _set) external view returns (uint256);
 }

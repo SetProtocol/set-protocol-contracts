@@ -37,7 +37,6 @@ contract LiquidatorMock is
     using AddressArrayUtils for address[];
 
     // Legacy Data
-    address private _auctionLibrary;
     RebalancingLibrary.AuctionPriceParameters private auctionPriceParams;
 
     uint256 constant public priceDivisor = 1000;
@@ -190,10 +189,6 @@ contract LiquidatorMock is
         auctionParams[2] = auctionPriceParams.auctionStartPrice;
         auctionParams[3] = auctionPriceParams.auctionPivotPrice;
         return auctionParams;
-    }
-
-    function auctionLibrary(address _set) external view returns (address) {
-        return _auctionLibrary;
     }
 
     function minimumBid(address _set) external view returns (uint256) {

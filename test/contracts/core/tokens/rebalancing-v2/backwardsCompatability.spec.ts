@@ -267,21 +267,6 @@ contract('BackwardsCompatability', accounts => {
     });
   });
 
-  describe('#auctionLibrary', async () => {
-    async function subject(): Promise<Address> {
-      return rebalancingSetToken.auctionLibrary.callAsync();
-    }
-
-    it('returns the correct auctionLibrary', async () => {
-      const retrievedAuctionLibrary = await subject();
-
-      const auctionLibrary =  await liquidatorMock.auctionLibrary.callAsync(
-        rebalancingSetToken.address
-      );
-      expect(retrievedAuctionLibrary).to.equal(auctionLibrary);
-    });
-  });
-
   describe('#getFailedAuctionWithdrawComponents', async () => {
     async function subject(): Promise<Address[]> {
       return rebalancingSetToken.getFailedAuctionWithdrawComponents.callAsync();

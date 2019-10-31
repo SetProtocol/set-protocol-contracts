@@ -20,12 +20,14 @@ pragma experimental "ABIEncoderV2";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ICore } from "../interfaces/ICore.sol";
+import { ILiquidator } from "../interfaces/ILiquidator.sol";
 import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { Auction } from "./impl/Auction.sol";
 import { LinearAuction } from "./impl/LinearAuction.sol";
 import { ExponentialPivotAuction } from "./impl/ExponentialPivotAuction.sol";
 import { Rebalance } from "../lib/Rebalance.sol";
+import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 import { SetUSDValuation } from "./impl/SetUSDValuation.sol";
 
 
@@ -36,7 +38,7 @@ import { SetUSDValuation } from "./impl/SetUSDValuation.sol";
  * Contract that holds all the state and functionality required for setting up, returning prices, and tearing
  * down exponential pivot auction rebalances for RebalancingSetTokens.
  */
-contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
+contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidator {
     using SafeMath for uint256;
 
     ICore public core;
@@ -208,35 +210,46 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
 
     /* ============ Getters Functions ============ */
 
-    /**
-     * Validates whether the rebalance has failed. 
-     *
-     * @param _set                    Address of the SetToken
-     * @return boolean               Boolean whether the rebalance has failed
-     */
     function hasRebalanceFailed(address _set) external view returns (bool) {
         return LinearAuction.hasAuctionFailed(linearAuction(_set));
     }
 
-    /**
-     * Gets the auction's combinedTokenArray
-     */
+    function minimumBid(address _set) external view returns (uint256) {
+        return auction(_set).minimumBid;
+    }
+
+    function remainingCurrentSets(address _set) external view returns (uint256) {
+        return auction(_set).remainingCurrentSets;
+    }
+
+    function startingCurrentSets(address _set) external view returns (uint256) {
+        return auction(_set).startingCurrentSets;
+    }
+
     function getCombinedTokenArray(address _set) external view returns (address[] memory) {
         return auction(_set).combinedTokenArray;
     }
 
-    /**
-     * Gets the auction's currentSetUnits
-     */
     function getCombinedCurrentSetUnits(address _set) external view returns (uint256[] memory) {
         return auction(_set).combinedCurrentSetUnits;
     }
 
-    /**
-     * Gets the auction's nextSetUnits
-     */
     function getCombinedNextSetUnits(address _set) external view returns (uint256[] memory) {
         return auction(_set).combinedNextSetUnits;
+    }
+
+
+    function auctionPriceParameters(address _set)
+        external
+        view
+        returns (RebalancingLibrary.AuctionPriceParameters memory)
+    {
+        return RebalancingLibrary.AuctionPriceParameters({
+            auctionStartTime: auction(_set).startTime,
+            auctionTimeToPivot: linearAuction(_set).endTime,
+            auctionStartPrice: linearAuction(_set).startNumerator,
+            auctionPivotPrice: linearAuction(_set).endNumerator
+        });
     }
 
     /* ============ Implementing LinearAuction Function  ============ */
@@ -253,9 +266,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
 
     /* ============ Private Functions ============ */
 
-    /**
-     * Clears auction state.
-     */
     function clearAuctionState(address _set) private {
         delete auctions[_set];
     }

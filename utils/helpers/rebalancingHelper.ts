@@ -6,6 +6,7 @@ import {
   ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreMockContract,
+  ExponentialPivotAuctionLiquidatorContract,
   LinearAuctionPriceCurveContract,
   LiquidatorMockContract,
   SetTokenContract,

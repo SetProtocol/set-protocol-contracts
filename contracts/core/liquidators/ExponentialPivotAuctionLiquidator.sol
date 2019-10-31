@@ -113,16 +113,12 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
      * Validates that the Liquidator can generate a valid auction.
      * Can only be called by a SetToken.
      */
-    function cancelProposal()
-        external
-        isValidSet
-    {
+    function cancelProposal() external isValidSet {
         requireAuctionInactive(auction(msg.sender));
     }
 
     /**
-     * Initiates a linear auction.
-     * Can only be called by a SetToken.
+     * Initiates a linear auction. Can only be called by a SetToken.
      *
      * @param _currentSet                   The Set to rebalance from
      * @param _nextSet                      The Set to rebalance to
@@ -172,7 +168,7 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
     /**
      * Retrieves the current auction price for the particular Set
      *
-     * @param _quantity               The currentSetQuantity to rebalance
+     * @param _set                    Address of the SetToken
      * @param _quantity               The currentSetQuantity to rebalance
      */
     function getBidPrice(
@@ -190,10 +186,10 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
         );
     }
 
-    function settleRebalance()
-        external
-        isValidSet
-    {
+    /**
+     * Validates auction completion and clears auction state.
+     */
+    function settleRebalance() external isValidSet {
         requireAuctionActive(auction(msg.sender));
 
         Auction.validateAuctionCompletion(auction(msg.sender));
@@ -201,10 +197,10 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
         clearAuctionState(msg.sender);
     }
 
-    function endFailedRebalance()
-        external
-        isValidSet
-    {
+    /**
+     * Clears auction state.
+     */
+    function endFailedRebalance() external isValidSet {
         requireAuctionActive(auction(msg.sender));
 
         clearAuctionState(msg.sender);
@@ -212,41 +208,75 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
 
     /* ============ Getters Functions ============ */
 
+    /**
+     * Validates whether the rebalance has failed. 
+     *
+     * @param _set                    Address of the SetToken
+     * @returns boolean               Boolean whether the rebalance has failed
+     */
     function hasRebalanceFailed(address _set) external view returns (bool) {
         return LinearAuction.hasAuctionFailed(linearAuction(_set));
     }
 
+    /**
+     * Gets the auction's combinedTokenArray
+     */
     function getCombinedTokenArray(address _set) external view returns (address[] memory) {
         return auction(_set).combinedTokenArray;
     }
 
+    /**
+     * Gets the auction's currentSetUnits
+     */
     function getCombinedCurrentSetUnits(address _set) external view returns (uint256[] memory) {
         return auction(_set).combinedCurrentSetUnits;
     }
 
+    /**
+     * Gets the auction's nextSetUnits
+     */
     function getCombinedNextSetUnits(address _set) external view returns (uint256[] memory) {
         return auction(_set).combinedNextSetUnits;
     }
 
     /* ============ Implementing LinearAuction Function  ============ */
+
+    /**
+     * Retrieves the current auction price for the particular Set
+     *
+     * @param _set                    Address of the SetToken
+     * @returns                       The USD value of the Set
+     */
     function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
         return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
     }
 
     /* ============ Private Functions ============ */
 
-    function clearAuctionState(address _sender) private {
-        delete auctions[_sender];
+    /**
+     * Clears auction state.
+     */
+    function clearAuctionState(address _set) private {
+        delete auctions[_set];
     }
 
+    /**
+     * Retrieves the auction Setup struct from the linear auction object
+     */
     function auction(address _set) private view returns(Auction.Setup storage) {
         return linearAuction(_set).auction;
     }
 
+    /**
+     * Retrieves the linear auction State struct from the auction mapping
+     */
     function linearAuction(address _set) private view returns(LinearAuction.State storage) {
         return auctions[_set];
     }
 
+    /**
+     * Validates the Set is approved by Core
+     */
     function requireValidSet(address _set) private view {
         require(
             core.validSets(_set),
@@ -254,6 +284,9 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
         );       
     }
 
+    /**
+     * Validates the Set's auction is not active
+     */
     function requireAuctionInactive(Auction.Setup storage _auction) private view {
         require(
             !Auction.isAuctionActive(_auction),
@@ -261,6 +294,9 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction {
         );       
     }
 
+    /*
+     * Validates the Set's auction is active
+     */
     function requireAuctionActive(Auction.Setup storage _auction) private view {
         require(
             Auction.isAuctionActive(_auction),

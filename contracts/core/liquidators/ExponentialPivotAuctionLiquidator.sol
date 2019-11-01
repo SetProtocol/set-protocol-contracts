@@ -156,7 +156,7 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
     )
         external
         isValidSet
-        returns (address[] memory, uint256[] memory, uint256[] memory)
+        returns (Rebalance.TokenFlow memory)
     {
         requireAuctionActive(auction(msg.sender));
 
@@ -179,13 +179,11 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
     )
         public
         view
-        returns (address[] memory, uint256[] memory, uint256[] memory)
+        returns (Rebalance.TokenFlow memory)
     {
         requireAuctionActive(auction(msg.sender));
 
-        return Rebalance.decomposeTokenFlow(
-            LinearAuction.getTokenFlow(linearAuction(_set), _quantity)
-        );
+        return LinearAuction.getTokenFlow(linearAuction(_set), _quantity);
     }
 
     /**

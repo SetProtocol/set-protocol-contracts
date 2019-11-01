@@ -18,6 +18,7 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { ISetToken } from "./ISetToken.sol";
+import { Rebalance } from "../lib/Rebalance.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 
 /**
@@ -52,13 +53,13 @@ interface ILiquidator {
     )
         external
         view
-        returns (address[] memory, uint256[] memory, uint256[] memory);
+        returns (Rebalance.TokenFlow memory);
 
     function placeBid(
         uint256 _quantity
     )
         external
-        returns (address[] memory, uint256[] memory, uint256[] memory);
+        returns (Rebalance.TokenFlow memory);
 
 
     function settleRebalance()

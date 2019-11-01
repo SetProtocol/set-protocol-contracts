@@ -22,6 +22,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";
 import { ILiquidator } from "../../core/interfaces/ILiquidator.sol";
+import { Rebalance } from "../../core/lib/Rebalance.sol";
 import { RebalancingLibrary } from "../../core/lib/RebalancingLibrary.sol";
 import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
 
@@ -87,12 +88,12 @@ contract LiquidatorMock is
     )
         external
         view
-        returns (address[] memory, uint256[] memory, uint256[] memory)
+        returns (Rebalance.TokenFlow memory)
     {
         uint256[] memory inflowUnits = getInflowTokenTransferValues(nextSet, _quantity, _combinedNextSetUnits);
         uint256[] memory outflowUnits = getTransferValues(currentSet, _quantity, _combinedCurrentUnits);
 
-        return (
+        return Rebalance.composeTokenFlow(
             _combinedTokenArray,
             inflowUnits,
             outflowUnits
@@ -103,7 +104,7 @@ contract LiquidatorMock is
         uint256 _quantity
     )
         external
-        returns (address[] memory, uint256[] memory, uint256[] memory)
+        returns (Rebalance.TokenFlow memory)
     {
         placeBidQuantity = _quantity;
 
@@ -114,7 +115,7 @@ contract LiquidatorMock is
         uint256[] memory inflowUnits = getInflowTokenTransferValues(nextSet, _quantity, _combinedNextSetUnits);
         uint256[] memory outflowUnits = getTransferValues(currentSet, _quantity, _combinedCurrentUnits);
 
-        return (
+        return Rebalance.composeTokenFlow(
             _combinedTokenArray,
             inflowUnits,
             outflowUnits

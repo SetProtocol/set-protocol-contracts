@@ -1,7 +1,9 @@
 pragma solidity 0.5.7;
+pragma experimental "ABIEncoderV2";
 
 import { ILiquidator } from "../../../core/interfaces/ILiquidator.sol";
 import { ISetToken } from "../../../core/interfaces/ISetToken.sol";
+import { Rebalance } from "../../../core/lib/Rebalance.sol";
 
 // Mock contract implementation of Auction with extra functions for testing
 contract LiquidatorProxy {
@@ -42,15 +44,11 @@ contract LiquidatorProxy {
     }
 
     function placeBid(uint256 _quantity) external {
-        (
-            address[] memory combinedTokens, 
-            uint256[] memory inflowArray, 
-            uint256[] memory outflowArray
-        ) = liquidator.placeBid(_quantity);
+        Rebalance.TokenFlow memory tokenFlow = liquidator.placeBid(_quantity);
 
-        combinedTokenArray = combinedTokens;
-        inflow = inflowArray;
-        outflow = outflowArray;
+        combinedTokenArray = tokenFlow.addresses;
+        inflow = tokenFlow.inflow;
+        outflow = tokenFlow.outflow;
     }
 
     function getBidPrice(
@@ -59,7 +57,7 @@ contract LiquidatorProxy {
     )
         external
         view
-        returns (address[] memory, uint256[] memory, uint256[] memory)
+        returns (Rebalance.TokenFlow memory)
     {
         return liquidator.getBidPrice(_set, _quantity);
     }

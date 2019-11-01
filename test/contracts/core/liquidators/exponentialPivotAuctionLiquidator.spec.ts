@@ -604,7 +604,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         );
       });
 
-      async function subject(): Promise<[Address[], BigNumber[], BigNumber[]]> {
+      async function subject(): Promise<any> {
         return liquidatorProxy.getBidPrice.callAsync(subjectSet, subjectQuantity);
       }
 
@@ -636,18 +636,18 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       }
 
       it('returns the token array', async () => {
-        const [result] = await subject();
-        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.addresses));
+        const { addresses } = await subject();
+        expect(JSON.stringify(addresses)).to.equal(JSON.stringify(tokenFlows.addresses));
       });
 
       it('returns the correct inflow', async () => {
-        const [, result] = await subject();
-        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.inflow));
+        const { inflow } = await subject();
+        expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
       });
 
       it('returns the correct outflow', async () => {
-        const [, , result] = await subject();
-        expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
+        const { outflow } = await subject();
+        expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
       });
 
       describe('after the pivot time', async () => {
@@ -664,18 +664,18 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         });
 
         it('returns the token array', async () => {
-          const [result] = await subject();
-          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.addresses));
+          const { addresses } = await subject();
+          expect(JSON.stringify(addresses)).to.equal(JSON.stringify(tokenFlows.addresses));
         });
 
         it('returns the correct inflow', async () => {
-          const [, result] = await subject();
-          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.inflow));
+          const { inflow } = await subject();
+          expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
         });
 
         it('returns the correct outflow', async () => {
-          const [, , result] = await subject();
-          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
+          const { outflow } = await subject();
+          expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
         });
       });
 
@@ -694,18 +694,18 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         });
 
         it('returns the token array', async () => {
-          const [result] = await subject();
-          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.addresses));
+          const { addresses } = await subject();
+          expect(JSON.stringify(addresses)).to.equal(JSON.stringify(tokenFlows.addresses));
         });
 
         it('returns the correct inflow', async () => {
-          const [, result] = await subject();
-          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.inflow));
+          const { inflow } = await subject();
+          expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
         });
 
         it('returns the correct outflow', async () => {
-          const [, , result] = await subject();
-          expect(JSON.stringify(result)).to.equal(JSON.stringify(tokenFlows.outflow));
+          const { outflow } = await subject();
+          expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
         });
       });
 

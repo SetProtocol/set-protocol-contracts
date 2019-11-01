@@ -31,6 +31,7 @@ import { IVault } from "../interfaces/IVault.sol";
 import { IWhiteList } from "../interfaces/IWhiteList.sol";
 import { PlaceBid } from "./rebalancing-v2/PlaceBid.sol";
 import { Propose } from "./rebalancing-v2/Propose.sol";
+import { Rebalance } from "../lib/Rebalance.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./rebalancing-v2/RebalancingSetState.sol";
 import { SettleRebalance } from "./rebalancing-v2/SettleRebalance.sol";
@@ -193,7 +194,9 @@ contract RebalancingSetTokenV2 is
     {
         validateGetBidPrice(_quantity);
 
-        return liquidator.getBidPrice(address(this), _quantity);
+        return Rebalance.decomposeTokenFlow(
+            liquidator.getBidPrice(address(this), _quantity)
+        );
     }
 
     /*
@@ -214,15 +217,11 @@ contract RebalancingSetTokenV2 is
         validatePlaceBid(_quantity);
 
         // Place bid and get back inflow and outflow arrays
-        (
-            address[] memory combinedTokenArray,
-            uint256[] memory inflowUnitArray,
-            uint256[] memory outflowUnitArray
-        ) = liquidator.placeBid(_quantity);
+        Rebalance.TokenFlow memory tokenFlow = liquidator.placeBid(_quantity);
 
         updateHasBiddedIfNecessary();
 
-        return (combinedTokenArray, inflowUnitArray, outflowUnitArray);
+        return Rebalance.decomposeTokenFlow(tokenFlow);
     }
 
     /*

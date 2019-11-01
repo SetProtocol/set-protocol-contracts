@@ -105,9 +105,6 @@ contract LinearAuction is Auction {
 
     /**
      * Returns the TokenFlow based on the current price
-     *
-     * @param _linearAuction          Linear Auction State object
-     * @return TokenFlow              Object struct containing tokens, inflow, and outflow
      */
     function getTokenFlow(
         State storage _linearAuction,
@@ -126,26 +123,14 @@ contract LinearAuction is Auction {
 
     /**
      * Returns the linear price based on the current timestamp
-     *
-     * @param _linearAuction            Linear Auction State object
-     * @return price                    uint representing the current price
      */
-    function getPrice(
-        State storage _linearAuction
-    )
-        internal
-        view
-        returns (Rebalance.Price memory)
-    {
+    function getPrice(State storage _linearAuction) internal view returns (Rebalance.Price memory) {
         return Rebalance.composePrice(getNumerator(_linearAuction), Auction.pricePrecision);
     }
 
     /**
      * Auction failed is defined the timestamp breacnhing the auction end time and
      * the auction not being complete
-     *
-     * @param _linearAuction    Linear Auction State object
-     * @return hasFailed        Boolean whether the auction has failed
      */
     function hasAuctionFailed(State storage _linearAuction) internal view returns(bool) {
         bool endTimeExceeded = block.timestamp >= _linearAuction.endTime;
@@ -169,10 +154,6 @@ contract LinearAuction is Auction {
 
     /**
      * Calculates the fair value based on the USD values of the next and current Sets.
-     *
-     * @param _currentSet             The Set to rebalance from
-     * @param _nextSet                The Set to rebalance to
-     * @return fairValue              USD value
      */
     function calculateFairValue(
         ISetToken _currentSet,
@@ -190,9 +171,6 @@ contract LinearAuction is Auction {
 
     /**
      * Calculates the linear auction start price
-     *
-     * @param _fairValue              Fair value figure
-     * @return startNumerator             Value to start auction at
      */
     function calculateStartNumerator(uint256 _fairValue) internal view returns(uint256) {
         uint256 startRange = _fairValue.mul(rangeStart).div(100);
@@ -201,9 +179,6 @@ contract LinearAuction is Auction {
 
     /**
      * Calculates the linear auction end price
-     *
-     * @param _fairValue              Fair value figure
-     * @return startNumerator             Value to start auction at
      */
     function calculateEndNumerator(uint256 _fairValue) internal view returns(uint256) {
         uint256 endRange = _fairValue.mul(rangeEnd).div(100);

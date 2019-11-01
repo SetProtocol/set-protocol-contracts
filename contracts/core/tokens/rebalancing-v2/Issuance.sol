@@ -42,19 +42,16 @@ contract Issuance is
         internal
         view
     {
-        // Check that function caller is Core
         require(
             msg.sender == address(core),
             "Mint: Sender must be core"
         );
 
-        // Check that set is not in Rebalance State
         require(
             rebalanceState != RebalancingLibrary.State.Rebalance,
             "Mint: Cannot mint during Rebalance"
         );
 
-        // Check that set is not in Drawdown State
         require(
             rebalanceState != RebalancingLibrary.State.Drawdown,
             "Mint: Cannot mint during Drawdown"
@@ -65,13 +62,11 @@ contract Issuance is
         internal
         view
     {
-        // Check that set is not in Rebalancing State
         require(
             rebalanceState != RebalancingLibrary.State.Rebalance,
             "Burn: Cannot burn during Rebalance"
         );
 
-        // Check to see if state is Drawdown
         if (rebalanceState == RebalancingLibrary.State.Drawdown) {
             // In Drawdown Sets can only be burned as part of the withdrawal process
             require(

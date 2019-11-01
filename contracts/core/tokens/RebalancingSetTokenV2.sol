@@ -69,14 +69,14 @@ contract RebalancingSetTokenV2 is
     /**
      * Constructor function for Rebalancing Set Token
      *
-     * addressConfig is [factory, manager, liquidator, initialSet, componentWhiteList, liquidatorWhiteList]
+     * addressConfig = [factory, manager, liquidator, initialSet, componentWhiteList, liquidatorWhiteList]
      * factory                   Factory used to create the Rebalancing Set
      * manager                   Address that is able to propose the next Set
      * liquidator                Address of the liquidator contract
      * initialSet                Initial set that collateralizes the Rebalancing set
      * componentWhiteList        Whitelist that nextSet components are checked against during propose
      *
-     * uintConfig is [unitShares, naturalUnit, proposalPeriod, rebalanceInterval, rebalanceFailPeriod,
+     * uintConfig = [unitShares, naturalUnit, proposalPeriod, rebalanceInterval, rebalanceFailPeriod,
      *                lastRebalanceTimestamp]
      * initialUnitShares         Units of currentSet that equals one share
      * naturalUnit               The minimum multiple of Sets that can be issued or redeemed

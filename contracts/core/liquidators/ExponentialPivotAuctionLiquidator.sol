@@ -43,7 +43,7 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
 
     ICore public core;
     string public name;
-    IOracleWhiteList public oracleWhiteList; // Instance of the oracle list
+    IOracleWhiteList public oracleWhiteList;
     mapping(address => LinearAuction.State) public auctions;
 
     /* ============ Modifier ============ */
@@ -150,6 +150,7 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
      * Can only be called by a SetToken during an active auction
      *
      * @param _quantity               The currentSetQuantity to rebalance
+     * @return TokenFlow              Struct with array, inflow, and outflow data 
      */
     function placeBid(
         uint256 _quantity
@@ -172,6 +173,7 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
      *
      * @param _set                    Address of the SetToken
      * @param _quantity               The currentSetQuantity to rebalance
+     * @return TokenFlow              Struct with array, inflow, and outflow data
      */
     function getBidPrice(
         address _set,
@@ -252,12 +254,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
 
     /* ============ Implementing LinearAuction Function  ============ */
 
-    /**
-     * Retrieves the current auction price for the particular Set
-     *
-     * @param _set                    Address of the SetToken
-     * @return                       The USD value of the Set
-     */
     function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
         return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
     }
@@ -268,23 +264,14 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
         delete auctions[_set];
     }
 
-    /**
-     * Retrieves the auction Setup struct from the linear auction object
-     */
     function auction(address _set) private view returns(Auction.Setup storage) {
         return linearAuction(_set).auction;
     }
 
-    /**
-     * Retrieves the linear auction State struct from the auction mapping
-     */
     function linearAuction(address _set) private view returns(LinearAuction.State storage) {
         return auctions[_set];
     }
 
-    /**
-     * Validates the Set is approved by Core
-     */
     function requireValidSet(address _set) private view {
         require(
             core.validSets(_set),
@@ -292,9 +279,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
         );       
     }
 
-    /**
-     * Validates the Set's auction is not active
-     */
     function requireAuctionInactive(Auction.Setup storage _auction) private view {
         require(
             !Auction.isAuctionActive(_auction),
@@ -302,9 +286,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
         );       
     }
 
-    /*
-     * Validates the Set's auction is active
-     */
     function requireAuctionActive(Auction.Setup storage _auction) private view {
         require(
             Auction.isAuctionActive(_auction),

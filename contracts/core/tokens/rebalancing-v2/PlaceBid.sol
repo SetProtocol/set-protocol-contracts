@@ -49,13 +49,11 @@ contract PlaceBid is
         internal
         view
     {
-        // Must be in Rebalance State
         require(
             rebalanceState == RebalancingLibrary.State.Rebalance,
             "GetBidPrice: State must be Rebalance"
         );
 
-        // Bid amount must be greater than zero
         require(
             _quantity > 0,
             "GetBidPrice: Bid must be > 0"
@@ -73,7 +71,6 @@ contract PlaceBid is
         internal
         view
     {
-        // Make sure sender is a module
         require(
             core.validModules(msg.sender),
             "PlaceBid: Sender must be approved module"

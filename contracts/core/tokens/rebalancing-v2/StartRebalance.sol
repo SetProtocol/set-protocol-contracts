@@ -51,13 +51,11 @@ contract StartRebalance is
     function validateStartRebalance()
         internal
     {
-        // Must be in "Proposal" state
         require(
             rebalanceState == RebalancingLibrary.State.Proposal,
             "Start: State must be Proposal"
         );
 
-        // The full proposal period must have elapsed
         require(
             block.timestamp >= proposalStartTime.add(proposalPeriod),
             "Start: Proposal period not elapsed"
@@ -75,10 +73,7 @@ contract StartRebalance is
         view
         returns (uint256)
     {
-        // Get startingCurrentSets and make it divisible by currentSet natural unit
         uint256 currentSetBalance = vault.getOwnerBalance(address(currentSet), address(this));
-
-        // Calculates the set's natural unit
         uint256 currentSetNaturalUnit = currentSet.naturalUnit();
 
         // Rounds the redemption quantity to a multiple of the current Set natural unit and sets variable

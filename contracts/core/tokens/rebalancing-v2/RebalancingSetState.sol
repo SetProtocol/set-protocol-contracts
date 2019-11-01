@@ -122,9 +122,6 @@ contract RebalancingSetState {
 
     /* ============ Modifier ============ */
 
-    /**
-     * Throws if called by any account other than the manager.
-     */
     modifier onlyManager() {
         require(
             msg.sender == manager,
@@ -147,11 +144,6 @@ contract RebalancingSetState {
 
     /* ============ Setter Functions ============ */
 
-    /*
-     * Set new manager address
-     *
-     * @param  _newManager       The address of the new manager account
-     */
     function setManager(
         address _newManager
     )
@@ -163,9 +155,7 @@ contract RebalancingSetState {
     }
 
     /*
-     * Set new liquidator address
-     *
-     * @param  _newLiquidator       The address of the new liquidator account
+     * Set new liquidator address. Only whitelisted addresses are valid.
      */
     function setLiquidator(
         ILiquidator _newLiquidator
@@ -173,7 +163,6 @@ contract RebalancingSetState {
         external
         onlyManager
     {
-        // Require that liquidator is whitelisted by the liquidatorWhitelist
         require(
             liquidatorWhiteList.whiteList(address(_newLiquidator)),
             "SetLiquidator: Input not whitelisted"
@@ -187,8 +176,6 @@ contract RebalancingSetState {
 
     /*
      * Function for compatability with ISetToken interface. Returns currentSet.
-     *
-     * @return  componentAddresses       Array of currentSet
      */
     function getComponents()
         external
@@ -202,8 +189,6 @@ contract RebalancingSetState {
 
     /*
      * Function for compatability with ISetToken interface. Returns unitShares.
-     *
-     * @return  units       Array of component unit
      */
     function getUnits()
         external
@@ -216,11 +201,8 @@ contract RebalancingSetState {
     }
 
     /*
-     * Checks to make sure address is the current set of the RebalancingSetToken.
+     * Returns whether the address is the current set of the RebalancingSetToken.
      * Conforms to the ISetToken Interface.
-     *
-     * @param  _tokenAddress     Address of token being checked
-     * @return  bool             True if token is the current Set
      */
     function tokenIsComponent(
         address _tokenAddress
@@ -234,8 +216,6 @@ contract RebalancingSetState {
 
     /*
      * Get array version of failedAuctionWithdrawComponents
-     *
-     * @return  failedRebalanceComponents
      */
     function getFailedRebalanceComponents()
         external

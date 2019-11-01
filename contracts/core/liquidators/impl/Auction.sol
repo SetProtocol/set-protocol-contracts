@@ -171,9 +171,6 @@ contract Auction {
      * @param _quantity               Amount of currentSets bidder is seeking to rebalance
      * @param _priceNumerator         The numerator of the price ratio
      * @param _priceDivisor           The denominator of the price ratio
-     * @return combinedTokenArray     Array of tokens
-     * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
-     * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
      */
     function calculateTokenFlow(
         Setup storage _auction,

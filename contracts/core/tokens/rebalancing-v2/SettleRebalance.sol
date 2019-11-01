@@ -53,7 +53,6 @@ contract SettleRebalance is
         internal
         view
     {
-        // Must be in Rebalance state to call settlement
         require(
             rebalanceState == RebalancingLibrary.State.Rebalance,
             "Settle: State must be Rebalance"
@@ -111,8 +110,6 @@ contract SettleRebalance is
     /**
      * Calculate the amount of nextSets to issue by using the component amounts in the
      * vault.
-     *
-     * @return  uint256             Amount of nextSets to issue
      */
     function calculateNextSetIssueQuantity()
         internal
@@ -171,9 +168,6 @@ contract SettleRebalance is
     /**
      * Get the maximum possible issue amount of nextSet based on number of components owned by rebalancing
      * set token.
-     *
-     * @param _setToken         nextSet details
-     * @return uint256          maxIssueAmount
      */
     function calculateMaxIssueAmount(
         SetTokenLibrary.SetDetails memory _setToken

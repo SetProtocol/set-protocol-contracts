@@ -65,9 +65,6 @@ contract BackwardsCompatability is
         return liquidator.getCombinedTokenArray(address(this));
     }
 
-    /*
-     * Retrieves the combinedTokenArray from Liquidator and returns the length
-     */    
     function getCombinedTokenArrayLength() external view returns (uint256) {
         return liquidator.getCombinedTokenArray(address(this)).length;
     }

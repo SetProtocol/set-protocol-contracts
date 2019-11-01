@@ -41,9 +41,6 @@ contract FailRebalance is
 
     /* ============ Internal Functions ============ */
 
-    /*
-     * Validate that a rebalance has failed.
-     */
     function validateFailRebalance()
         internal
         view
@@ -99,8 +96,6 @@ contract FailRebalance is
 
     /*
      * Returns whether the conditions for a failed rebalance has been met.
-     *
-     * @return Boolean whether the rebalance has failed
      */
     function failTriggersBreached()
         private
@@ -112,8 +107,6 @@ contract FailRebalance is
 
     /*
      * Returns whether the liquidator believes the rebalance has failed.
-     *
-     * @return Boolean whether the rebalance has failed
      */
     function liquidatorBreached()
         private
@@ -126,8 +119,6 @@ contract FailRebalance is
     /*
      * Returns whether the the fail time has elapsed, which means that a period
      * of time where the auction should have succeeded has not.
-     *
-     * @return Boolean whether the rebalance has failed
      */
     function failPeriodBreached()
         private
@@ -141,8 +132,6 @@ contract FailRebalance is
 
     /*
      * If the determination is Default State, reissue the Set.
-     *
-     * @param  _newRebalanceState      The new State to transition to
      */
     function reissueSetIfRevertToDefault(
         RebalancingLibrary.State _newRebalanceState
@@ -163,8 +152,6 @@ contract FailRebalance is
     /*
      * If the determination is Drawdown State, set the drawdown components which is the union of
      * the current and next Set components.
-     *
-     * @param  _newRebalanceState      The new State to transition to
      */
     function setWithdrawComponentsIfDrawdown(
         RebalancingLibrary.State _newRebalanceState

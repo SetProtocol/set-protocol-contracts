@@ -193,10 +193,8 @@ contract RebalancingSetTokenV2Factory {
             "Create: Natural Unit too large"
         );
 
-        // Parse _callData for additional parameters
         InitRebalancingParameters memory parameters = parseRebalanceSetCallData(_callData);
 
-        // Require manager address is non-zero
         require(
             parameters.manager != address(0),
             "Create: Invalid manager address"
@@ -210,7 +208,7 @@ contract RebalancingSetTokenV2Factory {
 
         // Require that liquidator is whitelisted by the liquidatorWhitelist
         require(
-            liquidatorWhitelist.whiteList(parameters.liquidator),
+            liquidatorWhitelist.whiteList(address(parameters.liquidator)),
             "Create: Liquidator not whitelisted"
         );
 

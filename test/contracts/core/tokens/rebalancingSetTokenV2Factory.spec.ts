@@ -548,6 +548,26 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe.only('when the lastRebalanceTimestamp is in the future', async () => {
+      beforeEach(async () => {
+        const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
+        callDataLastRebalanceTimestamp = new BigNumber(lastRebalanceTimestamp).mul(2);
+
+        subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
+          callDataManagerAddress,
+          callDataLiquidator,
+          callDataProposalPeriod,
+          callDataRebalanceInterval,
+          callDataFailAuctionPeriod,
+          callDataLastRebalanceTimestamp,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#create not from core', async () => {
@@ -579,7 +599,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       const proposalPeriod = new BigNumber(86400);
       const rebalanceInterval = new BigNumber(86400).mul(2);
       const failAuctionPeriod = new BigNumber(86400).mul(3);
-      const lastRebalanceTimestamp = ZERO;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
         managerAddress,
         liquidator,

@@ -70,7 +70,7 @@ contract('BackwardsCompatability', accounts => {
     erc20Helper,
     blockchain
   );
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper)
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
 
   let currentSetToken: SetTokenContract;
   let nextSetToken: SetTokenContract;
@@ -126,6 +126,7 @@ contract('BackwardsCompatability', accounts => {
 
     const proposalPeriod = ONE_DAY_IN_SECONDS;
     const failPeriod = ONE_DAY_IN_SECONDS;
+    const lastRebalanceTimestamp = await web3.eth.getBlock('latest');
     rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
       coreMock,
       rebalancingFactory.address,
@@ -134,6 +135,7 @@ contract('BackwardsCompatability', accounts => {
       currentSetToken.address,
       proposalPeriod,
       failPeriod,
+      lastRebalanceTimestamp,
     );
 
     await coreMock.issue.sendTransactionAsync(
@@ -181,7 +183,7 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct getCombinedCurrentUnits', async () => {
       const retrievedResult = await subject();
 
-      const expectedResult =  await liquidatorMock.getCombinedCurrentUnits.callAsync(
+      const expectedResult =  await liquidatorMock.getCombinedCurrentSetUnits.callAsync(
         rebalancingSetToken.address
       );
       expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
@@ -234,15 +236,15 @@ contract('BackwardsCompatability', accounts => {
     });
   });
 
-  describe('#startingCurrentSetAmount', async () => {
+  describe('#startingCurrentSets', async () => {
     async function subject(): Promise<BigNumber> {
       return rebalancingSetToken.startingCurrentSetAmount.callAsync();
     }
 
-    it('returns the correct startingCurrentSetAmount', async () => {
+    it('returns the correct startingCurrentSets', async () => {
       const retrievedResult = await subject();
 
-      const expectedResult =  await liquidatorMock.startingCurrentSetAmount.callAsync(
+      const expectedResult =  await liquidatorMock.getCombinedCurrentSetUnits.callAsync(
         rebalancingSetToken.address
       );
       expect(retrievedResult).to.bignumber.equal(expectedResult);

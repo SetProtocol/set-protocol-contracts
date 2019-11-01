@@ -4900,10 +4900,42 @@ set-protocol-strategies@^1.1.7:
     web3 "1.0.0-beta.36"
     web3-utils "1.0.0-beta.36"
 
-set-protocol-utils@^1.0.0-beta.32, set-protocol-utils@^1.0.0-beta.39, set-protocol-utils@^1.0.0-beta.40:
+set-protocol-utils@^1.0.0-beta.32, set-protocol-utils@^1.0.0-beta.39:
   version "1.0.0-beta.40"
   resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-1.0.0-beta.40.tgz#8023ce4d5d0493899f170c97c5e6890deffe96e6"
   integrity sha512-mOTB6D5Tszl9VK2yoP1HzihjIMVaTCpQ0WexLY62I3AOmwfO2L1aY95bM802zHqkwK0N0sKKlWoB+tPq0QwZ2Q==
+  dependencies:
+    "@0xproject/base-contract" "^1.0.4"
+    "@0xproject/order-utils" "^1.0.1"
+    "@0xproject/types" "^1.0.7"
+    "@0xproject/web3-wrapper" "^1.1.2"
+    "@types/lodash" "4.14.104"
+    "@types/node" "^8.9.1"
+    "@types/web3" "^1.0.10"
+    abi-decoder "^1.0.9"
+    bignumber.js "~4.1.0"
+    bn-chai "^1.0.1"
+    bn.js "^4.11.8"
+    chai "^4.1.2"
+    chai-as-promised "^7.1.1"
+    chai-bignumber "^2.0.2"
+    ethereum-types "^1.0.0"
+    ethereumjs-util "^5.0.0"
+    ethers "3.0.22"
+    husky "^0.14.3"
+    js-sha3 "^0.7.0"
+    lint-staged "^7.2.0"
+    lodash "^4.17.4"
+    tiny-promisify "^1.0.0"
+    tslint-eslint-rules "^5.3.1"
+    types-bn "^0.0.1"
+    web3 "1.0.0-beta.36"
+    web3-utils "1.0.0-beta.36"
+
+set-protocol-utils@^1.0.0-beta.41:
+  version "1.0.0-beta.41"
+  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-1.0.0-beta.41.tgz#06c119d58100a9518973fb76795499570be66446"
+  integrity sha512-zvx80SpogL/rElGhCYPMWba6X6SYtHQ28Yqsq6FLcmNnrnTtCKwQhrvRusgjxXT3d3OZy+CSnGOVQ+91uLC/FA==
   dependencies:
     "@0xproject/base-contract" "^1.0.4"
     "@0xproject/order-utils" "^1.0.1"

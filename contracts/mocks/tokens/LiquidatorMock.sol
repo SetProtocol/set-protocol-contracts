@@ -200,7 +200,7 @@ contract LiquidatorMock is
         return _remainingCurrentSets;
     }
 
-    function startingCurrentSetAmount(address _set) external view returns (uint256) {
+    function startingCurrentSets(address _set) external view returns (uint256) {
         return _startingCurrentSetAmount;
     }
 
@@ -208,7 +208,7 @@ contract LiquidatorMock is
         return _combinedTokenArray;
     }
  
-    function getCombinedCurrentUnits(address _set) external view returns (uint256[] memory) {
+    function getCombinedCurrentSetUnits(address _set) external view returns (uint256[] memory) {
         return _combinedCurrentUnits;
     }
 

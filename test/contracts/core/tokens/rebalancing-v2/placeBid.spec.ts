@@ -73,7 +73,7 @@ contract('PlaceBid', accounts => {
     erc20Helper,
     blockchain
   );
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper)
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
   const libraryMockHelper = new LibraryMockHelper(deployerAccount);
 
   let currentSetToken: SetTokenContract;
@@ -132,6 +132,7 @@ contract('PlaceBid', accounts => {
 
     const proposalPeriod = ONE_DAY_IN_SECONDS;
     const failPeriod = ONE_DAY_IN_SECONDS;
+    const lastRebalanceTimestamp = await web3.eth.getBlock('latest');
     rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
       coreMock,
       rebalancingFactory.address,
@@ -140,6 +141,7 @@ contract('PlaceBid', accounts => {
       currentSetToken.address,
       proposalPeriod,
       failPeriod,
+      lastRebalanceTimestamp,
     );
 
     // Issue currentSetToken
@@ -340,7 +342,7 @@ contract('PlaceBid', accounts => {
 
       const returnedOutflow = await placeBidMock.getOutflowUnits.callAsync();
 
-      const liquidatorCurrentUnits = await liquidatorMock.getCombinedCurrentUnits.callAsync(
+      const liquidatorCurrentUnits = await liquidatorMock.getCombinedCurrentSetUnits.callAsync(
         rebalancingSetToken.address
       );
       const expectedOutflowUnits = await liquidatorHelper.getBidPriceValues(
@@ -405,7 +407,7 @@ contract('PlaceBid', accounts => {
     it('should return the correct outflow units', async () => {
       const [, , outflowUnits] = await subject();
 
-      const liquidatorCurrentUnits = await liquidatorMock.getCombinedCurrentUnits.callAsync(
+      const liquidatorCurrentUnits = await liquidatorMock.getCombinedCurrentSetUnits.callAsync(
         rebalancingSetToken.address
       );
       const expectedOutflowUnits = await liquidatorHelper.getBidPriceValues(

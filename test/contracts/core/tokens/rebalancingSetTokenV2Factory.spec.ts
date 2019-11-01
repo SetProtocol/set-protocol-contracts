@@ -216,6 +216,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     let callDataProposalPeriod: BigNumber;
     let callDataRebalanceInterval: BigNumber;
     let callDataFailAuctionPeriod: BigNumber;
+    let callDataLastRebalanceTimestamp: BigNumber;
 
     beforeEach(async () => {
       rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
@@ -237,12 +238,15 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       callDataProposalPeriod = new BigNumber(86400);
       callDataRebalanceInterval = new BigNumber(86400).mul(2);
       callDataFailAuctionPeriod = new BigNumber(86400).mul(3);
+      const { timestamp } = await web3.eth.getBlock('latest');
+      callDataLastRebalanceTimestamp = timestamp;
       subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
         callDataManagerAddress,
         callDataLiquidator,
         callDataProposalPeriod,
         callDataRebalanceInterval,
         callDataFailAuctionPeriod,
+        callDataLastRebalanceTimestamp,
       );
     });
 
@@ -415,6 +419,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
+          callDataLastRebalanceTimestamp,
         );
       });
 
@@ -433,6 +438,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
+          callDataLastRebalanceTimestamp,
         );
       });
 
@@ -451,6 +457,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
+          callDataLastRebalanceTimestamp,
         );
       });
 
@@ -469,6 +476,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
+          callDataLastRebalanceTimestamp,
         );
       });
 
@@ -487,6 +495,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
+          callDataLastRebalanceTimestamp,
         );
       });
 
@@ -505,6 +514,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
+          callDataLastRebalanceTimestamp,
         );
       });
 
@@ -523,6 +533,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
+          callDataLastRebalanceTimestamp,
         );
       });
 
@@ -561,12 +572,14 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       const proposalPeriod = new BigNumber(86400);
       const rebalanceInterval = new BigNumber(86400).mul(2);
       const failAuctionPeriod = new BigNumber(86400).mul(3);
+      const lastRebalanceTimestamp = ZERO;
       subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
         managerAddress,
         liquidator,
         proposalPeriod,
         rebalanceInterval,
         failAuctionPeriod,
+        lastRebalanceTimestamp,
       );
     });
 

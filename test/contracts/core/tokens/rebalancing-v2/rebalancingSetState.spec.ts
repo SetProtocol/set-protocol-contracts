@@ -87,6 +87,7 @@ contract('RebalancingSetState', accounts => {
   let proposalPeriod: BigNumber;
   let rebalanceInterval: BigNumber;
   let failPeriod: BigNumber;
+  let lastRebalanceTimestamp: BigNumber;
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -130,6 +131,9 @@ contract('RebalancingSetState', accounts => {
     rebalanceInterval = ONE_DAY_IN_SECONDS;
     failPeriod = ONE_DAY_IN_SECONDS;
 
+    const { timestamp } = await web3.eth.getBlock('latest');
+    lastRebalanceTimestamp = timestamp;
+
     rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
       rebalancingFactory.address,
       manager,
@@ -141,6 +145,7 @@ contract('RebalancingSetState', accounts => {
       proposalPeriod,
       rebalanceInterval,
       failPeriod,
+      lastRebalanceTimestamp,
     );
   });
 
@@ -159,6 +164,7 @@ contract('RebalancingSetState', accounts => {
     let subjectProposalPeriod: BigNumber;
     let subjectRebalanceInterval: BigNumber;
     let subjectFailPeriod: BigNumber;
+    let subjectLastRebalanceTimestamp: BigNumber;
     const subjectName: string = 'Rebalancing Set';
     const subjectSymbol: string = 'RBSET';
 
@@ -175,6 +181,7 @@ contract('RebalancingSetState', accounts => {
       subjectProposalPeriod = ONE_DAY_IN_SECONDS;
       subjectRebalanceInterval = ONE_DAY_IN_SECONDS.mul(2);
       subjectFailPeriod = ONE_DAY_IN_SECONDS.mul(3);
+      subjectLastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
     });
 
     async function subject(): Promise<RebalancingSetTokenV2Contract> {
@@ -189,6 +196,7 @@ contract('RebalancingSetState', accounts => {
         subjectProposalPeriod,
         subjectRebalanceInterval,
         subjectFailPeriod,
+        subjectLastRebalanceTimestamp,
         subjectName,
         subjectSymbol,
       );
@@ -295,10 +303,8 @@ contract('RebalancingSetState', accounts => {
     it('creates a set with the correct lastRebalanceTimestamp', async () => {
       rebalancingSetToken = await subject();
 
-      const { timestamp } = await web3.eth.getBlock('latest');
-
       const lastRebalanceTimestamp = await rebalancingSetToken.lastRebalanceTimestamp.callAsync();
-      expect(lastRebalanceTimestamp).to.be.bignumber.equal(timestamp);
+      expect(lastRebalanceTimestamp).to.be.bignumber.equal(lastRebalanceTimestamp);
     });
 
     it('sets the rebalancingSetToken state to Default', async () => {

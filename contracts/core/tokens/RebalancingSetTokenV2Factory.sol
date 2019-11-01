@@ -77,6 +77,7 @@ contract RebalancingSetTokenV2Factory {
         uint256 proposalPeriod;
         uint256 rebalanceInterval;
         uint256 rebalanceFailPeriod;
+        uint256 lastRebalanceTimestamp;
     }
 
     /* ============ Constructor ============ */
@@ -240,6 +241,12 @@ contract RebalancingSetTokenV2Factory {
             "RebalancingSetTokenV2Factory.create: Fail Period too long"
         );
 
+        // Require that the fail rebalance period is greater than the minimum
+        require(
+            parameters.lastRebalanceTimestamp <= block.timestamp,
+            "RebalancingSetTokenV2Factory.create: RebalanceTimestamp must be in the past"
+        );
+
         // Create a new SetToken contract
         return address(
             new RebalancingSetTokenV2(
@@ -250,7 +257,12 @@ contract RebalancingSetTokenV2Factory {
                 rebalanceComponentWhitelist,
                 _units[0],
                 _naturalUnit,
-                [parameters.proposalPeriod, parameters.rebalanceInterval, parameters.rebalanceFailPeriod],
+                [
+                    parameters.proposalPeriod,
+                    parameters.rebalanceInterval,
+                    parameters.rebalanceFailPeriod,
+                    parameters.lastRebalanceTimestamp
+                ],
                 _name.bytes32ToString(),
                 _symbol.bytes32ToString()
             )
@@ -274,6 +286,7 @@ contract RebalancingSetTokenV2Factory {
             mstore(add(parameters, 64),  mload(add(_callData, 96)))   // proposalPeriod
             mstore(add(parameters, 96),  mload(add(_callData, 128)))  // rebalanceInterval
             mstore(add(parameters, 128), mload(add(_callData, 160)))  // rebalanceFailPeriod
+            mstore(add(parameters, 160), mload(add(_callData, 192)))  // lastRebalanceTimestamp
         }
 
         return parameters;

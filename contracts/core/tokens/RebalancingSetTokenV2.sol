@@ -76,11 +76,11 @@ contract RebalancingSetTokenV2 is
      * @param _componentWhiteList        Whitelist that nextSet components are checked against during propose
      * @param _initialUnitShares         Units of currentSet that equals one share
      * @param _naturalUnit               The minimum multiple of Sets that can be issued or redeemed
-     * @param _rebalanceConfig           [_proposalPeriod, _rebalanceInterval, _rebalanceFailPeriod]
-     *                                   _proposalPeriod: Time for users to inspect a rebalance proposal
-     *                                   _rebalanceInterval: Minimum amount of time between rebalances
-     *                                   _rebalanceFailPeriod: Time after auctionStart 
+     * @param _rebalanceConfig           0 - proposalPeriod: Time for users to inspect a rebalance proposal
+     *                                   1 - rebalanceInterval: Minimum amount of time between rebalances
+     *                                   2 - rebalanceFailPeriod: Time after auctionStart 
      *                                      where something in the rebalance has ovviously gone wrong
+     *                                   3 - lastRebalanceTimestamp: Time of the last rebalance
      * @param _name                      The name of the new RebalancingSetTokenV2
      * @param _symbol                    The symbol of the new RebalancingSetTokenV2
      */
@@ -92,7 +92,7 @@ contract RebalancingSetTokenV2 is
         IWhiteList _componentWhiteList,
         uint256 _initialUnitShares,
         uint256 _naturalUnit,
-        uint256[3] memory _rebalanceConfig,
+        uint256[4] memory _rebalanceConfig,
         string memory _name,
         string memory _symbol
     )
@@ -116,8 +116,7 @@ contract RebalancingSetTokenV2 is
         proposalPeriod = _rebalanceConfig[0];
         rebalanceInterval = _rebalanceConfig[1];
         rebalanceFailPeriod = _rebalanceConfig[2];
-
-        lastRebalanceTimestamp = block.timestamp;
+        lastRebalanceTimestamp = _rebalanceConfig[3];
         rebalanceState = RebalancingLibrary.State.Default;
     }
 
@@ -135,11 +134,11 @@ contract RebalancingSetTokenV2 is
         external
         onlyManager
     {
-        validateProposal(_nextSet);
+        Propose.validateProposal(_nextSet);
 
-        liquidatorProcessProposal(_nextSet);
+        Propose.liquidatorProcessProposal(_nextSet);
 
-        transitionToProposal(_nextSet);
+        Propose.transitionToProposal(_nextSet);
     }
 
     /**
@@ -150,11 +149,11 @@ contract RebalancingSetTokenV2 is
         external
         onlyManager
     {
-        validateCancelProposal();
+        Propose.validateCancelProposal();
 
-        liquidatorCancelProposal();
+        Propose.liquidatorCancelProposal();
 
-        revertProposal();
+        Propose.revertProposal();
     }
 
     /*
@@ -173,11 +172,11 @@ contract RebalancingSetTokenV2 is
 
         uint256 startingCurrentSetQuantity = calculateStartingSetQuantity();
 
-        redeemCurrentSet(startingCurrentSetQuantity);
+        StartRebalance.redeemCurrentSet(startingCurrentSetQuantity);
 
-        liquidatorStartRebalance(startingCurrentSetQuantity);
+        StartRebalance.liquidatorStartRebalance(startingCurrentSetQuantity);
 
-        transitionToRebalance();
+        StartRebalance.transitionToRebalance();
     }
 
     /*
@@ -192,7 +191,7 @@ contract RebalancingSetTokenV2 is
         view
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        validateGetBidPrice(_quantity);
+        PlaceBid.validateGetBidPrice(_quantity);
 
         return Rebalance.decomposeTokenFlow(
             liquidator.getBidPrice(address(this), _quantity)
@@ -214,12 +213,12 @@ contract RebalancingSetTokenV2 is
         external
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        validatePlaceBid(_quantity);
+        PlaceBid.validatePlaceBid(_quantity);
 
         // Place bid and get back inflow and outflow arrays
         Rebalance.TokenFlow memory tokenFlow = liquidator.placeBid(_quantity);
 
-        updateHasBiddedIfNecessary();
+        PlaceBid.updateHasBiddedIfNecessary();
 
         return Rebalance.decomposeTokenFlow(tokenFlow);
     }
@@ -233,16 +232,16 @@ contract RebalancingSetTokenV2 is
     function settleRebalance()
         external
     {
-        uint256 issueQuantity = calculateNextSetIssueQuantity();
-        uint256 newUnitShares = calculateNextSetNewUnitShares(issueQuantity);
+        uint256 issueQuantity = SettleRebalance.calculateNextSetIssueQuantity();
+        uint256 newUnitShares = SettleRebalance.calculateNextSetNewUnitShares(issueQuantity);
 
-        validateSettleRebalance(newUnitShares);
+        SettleRebalance.validateSettleRebalance(newUnitShares);
 
-        issueNextSet(issueQuantity);
+        SettleRebalance.issueNextSet(issueQuantity);
 
-        liquidatorSettleRebalance();
+        liquidator.settleRebalance();
 
-        transitionToDefault(newUnitShares);
+        SettleRebalance.transitionToDefault(newUnitShares);
     }
 
     /*
@@ -256,13 +255,13 @@ contract RebalancingSetTokenV2 is
     function endFailedRebalance()
         public
     {
-        validateFailRebalance();
+        FailRebalance.validateFailRebalance();
 
-        RebalancingLibrary.State newRebalanceState = getNewRebalanceState();
+        RebalancingLibrary.State newRebalanceState = FailRebalance.getNewRebalanceState();
 
-        liquidatorEndFailedRebalance();
+        liquidator.endFailedRebalance();
 
-        transitionToNewState(newRebalanceState);
+        FailRebalance.transitionToNewState(newRebalanceState);
     }
 
     /*
@@ -278,7 +277,7 @@ contract RebalancingSetTokenV2 is
     )
         external
     {
-        validateMint();
+        Issuance.validateMint();
 
         _mint(_issuer, _quantity);
     }
@@ -296,7 +295,7 @@ contract RebalancingSetTokenV2 is
     )
         external
     {
-        validateBurn();
+        Issuance.validateBurn();
 
         _burn(_from, _quantity);
     }

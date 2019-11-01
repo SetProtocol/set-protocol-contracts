@@ -120,6 +120,7 @@ export class RebalancingHelper {
     proposalPeriod: BigNumber,
     rebalanceInterval: BigNumber,
     rebalanceFailPeriod: BigNumber,
+    lastRebalanceTimestamp: BigNumber,
     name: string = 'Rebalancing Set',
     symbol: string = 'RBSET',
     from: Address = this._tokenOwnerAddress
@@ -132,7 +133,7 @@ export class RebalancingHelper {
       componentWhiteList,
       initialShareRatio,
       initialNaturalUnit,
-      [proposalPeriod, rebalanceInterval, rebalanceFailPeriod],
+      [proposalPeriod, rebalanceInterval, rebalanceFailPeriod, lastRebalanceTimestamp],
       name,
       symbol,
       { from, gas: DEFAULT_GAS },
@@ -452,6 +453,7 @@ export class RebalancingHelper {
     initialSet: Address,
     proposalPeriod: BigNumber,
     failRebalancePeriod: BigNumber,
+    lastRebalanceTimestamp: BigNumber,
     initialUnitShares: BigNumber = DEFAULT_UNIT_SHARES,
   ): Promise<RebalancingSetTokenV2Contract> {
     // Generate defualt rebalancingSetToken params
@@ -462,6 +464,7 @@ export class RebalancingHelper {
       proposalPeriod,
       rebalanceInterval,
       failRebalancePeriod,
+      lastRebalanceTimestamp,
     );
 
     // Create rebalancingSetToken

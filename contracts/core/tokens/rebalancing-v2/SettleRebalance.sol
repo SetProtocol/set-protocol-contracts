@@ -89,15 +89,6 @@ contract SettleRebalance is
     }
 
     /*
-     * Pings the liquidator to settle the rebalance.
-     */ 
-    function liquidatorSettleRebalance()
-        internal
-    {
-        liquidator.settleRebalance();
-    }
-
-    /*
      * Updates state post-settlement.
      *
      * @param  _nextUnitShares   The new implied unit shares

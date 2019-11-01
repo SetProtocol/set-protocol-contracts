@@ -74,15 +74,6 @@ contract FailRebalance is
     }
 
     /*
-     * Pings the liquidator to settle the rebalance.
-     */ 
-    function liquidatorEndFailedRebalance()
-        internal
-    {
-        liquidator.endFailedRebalance();
-    }
-
-    /*
      * Update state based on new Rebalance State.
      *
      * @param  _newRebalanceState      The new State to transition to

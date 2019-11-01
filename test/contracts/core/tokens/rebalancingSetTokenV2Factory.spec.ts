@@ -285,6 +285,13 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         expect(resultName).to.equal(rebalancingComponentWhiteList.address);
       });
 
+      it('should have the correct liquidatorWhiteList address', async () => {
+        const rebalancingToken = await subject();
+
+        const resultName = await rebalancingToken.liquidatorWhiteList.callAsync();
+        expect(resultName).to.equal(liquidatorWhiteList.address);
+      });
+
       it('should have the correct name', async () => {
         const rebalancingToken = await subject();
 

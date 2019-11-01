@@ -53,7 +53,12 @@ contract RebalancingSetState {
 
     // Contract holding the state and logic required for rebalance liquidation
     // The Liquidator interacts closely with the Set during rebalances.
+    IWhiteList public liquidatorWhiteList;
+
+    // Contract holding the state and logic required for rebalance liquidation
+    // The Liquidator interacts closely with the Set during rebalances.
     ILiquidator public liquidator;
+
 
     // The account that is allowed to make proposals
     address public manager;
@@ -123,7 +128,7 @@ contract RebalancingSetState {
     modifier onlyManager() {
         require(
             msg.sender == manager,
-            "Propose: Sender must be manager"
+            "Sender must be manager"
         );
         _;
     }
@@ -133,6 +138,11 @@ contract RebalancingSetState {
     event NewManagerAdded(
         address newManager,
         address oldManager
+    );
+
+    event NewLiquidatorAdded(
+        address newLiquidator,
+        address oldLiquidator
     );
 
     /* ============ Setter Functions ============ */
@@ -150,6 +160,27 @@ contract RebalancingSetState {
     {
         emit NewManagerAdded(_newManager, manager);
         manager = _newManager;
+    }
+
+    /*
+     * Set new liquidator address
+     *
+     * @param  _newLiquidator       The address of the new liquidator account
+     */
+    function setLiquidator(
+        ILiquidator _newLiquidator
+    )
+        external
+        onlyManager
+    {
+        // Require that liquidator is whitelisted by the liquidatorWhitelist
+        require(
+            liquidatorWhiteList.whiteList(address(_newLiquidator)),
+            "SetLiquidator: Input not whitelisted"
+        );
+
+        emit NewLiquidatorAdded(address(_newLiquidator), address(liquidator));
+        liquidator = _newLiquidator;
     }
 
     /* ============ Getter Functions ============ */

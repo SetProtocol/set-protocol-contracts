@@ -56,19 +56,19 @@ contract SettleRebalance is
         // Must be in Rebalance state to call settlement
         require(
             rebalanceState == RebalancingLibrary.State.Rebalance,
-            "ValidateSettleRebalance: State must be Rebalance"
+            "Settle: State must be Rebalance"
         );
 
         // A rebalance can not have completed without a successful bid
         require(
             hasBidded,
-            "ValidateSettleRebalance: No bids made"
+            "Settle: No bids made"
         );
 
         // The unit shares must result in a quantity greater than the number of natural units outstanding
         require(
             _nextUnitShares > 0,
-            "ValidateSettleRebalance: Failed rebalance, unitshares equals 0. Call endFailedRebalance."
+            "Settle: Failed rebalance, unitshares equals 0. Call endFailedRebalance."
         );
     }
 

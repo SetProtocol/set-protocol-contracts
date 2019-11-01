@@ -59,33 +59,33 @@ contract Propose is
         // New Proposal can only be made in Default state
         require(
             rebalanceState == RebalancingLibrary.State.Default,
-            "ValidateProposal: State must be in Default"
+            "Propose: State must be Default"
         );
 
         // Enough time must have passed from last rebalance to start a new proposal
         require(
             block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
-            "ValidateProposal: Rebalance interval not elapsed"
+            "Propose: Rebalance interval not elapsed"
         );
 
         // New proposed Set must be a valid Set created by Core
         require(
             core.validSets(address(_nextSet)),
-            "ValidateProposal: Invalid or disabled proposed SetToken address"
+            "Propose: Invalid or disabled Set"
         );
 
         // Check proposed components on whitelist. This is to ensure managers are unable to add contract addresses
         // to a propose that prohibit the set from carrying out an auction i.e. a token that only the manager possesses
         require(
             componentWhiteList.areValidAddresses(_nextSet.getComponents()),
-            "ValidateProposal: Proposed set contains invalid component token"
+            "Propose: Set contains invalid component"
         );
 
         // Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.
         // Done to make sure that when calculating token units there will are no rounding errors.
         require(
             naturalUnitsAreValid(currentSet, _nextSet),
-            "ValidateProposal: Invalid proposed Set natural unit"
+            "Propose: Invalid natural unit"
         );
     }
 
@@ -98,28 +98,8 @@ contract Propose is
     {
         require(
             rebalanceState == RebalancingLibrary.State.Proposal,
-            "ValidateCancelProposal: State must be in Proposal"
+            "Cancel: State must be Proposal"
         );
-    }
-
-    /**
-     * Sends the currentSet and nextSet to the liquidator.
-     */
-    function liquidatorProcessProposal(
-        ISetToken _nextSet
-    )
-        internal
-    {
-        liquidator.processProposal(currentSet, _nextSet);
-    }
-
-    /**
-     * Informs the liquidator that the proposal has been canceled
-     */
-    function liquidatorCancelProposal()
-        internal
-    {
-        liquidator.cancelProposal();
     }
 
     /**

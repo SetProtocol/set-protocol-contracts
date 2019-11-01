@@ -34,6 +34,21 @@ export function getExpectedNewManagerAddedLog(
   }];
 }
 
+export function getExpectedNewLiquidatorAddedLog(
+  newLiquidator: Address,
+  oldLiquidator: Address,
+  contractAddress: Address,
+): Log[] {
+  return [{
+    event: 'NewLiquidatorAdded',
+    address: contractAddress,
+    args: {
+      newLiquidator,
+      oldLiquidator,
+    },
+  }];
+}
+
 export function getExpectedRebalanceProposedLog(
   nextSet: Address,
   auctionLibrary: Address,

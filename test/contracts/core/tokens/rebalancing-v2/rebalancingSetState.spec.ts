@@ -29,6 +29,7 @@ import {
 } from '@utils/constants';
 import {
   getExpectedNewManagerAddedLog,
+  getExpectedNewLiquidatorAddedLog
 } from '@utils/contract_logs/rebalancingSetToken';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
@@ -135,17 +136,22 @@ contract('RebalancingSetState', accounts => {
     lastRebalanceTimestamp = timestamp;
 
     rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
-      rebalancingFactory.address,
-      manager,
-      liquidator,
-      initialSet,
-      rebalancingComponentWhiteList.address,
-      initialUnitShares,
-      initialNaturalUnit,
-      proposalPeriod,
-      rebalanceInterval,
-      failPeriod,
-      lastRebalanceTimestamp,
+      [
+        rebalancingFactory.address,
+        manager,
+        liquidator,
+        initialSet,
+        rebalancingComponentWhiteList.address,
+        liquidatorWhitelist.address,
+      ],
+      [
+        initialUnitShares,
+        initialNaturalUnit,
+        proposalPeriod,
+        rebalanceInterval,
+        failPeriod,
+        lastRebalanceTimestamp,
+      ]
     );
   });
 
@@ -159,6 +165,7 @@ contract('RebalancingSetState', accounts => {
     let subjectLiquidator: Address;
     let subjectInitialSet: Address;
     let subjectComponentWhiteList: Address;
+    let subjectLiquidatorWhiteList: Address;
     let subjectInitialUnitShares: BigNumber;
     let subjectNaturalUnit: BigNumber;
     let subjectProposalPeriod: BigNumber;
@@ -170,33 +177,44 @@ contract('RebalancingSetState', accounts => {
 
     beforeEach(async () => {
       const components = await erc20Helper.deployTokensAsync(1, deployerAccount);
+      const { timestamp } = await web3.eth.getBlock('latest');
 
       subjectFactory = rebalancingFactory.address;
       subjectManager = managerAccount;
       subjectLiquidator = fakeModuleAccount;
       subjectInitialSet = components[0].address,
       subjectComponentWhiteList = rebalancingComponentWhiteList.address;
+      subjectLiquidatorWhiteList = liquidatorWhitelist.address;
       subjectInitialUnitShares = DEFAULT_UNIT_SHARES;
       subjectNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       subjectProposalPeriod = ONE_DAY_IN_SECONDS;
       subjectRebalanceInterval = ONE_DAY_IN_SECONDS.mul(2);
       subjectFailPeriod = ONE_DAY_IN_SECONDS.mul(3);
-      subjectLastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
+      subjectLastRebalanceTimestamp = new BigNumber(timestamp);
     });
 
     async function subject(): Promise<RebalancingSetTokenV2Contract> {
-      return rebalancingHelper.deployRebalancingSetTokenV2Async(
+      const addressConfig = [
         subjectFactory,
         subjectManager,
         subjectLiquidator,
         subjectInitialSet,
         subjectComponentWhiteList,
+        subjectLiquidatorWhiteList,
+      ];
+
+      const bigNumberConfig = [
         subjectInitialUnitShares,
         subjectNaturalUnit,
         subjectProposalPeriod,
         subjectRebalanceInterval,
         subjectFailPeriod,
         subjectLastRebalanceTimestamp,
+      ];
+
+      return rebalancingHelper.deployRebalancingSetTokenV2Async(
+        addressConfig,
+        bigNumberConfig,
         subjectName,
         subjectSymbol,
       );
@@ -389,6 +407,68 @@ contract('RebalancingSetState', accounts => {
     describe('when the caller is not the current manager', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#setLiquidator', async () => {
+    let subjectNewLiquidator: Address;
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      subjectNewLiquidator = otherAccount,
+      subjectCaller = managerAccount;
+
+      await liquidatorWhitelist.addAddress.sendTransactionAsync(
+        otherAccount,
+        { from: deployerAccount, gas: DEFAULT_GAS }
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingSetToken.setLiquidator.sendTransactionAsync(
+        subjectNewLiquidator,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('updates to the new liquidatorWhiteList correctly', async () => {
+      await subject();
+
+      const expectedNewLiquidator = await rebalancingSetToken.liquidator.callAsync();
+      expect(subjectNewLiquidator).to.equal(expectedNewLiquidator);
+    });
+
+    it('emits the correct NewLiquidatorAdded event', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedNewLiquidatorAddedLog(
+          subjectNewLiquidator,
+          liquidator,
+          rebalancingSetToken.address
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the caller is not the current manager', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the liquidator is not whitelisted', async () => {
+      beforeEach(async () => {
+        subjectNewLiquidator = managerAccount;
       });
 
       it('should revert', async () => {

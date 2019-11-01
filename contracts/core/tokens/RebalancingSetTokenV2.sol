@@ -69,30 +69,30 @@ contract RebalancingSetTokenV2 is
     /**
      * Constructor function for Rebalancing Set Token
      *
-     * @param _factory                   Factory used to create the Rebalancing Set
-     * @param _manager                   Address that is able to propose the next Set
-     * @param _liquidator                Address of the liquidator contract
-     * @param _initialSet                Initial set that collateralizes the Rebalancing set
-     * @param _componentWhiteList        Whitelist that nextSet components are checked against during propose
-     * @param _initialUnitShares         Units of currentSet that equals one share
-     * @param _naturalUnit               The minimum multiple of Sets that can be issued or redeemed
-     * @param _rebalanceConfig           0 - proposalPeriod: Time for users to inspect a rebalance proposal
-     *                                   1 - rebalanceInterval: Minimum amount of time between rebalances
-     *                                   2 - rebalanceFailPeriod: Time after auctionStart 
-     *                                      where something in the rebalance has ovviously gone wrong
-     *                                   3 - lastRebalanceTimestamp: Time of the last rebalance
+     * addressConfig is [factory, manager, liquidator, initialSet, componentWhiteList, liquidatorWhiteList]
+     * factory                   Factory used to create the Rebalancing Set
+     * manager                   Address that is able to propose the next Set
+     * liquidator                Address of the liquidator contract
+     * initialSet                Initial set that collateralizes the Rebalancing set
+     * componentWhiteList        Whitelist that nextSet components are checked against during propose
+     *
+     * uintConfig is [unitShares, naturalUnit, proposalPeriod, rebalanceInterval, rebalanceFailPeriod,
+     *                lastRebalanceTimestamp]
+     * initialUnitShares         Units of currentSet that equals one share
+     * naturalUnit               The minimum multiple of Sets that can be issued or redeemed
+     * proposalPeriod:           Time for users to inspect a rebalance proposal
+     * rebalanceInterval:        Minimum amount of time between rebalances
+     * rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
+     * lastRebalanceTimestamp:   Time of the last rebalance
+     *
+     * @param _addressConfig             List of configuration addresses
+     * @param _uintConfig                List of uint addresses
      * @param _name                      The name of the new RebalancingSetTokenV2
      * @param _symbol                    The symbol of the new RebalancingSetTokenV2
      */
     constructor(
-        IRebalancingSetFactory _factory,
-        address _manager,
-        ILiquidator _liquidator,
-        ISetToken _initialSet,
-        IWhiteList _componentWhiteList,
-        uint256 _initialUnitShares,
-        uint256 _naturalUnit,
-        uint256[4] memory _rebalanceConfig,
+        address[6] memory _addressConfig,
+        uint256[6] memory _uintConfig,
         string memory _name,
         string memory _symbol
     )
@@ -103,20 +103,21 @@ contract RebalancingSetTokenV2 is
             18
         )
     {
-        core = ICore(_factory.core());
+        factory = IRebalancingSetFactory(_addressConfig[0]);
+        manager = _addressConfig[1];
+        liquidator = ILiquidator(_addressConfig[2]);
+        currentSet = ISetToken(_addressConfig[3]);
+        componentWhiteList = IWhiteList(_addressConfig[4]);
+        liquidatorWhiteList = IWhiteList(_addressConfig[5]);
+        core = ICore(factory.core());
         vault = IVault(core.vault());
-        componentWhiteList = _componentWhiteList;
-        factory = _factory;
-        liquidator = _liquidator;
-        manager = _manager;
-        currentSet = _initialSet;
-        unitShares = _initialUnitShares;
-        naturalUnit = _naturalUnit;
 
-        proposalPeriod = _rebalanceConfig[0];
-        rebalanceInterval = _rebalanceConfig[1];
-        rebalanceFailPeriod = _rebalanceConfig[2];
-        lastRebalanceTimestamp = _rebalanceConfig[3];
+        unitShares = _uintConfig[0];
+        naturalUnit = _uintConfig[1];
+        proposalPeriod = _uintConfig[2];
+        rebalanceInterval = _uintConfig[3];
+        rebalanceFailPeriod = _uintConfig[4];
+        lastRebalanceTimestamp = _uintConfig[5];
         rebalanceState = RebalancingLibrary.State.Default;
     }
 
@@ -136,7 +137,7 @@ contract RebalancingSetTokenV2 is
     {
         Propose.validateProposal(_nextSet);
 
-        Propose.liquidatorProcessProposal(_nextSet);
+        liquidator.processProposal(currentSet, _nextSet);
 
         Propose.transitionToProposal(_nextSet);
     }
@@ -151,7 +152,7 @@ contract RebalancingSetTokenV2 is
     {
         Propose.validateCancelProposal();
 
-        Propose.liquidatorCancelProposal();
+        liquidator.cancelProposal();
 
         Propose.revertProposal();
     }
@@ -168,7 +169,7 @@ contract RebalancingSetTokenV2 is
     function startRebalance()
         external
     {
-        validateStartRebalance();
+        StartRebalance.validateStartRebalance();
 
         uint256 startingCurrentSetQuantity = calculateStartingSetQuantity();
 

@@ -39,31 +39,33 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
 
   /* ============ Deployment ============ */
 
+  /**
+   * addressConfig is [factory, manager, liquidator, initialSet, componentWhiteList, liquidatorWhiteList]
+   * factory                   Factory used to create the Rebalancing Set
+   * manager                   Address that is able to propose the next Set
+   * liquidator                Address of the liquidator contract
+   * initialSet                Initial set that collateralizes the Rebalancing set
+   * componentWhiteList        Whitelist that nextSet components are checked against during propose
+   *
+   * uintConfig is [unitShares, naturalUnit, proposalPeriod, rebalanceInterval, rebalanceFailPeriod,
+   *                lastRebalanceTimestamp]
+   * initialUnitShares         Units of currentSet that equals one share
+   * naturalUnit               The minimum multiple of Sets that can be issued or redeemed
+   * proposalPeriod:           Time for users to inspect a rebalance proposal
+   * rebalanceInterval:        Minimum amount of time between rebalances
+   * rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
+   * lastRebalanceTimestamp:   Time of the last rebalance
+   */
   public async deployRebalancingSetTokenV2Async(
-    factory: Address,
-    tokenManager: Address,
-    liquidator: Address,
-    initialSet: Address,
-    componentWhiteList: Address,
-    initialShareRatio: BigNumber,
-    initialNaturalUnit: BigNumber,
-    proposalPeriod: BigNumber,
-    rebalanceInterval: BigNumber,
-    rebalanceFailPeriod: BigNumber,
-    lastRebalanceTimestamp: BigNumber,
+    addressConfig: Address[],
+    bigNumberConfig: BigNumber[],
     name: string = 'Rebalancing Set',
     symbol: string = 'RBSET',
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenV2Contract> {
     const truffleRebalancingToken = await RebalancingSetTokenV2.new(
-      factory,
-      tokenManager,
-      liquidator,
-      initialSet,
-      componentWhiteList,
-      initialShareRatio,
-      initialNaturalUnit,
-      [proposalPeriod, rebalanceInterval, rebalanceFailPeriod, lastRebalanceTimestamp],
+      addressConfig,
+      bigNumberConfig,
       name,
       symbol,
       { from, gas: DEFAULT_GAS },

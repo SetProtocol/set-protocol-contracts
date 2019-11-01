@@ -285,17 +285,22 @@ contract('RebalancingSetState', accounts => {
 
       await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
       rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
-        rebalancingFactory.address,
-        manager,
-        liquidator,
-        initialSet,
-        rebalancingComponentWhiteList.address,
-        initialUnitShares,
-        initialNaturalUnit,
-        proposalPeriod,
-        rebalanceInterval,
-        failPeriod,
-        lastRebalanceTimestamp,
+        [
+          rebalancingFactory.address,
+          manager,
+          liquidator,
+          initialSet,
+          rebalancingComponentWhiteList.address,
+          liquidatorWhitelist.address,
+        ],
+        [
+          initialUnitShares,
+          initialNaturalUnit,
+          proposalPeriod,
+          rebalanceInterval,
+          failPeriod,
+          new BigNumber(lastRebalanceTimestamp),
+        ],
       );
 
       subjectIssuer = deployerAccount,

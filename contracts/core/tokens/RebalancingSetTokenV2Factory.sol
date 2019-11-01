@@ -250,18 +250,21 @@ contract RebalancingSetTokenV2Factory {
         // Create a new SetToken contract
         return address(
             new RebalancingSetTokenV2(
-                IRebalancingSetFactory(address(this)),
-                parameters.manager,
-                parameters.liquidator,
-                ISetToken(startingSet),
-                rebalanceComponentWhitelist,
-                _units[0],
-                _naturalUnit,
                 [
-                    parameters.proposalPeriod,
-                    parameters.rebalanceInterval,
-                    parameters.rebalanceFailPeriod,
-                    parameters.lastRebalanceTimestamp
+                    address(this),                          // factory
+                    parameters.manager,                     // manager
+                    address(parameters.liquidator),         // liquidator
+                    startingSet,                            // initialSet
+                    address(rebalanceComponentWhitelist),   // componentWhiteList
+                    address(liquidatorWhitelist)            // liquidatorWhiteList
+                ],
+                [
+                    _units[0],                          // unitShares
+                    _naturalUnit,                       // naturalUnit
+                    parameters.proposalPeriod,          // proposalPeriod
+                    parameters.rebalanceInterval,       // rebalanceInterval
+                    parameters.rebalanceFailPeriod,     // rebalanceFailPeriod
+                    parameters.lastRebalanceTimestamp   // lastRebalanceTimestamp
                 ],
                 _name.bytes32ToString(),
                 _symbol.bytes32ToString()
@@ -299,10 +302,6 @@ contract RebalancingSetTokenV2Factory {
         view
         returns (bool)
     {
-        // Require that liquidator is whitelisted by the liquidatorWhitelist
-        address[] memory liquidatorArray = new address[](1);
-        liquidatorArray[0] = _liquidator;
-
-        return liquidatorWhitelist.areValidAddresses(liquidatorArray);
+        return liquidatorWhitelist.whiteList(_liquidator);
     }
 }

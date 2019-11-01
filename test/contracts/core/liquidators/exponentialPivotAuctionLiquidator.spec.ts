@@ -949,10 +949,10 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         } = await subject();
 
         const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectSet));
-        expect(auctionStartTime).to.equal(linearAuction.auction.startTime);
-        expect(auctionTimeToPivot).to.equal(linearAuction.endTime);
-        expect(auctionStartPrice).to.equal(linearAuction.startNumerator);
-        expect(auctionPivotPrice).to.equal(linearAuction.endNumerator);
+        expect(auctionStartTime).to.bignumber.equal(linearAuction.auction.startTime);
+        expect(auctionTimeToPivot).to.bignumber.equal(linearAuction.endTime);
+        expect(auctionStartPrice).to.bignumber.equal(linearAuction.startNumerator);
+        expect(auctionPivotPrice).to.bignumber.equal(linearAuction.endNumerator);
       });
     });
   });

@@ -113,8 +113,6 @@ contract('RebalancingSetState', accounts => {
 
     liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
-
-
   });
 
   afterEach(async () => {
@@ -146,7 +144,7 @@ contract('RebalancingSetState', accounts => {
       const failPeriod = ONE_DAY_IN_SECONDS;
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,
@@ -276,7 +274,7 @@ contract('RebalancingSetState', accounts => {
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
       const failPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
 
       const rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
       const rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
@@ -342,7 +340,7 @@ contract('RebalancingSetState', accounts => {
       const failPeriod = ONE_DAY_IN_SECONDS;
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,
@@ -429,7 +427,7 @@ contract('RebalancingSetState', accounts => {
       const failPeriod = ONE_DAY_IN_SECONDS;
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,
@@ -562,7 +560,7 @@ contract('RebalancingSetState', accounts => {
       const failPeriod = ONE_DAY_IN_SECONDS;
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,

@@ -126,7 +126,7 @@ contract('BackwardsCompatability', accounts => {
 
     const proposalPeriod = ONE_DAY_IN_SECONDS;
     const failPeriod = ONE_DAY_IN_SECONDS;
-    const lastRebalanceTimestamp = await web3.eth.getBlock('latest');
+    const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
     rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
       coreMock,
       rebalancingFactory.address,
@@ -135,7 +135,7 @@ contract('BackwardsCompatability', accounts => {
       currentSetToken.address,
       proposalPeriod,
       failPeriod,
-      lastRebalanceTimestamp,
+      new BigNumber(lastRebalanceTimestamp),
     );
 
     await coreMock.issue.sendTransactionAsync(
@@ -244,7 +244,7 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct startingCurrentSets', async () => {
       const retrievedResult = await subject();
 
-      const expectedResult =  await liquidatorMock.getCombinedCurrentSetUnits.callAsync(
+      const expectedResult =  await liquidatorMock.startingCurrentSets.callAsync(
         rebalancingSetToken.address
       );
       expect(retrievedResult).to.bignumber.equal(expectedResult);

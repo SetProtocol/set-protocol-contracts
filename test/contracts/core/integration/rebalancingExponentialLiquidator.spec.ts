@@ -235,7 +235,7 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
       failPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,
@@ -420,7 +420,7 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
       failPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,
@@ -520,7 +520,7 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
       failPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,
@@ -656,7 +656,7 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const failPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,
@@ -859,7 +859,7 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       failPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest').timestamp;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,

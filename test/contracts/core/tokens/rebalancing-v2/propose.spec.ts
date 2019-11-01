@@ -155,7 +155,7 @@ contract('Propose', accounts => {
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
       failPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest');
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,
@@ -164,7 +164,7 @@ contract('Propose', accounts => {
         currentSetToken.address,
         proposalPeriod,
         failPeriod,
-        lastRebalanceTimestamp,
+        new BigNumber(lastRebalanceTimestamp),
       );
 
       subjectNextSet = nextSetToken.address;
@@ -395,7 +395,7 @@ contract('Propose', accounts => {
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
       failPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest');
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,
@@ -404,7 +404,7 @@ contract('Propose', accounts => {
         currentSetToken.address,
         proposalPeriod,
         failPeriod,
-        lastRebalanceTimestamp,
+        new BigNumber(lastRebalanceTimestamp),
       );
 
       subjectCaller = managerAccount;

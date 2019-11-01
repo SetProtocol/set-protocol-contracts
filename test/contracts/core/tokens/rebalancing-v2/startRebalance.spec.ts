@@ -144,7 +144,7 @@ contract('StartRebalance', accounts => {
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
       failPeriod = ONE_DAY_IN_SECONDS;
-      const lastRebalanceTimestamp = await web3.eth.getBlock('latest');
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,
@@ -153,7 +153,7 @@ contract('StartRebalance', accounts => {
         currentSetToken.address,
         proposalPeriod,
         failPeriod,
-        lastRebalanceTimestamp,
+        new BigNumber(lastRebalanceTimestamp),
       );
 
       // Issue currentSetToken

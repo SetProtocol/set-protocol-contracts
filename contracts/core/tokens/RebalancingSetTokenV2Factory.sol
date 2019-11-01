@@ -153,47 +153,44 @@ contract RebalancingSetTokenV2Factory {
         external
         returns (address)
     {
-        // Expecting caller to be Core
         require(
             msg.sender == address(core),
-            "RebalancingSetTokenV2Factory.create: Sender must be core"
+            "Create: Sender must be core"
         );
 
         // Ensure component array only includes one address which will be the currentSet
         require(
             _components.length == 1,
-            "RebalancingSetTokenV2Factory.create: Components must be length 1"
+            "Create: Components must be length 1"
         );
 
         // Ensure units array only includes one uint which will be the starting unitShares
         require(
             _units.length == 1,
-            "RebalancingSetTokenV2Factory.create: Units must be length 1"
+            "Create: Units must be length 1"
         );
 
-        // Ensure unitShares is not set to 0
         require(
             _units[0] > 0,
-            "RebalancingSetTokenV2Factory.create: UnitShares must be greater than zero"
+            "Create: UnitShares must be greater than zero"
         );
 
-        // Retrieve address of initial Set for rebalancing token
         address startingSet = _components[0];
 
         // Expect Set to rebalance to be valid and enabled Set
         require(
             core.validSets(startingSet),
-            "RebalancingSetTokenV2Factory.create: Invalid or disabled SetToken address"
+            "Create: Invalid or disabled SetToken address"
         );
 
         require(
             _naturalUnit >= minimumNaturalUnit,
-            "RebalancingSetTokenV2Factory.create: Natural Unit too low"
+            "Create: Natural Unit too low"
         );
 
         require(
             _naturalUnit <= maximumNaturalUnit,
-            "RebalancingSetTokenV2Factory.create: Natural Unit too large"
+            "Create: Natural Unit too large"
         );
 
         // Parse _callData for additional parameters
@@ -202,52 +199,46 @@ contract RebalancingSetTokenV2Factory {
         // Require manager address is non-zero
         require(
             parameters.manager != address(0),
-            "RebalancingSetTokenV2Factory.create: Invalid manager address"
+            "Create: Invalid manager address"
         );
 
         // Require liquidator address is non-zero
         require(
             address(parameters.liquidator) != address(0),
-            "RebalancingSetTokenV2Factory.create: Invalid liquidator address"
+            "Create: Invalid liquidator address"
         );
 
         // Require that liquidator is whitelisted by the liquidatorWhitelist
         require(
-            isValidLiquidator(address(parameters.liquidator)),
-            "RebalancingSetTokenV2Factory.create: Liquidator not whitelisted"
+            liquidatorWhitelist.whiteList(parameters.liquidator),
+            "Create: Liquidator not whitelisted"
         );
 
-        // Require that the proposal period is greater than the minimum
         require(
             parameters.proposalPeriod >= minimumProposalPeriod,
-            "RebalancingSetTokenV2Factory.create: Proposal period too short"
+            "Create: Proposal period too short"
         );
 
-        // Require that the rebalance interval is greater than the minimum
         require(
             parameters.rebalanceInterval >= minimumRebalanceInterval,
-            "RebalancingSetTokenV2Factory.create: Rebalance interval too short"
+            "Create: Rebalance interval too short"
         ); 
 
-        // Require that the fail rebalance period is greater than the minimum
         require(
             parameters.rebalanceFailPeriod >= minimumFailRebalancePeriod,
-            "RebalancingSetTokenV2Factory.create: Fail Period too short"
+            "Create: Fail Period too short"
         );
 
-        // Require that the fail rebalance period is greater than the minimum
         require(
             parameters.rebalanceFailPeriod <= maximumFailRebalancePeriod,
-            "RebalancingSetTokenV2Factory.create: Fail Period too long"
+            "Create: Fail Period too long"
         );
 
-        // Require that the fail rebalance period is greater than the minimum
         require(
             parameters.lastRebalanceTimestamp <= block.timestamp,
-            "RebalancingSetTokenV2Factory.create: RebalanceTimestamp must be in the past"
+            "Create: RebalanceTimestamp must be in the past"
         );
 
-        // Create a new SetToken contract
         return address(
             new RebalancingSetTokenV2(
                 [
@@ -259,12 +250,12 @@ contract RebalancingSetTokenV2Factory {
                     address(liquidatorWhitelist)            // liquidatorWhiteList
                 ],
                 [
-                    _units[0],                          // unitShares
-                    _naturalUnit,                       // naturalUnit
-                    parameters.proposalPeriod,          // proposalPeriod
-                    parameters.rebalanceInterval,       // rebalanceInterval
-                    parameters.rebalanceFailPeriod,     // rebalanceFailPeriod
-                    parameters.lastRebalanceTimestamp   // lastRebalanceTimestamp
+                    _units[0],                              // unitShares
+                    _naturalUnit,                           // naturalUnit
+                    parameters.proposalPeriod,              // proposalPeriod
+                    parameters.rebalanceInterval,           // rebalanceInterval
+                    parameters.rebalanceFailPeriod,         // rebalanceFailPeriod
+                    parameters.lastRebalanceTimestamp       // lastRebalanceTimestamp
                 ],
                 _name.bytes32ToString(),
                 _symbol.bytes32ToString()
@@ -293,15 +284,5 @@ contract RebalancingSetTokenV2Factory {
         }
 
         return parameters;
-    }
-
-    function isValidLiquidator(
-        address _liquidator
-    )
-        private
-        view
-        returns (bool)
-    {
-        return liquidatorWhitelist.whiteList(_liquidator);
     }
 }

@@ -101,30 +101,19 @@ contract Auction {
         _auction.combinedNextSetUnits = calculateCombinedUnitArray(_auction, _nextSet);
     }
 
-    /*
-     * Sets the Auction Setup struct variables.
-     *
-     * @param _auction          Auction Setup object
-     * @param _quantity         Quantity to reduce
-     */
     function reduceRemainingCurrentSets(Setup storage _auction, uint256 _quantity) internal {
         _auction.remainingCurrentSets = _auction.remainingCurrentSets.sub(_quantity);
     }
 
     /*
-     * Validate bid quantity
-     *
-     * @param _auction          Auction Setup object
-     * @param _quantity         Amount of currentSets bidder is seeking to rebalance
+     * Validate bid is a multiple of minimum bid and that amount is less than remaining.
      */
     function validateBidQuantity(Setup storage _auction, uint256 _quantity) internal view {
-        // Make sure that bid amount is multiple of minimum bid amount
         require(
             _quantity.mod(_auction.minimumBid) == 0,
             "Auction.validateBidQuantity: Must bid multiple of minimum bid"
         );
 
-        // Make sure that bid Amount is less than remainingCurrentSets
         require(
             _quantity <= _auction.remainingCurrentSets,
             "Auction.validateBidQuantity: Bid exceeds remaining current sets"
@@ -132,10 +121,8 @@ contract Auction {
     }
 
     /*
-     * Returns whether the auction has been completed, which is when all currentSets have been
+     * Asserts whether the auction has been completed, which is when all currentSets have been
      * rebalanced.
-     *
-     * @param _auction                Auction Setup object
      */
     function validateAuctionCompletion(Setup storage _auction) internal view {
         require(
@@ -146,9 +133,6 @@ contract Auction {
 
     /**
      * Returns whether the remainingSets is still a quantity equal or greater than the minimum bid
-     *
-     * @param _auction                Auction Setup object
-     * @return hasBiddableQuantity    Boolean whether there is a biddable quantity
      */
     function hasBiddableQuantity(Setup storage _auction) internal view returns(bool) {
         return _auction.remainingCurrentSets >= _auction.minimumBid;
@@ -156,9 +140,6 @@ contract Auction {
 
     /**
      * Returns whether the auction is active
-     *
-     * @param _auction                Auction Setup object
-     * @return hasBiddableQuantity    Boolean whether the auction is active
      */
     function isAuctionActive(Setup storage _auction) internal view returns(bool) {
         return _auction.startTime > 0;
@@ -184,10 +165,8 @@ contract Auction {
         // Normalized quantity amount
         uint256 unitsMultiplier = _quantity.div(_auction.minimumBid).mul(pricePrecision);
 
-        // Get combinedTokenArray from storage to memory
         address[] memory memCombinedTokenArray = _auction.combinedTokenArray;
 
-        // Declare unit arrays in memory
         uint256 combinedTokenCount = memCombinedTokenArray.length;
         uint256[] memory inflowUnitArray = new uint256[](combinedTokenCount);
         uint256[] memory outflowUnitArray = new uint256[](combinedTokenCount);
@@ -198,7 +177,7 @@ contract Auction {
             (
                 inflowUnitArray[i],
                 outflowUnitArray[i]
-            ) = calculateTokenFlow(
+            ) = calculateInflowOutflow(
                 _auction.combinedCurrentSetUnits[i],
                 _auction.combinedNextSetUnits[i],
                 unitsMultiplier,
@@ -256,12 +235,10 @@ contract Auction {
      * @param _currentUnit          Amount of token i in currentSet per minimum bid amount
      * @param _nextSetUnit          Amount of token i in nextSet per minimum bid amount
      * @param _unitsMultiplier      Bid amount normalized to number of minimum bid amounts
-     * @param _priceNumerator       The numerator of the price ratio
-     * @param _priceDivisor         The denominator of the price ratio
      * @return inflowUnit           Amount of token i transferred into the system
      * @return outflowUnit          Amount of token i transferred to the bidder
      */
-    function calculateTokenFlow(
+    function calculateInflowOutflow(
         uint256 _currentUnit,
         uint256 _nextSetUnit,
         uint256 _unitsMultiplier,

@@ -58,7 +58,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
      * @param _core                   Core instance
      * @param _oracleWhiteList        Oracle WhiteList instance
      * @param _pricePrecision         Price precision used in auctions
-     * @param _pricePrecision         Price precision used in auctions
      * @param _auctionPeriod          Length of auction
      * @param _rangeStart             Percentage above FairValue to begin auction at
      * @param _rangeEnd               Percentage below FairValue to end auction at     

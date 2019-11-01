@@ -70,7 +70,6 @@ contract OracleWhiteList is
     )
         public
     {
-        // Require that token and oracle address arrays are of equal length
         require(
             _initialTokenAddresses.length == _initialOracleAddresses.length,
             "OracleWhiteList.constructor: Token and Oracle array lengths must match."
@@ -101,22 +100,15 @@ contract OracleWhiteList is
         onlyOwner
         timeLockUpgrade
     {
-        // Require that token address doesn't have oracle already associated with it
         require(
             oracleWhiteList[_tokenAddress] == address(0),
             "OracleWhiteList.addTokenOraclePair: Token and Oracle pair already exists."
         );
 
-        // Add token address to addresses array
         addresses.push(_tokenAddress);
-
-        // Set oracle address for passed token address
         oracleWhiteList[_tokenAddress] = _oracleAddress;
 
-        emit TokenOraclePairAdded(
-            _tokenAddress,
-            _oracleAddress
-        );
+        emit TokenOraclePairAdded(_tokenAddress, _oracleAddress);
     }
 
     /**
@@ -130,25 +122,17 @@ contract OracleWhiteList is
         external
         onlyOwner
     {
-        // get oracle address of passed token address
         address oracleAddress = oracleWhiteList[_tokenAddress];
 
-        // Require that an oracle address exists for passed token address
         require(
             oracleAddress != address(0),
             "OracleWhiteList.removeTokenOraclePair: Token Address is not current whitelisted."
         );
 
-        // Remove token address from addresses array
         addresses = addresses.remove(_tokenAddress);
-
-        // Remove oracle associated with token address
         oracleWhiteList[_tokenAddress] = address(0);
 
-        emit TokenOraclePairRemoved(
-            _tokenAddress,
-            oracleAddress
-        );
+        emit TokenOraclePairRemoved(_tokenAddress, oracleAddress);
     }
 
     /**
@@ -165,7 +149,6 @@ contract OracleWhiteList is
         onlyOwner
         timeLockUpgrade
     {
-        // Require that token address has oracle already associated with it
         require(
             oracleWhiteList[_tokenAddress] != address(0),
             "OracleWhiteList.addTokenOraclePair: Token and Oracle pair already exists."

@@ -83,7 +83,7 @@ contract RebalancingSetTokenV2 is
      * proposalPeriod:           Time for users to inspect a rebalance proposal
      * rebalanceInterval:        Minimum amount of time between rebalances
      * rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
-     * lastRebalanceTimestamp:   Time of the last rebalance
+     * lastRebalanceTimestamp:   Time of the last rebalance; Allows customized deployments
      *
      * @param _addressConfig             List of configuration addresses
      * @param _uintConfig                List of uint addresses
@@ -266,8 +266,7 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Mint set token for given address.
-     * Can only be called by Core contract.
+     * Mint set token for given address. Can only be called by Core contract.
      *
      * @param  _issuer      The address of the issuing account
      * @param  _quantity    The number of sets to attribute to issuer
@@ -284,8 +283,7 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Burn set token for given address.
-     * Can only be called by authorized contracts.
+     * Burn set token for given address. Can only be called by authorized contracts.
      *
      * @param  _from        The address of the redeeming account
      * @param  _quantity    The number of sets to burn from redeemer

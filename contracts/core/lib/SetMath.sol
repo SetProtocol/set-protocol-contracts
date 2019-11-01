@@ -22,34 +22,38 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 /**
  * @title SetMath
  * @author Set Protocol
- *
  */
 library SetMath {
     using SafeMath for uint256;
 
-    // Quantity Set to component
+    
+    /**
+     * Converts SetToken quantity to component quantity
+     */
     function setToComponent(
         uint256 _setQuantity,
-        uint256 _unit,
+        uint256 _componentUnit,
         uint256 _naturalUnit
     ) 
         internal
         pure
         returns(uint256)
     {
-        return _setQuantity.mul(_unit).div(_naturalUnit);
+        return _setQuantity.mul(_componentUnit).div(_naturalUnit);
     }
 
-    // Quantity Component to Set
+    /**
+     * Converts component quantity to Set quantity
+     */
     function componentToSet(
         uint256 _componentQuantity,
-        uint256 _unit,
+        uint256 _componentUnit,
         uint256 _naturalUnit
     ) 
         internal
         pure
         returns(uint256)
     {
-        return _componentQuantity.mul(_naturalUnit).div(_unit);
+        return _componentQuantity.mul(_naturalUnit).div(_componentUnit);
     }
 }

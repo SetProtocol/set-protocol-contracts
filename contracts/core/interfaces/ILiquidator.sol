@@ -25,7 +25,6 @@ import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
  * @title ILiquidator
  * @author Set Protocol
  *
- * The ILiquidator
  */
 interface ILiquidator {
 
@@ -68,7 +67,7 @@ interface ILiquidator {
     function endFailedRebalance() external;
 
     // ----------------------------------------------------------------------
-    // Auction Price Parameters
+    // Auction Price
     // ----------------------------------------------------------------------
 
     function auctionPriceParameters(address _set)
@@ -77,7 +76,7 @@ interface ILiquidator {
         returns (RebalancingLibrary.AuctionPriceParameters memory);
 
     // ----------------------------------------------------------------------
-    // Auction Parameters
+    // Auction
     // ----------------------------------------------------------------------
 
     function hasRebalanceFailed(address _set) external view returns (bool);        

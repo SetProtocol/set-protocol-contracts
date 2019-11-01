@@ -56,7 +56,6 @@ contract Propose is
         internal
         view
     {
-        // New Proposal can only be made in Default state
         require(
             rebalanceState == RebalancingLibrary.State.Default,
             "Propose: State must be Default"

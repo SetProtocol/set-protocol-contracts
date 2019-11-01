@@ -928,5 +928,32 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         expect(JSON.stringify(result)).to.equal(JSON.stringify(linearAuction.auction.combinedNextSetUnits));
       });
     });
+
+    describe('#auctionPriceParameters', async () => {
+      let subjectSet: Address;
+
+      beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+      });
+
+      async function subject(): Promise<any> {
+        return liquidator.auctionPriceParameters.callAsync(subjectSet);
+      }
+
+      it('should return the correct values', async () => {
+        const {
+          auctionStartTime,
+          auctionTimeToPivot,
+          auctionStartPrice,
+          auctionPivotPrice,
+        } = await subject();
+
+        const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectSet));
+        expect(auctionStartTime).to.equal(linearAuction.auction.startTime);
+        expect(auctionTimeToPivot).to.equal(linearAuction.endTime);
+        expect(auctionStartPrice).to.equal(linearAuction.startNumerator);
+        expect(auctionPivotPrice).to.equal(linearAuction.endNumerator);
+      });
+    });
   });
 });

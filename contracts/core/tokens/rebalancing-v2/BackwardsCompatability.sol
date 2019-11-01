@@ -79,10 +79,6 @@ contract BackwardsCompatability is
         return liquidator.auctionPriceParameters(address(this));
     }
 
-    function auctionLibrary() external view returns (address) {
-        return address(liquidator);
-    }
-
     /*
      * Since structs with arrays cannot be retrieved, we return 
      * minimumBid and remainingCurrentSets separately.

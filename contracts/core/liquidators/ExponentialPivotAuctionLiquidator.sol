@@ -237,7 +237,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
         return auction(_set).combinedNextSetUnits;
     }
 
-
     function auctionPriceParameters(address _set)
         external
         view

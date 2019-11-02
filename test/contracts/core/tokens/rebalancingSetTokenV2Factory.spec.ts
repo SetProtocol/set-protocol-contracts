@@ -549,7 +549,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       });
     });
 
-    describe.only('when the lastRebalanceTimestamp is in the future', async () => {
+    describe('when the lastRebalanceTimestamp is in the future', async () => {
       beforeEach(async () => {
         const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
         callDataLastRebalanceTimestamp = new BigNumber(lastRebalanceTimestamp).mul(2);

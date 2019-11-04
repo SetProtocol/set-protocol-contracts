@@ -833,7 +833,7 @@ contract('ExchangeIssuanceModule', accounts => {
 
     describe('when a sendToken is not a component of the Set', async () => {
       before(async () => {
-        const firstComponent = erc20Helper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
+        const firstComponent = await erc20Helper.deployTokenAsync(contractDeployer);
         const notComponent = await erc20Helper.deployTokenAsync(contractDeployer);
 
         customExchangeRedeemSendTokens = [firstComponent.address, notComponent.address];

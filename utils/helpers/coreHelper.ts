@@ -7,12 +7,14 @@ import {
   CoreContract,
   CoreMockContract,
   ExchangeIssuanceModuleContract,
+  OracleWhiteListContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetIssuanceModuleContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
+  RebalancingSetTokenV2FactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   TimeLockUpgradeMockContract,
@@ -41,11 +43,13 @@ const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreMock = artifacts.require('CoreMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
+const OracleWhiteList = artifacts.require('OracleWhiteList');
 const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
 const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
+const RebalancingSetTokenV2Factory = artifacts.require('RebalancingSetTokenV2Factory');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
@@ -169,6 +173,38 @@ export class CoreHelper {
     );
 
     return new RebalancingSetTokenFactoryContract(
+      new web3.eth.Contract(truffleTokenFactory.abi, truffleTokenFactory.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployRebalancingSetTokenV2FactoryAsync(
+    coreAddress: Address,
+    componentWhitelistAddress: Address,
+    liquidatorWhitelistAddress: Address,
+    minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
+    minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
+    minimumFailRebalancePeriod: BigNumber = ONE_DAY_IN_SECONDS,
+    maximumFailRebalancePeriod: BigNumber = ONE_DAY_IN_SECONDS.mul(30),
+    minimumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MINIMUM_NATURAL_UNIT,
+    maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingSetTokenV2FactoryContract> {
+    await this.linkRebalancingLibrariesAsync(RebalancingSetTokenV2Factory);
+    const truffleTokenFactory = await RebalancingSetTokenV2Factory.new(
+      coreAddress,
+      componentWhitelistAddress,
+      liquidatorWhitelistAddress,
+      minimumRebalanceInterval,
+      minimumProposalPeriod,
+      minimumFailRebalancePeriod,
+      maximumFailRebalancePeriod,
+      minimumNaturalUnit,
+      maximumNaturalUnit,
+      { from },
+    );
+
+    return new RebalancingSetTokenV2FactoryContract(
       new web3.eth.Contract(truffleTokenFactory.abi, truffleTokenFactory.address),
       { from, gas: DEFAULT_GAS },
     );
@@ -362,6 +398,23 @@ export class CoreHelper {
     );
 
     return new WhiteListContract(
+      new web3.eth.Contract(truffleWhiteList.abi, truffleWhiteList.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployOracleWhiteListAsync(
+    initialTokenAddresses: Address[] = [],
+    initialOracleAddresses: Address[] = [],
+    from: Address = this._tokenOwnerAddress
+  ): Promise<OracleWhiteListContract> {
+    const truffleWhiteList = await OracleWhiteList.new(
+      initialTokenAddresses,
+      initialOracleAddresses,
+      { from },
+    );
+
+    return new OracleWhiteListContract(
       new web3.eth.Contract(truffleWhiteList.abi, truffleWhiteList.address),
       { from, gas: DEFAULT_GAS },
     );
@@ -578,6 +631,17 @@ export class CoreHelper {
   }
 
   public async addTokenToWhiteList(
+    address: Address,
+    whiteList: WhiteListContract,
+    from: Address = this._contractOwnerAddress,
+  ): Promise<void> {
+    await whiteList.addAddress.sendTransactionAsync(
+      address,
+      { from },
+    );
+  }
+
+  public async addAddressToWhiteList(
     address: Address,
     whiteList: WhiteListContract,
     from: Address = this._contractOwnerAddress,

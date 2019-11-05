@@ -2,9 +2,7 @@ import { Address } from 'set-protocol-utils';
 import {
   RebalancingSetEthBidderContract,
 } from '../contracts';
-import { getWeb3 } from '../web3Helper';
-
-const web3 = getWeb3();
+import { getContractInstance, txnFrom } from '../web3Helper';
 
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const RebalancingSetEthBidder = artifacts.require('RebalancingSetEthBidder');
@@ -25,9 +23,7 @@ export class RebalancingSetEthBidderHelper {
     wethAddress: Address,
     from: Address = this._contractOwnerAddress
   ): Promise<RebalancingSetEthBidderContract> {
-    const erc20WrapperLibrary = await ERC20Wrapper.new(
-      { from: this._contractOwnerAddress },
-    );
+    const erc20WrapperLibrary = await ERC20Wrapper.new(txnFrom(from));
 
     await RebalancingSetEthBidder.link('ERC20Wrapper', erc20WrapperLibrary.address);
 
@@ -35,12 +31,12 @@ export class RebalancingSetEthBidderHelper {
       rebalanceAuctionModuleAddress,
       transferProxyAddress,
       wethAddress,
-      { from },
+      txnFrom(from)
     );
 
     return new RebalancingSetEthBidderContract(
-      new web3.eth.Contract(rebalancingSetEthBidderContract.abi, rebalancingSetEthBidderContract.address),
-      { from },
+      getContractInstance(rebalancingSetEthBidderContract),
+      txnFrom(from)
     );
   }
 }

@@ -32,7 +32,7 @@ import {
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 
 import { Blockchain } from '../blockchain';
-import { getWeb3 } from '../web3Helper';
+import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
 
 import { CoreHelper } from './coreHelper';
 import { ERC20Helper } from './erc20Helper';
@@ -98,12 +98,12 @@ export class RebalancingHelper {
       rebalancingComponentWhiteListAddress,
       name,
       symbol,
-      { from, gas: DEFAULT_GAS },
+      txnFrom(from)
     );
 
     const rebalancingToken = new RebalancingSetTokenContract(
       new web3.eth.Contract(truffleRebalancingToken.abi, truffleRebalancingToken.address),
-      { from, gas: DEFAULT_GAS },
+      txnFrom(from)
     );
 
     return rebalancingToken;
@@ -138,12 +138,12 @@ export class RebalancingHelper {
       bigNumberConfig,
       name,
       symbol,
-      { from, gas: DEFAULT_GAS },
+      txnFrom(from)
     );
 
     const rebalancingToken = new RebalancingSetTokenV2Contract(
-      new web3.eth.Contract(truffleRebalancingToken.abi, truffleRebalancingToken.address),
-      { from, gas: DEFAULT_GAS },
+      getContractInstance(truffleRebalancingToken),
+      txnFrom(from)
     );
 
     return rebalancingToken;
@@ -171,7 +171,7 @@ export class RebalancingHelper {
       encodedName,
       encodedSymbol,
       callData,
-      { from },
+      txnFrom(from),
     );
 
     const logs = await setTestUtils.getLogsFromTxHash(txHash);
@@ -180,7 +180,7 @@ export class RebalancingHelper {
     return await RebalancingSetTokenContract.at(
       setAddress,
       web3,
-      { from }
+      txnFrom(from)
     );
   }
 
@@ -206,7 +206,7 @@ export class RebalancingHelper {
       encodedName,
       encodedSymbol,
       callData,
-      { from },
+      txnFrom(from),
     );
 
     const logs = await setTestUtils.getLogsFromTxHash(txHash);
@@ -215,7 +215,7 @@ export class RebalancingHelper {
     return await RebalancingSetTokenV2Contract.at(
       setAddress,
       web3,
-      { from }
+      txnFrom(from)
     );
   }
 
@@ -298,18 +298,18 @@ export class RebalancingHelper {
       await core.issue.sendTransactionAsync(
         currentSetAddress,
         currentSetRequiredAmount,
-        { from },
+        txnFrom(from),
       );
 
       await currentSetInstance.approve.sendTransactionAsync(
         transferProxyAddress,
         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-        { from },
+        txnFrom(from),
       );
       await core.issue.sendTransactionAsync(
         rebalancingSet.address,
         rebalancingSetQuantity,
-        { from },
+        txnFrom(from),
       );
   }
 
@@ -341,7 +341,7 @@ export class RebalancingHelper {
       from,
       rebalancingSetQuantity,
       new BigNumber(0),
-      { from },
+      txnFrom(from),
     );
 
     await core.redeemAndWithdrawTo.sendTransactionAsync(
@@ -349,7 +349,7 @@ export class RebalancingHelper {
       from,
       currentSetRequiredAmount,
       new BigNumber(0),
-      { from },
+      txnFrom(from),
     );
   }
 
@@ -363,12 +363,12 @@ export class RebalancingHelper {
     const truffleLinearAuctionPriceCurve = await LinearAuctionPriceCurve.new(
       priceDivisor,
       usesStartPrice,
-      { from },
+      txnFrom(from),
     );
 
     return new LinearAuctionPriceCurveContract(
-      new web3.eth.Contract(truffleLinearAuctionPriceCurve.abi, truffleLinearAuctionPriceCurve.address),
-      { from, gas: DEFAULT_GAS },
+      getContractInstance(truffleLinearAuctionPriceCurve),
+      txnFrom(from)
     );
   }
 
@@ -380,12 +380,12 @@ export class RebalancingHelper {
     const truffleConstantAuctionPriceCurve = await ConstantAuctionPriceCurve.new(
       priceNumerator,
       priceDivisor,
-      { from },
+      txnFrom(from),
     );
 
     return new ConstantAuctionPriceCurveContract(
-      new web3.eth.Contract(truffleConstantAuctionPriceCurve.abi, truffleConstantAuctionPriceCurve.address),
-      { from, gas: DEFAULT_GAS },
+      getContractInstance(truffleConstantAuctionPriceCurve),
+      txnFrom(from)
     );
   }
 
@@ -397,7 +397,7 @@ export class RebalancingHelper {
     const truffleUpdatableConstantAuctionPriceCurve = await UpdatableConstantAuctionPriceCurve.new(
       priceNumerator,
       priceDivisor,
-      { from },
+      txnFrom(from),
     );
 
     return new UpdatableConstantAuctionPriceCurveContract(
@@ -405,7 +405,7 @@ export class RebalancingHelper {
         truffleUpdatableConstantAuctionPriceCurve.abi,
         truffleUpdatableConstantAuctionPriceCurve.address
        ),
-      { from, gas: DEFAULT_GAS },
+      txnFrom(from)
     );
   }
 
@@ -416,7 +416,7 @@ export class RebalancingHelper {
   ): Promise<void> {
     await core.addPriceLibrary.sendTransactionAsync(
       priceLibrary.address,
-      { from }
+      txnFrom(from)
     );
   }
 
@@ -995,7 +995,7 @@ export class RebalancingHelper {
     setTokenAddress: Address,
   ): Promise<SetTokenContract> {
     return new SetTokenContract(
-      new web3.eth.Contract(SetToken.abi, setTokenAddress),
+      getContractInstance(SetToken, setTokenAddress),
       { from: this._tokenOwnerAddress },
     );
   }
@@ -1064,8 +1064,8 @@ export class RebalancingHelper {
      from: Address = this._tokenOwnerAddress,
   ): Promise<RebalancingSetTokenContract> {
     return new RebalancingSetTokenContract(
-      new web3.eth.Contract(RebalancingSetToken.abi, rebalancingSetTokenAddress),
-      { from, gas: DEFAULT_GAS },
+      getContractInstance(RebalancingSetToken, rebalancingSetTokenAddress),
+      txnFrom(from)
     );
   }
 }

@@ -13,7 +13,7 @@ import {
   LiquidatorProxyContract,
   SetTokenContract,
 } from '../contracts';
-import { getContractInstance } from '../web3Helper';
+import { getContractInstance, txnFrom } from '../web3Helper';
 import {
   ZERO,
 } from '../constants';
@@ -53,18 +53,18 @@ export class LiquidatorHelper {
   public async deployAuctionMockAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<AuctionMockContract> {
-    const auctionMock = await AuctionMock.new({ from });
+    const auctionMock = await AuctionMock.new(txnFrom(from));
 
-    return new AuctionMockContract(getContractInstance(auctionMock), { from });
+    return new AuctionMockContract(getContractInstance(auctionMock), txnFrom(from));
   }
 
   public async deployLiquidatorProxyAsync(
     liquidator: Address,
     from: Address = this._contractOwnerAddress
   ): Promise<LiquidatorProxyContract> {
-    const liquidatorProxy = await LiquidatorProxy.new(liquidator, { from });
+    const liquidatorProxy = await LiquidatorProxy.new(liquidator, txnFrom(from));
 
-    return new LiquidatorProxyContract(getContractInstance(liquidatorProxy), { from });
+    return new LiquidatorProxyContract(getContractInstance(liquidatorProxy), txnFrom(from));
   }
 
   public async deployLinearAuctionMockAsync(
@@ -81,10 +81,10 @@ export class LiquidatorHelper {
       auctionPeriod,
       rangeStart,
       rangeEnd,
-      { from }
+      txnFrom(from)
     );
 
-    return new LinearAuctionMockContract(getContractInstance(linearAuctionMock), { from });
+    return new LinearAuctionMockContract(getContractInstance(linearAuctionMock), txnFrom(from));
   }
 
   public async deployExponentialPivotAuctionLiquidatorAsync(
@@ -105,12 +105,12 @@ export class LiquidatorHelper {
       rangeStart,
       rangeEnd,
       name,
-      { from }
+      txnFrom(from)
     );
 
     return new ExponentialPivotAuctionLiquidatorContract(
       getContractInstance(exponentialAuctionLiquidator),
-      { from }
+      txnFrom(from)
     );
   }
 
@@ -128,18 +128,18 @@ export class LiquidatorHelper {
       auctionPeriod,
       rangeStart,
       rangeEnd,
-      { from }
+      txnFrom(from)
     );
 
-    return new ExponentialPivotAuctionMockContract(getContractInstance(exponentialAuctionMock), { from });
+    return new ExponentialPivotAuctionMockContract(getContractInstance(exponentialAuctionMock), txnFrom(from));
   }
 
   public async deployLiquidatorMockAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<LiquidatorMockContract> {
-    const liquidatorMock = await LiquidatorMock.new({ from });
+    const liquidatorMock = await LiquidatorMock.new(txnFrom(from));
 
-    return new LiquidatorMockContract(getContractInstance(liquidatorMock), { from });
+    return new LiquidatorMockContract(getContractInstance(liquidatorMock), txnFrom(from));
   }
 
   /* ============ Bid-Related ============ */

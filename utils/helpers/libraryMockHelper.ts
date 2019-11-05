@@ -20,7 +20,7 @@ import {
   ZeroExOrderLibraryMockContract
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
-import { getWeb3, getContractInstance } from '../web3Helper';
+import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
 import { DEFAULT_GAS } from '@utils/constants';
 
 const web3 = getWeb3();
@@ -62,39 +62,30 @@ export class LibraryMockHelper {
 
     await CommonValidationsLibraryMock.link('CommonValidationsLibrary', truffleCommonValidationsLibrary.address);
 
-    const commonValidationsMockContract = await CommonValidationsLibraryMock.new(
-      { from },
-    );
+    const commonValidationsMockContract = await CommonValidationsLibraryMock.new(txnFrom(from));
 
     return new CommonValidationsLibraryMockContract(
       getContractInstance(commonValidationsMockContract),
-      { from },
+      txnFrom(from),
     );
   }
 
   public async deployBytes32LibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<Bytes32LibraryMockContract> {
-    const bytes32MockContract = await Bytes32LibraryMock.new(
-      { from },
-    );
+    const bytes32MockContract = await Bytes32LibraryMock.new(txnFrom(from));
 
-    return new Bytes32LibraryMockContract(
-      getContractInstance(bytes32MockContract),
-      { from },
-    );
+    return new Bytes32LibraryMockContract(getContractInstance(bytes32MockContract), txnFrom(from));
   }
 
   public async deployCommonMathLibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<CommonMathMockContract> {
-    const truffleCommonMathLibrary = await CommonMathMock.new(
-      { from },
-    );
+    const truffleCommonMathLibrary = await CommonMathMock.new(txnFrom(from));
 
     return new CommonMathMockContract(
       getContractInstance(truffleCommonMathLibrary),
-      { from },
+      txnFrom(from),
     );
   }
 
@@ -107,26 +98,22 @@ export class LibraryMockHelper {
 
     await CoreIssuanceLibraryMock.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
 
-    const truffleCoreIssuanceLibraryMock = await CoreIssuanceLibraryMock.new(
-      { from },
-    );
+    const truffleCoreIssuanceLibraryMock = await CoreIssuanceLibraryMock.new(txnFrom(from));
 
     return new CoreIssuanceLibraryMockContract(
       getContractInstance(truffleCoreIssuanceLibraryMock),
-      { from },
+      txnFrom(from),
     );
   }
 
   public async deployExchangeIssuanceLibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<ExchangeIssuanceLibraryMockContract> {
-    const exchangeIssuanceMockContract = await ExchangeIssuanceLibraryMock.new(
-      { from },
-    );
+    const exchangeIssuanceMockContract = await ExchangeIssuanceLibraryMock.new(txnFrom(from));
 
     return new ExchangeIssuanceLibraryMockContract(
       getContractInstance(exchangeIssuanceMockContract),
-      { from },
+      txnFrom(from),
     );
   }
 
@@ -144,12 +131,12 @@ export class LibraryMockHelper {
       core.address,
       vault.address,
       transferProxy.address,
-      { from },
+      txnFrom(from),
     );
 
     return new TokenFlushMockContract(
       getContractInstance(tokenFlushMockContract),
-      { from },
+      txnFrom(from),
     );
   }
 
@@ -167,66 +154,60 @@ export class LibraryMockHelper {
     const rebalancingSetIssuanceMockContract = await RebalancingSetIssuanceMock.new(
       core.address,
       vault.address,
-      { from },
+      txnFrom(from),
     );
 
     return new RebalancingSetIssuanceMockContract(
       getContractInstance(rebalancingSetIssuanceMockContract),
-      { from },
+      txnFrom(from),
     );
   }
 
   public async deployERC20WrapperLibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<ERC20WrapperMockContract> {
-    const erc20WrapperMockContract = await ERC20WrapperMock.new(
-      { from },
-    );
+    const erc20WrapperMockContract = await ERC20WrapperMock.new(txnFrom(from));
 
     return new ERC20WrapperMockContract(
       getContractInstance(erc20WrapperMockContract),
-      { from },
+      txnFrom(from),
     );
   }
 
   public async deploySetMathAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<SetMathMockContract> {
-    const setMathMockContract = await SetMathMock.new({ from });
+    const setMathMockContract = await SetMathMock.new(txnFrom(from));
 
     return new SetMathMockContract(
       getContractInstance(setMathMockContract),
-      { from },
+      txnFrom(from),
     );
   }
 
   public async deploySetTokenLibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<SetTokenLibraryMockContract> {
-    const truffleSetTokenLibrary = await SetTokenLibrary.new(
-      { from: this._contractOwnerAddress },
-    );
+    const truffleSetTokenLibrary = await SetTokenLibrary.new(txnFrom(from));
 
     await SetTokenLibraryMock.link('SetTokenLibrary', truffleSetTokenLibrary.address);
 
-    const setTokenLibraryMockContract = await SetTokenLibraryMock.new(
-      { from },
-    );
+    const setTokenLibraryMockContract = await SetTokenLibraryMock.new(txnFrom(from));
 
     return new SetTokenLibraryMockContract(
       getContractInstance(setTokenLibraryMockContract),
-      { from },
+      txnFrom(from),
     );
   }
 
   public async deploySetUSDValuationMockAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<SetUSDValuationMockContract> {
-    const setValuationMockContract = await SetUSDValuationMock.new({ from });
+    const setValuationMockContract = await SetUSDValuationMock.new(txnFrom(from));
 
     return new SetUSDValuationMockContract(
       getContractInstance(setValuationMockContract),
-      { from },
+      txnFrom(from),
     );
   }
 
@@ -238,7 +219,7 @@ export class LibraryMockHelper {
     const oraclePromises = _.map(startingPrices, async price => {
       return await UpdatableOracleMock.new(
         price,
-        { from }
+        txnFrom(from)
       );
     });
 
@@ -246,7 +227,7 @@ export class LibraryMockHelper {
       _.each(oracles, oracleMock => {
         mockOracles.push(new UpdatableOracleMockContract(
           new web3.eth.Contract(oracleMock.abi, oracleMock.address),
-          { from }
+          txnFrom(from)
         ));
       });
     });
@@ -258,12 +239,9 @@ export class LibraryMockHelper {
     price: BigNumber,
     from: Address = this._contractOwnerAddress
   ): Promise<UpdatableOracleMockContract> {
-    const oracleMock = await UpdatableOracleMock.new(price, { from });
+    const oracleMock = await UpdatableOracleMock.new(price, txnFrom(from));
 
-    return new UpdatableOracleMockContract(
-      getContractInstance(oracleMock),
-      { from }
-    );
+    return new UpdatableOracleMockContract(getContractInstance(oracleMock), txnFrom(from));
   }
 
   public getUpdatableOracleMockInstance(
@@ -279,26 +257,19 @@ export class LibraryMockHelper {
   public async deployZeroExOrderLibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<ZeroExOrderLibraryMockContract> {
-    const zeroExExchangeWrapperInstance = await ZeroExOrderLibraryMock.new(
-      { from },
-    );
+    const zeroExExchangeWrapperInstance = await ZeroExOrderLibraryMock.new(txnFrom(from));
 
     return new ZeroExOrderLibraryMockContract(
       getContractInstance(zeroExExchangeWrapperInstance),
-      { from },
+      txnFrom(from),
     );
   }
 
   public async deployPlaceBidMockAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<PlaceBidMockContract> {
-    const placeBidMockContract = await PlaceBidMock.new(
-      { from },
-    );
+    const placeBidMockContract = await PlaceBidMock.new(txnFrom(from));
 
-    return new PlaceBidMockContract(
-      getContractInstance(placeBidMockContract),
-      { from },
-    );
+    return new PlaceBidMockContract(getContractInstance(placeBidMockContract), txnFrom(from));
   }
 }

@@ -19,11 +19,7 @@ import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from '../constants';
-import {
-  getWeb3,
-} from '../web3Helper';
-
-const web3 = getWeb3();
+import { getContractInstance } from '../web3Helper';
 
 const BadTokenMock = artifacts.require('BadTokenMock');
 const InvalidReturnTokenMock = artifacts.require('InvalidReturnTokenMock');
@@ -58,7 +54,7 @@ export class ERC20Helper {
     );
 
     return new StandardTokenMockContract(
-      new web3.eth.Contract(truffleMockToken.abi, truffleMockToken.address),
+      getContractInstance(truffleMockToken),
       { from: this._senderAccountAddress },
     );
   }
@@ -82,7 +78,7 @@ export class ERC20Helper {
     await Promise.all(mockTokenPromises).then(tokenMocks => {
       _.each(tokenMocks, standardToken => {
         mockTokens.push(new StandardTokenMockContract(
-          new web3.eth.Contract(standardToken.abi, standardToken.address),
+          getContractInstance(standardToken),
           { from: this._senderAccountAddress }
         ));
       });
@@ -105,7 +101,7 @@ export class ERC20Helper {
     );
 
     return new StandardTokenWithFeeMockContract(
-      new web3.eth.Contract(truffleMockTokenWithFee.abi, truffleMockTokenWithFee.address),
+      getContractInstance(truffleMockTokenWithFee),
       { from: this._senderAccountAddress },
     );
   }
@@ -124,7 +120,7 @@ export class ERC20Helper {
     );
 
     return new NoXferReturnTokenMockContract(
-      new web3.eth.Contract(truffleMockTokenNoXferReturn.abi, truffleMockTokenNoXferReturn.address),
+      getContractInstance(truffleMockTokenNoXferReturn),
       { from: this._senderAccountAddress },
     );
   }
@@ -143,7 +139,7 @@ export class ERC20Helper {
     );
 
     return new InvalidReturnTokenMockContract(
-      new web3.eth.Contract(truffleMockTokenInvalidReturn.abi, truffleMockTokenInvalidReturn.address),
+      getContractInstance(truffleMockTokenInvalidReturn),
       { from: this._senderAccountAddress },
     );
   }
@@ -160,7 +156,7 @@ export class ERC20Helper {
     );
 
     return new NoDecimalTokenMockContract(
-      new web3.eth.Contract(truffleMockToken.abi, truffleMockToken.address),
+      getContractInstance(truffleMockToken),
       { from: this._senderAccountAddress },
     );
   }
@@ -177,21 +173,21 @@ export class ERC20Helper {
     );
 
     return new BadTokenMockContract(
-      new web3.eth.Contract(truffleMockToken.abi, truffleMockToken.address),
+      getContractInstance(truffleMockToken),
       { from: this._senderAccountAddress },
     );
   }
 
   public zrxToken(): StandardTokenMockContract {
     return new StandardTokenMockContract(
-      new web3.eth.Contract(StandardTokenMock.abi, TestUtils.ZERO_EX_TOKEN_ADDRESS),
+      getContractInstance(StandardTokenMock, TestUtils.ZERO_EX_TOKEN_ADDRESS),
       { from: this._senderAccountAddress },
     );
   }
 
   public kyberReserveToken(tokenAddress: Address): StandardTokenMockContract {
     return new StandardTokenMockContract(
-      new web3.eth.Contract(StandardTokenMock.abi, tokenAddress),
+      getContractInstance(StandardTokenMock, tokenAddress),
       { from: this._senderAccountAddress },
     );
   }
@@ -209,7 +205,7 @@ export class ERC20Helper {
     );
 
     return new WethMockContract(
-      new web3.eth.Contract(truffleMockToken.abi, truffleMockToken.address),
+      getContractInstance(truffleMockToken),
       { from: this._senderAccountAddress },
     );
   }
@@ -333,7 +329,7 @@ export class ERC20Helper {
     const tokenPromises = _.map(
       tokens,
       tokenAddress => new StandardTokenMockContract(
-        new web3.eth.Contract(StandardTokenMock.abi, tokenAddress),
+        getContractInstance(StandardTokenMock, tokenAddress),
         { from: this._senderAccountAddress },
       )
     );

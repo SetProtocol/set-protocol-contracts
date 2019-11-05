@@ -32,7 +32,7 @@ import {
   ONE_DAY_IN_SECONDS,
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
-import { getWeb3 } from '../web3Helper';
+import { getWeb3, getContractInstance } from '../web3Helper';
 
 const web3 = getWeb3();
 
@@ -92,12 +92,10 @@ export class CoreHelper {
       { from, gas: DEFAULT_GAS },
     );
 
-    const transferProxy = new TransferProxyContract(
-      new web3.eth.Contract(truffleTransferProxy.abi, truffleTransferProxy.address),
+    return new TransferProxyContract(
+      getContractInstance(truffleTransferProxy),
       { from, gas: DEFAULT_GAS },
     );
-
-    return transferProxy;
   }
 
   public async deployVaultAsync(
@@ -113,7 +111,7 @@ export class CoreHelper {
     );
 
     return new VaultContract(
-      new web3.eth.Contract(truffleVault.abi, truffleVault.address),
+      getContractInstance(truffleVault),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -126,7 +124,7 @@ export class CoreHelper {
     );
 
     return new AuthorizableContract(
-      new web3.eth.Contract(truffleAuthorizable.abi, truffleAuthorizable.address),
+      getContractInstance(truffleAuthorizable),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -143,7 +141,7 @@ export class CoreHelper {
     );
 
     return new SetTokenFactoryContract(
-      new web3.eth.Contract(truffleSetTokenFactory.abi, truffleSetTokenFactory.address),
+      getContractInstance(truffleSetTokenFactory),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -173,7 +171,7 @@ export class CoreHelper {
     );
 
     return new RebalancingSetTokenFactoryContract(
-      new web3.eth.Contract(truffleTokenFactory.abi, truffleTokenFactory.address),
+      getContractInstance(truffleTokenFactory),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -205,7 +203,7 @@ export class CoreHelper {
     );
 
     return new RebalancingSetTokenV2FactoryContract(
-      new web3.eth.Contract(truffleTokenFactory.abi, truffleTokenFactory.address),
+      getContractInstance(truffleTokenFactory),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -279,7 +277,7 @@ export class CoreHelper {
     );
 
     const setToken = new SetTokenContract(
-      new web3.eth.Contract(truffleSetToken.abi, truffleSetToken.address),
+      getContractInstance(truffleSetToken),
       { from, gas: DEFAULT_GAS },
     );
 
@@ -307,7 +305,7 @@ export class CoreHelper {
     );
 
     return new CoreContract(
-      new web3.eth.Contract(truffleCore.abi, truffleCore.address),
+      getContractInstance(truffleCore),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -332,7 +330,7 @@ export class CoreHelper {
     );
 
     return new CoreContract(
-      new web3.eth.Contract(truffleCore.abi, truffleCore.address),
+      getContractInstance(truffleCore),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -357,7 +355,7 @@ export class CoreHelper {
     );
 
     return new CoreMockContract(
-      new web3.eth.Contract(truffleCore.abi, truffleCore.address),
+      getContractInstance(truffleCore),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -370,7 +368,7 @@ export class CoreHelper {
     );
 
     return new TimeLockUpgradeMockContract(
-      new web3.eth.Contract(truffleTimeLockUpgradeMock.abi, truffleTimeLockUpgradeMock.address),
+      getContractInstance(truffleTimeLockUpgradeMock),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -383,7 +381,7 @@ export class CoreHelper {
     );
 
     return new TimeLockUpgradeV2MockContract(
-      new web3.eth.Contract(truffleTimeLockUpgradeV2Mock.abi, truffleTimeLockUpgradeV2Mock.address),
+      getContractInstance(truffleTimeLockUpgradeV2Mock),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -398,7 +396,7 @@ export class CoreHelper {
     );
 
     return new WhiteListContract(
-      new web3.eth.Contract(truffleWhiteList.abi, truffleWhiteList.address),
+      getContractInstance(truffleWhiteList),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -415,7 +413,7 @@ export class CoreHelper {
     );
 
     return new OracleWhiteListContract(
-      new web3.eth.Contract(truffleWhiteList.abi, truffleWhiteList.address),
+      getContractInstance(truffleWhiteList),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -433,7 +431,7 @@ export class CoreHelper {
     );
 
     return new RebalanceAuctionModuleContract(
-      new web3.eth.Contract(truffleRebalanceAuctionModule.abi, truffleRebalanceAuctionModule.address),
+      getContractInstance(truffleRebalanceAuctionModule),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -451,7 +449,7 @@ export class CoreHelper {
     );
 
     return new RebalanceAuctionModuleMockContract(
-      new web3.eth.Contract(truffleRebalanceAuctionModuleMock.abi, truffleRebalanceAuctionModuleMock.address),
+      getContractInstance(truffleRebalanceAuctionModuleMock),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -470,7 +468,7 @@ export class CoreHelper {
     );
 
     return new ExchangeIssuanceModuleContract(
-      new web3.eth.Contract(truffleExchangeIssuanceModule.abi, truffleExchangeIssuanceModule.address),
+      getContractInstance(truffleExchangeIssuanceModule),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -499,7 +497,7 @@ export class CoreHelper {
     );
 
     return new RebalancingSetExchangeIssuanceModuleContract(
-      new web3.eth.Contract(payableExchangeIssuanceContract.abi, payableExchangeIssuanceContract.address),
+      getContractInstance(payableExchangeIssuanceContract),
       { from },
     );
   }
@@ -526,7 +524,7 @@ export class CoreHelper {
     );
 
     return new RebalancingSetIssuanceModuleContract(
-      new web3.eth.Contract(truffleModule.abi, truffleModule.address),
+      getContractInstance(truffleModule),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -784,10 +782,7 @@ export class CoreHelper {
     operationState: BigNumber,
     from: Address = this._tokenOwnerAddress,
   ) {
-    await core.setOperationState.sendTransactionAsync(
-      operationState,
-      { from }
-    );
+    await core.setOperationState.sendTransactionAsync(operationState, { from });
   }
 
   /* ============ CoreExchangeDispatcher Extension ============ */
@@ -820,9 +815,6 @@ export class CoreHelper {
      setTokenAddress: Address,
      from: Address = this._contractOwnerAddress,
   ): Promise<SetTokenContract> {
-    return new SetTokenContract(
-      new web3.eth.Contract(SetToken.abi, setTokenAddress),
-      { from, gas: DEFAULT_GAS },
-    );
+    return new SetTokenContract(getContractInstance(SetToken, setTokenAddress), { from, gas: DEFAULT_GAS });
   }
 }

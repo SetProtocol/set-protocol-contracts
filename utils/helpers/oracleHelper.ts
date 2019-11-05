@@ -4,7 +4,7 @@ import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import { FeedFactoryContract, MedianContract, PriceFeedContract } from '../contracts';
-import { getWeb3 } from '../web3Helper';
+import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
 import { FeedCreatedArgs } from '../contract_logs/oracle';
 
 const web3 = getWeb3();
@@ -28,13 +28,11 @@ export class OracleHelper {
   public async deployFeedFactoryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<FeedFactoryContract> {
-    const feedFactory = await FeedFactory.new(
-      { from },
-    );
+    const feedFactory = await FeedFactory.new(txnFrom(from));
 
     return new FeedFactoryContract(
-      new web3.eth.Contract(feedFactory.abi, feedFactory.address),
-      { from },
+      getContractInstance(feedFactory),
+      txnFrom(from),
     );
   }
 
@@ -43,7 +41,7 @@ export class OracleHelper {
     from: Address = this._contractOwnerAddress
   ): Promise<PriceFeedContract> {
     const txHash = await feedFactory.create.sendTransactionAsync(
-      { from },
+      txnFrom(from),
     );
 
     const logs = await setTestUtils.getLogsFromTxHash(txHash);
@@ -53,20 +51,18 @@ export class OracleHelper {
     return await PriceFeedContract.at(
       args.feed,
       web3,
-      { from }
+      txnFrom(from)
     );
   }
 
   public async deployMedianizerAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<MedianContract> {
-    const medianizer = await Median.new(
-      { from },
-    );
+    const medianizer = await Median.new(txnFrom(from));
 
     return new MedianContract(
-      new web3.eth.Contract(medianizer.abi, medianizer.address),
-      { from },
+      getContractInstance(medianizer),
+      txnFrom(from),
     );
   }
 
@@ -79,7 +75,7 @@ export class OracleHelper {
   ): Promise<string> {
     return await medianizer.lift.sendTransactionAsync(
       priceFeedSigner,
-      { from },
+      txnFrom(from),
     );
   }
 
@@ -90,7 +86,7 @@ export class OracleHelper {
   ): Promise<string> {
     return await medianizer.setMin.sendTransactionAsync(
       new BigNumber(minimum),
-      { from },
+      txnFrom(from),
     );
   }
 
@@ -103,7 +99,7 @@ export class OracleHelper {
     return await priceFeed.poke.sendTransactionAsync(
       price,
       timeStamp,
-      { from },
+      txnFrom(from),
     );
   }
 
@@ -135,7 +131,7 @@ export class OracleHelper {
       [new BigNumber(ecSignature.v)],
       [ecSignature.r],
       [ecSignature.s],
-      { from }
+      txnFrom(from)
     );
   }
 }

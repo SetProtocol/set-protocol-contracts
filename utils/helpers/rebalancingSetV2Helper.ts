@@ -24,7 +24,7 @@ import {
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 
-import { getWeb3 } from '../web3Helper';
+import { getWeb3, getContractInstance } from '../web3Helper';
 
 import { RebalancingHelper } from './rebalancingHelper';
 
@@ -72,7 +72,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     );
 
     const rebalancingToken = new RebalancingSetTokenV2Contract(
-      new web3.eth.Contract(truffleRebalancingToken.abi, truffleRebalancingToken.address),
+      getContractInstance(truffleRebalancingToken),
       { from, gas: DEFAULT_GAS },
     );
 

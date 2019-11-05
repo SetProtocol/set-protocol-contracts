@@ -9,11 +9,10 @@ import {
 }  from '../contracts';
 
 import { DEFAULT_GAS } from '../constants';
-import { getWeb3 } from '../web3Helper';
+import { getContractInstance } from '../web3Helper';
 
 import { CoreHelper } from './coreHelper';
 
-const web3 = getWeb3();
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const ZeroExExchangeWrapper = artifacts.require('ZeroExExchangeWrapper');
@@ -50,7 +49,7 @@ export class ExchangeHelper {
     );
 
     return new KyberNetworkWrapperContract(
-      new web3.eth.Contract(kyberNetworkWrapperInstance.abi, kyberNetworkWrapperInstance.address),
+      getContractInstance(kyberNetworkWrapperInstance),
       { from },
     );
   }
@@ -95,7 +94,7 @@ export class ExchangeHelper {
     );
 
     return new ZeroExExchangeWrapperContract(
-      new web3.eth.Contract(zeroExExchangeWrapperInstance.abi, zeroExExchangeWrapperInstance.address),
+      getContractInstance(zeroExExchangeWrapperInstance),
       { from },
     );
   }

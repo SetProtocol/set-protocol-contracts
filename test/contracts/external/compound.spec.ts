@@ -30,12 +30,12 @@ const blockchain = new Blockchain(web3);
 const setUtils = new SetUtils(web3);
 
 
-contract('Compound', accounts => {
+contract('Compound Helpers', accounts => {
   const [
     ownerAccount,
   ] = accounts;
 
-  const compoundHelper = new CompoundHelper();
+  const compoundHelper = new CompoundHelper(ownerAccount);
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();

@@ -56,12 +56,7 @@ contract('Compound Helpers', accounts => {
 
   describe('Test', async () => {
     it('does things', async () => {
-      const txn = await compoundHelper.setup();
-
-      const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
-      const setTestUtils = new SetTestUtils(web3);
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txn.transactionHash);
-      console.log("Formatted logs", JSON.stringify(formattedLogs));
+      await compoundHelper.setup();
     });
   });
 

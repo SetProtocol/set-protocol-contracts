@@ -28,6 +28,7 @@ export class CompoundHelper {
   public priceOracle: Address = CONTRACTS.PriceOracle;
   public interestRateModel: Address = CONTRACTS.InterestRateModel;
   public comptroller: Address = CONTRACTS.Comptroller;
+  public admin: Address = PERMISSIONED_ACCOUNTS.admin;
 
   constructor(senderAccountAddress: Address) {
     this._senderAccountAddress = senderAccountAddress;
@@ -35,7 +36,7 @@ export class CompoundHelper {
 
   /* ============ Kyber Network System Methods ============ */
 
-  public async setup(): Promise<any> {
+  public async setup(): Promise<void> {
     const erc20Helper = new ERC20Helper(this._senderAccountAddress);
 
 
@@ -52,7 +53,7 @@ export class CompoundHelper {
       new BigNumber(10 ** 18),
       "Test",
       "Test A",
-      new BigNumber(18),
+      new BigNumber(8),
       this._senderAccountAddress,
     );
     console.log("CToken Address", cTokenAddress);
@@ -106,7 +107,45 @@ export class CompoundHelper {
     const totalReserves = await CTokenContract.methods.totalReserves().call();
     console.log("Total Reserves", totalReserves);
 
-    return thing;
+  }
+
+  public async deployMockCUSDC(
+    underlying: Address,
+    admin: Address,
+  ): Promise<string> {
+    const config = {
+      "name": "Compound USD Coin",
+      "symbol": "cUSDC",
+      "decimals": new BigNumber(8),
+      "underlying": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "contract": "CErc20",
+      "initial_exchange_rate_mantissa": new BigNumber("200000000000000"),
+    };
+
+    return await this.deployCToken(
+      underlying,
+      this.comptroller,
+      this.interestRateModel,
+      config.initial_exchange_rate_mantissa,
+      config.symbol,
+      config.name,
+      config.decimals,
+      this.admin,
+    );
+  }
+
+  public async enableCToken(cToken: Address): Promise<void> {
+    const ComptrollerContract = new web3.eth.Contract(ComptrollerABI, this.comptroller);
+
+    const supportMarketData = ComptrollerContract.methods._supportMarket(
+      cToken
+    ).encodeABI();
+    await web3.eth.sendTransaction({
+      from: this._senderAccountAddress,
+      to: this.comptroller,
+      data: supportMarketData,
+      gas: DEFAULT_GAS,
+    });  
   }
 
   public async deployCToken(
@@ -139,8 +178,7 @@ export class CompoundHelper {
   public async getExchangeRate(
     cToken: Address,
   ): Promise<BigNumber> {    
-    const instance = await new web3.eth.Contract(CErc20ABI, cToken);
-    const exchangeRate: number = await instance.methods.exchangeRateStored().call();
+    const exchangeRate: number = await this.cTokenInstance(cToken).methods.exchangeRateStored().call();
     return new BigNumber(exchangeRate);
   }
 
@@ -149,8 +187,7 @@ export class CompoundHelper {
     quantity: BigNumber,
     from: Address = this._senderAccountAddress,
   ): Promise<any> {    
-    const CTokenContract = await new web3.eth.Contract(CErc20ABI, cToken);
-    const txnData = CTokenContract.methods.mint(
+    const txnData = this.cTokenInstance(cToken).methods.mint(
       quantity.toString()
     ).encodeABI();
 
@@ -166,8 +203,7 @@ export class CompoundHelper {
     cToken: Address,
     from: Address = this._senderAccountAddress,
   ): Promise<any> {    
-    const CTokenContract = await new web3.eth.Contract(CErc20ABI, cToken);
-    const txnData = CTokenContract.methods.accrueInterest().encodeABI();
+    const txnData = this.cTokenInstance(cToken).methods.accrueInterest().encodeABI();
 
     return await web3.eth.sendTransaction({
       from,
@@ -177,5 +213,20 @@ export class CompoundHelper {
     });
   }
 
+  public cTokenInstance(
+    cToken: Address,
+  ): any {    
+    return new web3.eth.Contract(CErc20ABI, cToken);
+  }
 
+  // public async computeUSDPriceOfCToken(): Promise<BigNumber> {
+  //   const USDC = {
+  //     name: "USD Coin",
+  //     symbol: "USDC",
+  //     decimals: 6,
+  //     feed_price: new BigNumber(10 ** 18),
+  //   };                       
+            
+  //   const ONE_COMPOUND_TOKEN = new BigNumber(10 ** 8);
+  // }
 }

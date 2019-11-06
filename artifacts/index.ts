@@ -33,6 +33,7 @@ export { StandardTokenMock } from "./ts/StandardTokenMock";
 export { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
 export { StartRebalanceLibrary } from "./ts/StartRebalanceLibrary";
 export { TimeLockUpgrade } from "./ts/TimeLockUpgrade";
+export { TimeLockUpgradeV2 } from "./ts/TimeLockUpgradeV2";
 export { TransferProxy } from "./ts/TransferProxy";
 export { Vault } from "./ts/Vault";
 export { WethMock } from "./ts/WethMock";
@@ -81,6 +82,7 @@ export {
   StandardTokenWithFeeMockContract,
   StartRebalanceLibraryContract,
   TimeLockUpgradeContract,
+  TimeLockUpgradeV2Contract,
   TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract,

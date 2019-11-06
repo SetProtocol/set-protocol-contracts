@@ -34,18 +34,6 @@ library AddressArrayUtils {
         return isIn;
     }
 
-    /// @return Returns index and isIn for the first occurrence starting from
-    /// end
-    function indexOfFromEnd(address[] memory A, address a) internal pure returns (uint256, bool) {
-        uint256 length = A.length;
-        for (uint256 i = length; i > 0; i--) {
-            if (A[i - 1] == a) {
-                return (i, true);
-            }
-        }
-        return (0, false);
-    }
-
     /**
      * Returns the combination of the two arrays
      * @param A The first array
@@ -78,19 +66,6 @@ library AddressArrayUtils {
         }
         newAddresses[A.length] = a;
         return newAddresses;
-    }
-
-    /**
-     * Returns the combination of two storage arrays.
-     * @param A The first array
-     * @param B The second array
-     * @return Returns A appended by a
-     */
-    function sExtend(address[] storage A, address[] storage B) internal {
-        uint256 length = B.length;
-        for (uint256 i = 0; i < length; i++) {
-            A.push(B[i]);
-        }
     }
 
     /**
@@ -134,40 +109,6 @@ library AddressArrayUtils {
     }
 
     /**
-     * Alternate implementation
-     * Assumes there are no duplicates
-     */
-    function unionB(address[] memory A, address[] memory B) internal pure returns (address[] memory) {
-        bool[] memory includeMap = new bool[](A.length + B.length);
-        uint256 count = 0;
-        for (uint256 i = 0; i < A.length; i++) {
-            includeMap[i] = true;
-            count++;
-        }
-        for (uint256 j = 0; j < B.length; j++) {
-            if (!contains(A, B[j])) {
-                includeMap[A.length + j] = true;
-                count++;
-            }
-        }
-        address[] memory newAddresses = new address[](count);
-        uint256 k = 0;
-        for (uint256 m = 0; m < A.length; m++) {
-            if (includeMap[m]) {
-                newAddresses[k] = A[m];
-                k++;
-            }
-        }
-        for (uint256 n = 0; n < B.length; n++) {
-            if (includeMap[A.length + n]) {
-                newAddresses[k] = B[n];
-                k++;
-            }
-        }
-        return newAddresses;
-    }
-
-    /**
      * Computes the difference of two arrays. Assumes there are no duplicates.
      * @param A The first array
      * @param B The second array
@@ -194,19 +135,6 @@ library AddressArrayUtils {
             }
         }
         return newAddresses;
-    }
-
-    /**
-    * @dev Reverses storage array in place
-    */
-    function sReverse(address[] storage A) internal {
-        address t;
-        uint256 length = A.length;
-        for (uint256 i = 0; i < length / 2; i++) {
-            t = A[i];
-            A[i] = A[A.length - i - 1];
-            A[A.length - i - 1] = t;
-        }
     }
 
     /**
@@ -247,53 +175,6 @@ library AddressArrayUtils {
         }
     }
 
-    function sPop(address[] storage A, uint256 index) internal returns (address) {
-        uint256 length = A.length;
-        if (index >= length) {
-            revert("Error: index out of bounds");
-        }
-        address entry = A[index];
-        for (uint256 i = index; i < length - 1; i++) {
-            A[i] = A[i + 1];
-        }
-        A.length--;
-        return entry;
-    }
-
-    /**
-    * Deletes address at index and fills the spot with the last address.
-    * Order is not preserved.
-    * @return Returns the removed entry
-    */
-    function sPopCheap(address[] storage A, uint256 index) internal returns (address) {
-        uint256 length = A.length;
-        if (index >= length) {
-            revert("Error: index out of bounds");
-        }
-        address entry = A[index];
-        if (index != length - 1) {
-            A[index] = A[length - 1];
-            delete A[length - 1];
-        }
-        A.length--;
-        return entry;
-    }
-
-    /**
-     * Deletes address at index. Works by swapping it with the last address, then deleting.
-     * Order is not preserved
-     * @param A Storage array to remove from
-     */
-    function sRemoveCheap(address[] storage A, address a) internal {
-        (uint256 index, bool isIn) = indexOf(A, a);
-        if (!isIn) {
-            revert("Error: entry not found");
-        } else {
-            sPopCheap(A, index);
-            return;
-        }
-    }
-
     /**
      * Returns whether or not there's a duplicate. Runs in O(n^2).
      * @param A Array to search
@@ -330,23 +211,4 @@ library AddressArrayUtils {
         }
         return true;
     }
-
-    /**
-     * Returns the elements indexed at indexArray.
-     * @param A The array to index
-     * @param indexArray The array to use to index
-     * @return Returns array containing elements indexed at indexArray
-     */
-    function argGet(address[] memory A, uint256[] memory indexArray)
-        internal
-        pure
-        returns (address[] memory)
-    {
-        address[] memory array = new address[](indexArray.length);
-        for (uint256 i = 0; i < indexArray.length; i++) {
-            array[i] = A[indexArray[i]];
-        }
-        return array;
-    }
-
 }

@@ -61,7 +61,7 @@ contract('Compound Helpers', accounts => {
       const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
       const setTestUtils = new SetTestUtils(web3);
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txn.transactionHash);
-      console.log("Formatted logs", JSON.stringify(formattedLogs[1].args));
+      console.log("Formatted logs", JSON.stringify(formattedLogs));
     });
   });
 

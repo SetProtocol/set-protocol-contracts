@@ -57,6 +57,17 @@ export class CompoundHelper {
     );
     console.log("CToken Address", cTokenAddress);
 
+    // Add Market
+    const supportMarketData = ComptrollerContract.methods._supportMarket(
+      cTokenAddress
+    ).encodeABI();
+    await web3.eth.sendTransaction({
+      from: this._senderAccountAddress,
+      to: this.comptroller,
+      data: supportMarketData,
+      gas: DEFAULT_GAS,
+    });    
+
     const exchangeRate = await this.getExchangeRate(cTokenAddress);
     console.log("Exchange Rate", exchangeRate);
 
@@ -84,15 +95,18 @@ export class CompoundHelper {
       this._senderAccountAddress
     );
 
-    return await this.mintCToken(cTokenAddress, ether(1));
+    await this.accrueInterest(cTokenAddress);
 
-    // const CTokenContract = await new web3.eth.Contract(CErc20ABI, cTokenAddress);
-    // const totalSupply = await CTokenContract.methods.totalSupply().call();
-    // console.log("Total Supply", totalSupply);
+    const thing = await this.mintCToken(cTokenAddress, ether(1));
 
-    // const totalReserves = await CTokenContract.methods.totalReserves().call();
-    // console.log("Total Reserves", totalReserves);
+    const CTokenContract = await new web3.eth.Contract(CErc20ABI, cTokenAddress);
+    const totalSupply = await CTokenContract.methods.totalSupply().call();
+    console.log("Total Supply", totalSupply);
 
+    const totalReserves = await CTokenContract.methods.totalReserves().call();
+    console.log("Total Reserves", totalReserves);
+
+    return thing;
   }
 
   public async deployCToken(
@@ -139,6 +153,21 @@ export class CompoundHelper {
     const txnData = CTokenContract.methods.mint(
       quantity.toString()
     ).encodeABI();
+
+    return await web3.eth.sendTransaction({
+      from,
+      to: cToken,
+      data: txnData,
+      gas: DEFAULT_GAS,
+    });
+  }
+
+  public async accrueInterest(
+    cToken: Address,
+    from: Address = this._senderAccountAddress,
+  ): Promise<any> {    
+    const CTokenContract = await new web3.eth.Contract(CErc20ABI, cToken);
+    const txnData = CTokenContract.methods.accrueInterest().encodeABI();
 
     return await web3.eth.sendTransaction({
       from,

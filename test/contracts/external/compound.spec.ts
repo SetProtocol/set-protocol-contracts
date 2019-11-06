@@ -20,6 +20,7 @@ import { ZERO } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CompoundHelper } from '@utils/helpers/compoundHelper';
+import { CErc20ABI } from '@utils/external/abis/compound/CErc20ABI';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -37,6 +38,14 @@ contract('Compound Helpers', accounts => {
 
   const compoundHelper = new CompoundHelper(ownerAccount);
 
+  before(async () => {
+    ABIDecoder.addABI(CErc20ABI);
+  });
+
+  after(async () => {
+    ABIDecoder.removeABI(CErc20ABI);
+  });
+
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
   });
@@ -47,7 +56,12 @@ contract('Compound Helpers', accounts => {
 
   describe('Test', async () => {
     it('does things', async () => {
-      await compoundHelper.setup();
+      const txn = await compoundHelper.setup();
+
+      const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
+      const setTestUtils = new SetTestUtils(web3);
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txn.transactionHash);
+      console.log("Formatted logs", JSON.stringify(formattedLogs[1].args));
     });
   });
 

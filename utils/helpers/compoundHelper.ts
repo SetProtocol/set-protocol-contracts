@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
+import * as setProtocolUtils from 'set-protocol-utils';
 
 import { StandardTokenMockContract } from '../contracts';
 
@@ -34,7 +35,7 @@ export class CompoundHelper {
 
   /* ============ Kyber Network System Methods ============ */
 
-  public async setup() {
+  public async setup(): Promise<any> {
     const erc20Helper = new ERC20Helper(this._senderAccountAddress);
 
 
@@ -44,7 +45,7 @@ export class CompoundHelper {
 
     const erc20 = await erc20Helper.deployTokenAsync(this._senderAccountAddress);
 
-    const address = await this.deployCToken(
+    const cTokenAddress = await this.deployCToken(
       erc20.address,
       this.comptroller,
       this.interestRateModel,
@@ -54,9 +55,9 @@ export class CompoundHelper {
       new BigNumber(18),
       this._senderAccountAddress,
     );
-    console.log("CToken Address", address);
+    console.log("CToken Address", cTokenAddress);
 
-    const exchangeRate = await this.getExchangeRate(address);
+    const exchangeRate = await this.getExchangeRate(cTokenAddress);
     console.log("Exchange Rate", exchangeRate);
 
     const setBorrowData = InterestRateModelContract.methods.setBorrowRate(
@@ -79,11 +80,19 @@ export class CompoundHelper {
     // Approve tokens to cToken
     await erc20Helper.approveTransferAsync(
       erc20,
-      address,
+      cTokenAddress,
       this._senderAccountAddress
     );
 
-    const txnHash = await this.mintCToken(address, new BigNumber(100));
+    return await this.mintCToken(cTokenAddress, ether(1));
+
+    // const CTokenContract = await new web3.eth.Contract(CErc20ABI, cTokenAddress);
+    // const totalSupply = await CTokenContract.methods.totalSupply().call();
+    // console.log("Total Supply", totalSupply);
+
+    // const totalReserves = await CTokenContract.methods.totalReserves().call();
+    // console.log("Total Reserves", totalReserves);
+
   }
 
   public async deployCToken(
@@ -125,7 +134,7 @@ export class CompoundHelper {
     cToken: Address,
     quantity: BigNumber,
     from: Address = this._senderAccountAddress,
-  ): Promise<string> {    
+  ): Promise<any> {    
     const CTokenContract = await new web3.eth.Contract(CErc20ABI, cToken);
     const txnData = CTokenContract.methods.mint(
       quantity.toString()

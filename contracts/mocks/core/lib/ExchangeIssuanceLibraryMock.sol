@@ -14,12 +14,15 @@ contract ExchangeIssuanceLibraryMock {
         uint256 _quantity
     )
         external
-        view 
+        view
+        returns (uint256)
     {
         ExchangeIssuanceLibrary.validateQuantity(
             _set,
             _quantity
         );
+
+        return 1;
     }
 
     function testValidatePostExchangeReceiveTokenBalances(

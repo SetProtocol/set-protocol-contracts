@@ -15,7 +15,7 @@ import {
   DEFAULT_AUCTION_PRICE_DIVISOR,
   ZERO,
 } from '@utils/constants';
-import { getWeb3 } from '@utils/web3Helper';
+import { getWeb3, blankTxn } from '@utils/web3Helper';
 
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { CoreHelper } from '@utils/helpers/coreHelper';
@@ -173,6 +173,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
     it('returns the correct price after one hour', async () => {
       const timeJump = new BigNumber(3600);
       await blockchain.increaseTimeAsync(timeJump);
+      await blankTxn(ownerAccount);
 
       const returnedPrice = await subject();
 
@@ -191,6 +192,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
     it('returns the correct price at the pivot', async () => {
       const timeJump = subjectAuctionPriceParameters.auctionTimeToPivot;
       await blockchain.increaseTimeAsync(timeJump);
+      await blankTxn(ownerAccount);
 
       const returnedPrice = await subject();
 
@@ -201,6 +203,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
     it('returns the correct price after the pivot', async () => {
       const timeJump = new BigNumber(115000);
       await blockchain.increaseTimeAsync(timeJump);
+      await blankTxn(ownerAccount);
 
       const returnedPrice = await subject();
 
@@ -219,6 +222,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
     it('returns the correct price after denominator hits 1', async () => {
       const timeJump = new BigNumber(150000);
       await blockchain.increaseTimeAsync(timeJump);
+      await blankTxn(ownerAccount);
 
       const returnedPrice = await subject();
 

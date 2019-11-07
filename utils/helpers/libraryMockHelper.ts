@@ -21,7 +21,7 @@ import {
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
 import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
-import { DEFAULT_GAS } from '@utils/constants';
+import { DEFAULT_GAS } from '../constants';
 
 const web3 = getWeb3();
 const Bytes32LibraryMock = artifacts.require('Bytes32LibraryMock');

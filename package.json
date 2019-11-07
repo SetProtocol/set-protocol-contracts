@@ -103,8 +103,8 @@
     "ts-mocha": "^6.0.0",
     "ts-node": "^8.0.2",
     "tslint-eslint-rules": "^5.3.1",
-    "web3": "1.0.0-beta.48",
-    "web3-utils": "1.0.0-beta.48"
+    "web3": "1.0.0-beta.36",
+    "web3-utils": "1.0.0-beta.36"
   },
   "husky": {
     "hooks": {

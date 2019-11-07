@@ -14,7 +14,7 @@ contract ExchangeIssuanceLibraryMock {
         uint256 _quantity
     )
         external
-        view 
+        view
     {
         ExchangeIssuanceLibrary.validateQuantity(
             _set,

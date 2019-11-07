@@ -1,6 +1,6 @@
 const Web3 = require('web3'); // import web3 v1.0 constructor
 const BigNumber = require('bignumber.js');
-import { DEFAULT_GAS } from './constants';
+import { DEFAULT_GAS, NULL_ADDRESS } from './constants';
 
 // use globally injected web3 to find the currentProvider and wrap with web3 v1.0
 export const getWeb3 = () => {
@@ -26,4 +26,13 @@ export const getGasUsageInEth = async txHash => {
 
 export const txnFrom = (from: string) => {
   return { from, gas: DEFAULT_GAS };
+};
+
+export const blankTxn = async (from: string) => {
+  const web3 = getWeb3();
+  await web3.eth.sendTransaction({
+    from,
+    to: NULL_ADDRESS,
+    value: '1',
+  });
 };

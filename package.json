@@ -79,7 +79,7 @@
     "set-abi-gen": "1.1.0-beta.1",
     "set-protocol-strategies": "^1.1.7",
     "solc": "^0.5.4",
-    "solidity-coverage": "https://github.com/leapdao/solidity-coverage#master",
+    "solidity-coverage": "^0.6.3",
     "truffle": "^5.0.37",
     "tslint": "^5.8.0",
     "tslint-no-unused-expression-chai": "0.0.3",

@@ -7,7 +7,6 @@ import {
   CoreContract,
   CoreMockContract,
   LinearAuctionPriceCurveContract,
-  LiquidatorMockContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
@@ -434,10 +433,14 @@ export class RebalancingHelper {
     auctionLibrary: Address,
     caller: Address
   ): Promise<void> {
-    const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
-    await this._coreHelper.addTokensToWhiteList(
-      nextSetTokenComponentAddresses,
-      rebalancingComponentWhiteList
+    // Transition to propose
+    await this.defaultTransitionToProposeAsync(
+      core,
+      rebalancingComponentWhiteList,
+      rebalancingSetToken,
+      nextSetToken,
+      auctionLibrary,
+      caller
     );
 
     // Transition to rebalance

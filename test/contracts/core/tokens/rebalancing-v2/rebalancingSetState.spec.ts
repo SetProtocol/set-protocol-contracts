@@ -85,7 +85,6 @@ contract('RebalancingSetState', accounts => {
   let liquidator: Address;
   let initialUnitShares: BigNumber;
   let initialNaturalUnit: BigNumber;
-  let proposalPeriod: BigNumber;
   let rebalanceInterval: BigNumber;
   let failPeriod: BigNumber;
   let lastRebalanceTimestamp: BigNumber;
@@ -128,7 +127,6 @@ contract('RebalancingSetState', accounts => {
     liquidator = fakeModuleAccount;
     initialUnitShares = DEFAULT_UNIT_SHARES;
     initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-    proposalPeriod = ONE_DAY_IN_SECONDS;
     rebalanceInterval = ONE_DAY_IN_SECONDS;
     failPeriod = ONE_DAY_IN_SECONDS;
 
@@ -147,7 +145,6 @@ contract('RebalancingSetState', accounts => {
       [
         initialUnitShares,
         initialNaturalUnit,
-        proposalPeriod,
         rebalanceInterval,
         failPeriod,
         lastRebalanceTimestamp,
@@ -168,7 +165,6 @@ contract('RebalancingSetState', accounts => {
     let subjectLiquidatorWhiteList: Address;
     let subjectInitialUnitShares: BigNumber;
     let subjectNaturalUnit: BigNumber;
-    let subjectProposalPeriod: BigNumber;
     let subjectRebalanceInterval: BigNumber;
     let subjectFailPeriod: BigNumber;
     let subjectLastRebalanceTimestamp: BigNumber;
@@ -187,7 +183,6 @@ contract('RebalancingSetState', accounts => {
       subjectLiquidatorWhiteList = liquidatorWhitelist.address;
       subjectInitialUnitShares = DEFAULT_UNIT_SHARES;
       subjectNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-      subjectProposalPeriod = ONE_DAY_IN_SECONDS;
       subjectRebalanceInterval = ONE_DAY_IN_SECONDS.mul(2);
       subjectFailPeriod = ONE_DAY_IN_SECONDS.mul(3);
       subjectLastRebalanceTimestamp = new BigNumber(timestamp);
@@ -206,7 +201,6 @@ contract('RebalancingSetState', accounts => {
       const bigNumberConfig = [
         subjectInitialUnitShares,
         subjectNaturalUnit,
-        subjectProposalPeriod,
         subjectRebalanceInterval,
         subjectFailPeriod,
         subjectLastRebalanceTimestamp,
@@ -297,13 +291,6 @@ contract('RebalancingSetState', accounts => {
       expect(returnedNaturalUnit).to.be.bignumber.equal(subjectNaturalUnit);
     });
 
-    it('creates a set with the correct proposal period', async () => {
-      rebalancingSetToken = await subject();
-
-      const tokenProposalPeriod = await rebalancingSetToken.proposalPeriod.callAsync();
-      expect(tokenProposalPeriod).to.be.bignumber.equal(subjectProposalPeriod);
-    });
-
     it('creates a set with the correct rebalance interval', async () => {
       rebalancingSetToken = await subject();
 
@@ -344,13 +331,6 @@ contract('RebalancingSetState', accounts => {
 
       const tokenNextlSet = await rebalancingSetToken.nextSet.callAsync();
       expect(tokenNextlSet).to.equal(NULL_ADDRESS);
-    });
-
-    it('should have proposalStartTime variable set to 0', async () => {
-      rebalancingSetToken = await subject();
-
-      const proposalStartTime = await rebalancingSetToken.proposalStartTime.callAsync();
-      expect(proposalStartTime).to.be.bignumber.equal(0);
     });
 
     it('should have rebalanceStartTime variable set to 0', async () => {

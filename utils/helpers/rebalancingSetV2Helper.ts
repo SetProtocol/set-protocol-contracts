@@ -42,16 +42,15 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
   /**
    * addressConfig is [factory, manager, liquidator, initialSet, componentWhiteList, liquidatorWhiteList]
    * factory                   Factory used to create the Rebalancing Set
-   * manager                   Address that is able to propose the next Set
+   * manager                   Address that is able to rebalance the next Set
    * liquidator                Address of the liquidator contract
    * initialSet                Initial set that collateralizes the Rebalancing set
-   * componentWhiteList        Whitelist that nextSet components are checked against during propose
+   * componentWhiteList        Whitelist that nextSet components are checked against during rebalance
    *
-   * uintConfig is [unitShares, naturalUnit, proposalPeriod, rebalanceInterval, rebalanceFailPeriod,
+   * uintConfig is [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod,
    *                lastRebalanceTimestamp]
    * initialUnitShares         Units of currentSet that equals one share
    * naturalUnit               The minimum multiple of Sets that can be issued or redeemed
-   * proposalPeriod:           Time for users to inspect a rebalance proposal
    * rebalanceInterval:        Minimum amount of time between rebalances
    * rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
    * lastRebalanceTimestamp:   Time of the last rebalance
@@ -120,7 +119,6 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     manager: Address,
     liquidator: Address,
     initialSet: Address,
-    proposalPeriod: BigNumber,
     failRebalancePeriod: BigNumber,
     lastRebalanceTimestamp: BigNumber,
     initialUnitShares: BigNumber = DEFAULT_UNIT_SHARES,
@@ -130,7 +128,6 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     const callData = SetUtils.generateRebalancingSetTokenV2CallData(
       manager,
       liquidator,
-      proposalPeriod,
       rebalanceInterval,
       failRebalancePeriod,
       lastRebalanceTimestamp,
@@ -147,7 +144,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     );
   }
 
-  public async defaultTransitionToProposeV2Async(
+  public async transitionToRebalanceV2Async(
     core: CoreLikeContract,
     rebalancingComponentWhiteList: WhiteListContract,
     rebalancingSetToken: RebalancingSetTokenV2Contract,
@@ -160,51 +157,20 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
       rebalancingComponentWhiteList
     );
 
-    // Transition to propose
-    await this.transitionToProposeV2Async(
-      core,
-      rebalancingSetToken,
-      nextSetToken,
-      caller,
-    );
-  }
-
-  public async transitionToProposeV2Async(
-    core: CoreLikeContract,
-    rebalancingSetToken: RebalancingSetTokenV2Contract,
-    nextSetToken: SetTokenContract,
-    caller: Address
-  ): Promise<void> {
-    // Transition to propose, auctionLibrary MUST be approved priceLibrary on Core already
-    await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
-    await rebalancingSetToken.propose.sendTransactionAsync(
-      nextSetToken.address,
-      { from: caller, gas: DEFAULT_GAS}
-    );
-  }
-
-  public async transitionToRebalanceV2Async(
-    core: CoreLikeContract,
-    rebalancingSetToken: RebalancingSetTokenV2Contract,
-    nextSetToken: SetTokenContract,
-    caller: Address
-  ): Promise<void> {
-    await this.transitionToProposeV2Async(
-      core,
-      rebalancingSetToken,
-      nextSetToken,
-      caller
-    );
+    console.log("Added whitelist");
+    console.log("nextSetToken.address", nextSetToken.address);
 
     // Transition to rebalance
     await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
     await rebalancingSetToken.startRebalance.sendTransactionAsync(
+      nextSetToken.address,
       { from: caller, gas: DEFAULT_GAS }
     );
   }
 
   public async transitionToDrawdownV2Async(
     core: CoreLikeContract,
+    rebalancingComponentWhiteList: WhiteListContract,
     rebalancingSetToken: RebalancingSetTokenV2Contract,
     rebalanceAuctionModule: RebalanceAuctionModuleContract,
     liquidatorMock: LiquidatorMockContract,
@@ -214,6 +180,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
   ): Promise<void> {
     await this.transitionToRebalanceV2Async(
       core,
+      rebalancingComponentWhiteList,
       rebalancingSetToken,
       nextSetToken,
       manager

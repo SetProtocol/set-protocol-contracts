@@ -52,9 +52,6 @@ contract LiquidatorMock is
     uint256 private _startingCurrentSetAmount;
     uint256 private _remainingCurrentSets;
 
-    ISetToken public startRebalanceCurrentSet;
-    ISetToken public startRebalanceNextSet;
-
     address[] private _combinedTokenArray;
     uint256[] private _combinedCurrentUnits;
     uint256[] private _combinedNextSetUnits;
@@ -66,21 +63,6 @@ contract LiquidatorMock is
     bool public endFailedRebalanceHasBeenCalled;
 
     /* ============ External Functions ============ */
-
-    function processProposal(
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        external
-    {
-        currentSet = _currentSet;
-        nextSet = _nextSet;
-    }
-
-    function cancelProposal() external {
-        currentSet = ISetToken(address(0));
-        nextSet = ISetToken(address(0));
-    }
 
     function getBidPrice(
         address _set,
@@ -129,14 +111,14 @@ contract LiquidatorMock is
     )
         external
     {
-        startRebalanceNextSet = _nextSet;
-        startRebalanceCurrentSet = _currentSet;
+        currentSet = _nextSet;
+        nextSet = _currentSet;
 
         startRebalanceTime = block.timestamp;
         _startingCurrentSetAmount = startingCurrentSetAmount_;
         _remainingCurrentSets = _startingCurrentSetAmount;
 
-        _minimumBid = calculateMinimumBid(currentSet, nextSet);
+        _minimumBid = calculateMinimumBid(_currentSet, _nextSet);
 
         // Set the combined token array
         address[] memory currentSetComponents = _currentSet.getComponents();

@@ -30,7 +30,6 @@ import { Issuance } from "./rebalancing-v2/Issuance.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { IWhiteList } from "../interfaces/IWhiteList.sol";
 import { PlaceBid } from "./rebalancing-v2/PlaceBid.sol";
-import { Propose } from "./rebalancing-v2/Propose.sol";
 import { Rebalance } from "../lib/Rebalance.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./rebalancing-v2/RebalancingSetState.sol";
@@ -49,7 +48,7 @@ import { StartRebalance } from "./rebalancing-v2/StartRebalance.sol";
  * - RebalanceAuctionModule execution should be backwards compatible with V1. 
  * - Bidding and auction parameters state no longer live on this contract. They live on the liquidator
  *   BackwardsComptability is used to allow retrieving of previous supported states.
- * - Re-proposals are no longer allowed. Instead, managers cancel proposals and then propose again
+ * - Proposals are removed.
  */
 contract RebalancingSetTokenV2 is
     ERC20,
@@ -57,7 +56,6 @@ contract RebalancingSetTokenV2 is
     RebalancingSetState,
     BackwardsCompatability,
     Issuance,
-    Propose,
     StartRebalance,
     PlaceBid,
     SettleRebalance,
@@ -76,11 +74,10 @@ contract RebalancingSetTokenV2 is
      * initialSet                Initial set that collateralizes the Rebalancing set
      * componentWhiteList        Whitelist that nextSet components are checked against during propose
      *
-     * uintConfig = [unitShares, naturalUnit, proposalPeriod, rebalanceInterval, rebalanceFailPeriod,
+     * uintConfig = [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod,
      *                lastRebalanceTimestamp]
      * initialUnitShares         Units of currentSet that equals one share
      * naturalUnit               The minimum multiple of Sets that can be issued or redeemed
-     * proposalPeriod:           Time for users to inspect a rebalance proposal
      * rebalanceInterval:        Minimum amount of time between rebalances
      * rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
      * lastRebalanceTimestamp:   Time of the last rebalance; Allows customized deployments
@@ -92,7 +89,7 @@ contract RebalancingSetTokenV2 is
      */
     constructor(
         address[6] memory _addressConfig,
-        uint256[6] memory _uintConfig,
+        uint256[5] memory _uintConfig,
         string memory _name,
         string memory _symbol
     )
@@ -114,70 +111,40 @@ contract RebalancingSetTokenV2 is
 
         unitShares = _uintConfig[0];
         naturalUnit = _uintConfig[1];
-        proposalPeriod = _uintConfig[2];
-        rebalanceInterval = _uintConfig[3];
-        rebalanceFailPeriod = _uintConfig[4];
-        lastRebalanceTimestamp = _uintConfig[5];
+        rebalanceInterval = _uintConfig[2];
+        rebalanceFailPeriod = _uintConfig[3];
+        lastRebalanceTimestamp = _uintConfig[4];
         rebalanceState = RebalancingLibrary.State.Default;
     }
 
    /* ============ External Functions ============ */
-
-    /**
-     * Set the terms of the next rebalance and transitions the Set to the proposal period.
-     * Can only be called after the rebalance interval has elapsed since the last rebalance.
-     * 
-     * @param _nextSet                      The Set to rebalance into
-     */
-    function propose(
-        ISetToken _nextSet
-    )
-        external
-        onlyManager
-    {
-        Propose.validateProposal(_nextSet);
-
-        liquidator.processProposal(currentSet, _nextSet);
-
-        Propose.transitionToProposal(_nextSet);
-    }
-
-    /**
-     * Reverts an existing proposal. Can only be called by the manager during the 
-     * proposal phase.
-     */
-    function cancelProposal()
-        external
-        onlyManager
-    {
-        Propose.validateCancelProposal();
-
-        liquidator.cancelProposal();
-
-        Propose.revertProposal();
-    }
 
     /*
      * Initiates the rebalance in coordination with the Liquidator contract. 
      * In this step, we redeem the currentSet and pass relevant information
      * to the liquidator.
      *
-     * Can only be called if the proposal period has elapsed.
+     * @param _nextSet                      The Set to rebalance into
      *
-     * Anyone can call this function.
+     * Can only be called if the rebalance interval has elapsed.
+     *
+     * Can only be called by manager.
      */
-    function startRebalance()
+    function startRebalance(
+        ISetToken _nextSet
+    )
         external
+        onlyManager
     {
-        StartRebalance.validateStartRebalance();
+        StartRebalance.validateStartRebalance(_nextSet);
 
-        uint256 startingCurrentSetQuantity = calculateStartingSetQuantity();
+        uint256 startingCurrentSetQuantity = StartRebalance.calculateStartingSetQuantity();
 
         StartRebalance.redeemCurrentSet(startingCurrentSetQuantity);
 
-        StartRebalance.liquidatorStartRebalance(startingCurrentSetQuantity);
+        StartRebalance.liquidatorStartRebalance(_nextSet, startingCurrentSetQuantity);
 
-        StartRebalance.transitionToRebalance();
+        StartRebalance.transitionToRebalance(_nextSet);
     }
 
     /*

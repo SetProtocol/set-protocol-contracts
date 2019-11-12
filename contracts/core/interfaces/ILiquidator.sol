@@ -30,15 +30,6 @@ interface ILiquidator {
 
     /* ============ External Functions ============ */
 
-    function processProposal(
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        external;
-
-    function cancelProposal()
-        external;
-
     function startRebalance(
         ISetToken _currentSet,
         ISetToken _nextSet,

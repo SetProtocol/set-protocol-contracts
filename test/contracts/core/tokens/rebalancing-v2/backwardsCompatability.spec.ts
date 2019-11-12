@@ -124,7 +124,6 @@ contract('BackwardsCompatability', accounts => {
     const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
     await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
 
-    const proposalPeriod = ONE_DAY_IN_SECONDS;
     const failPeriod = ONE_DAY_IN_SECONDS;
     const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
     rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
@@ -133,7 +132,6 @@ contract('BackwardsCompatability', accounts => {
       managerAccount,
       liquidatorMock.address,
       currentSetToken.address,
-      proposalPeriod,
       failPeriod,
       new BigNumber(lastRebalanceTimestamp),
     );
@@ -150,6 +148,7 @@ contract('BackwardsCompatability', accounts => {
 
     await rebalancingHelper.transitionToRebalanceV2Async(
       coreMock,
+      rebalancingComponentWhiteList,
       rebalancingSetToken,
       nextSetToken,
       managerAccount,

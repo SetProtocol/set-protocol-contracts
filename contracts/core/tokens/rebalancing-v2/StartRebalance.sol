@@ -40,25 +40,51 @@ contract StartRebalance is
 
     event RebalanceStarted(
         address oldSet,
-        address newSet
+        address newSet,
+        uint256 timestamp
     );
 
     /* ============ Internal Functions ============ */
 
     /**
      * Validate that start rebalance can be called
+     *
+     * @param _nextSet                    The Set to rebalance into
      */
-    function validateStartRebalance()
+    function validateStartRebalance(
+        ISetToken _nextSet
+    )
         internal
     {
         require(
-            rebalanceState == RebalancingLibrary.State.Proposal,
-            "Start: State must be Proposal"
+            rebalanceState == RebalancingLibrary.State.Default,
+            "Propose: State must be Default"
         );
 
+        // Enough time must have passed from last rebalance to start a new proposal
         require(
-            block.timestamp >= proposalStartTime.add(proposalPeriod),
-            "Start: Proposal period not elapsed"
+            block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
+            "Propose: Rebalance interval not elapsed"
+        );
+
+        // New proposed Set must be a valid Set created by Core
+        require(
+            core.validSets(address(_nextSet)),
+            "Propose: Invalid or disabled Set"
+        );
+
+        // Check proposed components on whitelist. This is to ensure managers are unable to add contract addresses
+        // to a propose that prohibit the set from carrying out an auction i.e. a token that only the manager possesses
+        require(
+            componentWhiteList.areValidAddresses(_nextSet.getComponents()),
+            "Propose: Set contains invalid component"
+        );
+
+        // Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.
+        // Done to make sure that when calculating token units there will are no rounding errors.
+        require(
+            naturalUnitsAreValid(currentSet, _nextSet),
+            "Propose: Invalid natural unit"
         );
     }
 
@@ -99,26 +125,53 @@ contract StartRebalance is
      * @param _startingCurrentSetQuantity      Amount of currentSets the rebalance is initiated with
      */
     function liquidatorStartRebalance(
+        ISetToken _nextSet,
         uint256 _startingCurrentSetQuantity
     )
         internal
     {
         liquidator.startRebalance(
             currentSet,
-            nextSet,
+            _nextSet,
             _startingCurrentSetQuantity
         );
     }
 
     /**
      * Updates rebalance-related state parameters.
+     *
+     * @param _nextSet                    The Set to rebalance into
      */
-    function transitionToRebalance()
-        internal
-    {
+    function transitionToRebalance(ISetToken _nextSet) internal {
+        nextSet = _nextSet;
         rebalanceState = RebalancingLibrary.State.Rebalance;
         rebalanceStartTime = block.timestamp;
 
-        emit RebalanceStarted(address(currentSet), address(nextSet));
+        emit RebalanceStarted(address(currentSet), address(nextSet), block.timestamp);
+    }
+
+    /* ============ Private Functions ============ */
+
+    /**
+     * Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.
+     * Done to make sure that when calculating token units there will are no rounding errors.
+     *
+     * @param _currentSet                 The current base SetToken
+     * @param _nextSet                    The proposed SetToken
+     */
+    function naturalUnitsAreValid(
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        private
+        view
+        returns (bool)
+    {
+        uint256 currentNaturalUnit = _currentSet.naturalUnit();
+        uint256 nextSetNaturalUnit = _nextSet.naturalUnit();
+
+        return Math.max(currentNaturalUnit, nextSetNaturalUnit).mod(
+            Math.min(currentNaturalUnit, nextSetNaturalUnit)
+        ) == 0;
     }
 }

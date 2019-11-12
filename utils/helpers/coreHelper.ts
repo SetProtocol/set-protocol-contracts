@@ -181,7 +181,6 @@ export class CoreHelper {
     componentWhitelistAddress: Address,
     liquidatorWhitelistAddress: Address,
     minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
-    minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
     minimumFailRebalancePeriod: BigNumber = ONE_DAY_IN_SECONDS,
     maximumFailRebalancePeriod: BigNumber = ONE_DAY_IN_SECONDS.mul(30),
     minimumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MINIMUM_NATURAL_UNIT,
@@ -194,7 +193,6 @@ export class CoreHelper {
       componentWhitelistAddress,
       liquidatorWhitelistAddress,
       minimumRebalanceInterval,
-      minimumProposalPeriod,
       minimumFailRebalancePeriod,
       maximumFailRebalancePeriod,
       minimumNaturalUnit,
@@ -633,10 +631,14 @@ export class CoreHelper {
     whiteList: WhiteListContract,
     from: Address = this._contractOwnerAddress,
   ): Promise<void> {
-    await whiteList.addAddress.sendTransactionAsync(
-      address,
-      { from },
-    );
+    const isWhiteListed = await whiteList.whiteList.callAsync(address);
+
+    if (!isWhiteListed) {
+      await whiteList.addAddress.sendTransactionAsync(
+        address,
+        { from },
+      );
+    }
   }
 
   public async addAddressToWhiteList(

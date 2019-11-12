@@ -142,7 +142,6 @@ contract('SettleRebalance', accounts => {
       const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
       await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
 
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
       const failPeriod = ONE_DAY_IN_SECONDS;
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
@@ -150,7 +149,6 @@ contract('SettleRebalance', accounts => {
         managerAccount,
         liquidatorMock.address,
         currentSetToken.address,
-        proposalPeriod,
         failPeriod,
         rebalancingSetUnitShares,
       );
@@ -183,29 +181,15 @@ contract('SettleRebalance', accounts => {
       });
     });
 
-    describe('when settleRebalance is called from Proposal State', async () => {
-      beforeEach(async () => {
-        await rebalancingHelper.transitionToProposeV2Async(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken,
-          managerAccount
-        );
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
     describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
       beforeEach(async () => {
-        await rebalancingHelper.transitionToRebalanceV2Async(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken,
-          managerAccount
-        );
+       await rebalancingHelper.transitionToRebalanceV2Async(
+         coreMock,
+         rebalancingComponentWhiteList,
+         rebalancingSetToken,
+         nextSetToken,
+         managerAccount
+       );
 
         const bidQuantity = rebalancingSetQuantityToIssue;
 
@@ -343,12 +327,13 @@ contract('SettleRebalance', accounts => {
     describe('when settleRebalance is called but no bids are made', async () => {
 
       beforeEach(async () => {
-        await rebalancingHelper.transitionToRebalanceV2Async(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken,
-          managerAccount
-        );
+       await rebalancingHelper.transitionToRebalanceV2Async(
+         coreMock,
+         rebalancingComponentWhiteList,
+         rebalancingSetToken,
+         nextSetToken,
+         managerAccount
+       );
       });
 
       it('should revert', async () => {
@@ -372,12 +357,13 @@ contract('SettleRebalance', accounts => {
       });
 
       beforeEach(async () => {
-        await rebalancingHelper.transitionToRebalanceV2Async(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken,
-          managerAccount
-        );
+       await rebalancingHelper.transitionToRebalanceV2Async(
+         coreMock,
+         rebalancingComponentWhiteList,
+         rebalancingSetToken,
+         nextSetToken,
+         managerAccount
+       );
 
         // Create a price that is REALLY bad, where nothing is returned
         await liquidatorMock.setPriceNumerator.sendTransactionAsync(
@@ -402,6 +388,7 @@ contract('SettleRebalance', accounts => {
       beforeEach(async () => {
         await rebalancingHelper.transitionToDrawdownV2Async(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
           rebalanceAuctionModule,
           liquidatorMock,

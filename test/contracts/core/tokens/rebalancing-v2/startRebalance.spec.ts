@@ -28,7 +28,7 @@ import {
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import {
-  getExpectedRebalanceStartedLog,
+  getExpectedRebalanceStartedV2Log,
 } from '@utils/contract_logs/rebalancingSetToken';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
@@ -52,6 +52,8 @@ contract('StartRebalance', accounts => {
   const [
     deployerAccount,
     managerAccount,
+    otherAccount,
+    fakeTokenAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -119,13 +121,14 @@ contract('StartRebalance', accounts => {
 
   describe('#startRebalance', async () => {
     let subjectCaller: Address;
+    let subjectNextSet: Address;
     let subjectTimeFastForward: BigNumber;
-    let proposalPeriod: BigNumber;
     let failPeriod: BigNumber;
 
     let currentSetToken: SetTokenContract;
     let nextSetToken: SetTokenContract;
     let rebalancingSetQuantityToIssue: BigNumber;
+    let naturalUnits: BigNumber[];
 
     beforeEach(async () => {
       const setTokensToDeploy = 2;
@@ -134,6 +137,7 @@ contract('StartRebalance', accounts => {
         factory.address,
         transferProxy.address,
         setTokensToDeploy,
+        naturalUnits || undefined,
       );
 
       currentSetToken = setTokens[0];
@@ -142,7 +146,6 @@ contract('StartRebalance', accounts => {
       const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
       await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
 
-      proposalPeriod = ONE_DAY_IN_SECONDS;
       failPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
@@ -151,7 +154,6 @@ contract('StartRebalance', accounts => {
         managerAccount,
         liquidatorMock.address,
         currentSetToken.address,
-        proposalPeriod,
         failPeriod,
         new BigNumber(lastRebalanceTimestamp),
       );
@@ -169,30 +171,24 @@ contract('StartRebalance', accounts => {
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
       subjectCaller = managerAccount;
+      subjectNextSet = nextSetToken.address;
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
     });
 
     async function subject(): Promise<string> {
       await blockchain.increaseTimeAsync(subjectTimeFastForward);
       return rebalancingSetToken.startRebalance.sendTransactionAsync(
+        subjectNextSet,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
 
     describe('when startRebalance is called from Default State', async () => {
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
+      it('updates to the nextSet correctly', async () => {
+        await subject();
 
-    describe('when startRebalance is called from Propose State', async () => {
-      beforeEach(async () => {
-        await rebalancingHelper.transitionToProposeV2Async(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken,
-          managerAccount
-        );
+        const newRebalacingSet = await rebalancingSetToken.nextSet.callAsync();
+        expect(newRebalacingSet).to.equal(subjectNextSet);
       });
 
       it('updates the rebalanceState to Rebalance', async () => {
@@ -214,10 +210,12 @@ contract('StartRebalance', accounts => {
       it('emits the correct RebalanceProposed event', async () => {
         const txHash = await subject();
 
+        const { timestamp } = await web3.eth.getBlock('latest');
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-        const expectedLogs = getExpectedRebalanceStartedLog(
+        const expectedLogs = getExpectedRebalanceStartedV2Log(
           currentSetToken.address,
           nextSetToken.address,
+          new BigNumber(timestamp),
           rebalancingSetToken.address,
         );
 
@@ -238,15 +236,15 @@ contract('StartRebalance', accounts => {
       it('sends the correct currentSet to the liquidator', async () => {
         await subject();
 
-        const startRebalanceCurrentSet = await liquidatorMock.startRebalanceCurrentSet.callAsync();
-        expect(startRebalanceCurrentSet).to.equal(currentSetToken.address);
+        const currentSet = await liquidatorMock.currentSet.callAsync();
+        expect(currentSet).to.equal(currentSetToken.address);
       });
 
       it('sends the correct nextSet to the liquidator', async () => {
         await subject();
 
-        const startRebalanceNextSet = await liquidatorMock.startRebalanceNextSet.callAsync();
-        expect(startRebalanceNextSet).to.equal(nextSetToken.address);
+        const nextSet = await liquidatorMock.nextSet.callAsync();
+        expect(nextSet).to.equal(nextSetToken.address);
       });
 
       it('redeemsInVault the currentSet', async () => {
@@ -332,9 +330,58 @@ contract('StartRebalance', accounts => {
         });
       });
 
-      describe('when not enough time has passed before proposal period has elapsed', async () => {
+      describe('when one of the components in the next set is not on the whitelist', async () => {
+        beforeEach(async () => {
+          const nextSetComponents = await nextSetToken.getComponents.callAsync();
+          await rebalancingComponentWhiteList.removeAddress.sendTransactionAsync(
+            nextSetComponents[0],
+            { from: deployerAccount }
+          );
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when the rebalance interval has not elapsed', async () => {
         beforeEach(async () => {
           subjectTimeFastForward = ONE_DAY_IN_SECONDS.sub(10);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when not by the token manager', async () => {
+        beforeEach(async () => {
+          subjectCaller = otherAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when the new nextSet is not approved by Core', async () => {
+        beforeEach(async () => {
+          subjectNextSet = fakeTokenAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe("when the new new set's natural unit is not a multiple of the current set", async () => {
+        before(async () => {
+          // a setToken with natural unit ether(.003) and setToken with natural unit ether(.002) are being used
+          naturalUnits = [ether(.003), ether(.002), ether(.001)];
+        });
+
+        after(async () => {
+          naturalUnits = undefined;
         });
 
         it('should revert', async () => {
@@ -345,12 +392,13 @@ contract('StartRebalance', accounts => {
 
     describe('when startRebalance is called from Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingHelper.transitionToRebalanceV2Async(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken,
-          managerAccount
-        );
+       await rebalancingHelper.transitionToRebalanceV2Async(
+         coreMock,
+         rebalancingComponentWhiteList,
+         rebalancingSetToken,
+         nextSetToken,
+         managerAccount
+       );
       });
 
       it('should revert', async () => {
@@ -362,6 +410,7 @@ contract('StartRebalance', accounts => {
       beforeEach(async () => {
         await rebalancingHelper.transitionToDrawdownV2Async(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
           rebalanceAuctionModule,
           liquidatorMock,

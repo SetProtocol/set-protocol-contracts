@@ -111,8 +111,8 @@ contract LiquidatorMock is
     )
         external
     {
-        currentSet = _nextSet;
-        nextSet = _currentSet;
+        currentSet = _currentSet;
+        nextSet = _nextSet;
 
         startRebalanceTime = block.timestamp;
         _startingCurrentSetAmount = startingCurrentSetAmount_;

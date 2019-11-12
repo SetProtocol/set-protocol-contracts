@@ -157,9 +157,6 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
       rebalancingComponentWhiteList
     );
 
-    console.log("Added whitelist");
-    console.log("nextSetToken.address", nextSetToken.address);
-
     // Transition to rebalance
     await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
     await rebalancingSetToken.startRebalance.sendTransactionAsync(

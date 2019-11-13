@@ -199,10 +199,16 @@ contract RebalancingSetTokenV2 is
     function settleRebalance()
         external
     {
+        SettleRebalance.validateSettleRebalance();
+
         uint256 issueQuantity = SettleRebalance.calculateNextSetIssueQuantity();
         uint256 newUnitShares = SettleRebalance.calculateNextSetNewUnitShares(issueQuantity);
 
-        SettleRebalance.validateSettleRebalance(newUnitShares);
+        // The unit shares must result in a quantity greater than the number of natural units outstanding
+        require(
+            newUnitShares > 0,
+            "Settle: Failed rebalance, unitshares equals 0. Call endFailedRebalance."
+        );
 
         SettleRebalance.issueNextSet(issueQuantity);
 

@@ -74,8 +74,7 @@ contract RebalancingSetTokenV2 is
      * initialSet                Initial set that collateralizes the Rebalancing set
      * componentWhiteList        Whitelist that nextSet components are checked against during propose
      *
-     * uintConfig = [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod,
-     *                lastRebalanceTimestamp]
+     * uintConfig = [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, lastRebalanceTimestamp]
      * initialUnitShares         Units of currentSet that equals one share
      * naturalUnit               The minimum multiple of Sets that can be issued or redeemed
      * rebalanceInterval:        Minimum amount of time between rebalances

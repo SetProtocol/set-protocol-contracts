@@ -43,12 +43,9 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
-const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
-const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
-const setTestUtils = new SetTestUtils(web3);
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
   const [
@@ -379,25 +376,8 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
       describe("when the new set's natural unit is not a multiple of the current set", async () => {
         before(async () => {
           // a setToken with natural unit ether(.003) and setToken with natural unit ether(.002) are being used
-          customSet1NaturalUnit = ether(.003);
-          customSet2NaturalUnit = ether(.002);
-        });
-
-        after(async () => {
-          customSet1NaturalUnit = undefined;
-          customSet2NaturalUnit = undefined;
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
-      });
-
-      describe("when the new set's natural unit is not a multiple of the current set", async () => {
-        before(async () => {
-          // a setToken with natural unit ether(.003) and setToken with natural unit ether(.002) are being used
-          customSet1NaturalUnit = ether(.003);
-          customSet2NaturalUnit = ether(.002);
+          customSet1NaturalUnit = ether(.002);
+          customSet2NaturalUnit = ether(.003);
         });
 
         after(async () => {

@@ -40,7 +40,6 @@ const web3 = getWeb3();
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
-const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
 const SetToken = artifacts.require('SetToken');
 const UpdatableConstantAuctionPriceCurve = artifacts.require('UpdatableConstantAuctionPriceCurve');
 

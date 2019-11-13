@@ -66,21 +66,6 @@ export function getExpectedRebalanceProposedLog(
   }];
 }
 
-export function getExpectedRebalanceProposedV2Log(
-  nextSet: Address,
-  proposalPeriodEndTime: BigNumber,
-  contractAddress: Address,
-): Log[] {
-  return [{
-    event: 'RebalanceProposed',
-    address: contractAddress,
-    args: {
-      nextSet,
-      proposalPeriodEndTime,
-    },
-  }];
-}
-
 export function getExpectedRebalanceStartedLog(
   oldSet: Address,
   newSet: Address,
@@ -92,6 +77,23 @@ export function getExpectedRebalanceStartedLog(
     args: {
       oldSet,
       newSet,
+    },
+  }];
+}
+
+export function getExpectedRebalanceStartedV2Log(
+  oldSet: Address,
+  newSet: Address,
+  timestamp: BigNumber,
+  contractAddress: Address,
+): Log[] {
+  return [{
+    event: 'RebalanceStarted',
+    address: contractAddress,
+    args: {
+      oldSet,
+      newSet,
+      timestamp,
     },
   }];
 }

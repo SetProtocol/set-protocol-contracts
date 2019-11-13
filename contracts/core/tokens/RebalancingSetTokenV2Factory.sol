@@ -53,9 +53,6 @@ contract RebalancingSetTokenV2Factory {
     // Minimum amount of time between rebalances in seconds
     uint256 public minimumRebalanceInterval;
 
-    // Minimum amount of time users can review proposals
-    uint256 public minimumProposalPeriod;
-
     // Minimum fail auction period
     uint256 public minimumFailRebalancePeriod;
 
@@ -74,7 +71,6 @@ contract RebalancingSetTokenV2Factory {
     struct InitRebalancingParameters {
         address manager;
         ILiquidator liquidator;
-        uint256 proposalPeriod;
         uint256 rebalanceInterval;
         uint256 rebalanceFailPeriod;
         uint256 lastRebalanceTimestamp;
@@ -90,7 +86,6 @@ contract RebalancingSetTokenV2Factory {
      * @param  _componentWhitelist         Address of component whitelist contract
      * @param  _liquidatorWhitelist        Address of liquidator whitelist contract
      * @param  _minimumRebalanceInterval   Minimum amount of time between rebalances in seconds
-     * @param  _minimumProposalPeriod      Minimum amount of time users can review proposals in seconds
      * @param  _minimumNaturalUnit         Minimum number for the token natural unit
      * @param  _maximumNaturalUnit         Maximum number for the token natural unit
      */
@@ -99,7 +94,6 @@ contract RebalancingSetTokenV2Factory {
         IWhiteList _componentWhitelist,
         IWhiteList _liquidatorWhitelist,
         uint256 _minimumRebalanceInterval,
-        uint256 _minimumProposalPeriod,
         uint256 _minimumFailRebalancePeriod,
         uint256 _maximumFailRebalancePeriod,
         uint256 _minimumNaturalUnit,
@@ -111,7 +105,6 @@ contract RebalancingSetTokenV2Factory {
         rebalanceComponentWhitelist = _componentWhitelist;
         liquidatorWhitelist = _liquidatorWhitelist;
         minimumRebalanceInterval = _minimumRebalanceInterval;
-        minimumProposalPeriod = _minimumProposalPeriod;
         minimumFailRebalancePeriod = _minimumFailRebalancePeriod;
         maximumFailRebalancePeriod = _maximumFailRebalancePeriod;
         minimumNaturalUnit = _minimumNaturalUnit;
@@ -129,9 +122,8 @@ contract RebalancingSetTokenV2Factory {
      * |----------------------------|-------------------------------|
      * | manager                    | 32                            |
      * | liquidator                 | 64                            |
-     * | proposalPeriod             | 96                            |
-     * | rebalanceInterval          | 128                           |
-     * | rebalanceFailPeriod        | 160                           |
+     * | rebalanceInterval          | 96                            |
+     * | rebalanceFailPeriod        | 128                           |
      *
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
@@ -213,11 +205,6 @@ contract RebalancingSetTokenV2Factory {
         );
 
         require(
-            parameters.proposalPeriod >= minimumProposalPeriod,
-            "Create: Proposal period too short"
-        );
-
-        require(
             parameters.rebalanceInterval >= minimumRebalanceInterval,
             "Create: Rebalance interval too short"
         ); 
@@ -250,7 +237,6 @@ contract RebalancingSetTokenV2Factory {
                 [
                     _units[0],                              // unitShares
                     _naturalUnit,                           // naturalUnit
-                    parameters.proposalPeriod,              // proposalPeriod
                     parameters.rebalanceInterval,           // rebalanceInterval
                     parameters.rebalanceFailPeriod,         // rebalanceFailPeriod
                     parameters.lastRebalanceTimestamp       // lastRebalanceTimestamp
@@ -275,10 +261,9 @@ contract RebalancingSetTokenV2Factory {
         assembly {
             mstore(parameters,           mload(add(_callData, 32)))   // manager
             mstore(add(parameters, 32),  mload(add(_callData, 64)))   // liquidator
-            mstore(add(parameters, 64),  mload(add(_callData, 96)))   // proposalPeriod
-            mstore(add(parameters, 96),  mload(add(_callData, 128)))  // rebalanceInterval
-            mstore(add(parameters, 128), mload(add(_callData, 160)))  // rebalanceFailPeriod
-            mstore(add(parameters, 160), mload(add(_callData, 192)))  // lastRebalanceTimestamp
+            mstore(add(parameters, 64),  mload(add(_callData, 96)))   // rebalanceInterval
+            mstore(add(parameters, 96),  mload(add(_callData, 128)))  // rebalanceFailPeriod
+            mstore(add(parameters, 128), mload(add(_callData, 160)))  // lastRebalanceTimestamp
         }
 
         return parameters;

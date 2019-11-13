@@ -219,117 +219,6 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
     });
   });
 
-  describe('#processProposal', async () => {
-    let subjectCaller: Address;
-    let subjectCurrentSet: Address;
-    let subjectNextSet: Address;
-
-    beforeEach(async () => {
-      subjectCaller = functionCaller;
-      subjectCurrentSet = set1.address;
-      subjectNextSet = set2.address;
-    });
-
-    after(async () => {
-    });
-
-    async function subject(): Promise<string> {
-      return liquidator.processProposal.sendTransactionAsync(
-        subjectCurrentSet,
-        subjectNextSet,
-        { from: subjectCaller, gas: DEFAULT_GAS },
-      );
-    }
-
-    it('does not revert', async () => {
-      await subject();
-    });
-
-    describe('when component does not have an associated oracle', async () => {
-      beforeEach(async () => {
-        await oracleWhiteList.removeTokenOraclePair.sendTransactionAsync(
-          component3.address,
-          { from: ownerAccount, gas: DEFAULT_GAS }
-        );
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the caller is not a valid Set', async () => {
-      beforeEach(async () => {
-        subjectCaller = nonSet;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the auction is active', async () => {
-      beforeEach(async () => {
-        await liquidator.startRebalance.sendTransactionAsync(
-          set1.address,
-          set2.address,
-          ether(1),
-          { from: subjectCaller, gas: DEFAULT_GAS },
-        );
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
-  describe('#cancelProposal', async () => {
-    let subjectCaller: Address;
-
-    beforeEach(async () => {
-      subjectCaller = functionCaller;
-    });
-
-    after(async () => {
-    });
-
-    async function subject(): Promise<string> {
-      return liquidator.cancelProposal.sendTransactionAsync(
-        { from: subjectCaller, gas: DEFAULT_GAS },
-      );
-    }
-
-    it('does not revert', async () => {
-      await subject();
-    });
-
-    describe('when the caller is not a valid Set', async () => {
-      beforeEach(async () => {
-        subjectCaller = nonSet;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the auction is active', async () => {
-      beforeEach(async () => {
-        await liquidator.startRebalance.sendTransactionAsync(
-          set1.address,
-          set2.address,
-          ether(1),
-          { from: subjectCaller, gas: DEFAULT_GAS },
-        );
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
   describe('#startRebalance', async () => {
     let subjectCaller: Address;
     let subjectCurrentSet: Address;
@@ -412,6 +301,19 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
     describe('when the caller is not a valid Set', async () => {
       beforeEach(async () => {
         subjectCaller = nonSet;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when a token does not have a supported oracle', async () => {
+      beforeEach(async () => {
+        await oracleWhiteList.removeTokenOraclePair.sendTransactionAsync(
+          component3.address,
+          { from: ownerAccount, gas: DEFAULT_GAS },
+        );
       });
 
       it('should revert', async () => {

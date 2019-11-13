@@ -88,37 +88,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
     /* ============ External Functions ============ */
 
     /**
-     * Validates that the Liquidator can generate a valid auction.
-     * Can only be called by a SetToken.
-     *
-     * @param _currentSet                   The Set to rebalance from
-     * @param _nextSet                      The Set to rebalance to
-     */
-    function processProposal(
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        external
-        isValidSet
-    {
-        requireAuctionInactive(auction(msg.sender));
-
-        address[] memory combinedTokenArray = Auction.getCombinedTokenArray(_currentSet, _nextSet);
-        require(
-            oracleWhiteList.areValidAddresses(combinedTokenArray),
-            "ExponentialPivotAuctionLiquidator.processProposal: Passed token does not have matching oracle."
-        );
-    }
-
-    /**
-     * Validates that the Liquidator can generate a valid auction.
-     * Can only be called by a SetToken.
-     */
-    function cancelProposal() external isValidSet {
-        requireAuctionInactive(auction(msg.sender));
-    }
-
-    /**
      * Initiates a linear auction. Can only be called by a SetToken.
      *
      * @param _currentSet                   The Set to rebalance from
@@ -134,6 +103,12 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
         isValidSet
     {
         requireAuctionInactive(auction(msg.sender));
+
+        address[] memory combinedTokenArray = Auction.getCombinedTokenArray(_currentSet, _nextSet);
+        require(
+            oracleWhiteList.areValidAddresses(combinedTokenArray),
+            "ExponentialPivotAuctionLiquidator.startRebalance: Passed token does not have matching oracle."
+        );
 
         LinearAuction.initializeLinearAuction(
             linearAuction(msg.sender),

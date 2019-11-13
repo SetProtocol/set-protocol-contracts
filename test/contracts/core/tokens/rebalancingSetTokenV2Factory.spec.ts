@@ -114,7 +114,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     let subjectComponentWhitelist: Address;
     let subjectLiquidatorWhitelist: Address;
     let subjectMinimumRebalanceInterval: BigNumber;
-    let subjectMinimumProposalPeriod: BigNumber;
     let subjectMinimumFailRebalancePeriod: BigNumber;
     let subjectMaximumFailRebalancePeriod: BigNumber;
     let subjectMinimumNaturalUnit: BigNumber;
@@ -125,7 +124,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       subjectComponentWhitelist = rebalancingComponentWhiteList.address;
       subjectLiquidatorWhitelist = liquidatorWhiteList.address;
       subjectMinimumRebalanceInterval = ONE_DAY_IN_SECONDS;
-      subjectMinimumProposalPeriod = ONE_DAY_IN_SECONDS;
       subjectMinimumFailRebalancePeriod = ONE_DAY_IN_SECONDS;
       subjectMaximumFailRebalancePeriod = ONE_DAY_IN_SECONDS.mul(30);
       subjectMinimumNaturalUnit = DEFAULT_REBALANCING_MINIMUM_NATURAL_UNIT;
@@ -138,7 +136,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         subjectComponentWhitelist,
         subjectLiquidatorWhitelist,
         subjectMinimumRebalanceInterval,
-        subjectMinimumProposalPeriod,
         subjectMinimumFailRebalancePeriod,
         subjectMaximumFailRebalancePeriod,
         subjectMinimumNaturalUnit,
@@ -174,13 +171,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       expect(rebalanceInterval).to.be.bignumber.equal(subjectMinimumRebalanceInterval);
     });
 
-    it('should have the correct minimum proposal period', async () => {
-      const rebalancingTokenFactory = await subject();
-
-      const proposalPeriod = await rebalancingTokenFactory.minimumProposalPeriod.callAsync();
-      expect(proposalPeriod).to.bignumber.equal(subjectMinimumProposalPeriod);
-    });
-
     it('should have the correct minimum fail rebalance period', async () => {
       const rebalancingTokenFactory = await subject();
 
@@ -213,7 +203,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
 
     let callDataManagerAddress: Address;
     let callDataLiquidator: Address;
-    let callDataProposalPeriod: BigNumber;
     let callDataRebalanceInterval: BigNumber;
     let callDataFailAuctionPeriod: BigNumber;
     let callDataLastRebalanceTimestamp: BigNumber;
@@ -235,7 +224,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
 
       callDataManagerAddress = rebalancingTokenManagerAccount;
       callDataLiquidator = liquidatorAccount;
-      callDataProposalPeriod = new BigNumber(86400);
       callDataRebalanceInterval = new BigNumber(86400).mul(2);
       callDataFailAuctionPeriod = new BigNumber(86400).mul(3);
       const { timestamp } = await web3.eth.getBlock('latest');
@@ -243,7 +231,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
         callDataManagerAddress,
         callDataLiquidator,
-        callDataProposalPeriod,
         callDataRebalanceInterval,
         callDataFailAuctionPeriod,
         callDataLastRebalanceTimestamp,
@@ -318,13 +305,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
 
         const liquidatorAddress = await rebalancingToken.liquidator.callAsync();
         expect(liquidatorAddress).to.equal(callDataLiquidator);
-      });
-
-      it('should have the correct proposal period', async () => {
-        const rebalancingToken = await subject();
-
-        const proposalPeriod = await rebalancingToken.proposalPeriod.callAsync();
-        expect(proposalPeriod).to.bignumber.equal(callDataProposalPeriod);
       });
 
       it('should have the correct rebalance interval', async () => {
@@ -423,7 +403,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
           callDataManagerAddress,
           callDataLiquidator,
-          callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
@@ -442,7 +421,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
           callDataManagerAddress,
           callDataLiquidator,
-          callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
@@ -461,26 +439,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
           callDataManagerAddress,
           callDataLiquidator,
-          callDataProposalPeriod,
-          callDataRebalanceInterval,
-          callDataFailAuctionPeriod,
-          callDataLastRebalanceTimestamp,
-        );
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the proposalPeriod is less than the minimum', async () => {
-      beforeEach(async () => {
-        callDataProposalPeriod = new BigNumber(5000);
-
-        subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
-          callDataManagerAddress,
-          callDataLiquidator,
-          callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
@@ -499,7 +457,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
           callDataManagerAddress,
           callDataLiquidator,
-          callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
@@ -518,7 +475,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
           callDataManagerAddress,
           callDataLiquidator,
-          callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
@@ -537,7 +493,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
           callDataManagerAddress,
           callDataLiquidator,
-          callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
@@ -557,7 +512,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
           callDataManagerAddress,
           callDataLiquidator,
-          callDataProposalPeriod,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
@@ -596,14 +550,12 @@ contract('RebalancingSetTokenV2Factory', accounts => {
 
       const managerAddress = rebalancingTokenManagerAccount;
       const liquidator = liquidatorWhiteList.address;
-      const proposalPeriod = new BigNumber(86400);
       const rebalanceInterval = new BigNumber(86400).mul(2);
       const failAuctionPeriod = new BigNumber(86400).mul(3);
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
         managerAddress,
         liquidator,
-        proposalPeriod,
         rebalanceInterval,
         failAuctionPeriod,
         lastRebalanceTimestamp,

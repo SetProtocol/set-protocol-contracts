@@ -98,7 +98,7 @@
     "lint-staged": "^7.2.0",
     "module-alias": "^2.1.0",
     "openzeppelin-solidity": "^2.2",
-    "set-protocol-utils": "^1.0.0-beta.41",
+    "set-protocol-utils": "^1.0.0-beta.42",
     "tiny-promisify": "^1.0.0",
     "truffle-flattener": "^1.4.0",
     "ts-mocha": "^6.0.0",

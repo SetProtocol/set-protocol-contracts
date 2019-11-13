@@ -44,12 +44,8 @@ contract SettleRebalance is
 
     /*
      * Validates that the settle function can be called.
-     *
-     * @param  _nextUnitShares   The new implied unit shares
      */    
-    function validateSettleRebalance(
-        uint256 _nextUnitShares
-    )
+    function validateSettleRebalance()
         internal
         view
     {
@@ -62,12 +58,6 @@ contract SettleRebalance is
         require(
             hasBidded,
             "Settle: No bids made"
-        );
-
-        // The unit shares must result in a quantity greater than the number of natural units outstanding
-        require(
-            _nextUnitShares > 0,
-            "Settle: Failed rebalance, unitshares equals 0. Call endFailedRebalance."
         );
     }
 

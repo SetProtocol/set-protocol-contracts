@@ -143,7 +143,6 @@ contract('RebalancingSetState', accounts => {
       const liquidator = liquidatorMock.address;
       const failPeriod = ONE_DAY_IN_SECONDS;
 
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
@@ -151,13 +150,9 @@ contract('RebalancingSetState', accounts => {
         managerAccount,
         liquidator,
         currentSetToken.address,
-        proposalPeriod,
         failPeriod,
         lastRebalanceTimestamp,
       );
-
-      const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
-      await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
 
       subjectIssuer = deployerAccount,
       subjectQuantity = ether(5);
@@ -206,7 +201,7 @@ contract('RebalancingSetState', accounts => {
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
-    describe('Post-proposal stage', async () => {
+    describe('Post-Rebalance stage', async () => {
       beforeEach(async () => {
         // Issue currentSetToken
         await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
@@ -221,6 +216,7 @@ contract('RebalancingSetState', accounts => {
         beforeEach(async () => {
           await rebalancingHelper.transitionToRebalanceV2Async(
             coreMock,
+            rebalancingComponentWhiteList,
             rebalancingSetToken,
             nextSetToken,
             managerAccount
@@ -236,6 +232,7 @@ contract('RebalancingSetState', accounts => {
         beforeEach(async () => {
           await rebalancingHelper.transitionToDrawdownV2Async(
             coreMock,
+            rebalancingComponentWhiteList,
             rebalancingSetToken,
             rebalanceAuctionModule,
             liquidatorMock,
@@ -271,12 +268,10 @@ contract('RebalancingSetState', accounts => {
       const initialSet = currentSetToken.address;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
       const failPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
 
-      const rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
       const rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
         coreMock.address,
         rebalancingComponentWhiteList.address,
@@ -296,7 +291,6 @@ contract('RebalancingSetState', accounts => {
         [
           initialUnitShares,
           initialNaturalUnit,
-          proposalPeriod,
           rebalanceInterval,
           failPeriod,
           new BigNumber(lastRebalanceTimestamp),
@@ -344,7 +338,6 @@ contract('RebalancingSetState', accounts => {
       const liquidator = liquidatorMock.address;
       const failPeriod = ONE_DAY_IN_SECONDS;
 
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
@@ -352,7 +345,6 @@ contract('RebalancingSetState', accounts => {
         managerAccount,
         liquidator,
         currentSetToken.address,
-        proposalPeriod,
         failPeriod,
         lastRebalanceTimestamp,
       );
@@ -368,9 +360,6 @@ contract('RebalancingSetState', accounts => {
 
       // Use issued currentSetToken to issue rebalancingSetToken
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, mintedQuantity);
-
-      const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
-      await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
     });
 
     async function subject(): Promise<string> {
@@ -389,6 +378,7 @@ contract('RebalancingSetState', accounts => {
       beforeEach(async () => {
         await rebalancingHelper.transitionToDrawdownV2Async(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
           rebalanceAuctionModule,
           liquidatorMock,
@@ -431,7 +421,6 @@ contract('RebalancingSetState', accounts => {
       const liquidator = liquidatorMock.address;
       const failPeriod = ONE_DAY_IN_SECONDS;
 
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
@@ -439,7 +428,6 @@ contract('RebalancingSetState', accounts => {
         managerAccount,
         liquidator,
         currentSetToken.address,
-        proposalPeriod,
         failPeriod,
         lastRebalanceTimestamp,
       );
@@ -455,9 +443,6 @@ contract('RebalancingSetState', accounts => {
 
       // Use issued currentSetToken to issue rebalancingSetToken
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, mintedQuantity);
-
-      const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
-      await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
     });
 
     async function subject(): Promise<string> {
@@ -514,12 +499,13 @@ contract('RebalancingSetState', accounts => {
 
     describe('during Rebalance state', async () => {
       beforeEach(async () => {
-        await rebalancingHelper.transitionToRebalanceV2Async(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken,
-          managerAccount
-        );
+       await rebalancingHelper.transitionToRebalanceV2Async(
+         coreMock,
+         rebalancingComponentWhiteList,
+         rebalancingSetToken,
+         nextSetToken,
+         managerAccount
+       );
       });
 
       it('should revert', async () => {
@@ -531,6 +517,7 @@ contract('RebalancingSetState', accounts => {
       beforeEach(async () => {
         await rebalancingHelper.transitionToDrawdownV2Async(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
           rebalanceAuctionModule,
           liquidatorMock,
@@ -564,7 +551,6 @@ contract('RebalancingSetState', accounts => {
       const liquidator = liquidatorMock.address;
       const failPeriod = ONE_DAY_IN_SECONDS;
 
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
@@ -572,7 +558,6 @@ contract('RebalancingSetState', accounts => {
         managerAccount,
         liquidator,
         currentSetToken.address,
-        proposalPeriod,
         failPeriod,
         lastRebalanceTimestamp,
       );

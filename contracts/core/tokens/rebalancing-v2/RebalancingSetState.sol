@@ -70,9 +70,6 @@ contract RebalancingSetState {
     // Time in seconds that must elapsed from last rebalance to propose
     uint256 public rebalanceInterval;
 
-    // Time in seconds that must elapse after proposal before rebalance can be initiated
-    uint256 public proposalPeriod;
-
     // Time in seconds after rebalanceStartTime before the Set believes the auction has failed
     uint256 public rebalanceFailPeriod;
 
@@ -90,6 +87,7 @@ contract RebalancingSetState {
     uint256 public naturalUnit;
 
     // The current state of the Set (e.g. Default, Proposal, Rebalance, Drawdown)
+    // Proposal is unused
     RebalancingLibrary.State public rebalanceState;
 
     // The number of rebalances in the Set's history; starts at index 0
@@ -104,9 +102,6 @@ contract RebalancingSetState {
 
     // The proposal's SetToken to rebalance into
     ISetToken public nextSet;
-
-    // The timestamp of the last valid proposal
-    uint256 public proposalStartTime;
 
     // The timestamp of the last rebalance was initiated at
     uint256 public rebalanceStartTime;

@@ -44,11 +44,11 @@ import { StartRebalance } from "./rebalancing-v2/StartRebalance.sol";
  * Implementation of Rebalancing Set token V2. Major improvements vs. V1 include:
  * - Decouple the Rebalancing Set state and rebalance state from the rebalance execution (e.g. auction)
  *   This allows us to rapidly iterate and build new liquidation mechanisms for rebalances.
+ * - Proposals are removed in favor of starting an auction directly.
  * - The Set retains ability to fail an auction if the minimum fail time has elapsed.
  * - RebalanceAuctionModule execution should be backwards compatible with V1. 
  * - Bidding and auction parameters state no longer live on this contract. They live on the liquidator
  *   BackwardsComptability is used to allow retrieving of previous supported states.
- * - Proposals are removed.
  */
 contract RebalancingSetTokenV2 is
     ERC20,

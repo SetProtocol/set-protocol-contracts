@@ -68,18 +68,19 @@ contract RebalancingSetTokenV2 is
      * Constructor function for Rebalancing Set Token
      *
      * addressConfig = [factory, manager, liquidator, initialSet, componentWhiteList, liquidatorWhiteList]
-     * factory                   Factory used to create the Rebalancing Set
-     * manager                   Address that is able to propose the next Set
-     * liquidator                Address of the liquidator contract
-     * initialSet                Initial set that collateralizes the Rebalancing set
-     * componentWhiteList        Whitelist that nextSet components are checked against during propose
+     * [0]factory                   Factory used to create the Rebalancing Set
+     * [1]manager                   Address that is able to propose the next Set
+     * [2]liquidator                Address of the liquidator contract
+     * [3]initialSet                Initial set that collateralizes the Rebalancing set
+     * [4]componentWhiteList        Whitelist that nextSet components are checked against during propose
+     * [5]liquidatorWhiteList       Whitelist of valid liquidators
      *
      * uintConfig = [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, lastRebalanceTimestamp]
-     * initialUnitShares         Units of currentSet that equals one share
-     * naturalUnit               The minimum multiple of Sets that can be issued or redeemed
-     * rebalanceInterval:        Minimum amount of time between rebalances
-     * rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
-     * lastRebalanceTimestamp:   Time of the last rebalance; Allows customized deployments
+     * [0]initialUnitShares         Units of currentSet that equals one share
+     * [1]naturalUnit               The minimum multiple of Sets that can be issued or redeemed
+     * [2]rebalanceInterval:        Minimum amount of time between rebalances
+     * [3]rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
+     * [4]lastRebalanceTimestamp:   Time of the last rebalance; Allows customized deployments
      *
      * @param _addressConfig             List of configuration addresses
      * @param _uintConfig                List of uint addresses
@@ -126,7 +127,6 @@ contract RebalancingSetTokenV2 is
      * @param _nextSet                      The Set to rebalance into
      *
      * Can only be called if the rebalance interval has elapsed.
-     *
      * Can only be called by manager.
      */
     function startRebalance(
@@ -150,6 +150,9 @@ contract RebalancingSetTokenV2 is
      * Get token inflows and outflows required for bid from the Liquidator.
      *
      * @param _quantity               The amount of currentSet to be rebalanced
+     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
+     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
      */
     function getBidPrice(
         uint256 _quantity
@@ -173,6 +176,9 @@ contract RebalancingSetTokenV2 is
      * RebalanceAuctionModule -> RebalancingSetTokenV2 -> Liquidator
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
+     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
+     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
      */
     function placeBid(
         uint256 _quantity
@@ -251,7 +257,7 @@ contract RebalancingSetTokenV2 is
     {
         Issuance.validateMint();
 
-        _mint(_issuer, _quantity);
+        ERC20._mint(_issuer, _quantity);
     }
 
     /*
@@ -268,7 +274,7 @@ contract RebalancingSetTokenV2 is
     {
         Issuance.validateBurn();
 
-        _burn(_from, _quantity);
+        ERC20._burn(_from, _quantity);
     }
 
     /* ============ Backwards Compatability ============ */

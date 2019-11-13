@@ -308,6 +308,20 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       });
     });
 
+    describe('when a token does not have a supported oracle', async () => {
+      beforeEach(async () => {
+        await oracleWhiteList.removeTokenOraclePair.sendTransactionAsync(
+          component3.address,
+          { from: ownerAccount, gas: DEFAULT_GAS },
+        );
+      });
+
+      it('should revert', async () => {
+        await subject();
+        // await expectRevertError(subject());
+      });
+    });
+
     describe('when the auction is active', async () => {
       beforeEach(async () => {
         await liquidator.startRebalance.sendTransactionAsync(

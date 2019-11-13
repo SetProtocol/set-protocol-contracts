@@ -317,8 +317,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       });
 
       it('should revert', async () => {
-        await subject();
-        // await expectRevertError(subject());
+        await expectRevertError(subject());
       });
     });
 

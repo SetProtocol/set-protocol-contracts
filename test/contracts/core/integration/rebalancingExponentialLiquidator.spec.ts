@@ -114,12 +114,10 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
-    ABIDecoder.addABI(RebalancingSetTokenV2.abi);
   });
 
   after(async () => {
     ABIDecoder.removeABI(CoreMock.abi);
-    ABIDecoder.removeABI(RebalancingSetTokenV2.abi);
   });
 
   beforeEach(async () => {

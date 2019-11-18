@@ -49,6 +49,7 @@ contract('FailRebalance', accounts => {
   const [
     deployerAccount,
     managerAccount,
+    feeRecipient,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -146,6 +147,7 @@ contract('FailRebalance', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidatorMock.address,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         new BigNumber(lastRebalanceTimestamp),
@@ -397,6 +399,7 @@ contract('FailRebalance', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidatorMock.address,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         new BigNumber(lastRebalanceTimestamp),

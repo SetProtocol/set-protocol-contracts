@@ -71,9 +71,13 @@ contract RebalancingSetTokenV2Factory {
     struct InitRebalancingParameters {
         address manager;
         ILiquidator liquidator;
+        address feeRecipient;
         uint256 rebalanceInterval;
         uint256 rebalanceFailPeriod;
         uint256 lastRebalanceTimestamp;
+        uint256 entryFee;
+        uint256 rebalanceFee;
+        uint256 exitFee;
     }
 
     /* ============ Constructor ============ */
@@ -122,8 +126,12 @@ contract RebalancingSetTokenV2Factory {
      * |----------------------------|-------------------------------|
      * | manager                    | 32                            |
      * | liquidator                 | 64                            |
-     * | rebalanceInterval          | 96                            |
-     * | rebalanceFailPeriod        | 128                           |
+     * | feeRecipient               | 96                            |
+     * | rebalanceInterval          | 128                           |
+     * | rebalanceFailPeriod        | 160                           |
+     * | entryFee                   | 192                           |
+     * | rebalanceFee               | 224                           |
+     * | exitFee                    | 256                           |
      *
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
@@ -232,14 +240,18 @@ contract RebalancingSetTokenV2Factory {
                     address(parameters.liquidator),         // liquidator
                     startingSet,                            // initialSet
                     address(rebalanceComponentWhitelist),   // componentWhiteList
-                    address(liquidatorWhitelist)            // liquidatorWhiteList
+                    address(liquidatorWhitelist),           // liquidatorWhiteList
+                    parameters.feeRecipient                 // feeRecipient
                 ],
                 [
                     _units[0],                              // unitShares
                     _naturalUnit,                           // naturalUnit
                     parameters.rebalanceInterval,           // rebalanceInterval
                     parameters.rebalanceFailPeriod,         // rebalanceFailPeriod
-                    parameters.lastRebalanceTimestamp       // lastRebalanceTimestamp
+                    parameters.lastRebalanceTimestamp,      // lastRebalanceTimestamp
+                    parameters.entryFee,                    // entryFee
+                    parameters.rebalanceFee,                // rebalanceFee
+                    parameters.exitFee                      // exitFee
                 ],
                 _name.bytes32ToString(),
                 _symbol.bytes32ToString()
@@ -261,9 +273,13 @@ contract RebalancingSetTokenV2Factory {
         assembly {
             mstore(parameters,           mload(add(_callData, 32)))   // manager
             mstore(add(parameters, 32),  mload(add(_callData, 64)))   // liquidator
-            mstore(add(parameters, 64),  mload(add(_callData, 96)))   // rebalanceInterval
-            mstore(add(parameters, 96),  mload(add(_callData, 128)))  // rebalanceFailPeriod
-            mstore(add(parameters, 128), mload(add(_callData, 160)))  // lastRebalanceTimestamp
+            mstore(add(parameters, 64),  mload(add(_callData, 96)))   // feeRecipient
+            mstore(add(parameters, 96),  mload(add(_callData, 128)))  // rebalanceInterval
+            mstore(add(parameters, 128), mload(add(_callData, 160)))  // rebalanceFailPeriod
+            mstore(add(parameters, 160), mload(add(_callData, 192)))  // lastRebalanceTimestamp
+            mstore(add(parameters, 192), mload(add(_callData, 224)))  // entryFee
+            mstore(add(parameters, 224), mload(add(_callData, 256)))  // rebalanceFee
+            mstore(add(parameters, 256), mload(add(_callData, 288)))  // exitFee
         }
 
         return parameters;

@@ -31,7 +31,7 @@ import {
 } from '@utils/constants';
 import {
   getExpectedTransferLog,
-} from '@utils/contract_logs/rebalancingSetToken';
+} from '@utils/contract_logs/rebalancingSetTokenV2';
 import { expectRevertError, assertTokenBalanceAsync } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -52,10 +52,11 @@ const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
-contract('RebalancingSetState', accounts => {
+contract('Issuance', accounts => {
   const [
     deployerAccount,
     managerAccount,
+    feeRecipient,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -149,6 +150,7 @@ contract('RebalancingSetState', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidator,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -344,6 +346,7 @@ contract('RebalancingSetState', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidator,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -427,6 +430,7 @@ contract('RebalancingSetState', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidator,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -557,6 +561,7 @@ contract('RebalancingSetState', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidator,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,

@@ -1,7 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import { Address, Log } from 'set-protocol-utils';
 
-
 export function getExpectedTransferLog(
   from: Address,
   to: Address,
@@ -34,19 +33,32 @@ export function getExpectedNewManagerAddedLog(
   }];
 }
 
-export function getExpectedRebalanceProposedLog(
-  nextSet: Address,
-  auctionLibrary: Address,
-  proposalPeriodEndTime: BigNumber,
+export function getExpectedNewLiquidatorAddedLog(
+  newLiquidator: Address,
+  oldLiquidator: Address,
   contractAddress: Address,
 ): Log[] {
   return [{
-    event: 'RebalanceProposed',
+    event: 'NewLiquidatorAdded',
     address: contractAddress,
     args: {
-      nextSet,
-      auctionLibrary,
-      proposalPeriodEndTime,
+      newLiquidator,
+      oldLiquidator,
+    },
+  }];
+}
+
+export function getExpectedNewFeeRecipientAddedLog(
+  newFeeRecipient: Address,
+  oldFeeRecipient: Address,
+  contractAddress: Address,
+): Log[] {
+  return [{
+    event: 'NewFeeRecipient',
+    address: contractAddress,
+    args: {
+      newFeeRecipient,
+      oldFeeRecipient,
     },
   }];
 }
@@ -54,6 +66,7 @@ export function getExpectedRebalanceProposedLog(
 export function getExpectedRebalanceStartedLog(
   oldSet: Address,
   newSet: Address,
+  timestamp: BigNumber,
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -62,6 +75,7 @@ export function getExpectedRebalanceStartedLog(
     args: {
       oldSet,
       newSet,
+      timestamp,
     },
   }];
 }

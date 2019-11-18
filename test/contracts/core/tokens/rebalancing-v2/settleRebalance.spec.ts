@@ -48,6 +48,7 @@ contract('SettleRebalance', accounts => {
   const [
     deployerAccount,
     managerAccount,
+    feeRecipient,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -70,7 +71,7 @@ contract('SettleRebalance', accounts => {
     erc20Helper,
     blockchain
   );
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper)
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -148,6 +149,7 @@ contract('SettleRebalance', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidatorMock.address,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         rebalancingSetUnitShares,

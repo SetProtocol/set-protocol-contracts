@@ -59,12 +59,14 @@ contract RebalancingSetState {
     // The Liquidator interacts closely with the Set during rebalances.
     ILiquidator public liquidator;
 
-
     // The account that is allowed to make proposals
     address public manager;
 
+    // The account that is receives any fees
+    address public feeRecipient;
+
     // ----------------------------------------------------------------------
-    // Rebalance configuration
+    // Configuration
     // ----------------------------------------------------------------------
 
     // Time in seconds that must elapsed from last rebalance to propose
@@ -72,6 +74,15 @@ contract RebalancingSetState {
 
     // Time in seconds after rebalanceStartTime before the Set believes the auction has failed
     uint256 public rebalanceFailPeriod;
+
+    // Fee levied every mint operation, paid 
+    uint256 public entryFee;
+
+    // [x]
+    uint256 public rebalanceFee;
+
+    // [x]
+    uint256 public exitFee;
 
     // ----------------------------------------------------------------------
     // Current State
@@ -137,6 +148,11 @@ contract RebalancingSetState {
         address oldLiquidator
     );
 
+    event NewFeeRecipient(
+        address newFeeRecipient,
+        address oldFeeRecipient
+    );
+
     /* ============ Setter Functions ============ */
 
     function setManager(
@@ -165,6 +181,16 @@ contract RebalancingSetState {
 
         emit NewLiquidatorAdded(address(_newLiquidator), address(liquidator));
         liquidator = _newLiquidator;
+    }
+
+    function setFeeRecipient(
+        address _newFeeRecipient
+    )
+        external
+        onlyManager
+    {
+        emit NewFeeRecipient(_newFeeRecipient, feeRecipient);
+        feeRecipient = _newFeeRecipient;
     }
 
     /* ============ Getter Functions ============ */

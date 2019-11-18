@@ -21,6 +21,7 @@ import {
   DEFAULT_UNIT_SHARES,
   ONE_DAY_IN_SECONDS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+  ZERO,
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 
@@ -40,20 +41,27 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
   /* ============ Deployment ============ */
 
   /**
-   * addressConfig is [factory, manager, liquidator, initialSet, componentWhiteList, liquidatorWhiteList]
-   * factory                   Factory used to create the Rebalancing Set
-   * manager                   Address that is able to rebalance the next Set
-   * liquidator                Address of the liquidator contract
-   * initialSet                Initial set that collateralizes the Rebalancing set
-   * componentWhiteList        Whitelist that nextSet components are checked against during rebalance
+   * addressConfig [factory, manager, liquidator, initialSet, componentWhiteList,
+   *                liquidatorWhiteList, feeRecipient]
+   * [0]factory                   Factory used to create the Rebalancing Set
+   * [1]manager                   Address that is able to propose the next Set
+   * [2]liquidator                Address of the liquidator contract
+   * [3]initialSet                Initial set that collateralizes the Rebalancing set
+   * [4]componentWhiteList        Whitelist that nextSet components are checked against during propose
+   * [5]liquidatorWhiteList       Whitelist of valid liquidators
+   * [6]feeRecipient              Address that receives any incentive fees
    *
-   * uintConfig is [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod,
-   *                lastRebalanceTimestamp]
-   * initialUnitShares         Units of currentSet that equals one share
-   * naturalUnit               The minimum multiple of Sets that can be issued or redeemed
-   * rebalanceInterval:        Minimum amount of time between rebalances
-   * rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
-   * lastRebalanceTimestamp:   Time of the last rebalance
+   * uintConfig [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, lastRebalanceTimestamp,
+   *             entryFee, rebalanceFee, exitFee]
+   * [0]initialUnitShares         Units of currentSet that equals one share
+   * [1]naturalUnit               The minimum multiple of Sets that can be issued or redeemed
+   * [2]rebalanceInterval:        Minimum amount of time between rebalances
+   * [3]rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
+   * [4]lastRebalanceTimestamp:   Time of the last rebalance; Allows customized deployments
+   * [5]entryFee:                 Mint fee represented in a scaled percentage value
+   * [6]rebalanceFee:             Rebalance fee represented in a scaled percentage value
+   * [7]exitFee:                  Exit fee represented in a scaled percentage value
+   *
    */
   public async deployRebalancingSetTokenV2Async(
     addressConfig: Address[],
@@ -118,9 +126,13 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     factory: Address,
     manager: Address,
     liquidator: Address,
+    feeRecipient: Address,
     initialSet: Address,
     failRebalancePeriod: BigNumber,
     lastRebalanceTimestamp: BigNumber,
+    entryFee: BigNumber = ZERO,
+    rebalanceFee: BigNumber = ZERO,
+    exitFee: BigNumber = ZERO,
     initialUnitShares: BigNumber = DEFAULT_UNIT_SHARES,
   ): Promise<RebalancingSetTokenV2Contract> {
     // Generate defualt rebalancingSetToken params
@@ -128,9 +140,13 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     const callData = SetUtils.generateRebalancingSetTokenV2CallData(
       manager,
       liquidator,
+      feeRecipient,
       rebalanceInterval,
       failRebalancePeriod,
       lastRebalanceTimestamp,
+      entryFee,
+      rebalanceFee,
+      exitFee,
     );
 
     // Create rebalancingSetToken

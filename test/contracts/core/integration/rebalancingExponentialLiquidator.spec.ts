@@ -53,6 +53,7 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
     managerAccount,
     otherAccount,
     fakeTokenAccount,
+    feeRecipient,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -232,6 +233,7 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidator.address,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -434,6 +436,7 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidator.address,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -637,6 +640,7 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidator.address,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,

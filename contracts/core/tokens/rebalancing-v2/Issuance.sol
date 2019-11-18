@@ -82,4 +82,23 @@ contract Issuance is
             );
         }
     }
+
+    // function calculateFee(
+    //     uint256 _issueQuantity,
+    //     uint256 _
+    // )
+    //     internal
+    //     view
+    //     returns(uint256)
+    // {
+
+    // }
+
+    // function getFeeAdjustedIssueQuantity()
+    //     internal
+    //     view
+    //     returns(uint256)
+    // {
+
+    // }
 }

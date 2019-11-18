@@ -28,8 +28,8 @@ import {
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import {
-  getExpectedRebalanceStartedV2Log,
-} from '@utils/contract_logs/rebalancingSetToken';
+  getExpectedRebalanceStartedLog,
+} from '@utils/contract_logs/rebalancingSetTokenV2';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -54,6 +54,7 @@ contract('StartRebalance', accounts => {
     managerAccount,
     otherAccount,
     fakeTokenAccount,
+    feeRecipient,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -153,6 +154,7 @@ contract('StartRebalance', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidatorMock.address,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         new BigNumber(lastRebalanceTimestamp),
@@ -212,7 +214,7 @@ contract('StartRebalance', accounts => {
 
         const { timestamp } = await web3.eth.getBlock('latest');
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-        const expectedLogs = getExpectedRebalanceStartedV2Log(
+        const expectedLogs = getExpectedRebalanceStartedLog(
           currentSetToken.address,
           nextSetToken.address,
           new BigNumber(timestamp),

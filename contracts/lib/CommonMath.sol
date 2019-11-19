@@ -22,6 +22,8 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 library CommonMath {
     using SafeMath for uint256;
 
+    uint256 public constant SCALE_FACTOR = 10 ** 18;
+
     /**
      * Calculates and returns the maximum value for a uint256
      *
@@ -33,6 +35,34 @@ library CommonMath {
         returns (uint256)
     {
         return 2 ** 256 - 1;
+    }
+
+    /**
+     * Increases a value by the scale factor to allow for additional precision
+     * during mathematical operations
+     */
+    function scale(
+        uint256 a
+    )
+        internal
+        pure
+        returns (uint256)
+    {
+        return a.mul(SCALE_FACTOR);
+    }
+
+    /**
+     * Divides a value by the scale factor to allow for additional precision
+     * during mathematical operations
+    */
+    function deScale(
+        uint256 a
+    )
+        internal
+        pure
+        returns (uint256)
+    {
+        return a.div(SCALE_FACTOR);
     }
 
     /**

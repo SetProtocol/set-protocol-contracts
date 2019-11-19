@@ -40,6 +40,15 @@ contract SettleRebalance is
 {
     using SafeMath for uint256;
 
+    uint256 public constant SCALE_FACTOR = 10 ** 18;
+
+    /* ============ Events ============ */
+
+    event RebalanceFeePaid(
+        address indexed feeRecipient,
+        uint256 quantity
+    );
+
     /* ============ Internal Functions ============ */
 
     /*
@@ -116,6 +125,36 @@ contract SettleRebalance is
         uint256 issueAmount = maxIssueAmount.div(nextSetToken.naturalUnit).mul(nextSetToken.naturalUnit);
 
         return issueAmount;
+    }
+
+    // Calculates the RB Set to mint the feeRecipient
+    // Fee is enforced through inflation
+    // Mints the fee to the feeRecipient
+    function handleFees()
+        internal
+    {
+        uint256 settlementFee = calculateRebalanceFeeInflation();
+
+        if (settlementFee > 0) {
+            ERC20._mint(feeRecipient, settlementFee);
+
+            emit RebalanceFeePaid(feeRecipient, settlementFee);
+        }
+    }
+
+    // Fee is paid via inflation and ownership of the Set.
+    // Math: newShares / (newShares + oldShares) = percentFee
+    // Simplified: fee * oldShare / (scaleFactor - fee)
+    function calculateRebalanceFeeInflation()
+        internal
+        view
+        returns(uint256)
+    {
+        // fee * oldShare
+        uint256 a = rebalanceFee.mul(totalSupply());
+        // ScaleFactor (10e18) - fee
+        uint256 b = SCALE_FACTOR.sub(rebalanceFee);
+        return a.div(b);
     }
 
     /**

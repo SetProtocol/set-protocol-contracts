@@ -26,6 +26,7 @@ import { ether } from '@utils/units';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
+  ZERO,
 } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
@@ -124,8 +125,11 @@ contract('SettleRebalance', accounts => {
     let rebalancingSetUnitShares: BigNumber;
     let currentSetIssueQuantity: BigNumber;
 
+    let rebalanceFee: BigNumber;
+
     let customRebalancingSetQuantityToIssue: BigNumber;
     let customBaseSetQuantityToIssue: BigNumber;
+    let customRebalanceFee: BigNumber;
 
     beforeEach(async () => {
       const setTokensToDeploy = 2;
@@ -140,6 +144,8 @@ contract('SettleRebalance', accounts => {
       currentSetToken = setTokens[0];
       nextSetToken = setTokens[1];
 
+      rebalanceFee = customRebalanceFee || ZERO;
+
       const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
       await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
 
@@ -153,6 +159,9 @@ contract('SettleRebalance', accounts => {
         currentSetToken.address,
         failPeriod,
         rebalancingSetUnitShares,
+        ZERO, // entryFee
+        rebalanceFee,
+        ZERO,
       );
 
       // Issue currentSetToken
@@ -183,7 +192,7 @@ contract('SettleRebalance', accounts => {
       });
     });
 
-    describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
+    describe.only('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
       beforeEach(async () => {
        await rebalancingHelper.transitionToRebalanceV2Async(
          coreMock,
@@ -253,21 +262,20 @@ contract('SettleRebalance', accounts => {
           nextSetToken.address,
           rebalancingSetToken.address
         );
-        const settlementAmounts = await rebalancingHelper.getExpectedUnitSharesAndIssueAmount(
-          coreMock,
-          rebalancingSetToken,
+        const nextSetIssueAmount = await rebalancingHelper.getNextSetIssueQuantity(
           nextSetToken,
+          rebalancingSetToken,
           vault
         );
 
         await subject();
 
-        const expectedBalance = existingBalance.add(settlementAmounts['issueAmount']);
+        const expectedBalance = existingBalance.add(nextSetIssueAmount);
         const newBalance = await vault.balances.callAsync(nextSetToken.address, rebalancingSetToken.address);
         expect(newBalance).to.be.bignumber.equal(expectedBalance);
       });
 
-      it('decrements component balance for the rebalancingSetToken by the correct amount', async () => {
+      it.only('decrements component balance for the rebalancingSetToken by the correct amount', async () => {
         const componentAddresses = await nextSetToken.getComponents.callAsync();
         const setNaturalUnit = await nextSetToken.naturalUnit.callAsync();
         const setComponentUnits = await nextSetToken.getUnits.callAsync();
@@ -278,16 +286,15 @@ contract('SettleRebalance', accounts => {
           rebalancingSetToken.address
         );
 
-        const settlementAmounts = await rebalancingHelper.getExpectedUnitSharesAndIssueAmount(
-          coreMock,
-          rebalancingSetToken,
+        const nextSetIssueAmount = await rebalancingHelper.getNextSetIssueQuantity(
           nextSetToken,
+          rebalancingSetToken,
           vault
         );
 
         await subject();
 
-        const quantityToIssue = settlementAmounts['issueAmount'];
+        const quantityToIssue = nextSetIssueAmount;
         const expectedVaultBalances: BigNumber[] = [];
         setComponentUnits.forEach((component, idx) => {
           const requiredQuantityToIssue = quantityToIssue.div(setNaturalUnit).mul(component);
@@ -303,7 +310,7 @@ contract('SettleRebalance', accounts => {
       });
 
       it('updates the unitShares amount correctly', async () => {
-        const settlementAmounts = await rebalancingHelper.getExpectedUnitSharesAndIssueAmount(
+        const expectedUnitShares = await rebalancingHelper.getExpectedUnitSharesV2(
           coreMock,
           rebalancingSetToken,
           nextSetToken,
@@ -313,7 +320,7 @@ contract('SettleRebalance', accounts => {
         await subject();
 
         const newUnitShares = await rebalancingSetToken.unitShares.callAsync();
-        expect(newUnitShares).to.be.bignumber.equal(settlementAmounts['unitShares']);
+        expect(newUnitShares).to.be.bignumber.equal(expectedUnitShares);
       });
 
       it('clears the nextSet variable', async () => {
@@ -323,6 +330,73 @@ contract('SettleRebalance', accounts => {
         const expectedNextSet = 0;
 
         expect(nextSet).to.be.bignumber.equal(expectedNextSet);
+      });
+    });
+
+    describe.only('when the rebalance fee is 1%', async () => {
+
+      before(async () => {
+        customRebalanceFee = new BigNumber(10 ** 16);
+      });
+
+      after(async () => {
+        customRebalanceFee = undefined;
+      });
+
+      beforeEach(async () => {
+       await rebalancingHelper.transitionToRebalanceV2Async(
+         coreMock,
+         rebalancingComponentWhiteList,
+         rebalancingSetToken,
+         nextSetToken,
+         managerAccount
+       );
+
+        const bidQuantity = rebalancingSetQuantityToIssue;
+
+        await rebalancingHelper.placeBidAsync(
+          rebalanceAuctionModule,
+          rebalancingSetToken.address,
+          bidQuantity,
+        );
+      });
+
+      it('mints the correct Rebalancing Set to the feeRecipient', async () => {
+        const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
+
+        await subject();
+
+        const feeRecipientBalance = await rebalancingSetToken.balanceOf.callAsync(feeRecipient);
+        expect(feeRecipientBalance).to.bignumber.equal(rebalanceFeeInflation);
+      });
+
+      it('increments the totalSupply properly', async () => {      
+        const previousSupply = await rebalancingSetToken.totalSupply.callAsync();
+        const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
+        const expectedSupply = previousSupply.plus(rebalanceFeeInflation);
+
+        await subject();
+
+        const newSupply = await rebalancingSetToken.totalSupply.callAsync(feeRecipient);
+        expect(newSupply).to.bignumber.equal(expectedSupply);
+      });
+
+      it('emits the RebalancePaidFee log', async () => {      
+
+      });
+
+      it('updates the unitShares amount correctly', async () => {
+        const unitShares = await rebalancingHelper.getExpectedUnitSharesV2(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken,
+          vault
+        );
+
+        await subject();
+
+        const newUnitShares = await rebalancingSetToken.unitShares.callAsync();
+        expect(newUnitShares).to.be.bignumber.equal(unitShares);
       });
     });
 

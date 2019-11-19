@@ -20,6 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { CommonMath } from "../../../lib/CommonMath.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./RebalancingSetState.sol";
@@ -35,6 +36,8 @@ contract Issuance is
     RebalancingSetState
 {
     using SafeMath for uint256;
+    using CommonMath for uint256;
+
 
     /* ============ Internal Functions ============ */
 
@@ -82,23 +85,4 @@ contract Issuance is
             );
         }
     }
-
-    // function calculateFee(
-    //     uint256 _issueQuantity,
-    //     uint256 _
-    // )
-    //     internal
-    //     view
-    //     returns(uint256)
-    // {
-
-    // }
-
-    // function getFeeAdjustedIssueQuantity()
-    //     internal
-    //     view
-    //     returns(uint256)
-    // {
-
-    // }
 }

@@ -207,7 +207,8 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * After a successful rebalance, the new Set is issued. 
+     * After a successful rebalance, the new Set is issued. If there is a rebalance fee,
+     * the fee is paid via inflation of the Rebalancing Set.
      * Full issuance functionality is now returned to set owners.
      *
      * Anyone can call this function.
@@ -218,6 +219,10 @@ contract RebalancingSetTokenV2 is
         SettleRebalance.validateSettleRebalance();
 
         uint256 issueQuantity = SettleRebalance.calculateNextSetIssueQuantity();
+
+        // Calculates fees and mints Rebalancing Set to the feeRecipient
+        SettleRebalance.handleFees();
+
         uint256 newUnitShares = SettleRebalance.calculateNextSetNewUnitShares(issueQuantity);
 
         // The unit shares must result in a quantity greater than the number of natural units outstanding

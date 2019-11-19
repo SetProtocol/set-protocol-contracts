@@ -78,13 +78,13 @@ contract RebalancingSetTokenV2 is
      * [6]feeRecipient              Address that receives any incentive fees
      *
      * uintConfig [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, lastRebalanceTimestamp, 
-     *             entryFee, rebalanceFee, exitFee]
+     *             entryFee, rebalanceFee]
      * [0]initialUnitShares         Units of currentSet that equals one share
      * [1]naturalUnit               The minimum multiple of Sets that can be issued or redeemed
      * [2]rebalanceInterval:        Minimum amount of time between rebalances
      * [3]rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
      * [4]lastRebalanceTimestamp:   Time of the last rebalance; Allows customized deployments
-     * [5]entryFee:                 Mint fee represented in a scaled percentage value
+     * [5]entryFee:                 Mint fee represented in a scaled decimal value (e.g. 100% = 1e18, 1% = 1e16)
      * [6]rebalanceFee:             Rebalance fee represented in a scaled percentage value
      *
      * @param _addressConfig             List of configuration addresses

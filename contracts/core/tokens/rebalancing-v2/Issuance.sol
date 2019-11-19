@@ -115,7 +115,7 @@ contract Issuance is
             emit EntryFeePaid(feeRecipient, fee);
         }
 
-        // Return th
+        // Return the issue quantity less fees
         return _quantity.sub(fee);
     }
 }

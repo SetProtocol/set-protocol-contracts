@@ -148,7 +148,7 @@ contract SettleRebalance is
      * Formula for fee is:
      * FeeQuantity = rebalanceFee * oldTotalSupply / (scaleFactor - rebalanceFee)
      *
-     * The fee is represented as a scaled value.
+     * @return  uint256             New RebalancingSet issue quantity
      */
     function calculateRebalanceFeeInflation()
         internal

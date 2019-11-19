@@ -62,7 +62,7 @@ contract RebalancingSetState {
     // The account that is allowed to make proposals
     address public manager;
 
-    // The account that is receives any fees
+    // The account that receives any fees
     address public feeRecipient;
 
     // ----------------------------------------------------------------------

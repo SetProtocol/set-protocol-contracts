@@ -331,6 +331,8 @@ contract('Issuance', accounts => {
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
       const failPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
+      const entryFee = ZERO;
+      const rebalanceFee = ZERO;
 
       const rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
         coreMock.address,
@@ -347,6 +349,7 @@ contract('Issuance', accounts => {
           initialSet,
           rebalancingComponentWhiteList.address,
           liquidatorWhitelist.address,
+          feeRecipient,
         ],
         [
           initialUnitShares,
@@ -354,6 +357,8 @@ contract('Issuance', accounts => {
           rebalanceInterval,
           failPeriod,
           new BigNumber(lastRebalanceTimestamp),
+          entryFee,
+          rebalanceFee,
         ],
       );
 

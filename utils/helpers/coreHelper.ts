@@ -619,11 +619,9 @@ export class CoreHelper {
     whiteList: WhiteListContract,
     from: Address = this._contractOwnerAddress,
   ): Promise<void> {
-    const addAddressPromises = _.map(tokenAddresses, address => {
-      this.addTokenToWhiteList(address, whiteList);
-    });
-
-    await Promise.all(addAddressPromises);
+    for (let i = 0; i < tokenAddresses.length; i++) {
+      await this.addTokenToWhiteList(tokenAddresses[i], whiteList);
+    }
   }
 
   public async addTokenToWhiteList(

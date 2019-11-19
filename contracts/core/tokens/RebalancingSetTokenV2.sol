@@ -208,7 +208,7 @@ contract RebalancingSetTokenV2 is
 
     /*
      * After a successful rebalance, the new Set is issued. If there is a rebalance fee,
-     * the fee is paid via inflation of the Rebalancing Set.
+     * the fee is paid via inflation of the Rebalancing Set to the feeRecipient.
      * Full issuance functionality is now returned to set owners.
      *
      * Anyone can call this function.

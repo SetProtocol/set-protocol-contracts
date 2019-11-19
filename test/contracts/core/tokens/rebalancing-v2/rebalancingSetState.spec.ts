@@ -449,16 +449,16 @@ contract('RebalancingSetState', accounts => {
     });
 
     it('emits the correct NewLiquidatorAdded event', async () => {
-        const txHash = await subject();
+      const txHash = await subject();
 
-        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-        const expectedLogs = getExpectedNewLiquidatorAddedLog(
-          subjectNewLiquidator,
-          liquidator,
-          rebalancingSetToken.address
-        );
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs = getExpectedNewLiquidatorAddedLog(
+        subjectNewLiquidator,
+        liquidator,
+        rebalancingSetToken.address
+      );
 
-        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the caller is not the current manager', async () => {

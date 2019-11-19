@@ -65,18 +65,3 @@ export function getExpectedRebalanceStartedLog(
     },
   }];
 }
-
-export function getExpectedRebalanceFeePaidLog(
-  feeRecipient: Address,
-  quantity: Address,
-  contractAddress: Address,
-): Log[] {
-  return [{
-    event: 'RebalanceFeePaid',
-    address: contractAddress,
-    args: {
-      feeRecipient,
-      quantity,
-    },
-  }];
-}

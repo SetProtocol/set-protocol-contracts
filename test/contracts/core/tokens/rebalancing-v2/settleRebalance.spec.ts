@@ -36,12 +36,15 @@ import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 
+import { getExpectedRebalanceFeePaidLog } from '@utils/contract_logs/rebalancingSetTokenV2';
+
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
-const { SetProtocolUtils: SetUtils } = setProtocolUtils;
+const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
+const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
@@ -192,7 +195,7 @@ contract('SettleRebalance', accounts => {
       });
     });
 
-    describe.only('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
+    describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
       beforeEach(async () => {
        await rebalancingHelper.transitionToRebalanceV2Async(
          coreMock,
@@ -275,7 +278,7 @@ contract('SettleRebalance', accounts => {
         expect(newBalance).to.be.bignumber.equal(expectedBalance);
       });
 
-      it.only('decrements component balance for the rebalancingSetToken by the correct amount', async () => {
+      it('decrements component balance for the rebalancingSetToken by the correct amount', async () => {
         const componentAddresses = await nextSetToken.getComponents.callAsync();
         const setNaturalUnit = await nextSetToken.naturalUnit.callAsync();
         const setComponentUnits = await nextSetToken.getUnits.callAsync();
@@ -333,10 +336,9 @@ contract('SettleRebalance', accounts => {
       });
     });
 
-    describe.only('when the rebalance fee is 1%', async () => {
-
+    describe('when the rebalance fee is 10%', async () => {
       before(async () => {
-        customRebalanceFee = new BigNumber(10 ** 16);
+        customRebalanceFee = new BigNumber(10 ** 17);
       });
 
       after(async () => {
@@ -370,7 +372,7 @@ contract('SettleRebalance', accounts => {
         expect(feeRecipientBalance).to.bignumber.equal(rebalanceFeeInflation);
       });
 
-      it('increments the totalSupply properly', async () => {      
+      it('increments the totalSupply properly', async () => {
         const previousSupply = await rebalancingSetToken.totalSupply.callAsync();
         const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
         const expectedSupply = previousSupply.plus(rebalanceFeeInflation);
@@ -381,8 +383,19 @@ contract('SettleRebalance', accounts => {
         expect(newSupply).to.bignumber.equal(expectedSupply);
       });
 
-      it('emits the RebalancePaidFee log', async () => {      
+      it('emits the RebalancePaidFee log', async () => {
+        const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
 
+        const txHash = await subject();
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedRebalanceFeePaidLog(
+          feeRecipient,
+          rebalanceFeeInflation,
+          rebalancingSetToken.address
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
       });
 
       it('updates the unitShares amount correctly', async () => {

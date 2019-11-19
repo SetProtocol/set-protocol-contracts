@@ -269,8 +269,8 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
 
     for (let i = 0; i < components.length; i++) {
       const componentVaultBalance = await vault.getOwnerBalance.callAsync(
-        rebalancingSetToken.address,
         components[i],
+        rebalancingSetToken.address,
       );
 
       const impliedIssueAmount = componentVaultBalance.div(units[i]).mul(naturalUnit);
@@ -304,7 +304,6 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     // Gather data needed for calculations
     const totalSupply = await rebalancingSetToken.totalSupply.callAsync();
     const rebalancingNaturalUnit = await rebalancingSetToken.naturalUnit.callAsync();
-    const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
     const newSetNaturalUnit = await newSet.naturalUnit.callAsync();
     const components = await newSet.getComponents.callAsync();
     const units = await newSet.getUnits.callAsync();

@@ -129,7 +129,8 @@ contract SettleRebalance is
 
     /**
      * Calculates the fee and mints the rebalancing SetToken quantity to the recipient.
-     * In effect, the Set holders are paying the fee via inflation.
+     * The minting is done without an increase to the total collateral controlled by the 
+     * rebalancing SetToken. In effect, the existing holders are paying the fee via inflation.
      */
     function handleFees()
         internal
@@ -144,9 +145,15 @@ contract SettleRebalance is
     }
 
     /**
-     * Returns the new issue quantity based on the fee paid.
-     * Formula for fee is:
-     * FeeQuantity = rebalanceFee * oldTotalSupply / (scaleFactor - rebalanceFee)
+     * Returns the new rebalance fee. The calculation for the fee involves implying
+     * mint quantity so that the feeRecipient owns the fee percentage of the entire
+     * supply of the Set. 
+     * 
+     * The formula to solve for fee is:
+     * fee / fee + totalSupply = fee / scaleFactor
+     *
+     * The simplified formula utilized below is:
+     * feeQuantity = fee * totalSupply / (scaleFactor - fee)
      *
      * @return  uint256             New RebalancingSet issue quantity
      */
@@ -155,8 +162,9 @@ contract SettleRebalance is
         view
         returns(uint256)
     {
-        // fee * oldTotalSupply
+        // fee * totalSupply
         uint256 a = rebalanceFee.mul(totalSupply());
+
         // ScaleFactor (10e18) - fee
         uint256 b = SCALE_FACTOR.sub(rebalanceFee);
         

@@ -77,7 +77,6 @@ contract RebalancingSetTokenV2Factory {
         uint256 lastRebalanceTimestamp;
         uint256 entryFee;
         uint256 rebalanceFee;
-        uint256 exitFee;
     }
 
     /* ============ Constructor ============ */
@@ -131,7 +130,6 @@ contract RebalancingSetTokenV2Factory {
      * | rebalanceFailPeriod        | 160                           |
      * | entryFee                   | 192                           |
      * | rebalanceFee               | 224                           |
-     * | exitFee                    | 256                           |
      *
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
@@ -250,8 +248,7 @@ contract RebalancingSetTokenV2Factory {
                     parameters.rebalanceFailPeriod,         // rebalanceFailPeriod
                     parameters.lastRebalanceTimestamp,      // lastRebalanceTimestamp
                     parameters.entryFee,                    // entryFee
-                    parameters.rebalanceFee,                // rebalanceFee
-                    parameters.exitFee                      // exitFee
+                    parameters.rebalanceFee                 // rebalanceFee
                 ],
                 _name.bytes32ToString(),
                 _symbol.bytes32ToString()
@@ -279,7 +276,6 @@ contract RebalancingSetTokenV2Factory {
             mstore(add(parameters, 160), mload(add(_callData, 192)))  // lastRebalanceTimestamp
             mstore(add(parameters, 192), mload(add(_callData, 224)))  // entryFee
             mstore(add(parameters, 224), mload(add(_callData, 256)))  // rebalanceFee
-            mstore(add(parameters, 256), mload(add(_callData, 288)))  // exitFee
         }
 
         return parameters;

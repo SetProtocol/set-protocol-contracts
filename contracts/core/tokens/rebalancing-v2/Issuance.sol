@@ -17,6 +17,7 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
+import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -33,11 +34,18 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
  * Default implementation of Rebalancing Set Token propose function
  */
 contract Issuance is 
+    ERC20,
     RebalancingSetState
 {
     using SafeMath for uint256;
     using CommonMath for uint256;
 
+    /* ============ Events ============ */
+
+    event EntryFeePaid(
+        address indexed feeRecipient,
+        uint256 feeQuantity
+    );
 
     /* ============ Internal Functions ============ */
 
@@ -84,5 +92,30 @@ contract Issuance is
                 "Burn: Sender must be core"
             );
         }
+    }
+    /*
+     * Calculates entry fees and mints the feeRecipient a portion of the issue quantity.
+     *
+     * @param  _quantity              The number of rebalancing SetTokens the issuer mints
+     * @return issueQuantityNetOfFees Quantity of rebalancing SetToken to mint issuer net of fees 
+     */
+    function handleEntryFees(
+        uint256 _quantity
+    )
+        internal
+        returns(uint256)
+    {
+        // The entryFee is a scaled decimal figure by 10e18. We multiply the fee by the quantity
+        // Then descale by 10e18
+        uint256 fee = _quantity.mul(entryFee).deScale();
+
+        if (fee > 0) {
+            ERC20._mint(feeRecipient, fee);
+
+            emit EntryFeePaid(feeRecipient, fee);
+        }
+
+        // Return th
+        return _quantity.sub(fee);
     }
 }

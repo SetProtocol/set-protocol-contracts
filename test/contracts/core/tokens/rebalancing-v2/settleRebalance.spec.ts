@@ -164,7 +164,6 @@ contract('SettleRebalance', accounts => {
         rebalancingSetUnitShares,
         ZERO, // entryFee
         rebalanceFee,
-        ZERO,
       );
 
       // Issue currentSetToken

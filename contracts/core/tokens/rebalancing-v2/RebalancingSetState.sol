@@ -75,15 +75,13 @@ contract RebalancingSetState {
     // Time in seconds after rebalanceStartTime before the Set believes the auction has failed
     uint256 public rebalanceFailPeriod;
 
-    // Fee levied every mint operation, paid during minting
+    // Fee levied to feeRecipient every mint operation, paid during minting
     // Represents a decimal value scaled by 1e18 (e.g. 100% = 1e18 and 1% = 1e16)
     uint256 public entryFee;
 
-    // [x]
+    // Fee levied to feeRecipient every rebalance, paid during settlement
+    // Represents a decimal value scaled by 1e18 (e.g. 100% = 1e18 and 1% = 1e16)
     uint256 public rebalanceFee;
-
-    // [x]
-    uint256 public exitFee;
 
     // ----------------------------------------------------------------------
     // Current State

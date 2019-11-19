@@ -210,7 +210,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     let callDataLastRebalanceTimestamp: BigNumber;
     let callDataEntryFee: BigNumber;
     let callDataRebalanceFee: BigNumber;
-    let callDataExitFee: BigNumber;
 
     beforeEach(async () => {
       rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
@@ -236,7 +235,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       callDataLastRebalanceTimestamp = timestamp;
       callDataEntryFee = ether(1);
       callDataRebalanceFee = ether(2);
-      callDataExitFee = ether(3);
       subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
         callDataManagerAddress,
         callDataLiquidator,
@@ -246,7 +244,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         callDataLastRebalanceTimestamp,
         callDataEntryFee,
         callDataRebalanceFee,
-        callDataExitFee,
       );
     });
 
@@ -368,13 +365,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
         expect(rebalanceFee).to.be.bignumber.equal(callDataRebalanceFee);
       });
-
-      it('creates a set with the the correct exitFee', async () => {
-        const rebalancingSetToken = await subject();
-
-        const exitFee = await rebalancingSetToken.exitFee.callAsync();
-        expect(exitFee).to.be.bignumber.equal(callDataExitFee);
-      });
     });
 
     describe('when the components length is not 1', async () => {
@@ -450,7 +440,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
           callDataRebalanceFee,
-          callDataExitFee,
         );
       });
 
@@ -472,7 +461,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
           callDataRebalanceFee,
-          callDataExitFee,
         );
       });
 
@@ -494,7 +482,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
           callDataRebalanceFee,
-          callDataExitFee,
         );
       });
 
@@ -516,7 +503,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
           callDataRebalanceFee,
-          callDataExitFee,
         );
       });
 
@@ -538,7 +524,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
           callDataRebalanceFee,
-          callDataExitFee,
         );
       });
 
@@ -560,7 +545,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
           callDataRebalanceFee,
-          callDataExitFee,
         );
       });
 
@@ -583,7 +567,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
           callDataRebalanceFee,
-          callDataExitFee,
         );
       });
 
@@ -624,7 +607,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       const entryFee = ZERO;
       const rebalanceFee = ZERO;
-      const exitFee = ZERO;
       subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
         managerAddress,
         liquidator,
@@ -634,7 +616,6 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         lastRebalanceTimestamp,
         entryFee,
         rebalanceFee,
-        exitFee,
       );
     });
 

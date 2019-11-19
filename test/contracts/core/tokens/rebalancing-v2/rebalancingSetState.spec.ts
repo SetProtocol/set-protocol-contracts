@@ -155,7 +155,6 @@ contract('RebalancingSetState', accounts => {
         lastRebalanceTimestamp,
         ZERO, // Entry Fee
         ZERO, // Rebalance Fee
-        ZERO, // Exit Fee
       ]
     );
   });
@@ -179,7 +178,6 @@ contract('RebalancingSetState', accounts => {
     let subjectLastRebalanceTimestamp: BigNumber;
     let subjectEntryFee: BigNumber;
     let subjectRebalanceFee: BigNumber;
-    let subjectExitFee: BigNumber;
     const subjectName: string = 'Rebalancing Set';
     const subjectSymbol: string = 'RBSET';
 
@@ -201,7 +199,6 @@ contract('RebalancingSetState', accounts => {
       subjectLastRebalanceTimestamp = new BigNumber(timestamp);
       subjectEntryFee = ether(1);
       subjectRebalanceFee = ether(2);
-      subjectExitFee = ether(3);
     });
 
     async function subject(): Promise<RebalancingSetTokenV2Contract> {
@@ -223,7 +220,6 @@ contract('RebalancingSetState', accounts => {
         subjectLastRebalanceTimestamp,
         subjectEntryFee,
         subjectRebalanceFee,
-        subjectExitFee,
       ];
 
       return rebalancingHelper.deployRebalancingSetTokenV2Async(
@@ -358,12 +354,6 @@ contract('RebalancingSetState', accounts => {
       rebalancingSetToken = await subject();
       const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
       expect(rebalanceFee).to.be.bignumber.equal(subjectRebalanceFee);
-    });
-
-    it('creates a set with the the correct exitFee', async () => {
-      rebalancingSetToken = await subject();
-      const exitFee = await rebalancingSetToken.exitFee.callAsync();
-      expect(exitFee).to.be.bignumber.equal(subjectExitFee);
     });
 
     it('creates a set with the hasBidded variable set to false', async () => {

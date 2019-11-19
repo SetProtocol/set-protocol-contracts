@@ -6192,10 +6192,10 @@ set-protocol-utils@^1.0.0-beta.32, set-protocol-utils@^1.0.0-beta.39:
     web3 "1.0.0-beta.36"
     web3-utils "1.0.0-beta.36"
 
-set-protocol-utils@^1.0.0-beta.42:
-  version "1.0.0-beta.42"
-  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-1.0.0-beta.42.tgz#1501b8536d959570571ef745bf1e9aa79db56dd3"
-  integrity sha512-hx88I+z6lWPCV2DKoMTHBq2fgIckK+uMR/6sAdca46aUdt+DWRSBvI1cSwmHACrlqm/3vpzPnhz3AWWsukQkuw==
+set-protocol-utils@^1.0.0-beta.43:
+  version "1.0.0-beta.43"
+  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-1.0.0-beta.43.tgz#15ae674c16f4bfd140ec79db6221de23aba0fb89"
+  integrity sha512-bMCJq3Yk2uj/CRiTSKZycBbtn5Cn62rpQrzWIl3zNZ+24EdNRHS+siE3EbPYVXq4I8qxAddWSriKIbO4HWFnmw==
   dependencies:
     "@0xproject/base-contract" "^1.0.4"
     "@0xproject/order-utils" "^1.0.1"

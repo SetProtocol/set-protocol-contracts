@@ -127,9 +127,10 @@ contract SettleRebalance is
         return issueAmount;
     }
 
-    // Calculates the RB Set to mint the feeRecipient
-    // Fee is enforced through inflation
-    // Mints the fee to the feeRecipient
+    /**
+     * Calculates the fee and mints the rebalancing SetToken quantity to the recipient.
+     * In effect, the Set holders are paying the fee via inflation.
+     */
     function handleFees()
         internal
     {
@@ -142,18 +143,23 @@ contract SettleRebalance is
         }
     }
 
-    // Fee is paid via inflation and ownership of the Set.
-    // Math: newShares / (newShares + oldShares) = percentFee
-    // Simplified: fee * oldShare / (scaleFactor - fee)
+    /**
+     * Returns the new issue quantity based on the fee paid.
+     * Formula for fee is:
+     * FeeQuantity = rebalanceFee * oldTotalSupply / (scaleFactor - rebalanceFee)
+     *
+     * The fee is represented as a scaled value.
+     */
     function calculateRebalanceFeeInflation()
         internal
         view
         returns(uint256)
     {
-        // fee * oldShare
+        // fee * oldTotalSupply
         uint256 a = rebalanceFee.mul(totalSupply());
         // ScaleFactor (10e18) - fee
         uint256 b = SCALE_FACTOR.sub(rebalanceFee);
+        
         return a.div(b);
     }
 

@@ -18,6 +18,7 @@ export function getExpectedTransferLog(
   }];
 }
 
+
 export function getExpectedNewManagerAddedLog(
   newManager: Address,
   oldManager: Address,
@@ -44,6 +45,21 @@ export function getExpectedNewLiquidatorAddedLog(
     args: {
       newLiquidator,
       oldLiquidator,
+    },
+  }];
+}
+
+export function getExpectedEntryFeePaidLog(
+  feeRecipient: Address,
+  feeQuantity: BigNumber,
+  contractAddress: Address,
+): Log[] {
+  return [{
+    event: 'EntryFeePaid',
+    address: contractAddress,
+    args: {
+      feeRecipient,
+      feeQuantity,
     },
   }];
 }

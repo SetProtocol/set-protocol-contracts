@@ -53,7 +53,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
    * [6]feeRecipient              Address that receives any incentive fees
    *
    * uintConfig [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, lastRebalanceTimestamp,
-   *             entryFee, rebalanceFee, exitFee]
+   *             entryFee, rebalanceFee]
    * [0]initialUnitShares         Units of currentSet that equals one share
    * [1]naturalUnit               The minimum multiple of Sets that can be issued or redeemed
    * [2]rebalanceInterval:        Minimum amount of time between rebalances
@@ -61,7 +61,6 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
    * [4]lastRebalanceTimestamp:   Time of the last rebalance; Allows customized deployments
    * [5]entryFee:                 Mint fee represented in a scaled percentage value
    * [6]rebalanceFee:             Rebalance fee represented in a scaled percentage value
-   * [7]exitFee:                  Exit fee represented in a scaled percentage value
    *
    */
   public async deployRebalancingSetTokenV2Async(
@@ -133,7 +132,6 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     lastRebalanceTimestamp: BigNumber,
     entryFee: BigNumber = ZERO,
     rebalanceFee: BigNumber = ZERO,
-    exitFee: BigNumber = ZERO,
     initialUnitShares: BigNumber = DEFAULT_UNIT_SHARES,
   ): Promise<RebalancingSetTokenV2Contract> {
     // Generate defualt rebalancingSetToken params
@@ -147,7 +145,6 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
       lastRebalanceTimestamp,
       entryFee,
       rebalanceFee,
-      exitFee,
     );
 
     // Create rebalancingSetToken
@@ -281,6 +278,16 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     }
 
     return maxIssueAmount;
+  }
+
+  // Simplified: quantity * fee / 10e18
+  public async calculateEntryFee(
+    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    quantity: BigNumber
+  ): Promise<BigNumber> {
+    const entryFee = await rebalancingSetToken.entryFee.callAsync();
+
+    return entryFee.mul(quantity).div(SCALE_FACTOR).round(0, 3);
   }
 
   // Fee is paid via inflation and ownership of the Set.

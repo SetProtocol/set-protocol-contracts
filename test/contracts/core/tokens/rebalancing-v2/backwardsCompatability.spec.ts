@@ -48,6 +48,7 @@ contract('BackwardsCompatability', accounts => {
   const [
     deployerAccount,
     managerAccount,
+    feeRecipient,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -131,6 +132,7 @@ contract('BackwardsCompatability', accounts => {
       rebalancingFactory.address,
       managerAccount,
       liquidatorMock.address,
+      feeRecipient,
       currentSetToken.address,
       failPeriod,
       new BigNumber(lastRebalanceTimestamp),

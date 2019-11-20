@@ -40,6 +40,15 @@ contract SettleRebalance is
 {
     using SafeMath for uint256;
 
+    uint256 public constant SCALE_FACTOR = 10 ** 18;
+
+    /* ============ Events ============ */
+
+    event RebalanceFeePaid(
+        address indexed feeRecipient,
+        uint256 quantity
+    );
+
     /* ============ Internal Functions ============ */
 
     /*
@@ -116,6 +125,50 @@ contract SettleRebalance is
         uint256 issueAmount = maxIssueAmount.div(nextSetToken.naturalUnit).mul(nextSetToken.naturalUnit);
 
         return issueAmount;
+    }
+
+    /**
+     * Calculates the fee and mints the rebalancing SetToken quantity to the recipient.
+     * The minting is done without an increase to the total collateral controlled by the 
+     * rebalancing SetToken. In effect, the existing holders are paying the fee via inflation.
+     */
+    function handleFees()
+        internal
+    {
+        uint256 settlementFee = calculateRebalanceFeeInflation();
+
+        if (settlementFee > 0) {
+            ERC20._mint(feeRecipient, settlementFee);
+
+            emit RebalanceFeePaid(feeRecipient, settlementFee);
+        }
+    }
+
+    /**
+     * Returns the new rebalance fee. The calculation for the fee involves implying
+     * mint quantity so that the feeRecipient owns the fee percentage of the entire
+     * supply of the Set. 
+     * 
+     * The formula to solve for fee is:
+     * fee / fee + totalSupply = fee / scaleFactor
+     *
+     * The simplified formula utilized below is:
+     * feeQuantity = fee * totalSupply / (scaleFactor - fee)
+     *
+     * @return  uint256             New RebalancingSet issue quantity
+     */
+    function calculateRebalanceFeeInflation()
+        internal
+        view
+        returns(uint256)
+    {
+        // fee * totalSupply
+        uint256 a = rebalanceFee.mul(totalSupply());
+
+        // ScaleFactor (10e18) - fee
+        uint256 b = SCALE_FACTOR.sub(rebalanceFee);
+        
+        return a.div(b);
     }
 
     /**

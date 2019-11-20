@@ -28,10 +28,12 @@ import {
   ONE_DAY_IN_SECONDS,
   DEFAULT_UNIT_SHARES,
   DEFAULT_REBALANCING_NATURAL_UNIT,
+  ZERO,
 } from '@utils/constants';
 import {
   getExpectedTransferLog,
-} from '@utils/contract_logs/rebalancingSetToken';
+  getExpectedEntryFeePaidLog,
+} from '@utils/contract_logs/rebalancingSetTokenV2';
 import { expectRevertError, assertTokenBalanceAsync } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -52,10 +54,11 @@ const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
-contract('RebalancingSetState', accounts => {
+contract('Issuance', accounts => {
   const [
     deployerAccount,
     managerAccount,
+    feeRecipient,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -127,6 +130,9 @@ contract('RebalancingSetState', accounts => {
     let rebalancingSetToken: RebalancingSetTokenV2Contract;
     let nextSetToken: SetTokenContract;
     let currentSetToken: SetTokenContract;
+    let entryFee: BigNumber;
+
+    let customEntryFee: BigNumber;
 
     beforeEach(async () => {
       const setTokensToDeploy = 2;
@@ -142,6 +148,7 @@ contract('RebalancingSetState', accounts => {
 
       const liquidator = liquidatorMock.address;
       const failPeriod = ONE_DAY_IN_SECONDS;
+      entryFee = customEntryFee || ZERO;
 
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
@@ -149,9 +156,11 @@ contract('RebalancingSetState', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidator,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
+        entryFee,
       );
 
       subjectIssuer = deployerAccount,
@@ -199,6 +208,57 @@ contract('RebalancingSetState', accounts => {
         );
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when there is a 1% entry fee', async () => {
+      before(async () => {
+        customEntryFee = new BigNumber(10 ** 16);
+      });
+
+      after(async () => {
+        customEntryFee = undefined;
+      });
+
+      it('mints the correct Rebalncing Set quantity to the issuer', async () => {
+        const entryFee = await rebalancingHelper.calculateEntryFee(
+          rebalancingSetToken,
+          subjectQuantity
+        );
+        await subject();
+
+        const issuerBalance = await rebalancingSetToken.balanceOf.callAsync(subjectIssuer);
+        const expectedIssueQuantity = subjectQuantity.sub(entryFee);
+        expect(issuerBalance).to.bignumber.equal(expectedIssueQuantity);
+      });
+
+      it('mints the Rebalancing Set fee to the feeRecipient', async () => {
+        const entryFee = await rebalancingHelper.calculateEntryFee(
+          rebalancingSetToken,
+          subjectQuantity
+        );
+        await subject();
+
+        const feeRecipientSetBalance = await rebalancingSetToken.balanceOf.callAsync(feeRecipient);
+        expect(feeRecipientSetBalance).to.bignumber.equal(entryFee);
+      });
+
+      it('emits the EntryFeePaid log', async () => {
+        const txHash = await subject();
+
+        const entryFee = await rebalancingHelper.calculateEntryFee(
+          rebalancingSetToken,
+          subjectQuantity
+        );
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedEntryFeePaidLog(
+          feeRecipient,
+          entryFee,
+          rebalancingSetToken.address
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
     });
 
     describe('Post-Rebalance stage', async () => {
@@ -271,6 +331,8 @@ contract('RebalancingSetState', accounts => {
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
       const failPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
+      const entryFee = ZERO;
+      const rebalanceFee = ZERO;
 
       const rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
         coreMock.address,
@@ -287,6 +349,7 @@ contract('RebalancingSetState', accounts => {
           initialSet,
           rebalancingComponentWhiteList.address,
           liquidatorWhitelist.address,
+          feeRecipient,
         ],
         [
           initialUnitShares,
@@ -294,6 +357,8 @@ contract('RebalancingSetState', accounts => {
           rebalanceInterval,
           failPeriod,
           new BigNumber(lastRebalanceTimestamp),
+          entryFee,
+          rebalanceFee,
         ],
       );
 
@@ -344,6 +409,7 @@ contract('RebalancingSetState', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidator,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -427,6 +493,7 @@ contract('RebalancingSetState', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidator,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -557,6 +624,7 @@ contract('RebalancingSetState', accounts => {
         rebalancingFactory.address,
         managerAccount,
         liquidator,
+        feeRecipient,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,

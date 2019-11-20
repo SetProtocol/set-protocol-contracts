@@ -67,20 +67,25 @@ contract RebalancingSetTokenV2 is
     /**
      * Constructor function for Rebalancing Set Token
      *
-     * addressConfig = [factory, manager, liquidator, initialSet, componentWhiteList, liquidatorWhiteList]
+     * addressConfig [factory, manager, liquidator, initialSet, componentWhiteList, 
+     *                liquidatorWhiteList, feeRecipient]
      * [0]factory                   Factory used to create the Rebalancing Set
      * [1]manager                   Address that is able to propose the next Set
      * [2]liquidator                Address of the liquidator contract
      * [3]initialSet                Initial set that collateralizes the Rebalancing set
      * [4]componentWhiteList        Whitelist that nextSet components are checked against during propose
      * [5]liquidatorWhiteList       Whitelist of valid liquidators
+     * [6]feeRecipient              Address that receives any incentive fees
      *
-     * uintConfig = [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, lastRebalanceTimestamp]
+     * uintConfig [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, lastRebalanceTimestamp, 
+     *             entryFee, rebalanceFee]
      * [0]initialUnitShares         Units of currentSet that equals one share
      * [1]naturalUnit               The minimum multiple of Sets that can be issued or redeemed
      * [2]rebalanceInterval:        Minimum amount of time between rebalances
      * [3]rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
      * [4]lastRebalanceTimestamp:   Time of the last rebalance; Allows customized deployments
+     * [5]entryFee:                 Mint fee represented in a scaled decimal value (e.g. 100% = 1e18, 1% = 1e16)
+     * [6]rebalanceFee:             Rebalance fee represented in a scaled percentage value
      *
      * @param _addressConfig             List of configuration addresses
      * @param _uintConfig                List of uint addresses
@@ -88,8 +93,8 @@ contract RebalancingSetTokenV2 is
      * @param _symbol                    The symbol of the new RebalancingSetTokenV2
      */
     constructor(
-        address[6] memory _addressConfig,
-        uint256[5] memory _uintConfig,
+        address[7] memory _addressConfig,
+        uint256[7] memory _uintConfig,
         string memory _name,
         string memory _symbol
     )
@@ -106,6 +111,7 @@ contract RebalancingSetTokenV2 is
         currentSet = ISetToken(_addressConfig[3]);
         componentWhiteList = IWhiteList(_addressConfig[4]);
         liquidatorWhiteList = IWhiteList(_addressConfig[5]);
+        feeRecipient = _addressConfig[6];
         core = ICore(factory.core());
         vault = IVault(core.vault());
 
@@ -114,6 +120,8 @@ contract RebalancingSetTokenV2 is
         rebalanceInterval = _uintConfig[2];
         rebalanceFailPeriod = _uintConfig[3];
         lastRebalanceTimestamp = _uintConfig[4];
+        entryFee = _uintConfig[5];
+        rebalanceFee = _uintConfig[6];
         rebalanceState = RebalancingLibrary.State.Default;
     }
 
@@ -197,7 +205,8 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * After a successful rebalance, the new Set is issued. 
+     * After a successful rebalance, the new Set is issued. If there is a rebalance fee,
+     * the fee is paid via inflation of the Rebalancing Set to the feeRecipient.
      * Full issuance functionality is now returned to set owners.
      *
      * Anyone can call this function.
@@ -208,6 +217,10 @@ contract RebalancingSetTokenV2 is
         SettleRebalance.validateSettleRebalance();
 
         uint256 issueQuantity = SettleRebalance.calculateNextSetIssueQuantity();
+
+        // Calculates fees and mints Rebalancing Set to the feeRecipient, increasing supply
+        SettleRebalance.handleFees();
+
         uint256 newUnitShares = SettleRebalance.calculateNextSetNewUnitShares(issueQuantity);
 
         // The unit shares must result in a quantity greater than the number of natural units outstanding
@@ -244,7 +257,10 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Mint set token for given address. Can only be called by Core contract.
+     * Mint set token for given address. If there is an entryFee, calculates the fee and mints
+     * the rebalancing SetToken to the feeRecipient.
+     * 
+     * Can only be called by Core contract.
      *
      * @param  _issuer      The address of the issuing account
      * @param  _quantity    The number of sets to attribute to issuer
@@ -257,7 +273,9 @@ contract RebalancingSetTokenV2 is
     {
         Issuance.validateMint();
 
-        ERC20._mint(_issuer, _quantity);
+        uint256 issueQuantityNetOfFees = Issuance.handleEntryFees(_quantity);
+
+        ERC20._mint(_issuer, issueQuantityNetOfFees);
     }
 
     /*

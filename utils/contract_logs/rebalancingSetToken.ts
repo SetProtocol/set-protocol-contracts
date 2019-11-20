@@ -34,21 +34,6 @@ export function getExpectedNewManagerAddedLog(
   }];
 }
 
-export function getExpectedNewLiquidatorAddedLog(
-  newLiquidator: Address,
-  oldLiquidator: Address,
-  contractAddress: Address,
-): Log[] {
-  return [{
-    event: 'NewLiquidatorAdded',
-    address: contractAddress,
-    args: {
-      newLiquidator,
-      oldLiquidator,
-    },
-  }];
-}
-
 export function getExpectedRebalanceProposedLog(
   nextSet: Address,
   auctionLibrary: Address,
@@ -77,38 +62,6 @@ export function getExpectedRebalanceStartedLog(
     args: {
       oldSet,
       newSet,
-    },
-  }];
-}
-
-export function getExpectedRebalanceStartedV2Log(
-  oldSet: Address,
-  newSet: Address,
-  timestamp: BigNumber,
-  contractAddress: Address,
-): Log[] {
-  return [{
-    event: 'RebalanceStarted',
-    address: contractAddress,
-    args: {
-      oldSet,
-      newSet,
-      timestamp,
-    },
-  }];
-}
-
-export function getExpectedRebalanceFinishedLog(
-  newSet: Address,
-  newShareRatio: BigNumber,
-  contractAddress: Address,
-): Log[] {
-  return [{
-    event: 'RebalanceStarted',
-    address: contractAddress,
-    args: {
-      newSet,
-      newShareRatio,
     },
   }];
 }

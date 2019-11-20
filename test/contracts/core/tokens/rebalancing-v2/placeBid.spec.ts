@@ -50,6 +50,7 @@ contract('PlaceBid', accounts => {
     deployerAccount,
     managerAccount,
     otherAccount,
+    feeRecipient,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV2Contract;
@@ -137,6 +138,7 @@ contract('PlaceBid', accounts => {
       rebalancingFactory.address,
       managerAccount,
       liquidatorMock.address,
+      feeRecipient,
       currentSetToken.address,
       failPeriod,
       new BigNumber(lastRebalanceTimestamp),

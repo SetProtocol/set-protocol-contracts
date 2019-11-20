@@ -1409,7 +1409,7 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe.only('#startRebalance', async () => {
+  describe('#startRebalance', async () => {
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;
     let proposalPeriod: BigNumber;
@@ -1716,7 +1716,7 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe.only('#settleRebalance', async () => {
+  describe('#settleRebalance', async () => {
     let subjectCaller: Address;
 
     let proposalPeriod: BigNumber;
@@ -2082,7 +2082,7 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe.only('#endFailedAuction', async () => {
+  describe('#endFailedAuction', async () => {
     let subjectCaller: Address;
 
     let proposalPeriod: BigNumber;

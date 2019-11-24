@@ -234,18 +234,4 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
             "ExponentialPivotAuctionLiquidator: Invalid or disabled proposed SetToken address"
         );       
     }
-
-    function requireAuctionInactive(Auction.Setup storage _auction) private view {
-        require(
-            !Auction.isAuctionActive(_auction),
-            "ExponentialPivotAuctionLiquidator: Auction must be inactive"
-        );       
-    }
-
-    function requireAuctionActive(Auction.Setup storage _auction) private view {
-        require(
-            Auction.isAuctionActive(_auction),
-            "ExponentialPivotAuctionLiquidator: Auction must be active"
-        );       
-    }
 }

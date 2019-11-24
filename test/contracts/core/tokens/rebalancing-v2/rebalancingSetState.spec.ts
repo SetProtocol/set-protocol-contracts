@@ -11,11 +11,12 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  LiquidatorMockContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
+  SetTokenContract,
   SetTokenFactoryContract,
-  StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
   WhiteListContract,
@@ -39,6 +40,7 @@ import { ether } from '@utils/units';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 
 BigNumberSetup.configure();
@@ -73,6 +75,7 @@ contract('RebalancingSetState', accounts => {
   let rebalancingFactory: RebalancingSetTokenV2FactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
+  let liquidatorMock: LiquidatorMockContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -82,9 +85,10 @@ contract('RebalancingSetState', accounts => {
     erc20Helper,
     blockchain
   );
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
 
-  let components: StandardTokenMockContract[];
-  let initialSet: Address;
+  let initialSetToken: SetTokenContract;
+  let nextSetToken: SetTokenContract;
   let manager: Address;
   let liquidator: Address;
   let initialUnitShares: BigNumber;
@@ -126,9 +130,17 @@ contract('RebalancingSetState', accounts => {
 
     components = await erc20Helper.deployTokensAsync(1, deployerAccount);
 
-    initialSet = components[0].address;
+    liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
+    await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
+
+    [ initialSetToken, nextSetToken ] = await rebalancingHelper.createSetTokensAsync(
+      coreMock,
+      factory.address,
+      transferProxy.address,
+      2
+    );
     manager = managerAccount;
-    liquidator = fakeModuleAccount;
+    liquidator = liquidatorMock.address;
     initialUnitShares = DEFAULT_UNIT_SHARES;
     initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
     rebalanceInterval = ONE_DAY_IN_SECONDS;
@@ -142,7 +154,7 @@ contract('RebalancingSetState', accounts => {
         rebalancingFactory.address,
         manager,
         liquidator,
-        initialSet,
+        initialSetToken.address,
         rebalancingComponentWhiteList.address,
         liquidatorWhitelist.address,
         feeRecipient,
@@ -182,13 +194,12 @@ contract('RebalancingSetState', accounts => {
     const subjectSymbol: string = 'RBSET';
 
     beforeEach(async () => {
-      const components = await erc20Helper.deployTokensAsync(1, deployerAccount);
       const { timestamp } = await web3.eth.getBlock('latest');
 
       subjectFactory = rebalancingFactory.address;
       subjectManager = managerAccount;
       subjectLiquidator = fakeModuleAccount;
-      subjectInitialSet = components[0].address;
+      subjectInitialSet = initialSetToken.address;
       subjectComponentWhiteList = rebalancingComponentWhiteList.address;
       subjectLiquidatorWhiteList = liquidatorWhitelist.address;
       subjectFeeRecipient = feeRecipient;
@@ -470,6 +481,25 @@ contract('RebalancingSetState', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when startRebalance is called from Rebalance State', async () => {
+      beforeEach(async () => {
+      const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+      await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
+
+       await rebalancingHelper.transitionToRebalanceV2Async(
+         coreMock,
+         rebalancingComponentWhiteList,
+         rebalancingSetToken,
+         nextSetToken,
+         managerAccount
+       );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#setFeeRecipient', async () => {
@@ -535,7 +565,7 @@ contract('RebalancingSetState', accounts => {
     it('returns the correct component array', async () => {
       const components = await subject();
 
-      expect([initialSet]).to.deep.equal(components);
+      expect([initialSetToken.address]).to.deep.equal(components);
     });
   });
 
@@ -566,7 +596,7 @@ contract('RebalancingSetState', accounts => {
 
     beforeEach(async () => {
       subjectCaller = managerAccount;
-      subjectComponent = initialSet;
+      subjectComponent = initialSetToken.address;
     });
 
     async function subject(): Promise<boolean> {

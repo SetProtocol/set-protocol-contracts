@@ -28,7 +28,6 @@ import { LinearAuction } from "./impl/LinearAuction.sol";
 import { ExponentialPivotAuction } from "./impl/ExponentialPivotAuction.sol";
 import { Rebalance } from "../lib/Rebalance.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
-import { SetUSDValuation } from "./impl/SetUSDValuation.sol";
 
 
 /**
@@ -43,7 +42,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
 
     ICore public core;
     string public name;
-    IOracleWhiteList public oracleWhiteList;
     mapping(address => LinearAuction.State) public auctions;
 
     /* ============ Modifier ============ */
@@ -74,6 +72,7 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
     )
         public
         ExponentialPivotAuction(
+            _oracleWhiteList,
             _pricePrecision,
             _auctionPeriod,
             _rangeStart,
@@ -82,7 +81,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
     {
         core = _core;
         name = _name;
-        oracleWhiteList = _oracleWhiteList;
     }
 
     /* ============ External Functions ============ */
@@ -102,12 +100,9 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
         external
         isValidSet
     {
-        requireAuctionInactive(auction(msg.sender));
-
-        address[] memory combinedTokenArray = Auction.getCombinedTokenArray(_currentSet, _nextSet);
-        require(
-            oracleWhiteList.areValidAddresses(combinedTokenArray),
-            "ExponentialPivotAuctionLiquidator.startRebalance: Passed token does not have matching oracle."
+        LinearAuction.validateRebalanceComponents(
+            _currentSet,
+            _nextSet
         );
 
         LinearAuction.initializeLinearAuction(
@@ -133,8 +128,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
         isValidSet
         returns (Rebalance.TokenFlow memory)
     {
-        requireAuctionActive(auction(msg.sender));
-
         Auction.validateBidQuantity(auction(msg.sender), _quantity);
 
         Auction.reduceRemainingCurrentSets(auction(msg.sender), _quantity);
@@ -156,9 +149,7 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
         public
         view
         returns (Rebalance.TokenFlow memory)
-    {
-        requireAuctionActive(auction(msg.sender));
-
+    {   
         return LinearAuction.getTokenFlow(linearAuction(_set), _quantity);
     }
 
@@ -166,7 +157,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
      * Validates auction completion and clears auction state.
      */
     function settleRebalance() external isValidSet {
-        requireAuctionActive(auction(msg.sender));
 
         Auction.validateAuctionCompletion(auction(msg.sender));
 
@@ -177,7 +167,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
      * Clears auction state.
      */
     function endFailedRebalance() external isValidSet {
-        requireAuctionActive(auction(msg.sender));
 
         clearAuctionState(msg.sender);
     }
@@ -223,12 +212,6 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
             auctionStartPrice: linearAuction(_set).startNumerator,
             auctionPivotPrice: linearAuction(_set).endNumerator
         });
-    }
-
-    /* ============ Implementing LinearAuction Function  ============ */
-
-    function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
-        return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
     }
 
     /* ============ Private Functions ============ */

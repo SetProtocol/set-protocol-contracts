@@ -22,14 +22,13 @@ contract ExponentialPivotAuctionMock is ExponentialPivotAuction {
     )
         public
         ExponentialPivotAuction(
+            _oracleWhiteList,
             _pricePrecision,
             _auctionPeriod,
             _rangeStart,
             _rangeEnd
         )
-    {
-        oracleWhiteList = _oracleWhiteList;
-    }
+    {}
 
     function initializeLinearAuction(
         ISetToken _currentSet,
@@ -50,7 +49,7 @@ contract ExponentialPivotAuctionMock is ExponentialPivotAuction {
     }
 
     function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
-        return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
+        return super.calculateUSDValueOfSet(_set);
     }
 }
 

@@ -10,7 +10,6 @@ import { SetUSDValuation } from "../../../../core/liquidators/impl/SetUSDValuati
 
 contract LinearAuctionMock is LinearAuction {
     LinearAuction.State public auction;
-    IOracleWhiteList public oracleWhiteList; // Instance of the oracle list
 
     constructor(
         IOracleWhiteList _oracleWhiteList,
@@ -21,14 +20,13 @@ contract LinearAuctionMock is LinearAuction {
     )
         public
         LinearAuction(
+            _oracleWhiteList,
             _pricePrecision,
             _auctionPeriod,
             _rangeStart,
             _rangeEnd
         )
-    {
-        oracleWhiteList = _oracleWhiteList;
-    }
+    {}
 
     function initializeLinearAuction(
         ISetToken _currentSet,
@@ -67,7 +65,7 @@ contract LinearAuctionMock is LinearAuction {
     }
 
     function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
-        return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
+        return super.calculateUSDValueOfSet(_set);
     }
 }
 

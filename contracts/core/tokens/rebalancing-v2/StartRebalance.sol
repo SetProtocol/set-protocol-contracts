@@ -55,6 +55,7 @@ contract StartRebalance is
         ISetToken _nextSet
     )
         internal
+        view
     {
         require(
             rebalanceState == RebalancingLibrary.State.Default,
@@ -102,8 +103,8 @@ contract StartRebalance is
         uint256 currentSetBalance = vault.getOwnerBalance(address(currentSet), address(this));
         uint256 currentSetNaturalUnit = currentSet.naturalUnit();
 
-        // Rounds the redemption quantity to a multiple of the current Set natural unit and sets variable
-        return currentSetBalance.div(currentSetNaturalUnit).mul(currentSetNaturalUnit);
+        // Rounds the redemption quantity to a multiple of the current Set natural unit
+        return currentSetBalance.sub(currentSetBalance.mod(currentSetNaturalUnit));
     }
 
     /**
@@ -122,6 +123,7 @@ contract StartRebalance is
     /**
      * Signals to the Liquidator to initiate the rebalance.
      *
+     * @param _nextSet                         Next set instance
      * @param _startingCurrentSetQuantity      Amount of currentSets the rebalance is initiated with
      */
     function liquidatorStartRebalance(

@@ -43,12 +43,14 @@ contract ExponentialPivotAuction is LinearAuction {
     /**
      * ExponentialPivotAuction constructor
      *
+     * @param _oracleWhiteList        Oracle WhiteList instance
      * @param _pricePrecision         Price precision used in auctions
      * @param _auctionPeriod          Length of auction
      * @param _rangeStart             Percentage above FairValue to begin auction at
      * @param _rangeEnd               Percentage below FairValue to end auction at
      */
     constructor(
+        IOracleWhiteList _oracleWhiteList,
         uint256 _pricePrecision,
         uint256 _auctionPeriod,
         uint256 _rangeStart,
@@ -56,6 +58,7 @@ contract ExponentialPivotAuction is LinearAuction {
     )
         public
         LinearAuction(
+            _oracleWhiteList,
             _pricePrecision,
             _auctionPeriod,
             _rangeStart,
@@ -78,7 +81,6 @@ contract ExponentialPivotAuction is LinearAuction {
     {
         // Calculate how much time has elapsed since start of auction
         uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
-        uint256 startNumerator = _linearAuction.startNumerator;
         uint256 endNumerator = _linearAuction.endNumerator;
 
         // Initialize numerator and denominator

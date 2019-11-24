@@ -23,6 +23,7 @@ import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { Auction } from "./Auction.sol";
 import { Rebalance } from "../../lib/Rebalance.sol";
+import { SetUSDValuation } from "../impl/SetUSDValuation.sol";
 
 
 /**
@@ -43,19 +44,22 @@ contract LinearAuction is Auction {
     }
 
     /* ============ State Variables ============ */
+    IOracleWhiteList public oracleWhiteList;
     uint256 public auctionPeriod; // Length in seconds of auction
-    uint256 public rangeStart; // Percentage above FairValue to begin auction at
-    uint256 public rangeEnd;  // Percentage below FairValue to end auction at
+    uint256 public rangeStart; // Percentage below FairValue to begin auction at
+    uint256 public rangeEnd;  // Percentage above FairValue to end auction at
 
     /**
      * LinearAuction constructor
      *
+     * @param _oracleWhiteList        Oracle WhiteList instance 
      * @param _pricePrecision         Price precision used in auctions
      * @param _auctionPeriod          Length of auction
-     * @param _rangeStart             Percentage above FairValue to begin auction at
-     * @param _rangeEnd               Percentage below FairValue to end auction at
+     * @param _rangeStart             Percentage below FairValue to begin auction at
+     * @param _rangeEnd               Percentage above FairValue to end auction at
      */
     constructor(
+        IOracleWhiteList _oracleWhiteList,
         uint256 _pricePrecision,
         uint256 _auctionPeriod,
         uint256 _rangeStart,
@@ -65,6 +69,7 @@ contract LinearAuction is Auction {
         Auction(_pricePrecision)
         
     {
+        oracleWhiteList = _oracleWhiteList;
         auctionPeriod = _auctionPeriod;
         rangeStart = _rangeStart;
         rangeEnd = _rangeEnd;
@@ -103,6 +108,20 @@ contract LinearAuction is Auction {
 
     /* ============ Internal View Functions ============ */
 
+    function validateRebalanceComponents(
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+    {
+        address[] memory combinedTokenArray = Auction.getCombinedTokenArray(_currentSet, _nextSet);
+        require(
+            oracleWhiteList.areValidAddresses(combinedTokenArray),
+            "ExponentialPivotAuctionLiquidator.startRebalance: Passed token does not have matching oracle."
+        );
+    }
+
     /**
      * Returns the TokenFlow based on the current price
      */
@@ -134,7 +153,8 @@ contract LinearAuction is Auction {
      */
     function hasAuctionFailed(State storage _linearAuction) internal view returns(bool) {
         bool endTimeExceeded = block.timestamp >= _linearAuction.endTime;
-        bool setsNotAuctioned = !hasBiddableQuantity(_linearAuction.auction);
+        bool setsNotAuctioned = hasBiddableQuantity(_linearAuction.auction);
+
         return (endTimeExceeded && setsNotAuctioned);        
     }
 
@@ -191,5 +211,7 @@ contract LinearAuction is Auction {
      * @param _set              Instance of SetToken
      * @return USDValue         USD Value of the Set Token
      */
-    function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256);
+    function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
+        return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
+    }
 }

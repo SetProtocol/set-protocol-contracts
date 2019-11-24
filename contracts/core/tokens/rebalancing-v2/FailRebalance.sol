@@ -41,6 +41,13 @@ contract FailRebalance is
 
     /* ============ Internal Functions ============ */
 
+    /*
+     * Validations for failRebalance:
+     *  - State is Rebalance
+     *  - Either liquidator recognizes failure OR fail period breached on RB Set
+     *
+     * @param _quantity                 The amount of currentSet to be rebalanced
+     */
     function validateFailRebalance()
         internal
         view

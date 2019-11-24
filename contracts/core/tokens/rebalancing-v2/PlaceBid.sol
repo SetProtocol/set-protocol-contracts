@@ -39,7 +39,9 @@ contract PlaceBid is
     /* ============ Internal Functions ============ */
 
     /*
-     * Validates conditions to retrieve a Bid Price.
+     * Validates conditions to retrieve a Bid Price:
+     *  - State is Rebalance
+     *  - Quanity is greater than zero
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
      */
@@ -61,7 +63,9 @@ contract PlaceBid is
     }
 
     /*
-     * The caller should be the RebalanceAuctionModule.
+     * Validations for placeBid:
+     *  - Module is sender
+     *  - getBidPrice validations
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
      */

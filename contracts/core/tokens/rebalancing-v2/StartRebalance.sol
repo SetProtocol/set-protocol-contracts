@@ -47,7 +47,12 @@ contract StartRebalance is
     /* ============ Internal Functions ============ */
 
     /**
-     * Validate that start rebalance can be called
+     * Validate that start rebalance can be called:
+     *  - Current state is Default
+     *  - rebalanceInterval has elapsed
+     *  - Proposed set is valid in Core
+     *  - Components in set are all valid
+     *  - NaturalUnits are multiples of each other
      *
      * @param _nextSet                    The Set to rebalance into
      */

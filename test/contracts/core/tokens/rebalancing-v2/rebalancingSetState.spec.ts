@@ -128,8 +128,6 @@ contract('RebalancingSetState', accounts => {
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
 
-    components = await erc20Helper.deployTokensAsync(1, deployerAccount);
-
     liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
 

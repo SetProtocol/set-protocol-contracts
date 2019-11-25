@@ -62,12 +62,6 @@ contract SettleRebalance is
             rebalanceState == RebalancingLibrary.State.Rebalance,
             "Settle: State must be Rebalance"
         );
-
-        // A rebalance can not have completed without a successful bid
-        require(
-            hasBidded,
-            "Settle: No bids made"
-        );
     }
 
     /*
@@ -122,7 +116,7 @@ contract SettleRebalance is
         // Issue amount of Sets that is closest multiple of nextNaturalUnit to the maxIssueAmount
         // Since the initial division will round down to the nearest whole number when we multiply
         // by that same number we will return the closest multiple less than the maxIssueAmount
-        uint256 issueAmount = maxIssueAmount.div(nextSetToken.naturalUnit).mul(nextSetToken.naturalUnit);
+        uint256 issueAmount = maxIssueAmount.sub(maxIssueAmount.mod(nextSetToken.naturalUnit));
 
         return issueAmount;
     }
@@ -150,7 +144,7 @@ contract SettleRebalance is
      * supply of the Set. 
      * 
      * The formula to solve for fee is:
-     * fee / fee + totalSupply = fee / scaleFactor
+     * feeQuantity / feeQuantity + totalSupply = fee / scaleFactor
      *
      * The simplified formula utilized below is:
      * feeQuantity = fee * totalSupply / (scaleFactor - fee)
@@ -185,7 +179,8 @@ contract SettleRebalance is
         view
         returns (uint256)
     {
-        uint256 naturalUnitsOutstanding = calculateNaturalUnitsOutstanding();
+        // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding.
+        uint256 naturalUnitsOutstanding = totalSupply().div(naturalUnit);
 
         // Divide final issueAmount by naturalUnitsOutstanding to get newUnitShares
         return _issueQuantity.div(naturalUnitsOutstanding);
@@ -194,23 +189,10 @@ contract SettleRebalance is
     /* ============ Private Functions ============ */
 
     /**
-     * Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding.
-     * 
-     * NaturalUnitsOutstanding = totalSupply / naturalUnit
-     *
-     * @return  uint256             New unitShares for the rebalancingSetToken
-     */
-    function calculateNaturalUnitsOutstanding()
-        private
-        view
-        returns (uint256)
-    {
-        return totalSupply().div(naturalUnit);
-    }
-
-    /**
      * Get the maximum possible issue amount of nextSet based on number of components owned by rebalancing
      * set token.
+     *
+     * @param  _setToken    Struct of Set Token details
      */
     function calculateMaxIssueAmount(
         SetTokenLibrary.SetDetails memory _setToken
@@ -229,7 +211,8 @@ contract SettleRebalance is
             );
 
             // Calculate amount of Sets that can be issued from those components, if less than amount for other
-            // components then set that as maxIssueAmount
+            // components then set that as maxIssueAmount. We divide before multiplying so that we don't get
+            // an amount that isn't a multiple of the naturalUnit
             uint256 componentIssueAmount = componentAmount.div(_setToken.units[i]).mul(_setToken.naturalUnit);
             if (componentIssueAmount < maxIssueAmount) {
                 maxIssueAmount = componentIssueAmount;

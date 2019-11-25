@@ -51,8 +51,7 @@ contract RebalancingSetState {
     // The token whitelist that components are checked against during proposals
     IWhiteList public componentWhiteList;
 
-    // Contract holding the state and logic required for rebalance liquidation
-    // The Liquidator interacts closely with the Set during rebalances.
+    // WhiteList of liquidator contracts
     IWhiteList public liquidatorWhiteList;
 
     // Contract holding the state and logic required for rebalance liquidation
@@ -154,6 +153,9 @@ contract RebalancingSetState {
 
     /* ============ Setter Functions ============ */
 
+    /*
+     * Set new manager address.
+     */
     function setManager(
         address _newManager
     )
@@ -173,6 +175,11 @@ contract RebalancingSetState {
         external
         onlyManager
     {
+        require(
+            rebalanceState != RebalancingLibrary.State.Rebalance,
+            "SetLiquidator: Must not be in Rebalance state"
+        );
+
         require(
             liquidatorWhiteList.whiteList(address(_newLiquidator)),
             "SetLiquidator: Input not whitelisted"

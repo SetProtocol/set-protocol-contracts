@@ -148,10 +148,9 @@ contract Auction {
     /*
      * Calculates TokenFlows
      *
-     * @param _auction                Auction Setup object
-     * @param _quantity               Amount of currentSets bidder is seeking to rebalance
-     * @param _priceNumerator         The numerator of the price ratio
-     * @param _priceDivisor           The denominator of the price ratio
+     * @param _auction              Auction Setup object
+     * @param _quantity             Amount of currentSets bidder is seeking to rebalance
+     * @param _price                Struct of auction price numerator and denominator
      */
     function calculateTokenFlow(
         Setup storage _auction,
@@ -235,6 +234,7 @@ contract Auction {
      * @param _currentUnit          Amount of token i in currentSet per minimum bid amount
      * @param _nextSetUnit          Amount of token i in nextSet per minimum bid amount
      * @param _unitsMultiplier      Bid amount normalized to number of minimum bid amounts
+     * @param _price                Struct of auction price numerator and denominator
      * @return inflowUnit           Amount of token i transferred into the system
      * @return outflowUnit          Amount of token i transferred to the bidder
      */
@@ -321,11 +321,12 @@ contract Auction {
     {
         address[] memory combinedTokenArray = _auction.combinedTokenArray;
         uint256[] memory combinedUnits = new uint256[](combinedTokenArray.length);
+        uint256 pricePrecisionMem = pricePrecision;
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
             combinedUnits[i] = calculateCombinedUnit(
                 _set,
                 _auction.minimumBid,
-                pricePrecision,
+                pricePrecisionMem,
                 combinedTokenArray[i]
             );
         }
@@ -353,9 +354,10 @@ contract Auction {
         returns (uint256)
     {
         // Check if component in arrays and get index if it is
-        uint256 indexCurrent;
-        bool isComponent;
-        (indexCurrent, isComponent) = _setToken.getComponents().indexOf(_component);
+        (
+            uint256 indexCurrent, 
+            bool isComponent
+        ) = _setToken.getComponents().indexOf(_component);
 
         // Compute unit amounts of token in Set
         if (isComponent) {

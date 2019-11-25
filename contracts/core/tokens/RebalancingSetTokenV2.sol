@@ -77,8 +77,8 @@ contract RebalancingSetTokenV2 is
      * [5]liquidatorWhiteList       Whitelist of valid liquidators
      * [6]feeRecipient              Address that receives any incentive fees
      *
-     * uintConfig [unitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, lastRebalanceTimestamp, 
-     *             entryFee, rebalanceFee]
+     * uintConfig [initialUnitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, 
+     *             lastRebalanceTimestamp, entryFee, rebalanceFee]
      * [0]initialUnitShares         Units of currentSet that equals one share
      * [1]naturalUnit               The minimum multiple of Sets that can be issued or redeemed
      * [2]rebalanceInterval:        Minimum amount of time between rebalances
@@ -257,7 +257,7 @@ contract RebalancingSetTokenV2 is
     }
 
     /*
-     * Mint set token for given address. If there is an entryFee, calculates the fee and mints
+     * Mint set token for given address. If there if is an entryFee, calculates the fee and mints
      * the rebalancing SetToken to the feeRecipient.
      * 
      * Can only be called by Core contract.

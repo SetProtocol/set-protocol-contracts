@@ -41,6 +41,13 @@ contract FailRebalance is
 
     /* ============ Internal Functions ============ */
 
+    /*
+     * Validations for failRebalance:
+     *  - State is Rebalance
+     *  - Either liquidator recognizes failure OR fail period breached on RB Set
+     *
+     * @param _quantity                 The amount of currentSet to be rebalanced
+     */
     function validateFailRebalance()
         internal
         view
@@ -53,7 +60,7 @@ contract FailRebalance is
 
         // Failure triggers must be met
         require(
-            failTriggersBreached(),
+            liquidatorBreached() || failPeriodBreached(),
             "Fail: Fail triggers not been breached"
         );
     }
@@ -95,18 +102,9 @@ contract FailRebalance is
     /* ============ Private Functions ============ */
 
     /*
-     * Returns whether the conditions for a failed rebalance has been met.
-     */
-    function failTriggersBreached()
-        private
-        view
-        returns(bool)
-    {
-        return liquidatorBreached() || failPeriodBreached();
-    }
-
-    /*
      * Returns whether the liquidator believes the rebalance has failed.
+     *
+     * @return        If liquidator thinks rebalance failed
      */
     function liquidatorBreached()
         private
@@ -119,6 +117,8 @@ contract FailRebalance is
     /*
      * Returns whether the the fail time has elapsed, which means that a period
      * of time where the auction should have succeeded has not.
+     *
+     * @return        If fail period has passed on Rebalancing Set Token
      */
     function failPeriodBreached()
         private

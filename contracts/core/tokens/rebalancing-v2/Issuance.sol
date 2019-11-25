@@ -49,6 +49,12 @@ contract Issuance is
 
     /* ============ Internal Functions ============ */
 
+    /*
+     * Validate call to mint new Rebalancing Set Token
+     *
+     *  - Make sure caller is Core
+     *  - Make sure state is not Rebalance or Drawdown
+     */
     function validateMint()
         internal
         view
@@ -69,6 +75,12 @@ contract Issuance is
         );
     }
 
+    /*
+     * Validate call to burn Rebalancing Set Token
+     *
+     *  - Make sure state is not Rebalance or Drawdown
+     *  - Make sure sender is module when in drawdown, core otherwise
+     */
     function validateBurn()
         internal
         view

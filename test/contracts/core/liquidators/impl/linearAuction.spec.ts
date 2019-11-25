@@ -189,7 +189,7 @@ contract('LinearAuction', accounts => {
 
     it('sets the correct oracleWhiteList', async () => {
       const result = await auctionMock.oracleWhiteList.callAsync();
-      expect(result).to.bignumber.equal(oracleWhiteList.address);
+      expect(result).to.equal(oracleWhiteList.address);
     });
   });
 
@@ -453,17 +453,22 @@ contract('LinearAuction', accounts => {
 
       it('returns false', async () => {
         const hasAuctionFailed = await subject();
-        expect(hasAuctionFailed).to.equal(false);
+        expect(hasAuctionFailed).to.be.false;
       });
 
-      describe('when the timestamp has exceeded the endTime', async () => {
+      describe('when the timestamp has exceeded the endTime and still biddable quantity', async () => {
         beforeEach(async () => {
           await blockchain.increaseTimeAsync(auctionPeriod.add(1));
+
+          await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
+            startingCurrentSetQuantity,
+            { from: subjectCaller, gas: DEFAULT_GAS },
+          );
         });
 
-        it('should return false', async () => {
+        it('should return true', async () => {
           const hasAuctionFailed = await subject();
-          expect(hasAuctionFailed).to.equal(false);
+          expect(hasAuctionFailed).to.be.false;
         });
       });
 
@@ -477,23 +482,20 @@ contract('LinearAuction', accounts => {
 
         it('should return false', async () => {
           const hasAuctionFailed = await subject();
-          expect(hasAuctionFailed).to.equal(false);
+          expect(hasAuctionFailed).to.be.false;
         });
       });
 
-      describe('when the timestamp has exceeded endTime and there is a biddable quantity', async () => {
+      describe('when the timestamp has exceeded endTime and there is not biddable quantity', async () => {
         beforeEach(async () => {
           await blockchain.increaseTimeAsync(auctionPeriod.add(1));
 
-          await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
-            startingCurrentSetQuantity,
-            { from: subjectCaller, gas: DEFAULT_GAS },
-          );
+          await blockchain.mineBlockAsync();
         });
 
-        it('should true', async () => {
+        it('should return true', async () => {
           const hasAuctionFailed = await subject();
-          expect(hasAuctionFailed).to.equal(true);
+          expect(hasAuctionFailed).to.be.true;
         });
       });
     });

@@ -26,6 +26,10 @@ export class Blockchain {
     await this.sendJSONRpcRequestAsync('evm_increaseTime', [duration.toNumber()]);
   }
 
+  public async mineBlockAsync(): Promise<any> {
+    await this.sendJSONRpcRequestAsync('evm_mine', []);
+  }
+
   private async sendJSONRpcRequestAsync(
     method: string,
     params: any[],

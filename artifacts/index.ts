@@ -8,6 +8,7 @@ export { ERC20Detailed } from "./ts/ERC20Detailed";
 export { ERC20Wrapper } from "./ts/ERC20Wrapper";
 export { ExchangeIssuanceLibrary } from "./ts/ExchangeIssuanceLibrary";
 export { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
+export { ExponentialPivotAuctionLiquidator } from "./ts/ExponentialPivotAuctionLiquidator";
 export { FailAuctionLibrary } from "./ts/FailAuctionLibrary";
 export { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
 export { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
@@ -16,6 +17,7 @@ export { LinearAuctionPriceCurve } from "./ts/LinearAuctionPriceCurve";
 export { Median } from "./ts/Median";
 export { NoDecimalTokenMock } from "./ts/NoDecimalTokenMock";
 export { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
+export { OracleWhiteList } from "./ts/OracleWhiteList";
 export { PlaceBidLibrary } from "./ts/PlaceBidLibrary";
 export { ProposeLibrary } from "./ts/ProposeLibrary";
 export { ProtocolViewer } from "./ts/ProtocolViewer";
@@ -25,6 +27,8 @@ export { RebalancingSetEthBidder } from "./ts/RebalancingSetEthBidder";
 export { RebalancingSetExchangeIssuanceModule } from "./ts/RebalancingSetExchangeIssuanceModule";
 export { RebalancingSetToken } from "./ts/RebalancingSetToken";
 export { RebalancingSetTokenFactory } from "./ts/RebalancingSetTokenFactory";
+export { RebalancingSetTokenV2 } from "./ts/RebalancingSetTokenV2";
+export { RebalancingSetTokenV2Factory } from "./ts/RebalancingSetTokenV2Factory";
 export { SettleRebalanceLibrary } from "./ts/SettleRebalanceLibrary";
 export { SetToken } from "./ts/SetToken";
 export { SetTokenFactory } from "./ts/SetTokenFactory";
@@ -57,6 +61,7 @@ export {
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryContract,
   ExchangeIssuanceModuleContract,
+  ExponentialPivotAuctionLiquidatorContract,
   FailAuctionLibraryContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
@@ -65,6 +70,7 @@ export {
   MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
+  OracleWhiteListContract,
   PlaceBidLibraryContract,
   ProposeLibraryContract,
   ProtocolViewerContract,
@@ -74,6 +80,8 @@ export {
   RebalancingSetIssuanceModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
+  RebalancingSetTokenV2Contract,
+  RebalancingSetTokenV2FactoryContract,
   SettleRebalanceLibraryContract,
   SetTokenContract,
   SetTokenFactoryContract,

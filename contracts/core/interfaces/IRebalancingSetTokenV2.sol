@@ -18,6 +18,8 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
+import { ILiquidator } from "./ILiquidator.sol";
+import { ISetToken } from "./ISetToken.sol";
 
 /**
  * @title IRebalancingSetTokenV2
@@ -38,6 +40,16 @@ interface IRebalancingSetTokenV2 {
         external
         view
         returns (uint256);
+
+    /**
+     * Returns liquidator instance
+     *
+     * @return  ILiquidator    Liquidator instance
+     */
+    function liquidator()
+        external
+        view
+        returns (ILiquidator);
 
     /*
      * Get lastRebalanceTimestamp of Rebalancing Set
@@ -128,6 +140,16 @@ interface IRebalancingSetTokenV2 {
         external;
 
     /*
+     * After a successful rebalance, the new Set is issued. If there is a rebalance fee,
+     * the fee is paid via inflation of the Rebalancing Set to the feeRecipient.
+     * Full issuance functionality is now returned to set owners.
+     *
+     * Anyone can call this function.
+     */
+    function settleRebalance()
+        external;
+
+    /*
      * Get natural unit of Set
      *
      * @return  uint256       Natural unit of Set
@@ -145,7 +167,7 @@ interface IRebalancingSetTokenV2 {
     function currentSet()
         external
         view
-        returns (address);
+        returns (ISetToken);
 
     /**
      * Returns the address of the next base SetToken with the post auction allocation
@@ -155,7 +177,7 @@ interface IRebalancingSetTokenV2 {
     function nextSet()
         external
         view
-        returns (address);
+        returns (ISetToken);
 
     /*
      * Get the unit shares of the rebalancing Set
@@ -166,6 +188,20 @@ interface IRebalancingSetTokenV2 {
         external
         view
         returns (uint256);
+
+    /*
+     * Place bid during rebalance auction. Can only be called by Core.
+     *
+     * @param _quantity                 The amount of currentSet to be rebalanced
+     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
+     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
+     */
+    function placeBid(
+        uint256 _quantity
+    )
+        external
+        returns (address[] memory, uint256[] memory, uint256[] memory);
 
     /*
      * Get token inflows and outflows required for bid. Also the amount of Rebalancing

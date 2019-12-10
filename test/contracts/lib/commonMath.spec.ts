@@ -46,6 +46,23 @@ contract('CommonMathMock', accounts => {
     });
   });
 
+  describe('#testScaleFactor', async () => {
+    const caller: Address = ownerAccount;
+
+    async function subject(): Promise<BigNumber> {
+      return commonMathLibrary.testScaleFactor.callAsync(
+        { from: caller },
+      );
+    }
+
+    it('returns the scale factor', async () => {
+      const result = await subject();
+
+      const expectedScaleFactor = new BigNumber(10 ** 18);
+      expect(result).to.be.bignumber.equal(expectedScaleFactor);
+    });
+  });
+
   describe('#testScale', async () => {
     let subjectValue: BigNumber;
     const caller: Address = ownerAccount;

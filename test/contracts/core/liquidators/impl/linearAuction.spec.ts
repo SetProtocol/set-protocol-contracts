@@ -24,7 +24,6 @@ import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
-  SCALE_FACTOR,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
 import { getLinearAuction, TokenFlow } from '@utils/auction';
@@ -216,8 +215,7 @@ contract('LinearAuction', accounts => {
 
       const auction: any = await auctionMock.auction.callAsync();
 
-      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                          .mul(SCALE_FACTOR);
+      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit);
       expect(auction.auction.minimumBid).to.bignumber.equal(expectedMinimumBid);
     });
 
@@ -244,7 +242,7 @@ contract('LinearAuction', accounts => {
       );
       const rangeStart = await auctionMock.rangeStart.callAsync();
       const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
-      expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
+      expect(auction.startPriceScaled).to.bignumber.equal(expectedStartPrice);
     });
 
     it('sets the correct endPrice', async () => {
@@ -259,7 +257,7 @@ contract('LinearAuction', accounts => {
       );
       const rangeEnd = await auctionMock.rangeEnd.callAsync();
       const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
-      expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
+      expect(auction.endPriceScaled).to.bignumber.equal(expectedEndPrice);
     });
   });
 

@@ -138,15 +138,12 @@ export class LiquidatorHelper {
     const setTokenUnits = await setToken.getUnits.callAsync();
     const setTokenNaturalUnit = await setToken.naturalUnit.callAsync();
 
-    // Calculate minimumBidAmount
-    const maxNaturalUnit = minimumBid.div(SCALE_FACTOR);
-
     // Create combined unit array for target Set
     const combinedSetTokenUnits: BigNumber[] = [];
     combinedTokenArray.forEach(address => {
       const index = setTokenComponents.indexOf(address);
       if (index != -1) {
-        const totalTokenAmount = setTokenUnits[index].mul(maxNaturalUnit).div(setTokenNaturalUnit);
+        const totalTokenAmount = setTokenUnits[index].mul(minimumBid).div(setTokenNaturalUnit);
         combinedSetTokenUnits.push(totalTokenAmount);
       } else {
         combinedSetTokenUnits.push(new BigNumber(0));
@@ -161,26 +158,26 @@ export class LiquidatorHelper {
     auctionPeriod: BigNumber
   ): BigNumber {
     const elapsed = timestamp.sub(linearAuction.auction.startTime);
-    const priceRange = new BigNumber(linearAuction.endPrice).sub(linearAuction.startPrice);
+    const priceRange = new BigNumber(linearAuction.endPriceScaled).sub(linearAuction.startPriceScaled);
     const elapsedPrice = elapsed.mul(priceRange).div(auctionPeriod).round(0, 3);
 
-    return new BigNumber(linearAuction.startPrice).add(elapsedPrice);
+    return new BigNumber(linearAuction.startPriceScaled).add(elapsedPrice);
   }
 
   public calculateStartPrice(
-    fairValue: BigNumber,
+    fairValueScaled: BigNumber,
     rangeStart: BigNumber,
   ): BigNumber {
-    const negativeRange = fairValue.mul(rangeStart).div(100).round(0, 3);
-    return fairValue.sub(negativeRange);
+    const negativeRange = fairValueScaled.mul(rangeStart).div(100).round(0, 3);
+    return fairValueScaled.sub(negativeRange);
   }
 
   public calculateEndPrice(
-    fairValue: BigNumber,
+    fairValueScaled: BigNumber,
     rangeEnd: BigNumber,
   ): BigNumber {
-    const positiveRange = fairValue.mul(rangeEnd).div(100).round(0, 3);
-    return fairValue.add(positiveRange);
+    const positiveRange = fairValueScaled.mul(rangeEnd).div(100).round(0, 3);
+    return fairValueScaled.add(positiveRange);
   }
 
   public async calculateFairValueAsync(
@@ -271,7 +268,7 @@ export class LiquidatorHelper {
   public constructTokenFlow(
     linearAuction: LinearAuction,
     quantity: BigNumber,
-    price: BigNumber,
+    priceScaled: BigNumber,
   ): TokenFlow {
     const inflow: BigNumber[] = [];
     const outflow: BigNumber[] = [];
@@ -284,24 +281,25 @@ export class LiquidatorHelper {
       minimumBid,
     } = linearAuction.auction;
 
-    const unitsMultiplier = quantity.div(minimumBid).round(0, 3).mul(SCALE_FACTOR);
+    const unitsMultiplier = quantity.div(minimumBid).round(0, 3);
 
     for (let i = 0; i < combinedCurrentSetUnits.length; i++) {
-      const flow = combinedNextSetUnits[i].mul(SCALE_FACTOR).sub(combinedCurrentSetUnits[i].mul(price));
+      const flow = combinedNextSetUnits[i].mul(SCALE_FACTOR).sub(combinedCurrentSetUnits[i].mul(priceScaled));
       if (flow.greaterThan(0)) {
         const inflowUnit = unitsMultiplier.mul(
-          combinedNextSetUnits[i].mul(SCALE_FACTOR).sub(combinedCurrentSetUnits[i].mul(price))
-        ).div(price).round(0, 3);
+          combinedNextSetUnits[i].mul(SCALE_FACTOR).sub(combinedCurrentSetUnits[i].mul(priceScaled))
+        ).div(priceScaled).round(0, 3);
         inflow.push(inflowUnit);
         outflow.push(ZERO);
       } else {
         const outflowUnit = unitsMultiplier.mul(
-          combinedCurrentSetUnits[i].mul(price).sub(combinedNextSetUnits[i].mul(SCALE_FACTOR))
-        ).div(price).round(0, 3);
+          combinedCurrentSetUnits[i].mul(priceScaled).sub(combinedNextSetUnits[i].mul(SCALE_FACTOR))
+        ).div(priceScaled).round(0, 3);
         outflow.push(outflowUnit);
         inflow.push(ZERO);
       }
     }
+
     return {
       addresses: combinedTokenArray,
       inflow,

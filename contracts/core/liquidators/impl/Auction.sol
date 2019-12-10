@@ -152,7 +152,7 @@ contract Auction {
         returns (Rebalance.TokenFlow memory)
     {
         // Normalized quantity amount
-        uint256 unitsMultiplier = _quantity.div(_auction.minimumBid).scale();
+        uint256 unitsMultiplier = _quantity.div(_auction.minimumBid);
 
         address[] memory memCombinedTokenArray = _auction.combinedTokenArray;
 
@@ -231,7 +231,7 @@ contract Auction {
         uint256 _currentUnit,
         uint256 _nextSetUnit,
         uint256 _unitsMultiplier,
-        uint256 _price
+        uint256 _priceScaled
     )
         internal
         pure
@@ -268,19 +268,19 @@ contract Auction {
         uint256 outflowUnit;
 
         // Use if statement to check if token inflow or outflow
-        if (_nextSetUnit.scale() > _currentUnit.mul(_price)) {
+        if (_nextSetUnit.scale() > _currentUnit.mul(_priceScaled)) {
             // Calculate inflow amount
             inflowUnit = _unitsMultiplier.mul(
-                _nextSetUnit.scale().sub(_currentUnit.mul(_price))
-            ).div(_price);
+                _nextSetUnit.scale().sub(_currentUnit.mul(_priceScaled))
+            ).div(_priceScaled);
 
             // Set outflow amount to 0 for component i, since tokens need to be injected in rebalance
             outflowUnit = 0;
         } else {
             // Calculate outflow amount
             outflowUnit = _unitsMultiplier.mul(
-                _currentUnit.mul(_price).sub(_nextSetUnit.scale())
-            ).div(_price);
+                _currentUnit.mul(_priceScaled).sub(_nextSetUnit.scale())
+            ).div(_priceScaled);
 
             // Set inflow amount to 0 for component i, since tokens need to be returned in rebalance
             inflowUnit = 0;

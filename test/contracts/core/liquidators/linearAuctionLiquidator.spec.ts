@@ -27,7 +27,6 @@ import {
   DEFAULT_GAS,
   ZERO,
   ONE_DAY_IN_SECONDS,
-  SCALE_FACTOR,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
 import { getLinearAuction, TokenFlow } from '@utils/auction';
@@ -247,8 +246,7 @@ contract('LinearAuctionLiquidator', accounts => {
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
-      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                          .mul(SCALE_FACTOR);
+      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit);
       expect(auction.auction.minimumBid).to.bignumber.equal(expectedMinimumBid);
     });
 
@@ -263,34 +261,34 @@ contract('LinearAuctionLiquidator', accounts => {
       expect(auction.endTime).to.bignumber.equal(expectedEndTime);
     });
 
-    it('sets the correct startPrice', async () => {
+    it('sets the correct startPriceScaled', async () => {
       await subject();
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
-      const fairValue = await liquidatorHelper.calculateFairValueAsync(
+      const fairValueScaled = await liquidatorHelper.calculateFairValueAsync(
         set1,
         set2,
         oracleWhiteList,
       );
       const rangeStart = await liquidator.rangeStart.callAsync();
-      const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
-      expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
+      const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValueScaled, rangeStart);
+      expect(auction.startPriceScaled).to.bignumber.equal(expectedStartPrice);
     });
 
-    it('sets the correct endPrice', async () => {
+    it('sets the correct endPriceScaled', async () => {
       await subject();
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
-      const fairValue = await liquidatorHelper.calculateFairValueAsync(
+      const fairValueScaled = await liquidatorHelper.calculateFairValueAsync(
         set1,
         set2,
         oracleWhiteList,
       );
       const rangeEnd = await liquidator.rangeEnd.callAsync();
-      const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
-      expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
+      const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValueScaled, rangeEnd);
+      expect(auction.endPriceScaled).to.bignumber.equal(expectedEndPrice);
     });
 
     describe('when the caller is not a valid Set', async () => {
@@ -386,7 +384,7 @@ contract('LinearAuctionLiquidator', accounts => {
         expect(JSON.stringify(combinedTokenArray)).to.equal(JSON.stringify(tokenFlows.addresses));
       });
 
-      it('returns the correct inflow', async () => {
+      it.only('returns the correct inflow', async () => {
         await subject();
 
         const inflow = await liquidatorProxy.getInflow.callAsync();
@@ -402,9 +400,7 @@ contract('LinearAuctionLiquidator', accounts => {
 
       describe('when the quantity is not a multiple of the minimumBid', async () => {
         beforeEach(async () => {
-          const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                              .mul(SCALE_FACTOR)
-                                              .div(2);
+          const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit).div(2);
           subjectQuantity = gWei(10).plus(halfMinimumBid);
         });
 
@@ -531,36 +527,6 @@ contract('LinearAuctionLiquidator', accounts => {
           expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
         });
       });
-
-      describe('after the max 30 second period', async () => {
-        beforeEach(async () => {
-          const max30seconds = new BigNumber(30 * 1000).plus(1);
-          await blockchain.increaseTimeAsync(auctionPeriod.plus(max30seconds));
-
-          // Advance the block
-          await core.addSet.sendTransactionAsync(
-            whitelist,
-            { from: ownerAccount, gas: DEFAULT_GAS },
-          );
-
-          await setTokenFlow();
-        });
-
-        it('returns the token array', async () => {
-          const { addresses } = await subject();
-          expect(JSON.stringify(addresses)).to.equal(JSON.stringify(tokenFlows.addresses));
-        });
-
-        it('returns the correct inflow', async () => {
-          const { inflow } = await subject();
-          expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
-        });
-
-        it('returns the correct outflow', async () => {
-          const { outflow } = await subject();
-          expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
-        });
-      });
     });
 
     describe('#settleRebalance', async () => {
@@ -601,8 +567,8 @@ contract('LinearAuctionLiquidator', accounts => {
         expect(JSON.stringify(auction.auction.combinedCurrentSetUnits)).to.equal(JSON.stringify([]));
         expect(JSON.stringify(auction.auction.combinedNextSetUnits)).to.equal(JSON.stringify([]));
         expect(auction.endTime).to.bignumber.equal(ZERO);
-        expect(auction.startPrice).to.bignumber.equal(ZERO);
-        expect(auction.endPrice).to.bignumber.equal(ZERO);
+        expect(auction.startPriceScaled).to.bignumber.equal(ZERO);
+        expect(auction.endPriceScaled).to.bignumber.equal(ZERO);
       });
 
       describe('when there is a biddable quantity', async () => {
@@ -651,8 +617,8 @@ contract('LinearAuctionLiquidator', accounts => {
         expect(JSON.stringify(auction.auction.combinedCurrentSetUnits)).to.equal(JSON.stringify([]));
         expect(JSON.stringify(auction.auction.combinedNextSetUnits)).to.equal(JSON.stringify([]));
         expect(auction.endTime).to.bignumber.equal(ZERO);
-        expect(auction.startPrice).to.bignumber.equal(ZERO);
-        expect(auction.endPrice).to.bignumber.equal(ZERO);
+        expect(auction.startPriceScaled).to.bignumber.equal(ZERO);
+        expect(auction.endPriceScaled).to.bignumber.equal(ZERO);
       });
 
       describe('when the caller is not a valid Set', async () => {
@@ -762,8 +728,8 @@ contract('LinearAuctionLiquidator', accounts => {
         const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectSet));
         expect(auctionStartTime).to.bignumber.equal(linearAuction.auction.startTime);
         expect(auctionTimeToPivot).to.bignumber.equal(linearAuction.endTime);
-        expect(auctionStartPrice).to.bignumber.equal(linearAuction.startPrice);
-        expect(auctionPivotPrice).to.bignumber.equal(linearAuction.endPrice);
+        expect(auctionStartPrice).to.bignumber.equal(linearAuction.startPriceScaled);
+        expect(auctionPivotPrice).to.bignumber.equal(linearAuction.endPriceScaled);
       });
     });
   });

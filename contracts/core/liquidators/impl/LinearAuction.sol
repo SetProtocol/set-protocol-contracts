@@ -39,8 +39,8 @@ contract LinearAuction is Auction {
     struct State {
         Auction.Setup auction;
         uint256 endTime;
-        uint256 startPrice;
-        uint256 endPrice;
+        uint256 startPriceScaled;
+        uint256 endPriceScaled;
     }
 
     /* ============ State Variables ============ */
@@ -97,9 +97,9 @@ contract LinearAuction is Auction {
             _startingCurrentSetQuantity
         );
 
-        uint256 fairValue = calculateFairValue(_currentSet, _nextSet);
-        _linearAuction.startPrice = calculateStartPrice(fairValue);
-        _linearAuction.endPrice = calculateEndPrice(fairValue);
+        uint256 fairValueScaled = calculateFairValue(_currentSet, _nextSet);
+        _linearAuction.startPriceScaled = calculateStartPrice(fairValueScaled);
+        _linearAuction.endPriceScaled = calculateEndPrice(fairValueScaled);
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
 
@@ -156,10 +156,10 @@ contract LinearAuction is Auction {
      */
     function getPrice(State storage _linearAuction) internal view returns (uint256) {
         uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
-        uint256 range = _linearAuction.endPrice.sub(_linearAuction.startPrice);
+        uint256 range = _linearAuction.endPriceScaled.sub(_linearAuction.startPriceScaled);
         uint256 elapsedPrice = elapsed.mul(range).div(auctionPeriod);
 
-        return _linearAuction.startPrice.add(elapsedPrice);
+        return _linearAuction.startPriceScaled.add(elapsedPrice);
     }
 
     /**
@@ -180,19 +180,19 @@ contract LinearAuction is Auction {
     }
 
     /**
-     * Calculates the linear auction start price
+     * Calculates the linear auction start price with a scaled value
      */
-    function calculateStartPrice(uint256 _fairValue) internal view returns(uint256) {
-        uint256 startRange = _fairValue.mul(rangeStart).div(100);
-        return _fairValue.sub(startRange);
+    function calculateStartPrice(uint256 _fairValueScaled) internal view returns(uint256) {
+        uint256 startRange = _fairValueScaled.mul(rangeStart).div(100);
+        return _fairValueScaled.sub(startRange);
     }
 
     /**
-     * Calculates the linear auction end price
+     * Calculates the linear auction end price with a scaled value
      */
-    function calculateEndPrice(uint256 _fairValue) internal view returns(uint256) {
-        uint256 endRange = _fairValue.mul(rangeEnd).div(100);
-        return _fairValue.add(endRange);
+    function calculateEndPrice(uint256 _fairValueScaled) internal view returns(uint256) {
+        uint256 endRange = _fairValueScaled.mul(rangeEnd).div(100);
+        return _fairValueScaled.add(endRange);
     }
 
     /**

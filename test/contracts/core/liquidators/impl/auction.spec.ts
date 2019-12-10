@@ -22,7 +22,6 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
-  SCALE_FACTOR,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
 
@@ -154,8 +153,7 @@ contract('Auction', accounts => {
 
       const auctionSetup: any = await auctionMock.auction.callAsync();
 
-      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                          .mul(SCALE_FACTOR);
+      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit);
       expect(auctionSetup.minimumBid).to.bignumber.equal(expectedMinimumBid);
     });
 
@@ -226,7 +224,7 @@ contract('Auction', accounts => {
 
     describe('when there is insufficient collateral to rebalance', async () => {
       beforeEach(async () => {
-        subjectStartingCurrentSetQuantity = gWei(10);
+        subjectStartingCurrentSetQuantity = gWei(1).div(2);
       });
 
       it('should revert', async () => {
@@ -306,9 +304,7 @@ contract('Auction', accounts => {
 
     describe('when the quantity is not a multiple of the minimumBid', async () => {
       beforeEach(async () => {
-        const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                            .mul(SCALE_FACTOR)
-                                            .div(2);
+        const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit).div(2);
         subjectQuantity = gWei(10).plus(halfMinimumBid);
       });
 

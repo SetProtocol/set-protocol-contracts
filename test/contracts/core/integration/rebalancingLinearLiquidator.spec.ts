@@ -47,7 +47,7 @@ const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
-contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
+contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
   const [
     deployerAccount,
     managerAccount,
@@ -69,7 +69,6 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
   let liquidator: LinearAuctionLiquidatorContract;
 
   let name: string;
-  let pricePrecision: BigNumber;
   let auctionPeriod: BigNumber;
   let rangeStart: BigNumber;
   let rangeEnd: BigNumber;

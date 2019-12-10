@@ -7,8 +7,8 @@ import {
 export interface LinearAuction {
   auction: Auction;
   endTime: BigNumber;
-  startPrice: BigNumber;
-  endPrice: BigNumber;
+  startPriceScaled: BigNumber;
+  endPriceScaled: BigNumber;
 }
 
 export interface Price {
@@ -53,7 +53,7 @@ export function getLinearAuction(input: any): LinearAuction {
       combinedNextSetUnits: combinedNextSetUnits.map(v => new BigNumber(v)),
     },
     endTime: new BigNumber(input.endTime),
-    startPrice: new BigNumber(input.startPrice),
-    endPrice: new BigNumber(input.endPrice),
+    startPriceScaled: new BigNumber(input.startPriceScaled),
+    endPriceScaled: new BigNumber(input.endPriceScaled),
   };
 }

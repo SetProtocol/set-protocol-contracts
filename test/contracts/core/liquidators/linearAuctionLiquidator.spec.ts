@@ -341,6 +341,20 @@ contract('LinearAuctionLiquidator', accounts => {
       });
 
       async function subject(): Promise<string> {
+        return liquidatorProxy.placeBid.sendTransactionAsync(
+          subjectQuantity,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      async function directCallSubject(): Promise<string> {
+        return liquidator.placeBid.sendTransactionAsync(
+          subjectQuantity,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      async function setTokenFlows(): Promise<void> {
         const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(liquidatorProxy.address));
         const { timestamp } = await web3.eth.getBlock('latest');
 
@@ -355,18 +369,6 @@ contract('LinearAuctionLiquidator', accounts => {
           subjectQuantity,
           currentPrice,
         );
-
-        return liquidatorProxy.placeBid.sendTransactionAsync(
-          subjectQuantity,
-          { from: subjectCaller, gas: DEFAULT_GAS },
-        );
-      }
-
-      async function directCallSubject(): Promise<string> {
-        return liquidator.placeBid.sendTransactionAsync(
-          subjectQuantity,
-          { from: subjectCaller, gas: DEFAULT_GAS },
-        );
       }
 
       it('calculates the correct new remainingCurrentSets', async () => {
@@ -379,6 +381,7 @@ contract('LinearAuctionLiquidator', accounts => {
 
       it('returns the correct combinedTokenArray', async () => {
         await subject();
+        await setTokenFlows();
 
         const combinedTokenArray = await liquidatorProxy.getCombinedTokenArray.callAsync();
         expect(JSON.stringify(combinedTokenArray)).to.equal(JSON.stringify(tokenFlows.addresses));
@@ -386,6 +389,7 @@ contract('LinearAuctionLiquidator', accounts => {
 
       it('returns the correct inflow', async () => {
         await subject();
+        await setTokenFlows();
 
         const inflow = await liquidatorProxy.getInflow.callAsync();
         expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
@@ -393,10 +397,9 @@ contract('LinearAuctionLiquidator', accounts => {
 
       it('returns the correct outflow', async () => {
         await subject();
+        await setTokenFlows();
 
         const outflow = await liquidatorProxy.getOutflow.callAsync();
-        console.log('Outflow', JSON.stringify(outflow));
-
         expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
       });
 

@@ -384,7 +384,7 @@ contract('LinearAuctionLiquidator', accounts => {
         expect(JSON.stringify(combinedTokenArray)).to.equal(JSON.stringify(tokenFlows.addresses));
       });
 
-      it.only('returns the correct inflow', async () => {
+      it('returns the correct inflow', async () => {
         await subject();
 
         const inflow = await liquidatorProxy.getInflow.callAsync();
@@ -395,6 +395,8 @@ contract('LinearAuctionLiquidator', accounts => {
         await subject();
 
         const outflow = await liquidatorProxy.getOutflow.callAsync();
+        console.log('Outflow', JSON.stringify(outflow));
+
         expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
       });
 

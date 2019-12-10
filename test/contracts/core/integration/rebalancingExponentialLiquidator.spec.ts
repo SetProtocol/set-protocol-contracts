@@ -11,9 +11,9 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  LinearAuctionLiquidatorContract,
   OracleWhiteListContract,
   SetTokenContract,
-  ExponentialPivotAuctionLiquidatorContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
@@ -66,7 +66,7 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
   let rebalancingFactory: RebalancingSetTokenV2FactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
-  let liquidator: ExponentialPivotAuctionLiquidatorContract;
+  let liquidator: LinearAuctionLiquidatorContract;
 
   let name: string;
   let pricePrecision: BigNumber;
@@ -190,16 +190,14 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
       [component1Oracle.address, component2Oracle.address, component3Oracle.address],
     );
 
-    pricePrecision = new BigNumber(1000);
     auctionPeriod = ONE_DAY_IN_SECONDS;
     rangeStart = new BigNumber(10); // 10% above fair value
     rangeEnd = new BigNumber(10); // 10% below fair value
     name = 'liquidator';
 
-    liquidator = await liquidatorHelper.deployExponentialPivotAuctionLiquidatorAsync(
+    liquidator = await liquidatorHelper.deployLinearAuctionLiquidatorAsync(
       coreMock.address,
       oracleWhiteList.address,
-      pricePrecision,
       auctionPeriod,
       rangeStart,
       rangeEnd,

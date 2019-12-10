@@ -15,7 +15,7 @@ import {
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
-  ExponentialPivotAuctionLiquidatorContract,
+  LinearAuctionLiquidatorContract,
   TransferProxyContract,
   UpdatableOracleMockContract,
   VaultContract,
@@ -27,6 +27,7 @@ import {
   DEFAULT_GAS,
   ZERO,
   ONE_DAY_IN_SECONDS,
+  SCALE_FACTOR,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
 import { getLinearAuction, TokenFlow } from '@utils/auction';
@@ -42,9 +43,9 @@ const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
-const ExponentialPivotAuctionLiquidator = artifacts.require('ExponentialPivotAuctionLiquidator');
+const LinearAuctionLiquidator = artifacts.require('LinearAuctionLiquidator');
 
-contract('ExponentialPivotAuctionLiquidator', accounts => {
+contract('LinearAuctionLiquidator', accounts => {
   const [
     ownerAccount,
     functionCaller,
@@ -56,7 +57,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let liquidator: ExponentialPivotAuctionLiquidatorContract;
+  let liquidator: LinearAuctionLiquidatorContract;
   let liquidatorProxy: LiquidatorProxyContract;
 
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
@@ -65,7 +66,6 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
   const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper);
 
   let name: string;
-  let pricePrecision: BigNumber;
   let auctionPeriod: BigNumber;
   let rangeStart: BigNumber;
   let rangeEnd: BigNumber;
@@ -97,7 +97,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(ExponentialPivotAuctionLiquidator.abi);
+    ABIDecoder.addABI(LinearAuctionLiquidator.abi);
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -145,16 +145,14 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       [component1Oracle.address, component2Oracle.address, component3Oracle.address],
     );
 
-    pricePrecision = new BigNumber(1000);
     auctionPeriod = ONE_DAY_IN_SECONDS;
     rangeStart = new BigNumber(10); // 10% above fair value
     rangeEnd = new BigNumber(10); // 10% below fair value
     name = 'liquidator';
 
-    liquidator = await liquidatorHelper.deployExponentialPivotAuctionLiquidatorAsync(
+    liquidator = await liquidatorHelper.deployLinearAuctionLiquidatorAsync(
       core.address,
       oracleWhiteList.address,
-      pricePrecision,
       auctionPeriod,
       rangeStart,
       rangeEnd,
@@ -176,7 +174,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(ExponentialPivotAuctionLiquidator.abi);
+    ABIDecoder.removeABI(LinearAuctionLiquidator.abi);
   });
 
   beforeEach(async () => {
@@ -188,11 +186,6 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
   });
 
   describe('#constructor', async () => {
-    it('sets the correct pricePrecision', async () => {
-      const result = await liquidator.pricePrecision.callAsync();
-      expect(result).to.bignumber.equal(pricePrecision);
-    });
-
     it('sets the correct auctionPeriod', async () => {
       const result = await liquidator.auctionPeriod.callAsync();
       expect(result).to.bignumber.equal(auctionPeriod);
@@ -254,9 +247,8 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
-      const pricePrecision = await liquidator.pricePrecision.callAsync();
       const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                          .mul(pricePrecision);
+                                          .mul(SCALE_FACTOR);
       expect(auction.auction.minimumBid).to.bignumber.equal(expectedMinimumBid);
     });
 
@@ -271,7 +263,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       expect(auction.endTime).to.bignumber.equal(expectedEndTime);
     });
 
-    it('sets the correct startNumerator', async () => {
+    it('sets the correct startPrice', async () => {
       await subject();
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
@@ -280,14 +272,13 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         set1,
         set2,
         oracleWhiteList,
-        pricePrecision,
       );
       const rangeStart = await liquidator.rangeStart.callAsync();
       const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
-      expect(auction.startNumerator).to.bignumber.equal(expectedStartPrice);
+      expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
     });
 
-    it('sets the correct endNumerator', async () => {
+    it('sets the correct endPrice', async () => {
       await subject();
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
@@ -296,11 +287,10 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         set1,
         set2,
         oracleWhiteList,
-        pricePrecision,
       );
       const rangeEnd = await liquidator.rangeEnd.callAsync();
       const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
-      expect(auction.endNumerator).to.bignumber.equal(expectedEndPrice);
+      expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
     });
 
     describe('when the caller is not a valid Set', async () => {
@@ -364,10 +354,8 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
         tokenFlows = liquidatorHelper.constructTokenFlow(
           linearAuction,
-          pricePrecision,
           subjectQuantity,
           currentPrice,
-          pricePrecision,
         );
 
         return liquidatorProxy.placeBid.sendTransactionAsync(
@@ -414,9 +402,8 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
       describe('when the quantity is not a multiple of the minimumBid', async () => {
         beforeEach(async () => {
-          const pricePrecision = await liquidator.pricePrecision.callAsync();
           const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                              .mul(pricePrecision)
+                                              .mul(SCALE_FACTOR)
                                               .div(2);
           subjectQuantity = gWei(10).plus(halfMinimumBid);
         });
@@ -475,10 +462,8 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
         tokenFlows = liquidatorHelper.constructTokenFlow(
           linearAuction,
-          pricePrecision,
           subjectQuantity,
           currentPrice,
-          pricePrecision,
         );
       });
 
@@ -490,26 +475,16 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectCaller));
         const { timestamp } = await web3.eth.getBlock('latest');
 
-        const currentPrice = await liquidatorHelper.calculateExponentialPivotNumerator(
+        const currentPrice = await liquidatorHelper.calculateCurrentPrice(
           linearAuction,
           new BigNumber(timestamp),
           auctionPeriod,
-          pricePrecision,
-        );
-
-        const currentDenominator = await liquidatorHelper.calculateExponentialPivotDenominator(
-          linearAuction,
-          new BigNumber(timestamp),
-          auctionPeriod,
-          pricePrecision,
         );
 
         tokenFlows = liquidatorHelper.constructTokenFlow(
           linearAuction,
-          pricePrecision,
           subjectQuantity,
           currentPrice,
-          currentDenominator,
         );
       }
 
@@ -626,8 +601,8 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         expect(JSON.stringify(auction.auction.combinedCurrentSetUnits)).to.equal(JSON.stringify([]));
         expect(JSON.stringify(auction.auction.combinedNextSetUnits)).to.equal(JSON.stringify([]));
         expect(auction.endTime).to.bignumber.equal(ZERO);
-        expect(auction.startNumerator).to.bignumber.equal(ZERO);
-        expect(auction.endNumerator).to.bignumber.equal(ZERO);
+        expect(auction.startPrice).to.bignumber.equal(ZERO);
+        expect(auction.endPrice).to.bignumber.equal(ZERO);
       });
 
       describe('when there is a biddable quantity', async () => {
@@ -676,8 +651,8 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         expect(JSON.stringify(auction.auction.combinedCurrentSetUnits)).to.equal(JSON.stringify([]));
         expect(JSON.stringify(auction.auction.combinedNextSetUnits)).to.equal(JSON.stringify([]));
         expect(auction.endTime).to.bignumber.equal(ZERO);
-        expect(auction.startNumerator).to.bignumber.equal(ZERO);
-        expect(auction.endNumerator).to.bignumber.equal(ZERO);
+        expect(auction.startPrice).to.bignumber.equal(ZERO);
+        expect(auction.endPrice).to.bignumber.equal(ZERO);
       });
 
       describe('when the caller is not a valid Set', async () => {
@@ -787,8 +762,8 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectSet));
         expect(auctionStartTime).to.bignumber.equal(linearAuction.auction.startTime);
         expect(auctionTimeToPivot).to.bignumber.equal(linearAuction.endTime);
-        expect(auctionStartPrice).to.bignumber.equal(linearAuction.startNumerator);
-        expect(auctionPivotPrice).to.bignumber.equal(linearAuction.endNumerator);
+        expect(auctionStartPrice).to.bignumber.equal(linearAuction.startPrice);
+        expect(auctionPivotPrice).to.bignumber.equal(linearAuction.endPrice);
       });
     });
   });

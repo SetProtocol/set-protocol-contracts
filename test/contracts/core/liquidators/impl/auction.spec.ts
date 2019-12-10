@@ -22,6 +22,7 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
+  SCALE_FACTOR,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
 
@@ -123,19 +124,6 @@ contract('Auction', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#constructor', async () => {
-    async function subject(): Promise<any> {
-      return liquidatorHelper.deployAuctionMockAsync();
-    }
-
-    it('sets the correct pricePrecision', async () => {
-      await subject();
-      const pricePrecision = await auctionMock.pricePrecision.callAsync();
-      const defaultPricePrecision = await auctionMock.defaultPricePrecision.callAsync();
-      expect(pricePrecision).to.bignumber.equal(defaultPricePrecision);
-    });
-  });
-
   describe('#initializeAuction', async () => {
     let subjectCaller: Address;
     let subjectCurrentSet: Address;
@@ -166,9 +154,8 @@ contract('Auction', accounts => {
 
       const auctionSetup: any = await auctionMock.auction.callAsync();
 
-      const pricePrecision = await auctionMock.pricePrecision.callAsync();
       const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                          .mul(pricePrecision);
+                                          .mul(SCALE_FACTOR);
       expect(auctionSetup.minimumBid).to.bignumber.equal(expectedMinimumBid);
     });
 
@@ -211,13 +198,11 @@ contract('Auction', accounts => {
 
       const combinedTokenArray = await auctionMock.combinedTokenArray.callAsync();
       const auctionSetup: any = await auctionMock.auction.callAsync();
-      const pricePrecision = await auctionMock.pricePrecision.callAsync();
 
       const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
         set1,
         combinedTokenArray,
         new BigNumber(auctionSetup.minimumBid),
-        pricePrecision
       );
 
       expect(JSON.stringify(combinedCurrentSetUnits)).to.equal(JSON.stringify(expectedResult));
@@ -229,13 +214,11 @@ contract('Auction', accounts => {
       const combinedNextSetUnits = await auctionMock.combinedNextSetUnits.callAsync();
       const combinedTokenArray = await auctionMock.combinedTokenArray.callAsync();
       const auctionSetup: any = await auctionMock.auction.callAsync();
-      const pricePrecision = await auctionMock.pricePrecision.callAsync();
 
       const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
         set2,
         combinedTokenArray,
         new BigNumber(auctionSetup.minimumBid),
-        pricePrecision
       );
 
       expect(JSON.stringify(combinedNextSetUnits)).to.equal(JSON.stringify(expectedResult));
@@ -323,9 +306,8 @@ contract('Auction', accounts => {
 
     describe('when the quantity is not a multiple of the minimumBid', async () => {
       beforeEach(async () => {
-        const pricePrecision = await auctionMock.pricePrecision.callAsync();
         const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                            .mul(pricePrecision)
+                                            .mul(SCALE_FACTOR)
                                             .div(2);
         subjectQuantity = gWei(10).plus(halfMinimumBid);
       });

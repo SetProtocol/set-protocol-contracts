@@ -24,6 +24,7 @@ import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
+  SCALE_FACTOR,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
 import { getLinearAuction, TokenFlow } from '@utils/auction';
@@ -58,7 +59,6 @@ contract('LinearAuction', accounts => {
   const libraryMockHelper = new LibraryMockHelper(ownerAccount);
   const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper);
 
-  let pricePrecision: BigNumber;
   let auctionPeriod: BigNumber;
   let rangeStart: BigNumber;
   let rangeEnd: BigNumber;
@@ -138,14 +138,12 @@ contract('LinearAuction', accounts => {
       [component1Oracle.address, component2Oracle.address, component3Oracle.address],
     );
 
-    pricePrecision = new BigNumber(1000);
     auctionPeriod = ONE_DAY_IN_SECONDS;
     rangeStart = new BigNumber(10); // 10% above fair value
     rangeEnd = new BigNumber(10); // 10% below fair value
 
     auctionMock = await liquidatorHelper.deployLinearAuctionMockAsync(
       oracleWhiteList.address,
-      pricePrecision,
       auctionPeriod,
       rangeStart,
       rangeEnd,
@@ -167,11 +165,6 @@ contract('LinearAuction', accounts => {
   });
 
   describe('#constructor', async () => {
-    it('sets the correct pricePrecision', async () => {
-      const result = await auctionMock.pricePrecision.callAsync();
-      expect(result).to.bignumber.equal(pricePrecision);
-    });
-
     it('sets the correct auctionPeriod', async () => {
       const result = await auctionMock.auctionPeriod.callAsync();
       expect(result).to.bignumber.equal(auctionPeriod);
@@ -223,9 +216,8 @@ contract('LinearAuction', accounts => {
 
       const auction: any = await auctionMock.auction.callAsync();
 
-      const pricePrecision = await auctionMock.pricePrecision.callAsync();
       const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                          .mul(pricePrecision);
+                                          .mul(SCALE_FACTOR);
       expect(auction.auction.minimumBid).to.bignumber.equal(expectedMinimumBid);
     });
 
@@ -240,7 +232,7 @@ contract('LinearAuction', accounts => {
       expect(auction.endTime).to.bignumber.equal(expectedEndTime);
     });
 
-    it('sets the correct startNumerator', async () => {
+    it('sets the correct startPrice', async () => {
       await subject();
 
       const auction: any = await auctionMock.auction.callAsync();
@@ -249,14 +241,13 @@ contract('LinearAuction', accounts => {
         set1,
         set2,
         oracleWhiteList,
-        pricePrecision,
       );
       const rangeStart = await auctionMock.rangeStart.callAsync();
       const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
-      expect(auction.startNumerator).to.bignumber.equal(expectedStartPrice);
+      expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
     });
 
-    it('sets the correct endNumerator', async () => {
+    it('sets the correct endPrice', async () => {
       await subject();
 
       const auction: any = await auctionMock.auction.callAsync();
@@ -265,11 +256,10 @@ contract('LinearAuction', accounts => {
         set1,
         set2,
         oracleWhiteList,
-        pricePrecision,
       );
       const rangeEnd = await auctionMock.rangeEnd.callAsync();
       const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
-      expect(auction.endNumerator).to.bignumber.equal(expectedEndPrice);
+      expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
     });
   });
 
@@ -290,9 +280,9 @@ contract('LinearAuction', accounts => {
       );
     });
 
-    describe('#getNumerator', async () => {
+    describe('#getPrice', async () => {
       async function subject(): Promise<BigNumber> {
-        return auctionMock.getNumerator.callAsync();
+        return auctionMock.getPrice.callAsync();
       }
 
       it('returns the correct result', async () => {
@@ -333,12 +323,12 @@ contract('LinearAuction', accounts => {
     });
 
     describe('#getPrice', async () => {
-      async function subject(): Promise<any> {
+      async function subject(): Promise<BigNumber> {
         return auctionMock.getPrice.callAsync();
       }
 
       it('returns the correct numerator', async () => {
-        const { numerator } = await subject();
+        const numerator = await subject();
         const { timestamp } = await web3.eth.getBlock('latest');
         const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
         const currentPrice = await liquidatorHelper.calculateCurrentPrice(
@@ -347,11 +337,6 @@ contract('LinearAuction', accounts => {
           auctionPeriod,
         );
         expect(numerator).to.bignumber.equal(currentPrice);
-      });
-
-      it('returns the correct denominator', async () => {
-        const { denominator } = await subject();
-        expect(denominator).to.bignumber.equal(pricePrecision);
       });
     });
 
@@ -374,10 +359,8 @@ contract('LinearAuction', accounts => {
 
         tokenFlows = liquidatorHelper.constructTokenFlow(
           linearAuction,
-          pricePrecision,
           subjectQuantity,
           currentPrice,
-          pricePrecision,
         );
       });
 
@@ -422,10 +405,8 @@ contract('LinearAuction', accounts => {
 
           tokenFlows = liquidatorHelper.constructTokenFlow(
             linearAuction,
-            pricePrecision,
             subjectQuantity,
             currentPrice,
-            pricePrecision,
           );
         });
 

@@ -23,6 +23,7 @@ library CommonMath {
     using SafeMath for uint256;
 
     uint256 public constant SCALE_FACTOR = 10 ** 18;
+    uint256 public constant MAXUINT256 = 2 ** 256 - 1;
 
     /**
      * Calculates and returns the maximum value for a uint256
@@ -34,7 +35,15 @@ library CommonMath {
         pure
         returns (uint256)
     {
-        return 2 ** 256 - 1;
+        return MAXUINT256;
+    }
+
+    function scaleFactor()
+        internal
+        pure
+        returns(uint256)
+    {
+        return SCALE_FACTOR;
     }
 
     /**

@@ -39,8 +39,8 @@ contract LinearAuction is Auction {
     struct State {
         Auction.Setup auction;
         uint256 endTime;
-        uint256 startNumerator;
-        uint256 endNumerator;
+        uint256 startPrice;
+        uint256 endPrice;
     }
 
     /* ============ State Variables ============ */
@@ -53,20 +53,17 @@ contract LinearAuction is Auction {
      * LinearAuction constructor
      *
      * @param _oracleWhiteList        Oracle WhiteList instance 
-     * @param _pricePrecision         Price precision used in auctions
      * @param _auctionPeriod          Length of auction
      * @param _rangeStart             Percentage below FairValue to begin auction at
      * @param _rangeEnd               Percentage above FairValue to end auction at
      */
     constructor(
         IOracleWhiteList _oracleWhiteList,
-        uint256 _pricePrecision,
         uint256 _auctionPeriod,
         uint256 _rangeStart,
         uint256 _rangeEnd
     )
         public
-        Auction(_pricePrecision)
         
     {
         oracleWhiteList = _oracleWhiteList;
@@ -101,8 +98,8 @@ contract LinearAuction is Auction {
         );
 
         uint256 fairValue = calculateFairValue(_currentSet, _nextSet);
-        _linearAuction.startNumerator = calculateStartNumerator(fairValue);
-        _linearAuction.endNumerator = calculateEndNumerator(fairValue);
+        _linearAuction.startPrice = calculateStartPrice(fairValue);
+        _linearAuction.endPrice = calculateEndPrice(fairValue);
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
 
@@ -141,13 +138,6 @@ contract LinearAuction is Auction {
     }
 
     /**
-     * Returns the linear price based on the current timestamp
-     */
-    function getPrice(State storage _linearAuction) internal view returns (Rebalance.Price memory) {
-        return Rebalance.composePrice(getNumerator(_linearAuction), Auction.pricePrecision);
-    }
-
-    /**
      * Auction failed is defined the timestamp breacnhing the auction end time and
      * the auction not being complete
      */
@@ -164,12 +154,12 @@ contract LinearAuction is Auction {
      * @param _linearAuction            Linear Auction State object
      * @return price                    uint representing the current price
      */
-    function getNumerator(State storage _linearAuction) internal view returns (uint256) {
+    function getPrice(State storage _linearAuction) internal view returns (uint256) {
         uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
-        uint256 range = _linearAuction.endNumerator.sub(_linearAuction.startNumerator);
+        uint256 range = _linearAuction.endPrice.sub(_linearAuction.startPrice);
         uint256 elapsedPrice = elapsed.mul(range).div(auctionPeriod);
 
-        return _linearAuction.startNumerator.add(elapsedPrice);
+        return _linearAuction.startPrice.add(elapsedPrice);
     }
 
     /**
@@ -186,13 +176,13 @@ contract LinearAuction is Auction {
         uint256 currentSetUSDValue = calculateUSDValueOfSet(_currentSet);
         uint256 nextSetUSDValue = calculateUSDValueOfSet(_nextSet);
 
-        return nextSetUSDValue.mul(Auction.pricePrecision).div(currentSetUSDValue);
+        return nextSetUSDValue.scale().div(currentSetUSDValue);
     }
 
     /**
      * Calculates the linear auction start price
      */
-    function calculateStartNumerator(uint256 _fairValue) internal view returns(uint256) {
+    function calculateStartPrice(uint256 _fairValue) internal view returns(uint256) {
         uint256 startRange = _fairValue.mul(rangeStart).div(100);
         return _fairValue.sub(startRange);
     }
@@ -200,7 +190,7 @@ contract LinearAuction is Auction {
     /**
      * Calculates the linear auction end price
      */
-    function calculateEndNumerator(uint256 _fairValue) internal view returns(uint256) {
+    function calculateEndPrice(uint256 _fairValue) internal view returns(uint256) {
         uint256 endRange = _fairValue.mul(rangeEnd).div(100);
         return _fairValue.add(endRange);
     }

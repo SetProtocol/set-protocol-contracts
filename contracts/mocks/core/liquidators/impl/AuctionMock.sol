@@ -7,11 +7,8 @@ import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";
 contract AuctionMock is Auction {
     Auction.Setup public auction;
 
-    uint256 public defaultPricePrecision = 1000;
-
     constructor()
         public
-        Auction(defaultPricePrecision)
     {}
 
     function initializeAuction(

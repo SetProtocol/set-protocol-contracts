@@ -113,7 +113,7 @@ contract('Auction', accounts => {
 
     set1Components = [component1.address, component2.address];
     set1Units = [gWei(1), gWei(1)];
-    set1NaturalUnit = gWei(1);
+    set1NaturalUnit = gWei(2);
     set1 = await coreHelper.createSetTokenAsync(
       core,
       setTokenFactory.address,
@@ -124,7 +124,7 @@ contract('Auction', accounts => {
 
     set2Components = [component2.address, component3.address];
     set2Units = [gWei(1), gWei(1)];
-    set2NaturalUnit = gWei(2);
+    set2NaturalUnit = gWei(1);
     set2 = await coreHelper.createSetTokenAsync(
       core,
       setTokenFactory.address,
@@ -290,7 +290,7 @@ contract('Auction', accounts => {
       beforeEach(async () => {
         const setComponents = [component1.address, component2.address];
         const setUnits = [gWei(1), gWei(1)];
-        const setNaturalUnit = gWei(150);
+        const setNaturalUnit = gWei(300);
         const set3 = await coreHelper.createSetTokenAsync(
           core,
           setTokenFactory.address,
@@ -312,7 +312,7 @@ contract('Auction', accounts => {
           await coreHelper.getSetInstance(subjectNextSet),
           oracleWhiteList
         );
-        console.log(expectedPricePrecision);
+
         expect(auctionSetup.pricePrecision).to.bignumber.equal(expectedPricePrecision);
       });
     });

@@ -138,7 +138,7 @@ export class LiquidatorHelper {
     const nextSetValue = await this.calculateSetTokenValueAsync(nextSet, oracleWhiteList);
     const minimumPricePrecision = new BigNumber(1000);
 
-    if (currentSetValue > nextSetValue) {
+    if (currentSetValue.greaterThan(nextSetValue)) {
       const orderOfMag = this._libraryMockHelper.ceilLog10(currentSetValue.div(nextSetValue));
 
       return minimumPricePrecision.mul(10 ** (orderOfMag.toNumber() - 1));

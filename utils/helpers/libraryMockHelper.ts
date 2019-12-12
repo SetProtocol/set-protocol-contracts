@@ -21,7 +21,7 @@ import {
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
 import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
-import { DEFAULT_GAS } from '../constants';
+import { DEFAULT_GAS, ZERO } from '../constants';
 
 const web3 = getWeb3();
 const Bytes32LibraryMock = artifacts.require('Bytes32LibraryMock');
@@ -271,5 +271,47 @@ export class LibraryMockHelper {
     const placeBidMockContract = await PlaceBidMock.new(txnFrom(from));
 
     return new PlaceBidMockContract(getContractInstance(placeBidMockContract), txnFrom(from));
+  }
+
+  public ceilLog10(
+    value: BigNumber
+  ): BigNumber {
+    const valueNum = value.toNumber();
+    if (valueNum == 1) return ZERO;
+
+    let x = valueNum - 1;
+
+    let result = 0;
+
+    if (x >= 10000000000000000000000000000000000000000000000000000000000000000) {
+      x /= 10000000000000000000000000000000000000000000000000000000000000000;
+      result += 64;
+    }
+    if (x >= 100000000000000000000000000000000) {
+      x /= 100000000000000000000000000000000;
+      result += 32;
+    }
+    if (x >= 10000000000000000) {
+      x /= 10000000000000000;
+      result += 16;
+    }
+    if (x >= 100000000) {
+      x /= 100000000;
+      result += 8;
+    }
+    if (x >= 10000) {
+      x /= 10000;
+      result += 4;
+    }
+    if (x >= 100) {
+      x /= 100;
+      result += 2;
+    }
+    if (x >= 10) {
+      x /= 10;
+      result += 1;
+    }
+
+    return new BigNumber(result + 1);
   }
 }

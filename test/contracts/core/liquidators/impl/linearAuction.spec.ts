@@ -23,7 +23,7 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
-  ONE_DAY_IN_SECONDS,
+  ONE_DAY_IN_SECONDS
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
 import { getLinearAuction, TokenFlow } from '@utils/auction';
@@ -58,7 +58,6 @@ contract('LinearAuction', accounts => {
   const libraryMockHelper = new LibraryMockHelper(ownerAccount);
   const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper);
 
-  let pricePrecision: BigNumber;
   let auctionPeriod: BigNumber;
   let rangeStart: BigNumber;
   let rangeEnd: BigNumber;
@@ -138,14 +137,12 @@ contract('LinearAuction', accounts => {
       [component1Oracle.address, component2Oracle.address, component3Oracle.address],
     );
 
-    pricePrecision = new BigNumber(1000);
     auctionPeriod = ONE_DAY_IN_SECONDS;
     rangeStart = new BigNumber(10); // 10% above fair value
     rangeEnd = new BigNumber(10); // 10% below fair value
 
     auctionMock = await liquidatorHelper.deployLinearAuctionMockAsync(
       oracleWhiteList.address,
-      pricePrecision,
       auctionPeriod,
       rangeStart,
       rangeEnd,
@@ -167,11 +164,6 @@ contract('LinearAuction', accounts => {
   });
 
   describe('#constructor', async () => {
-    it('sets the correct pricePrecision', async () => {
-      const result = await auctionMock.pricePrecision.callAsync();
-      expect(result).to.bignumber.equal(pricePrecision);
-    });
-
     it('sets the correct auctionPeriod', async () => {
       const result = await auctionMock.auctionPeriod.callAsync();
       expect(result).to.bignumber.equal(auctionPeriod);
@@ -185,11 +177,6 @@ contract('LinearAuction', accounts => {
     it('sets the correct rangeEnd', async () => {
       const result = await auctionMock.rangeEnd.callAsync();
       expect(result).to.bignumber.equal(rangeEnd);
-    });
-
-    it('sets the correct oracleWhiteList', async () => {
-      const result = await auctionMock.oracleWhiteList.callAsync();
-      expect(result).to.equal(oracleWhiteList.address);
     });
   });
 
@@ -223,7 +210,7 @@ contract('LinearAuction', accounts => {
 
       const auction: any = await auctionMock.auction.callAsync();
 
-      const pricePrecision = await auctionMock.pricePrecision.callAsync();
+      const pricePrecision = auction.auction.pricePrecision;
       const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
                                           .mul(pricePrecision);
       expect(auction.auction.minimumBid).to.bignumber.equal(expectedMinimumBid);
@@ -240,6 +227,20 @@ contract('LinearAuction', accounts => {
       expect(auction.endTime).to.bignumber.equal(expectedEndTime);
     });
 
+    it('sets the correct pricePrecision', async () => {
+      await subject();
+
+      const auction: any = await auctionMock.auction.callAsync();
+
+      const expectedPricePrecision = await liquidatorHelper.calculatePricePrecisionAsync(
+        await coreHelper.getSetInstance(subjectCurrentSet),
+        await coreHelper.getSetInstance(subjectNextSet),
+        oracleWhiteList
+      );
+
+      expect(auction.auction.pricePrecision).to.bignumber.equal(expectedPricePrecision);
+    });
+
     it('sets the correct startNumerator', async () => {
       await subject();
 
@@ -249,7 +250,7 @@ contract('LinearAuction', accounts => {
         set1,
         set2,
         oracleWhiteList,
-        pricePrecision,
+        auction.auction.pricePrecision,
       );
       const rangeStart = await auctionMock.rangeStart.callAsync();
       const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
@@ -265,11 +266,76 @@ contract('LinearAuction', accounts => {
         set1,
         set2,
         oracleWhiteList,
-        pricePrecision,
+        auction.auction.pricePrecision,
       );
       const rangeEnd = await auctionMock.rangeEnd.callAsync();
       const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
       expect(auction.endNumerator).to.bignumber.equal(expectedEndPrice);
+    });
+
+    describe('when currentSet is greater than 10x the nextSet', async () => {
+      beforeEach(async () => {
+        const setComponents = [component1.address, component2.address];
+        const setUnits = [gWei(1), gWei(1)];
+        const setNaturalUnit = gWei(101);
+        const set3 = await coreHelper.createSetTokenAsync(
+          core,
+          setTokenFactory.address,
+          setComponents,
+          setUnits,
+          setNaturalUnit,
+        );
+
+        subjectNextSet = set3.address;
+      });
+
+      it('sets the correct pricePrecision', async () => {
+        await subject();
+
+        const auction: any = await auctionMock.auction.callAsync();
+
+        const expectedPricePrecision = await liquidatorHelper.calculatePricePrecisionAsync(
+          await coreHelper.getSetInstance(subjectCurrentSet),
+          await coreHelper.getSetInstance(subjectNextSet),
+          oracleWhiteList
+        );
+
+        expect(auction.auction.pricePrecision).to.bignumber.equal(expectedPricePrecision);
+      });
+
+      it('sets the correct startNumerator', async () => {
+        await subject();
+
+        const auction: any = await auctionMock.auction.callAsync();
+
+        const fairValue = await liquidatorHelper.calculateFairValueAsync(
+          await coreHelper.getSetInstance(subjectCurrentSet),
+          await coreHelper.getSetInstance(subjectNextSet),
+          oracleWhiteList,
+          auction.auction.pricePrecision,
+        );
+        const rangeStart = await auctionMock.rangeStart.callAsync();
+        const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
+
+        expect(auction.startNumerator).to.bignumber.equal(expectedStartPrice);
+      });
+
+      it('sets the correct endNumerator', async () => {
+        await subject();
+
+        const auction: any = await auctionMock.auction.callAsync();
+
+        const fairValue = await liquidatorHelper.calculateFairValueAsync(
+          await coreHelper.getSetInstance(subjectCurrentSet),
+          await coreHelper.getSetInstance(subjectNextSet),
+          oracleWhiteList,
+          auction.auction.pricePrecision,
+        );
+        const rangeEnd = await auctionMock.rangeEnd.callAsync();
+        const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
+
+        expect(auction.endNumerator).to.bignumber.equal(expectedEndPrice);
+      });
     });
   });
 
@@ -351,7 +417,9 @@ contract('LinearAuction', accounts => {
 
       it('returns the correct denominator', async () => {
         const { denominator } = await subject();
-        expect(denominator).to.bignumber.equal(pricePrecision);
+
+        const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
+        expect(denominator).to.bignumber.equal(linearAuction.auction.pricePrecision);
       });
     });
 
@@ -374,10 +442,10 @@ contract('LinearAuction', accounts => {
 
         tokenFlows = liquidatorHelper.constructTokenFlow(
           linearAuction,
-          pricePrecision,
+          linearAuction.auction.pricePrecision,
           subjectQuantity,
           currentPrice,
-          pricePrecision,
+          linearAuction.auction.pricePrecision,
         );
       });
 
@@ -422,10 +490,10 @@ contract('LinearAuction', accounts => {
 
           tokenFlows = liquidatorHelper.constructTokenFlow(
             linearAuction,
-            pricePrecision,
+            linearAuction.auction.pricePrecision,
             subjectQuantity,
             currentPrice,
-            pricePrecision,
+            linearAuction.auction.pricePrecision,
           );
         });
 
@@ -500,5 +568,4 @@ contract('LinearAuction', accounts => {
       });
     });
   });
-
 });

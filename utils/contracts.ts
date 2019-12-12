@@ -18,13 +18,12 @@ export { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock'
 export { ExchangeIssuanceLibraryContract } from '../types/generated/exchange_issuance_library';
 export { ExchangeIssuanceLibraryMockContract } from '../types/generated/exchange_issuance_library_mock';
 export { ExchangeIssuanceModuleContract } from '../types/generated/exchange_issuance_module';
-export { ExponentialPivotAuctionLiquidatorContract } from '../types/generated/exponential_pivot_auction_liquidator';
-export { ExponentialPivotAuctionMockContract } from '../types/generated/exponential_pivot_auction_mock';
 export { FailAuctionLibraryContract } from '../types/generated/fail_auction_library';
 export { FeedFactoryContract } from '../types/generated/feed_factory';
 export { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
 export { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
 export { KyberNetworkWrapperContract } from '../types/generated/kyber_network_wrapper';
+export { LinearAuctionLiquidatorContract } from '../types/generated/linear_auction_liquidator';
 export { LinearAuctionMockContract } from '../types/generated/linear_auction_mock';
 export { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
 export { LiquidatorMockContract } from '../types/generated/liquidator_mock';

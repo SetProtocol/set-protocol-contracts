@@ -125,6 +125,63 @@ library CommonMath {
 
         return _principal.mul(_numerator).div(_denominator);
     }
+    
+    /*
+     * Gets the rounded up log10 of passed value
+     *
+     * @param  _value         Value to calculate ceil(log()) on
+     * @return uint256        Output value
+     */
+    function ceilLog10(
+        uint256 _value
+    )
+        internal
+        pure 
+        returns (uint256)
+    {
+        // Make sure passed value is greater than 0
+        require (
+            _value > 0,
+            "AllocatorMathLibrary.ceilLog10: Value must be greater than zero."
+        );
 
+        // Since log10(1) = 0, if _value = 1 return 0
+        if (_value == 1) return 0;
+
+        // Calcualte ceil(log10())
+        uint256 x = _value - 1;
+
+        uint256 result = 0;
+
+        if (x >= 10 ** 64) {
+            x /= 10 ** 64;
+            result += 64;
+        }
+        if (x >= 10 ** 32) {
+            x /= 10 ** 32;
+            result += 32;
+        }
+        if (x >= 10 ** 16) {
+            x /= 10 ** 16;
+            result += 16;
+        }
+        if (x >= 10 ** 8) {
+            x /= 10 ** 8;
+            result += 8;
+        }
+        if (x >= 10 ** 4) {
+            x /= 10 ** 4;
+            result += 4;
+        }
+        if (x >= 100) {
+            x /= 100;
+            result += 2;
+        }
+        if (x >= 10) {
+            result += 1;
+        }
+
+        return result + 1;
+    }
 }
 

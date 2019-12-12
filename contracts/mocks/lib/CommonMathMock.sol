@@ -59,4 +59,12 @@ contract CommonMathMock {
     		_denominator
 		);
     }
+
+    function testCeilLog10(uint256 _value)
+        external
+        pure
+        returns(uint256)
+    {
+        return CommonMath.ceilLog10(_value);
+    }
 }

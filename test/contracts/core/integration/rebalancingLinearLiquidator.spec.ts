@@ -11,9 +11,9 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  LinearAuctionLiquidatorContract,
   OracleWhiteListContract,
   SetTokenContract,
-  ExponentialPivotAuctionLiquidatorContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
@@ -47,7 +47,7 @@ const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
-contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
+contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
   const [
     deployerAccount,
     managerAccount,
@@ -66,10 +66,9 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
   let rebalancingFactory: RebalancingSetTokenV2FactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
-  let liquidator: ExponentialPivotAuctionLiquidatorContract;
+  let liquidator: LinearAuctionLiquidatorContract;
 
   let name: string;
-  let pricePrecision: BigNumber;
   let auctionPeriod: BigNumber;
   let rangeStart: BigNumber;
   let rangeEnd: BigNumber;
@@ -196,10 +195,9 @@ contract('RebalancingSetV2 - ExponentialPivotAuctionLiquidator', accounts => {
     rangeEnd = new BigNumber(10); // 10% below fair value
     name = 'liquidator';
 
-    liquidator = await liquidatorHelper.deployExponentialPivotAuctionLiquidatorAsync(
+    liquidator = await liquidatorHelper.deployLinearAuctionLiquidatorAsync(
       coreMock.address,
       oracleWhiteList.address,
-      pricePrecision,
       auctionPeriod,
       rangeStart,
       rangeEnd,

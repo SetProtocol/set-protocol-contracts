@@ -15,7 +15,7 @@ import {
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
-  ExponentialPivotAuctionLiquidatorContract,
+  LinearAuctionLiquidatorContract,
   TransferProxyContract,
   UpdatableOracleMockContract,
   VaultContract,
@@ -42,13 +42,12 @@ const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
-const ExponentialPivotAuctionLiquidator = artifacts.require('ExponentialPivotAuctionLiquidator');
+const LinearAuctionLiquidator = artifacts.require('LinearAuctionLiquidator');
 
-contract('ExponentialPivotAuctionLiquidator', accounts => {
+contract('LinearAuctionLiquidator', accounts => {
   const [
     ownerAccount,
     functionCaller,
-    whitelist,
     nonSet,
   ] = accounts;
 
@@ -56,7 +55,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let liquidator: ExponentialPivotAuctionLiquidatorContract;
+  let liquidator: LinearAuctionLiquidatorContract;
   let liquidatorProxy: LiquidatorProxyContract;
 
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
@@ -65,7 +64,6 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
   const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper);
 
   let name: string;
-  let pricePrecision: BigNumber;
   let auctionPeriod: BigNumber;
   let rangeStart: BigNumber;
   let rangeEnd: BigNumber;
@@ -97,7 +95,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(ExponentialPivotAuctionLiquidator.abi);
+    ABIDecoder.addABI(LinearAuctionLiquidator.abi);
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -145,16 +143,14 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       [component1Oracle.address, component2Oracle.address, component3Oracle.address],
     );
 
-    pricePrecision = new BigNumber(1000);
     auctionPeriod = ONE_DAY_IN_SECONDS;
-    rangeStart = new BigNumber(10); // 10% above fair value
-    rangeEnd = new BigNumber(10); // 10% below fair value
+    rangeStart = new BigNumber(10); // 10% below fair value
+    rangeEnd = new BigNumber(10); // 10% above fair value
     name = 'liquidator';
 
-    liquidator = await liquidatorHelper.deployExponentialPivotAuctionLiquidatorAsync(
+    liquidator = await liquidatorHelper.deployLinearAuctionLiquidatorAsync(
       core.address,
       oracleWhiteList.address,
-      pricePrecision,
       auctionPeriod,
       rangeStart,
       rangeEnd,
@@ -176,7 +172,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(ExponentialPivotAuctionLiquidator.abi);
+    ABIDecoder.removeABI(LinearAuctionLiquidator.abi);
   });
 
   beforeEach(async () => {
@@ -188,11 +184,6 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
   });
 
   describe('#constructor', async () => {
-    it('sets the correct pricePrecision', async () => {
-      const result = await liquidator.pricePrecision.callAsync();
-      expect(result).to.bignumber.equal(pricePrecision);
-    });
-
     it('sets the correct auctionPeriod', async () => {
       const result = await liquidator.auctionPeriod.callAsync();
       expect(result).to.bignumber.equal(auctionPeriod);
@@ -254,7 +245,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
-      const pricePrecision = await liquidator.pricePrecision.callAsync();
+      const pricePrecision = auction.auction.pricePrecision;
       const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
                                           .mul(pricePrecision);
       expect(auction.auction.minimumBid).to.bignumber.equal(expectedMinimumBid);
@@ -271,6 +262,20 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       expect(auction.endTime).to.bignumber.equal(expectedEndTime);
     });
 
+    it('sets the correct pricePrecision', async () => {
+      await subject();
+
+      const auction: any = await liquidator.auctions.callAsync(subjectCaller);
+
+      const expectedPricePrecision = await liquidatorHelper.calculatePricePrecisionAsync(
+        set1,
+        set2,
+        oracleWhiteList,
+      );
+
+      expect(auction.auction.pricePrecision).to.bignumber.equal(expectedPricePrecision);
+    });
+
     it('sets the correct startNumerator', async () => {
       await subject();
 
@@ -280,7 +285,7 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         set1,
         set2,
         oracleWhiteList,
-        pricePrecision,
+        auction.auction.pricePrecision,
       );
       const rangeStart = await liquidator.rangeStart.callAsync();
       const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
@@ -296,11 +301,76 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
         set1,
         set2,
         oracleWhiteList,
-        pricePrecision,
+        auction.auction.pricePrecision,
       );
       const rangeEnd = await liquidator.rangeEnd.callAsync();
       const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
       expect(auction.endNumerator).to.bignumber.equal(expectedEndPrice);
+    });
+
+    describe('when the currentSet is > 10x nextSet', async () => {
+      beforeEach(async () => {
+        const setComponents = [component1.address, component2.address];
+        const setUnits = [gWei(1), gWei(1)];
+        const setNaturalUnit = gWei(100);
+        const set3 = await coreHelper.createSetTokenAsync(
+          core,
+          setTokenFactory.address,
+          setComponents,
+          setUnits,
+          setNaturalUnit,
+        );
+
+        subjectNextSet = set3.address;
+      });
+
+      it('sets the correct pricePrecision', async () => {
+        await subject();
+
+        const auction: any = await liquidator.auctions.callAsync(subjectCaller);
+
+        const fairValue = await liquidatorHelper.calculateFairValueAsync(
+          set1,
+          set2,
+          oracleWhiteList,
+          auction.auction.pricePrecision,
+        );
+        const rangeStart = await liquidator.rangeStart.callAsync();
+        const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
+        expect(ZERO).to.bignumber.equal(expectedStartPrice);
+      });
+
+      it('sets the correct startNumerator', async () => {
+        await subject();
+
+        const auction: any = await liquidator.auctions.callAsync(subjectCaller);
+        console.log(auction.startNumerator);
+        const fairValue = await liquidatorHelper.calculateFairValueAsync(
+          set1,
+          set2,
+          oracleWhiteList,
+          auction.auction.pricePrecision,
+        );
+        const rangeStart = await liquidator.rangeStart.callAsync();
+        const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
+        expect(auction.startNumerator).to.bignumber.equal(expectedStartPrice);
+      });
+
+      it('sets the correct endNumerator', async () => {
+        await subject();
+
+        const auction: any = await liquidator.auctions.callAsync(subjectCaller);
+        console.log(auction.endNumerator);
+        const fairValue = await liquidatorHelper.calculateFairValueAsync(
+          set1,
+          set2,
+          oracleWhiteList,
+          auction.auction.pricePrecision,
+        );
+        const rangeEnd = await liquidator.rangeEnd.callAsync();
+        const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
+        expect(auction.endNumerator).to.bignumber.equal(expectedEndPrice);
+      });
     });
 
     describe('when the caller is not a valid Set', async () => {
@@ -364,10 +434,10 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
         tokenFlows = liquidatorHelper.constructTokenFlow(
           linearAuction,
-          pricePrecision,
+          linearAuction.auction.pricePrecision,
           subjectQuantity,
           currentPrice,
-          pricePrecision,
+          linearAuction.auction.pricePrecision,
         );
 
         return liquidatorProxy.placeBid.sendTransactionAsync(
@@ -414,7 +484,9 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
       describe('when the quantity is not a multiple of the minimumBid', async () => {
         beforeEach(async () => {
-          const pricePrecision = await liquidator.pricePrecision.callAsync();
+          const auction: any = await liquidator.auctions.callAsync(liquidatorProxy.address);
+
+          const pricePrecision = auction.auction.pricePrecision;
           const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
                                               .mul(pricePrecision)
                                               .div(2);
@@ -475,42 +547,15 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
 
         tokenFlows = liquidatorHelper.constructTokenFlow(
           linearAuction,
-          pricePrecision,
+          linearAuction.auction.pricePrecision,
           subjectQuantity,
           currentPrice,
-          pricePrecision,
+          linearAuction.auction.pricePrecision,
         );
       });
 
       async function subject(): Promise<any> {
         return liquidatorProxy.getBidPrice.callAsync(subjectSet, subjectQuantity);
-      }
-
-      async function setTokenFlow(): Promise<void> {
-        const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectCaller));
-        const { timestamp } = await web3.eth.getBlock('latest');
-
-        const currentPrice = await liquidatorHelper.calculateExponentialPivotNumerator(
-          linearAuction,
-          new BigNumber(timestamp),
-          auctionPeriod,
-          pricePrecision,
-        );
-
-        const currentDenominator = await liquidatorHelper.calculateExponentialPivotDenominator(
-          linearAuction,
-          new BigNumber(timestamp),
-          auctionPeriod,
-          pricePrecision,
-        );
-
-        tokenFlows = liquidatorHelper.constructTokenFlow(
-          linearAuction,
-          pricePrecision,
-          subjectQuantity,
-          currentPrice,
-          currentDenominator,
-        );
       }
 
       it('returns the token array', async () => {
@@ -526,65 +571,6 @@ contract('ExponentialPivotAuctionLiquidator', accounts => {
       it('returns the correct outflow', async () => {
         const { outflow } = await subject();
         expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
-      });
-
-      describe('after the pivot time', async () => {
-        beforeEach(async () => {
-          await blockchain.increaseTimeAsync(auctionPeriod.plus(90));
-
-          // Advance the block
-          await core.addSet.sendTransactionAsync(
-            whitelist,
-            { from: ownerAccount, gas: DEFAULT_GAS },
-          );
-
-          await setTokenFlow();
-        });
-
-        it('returns the token array', async () => {
-          const { addresses } = await subject();
-          expect(JSON.stringify(addresses)).to.equal(JSON.stringify(tokenFlows.addresses));
-        });
-
-        it('returns the correct inflow', async () => {
-          const { inflow } = await subject();
-          expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
-        });
-
-        it('returns the correct outflow', async () => {
-          const { outflow } = await subject();
-          expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
-        });
-      });
-
-      describe('after the max 30 second period', async () => {
-        beforeEach(async () => {
-          const max30seconds = new BigNumber(30 * 1000).plus(1);
-          await blockchain.increaseTimeAsync(auctionPeriod.plus(max30seconds));
-
-          // Advance the block
-          await core.addSet.sendTransactionAsync(
-            whitelist,
-            { from: ownerAccount, gas: DEFAULT_GAS },
-          );
-
-          await setTokenFlow();
-        });
-
-        it('returns the token array', async () => {
-          const { addresses } = await subject();
-          expect(JSON.stringify(addresses)).to.equal(JSON.stringify(tokenFlows.addresses));
-        });
-
-        it('returns the correct inflow', async () => {
-          const { inflow } = await subject();
-          expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
-        });
-
-        it('returns the correct outflow', async () => {
-          const { outflow } = await subject();
-          expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
-        });
       });
     });
 

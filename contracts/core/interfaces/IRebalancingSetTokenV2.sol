@@ -125,6 +125,22 @@ interface IRebalancingSetTokenV2 {
         returns (uint256);
 
     /*
+     * Set new liquidator address. Only whitelisted addresses are valid.
+     */
+    function setLiquidator(
+        ILiquidator _newLiquidator
+    )
+        external;
+
+    /*
+     * Set new fee recipient address.
+     */
+    function setFeeRecipient(
+        address _newFeeRecipient
+    )
+        external;
+
+    /*
      * Initiates the rebalance in coordination with the Liquidator contract. 
      * In this step, we redeem the currentSet and pass relevant information
      * to the liquidator.

@@ -13,7 +13,6 @@ contract LinearAuctionMock is LinearAuction {
 
     constructor(
         IOracleWhiteList _oracleWhiteList,
-        uint256 _pricePrecision,
         uint256 _auctionPeriod,
         uint256 _rangeStart,
         uint256 _rangeEnd
@@ -21,7 +20,6 @@ contract LinearAuctionMock is LinearAuction {
         public
         LinearAuction(
             _oracleWhiteList,
-            _pricePrecision,
             _auctionPeriod,
             _rangeStart,
             _rangeEnd

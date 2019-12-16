@@ -25,19 +25,18 @@ import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { Auction } from "./impl/Auction.sol";
 import { LinearAuction } from "./impl/LinearAuction.sol";
-import { ExponentialPivotAuction } from "./impl/ExponentialPivotAuction.sol";
 import { Rebalance } from "../lib/Rebalance.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 
 
 /**
- * @title ExponentialPivotAuctionLiquidator
+ * @title LinearAuctionLiquidator
  * @author Set Protocol
  *
  * Contract that holds all the state and functionality required for setting up, returning prices, and tearing
- * down exponential pivot auction rebalances for RebalancingSetTokens.
+ * down linear auction rebalances for RebalancingSetTokens.
  */
-contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidator {
+contract LinearAuctionLiquidator is LinearAuction, ILiquidator {
     using SafeMath for uint256;
 
     ICore public core;
@@ -51,11 +50,10 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
     }
 
     /**
-     * ExponentialPivotAuctionLiquidator constructor
+     * LinearAuctionLiquidator constructor
      *
      * @param _core                   Core instance
      * @param _oracleWhiteList        Oracle WhiteList instance
-     * @param _pricePrecision         Price precision used in auctions
      * @param _auctionPeriod          Length of auction
      * @param _rangeStart             Percentage above FairValue to begin auction at
      * @param _rangeEnd               Percentage below FairValue to end auction at     
@@ -64,16 +62,14 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
     constructor(
         ICore _core,
         IOracleWhiteList _oracleWhiteList,
-        uint256 _pricePrecision,
         uint256 _auctionPeriod,
         uint256 _rangeStart,
         uint256 _rangeEnd,
         string memory _name
     )
         public
-        ExponentialPivotAuction(
+        LinearAuction(
             _oracleWhiteList,
-            _pricePrecision,
             _auctionPeriod,
             _rangeStart,
             _rangeEnd
@@ -231,7 +227,7 @@ contract ExponentialPivotAuctionLiquidator is ExponentialPivotAuction, ILiquidat
     function requireValidSet(address _set) private view {
         require(
             core.validSets(_set),
-            "ExponentialPivotAuctionLiquidator: Invalid or disabled proposed SetToken address"
+            "LinearAuctionLiquidator: Invalid or disabled proposed SetToken address"
         );       
     }
 }

@@ -23,6 +23,7 @@ export interface TokenFlow {
 }
 
 export interface Auction {
+  pricePrecision: BigNumber;
   minimumBid: BigNumber;
   startTime: BigNumber;
   startingCurrentSets: BigNumber;
@@ -34,6 +35,7 @@ export interface Auction {
 
 export function getLinearAuction(input: any): LinearAuction {
   const {
+    pricePrecision,
     minimumBid,
     startTime,
     startingCurrentSets,
@@ -44,6 +46,7 @@ export function getLinearAuction(input: any): LinearAuction {
 
   return {
     auction: {
+      pricePrecision: new BigNumber(pricePrecision),
       minimumBid: new BigNumber(minimumBid),
       startTime: new BigNumber(startTime),
       startingCurrentSets: new BigNumber(startingCurrentSets),

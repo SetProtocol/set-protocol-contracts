@@ -2,16 +2,15 @@ pragma solidity 0.5.7;
 
 import { Auction } from "../../../../core/liquidators/impl/Auction.sol";
 import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";
+import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.sol";
 
 // Mock contract implementation of Auction with extra functions for testing
 contract AuctionMock is Auction {
     Auction.Setup public auction;
 
-    uint256 public defaultPricePrecision = 1000;
-
-    constructor()
+    constructor(IOracleWhiteList _oracleWhiteList)
         public
-        Auction(defaultPricePrecision)
+        Auction(_oracleWhiteList)
     {}
 
     function initializeAuction(

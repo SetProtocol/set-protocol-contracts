@@ -5,12 +5,11 @@ import * as setProtocolUtils from 'set-protocol-utils';
 
 import {
   AuctionMockContract,
-  ExponentialPivotAuctionMockContract,
-  ExponentialPivotAuctionLiquidatorContract,
-  OracleWhiteListContract,
+  LinearAuctionLiquidatorContract,
   LinearAuctionMockContract,
   LiquidatorMockContract,
   LiquidatorProxyContract,
+  OracleWhiteListContract,
   SetTokenContract,
 } from '../contracts';
 import { getContractInstance, txnFrom } from '../web3Helper';
@@ -23,8 +22,7 @@ import {
 } from '../auction';
 
 const AuctionMock = artifacts.require('AuctionMock');
-const ExponentialPivotAuctionMock = artifacts.require('ExponentialPivotAuctionMock');
-const ExponentialPivotAuctionLiquidator = artifacts.require('ExponentialPivotAuctionLiquidator');
+const LinearAuctionLiquidator = artifacts.require('LinearAuctionLiquidator');
 const LinearAuctionMock = artifacts.require('LinearAuctionMock');
 const LiquidatorMock = artifacts.require('LiquidatorMock');
 const LiquidatorProxy = artifacts.require('LiquidatorProxy');
@@ -51,9 +49,10 @@ export class LiquidatorHelper {
   /* ============ Deployment ============ */
 
   public async deployAuctionMockAsync(
+    oracleWhiteList: Address,
     from: Address = this._contractOwnerAddress
   ): Promise<AuctionMockContract> {
-    const auctionMock = await AuctionMock.new(txnFrom(from));
+    const auctionMock = await AuctionMock.new(oracleWhiteList, txnFrom(from));
 
     return new AuctionMockContract(getContractInstance(auctionMock), txnFrom(from));
   }
@@ -69,7 +68,6 @@ export class LiquidatorHelper {
 
   public async deployLinearAuctionMockAsync(
     oracleWhiteList: Address,
-    pricePrecision: BigNumber,
     auctionPeriod: BigNumber,
     rangeStart: BigNumber,
     rangeEnd: BigNumber,
@@ -77,7 +75,6 @@ export class LiquidatorHelper {
   ): Promise<LinearAuctionMockContract> {
     const linearAuctionMock = await LinearAuctionMock.new(
       oracleWhiteList,
-      pricePrecision,
       auctionPeriod,
       rangeStart,
       rangeEnd,
@@ -87,20 +84,18 @@ export class LiquidatorHelper {
     return new LinearAuctionMockContract(getContractInstance(linearAuctionMock), txnFrom(from));
   }
 
-  public async deployExponentialPivotAuctionLiquidatorAsync(
+  public async deployLinearAuctionLiquidatorAsync(
     core: Address,
     oracleWhiteList: Address,
-    pricePrecision: BigNumber,
     auctionPeriod: BigNumber,
     rangeStart: BigNumber,
     rangeEnd: BigNumber,
     name: string,
     from: Address = this._contractOwnerAddress
-  ): Promise<ExponentialPivotAuctionLiquidatorContract> {
-    const exponentialAuctionLiquidator = await ExponentialPivotAuctionLiquidator.new(
+  ): Promise<LinearAuctionLiquidatorContract> {
+    const linearAuctionLiquidator = await LinearAuctionLiquidator.new(
       core,
       oracleWhiteList,
-      pricePrecision,
       auctionPeriod,
       rangeStart,
       rangeEnd,
@@ -108,30 +103,10 @@ export class LiquidatorHelper {
       txnFrom(from)
     );
 
-    return new ExponentialPivotAuctionLiquidatorContract(
-      getContractInstance(exponentialAuctionLiquidator),
+    return new LinearAuctionLiquidatorContract(
+      getContractInstance(linearAuctionLiquidator),
       txnFrom(from)
     );
-  }
-
-  public async deployExponentialPivotAuctionMockAsync(
-    oracleWhiteList: Address,
-    pricePrecision: BigNumber,
-    auctionPeriod: BigNumber,
-    rangeStart: BigNumber,
-    rangeEnd: BigNumber,
-    from: Address = this._contractOwnerAddress
-  ): Promise<ExponentialPivotAuctionMockContract> {
-    const exponentialAuctionMock = await ExponentialPivotAuctionMock.new(
-      oracleWhiteList,
-      pricePrecision,
-      auctionPeriod,
-      rangeStart,
-      rangeEnd,
-      txnFrom(from)
-    );
-
-    return new ExponentialPivotAuctionMockContract(getContractInstance(exponentialAuctionMock), txnFrom(from));
   }
 
   public async deployLiquidatorMockAsync(
@@ -152,6 +127,24 @@ export class LiquidatorHelper {
   ): Promise<BigNumber[]> {
     const naturalUnit = await setToken.naturalUnit.callAsync();
     return combinedUnits.map(unit => unit.mul(quantity).div(naturalUnit));
+  }
+
+  public async calculatePricePrecisionAsync(
+    currentSet: SetTokenContract,
+    nextSet: SetTokenContract,
+    oracleWhiteList: OracleWhiteListContract
+  ): Promise<BigNumber> {
+    const currentSetValue = await this.calculateSetTokenValueAsync(currentSet, oracleWhiteList);
+    const nextSetValue = await this.calculateSetTokenValueAsync(nextSet, oracleWhiteList);
+    const minimumPricePrecision = new BigNumber(1000);
+
+    if (currentSetValue.greaterThan(nextSetValue)) {
+      const orderOfMag = this._libraryMockHelper.ceilLog10(currentSetValue.div(nextSetValue));
+
+      return minimumPricePrecision.mul(10 ** (orderOfMag.toNumber() - 1));
+    }
+
+    return minimumPricePrecision;
   }
 
   public async constructCombinedUnitArrayAsync(
@@ -191,53 +184,6 @@ export class LiquidatorHelper {
     const elapsedPrice = elapsed.mul(priceRange).div(auctionPeriod).round(0, 3);
 
     return new BigNumber(linearAuction.startNumerator).add(elapsedPrice);
-  }
-
-  public calculateExponentialPivotNumerator(
-    linearAuction: LinearAuction,
-    timestamp: BigNumber,
-    auctionPeriod: BigNumber,
-    pricePrecision: BigNumber,
-  ): BigNumber {
-    const MAX_THIRTY_SECOND_PERIODS = new BigNumber(1000);
-    const THIRTY_SECONDS = new BigNumber(30);
-
-    const { endNumerator, auction } = linearAuction;
-    const elapsed = timestamp.sub(auction.startTime);
-    const thirtySecondPeriods = elapsed.sub(auctionPeriod).div(THIRTY_SECONDS).round(0, 3);
-
-    if (elapsed.lte(auctionPeriod)) {
-      return this.calculateCurrentPrice(linearAuction, timestamp, auctionPeriod);
-    } else if (thirtySecondPeriods.lt(MAX_THIRTY_SECOND_PERIODS)) {
-      return endNumerator;
-    } else {
-      const extension = endNumerator.mul(thirtySecondPeriods.sub(MAX_THIRTY_SECOND_PERIODS));
-      return endNumerator.add(extension);
-    }
-  }
-
-  public calculateExponentialPivotDenominator(
-    linearAuction: LinearAuction,
-    timestamp: BigNumber,
-    auctionPeriod: BigNumber,
-    pricePrecision: BigNumber,
-  ): BigNumber {
-    const MAX_THIRTY_SECOND_PERIODS = new BigNumber(1000);
-    const THIRTY_SECONDS = new BigNumber(30);
-
-    const elapsed = timestamp.sub(linearAuction.auction.startTime);
-    const thirtySecondPeriods = elapsed.sub(auctionPeriod).div(THIRTY_SECONDS).round(0, 3);
-
-    if (elapsed.lte(auctionPeriod)) {
-      return pricePrecision;
-    } else if (thirtySecondPeriods.lt(MAX_THIRTY_SECOND_PERIODS)) {
-      return pricePrecision
-              .sub(
-                thirtySecondPeriods.mul(pricePrecision).div(MAX_THIRTY_SECOND_PERIODS)
-              );
-    } else {
-      return new BigNumber(1);
-    }
   }
 
   public calculateStartPrice(

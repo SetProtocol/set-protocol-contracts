@@ -19,11 +19,10 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { Auction } from "./Auction.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
-import { Auction } from "./Auction.sol";
 import { Rebalance } from "../../lib/Rebalance.sol";
-import { SetUSDValuation } from "../impl/SetUSDValuation.sol";
 
 
 /**
@@ -44,7 +43,6 @@ contract LinearAuction is Auction {
     }
 
     /* ============ State Variables ============ */
-    IOracleWhiteList public oracleWhiteList;
     uint256 public auctionPeriod; // Length in seconds of auction
     uint256 public rangeStart; // Percentage below FairValue to begin auction at
     uint256 public rangeEnd;  // Percentage above FairValue to end auction at
@@ -52,24 +50,20 @@ contract LinearAuction is Auction {
     /**
      * LinearAuction constructor
      *
-     * @param _oracleWhiteList        Oracle WhiteList instance 
-     * @param _pricePrecision         Price precision used in auctions
+     * @param _oracleWhiteList        Oracle WhiteList instance
      * @param _auctionPeriod          Length of auction
      * @param _rangeStart             Percentage below FairValue to begin auction at
      * @param _rangeEnd               Percentage above FairValue to end auction at
      */
     constructor(
         IOracleWhiteList _oracleWhiteList,
-        uint256 _pricePrecision,
         uint256 _auctionPeriod,
         uint256 _rangeStart,
         uint256 _rangeEnd
     )
         public
-        Auction(_pricePrecision)
-        
+        Auction(_oracleWhiteList)
     {
-        oracleWhiteList = _oracleWhiteList;
         auctionPeriod = _auctionPeriod;
         rangeStart = _rangeStart;
         rangeEnd = _rangeEnd;
@@ -100,7 +94,7 @@ contract LinearAuction is Auction {
             _startingCurrentSetQuantity
         );
 
-        uint256 fairValue = calculateFairValue(_currentSet, _nextSet);
+        uint256 fairValue = calculateFairValue(_currentSet, _nextSet, _linearAuction.auction.pricePrecision);
         _linearAuction.startNumerator = calculateStartNumerator(fairValue);
         _linearAuction.endNumerator = calculateEndNumerator(fairValue);
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
@@ -144,7 +138,7 @@ contract LinearAuction is Auction {
      * Returns the linear price based on the current timestamp
      */
     function getPrice(State storage _linearAuction) internal view returns (Rebalance.Price memory) {
-        return Rebalance.composePrice(getNumerator(_linearAuction), Auction.pricePrecision);
+        return Rebalance.composePrice(getNumerator(_linearAuction), _linearAuction.auction.pricePrecision);
     }
 
     /**
@@ -177,16 +171,17 @@ contract LinearAuction is Auction {
      */
     function calculateFairValue(
         ISetToken _currentSet,
-        ISetToken _nextSet
+        ISetToken _nextSet,
+        uint256 _pricePrecision
     )
         internal
         view
         returns (uint256)
     {
-        uint256 currentSetUSDValue = calculateUSDValueOfSet(_currentSet);
-        uint256 nextSetUSDValue = calculateUSDValueOfSet(_nextSet);
+        uint256 currentSetUSDValue = Auction.calculateUSDValueOfSet(_currentSet);
+        uint256 nextSetUSDValue = Auction.calculateUSDValueOfSet(_nextSet);
 
-        return nextSetUSDValue.mul(Auction.pricePrecision).div(currentSetUSDValue);
+        return nextSetUSDValue.mul(_pricePrecision).div(currentSetUSDValue);
     }
 
     /**
@@ -203,15 +198,5 @@ contract LinearAuction is Auction {
     function calculateEndNumerator(uint256 _fairValue) internal view returns(uint256) {
         uint256 endRange = _fairValue.mul(rangeEnd).div(100);
         return _fairValue.add(endRange);
-    }
-
-    /**
-     * Unimplemented calculateUSDValue function.
-     *
-     * @param _set              Instance of SetToken
-     * @return USDValue         USD Value of the Set Token
-     */
-    function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
-        return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
     }
 }

@@ -33,7 +33,8 @@ interface ILiquidator {
     function startRebalance(
         ISetToken _currentSet,
         ISetToken _nextSet,
-        uint256 _startingCurrentSetQuantity
+        uint256 _startingCurrentSetQuantity,
+        bytes calldata _liquidatorData
     )
         external;
 

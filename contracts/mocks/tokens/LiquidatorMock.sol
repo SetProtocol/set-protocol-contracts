@@ -62,6 +62,8 @@ contract LiquidatorMock is
     bool public hasFailed;
     bool public endFailedRebalanceHasBeenCalled;
 
+    bytes public liquidatorData;
+
     /* ============ External Functions ============ */
 
     function getBidPrice(
@@ -107,10 +109,13 @@ contract LiquidatorMock is
     function startRebalance(
         ISetToken _currentSet,
         ISetToken _nextSet,
-        uint256 startingCurrentSetAmount_
+        uint256 startingCurrentSetAmount_,
+        bytes calldata _liquidatorData
     )
         external
     {
+        liquidatorData = _liquidatorData;
+
         currentSet = _currentSet;
         nextSet = _nextSet;
 

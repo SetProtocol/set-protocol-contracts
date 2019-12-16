@@ -163,7 +163,9 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     rebalancingComponentWhiteList: WhiteListContract,
     rebalancingSetToken: RebalancingSetTokenV2Contract,
     nextSetToken: SetTokenContract,
-    caller: Address
+    caller: Address,
+    liquidatorData: string = '0x',
+
   ): Promise<void> {
     const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
     await this._coreHelper.addTokensToWhiteList(
@@ -175,6 +177,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
     await rebalancingSetToken.startRebalance.sendTransactionAsync(
       nextSetToken.address,
+      liquidatorData,
       { from: caller, gas: DEFAULT_GAS }
     );
   }
@@ -187,6 +190,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     liquidatorMock: LiquidatorMockContract,
     nextSetToken: SetTokenContract,
     manager: Address,
+    liquidatorData: string = '0x',
     caller: Address = this._tokenOwnerAddress,
   ): Promise<void> {
     await this.transitionToRebalanceV2Async(
@@ -194,6 +198,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
       rebalancingComponentWhiteList,
       rebalancingSetToken,
       nextSetToken,
+      liquidatorData,
       manager
     );
 

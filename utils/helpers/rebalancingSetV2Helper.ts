@@ -19,6 +19,7 @@ import {
   DEFAULT_GAS,
   DEFAULT_REBALANCING_NATURAL_UNIT,
   DEFAULT_UNIT_SHARES,
+  EMPTY_BYTESTRING,
   ONE_DAY_IN_SECONDS,
   SCALE_FACTOR,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -164,7 +165,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     rebalancingSetToken: RebalancingSetTokenV2Contract,
     nextSetToken: SetTokenContract,
     caller: Address,
-    liquidatorData: string = '0x',
+    liquidatorData: string = EMPTY_BYTESTRING,
 
   ): Promise<void> {
     const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
@@ -190,7 +191,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     liquidatorMock: LiquidatorMockContract,
     nextSetToken: SetTokenContract,
     manager: Address,
-    liquidatorData: string = '0x',
+    liquidatorData: string = EMPTY_BYTESTRING,
     caller: Address = this._tokenOwnerAddress,
   ): Promise<void> {
     await this.transitionToRebalanceV2Async(
@@ -198,8 +199,8 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
       rebalancingComponentWhiteList,
       rebalancingSetToken,
       nextSetToken,
+      manager,
       liquidatorData,
-      manager
     );
 
     const minimumBid = await liquidatorMock.minimumBid.callAsync(rebalancingSetToken.address);

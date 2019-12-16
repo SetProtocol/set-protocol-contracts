@@ -252,7 +252,7 @@ contract('StartRebalance', accounts => {
         expect(nextSet).to.equal(nextSetToken.address);
       });
 
-      it.only('sends the correct liquidatorData to the liquidator', async () => {
+      it('sends the correct liquidatorData to the liquidator', async () => {
         await subject();
 
         const liquidatorData = await liquidatorMock.liquidatorData.callAsync();

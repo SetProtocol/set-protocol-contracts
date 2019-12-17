@@ -8,7 +8,7 @@ export { ERC20Detailed } from "./ts/ERC20Detailed";
 export { ERC20Wrapper } from "./ts/ERC20Wrapper";
 export { ExchangeIssuanceLibrary } from "./ts/ExchangeIssuanceLibrary";
 export { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
-export { ExponentialPivotAuctionLiquidator } from "./ts/ExponentialPivotAuctionLiquidator";
+export { LinearAuctionLiquidator } from "./ts/LinearAuctionLiquidator";
 export { FailAuctionLibrary } from "./ts/FailAuctionLibrary";
 export { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
 export { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
@@ -61,11 +61,11 @@ export {
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryContract,
   ExchangeIssuanceModuleContract,
-  ExponentialPivotAuctionLiquidatorContract,
   FailAuctionLibraryContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
   KyberNetworkWrapperContract,
+  LinearAuctionLiquidatorContract,
   LinearAuctionPriceCurveContract,
   MedianContract,
   NoDecimalTokenMockContract,

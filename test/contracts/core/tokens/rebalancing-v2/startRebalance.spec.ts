@@ -256,7 +256,7 @@ contract('StartRebalance', accounts => {
         await subject();
 
         const liquidatorData = await liquidatorMock.liquidatorData.callAsync();
-        expect(liquidatorData).to.equal(subjectLiquidatorData);
+        expect(liquidatorData).to.equal(subjectLiquidatorData.toLowerCase());
       });
 
       it('redeemsInVault the currentSet', async () => {

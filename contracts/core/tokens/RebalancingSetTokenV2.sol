@@ -133,12 +133,14 @@ contract RebalancingSetTokenV2 is
      * to the liquidator.
      *
      * @param _nextSet                      The Set to rebalance into
+     * @param _liquidatorData               Bytecode formatted data with liquidator-specific arguments
      *
      * Can only be called if the rebalance interval has elapsed.
      * Can only be called by manager.
      */
     function startRebalance(
-        ISetToken _nextSet
+        ISetToken _nextSet,
+        bytes calldata _liquidatorData
     )
         external
         onlyManager
@@ -149,7 +151,7 @@ contract RebalancingSetTokenV2 is
 
         StartRebalance.redeemCurrentSet(startingCurrentSetQuantity);
 
-        StartRebalance.liquidatorStartRebalance(_nextSet, startingCurrentSetQuantity);
+        StartRebalance.liquidatorStartRebalance(_nextSet, startingCurrentSetQuantity, _liquidatorData);
 
         StartRebalance.transitionToRebalance(_nextSet);
     }

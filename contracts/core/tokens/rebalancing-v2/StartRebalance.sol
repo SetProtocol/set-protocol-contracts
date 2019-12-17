@@ -130,17 +130,20 @@ contract StartRebalance is
      *
      * @param _nextSet                         Next set instance
      * @param _startingCurrentSetQuantity      Amount of currentSets the rebalance is initiated with
+     * @param _liquidatorData                  Bytecode formatted data with liquidator-specific arguments
      */
     function liquidatorStartRebalance(
         ISetToken _nextSet,
-        uint256 _startingCurrentSetQuantity
+        uint256 _startingCurrentSetQuantity,
+        bytes memory _liquidatorData
     )
         internal
     {
         liquidator.startRebalance(
             currentSet,
             _nextSet,
-            _startingCurrentSetQuantity
+            _startingCurrentSetQuantity,
+            _liquidatorData       
         );
     }
 

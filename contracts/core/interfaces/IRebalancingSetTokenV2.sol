@@ -146,12 +146,15 @@ interface IRebalancingSetTokenV2 {
      * to the liquidator.
      *
      * @param _nextSet                      The Set to rebalance into
+     * @param _liquidatorData               Bytecode formatted data with liquidator-specific arguments
      *
      * Can only be called if the rebalance interval has elapsed.
      * Can only be called by manager.
      */
     function startRebalance(
-        address _nextSet
+        address _nextSet,
+        bytes calldata _liquidatorData
+
     )
         external;
 

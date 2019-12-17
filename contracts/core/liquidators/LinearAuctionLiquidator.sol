@@ -87,15 +87,19 @@ contract LinearAuctionLiquidator is LinearAuction, ILiquidator {
      * @param _currentSet                   The Set to rebalance from
      * @param _nextSet                      The Set to rebalance to
      * @param _startingCurrentSetQuantity   The currentSet quantity to rebalance
+     * @param _liquidatorData                  Bytecode formatted data with liquidator-specific arguments
      */
     function startRebalance(
         ISetToken _currentSet,
         ISetToken _nextSet,
-        uint256 _startingCurrentSetQuantity
+        uint256 _startingCurrentSetQuantity,
+        bytes calldata _liquidatorData
     )
         external
         isValidSet
     {
+        _liquidatorData; // Pass linting
+
         LinearAuction.validateRebalanceComponents(
             _currentSet,
             _nextSet

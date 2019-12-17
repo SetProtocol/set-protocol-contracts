@@ -28,6 +28,7 @@ import { Blockchain } from '@utils/blockchain';
 import { ether, gWei } from '@utils/units';
 import {
   DEFAULT_GAS,
+  EMPTY_BYTESTRING,
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
@@ -212,6 +213,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
   describe('#startRebalance', async () => {
     let subjectCaller: Address;
     let subjectNextSet: Address;
+    let subjectLiquidatorData: string;
     let subjectTimeFastForward: BigNumber;
     let failPeriod: BigNumber;
 
@@ -249,6 +251,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
 
       subjectCaller = managerAccount;
       subjectNextSet = nextSetToken.address;
+      subjectLiquidatorData = EMPTY_BYTESTRING;
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
     });
 
@@ -256,6 +259,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
       await blockchain.increaseTimeAsync(subjectTimeFastForward);
       return rebalancingSetToken.startRebalance.sendTransactionAsync(
         subjectNextSet,
+        subjectLiquidatorData,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }

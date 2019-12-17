@@ -25,6 +25,7 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
+  EMPTY_BYTESTRING,
   ZERO,
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
@@ -220,12 +221,14 @@ contract('LinearAuctionLiquidator', accounts => {
     let subjectCurrentSet: Address;
     let subjectNextSet: Address;
     let subjectStartingCurrentSetQuantity: BigNumber;
+    let subjectLiquidatorData: string;
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
       subjectCurrentSet = set1.address;
       subjectNextSet = set2.address;
       subjectStartingCurrentSetQuantity = ether(10);
+      subjectLiquidatorData = EMPTY_BYTESTRING;
     });
 
     after(async () => {
@@ -236,6 +239,7 @@ contract('LinearAuctionLiquidator', accounts => {
         subjectCurrentSet,
         subjectNextSet,
         subjectStartingCurrentSetQuantity,
+        subjectLiquidatorData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
@@ -408,6 +412,7 @@ contract('LinearAuctionLiquidator', accounts => {
         set1.address,
         set2.address,
         startingCurrentSetQuantity,
+        EMPTY_BYTESTRING,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );
     });
@@ -531,6 +536,7 @@ contract('LinearAuctionLiquidator', accounts => {
           set1.address,
           set2.address,
           startingCurrentSetQuantity,
+          EMPTY_BYTESTRING,
           { from: subjectCaller, gas: DEFAULT_GAS },
         );
 

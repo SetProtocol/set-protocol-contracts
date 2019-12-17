@@ -123,6 +123,7 @@ contract('StartRebalance', accounts => {
   describe('#startRebalance', async () => {
     let subjectCaller: Address;
     let subjectNextSet: Address;
+    let subjectLiquidatorData: string;
     let subjectTimeFastForward: BigNumber;
     let failPeriod: BigNumber;
 
@@ -174,6 +175,7 @@ contract('StartRebalance', accounts => {
 
       subjectCaller = managerAccount;
       subjectNextSet = nextSetToken.address;
+      subjectLiquidatorData = fakeTokenAccount;
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
     });
 
@@ -181,6 +183,7 @@ contract('StartRebalance', accounts => {
       await blockchain.increaseTimeAsync(subjectTimeFastForward);
       return rebalancingSetToken.startRebalance.sendTransactionAsync(
         subjectNextSet,
+        subjectLiquidatorData,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
@@ -247,6 +250,13 @@ contract('StartRebalance', accounts => {
 
         const nextSet = await liquidatorMock.nextSet.callAsync();
         expect(nextSet).to.equal(nextSetToken.address);
+      });
+
+      it('sends the correct liquidatorData to the liquidator', async () => {
+        await subject();
+
+        const liquidatorData = await liquidatorMock.liquidatorData.callAsync();
+        expect(liquidatorData).to.equal(subjectLiquidatorData.toLowerCase());
       });
 
       it('redeemsInVault the currentSet', async () => {

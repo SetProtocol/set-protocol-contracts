@@ -25,6 +25,19 @@ library CommonMath {
     uint256 public constant SCALE_FACTOR = 10 ** 18;
 
     /**
+     * Returns scale factor equal to 10 ** 18
+     *
+     * @return  10 ** 18
+     */
+    function scaleFactor()
+        internal
+        pure
+        returns (uint256)
+    {
+        return SCALE_FACTOR;
+    }
+
+    /**
      * Calculates and returns the maximum value for a uint256
      *
      * @return  The maximum value for uint256

@@ -16,8 +16,6 @@
 
 pragma solidity 0.5.7;
 
-import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
-
 /**
  * @title IWhiteList
  * @author Set Protocol

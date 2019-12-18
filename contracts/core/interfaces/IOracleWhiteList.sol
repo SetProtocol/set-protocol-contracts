@@ -16,10 +16,8 @@
 
 pragma solidity 0.5.7;
 
-import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
-
 /**
- * @title IWhiteList
+ * @title IOracleWhiteList
  * @author Set Protocol
  *
  * The IWhiteList interface exposes the whitelist mapping to check components

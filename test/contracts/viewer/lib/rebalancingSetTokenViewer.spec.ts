@@ -4,6 +4,7 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -370,6 +371,83 @@ contract('ProtocolViewer', accounts => {
         expect(minimumBid).to.be.bignumber.equal(expectedMinimumBid);
         expect(expectedRemainingCurrentSets).to.be.bignumber.equal(expectedRemainingCurrentSets);
       });
+    });
+  });
+
+  describe.only('#batchFetchRebalanceStateAsync', async () => {
+    let subjectRebalancingSetAddresses: Address[];
+
+    let rebalancingSetToken: RebalancingSetTokenContract;
+    let currentSetToken: SetTokenContract;
+    let nextSetToken: SetTokenContract;
+
+    let defaultRebalancingSetToken: RebalancingSetTokenContract;
+
+    beforeEach(async () => {
+      const naturalUnits = [ether(.001), ether(.0001)];
+
+      const setTokens = await rebalancingHelper.createSetTokensAsync(
+        coreMock,
+        factory.address,
+        transferProxy.address,
+        2,
+        naturalUnits
+      );
+
+      currentSetToken = setTokens[0];
+      nextSetToken = setTokens[1];
+
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+        coreMock,
+        rebalancingFactory.address,
+        managerAccount,
+        currentSetToken.address,
+        ONE_DAY_IN_SECONDS
+      );
+
+      // Issue currentSetToken
+      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
+      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      const rebalancingSetTokenQuantityToIssue = ether(8);
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetTokenQuantityToIssue);
+
+      // Transition original rebalancing set to proposal
+      await rebalancingHelper.defaultTransitionToProposeAsync(
+          coreMock,
+          rebalancingComponentWhiteList,
+          rebalancingSetToken,
+          nextSetToken,
+          constantAuctionPriceCurve.address,
+          managerAccount
+        );
+
+      defaultRebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+        coreMock,
+        rebalancingFactory.address,
+        managerAccount,
+        currentSetToken.address,
+        ONE_DAY_IN_SECONDS
+      );
+
+      subjectRebalancingSetAddresses = [rebalancingSetToken.address, defaultRebalancingSetToken.address];
+    });
+
+    async function subject(): Promise<BigNumber[]> {
+      return rebalancingSetTokenViewer.batchFetchRebalanceStateAsync.callAsync(
+        subjectRebalancingSetAddresses,
+      );
+    }
+
+    it('fetches the RebalancingSetTokens\' states', async () => {
+      const rebalanceAuctionStates: BigNumber[] = await subject();
+
+      const firstRebalancingSetState = rebalanceAuctionStates[0];
+      expect(firstRebalancingSetState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.PROPOSAL);
+
+      const secondRebalancingSetState = rebalanceAuctionStates[1];
+      expect(secondRebalancingSetState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
     });
   });
 });

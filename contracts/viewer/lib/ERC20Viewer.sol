@@ -57,6 +57,34 @@ contract ERC20Viewer {
     }
 
     /*
+     * Fetches token balances for each tokenAddress, tokenOwner pair
+     *
+     * @param  _tokenAddresses    Addresses of ERC20 contracts to check balance for
+     * @param  _tokenOwners       Addresses of users sequential to tokenAddress to fetch balance for
+     * @return  uint256[]         Array of balances for each ERC20 contract passed in
+     */
+    function batchFetchUsersBalances(
+        address[] calldata _tokenAddresses,
+        address[] calldata _tokenOwners
+    )
+        external
+        returns (uint256[] memory)
+    {
+        // Cache length of addresses to fetch balances for
+        uint256 _addressesCount = _tokenAddresses.length;
+        
+        // Instantiate output array in memory
+        uint256[] memory balances = new uint256[](_addressesCount);
+
+        // Cycle through contract addresses array and fetching the balance of each for the owner
+        for (uint256 i = 0; i < _addressesCount; i++) {
+            balances[i] = IERC20(_tokenAddresses[i]).balanceOf(_tokenOwners[i]);
+        }
+
+        return balances;
+    }
+
+    /*
      * Fetches multiple supplies for passed in array of ERC20 contract addresses
      *
      * @param  _tokenAddresses    Addresses of ERC20 contracts to check supply for

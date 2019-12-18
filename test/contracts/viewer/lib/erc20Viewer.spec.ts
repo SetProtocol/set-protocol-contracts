@@ -2,8 +2,8 @@ require('module-alias/register');
 
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
-import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -47,6 +47,7 @@ contract('ERC20Viewer', accounts => {
     deployerAccount,
     managerAccount,
     ownerAccount,
+    anotherAccount,
   ] = accounts;
 
   let coreMock: CoreMockContract;
@@ -198,13 +199,13 @@ contract('ERC20Viewer', accounts => {
       const balances: BigNumber[] = await subject();
       const balancesJSON = JSON.stringify(balances);
 
-      const expectedSupplies = await erc20Helper.getTokenBalances(
+      const expectedBalances = await erc20Helper.getTokenBalances(
         [token, currentSetToken, rebalancingSetToken],
         subjectTokenOwner
       );
-      const expectedSuppliesJSON = JSON.stringify(expectedSupplies);
+      const expectedBalancesJSON = JSON.stringify(expectedBalances);
 
-      expect(balancesJSON).to.equal(expectedSuppliesJSON);
+      expect(balancesJSON).to.equal(expectedBalancesJSON);
     });
 
     describe('when the token addresses includes a non ERC20 contract', async () => {
@@ -215,6 +216,46 @@ contract('ERC20Viewer', accounts => {
       it('should revert', async () => {
         await expectRevertError(subject());
       });
+    });
+  });
+
+  describe('#batchFetchUsersBalances', async () => {
+    let subjectTokenAddresses: Address[];
+    let subjectTokenOwners: Address[];
+
+    beforeEach(async () => {
+      token = await erc20Helper.deployTokenAsync(ownerAccount);
+
+      subjectTokenAddresses = [token.address, currentSetToken.address, rebalancingSetToken.address];
+      subjectTokenOwners = [deployerAccount, anotherAccount, deployerAccount];
+    });
+
+    async function subject(): Promise<BigNumber[]> {
+      return erc20Viewer.batchFetchUsersBalances.callAsync(
+        subjectTokenAddresses,
+        subjectTokenOwners,
+      );
+    }
+
+    it('fetches the balances of the token addresses', async () => {
+      const balances: BigNumber[] = await subject();
+      const balancesJSON = JSON.stringify(balances);
+
+      const expectedDeployerBalances = await erc20Helper.getTokenBalances(
+        [token, rebalancingSetToken],
+        deployerAccount
+      );
+      const expectedAnotherAccountBalances = await erc20Helper.getTokenBalances(
+        [currentSetToken],
+        anotherAccount
+      );
+      const expectedBalances = [
+        expectedDeployerBalances[0],
+        expectedAnotherAccountBalances[0],
+        expectedDeployerBalances[1],
+      ];
+      const expectedBalancesJSON = JSON.stringify(expectedBalances);
+      expect(balancesJSON).to.equal(expectedBalancesJSON);
     });
   });
 });

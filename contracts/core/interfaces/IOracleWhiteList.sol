@@ -17,7 +17,7 @@
 pragma solidity 0.5.7;
 
 /**
- * @title IWhiteList
+ * @title IOracleWhiteList
  * @author Set Protocol
  *
  * The IWhiteList interface exposes the whitelist mapping to check components

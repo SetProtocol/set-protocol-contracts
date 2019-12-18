@@ -96,4 +96,30 @@ contract RebalancingSetTokenViewer {
 
         return (rebalanceState, auctionIntegerParams);
     }
+
+    /*
+     * Fetches RebalancingSetToken states for an array of RebalancingSetToken instances
+     *
+     * @param  _rebalancingSetTokens[]       RebalancingSetToken contract instances
+     * @return RebalancingLibrary.State[]    Current rebalance states on the RebalancingSetToken
+     */
+    function batchFetchRebalanceStateAsync(
+        IRebalancingSetToken[] calldata _rebalancingSetTokens
+    )
+        external
+        returns (RebalancingLibrary.State[] memory)
+    {
+        // Cache length of addresses to fetch states for
+        uint256 _addressesCount = _rebalancingSetTokens.length;
+        
+        // Instantiate output array in memory
+        RebalancingLibrary.State[] memory states = new RebalancingLibrary.State[](_addressesCount);
+
+        // Cycle through contract addresses array and fetching the rebalance state of each RebalancingSet
+        for (uint256 i = 0; i < _addressesCount; i++) {
+            states[i] = _rebalancingSetTokens[i].rebalanceState();
+        }
+
+        return states;
+    }
 }

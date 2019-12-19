@@ -23,6 +23,7 @@ import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20
 import { BackwardsCompatability } from "./rebalancing-v2/BackwardsCompatability.sol";
 import { FailRebalance } from "./rebalancing-v2/FailRebalance.sol";
 import { ICore } from "../interfaces/ICore.sol";
+import { IFeeCalculator } from "../interfaces/IFeeCalculator.sol";
 import { ILiquidator } from "../interfaces/ILiquidator.sol";
 import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
@@ -93,8 +94,8 @@ contract RebalancingSetTokenV2 is
      * @param _symbol                    The symbol of the new RebalancingSetTokenV2
      */
     constructor(
-        address[7] memory _addressConfig,
-        uint256[7] memory _uintConfig,
+        address[8] memory _addressConfig,
+        uint256[6] memory _uintConfig,
         string memory _name,
         string memory _symbol
     )
@@ -121,8 +122,10 @@ contract RebalancingSetTokenV2 is
         rebalanceFailPeriod = _uintConfig[3];
         lastRebalanceTimestamp = _uintConfig[4];
         entryFee = _uintConfig[5];
-        rebalanceFee = _uintConfig[6];
+        // rebalanceFee = _uintConfig[6];
         rebalanceState = RebalancingLibrary.State.Default;
+
+        // IFeeCalculator(_addressConfig[7]).initialize(_rebalanceFeeCalldata);
     }
 
    /* ============ External Functions ============ */

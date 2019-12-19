@@ -360,6 +360,7 @@ contract('Issuance', accounts => {
           entryFee,
           rebalanceFee,
         ],
+        '0x00'
       );
 
       subjectIssuer = deployerAccount,

@@ -19,6 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { ICore} from "../interfaces/ICore.sol";
 import { ISetToken} from "../interfaces/ISetToken.sol";
 
 
@@ -71,6 +72,16 @@ library SetTokenLibrary {
             _quantity.mod(ISetToken(_set).naturalUnit()) == 0,
             "SetTokenLibrary.isMultipleOfSetNaturalUnit: Quantity is not a multiple of nat unit"
         );
+    }
+
+    function requireValidSet(ICore _core, address _set)
+        internal
+        view
+    {
+        require(
+            _core.validSets(_set),
+            "SetTokenLibrary: Must be an approved SetToken address"
+        );       
     }
 
     /**

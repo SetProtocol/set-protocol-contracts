@@ -11,6 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  FixedRebalanceFeeCalculatorContract,
   LiquidatorMockContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
@@ -42,6 +43,7 @@ import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
+import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -86,6 +88,9 @@ contract('RebalancingSetState', accounts => {
     blockchain
   );
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
+
+  let feeCalculator: FixedRebalanceFeeCalculatorContract;
 
   let initialSetToken: SetTokenContract;
   let nextSetToken: SetTokenContract;
@@ -147,6 +152,9 @@ contract('RebalancingSetState', accounts => {
     const { timestamp } = await web3.eth.getBlock('latest');
     lastRebalanceTimestamp = timestamp;
 
+    feeCalculator = await feeCalculatorHelper.deployFixedRebalanceFeeCalculatorAsync(coreMock.address);
+    const valueEncodedBytes = web3.utils.padLeft(web3.utils.numberToHex(ether(1).toString()), 64);
+
     rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
       [
         rebalancingFactory.address,
@@ -156,6 +164,7 @@ contract('RebalancingSetState', accounts => {
         rebalancingComponentWhiteList.address,
         liquidatorWhitelist.address,
         feeRecipient,
+        feeCalculator.address,
       ],
       [
         initialUnitShares,
@@ -164,7 +173,6 @@ contract('RebalancingSetState', accounts => {
         failPeriod,
         lastRebalanceTimestamp,
         ZERO, // Entry Fee
-        ZERO, // Rebalance Fee
       ]
     );
   });
@@ -173,7 +181,7 @@ contract('RebalancingSetState', accounts => {
     blockchain.revertAsync();
   });
 
-  describe('#constructor', async () => {
+  describe.only('#constructor', async () => {
     let subjectFactory: Address;
     let subjectManager: Address;
     let subjectLiquidator: Address;
@@ -211,6 +219,8 @@ contract('RebalancingSetState', accounts => {
     });
 
     async function subject(): Promise<RebalancingSetTokenV2Contract> {
+      const valueEncodedBytes = web3.utils.padLeft(web3.utils.numberToHex(ether(1).toString()), 64);
+
       const addressConfig = [
         subjectFactory,
         subjectManager,
@@ -219,6 +229,7 @@ contract('RebalancingSetState', accounts => {
         subjectComponentWhiteList,
         subjectLiquidatorWhiteList,
         subjectFeeRecipient,
+        feeCalculator.address,
       ];
 
       const bigNumberConfig = [
@@ -228,7 +239,6 @@ contract('RebalancingSetState', accounts => {
         subjectFailPeriod,
         subjectLastRebalanceTimestamp,
         subjectEntryFee,
-        subjectRebalanceFee,
       ];
 
       return rebalancingHelper.deployRebalancingSetTokenV2Async(

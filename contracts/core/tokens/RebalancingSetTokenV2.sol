@@ -19,6 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import { Initializable } from "zos-lib/contracts/Initializable.sol";
 
 import { BackwardsCompatability } from "./rebalancing-v2/BackwardsCompatability.sol";
 import { FailRebalance } from "./rebalancing-v2/FailRebalance.sol";
@@ -54,6 +55,7 @@ import { StartRebalance } from "./rebalancing-v2/StartRebalance.sol";
 contract RebalancingSetTokenV2 is
     ERC20,
     ERC20Detailed,
+    Initializable,
     RebalancingSetState,
     BackwardsCompatability,
     Issuance,
@@ -113,6 +115,7 @@ contract RebalancingSetTokenV2 is
         componentWhiteList = IWhiteList(_addressConfig[4]);
         liquidatorWhiteList = IWhiteList(_addressConfig[5]);
         feeRecipient = _addressConfig[6];
+        rebalanceFeeCalculator = IFeeCalculator(_addressConfig[7]);
         core = ICore(factory.core());
         vault = IVault(core.vault());
 
@@ -124,8 +127,17 @@ contract RebalancingSetTokenV2 is
         entryFee = _uintConfig[5];
         // rebalanceFee = _uintConfig[6];
         rebalanceState = RebalancingLibrary.State.Default;
+    }
 
-        // IFeeCalculator(_addressConfig[7]).initialize(_rebalanceFeeCalldata);
+    function initialize(
+        bytes calldata _rebalanceFeeCalldata
+    )
+        external
+        initializer
+    {
+        // Can only be called by the factory
+
+        rebalanceFeeCalculator.initialize(_rebalanceFeeCalldata);
     }
 
    /* ============ External Functions ============ */

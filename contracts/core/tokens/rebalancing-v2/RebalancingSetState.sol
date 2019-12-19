@@ -18,8 +18,9 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { ICore } from "../../interfaces/ICore.sol";
-import { IRebalancingSetFactory } from "../../interfaces/IRebalancingSetFactory.sol";
+import { IFeeCalculator } from "../../interfaces/IFeeCalculator.sol";
 import { ILiquidator } from "../../interfaces/ILiquidator.sol";
+import { IRebalancingSetFactory } from "../../interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
@@ -78,9 +79,11 @@ contract RebalancingSetState {
     // Represents a decimal value scaled by 1e18 (e.g. 100% = 1e18 and 1% = 1e16)
     uint256 public entryFee;
 
+    uint256 public rebalanceFee;
+
     // Fee levied to feeRecipient every rebalance, paid during settlement
     // Represents a decimal value scaled by 1e18 (e.g. 100% = 1e18 and 1% = 1e16)
-    uint256 public rebalanceFee;
+    IFeeCalculator public rebalanceFeeCalculator;
 
     // ----------------------------------------------------------------------
     // Current State

@@ -20,6 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { Bytes32Library } from "../../lib/Bytes32Library.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { ILiquidator } from "../interfaces/ILiquidator.sol";
+import { IRebalancingSetTokenV2 } from "../interfaces/IRebalancingSetTokenV2.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { RebalancingSetTokenV2 } from "./RebalancingSetTokenV2.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
@@ -231,7 +232,7 @@ contract RebalancingSetTokenV2Factory {
             "Create: RebalanceTimestamp must be in the past"
         );
 
-        return address(
+        address rebalancingSet = address(
             new RebalancingSetTokenV2(
                 [
                     address(this),                          // factory
@@ -255,6 +256,10 @@ contract RebalancingSetTokenV2Factory {
                 _symbol.bytes32ToString()
             )
         );
+
+        IRebalancingSetTokenV2(rebalancingSet).initialize(parameters.rebalanceFeeCalculatorData);
+
+        return rebalancingSet;
     }
 
     /* ============ Private Functions ============ */
@@ -279,7 +284,7 @@ contract RebalancingSetTokenV2Factory {
             mstore(add(parameters, 224), mload(add(_callData, 256)))  // rebalanceFeeCalculator
         }
 
-        // parameters.rebalanceFeeCalculatorData = _callData.slice(256, _callData.length);
+        parameters.rebalanceFeeCalculatorData = _callData.slice(256, _callData.length);
 
         return parameters;
     }

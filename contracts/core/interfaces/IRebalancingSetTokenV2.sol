@@ -124,6 +124,11 @@ interface IRebalancingSetTokenV2 {
         view
         returns (uint256);
 
+    function initialize(
+        bytes calldata _rebalanceFeeCalldata
+    )
+        external;
+
     /*
      * Set new liquidator address. Only whitelisted addresses are valid.
      */

@@ -64,33 +64,33 @@ contract StartRebalance is
     {
         require(
             rebalanceState == RebalancingLibrary.State.Default,
-            "StartRebalance: State must be Default"
+            "State must be Default"
         );
 
         // Enough time must have passed from last rebalance to start a new proposal
         require(
             block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
-            "StartRebalance: Rebalance interval not elapsed"
+            "Rebalance interval not elapsed"
         );
 
         // New proposed Set must be a valid Set created by Core
         require(
             core.validSets(address(_nextSet)),
-            "StartRebalance: Invalid or disabled Set"
+            "Invalid or disabled Set"
         );
 
         // Check proposed components on whitelist. This is to ensure managers are unable to add contract addresses
         // to a propose that prohibit the set from carrying out an auction i.e. a token that only the manager possesses
         require(
             componentWhiteList.areValidAddresses(_nextSet.getComponents()),
-            "StartRebalance: Set contains invalid component"
+            "Set contains invalid component"
         );
 
         // Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.
         // Done to make sure that when calculating token units there will are no rounding errors.
         require(
             naturalUnitsAreValid(currentSet, _nextSet),
-            "StartRebalance: Invalid natural unit"
+            "Invalid natural unit"
         );
     }
 

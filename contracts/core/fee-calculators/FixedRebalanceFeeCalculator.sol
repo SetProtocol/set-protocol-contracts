@@ -17,7 +17,6 @@
 pragma solidity 0.5.7;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { Initializable } from "zos-lib/contracts/Initializable.sol";
 
 import { ICore } from "../interfaces/ICore.sol";
 import { IFeeCalculator } from "../interfaces/IFeeCalculator.sol";
@@ -33,9 +32,7 @@ import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
  * assist with issuance and usage from modules.
  */
 
-contract FixedRebalanceFeeCalculator is 
-    IFeeCalculator,
-    Initializable
+contract FixedRebalanceFeeCalculator is IFeeCalculator
 {
     // using LibBytes for bytes;
     using SafeMath for uint256;
@@ -60,10 +57,10 @@ contract FixedRebalanceFeeCalculator is
         bytes calldata _feeCalculatorData
     )
         external
-        initializer
-        isValidSet
     {
-        // Can only be initialized once
+        // Issue: can be called by random people
+        // Can only be initialized once by the msg.sender not the function
+        // Require that the value is 0
 
         uint256 rebalanceFee = parseFeeCalculatorData(_feeCalculatorData);
 
@@ -75,7 +72,7 @@ contract FixedRebalanceFeeCalculator is
     /**
      *
      */
-    function getFeeScaled()
+    function getFee()
         external
         view
         isValidSet
@@ -106,7 +103,6 @@ contract FixedRebalanceFeeCalculator is
         uint256 rebalanceFee;
 
         assembly {
-            // mstore(rebalanceFee, mload(_feeCalculatorData.contentAddress()))
             rebalanceFee := mload(add(_feeCalculatorData, 32))
         }
 

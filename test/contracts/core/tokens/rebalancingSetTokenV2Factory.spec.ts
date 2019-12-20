@@ -11,6 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
+  FixedRebalanceFeeCalculatorContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
@@ -34,6 +35,7 @@ import { getWeb3 } from '@utils/web3Helper';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
+import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -65,10 +67,12 @@ contract('RebalancingSetTokenV2Factory', accounts => {
   let setTokenFactory: SetTokenFactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhiteList: WhiteListContract;
+  let fixedFeeCalculator: FixedRebalanceFeeCalculatorContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
   const rebalanceHelper = new RebalancingSetV2Helper(deployerAccount, coreHelper, erc20Helper, blockchain);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -104,6 +108,8 @@ contract('RebalancingSetTokenV2Factory', accounts => {
 
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
     liquidatorWhiteList = await coreHelper.deployWhiteListAsync();
+
+    fixedFeeCalculator = await feeCalculatorHelper.deployFixedRebalanceFeeCalculatorAsync(core.address);
   });
 
   afterEach(async () => {
@@ -205,11 +211,14 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     let callDataManagerAddress: Address;
     let callDataLiquidator: Address;
     let callDataFeeRecipient: Address;
+    let callDataFeeCalculator: Address;
     let callDataRebalanceInterval: BigNumber;
     let callDataFailAuctionPeriod: BigNumber;
     let callDataLastRebalanceTimestamp: BigNumber;
     let callDataEntryFee: BigNumber;
-    let callDataRebalanceFee: BigNumber;
+    let callDataRebalanceFeeCallData: Buffer;
+
+    let rebalanceFee: BigNumber
 
     beforeEach(async () => {
       rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
@@ -229,21 +238,25 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       callDataManagerAddress = rebalancingTokenManagerAccount;
       callDataLiquidator = liquidatorAccount;
       callDataFeeRecipient = feeRecipient;
+      callDataFeeCalculator = fixedFeeCalculator.address;
       callDataRebalanceInterval = new BigNumber(86400).mul(2);
       callDataFailAuctionPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp } = await web3.eth.getBlock('latest');
       callDataLastRebalanceTimestamp = timestamp;
       callDataEntryFee = ether(1);
-      callDataRebalanceFee = ether(2);
+
+      rebalanceFee = ether(2);
+      callDataRebalanceFeeCallData = SetUtils.generateFixedFeeCalculatorCalldata(rebalanceFee);
       subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
         callDataManagerAddress,
         callDataLiquidator,
         callDataFeeRecipient,
+        callDataFeeCalculator,
         callDataRebalanceInterval,
         callDataFailAuctionPeriod,
         callDataLastRebalanceTimestamp,
         callDataEntryFee,
-        callDataRebalanceFee,
+        callDataRebalanceFeeCallData
       );
     });
 
@@ -324,6 +337,13 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         expect(feeRecipientAddress).to.equal(callDataFeeRecipient);
       });
 
+      it('should have the correct rebalanceFeeCalculator address', async () => {
+        const rebalancingToken = await subject();
+
+        const rebalanceFeeCalculatorAddress = await rebalancingToken.rebalanceFeeCalculator.callAsync();
+        expect(rebalanceFeeCalculatorAddress).to.equal(callDataFeeCalculator);
+      });
+
       it('should have the correct rebalance interval', async () => {
         const rebalancingToken = await subject();
 
@@ -359,11 +379,11 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         expect(entryFee).to.be.bignumber.equal(callDataEntryFee);
       });
 
-      it('creates a set with the the correct rebalanceFee', async () => {
+      it('should call the feeCalculator and set the correct rebalanceFee', async () => {
         const rebalancingSetToken = await subject();
 
-        const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
-        expect(rebalanceFee).to.be.bignumber.equal(callDataRebalanceFee);
+        const result = await fixedFeeCalculator.fees.callAsync(rebalancingSetToken.address);
+        expect(result).to.be.bignumber.equal(rebalanceFee);
       });
     });
 
@@ -435,11 +455,12 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataManagerAddress,
           callDataLiquidator,
           callDataFeeRecipient,
+          callDataFeeCalculator,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
-          callDataRebalanceFee,
+          callDataRebalanceFeeCallData
         );
       });
 
@@ -456,11 +477,12 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataManagerAddress,
           callDataLiquidator,
           callDataFeeRecipient,
+          callDataFeeCalculator,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
-          callDataRebalanceFee,
+          callDataRebalanceFeeCallData
         );
       });
 
@@ -477,11 +499,12 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataManagerAddress,
           callDataLiquidator,
           callDataFeeRecipient,
+          callDataFeeCalculator,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
-          callDataRebalanceFee,
+          callDataRebalanceFeeCallData
         );
       });
 
@@ -498,11 +521,12 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataManagerAddress,
           callDataLiquidator,
           callDataFeeRecipient,
+          callDataFeeCalculator,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
-          callDataRebalanceFee,
+          callDataRebalanceFeeCallData
         );
       });
 
@@ -519,11 +543,12 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataManagerAddress,
           callDataLiquidator,
           callDataFeeRecipient,
+          callDataFeeCalculator,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
-          callDataRebalanceFee,
+          callDataRebalanceFeeCallData
         );
       });
 
@@ -540,11 +565,12 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataManagerAddress,
           callDataLiquidator,
           callDataFeeRecipient,
+          callDataFeeCalculator,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
-          callDataRebalanceFee,
+          callDataRebalanceFeeCallData
         );
       });
 
@@ -562,11 +588,12 @@ contract('RebalancingSetTokenV2Factory', accounts => {
           callDataManagerAddress,
           callDataLiquidator,
           callDataFeeRecipient,
+          callDataFeeCalculator,
           callDataRebalanceInterval,
           callDataFailAuctionPeriod,
           callDataLastRebalanceTimestamp,
           callDataEntryFee,
-          callDataRebalanceFee,
+          callDataRebalanceFeeCallData
         );
       });
 
@@ -602,20 +629,23 @@ contract('RebalancingSetTokenV2Factory', accounts => {
 
       const managerAddress = rebalancingTokenManagerAccount;
       const liquidator = liquidatorWhiteList.address;
+      const feeCalculator = fixedFeeCalculator.address;
       const rebalanceInterval = new BigNumber(86400).mul(2);
       const failAuctionPeriod = new BigNumber(86400).mul(3);
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       const entryFee = ZERO;
       const rebalanceFee = ZERO;
+      const callDataRebalanceFeeCallData = SetUtils.generateFixedFeeCalculatorCalldata(rebalanceFee);
       subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
         managerAddress,
         liquidator,
         feeRecipient,
+        feeCalculator,
         rebalanceInterval,
         failAuctionPeriod,
         lastRebalanceTimestamp,
         entryFee,
-        rebalanceFee,
+        callDataRebalanceFeeCallData,
       );
     });
 

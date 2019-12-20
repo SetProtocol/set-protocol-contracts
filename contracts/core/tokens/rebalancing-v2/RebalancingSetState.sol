@@ -59,6 +59,9 @@ contract RebalancingSetState {
     // The Liquidator interacts closely with the Set during rebalances.
     ILiquidator public liquidator;
 
+    // Contract responsible for calculation of rebalance fees
+    IFeeCalculator public rebalanceFeeCalculator;
+
     // The account that is allowed to make proposals
     address public manager;
 
@@ -78,13 +81,7 @@ contract RebalancingSetState {
     // Fee levied to feeRecipient every mint operation, paid during minting
     // Represents a decimal value scaled by 1e18 (e.g. 100% = 1e18 and 1% = 1e16)
     uint256 public entryFee;
-
-    uint256 public rebalanceFee;
-
-    // Fee levied to feeRecipient every rebalance, paid during settlement
-    // Represents a decimal value scaled by 1e18 (e.g. 100% = 1e18 and 1% = 1e16)
-    IFeeCalculator public rebalanceFeeCalculator;
-
+    
     // ----------------------------------------------------------------------
     // Current State
     // ----------------------------------------------------------------------
@@ -132,7 +129,7 @@ contract RebalancingSetState {
     modifier onlyManager() {
         require(
             msg.sender == manager,
-            "Sender must be manager"
+            "Must be manager"
         );
         _;
     }
@@ -180,12 +177,12 @@ contract RebalancingSetState {
     {
         require(
             rebalanceState != RebalancingLibrary.State.Rebalance,
-            "SetLiquidator: Must not be in Rebalance state"
+            "Must not be Rebalance state"
         );
 
         require(
             liquidatorWhiteList.whiteList(address(_newLiquidator)),
-            "SetLiquidator: Input not whitelisted"
+            "Not whitelisted"
         );
 
         emit NewLiquidatorAdded(address(_newLiquidator), address(liquidator));
@@ -203,6 +200,14 @@ contract RebalancingSetState {
     }
 
     /* ============ Getter Functions ============ */
+
+    function rebalanceFee()
+        external
+        view
+        returns (uint256)
+    {
+        return rebalanceFeeCalculator.getFee();
+    }
 
     /*
      * Function for compatability with ISetToken interface. Returns currentSet.
@@ -242,16 +247,5 @@ contract RebalancingSetState {
         returns (bool)
     {
         return _tokenAddress == address(currentSet);
-    }
-
-    /*
-     * Get array version of failedAuctionWithdrawComponents
-     */
-    function getFailedRebalanceComponents()
-        external
-        view
-        returns (address[] memory)
-    {
-        return failedRebalanceComponents;
     }
 }

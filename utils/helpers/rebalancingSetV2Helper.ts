@@ -128,6 +128,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     manager: Address,
     liquidator: Address,
     feeRecipient: Address,
+    rebalanceFeeCalculator: Address,
     initialSet: Address,
     failRebalancePeriod: BigNumber,
     lastRebalanceTimestamp: BigNumber,
@@ -137,15 +138,18 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
   ): Promise<RebalancingSetTokenV2Contract> {
     // Generate defualt rebalancingSetToken params
     const rebalanceInterval = ONE_DAY_IN_SECONDS;
+    const rebalanceFeeCallData = SetUtils.generateFixedFeeCalculatorCalldata(rebalanceFee);
+
     const callData = SetUtils.generateRebalancingSetTokenV2CallData(
       manager,
       liquidator,
       feeRecipient,
+      rebalanceFeeCalculator,
       rebalanceInterval,
       failRebalancePeriod,
       lastRebalanceTimestamp,
       entryFee,
-      rebalanceFee,
+      rebalanceFeeCallData,
     );
 
     // Create rebalancingSetToken

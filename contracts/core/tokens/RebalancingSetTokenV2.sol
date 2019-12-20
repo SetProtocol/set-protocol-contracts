@@ -125,18 +125,16 @@ contract RebalancingSetTokenV2 is
         rebalanceFailPeriod = _uintConfig[3];
         lastRebalanceTimestamp = _uintConfig[4];
         entryFee = _uintConfig[5];
-        // rebalanceFee = _uintConfig[6];
         rebalanceState = RebalancingLibrary.State.Default;
     }
 
+    // Called upon instantiation by the Factory
     function initialize(
         bytes calldata _rebalanceFeeCalldata
     )
         external
         initializer
     {
-        // Can only be called by the factory
-
         rebalanceFeeCalculator.initialize(_rebalanceFeeCalldata);
     }
 
@@ -243,7 +241,7 @@ contract RebalancingSetTokenV2 is
         // The unit shares must result in a quantity greater than the number of natural units outstanding
         require(
             newUnitShares > 0,
-            "Settle: Failed rebalance, unitshares equals 0. Call endFailedRebalance."
+            "Failed rebalance, unitshares is 0."
         );
 
         SettleRebalance.issueNextSet(issueQuantity);

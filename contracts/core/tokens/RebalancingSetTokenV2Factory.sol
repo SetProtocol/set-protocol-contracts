@@ -24,7 +24,6 @@ import { IRebalancingSetTokenV2 } from "../interfaces/IRebalancingSetTokenV2.sol
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { RebalancingSetTokenV2 } from "./RebalancingSetTokenV2.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
-import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol";
 import { IWhiteList } from "../interfaces/IWhiteList.sol";
 
 
@@ -73,11 +72,11 @@ contract RebalancingSetTokenV2Factory {
         address manager;
         ILiquidator liquidator;
         address feeRecipient;
+        address rebalanceFeeCalculator;
         uint256 rebalanceInterval;
         uint256 rebalanceFailPeriod;
         uint256 lastRebalanceTimestamp;
         uint256 entryFee;
-        address rebalanceFeeCalculator;
         bytes rebalanceFeeCalculatorData;
     }
 
@@ -128,10 +127,10 @@ contract RebalancingSetTokenV2Factory {
      * | manager                    | 32                            |
      * | liquidator                 | 64                            |
      * | feeRecipient               | 96                            |
-     * | rebalanceInterval          | 128                           |
-     * | rebalanceFailPeriod        | 160                           |
-     * | entryFee                   | 192                           |
-     * | rebalanceFeeCalculator     | 224                           |
+     * | rebalanceFeeCalculator     | 128                           |
+     * | rebalanceInterval          | 160                           |
+     * | rebalanceFailPeriod        | 192                           |
+     * | entryFee                   | 224                           |
      *
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
@@ -155,24 +154,24 @@ contract RebalancingSetTokenV2Factory {
     {
         require(
             msg.sender == address(core),
-            "Create: Sender must be core"
+            "Sender must be core"
         );
 
         // Ensure component array only includes one address which will be the currentSet
         require(
             _components.length == 1,
-            "Create: Components must be length 1"
+            "Components must be len 1"
         );
 
         // Ensure units array only includes one uint which will be the starting unitShares
         require(
             _units.length == 1,
-            "Create: Units must be length 1"
+            "Units must be len 1"
         );
 
         require(
             _units[0] > 0,
-            "Create: UnitShares must be greater than zero"
+            "UnitShares must be > 0"
         );
 
         address startingSet = _components[0];
@@ -180,56 +179,43 @@ contract RebalancingSetTokenV2Factory {
         // Expect Set to rebalance to be valid and enabled Set
         require(
             core.validSets(startingSet),
-            "Create: Invalid or disabled SetToken address"
+            "Invalid SetToken"
         );
 
         require(
-            _naturalUnit >= minimumNaturalUnit,
-            "Create: Natural Unit too low"
-        );
-
-        require(
-            _naturalUnit <= maximumNaturalUnit,
-            "Create: Natural Unit too large"
+            _naturalUnit >= minimumNaturalUnit && _naturalUnit <= maximumNaturalUnit,
+            "Invalid natural unit"
         );
 
         InitRebalancingParameters memory parameters = parseRebalanceSetCallData(_callData);
 
         require(
             parameters.manager != address(0),
-            "Create: Invalid manager address"
+            "Invalid manager"
         );
 
         // Require liquidator address is non-zero
-        require(
-            address(parameters.liquidator) != address(0),
-            "Create: Invalid liquidator address"
-        );
-
         // Require that liquidator is whitelisted by the liquidatorWhitelist
         require(
+            address(parameters.liquidator) != address(0) && 
             liquidatorWhitelist.whiteList(address(parameters.liquidator)),
-            "Create: Liquidator not whitelisted"
+            "Invalid liquidator"
         );
 
         require(
             parameters.rebalanceInterval >= minimumRebalanceInterval,
-            "Create: Rebalance interval too short"
+            "Rebalance interval too short"
         ); 
 
         require(
-            parameters.rebalanceFailPeriod >= minimumFailRebalancePeriod,
-            "Create: Fail Period too short"
-        );
-
-        require(
+            parameters.rebalanceFailPeriod >= minimumFailRebalancePeriod &&
             parameters.rebalanceFailPeriod <= maximumFailRebalancePeriod,
-            "Create: Fail Period too long"
+            "Invalid Fail Period"
         );
 
         require(
             parameters.lastRebalanceTimestamp <= block.timestamp,
-            "Create: RebalanceTimestamp must be in the past"
+            "Invalid RebalanceTimestamp"
         );
 
         address rebalancingSet = address(
@@ -277,11 +263,11 @@ contract RebalancingSetTokenV2Factory {
             mstore(parameters,           mload(add(_callData, 32)))   // manager
             mstore(add(parameters, 32),  mload(add(_callData, 64)))   // liquidator
             mstore(add(parameters, 64),  mload(add(_callData, 96)))   // feeRecipient
-            mstore(add(parameters, 96),  mload(add(_callData, 128)))  // rebalanceInterval
-            mstore(add(parameters, 128), mload(add(_callData, 160)))  // rebalanceFailPeriod
-            mstore(add(parameters, 160), mload(add(_callData, 192)))  // lastRebalanceTimestamp
-            mstore(add(parameters, 192), mload(add(_callData, 224)))  // entryFee
-            mstore(add(parameters, 224), mload(add(_callData, 256)))  // rebalanceFeeCalculator
+            mstore(add(parameters, 96),  mload(add(_callData, 128)))  // rebalanceFeeCalculator
+            mstore(add(parameters, 128), mload(add(_callData, 160)))  // rebalanceInterval
+            mstore(add(parameters, 160), mload(add(_callData, 192)))  // rebalanceFailPeriod
+            mstore(add(parameters, 192), mload(add(_callData, 224)))  // lastRebalanceTimestamp
+            mstore(add(parameters, 224), mload(add(_callData, 256)))  // entryFee
         }
 
         parameters.rebalanceFeeCalculatorData = _callData.slice(256, _callData.length);

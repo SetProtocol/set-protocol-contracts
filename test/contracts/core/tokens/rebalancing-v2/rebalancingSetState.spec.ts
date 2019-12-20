@@ -36,7 +36,7 @@ import {
   getExpectedNewFeeRecipientAddedLog
 } from '@utils/contract_logs/rebalancingSetTokenV2';
 import { expectRevertError } from '@utils/tokenAssertions';
-import { getWeb3 } from '@utils/web3Helper';
+import { getWeb3, txnFrom } from '@utils/web3Helper';
 import { ether } from '@utils/units';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
@@ -124,6 +124,7 @@ contract('RebalancingSetState', accounts => {
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
     liquidatorWhitelist = await coreHelper.deployWhiteListAsync();
+
     rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
@@ -181,7 +182,7 @@ contract('RebalancingSetState', accounts => {
     blockchain.revertAsync();
   });
 
-  describe.only('#constructor', async () => {
+  describe('#constructor', async () => {
     let subjectFactory: Address;
     let subjectManager: Address;
     let subjectLiquidator: Address;
@@ -196,6 +197,7 @@ contract('RebalancingSetState', accounts => {
     let subjectLastRebalanceTimestamp: BigNumber;
     let subjectEntryFee: BigNumber;
     let subjectRebalanceFee: BigNumber;
+    let subjectRebalanceFeeCalculator: Address;
     const subjectName: string = 'Rebalancing Set';
     const subjectSymbol: string = 'RBSET';
 
@@ -216,11 +218,10 @@ contract('RebalancingSetState', accounts => {
       subjectLastRebalanceTimestamp = new BigNumber(timestamp);
       subjectEntryFee = ether(1);
       subjectRebalanceFee = ether(2);
+      subjectRebalanceFeeCalculator = feeCalculator.address;
     });
 
     async function subject(): Promise<RebalancingSetTokenV2Contract> {
-      const valueEncodedBytes = web3.utils.padLeft(web3.utils.numberToHex(ether(1).toString()), 64);
-
       const addressConfig = [
         subjectFactory,
         subjectManager,
@@ -229,7 +230,7 @@ contract('RebalancingSetState', accounts => {
         subjectComponentWhiteList,
         subjectLiquidatorWhiteList,
         subjectFeeRecipient,
-        feeCalculator.address,
+        subjectRebalanceFeeCalculator
       ];
 
       const bigNumberConfig = [
@@ -369,10 +370,10 @@ contract('RebalancingSetState', accounts => {
       expect(entryFee).to.be.bignumber.equal(subjectEntryFee);
     });
 
-    it('creates a set with the the correct rebalanceFee', async () => {
+    it('creates a set with the the correct rebalanceFeeCalculator', async () => {
       rebalancingSetToken = await subject();
-      const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
-      expect(rebalanceFee).to.be.bignumber.equal(subjectRebalanceFee);
+      const rebalanceFeeCalculator = await rebalancingSetToken.rebalanceFeeCalculator.callAsync();
+      expect(rebalanceFeeCalculator).to.equal(subjectRebalanceFeeCalculator);
     });
 
     it('creates a set with the hasBidded variable set to false', async () => {
@@ -380,6 +381,48 @@ contract('RebalancingSetState', accounts => {
       const hasBidded = await rebalancingSetToken.hasBidded.callAsync();
       expect(hasBidded).to.equal(false);
     });
+  });
+
+  // WIP
+  describe('#initialize', async () => {
+    let subjectRebalanceFeeCalldata: string;
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      const valueEncodedBytes = web3.utils.padLeft(web3.utils.numberToHex(ether(1).toString()), 64);      
+      subjectRebalanceFeeCalldata = valueEncodedBytes;
+      
+      await coreMock.addSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(deployerAccount));
+
+      subjectCaller = managerAccount;
+
+
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingSetToken.initialize.sendTransactionAsync(
+        subjectRebalanceFeeCalldata,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('calls the rebalancefeeCalculator properly', async () => {
+      await subject();
+
+      const expectedValue = await feeCalculator.fees.callAsync(rebalancingSetToken.address);
+      // TODO cleanup test
+      expect(expectedValue).to.bignumber.equal(ether(1));
+    });
+
+    // describe('when the caller is not the current manager', async () => {
+    //   beforeEach(async () => {
+    //     subjectCaller = otherAccount;
+    //   });
+
+    //   it('should revert', async () => {
+    //     await expectRevertError(subject());
+    //   });
+    // });
   });
 
   describe('#setManager', async () => {
@@ -630,28 +673,6 @@ contract('RebalancingSetState', accounts => {
 
         expect(isComponentOfSet).to.equal(false);
       });
-    });
-  });
-
-  describe('#getFailedRebalanceComponents', async () => {
-    let subjectCaller: Address;
-
-    beforeEach(async () => {
-      subjectCaller = managerAccount;
-    });
-
-    async function subject(): Promise<Address[]> {
-      return rebalancingSetToken.getFailedRebalanceComponents.callAsync(
-        { from: subjectCaller, gas: DEFAULT_GAS}
-      );
-    }
-
-    it('should have an empty failedRebalanceComponents', async () => {
-      const failedRebalanceComponents = await subject();
-
-      const expectedComponents = [];
-
-      expect(JSON.stringify(failedRebalanceComponents)).to.equal(JSON.stringify(expectedComponents));
     });
   });
 });

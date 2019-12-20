@@ -11,6 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  FixedRebalanceFeeCalculatorContract,
   SetTokenContract,
   LiquidatorMockContract,
   RebalanceAuctionModuleContract,
@@ -35,6 +36,7 @@ import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
 
 import { getExpectedRebalanceFeePaidLog } from '@utils/contract_logs/rebalancingSetTokenV2';
 
@@ -66,6 +68,8 @@ contract('SettleRebalance', accounts => {
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
   let liquidatorMock: LiquidatorMockContract;
+  let fixedFeeCalculator: FixedRebalanceFeeCalculatorContract;
+
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -76,6 +80,7 @@ contract('SettleRebalance', accounts => {
     blockchain
   );
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -100,6 +105,7 @@ contract('SettleRebalance', accounts => {
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
     liquidatorWhitelist = await coreHelper.deployWhiteListAsync();
+
     rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
@@ -111,6 +117,8 @@ contract('SettleRebalance', accounts => {
 
     liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
+
+    fixedFeeCalculator = await feeCalculatorHelper.deployFixedRebalanceFeeCalculatorAsync(coreMock.address);
   });
 
   afterEach(async () => {
@@ -159,6 +167,7 @@ contract('SettleRebalance', accounts => {
         managerAccount,
         liquidatorMock.address,
         feeRecipient,
+        fixedFeeCalculator.address,
         currentSetToken.address,
         failPeriod,
         rebalancingSetUnitShares,
@@ -194,7 +203,7 @@ contract('SettleRebalance', accounts => {
       });
     });
 
-    describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
+    describe.only('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
       beforeEach(async () => {
        await rebalancingHelper.transitionToRebalanceV2Async(
          coreMock,
@@ -211,6 +220,17 @@ contract('SettleRebalance', accounts => {
           rebalancingSetToken.address,
           bidQuantity,
         );
+
+      	console.log("Calculator address", fixedFeeCalculator.address);
+
+      	const rbFeeCalculator = await rebalancingSetToken.rebalanceFeeCalculator.callAsync();
+      	console.log("RB Set Calculator Address", rbFeeCalculator.toString());
+
+      	const fromCalculator = await fixedFeeCalculator.fees.callAsync(rebalancingSetToken.address);
+      	console.log("From Calculator?", fromCalculator.toString());
+
+      	const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
+      	console.log("Getting the fee?", rebalanceFee.toString());
       });
 
       it('updates the rebalanceState to Default', async () => {

@@ -379,7 +379,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         expect(entryFee).to.be.bignumber.equal(callDataEntryFee);
       });
 
-      it('should call the feeCalculator and set the correct rebalanceFee', async () => {
+      it('initialize the Set and set the correct fee on the feeCalculator', async () => {
         const rebalancingSetToken = await subject();
 
         const result = await fixedFeeCalculator.fees.callAsync(rebalancingSetToken.address);

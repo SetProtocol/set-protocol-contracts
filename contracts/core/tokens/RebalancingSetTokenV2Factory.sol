@@ -131,6 +131,7 @@ contract RebalancingSetTokenV2Factory {
      * | rebalanceInterval          | 160                           |
      * | rebalanceFailPeriod        | 192                           |
      * | entryFee                   | 224                           |
+     * | rebalanceFeeCalculatorData | 256 to end                    |
      *
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
@@ -194,8 +195,7 @@ contract RebalancingSetTokenV2Factory {
             "Invalid manager"
         );
 
-        // Require liquidator address is non-zero
-        // Require that liquidator is whitelisted by the liquidatorWhitelist
+        // Require liquidator address is non-zero and is whitelisted by the liquidatorWhitelist
         require(
             address(parameters.liquidator) != address(0) && 
             liquidatorWhitelist.whiteList(address(parameters.liquidator)),
@@ -243,6 +243,7 @@ contract RebalancingSetTokenV2Factory {
             )
         );
 
+        // Initaializes the RebalancingSetToken
         IRebalancingSetTokenV2(rebalancingSet).initialize(parameters.rebalanceFeeCalculatorData);
 
         return rebalancingSet;
@@ -270,6 +271,7 @@ contract RebalancingSetTokenV2Factory {
             mstore(add(parameters, 224), mload(add(_callData, 256)))  // entryFee
         }
 
+        // Extracts the fee calculator data from the remaining calldata
         parameters.rebalanceFeeCalculatorData = _callData.slice(256, _callData.length);
 
         return parameters;

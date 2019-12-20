@@ -209,7 +209,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
     );
     await coreHelper.addAddressToWhiteList(liquidator.address, liquidatorWhitelist);
 
-    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync(coreMock.address);
+    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
   });
 
   afterEach(async () => {

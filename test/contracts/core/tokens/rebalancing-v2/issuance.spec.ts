@@ -121,7 +121,7 @@ contract('Issuance', accounts => {
     liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
 
-    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync(coreMock.address);
+    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
   });
 
   afterEach(async () => {

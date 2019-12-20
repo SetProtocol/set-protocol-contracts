@@ -10,6 +10,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  FeeCalculatorMockContract,
   FixedRebalanceFeeCalculatorContract,
   SetTokenFactoryContract,
   TransferProxyContract,
@@ -18,13 +19,9 @@ import {
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3, txnFrom } from '@utils/web3Helper';
-import {
-  DEFAULT_GAS,
-} from '@utils/constants';
-import { ether, gWei } from '@utils/units';
+import { ether } from '@utils/units';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
-import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
 
 BigNumberSetup.configure();
@@ -35,10 +32,9 @@ const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
 const FixedRebalanceFeeCalculator = artifacts.require('FixedRebalanceFeeCalculator');
 
-contract('Auction', accounts => {
+contract('FixedRebalanceFeeCalculator', accounts => {
   const [
     ownerAccount,
-    functionCaller,
   ] = accounts;
 
   let coreMock: CoreMockContract;
@@ -50,6 +46,7 @@ contract('Auction', accounts => {
   const feeCalculatorHelper = new FeeCalculatorHelper(ownerAccount);
 
   let feeCalculator: FixedRebalanceFeeCalculatorContract;
+  let feeCalculatorMock: FeeCalculatorMockContract;
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -64,6 +61,7 @@ contract('Auction', accounts => {
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, setTokenFactory);
 
     feeCalculator = await feeCalculatorHelper.deployFixedRebalanceFeeCalculatorAsync(coreMock.address);
+    feeCalculatorMock = await feeCalculatorHelper.deployFeeCalculatorMockAsync();
   });
 
   after(async () => {
@@ -104,14 +102,16 @@ contract('Auction', accounts => {
     let subjectCaller: Address;
     let subjectCalculatorData: string;
 
+    let feeQuantity: BigNumber;
+    let customFeeQuantity: BigNumber;
+
     beforeEach(async () => {
       subjectCaller = ownerAccount;
 
       await coreMock.addSet.sendTransactionAsync(ownerAccount, txnFrom(ownerAccount));
 
-      const valueEncodedBytes = web3.utils.padLeft(web3.utils.numberToHex(ether(1).toString()), 64);
-
-      subjectCalculatorData = valueEncodedBytes;
+      feeQuantity = customFeeQuantity || ether(1);
+      subjectCalculatorData = feeCalculatorHelper.generateFixedRebalanceFeeCallData(feeQuantity);
     });
 
     async function subject(): Promise<any> {
@@ -124,8 +124,71 @@ contract('Auction', accounts => {
       const feeValue = await feeCalculator.fees.callAsync(ownerAccount);
       expect(feeValue).to.bignumber.equal(ether(1));
     });
+
+    describe('when the fee is greater than 100%', async () => {
+      before(async () => {
+        customFeeQuantity = ether(2);
+      });
+
+      after(async () => {
+        customFeeQuantity = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the fee is not a multiple of 0.1%', async () => {
+      before(async () => {
+        const ONE_BASIS_POINT = new BigNumber(10 ** 14);
+
+        customFeeQuantity = ether(1).div(100).plus(ONE_BASIS_POINT);
+      });
+
+      after(async () => {
+        customFeeQuantity = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
+  describe('#getFee', async () => {
+    let feeQuantity: BigNumber;
 
+    beforeEach(async () => {
+      await coreMock.addSet.sendTransactionAsync(feeCalculatorMock.address, txnFrom(ownerAccount));
 
+      feeQuantity = ether(1);
+      const feeData = feeCalculatorHelper.generateFixedRebalanceFeeCallData(feeQuantity);
+      await feeCalculatorMock.testInitialize.sendTransactionAsync(
+        feeCalculator.address,
+        feeData,
+        txnFrom(ownerAccount)
+      );
+    });
+
+    async function subject(): Promise<BigNumber> {
+      return feeCalculatorMock.testGetFee.callAsync(feeCalculator.address);
+    }
+
+    it('returns the correct fee', async () => {
+      const fee = await subject();
+
+      expect(fee).to.bignumber.equal(feeQuantity);
+    });
+
+    describe('when the caller is not a valid Set', async () => {
+      beforeEach(async () => {
+        await coreMock.disableSet.sendTransactionAsync(feeCalculatorMock.address, txnFrom(ownerAccount));
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
 });

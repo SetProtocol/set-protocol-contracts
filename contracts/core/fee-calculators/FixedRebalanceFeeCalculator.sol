@@ -18,9 +18,9 @@ pragma solidity 0.5.7;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { CommonMath } from "../../lib/CommonMath.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IFeeCalculator } from "../interfaces/IFeeCalculator.sol";
-// import { LibBytes } from "../external/0x/LibBytes.sol";
 import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
 
 
@@ -28,21 +28,19 @@ import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
  * @title FixedRebalanceFeeCalculator
  * @author Set Protocol
  *
- * The transferProxy contract is responsible for moving tokens through the system to
- * assist with issuance and usage from modules.
+ * 
  */
 
-contract FixedRebalanceFeeCalculator is IFeeCalculator
-{
-    // using LibBytes for bytes;
+contract FixedRebalanceFeeCalculator is IFeeCalculator {
     using SafeMath for uint256;
+
+    uint256 public constant TEN_BASIS_POINTS = 10 ** 15;
 
     ICore public core;
     mapping(address => uint256) public fees;
 
     /* ============ Modifier ============ */
-    modifier isValidSet() {
-        // TODO - Add test for SetTokenLibrary
+    modifier onlyValidSet() {
         SetTokenLibrary.requireValidSet(core, msg.sender);
         _;
     }
@@ -60,7 +58,6 @@ contract FixedRebalanceFeeCalculator is IFeeCalculator
     {
         // Issue: can be called by random people
         // Can only be initialized once by the msg.sender not the function
-        // Require that the value is 0
 
         uint256 rebalanceFee = parseFeeCalculatorData(_feeCalculatorData);
 
@@ -72,10 +69,11 @@ contract FixedRebalanceFeeCalculator is IFeeCalculator
     /**
      *
      */
+     // Do we need to validate that it is a valid Set?
     function getFee()
         external
         view
-        isValidSet
+        onlyValidSet
         returns(uint256)
     {
         return fees[msg.sender];
@@ -89,7 +87,17 @@ contract FixedRebalanceFeeCalculator is IFeeCalculator
         internal
         view
     {
-        // Validate fees are greater than 0, multiple of 10^15, less than scaled value
+        // Value is equal or less than 100%
+        require(
+            _rebalanceFee <= CommonMath.scaleFactor(),
+            "Fee must be equal or less than 100%"
+        );
+
+        // Validate fees, multiple of 10^15 or 0.1%
+        require(
+            _rebalanceFee.mod(TEN_BASIS_POINTS) == 0,
+            "Fee must be multiple of 0.1%"
+        );
     }
 
 

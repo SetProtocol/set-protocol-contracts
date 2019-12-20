@@ -374,7 +374,7 @@ contract('ProtocolViewer', accounts => {
     });
   });
 
-  describe.only('#batchFetchRebalanceStateAsync', async () => {
+  describe('#batchFetchRebalanceStateAsync', async () => {
     let subjectRebalancingSetAddresses: Address[];
 
     let rebalancingSetToken: RebalancingSetTokenContract;

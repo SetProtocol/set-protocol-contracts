@@ -51,6 +51,8 @@ import { StartRebalance } from "./rebalancing-v2/StartRebalance.sol";
  * - RebalanceAuctionModule execution should be backwards compatible with V1. 
  * - Bidding and auction parameters state no longer live on this contract. They live on the liquidator
  *   BackwardsComptability is used to allow retrieving of previous supported states.
+ * - Introduces entry and rebalance fees, where rebalance fees are configurable based on an external
+ *   fee calculator contract
  */
 contract RebalancingSetTokenV2 is
     ERC20,
@@ -71,7 +73,7 @@ contract RebalancingSetTokenV2 is
      * Constructor function for Rebalancing Set Token
      *
      * addressConfig [factory, manager, liquidator, initialSet, componentWhiteList, 
-     *                liquidatorWhiteList, feeRecipient]
+     *                liquidatorWhiteList, feeRecipientm rebalanceFeeCalculator]
      * [0]factory                   Factory used to create the Rebalancing Set
      * [1]manager                   Address that is able to propose the next Set
      * [2]liquidator                Address of the liquidator contract
@@ -79,16 +81,16 @@ contract RebalancingSetTokenV2 is
      * [4]componentWhiteList        Whitelist that nextSet components are checked against during propose
      * [5]liquidatorWhiteList       Whitelist of valid liquidators
      * [6]feeRecipient              Address that receives any incentive fees
+     * [7]rebalanceFeeCalculator    Address to retrieve rebalance fee during settlement
      *
      * uintConfig [initialUnitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, 
-     *             lastRebalanceTimestamp, entryFee, rebalanceFee]
+     *             lastRebalanceTimestamp, entryFee]
      * [0]initialUnitShares         Units of currentSet that equals one share
      * [1]naturalUnit               The minimum multiple of Sets that can be issued or redeemed
      * [2]rebalanceInterval:        Minimum amount of time between rebalances
      * [3]rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
      * [4]lastRebalanceTimestamp:   Time of the last rebalance; Allows customized deployments
      * [5]entryFee:                 Mint fee represented in a scaled decimal value (e.g. 100% = 1e18, 1% = 1e16)
-     * [6]rebalanceFee:             Rebalance fee represented in a scaled percentage value
      *
      * @param _addressConfig             List of configuration addresses
      * @param _uintConfig                List of uint addresses
@@ -116,8 +118,6 @@ contract RebalancingSetTokenV2 is
         liquidatorWhiteList = IWhiteList(_addressConfig[5]);
         feeRecipient = _addressConfig[6];
         rebalanceFeeCalculator = IFeeCalculator(_addressConfig[7]);
-        core = ICore(factory.core());
-        vault = IVault(core.vault());
 
         unitShares = _uintConfig[0];
         naturalUnit = _uintConfig[1];
@@ -125,10 +125,18 @@ contract RebalancingSetTokenV2 is
         rebalanceFailPeriod = _uintConfig[3];
         lastRebalanceTimestamp = _uintConfig[4];
         entryFee = _uintConfig[5];
+
+        core = ICore(factory.core());
+        vault = IVault(core.vault());
         rebalanceState = RebalancingLibrary.State.Default;
     }
 
-    // Called upon instantiation by the Factory
+    /*
+     * Intended to be called during creation by the RebalancingSetTokenFactory. Can only be initialized
+     * once.
+     *
+     * @param _rebalanceFeeCalldata       Bytes encoded rebalance fee represented as a scaled percentage value
+     */
     function initialize(
         bytes calldata _rebalanceFeeCalldata
     )

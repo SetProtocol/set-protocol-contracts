@@ -11,7 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
-  FixedRebalanceFeeCalculatorContract,
+  FixedFeeCalculatorContract,
   LinearAuctionLiquidatorContract,
   OracleWhiteListContract,
   SetTokenContract,
@@ -70,7 +70,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
   let liquidator: LinearAuctionLiquidatorContract;
-  let fixedFeeCalculator: FixedRebalanceFeeCalculatorContract;
+  let fixedFeeCalculator: FixedFeeCalculatorContract;
 
   let name: string;
   let auctionPeriod: BigNumber;
@@ -209,7 +209,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
     );
     await coreHelper.addAddressToWhiteList(liquidator.address, liquidatorWhitelist);
 
-    fixedFeeCalculator = await feeCalculatorHelper.deployFixedRebalanceFeeCalculatorAsync(coreMock.address);
+    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync(coreMock.address);
   });
 
   afterEach(async () => {

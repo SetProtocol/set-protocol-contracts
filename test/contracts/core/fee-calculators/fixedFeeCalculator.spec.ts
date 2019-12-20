@@ -11,7 +11,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
   FeeCalculatorMockContract,
-  FixedRebalanceFeeCalculatorContract,
+  FixedFeeCalculatorContract,
   SetTokenFactoryContract,
   TransferProxyContract,
   VaultContract,
@@ -30,9 +30,9 @@ const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
-const FixedRebalanceFeeCalculator = artifacts.require('FixedRebalanceFeeCalculator');
+const FixedFeeCalculator = artifacts.require('FixedFeeCalculator');
 
-contract('FixedRebalanceFeeCalculator', accounts => {
+contract('FixedFeeCalculator', accounts => {
   const [
     ownerAccount,
   ] = accounts;
@@ -45,12 +45,12 @@ contract('FixedRebalanceFeeCalculator', accounts => {
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
   const feeCalculatorHelper = new FeeCalculatorHelper(ownerAccount);
 
-  let feeCalculator: FixedRebalanceFeeCalculatorContract;
+  let feeCalculator: FixedFeeCalculatorContract;
   let feeCalculatorMock: FeeCalculatorMockContract;
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(FixedRebalanceFeeCalculator.abi);
+    ABIDecoder.addABI(FixedFeeCalculator.abi);
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -60,13 +60,13 @@ contract('FixedRebalanceFeeCalculator', accounts => {
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, setTokenFactory);
 
-    feeCalculator = await feeCalculatorHelper.deployFixedRebalanceFeeCalculatorAsync(coreMock.address);
+    feeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
     feeCalculatorMock = await feeCalculatorHelper.deployFeeCalculatorMockAsync();
   });
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(FixedRebalanceFeeCalculator.abi);
+    ABIDecoder.removeABI(FixedFeeCalculator.abi);
   });
 
   beforeEach(async () => {
@@ -75,27 +75,6 @@ contract('FixedRebalanceFeeCalculator', accounts => {
 
   afterEach(async () => {
     await blockchain.revertAsync();
-  });
-
-  describe('#constructor', async () => {
-    let feeCalculatorDeployed: FixedRebalanceFeeCalculatorContract;
-
-    let subjectCore: Address;
-
-    beforeEach(async () => {
-      subjectCore = coreMock.address;
-    });
-
-    async function subject(): Promise<any> {
-      return feeCalculatorHelper.deployFixedRebalanceFeeCalculatorAsync(subjectCore);
-    }
-
-    it('sets the correct core', async () => {
-      feeCalculatorDeployed = await subject();
-
-      const actualOracleWhiteList = await feeCalculatorDeployed.core.callAsync();
-      expect(actualOracleWhiteList).to.bignumber.equal(coreMock.address);
-    });
   });
 
   describe('#initialize', async () => {
@@ -122,7 +101,14 @@ contract('FixedRebalanceFeeCalculator', accounts => {
       await subject();
 
       const feeValue = await feeCalculator.fees.callAsync(ownerAccount);
-      expect(feeValue).to.bignumber.equal(ether(1));
+      expect(feeValue).to.bignumber.equal(feeQuantity);
+    });
+
+    it('updates the isInitialized state variable', async () => {
+      await subject();
+
+      const isInitialized = await feeCalculator.isInitialized.callAsync(ownerAccount);
+      expect(isInitialized).to.equal(true);
     });
 
     describe('when the fee is greater than 100%', async () => {
@@ -154,6 +140,16 @@ contract('FixedRebalanceFeeCalculator', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the fee is already initialized', async () => {
+      beforeEach(async () => {
+        await feeCalculator.initialize.sendTransactionAsync(subjectCalculatorData, txnFrom(subjectCaller));
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#getFee', async () => {
@@ -179,16 +175,6 @@ contract('FixedRebalanceFeeCalculator', accounts => {
       const fee = await subject();
 
       expect(fee).to.bignumber.equal(feeQuantity);
-    });
-
-    describe('when the caller is not a valid Set', async () => {
-      beforeEach(async () => {
-        await coreMock.disableSet.sendTransactionAsync(feeCalculatorMock.address, txnFrom(ownerAccount));
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
     });
   });
 });

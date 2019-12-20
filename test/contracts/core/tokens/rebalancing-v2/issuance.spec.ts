@@ -11,7 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
-  FixedRebalanceFeeCalculatorContract,
+  FixedFeeCalculatorContract,
   LiquidatorMockContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
@@ -74,7 +74,7 @@ contract('Issuance', accounts => {
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
   let liquidatorMock: LiquidatorMockContract;
-  let fixedFeeCalculator: FixedRebalanceFeeCalculatorContract;
+  let fixedFeeCalculator: FixedFeeCalculatorContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -121,7 +121,7 @@ contract('Issuance', accounts => {
     liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
 
-    fixedFeeCalculator = await feeCalculatorHelper.deployFixedRebalanceFeeCalculatorAsync(coreMock.address);
+    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync(coreMock.address);
   });
 
   afterEach(async () => {

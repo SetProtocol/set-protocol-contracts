@@ -4,11 +4,11 @@ import { BigNumber } from 'bignumber.js';
 
 import {
   FeeCalculatorMockContract,
-  FixedRebalanceFeeCalculatorContract,
+  FixedFeeCalculatorContract,
 } from '../contracts';
 import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
 
-const FixedRebalanceFeeCalculator = artifacts.require('FixedRebalanceFeeCalculator');
+const FixedFeeCalculator = artifacts.require('FixedFeeCalculator');
 const FeeCalculatorMock = artifacts.require('FeeCalculatorMock');
 
 const web3 = getWeb3();
@@ -22,13 +22,12 @@ export class FeeCalculatorHelper {
 
   /* ============ Deployment ============ */
 
-  public async deployFixedRebalanceFeeCalculatorAsync(
-    core: Address,
+  public async deployFixedFeeCalculatorAsync(
     from: Address = this._contractOwnerAddress
-  ): Promise<FixedRebalanceFeeCalculatorContract> {
-    const feeCalculator = await FixedRebalanceFeeCalculator.new(core, txnFrom(from));
+  ): Promise<FixedFeeCalculatorContract> {
+    const feeCalculator = await FixedFeeCalculator.new(txnFrom(from));
 
-    return new FixedRebalanceFeeCalculatorContract(getContractInstance(feeCalculator), txnFrom(from));
+    return new FixedFeeCalculatorContract(getContractInstance(feeCalculator), txnFrom(from));
   }
 
   public async deployFeeCalculatorMockAsync(

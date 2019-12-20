@@ -11,7 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
-  FixedRebalanceFeeCalculatorContract,
+  FixedFeeCalculatorContract,
   LiquidatorMockContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
@@ -90,7 +90,7 @@ contract('RebalancingSetState', accounts => {
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
   const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
-  let feeCalculator: FixedRebalanceFeeCalculatorContract;
+  let feeCalculator: FixedFeeCalculatorContract;
 
   let initialSetToken: SetTokenContract;
   let nextSetToken: SetTokenContract;
@@ -153,8 +153,7 @@ contract('RebalancingSetState', accounts => {
     const { timestamp } = await web3.eth.getBlock('latest');
     lastRebalanceTimestamp = timestamp;
 
-    feeCalculator = await feeCalculatorHelper.deployFixedRebalanceFeeCalculatorAsync(coreMock.address);
-    const valueEncodedBytes = web3.utils.padLeft(web3.utils.numberToHex(ether(1).toString()), 64);
+    feeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
 
     rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
       [
@@ -196,7 +195,6 @@ contract('RebalancingSetState', accounts => {
     let subjectFailPeriod: BigNumber;
     let subjectLastRebalanceTimestamp: BigNumber;
     let subjectEntryFee: BigNumber;
-    let subjectRebalanceFee: BigNumber;
     let subjectRebalanceFeeCalculator: Address;
     const subjectName: string = 'Rebalancing Set';
     const subjectSymbol: string = 'RBSET';
@@ -217,7 +215,6 @@ contract('RebalancingSetState', accounts => {
       subjectFailPeriod = ONE_DAY_IN_SECONDS.mul(3);
       subjectLastRebalanceTimestamp = new BigNumber(timestamp);
       subjectEntryFee = ether(1);
-      subjectRebalanceFee = ether(2);
       subjectRebalanceFeeCalculator = feeCalculator.address;
     });
 
@@ -230,7 +227,7 @@ contract('RebalancingSetState', accounts => {
         subjectComponentWhiteList,
         subjectLiquidatorWhiteList,
         subjectFeeRecipient,
-        subjectRebalanceFeeCalculator
+        subjectRebalanceFeeCalculator,
       ];
 
       const bigNumberConfig = [
@@ -383,20 +380,20 @@ contract('RebalancingSetState', accounts => {
     });
   });
 
-  // WIP
   describe('#initialize', async () => {
     let subjectRebalanceFeeCalldata: string;
     let subjectCaller: Address;
 
+    let fee: BigNumber;
+
     beforeEach(async () => {
-      const valueEncodedBytes = web3.utils.padLeft(web3.utils.numberToHex(ether(1).toString()), 64);      
-      subjectRebalanceFeeCalldata = valueEncodedBytes;
-      
+      fee = ether(1);
+
+      subjectRebalanceFeeCalldata = feeCalculatorHelper.generateFixedRebalanceFeeCallData(fee);
+
       await coreMock.addSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(deployerAccount));
 
       subjectCaller = managerAccount;
-
-
     });
 
     async function subject(): Promise<string> {
@@ -410,19 +407,21 @@ contract('RebalancingSetState', accounts => {
       await subject();
 
       const expectedValue = await feeCalculator.fees.callAsync(rebalancingSetToken.address);
-      // TODO cleanup test
-      expect(expectedValue).to.bignumber.equal(ether(1));
+      expect(expectedValue).to.bignumber.equal(fee);
     });
 
-    // describe('when the caller is not the current manager', async () => {
-    //   beforeEach(async () => {
-    //     subjectCaller = otherAccount;
-    //   });
+    describe('when the Set has already been initialized', async () => {
+      beforeEach(async () => {
+        await rebalancingSetToken.initialize.sendTransactionAsync(
+          subjectRebalanceFeeCalldata,
+          { from: subjectCaller, gas: DEFAULT_GAS}
+        );
+      });
 
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#setManager', async () => {

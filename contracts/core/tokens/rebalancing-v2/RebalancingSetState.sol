@@ -201,6 +201,10 @@ contract RebalancingSetState {
 
     /* ============ Getter Functions ============ */
 
+    /*
+     * Retrieves the current expected fee from the fee calculator
+     * Value is returned as a scale decimal figure.
+     */
     function rebalanceFee()
         external
         view

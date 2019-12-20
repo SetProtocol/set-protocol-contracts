@@ -203,7 +203,7 @@ contract('SettleRebalance', accounts => {
       });
     });
 
-    describe.only('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
+    describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
       beforeEach(async () => {
        await rebalancingHelper.transitionToRebalanceV2Async(
          coreMock,
@@ -220,17 +220,6 @@ contract('SettleRebalance', accounts => {
           rebalancingSetToken.address,
           bidQuantity,
         );
-
-      	console.log("Calculator address", fixedFeeCalculator.address);
-
-      	const rbFeeCalculator = await rebalancingSetToken.rebalanceFeeCalculator.callAsync();
-      	console.log("RB Set Calculator Address", rbFeeCalculator.toString());
-
-      	const fromCalculator = await fixedFeeCalculator.fees.callAsync(rebalancingSetToken.address);
-      	console.log("From Calculator?", fromCalculator.toString());
-
-      	const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
-      	console.log("Getting the fee?", rebalanceFee.toString());
       });
 
       it('updates the rebalanceState to Default', async () => {

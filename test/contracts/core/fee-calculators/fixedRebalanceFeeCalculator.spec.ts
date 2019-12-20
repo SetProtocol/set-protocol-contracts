@@ -141,9 +141,9 @@ contract('FixedRebalanceFeeCalculator', accounts => {
 
     describe('when the fee is not a multiple of 0.1%', async () => {
       before(async () => {
-        const ONE_BASIS_POINT = new BigNumber(10 ** 14);
+        const ONE_TENTH_BASIS_POINT = new BigNumber(10 ** 13);
 
-        customFeeQuantity = ether(1).div(100).plus(ONE_BASIS_POINT);
+        customFeeQuantity = ether(1).div(100).plus(ONE_TENTH_BASIS_POINT);
       });
 
       after(async () => {

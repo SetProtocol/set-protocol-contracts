@@ -218,7 +218,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     let callDataEntryFee: BigNumber;
     let callDataRebalanceFeeCallData: Buffer;
 
-    let rebalanceFee: BigNumber
+    let rebalanceFee: BigNumber;
 
     beforeEach(async () => {
       rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
@@ -245,7 +245,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       callDataLastRebalanceTimestamp = timestamp;
       callDataEntryFee = ether(1);
 
-      rebalanceFee = ether(2);
+      rebalanceFee = ether(1);
       callDataRebalanceFeeCallData = SetUtils.generateFixedFeeCalculatorCalldata(rebalanceFee);
       subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
         callDataManagerAddress,

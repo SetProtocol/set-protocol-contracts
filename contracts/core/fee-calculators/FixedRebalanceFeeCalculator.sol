@@ -34,7 +34,7 @@ import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
 contract FixedRebalanceFeeCalculator is IFeeCalculator {
     using SafeMath for uint256;
 
-    uint256 public constant TEN_BASIS_POINTS = 10 ** 15;
+    uint256 public constant ONE_BASIS_POINT = 10 ** 14;
 
     ICore public core;
     mapping(address => uint256) public fees;
@@ -93,10 +93,10 @@ contract FixedRebalanceFeeCalculator is IFeeCalculator {
             "Fee must be equal or less than 100%"
         );
 
-        // Validate fees, multiple of 10^15 or 0.1%
+        // Validate fee is a multiple of 10^15 or 0.01%
         require(
-            _rebalanceFee.mod(TEN_BASIS_POINTS) == 0,
-            "Fee must be multiple of 0.1%"
+            _rebalanceFee.mod(ONE_BASIS_POINT) == 0,
+            "Fee must be multiple of 0.01%"
         );
     }
 

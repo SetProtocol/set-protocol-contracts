@@ -278,6 +278,14 @@ contract('BackwardsCompatability', accounts => {
   });
 
   describe('#getFailedAuctionWithdrawComponents', async () => {
+    beforeEach(async () => {
+      await rebalancingHelper.failRebalanceToDrawdownAsync(
+        rebalancingSetToken,
+        liquidatorMock,
+        rebalanceAuctionModule
+      );
+    });
+
     async function subject(): Promise<Address[]> {
       return rebalancingSetToken.getFailedAuctionWithdrawComponents.callAsync();
     }
@@ -285,10 +293,14 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct getFailedAuctionWithdrawComponents', async () => {
       const auctionWithdrawComponents = await subject();
 
-      const failedComponents =  await rebalancingSetToken.getCombinedTokenArray.callAsync(
-        rebalancingSetToken.address
+      const failedComponents =  await rebalancingHelper.getFailedWithdrawComponentsAsync(
+        currentSetToken,
+        nextSetToken,
       );
-      expect(JSON.stringify(auctionWithdrawComponents)).to.equal(JSON.stringify(failedComponents));
+      const sortedExpected = _.sortBy(failedComponents);
+      const sortActual = _.sortBy(auctionWithdrawComponents);
+
+      expect(JSON.stringify(sortActual)).to.equal(JSON.stringify(sortedExpected));
     });
   });
 

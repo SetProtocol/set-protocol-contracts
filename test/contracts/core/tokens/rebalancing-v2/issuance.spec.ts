@@ -333,13 +333,13 @@ contract('Issuance', accounts => {
       const manager = managerAccount;
       const liquidator = liquidatorMock.address;
       const initialSet = currentSetToken.address;
+      const feeCalculator = fixedFeeCalculator.address;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
       const failPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       const entryFee = ZERO;
-      const rebalanceFee = ZERO;
 
       const rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
         coreMock.address,
@@ -357,6 +357,7 @@ contract('Issuance', accounts => {
           rebalancingComponentWhiteList.address,
           liquidatorWhitelist.address,
           feeRecipient,
+          feeCalculator,
         ],
         [
           initialUnitShares,
@@ -365,7 +366,6 @@ contract('Issuance', accounts => {
           failPeriod,
           new BigNumber(lastRebalanceTimestamp),
           entryFee,
-          rebalanceFee,
         ],
         '0x00'
       );

@@ -124,6 +124,9 @@ interface IRebalancingSetTokenV2 {
         view
         returns (uint256);
 
+    /*
+     * Initializes the RebalancingSetToken. Typically called by the Factory during creation
+     */
     function initialize(
         bytes calldata _rebalanceFeeCalldata
     )

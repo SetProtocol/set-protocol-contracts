@@ -73,7 +73,7 @@ contract RebalancingSetTokenV2 is
      * Constructor function for Rebalancing Set Token
      *
      * addressConfig [factory, manager, liquidator, initialSet, componentWhiteList, 
-     *                liquidatorWhiteList, feeRecipientm rebalanceFeeCalculator]
+     *                liquidatorWhiteList, feeRecipient, rebalanceFeeCalculator]
      * [0]factory                   Factory used to create the Rebalancing Set
      * [1]manager                   Address that is able to propose the next Set
      * [2]liquidator                Address of the liquidator contract
@@ -133,7 +133,8 @@ contract RebalancingSetTokenV2 is
 
     /*
      * Intended to be called during creation by the RebalancingSetTokenFactory. Can only be initialized
-     * once.
+     * once. This implementation initializes the rebalance fee.
+     *
      *
      * @param _rebalanceFeeCalldata       Bytes encoded rebalance fee represented as a scaled percentage value
      */

@@ -20,6 +20,7 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3, txnFrom } from '@utils/web3Helper';
 import { ether } from '@utils/units';
+import { ZERO } from '@utils/constants';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
@@ -109,6 +110,21 @@ contract('FixedFeeCalculator', accounts => {
 
       const isInitialized = await feeCalculator.isInitialized.callAsync(ownerAccount);
       expect(isInitialized).to.equal(true);
+    });
+
+    describe('when the fee is 0%', async () => {
+      before(async () => {
+        customFeeQuantity = ZERO;
+      });
+
+      after(async () => {
+        customFeeQuantity = undefined;
+      });
+
+      it('should revert', async () => {
+        const feeValue = await feeCalculator.fees.callAsync(ownerAccount);
+        expect(feeValue).to.bignumber.equal(feeQuantity);
+      });
     });
 
     describe('when the fee is greater than 100%', async () => {

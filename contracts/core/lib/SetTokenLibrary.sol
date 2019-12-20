@@ -74,7 +74,16 @@ library SetTokenLibrary {
         );
     }
 
-    function requireValidSet(ICore _core, address _set)
+    /**
+     * Validates that passed in quantity is a multiple of the natural unit of the Set.
+     *
+     * @param _core                     Address of Core
+     * @param _set                      Address of the Set
+     */
+    function requireValidSet(
+        ICore _core,
+        address _set
+    )
         internal
         view
     {

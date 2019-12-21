@@ -24,17 +24,17 @@ import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./RebalancingSetState.sol";
-import { SettleRebalance } from "./SettleRebalance.sol";
+import { RebalancingSettlement } from "./RebalancingSettlement.sol";
 
 
 /**
- * @title FailRebalance
+ * @title RebalancingFailure
  * @author Set Protocol
  *
  */
-contract FailRebalance is 
+contract RebalancingFailure is 
     RebalancingSetState,
-    SettleRebalance
+    RebalancingSettlement
 {
     using SafeMath for uint256;
     using AddressArrayUtils for address[];

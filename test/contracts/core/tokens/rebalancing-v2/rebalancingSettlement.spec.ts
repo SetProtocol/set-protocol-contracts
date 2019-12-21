@@ -50,7 +50,7 @@ const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
-contract('SettleRebalance', accounts => {
+contract('RebalancingSettlement', accounts => {
   const [
     deployerAccount,
     managerAccount,

@@ -47,7 +47,7 @@ const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
-contract('FailRebalance', accounts => {
+contract('RebalancingFailure', accounts => {
   const [
     deployerAccount,
     managerAccount,

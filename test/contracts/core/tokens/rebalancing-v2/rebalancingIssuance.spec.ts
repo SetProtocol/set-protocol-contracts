@@ -56,7 +56,7 @@ const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
-contract('Issuance', accounts => {
+contract('RebalancingIssuance', accounts => {
   const [
     deployerAccount,
     managerAccount,

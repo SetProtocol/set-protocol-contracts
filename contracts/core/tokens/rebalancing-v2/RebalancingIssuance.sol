@@ -28,12 +28,12 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
 
 
 /**
- * @title Issuance
+ * @title RebalancingIssuance
  * @author Set Protocol
  *
  * Default implementation of Rebalancing Set Token propose function
  */
-contract Issuance is 
+contract RebalancingIssuance is 
     ERC20,
     RebalancingSetState
 {

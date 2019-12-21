@@ -26,12 +26,12 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
 
 
 /**
- * @title StartRebalance
+ * @title RebalancingStart
  * @author Set Protocol
  *
  * Implementation of Rebalancing Set Token V2 start rebalance functionality
  */
-contract StartRebalance is 
+contract RebalancingStart is 
     RebalancingSetState
 {
     using SafeMath for uint256;

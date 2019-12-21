@@ -46,7 +46,7 @@ const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
 
-contract('BackwardsCompatability', accounts => {
+contract('BackwardCompatibility', accounts => {
   const [
     deployerAccount,
     managerAccount,

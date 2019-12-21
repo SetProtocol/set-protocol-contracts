@@ -47,7 +47,7 @@ const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
-contract('PlaceBid', accounts => {
+contract('RebalancingBid', accounts => {
   const [
     deployerAccount,
     managerAccount,

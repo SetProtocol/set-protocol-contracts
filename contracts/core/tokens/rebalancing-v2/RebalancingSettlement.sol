@@ -30,11 +30,11 @@ import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 
 /**
- * @title SettleRebalance
+ * @title RebalancingSettlement
  * @author Set Protocol
  *
  */
-contract SettleRebalance is 
+contract RebalancingSettlement is 
     ERC20,
     RebalancingSetState
 {

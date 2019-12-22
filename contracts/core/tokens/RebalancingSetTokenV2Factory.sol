@@ -203,7 +203,7 @@ contract RebalancingSetTokenV2Factory {
             "Invalid liquidator"
         );
 
-        // Require liquidator address is non-zero and is whitelisted by the liquidatorWhitelist
+        // Require rebalance fee is whitelisted by the liquidatorWhitelist
         require(
             feeCalculatorWhitelist.whiteList(address(parameters.rebalanceFeeCalculator)),
             "Invalid fee calculator"

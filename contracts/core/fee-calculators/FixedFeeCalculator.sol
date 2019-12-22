@@ -61,9 +61,7 @@ contract FixedFeeCalculator is IFeeCalculator {
         external
     {
         // Sender fee must not already be initialized
-        require(
-            !isInitialized[msg.sender], "Must not be initialized"
-        );
+        require(!isInitialized[msg.sender], "Must not be initialized");
 
         uint256 fee = parseFeeCalculatorData(_feeCalculatorData);
 

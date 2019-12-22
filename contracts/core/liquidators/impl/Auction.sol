@@ -90,7 +90,7 @@ contract Auction {
         internal
     {
         _auction.pricePrecision = calculatePricePrecision(_currentSet, _nextSet);
-
+        
         uint256 minimumBid = calculateMinimumBid(_currentSet, _nextSet, _auction.pricePrecision);
         
         // remainingCurrentSets must be greater than minimumBid or no bidding would be allowed
@@ -216,7 +216,7 @@ contract Auction {
 
             // Apply order of magnitude to pricePrecision, only want increase if value is >10x so subtract
             // one order of magnitude
-            return MINIMUM_PRICE_PRECISION.mul(10 ** orderOfMagnitude.sub(1));
+            return MINIMUM_PRICE_PRECISION.mul(10 ** orderOfMagnitude).div(10);
         }
         
         return MINIMUM_PRICE_PRECISION;

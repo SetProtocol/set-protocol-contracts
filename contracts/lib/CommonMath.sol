@@ -156,7 +156,7 @@ library CommonMath {
         // Make sure passed value is greater than 0
         require (
             _value > 0,
-            "AllocatorMathLibrary.ceilLog10: Value must be greater than zero."
+            "CommonMath.ceilLog10: Value must be greater than zero."
         );
 
         // Since log10(1) = 0, if _value = 1 return 0

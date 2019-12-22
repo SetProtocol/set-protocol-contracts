@@ -71,6 +71,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
   let liquidatorWhitelist: WhiteListContract;
   let liquidator: LinearAuctionLiquidatorContract;
   let fixedFeeCalculator: FixedFeeCalculatorContract;
+  let feeCalculatorWhitelist: WhiteListContract;
 
   let name: string;
   let auctionPeriod: BigNumber;
@@ -138,10 +139,12 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
     setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
     liquidatorWhitelist = await coreHelper.deployWhiteListAsync();
+    feeCalculatorWhitelist = await coreHelper.deployWhiteListAsync();
     rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
-      liquidatorWhitelist.address
+      liquidatorWhitelist.address,
+      feeCalculatorWhitelist.address,
     );
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, setTokenFactory);
@@ -210,6 +213,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
     await coreHelper.addAddressToWhiteList(liquidator.address, liquidatorWhitelist);
 
     fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
+    await coreHelper.addAddressToWhiteList(fixedFeeCalculator.address, feeCalculatorWhitelist);
   });
 
   afterEach(async () => {

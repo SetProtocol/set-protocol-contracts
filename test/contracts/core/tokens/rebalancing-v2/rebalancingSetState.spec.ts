@@ -91,6 +91,7 @@ contract('RebalancingSetState', accounts => {
   const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   let feeCalculator: FixedFeeCalculatorContract;
+  let feeCalculatorWhitelist: WhiteListContract;
 
   let initialSetToken: SetTokenContract;
   let nextSetToken: SetTokenContract;
@@ -124,11 +125,13 @@ contract('RebalancingSetState', accounts => {
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
     liquidatorWhitelist = await coreHelper.deployWhiteListAsync();
+    feeCalculatorWhitelist = await coreHelper.deployWhiteListAsync();
 
     rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
-      liquidatorWhitelist.address
+      liquidatorWhitelist.address,
+      feeCalculatorWhitelist.address
     );
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
@@ -154,6 +157,7 @@ contract('RebalancingSetState', accounts => {
     lastRebalanceTimestamp = timestamp;
 
     feeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
+    await coreHelper.addAddressToWhiteList(feeCalculator.address, feeCalculatorWhitelist);
 
     rebalancingSetToken = await rebalancingHelper.deployRebalancingSetTokenV2Async(
       [

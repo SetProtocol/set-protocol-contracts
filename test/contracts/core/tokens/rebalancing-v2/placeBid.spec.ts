@@ -68,6 +68,7 @@ contract('PlaceBid', accounts => {
   let liquidatorMock: LiquidatorMockContract;
   let placeBidMock: PlaceBidMockContract;
   let feeCalculator: FixedFeeCalculatorContract;
+  let feeCalculatorWhitelist: WhiteListContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -108,10 +109,12 @@ contract('PlaceBid', accounts => {
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
     liquidatorWhitelist = await coreHelper.deployWhiteListAsync();
+    feeCalculatorWhitelist = await coreHelper.deployWhiteListAsync();
     rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
-      liquidatorWhitelist.address
+      liquidatorWhitelist.address,
+      feeCalculatorWhitelist.address
     );
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
@@ -122,6 +125,7 @@ contract('PlaceBid', accounts => {
     placeBidMock = await libraryMockHelper.deployPlaceBidMockAsync();
 
     feeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
+    await coreHelper.addAddressToWhiteList(feeCalculator.address, feeCalculatorWhitelist);
 
     const setTokensToDeploy = 2;
     const setTokens = await rebalancingHelper.createSetTokensAsync(

@@ -50,6 +50,9 @@ contract RebalancingSetTokenV2Factory {
     // Whitelist contract for approved liquidators
     IWhiteList public liquidatorWhitelist;
 
+    // Whitelist contract for approved fee calcualtors
+    IWhiteList public feeCalculatorWhitelist;
+
     // Minimum amount of time between rebalances in seconds
     uint256 public minimumRebalanceInterval;
 
@@ -89,6 +92,7 @@ contract RebalancingSetTokenV2Factory {
      * @param  _core                       Address of deployed core contract
      * @param  _componentWhitelist         Address of component whitelist contract
      * @param  _liquidatorWhitelist        Address of liquidator whitelist contract
+     * @param  _feeCalculatorWhitelist     Address of feeCalculator whitelist contract
      * @param  _minimumRebalanceInterval   Minimum amount of time between rebalances in seconds
      * @param  _minimumNaturalUnit         Minimum number for the token natural unit
      * @param  _maximumNaturalUnit         Maximum number for the token natural unit
@@ -97,6 +101,7 @@ contract RebalancingSetTokenV2Factory {
         ICore _core,
         IWhiteList _componentWhitelist,
         IWhiteList _liquidatorWhitelist,
+        IWhiteList _feeCalculatorWhitelist,
         uint256 _minimumRebalanceInterval,
         uint256 _minimumFailRebalancePeriod,
         uint256 _maximumFailRebalancePeriod,
@@ -108,6 +113,7 @@ contract RebalancingSetTokenV2Factory {
         core = _core;
         rebalanceComponentWhitelist = _componentWhitelist;
         liquidatorWhitelist = _liquidatorWhitelist;
+        feeCalculatorWhitelist = _feeCalculatorWhitelist;
         minimumRebalanceInterval = _minimumRebalanceInterval;
         minimumFailRebalancePeriod = _minimumFailRebalancePeriod;
         maximumFailRebalancePeriod = _maximumFailRebalancePeriod;
@@ -160,19 +166,14 @@ contract RebalancingSetTokenV2Factory {
 
         // Ensure component array only includes one address which will be the currentSet
         require(
-            _components.length == 1,
-            "Components must be len 1"
-        );
-
-        // Ensure units array only includes one uint which will be the starting unitShares
-        require(
+            _components.length == 1 && 
             _units.length == 1,
-            "Units must be len 1"
+            "Components & units must be len 1"
         );
 
         require(
             _units[0] > 0,
-            "UnitShares must be > 0"
+            "UnitShares not > 0"
         );
 
         address startingSet = _components[0];
@@ -200,6 +201,12 @@ contract RebalancingSetTokenV2Factory {
             address(parameters.liquidator) != address(0) && 
             liquidatorWhitelist.whiteList(address(parameters.liquidator)),
             "Invalid liquidator"
+        );
+
+        // Require liquidator address is non-zero and is whitelisted by the liquidatorWhitelist
+        require(
+            feeCalculatorWhitelist.whiteList(address(parameters.rebalanceFeeCalculator)),
+            "Invalid fee calculator"
         );
 
         require(

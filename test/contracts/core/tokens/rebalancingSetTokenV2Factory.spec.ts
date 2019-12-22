@@ -68,6 +68,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhiteList: WhiteListContract;
   let fixedFeeCalculator: FixedFeeCalculatorContract;
+  let feeCalculatorWhitelist: WhiteListContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -110,6 +111,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     liquidatorWhiteList = await coreHelper.deployWhiteListAsync();
 
     fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
+    feeCalculatorWhitelist = await coreHelper.deployWhiteListAsync();
   });
 
   afterEach(async () => {
@@ -120,6 +122,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
     let subjectCoreAddress: Address;
     let subjectComponentWhitelist: Address;
     let subjectLiquidatorWhitelist: Address;
+    let subjectFeeCalculatorWhitelist: Address;
     let subjectMinimumRebalanceInterval: BigNumber;
     let subjectMinimumFailRebalancePeriod: BigNumber;
     let subjectMaximumFailRebalancePeriod: BigNumber;
@@ -130,6 +133,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       subjectCoreAddress = core.address;
       subjectComponentWhitelist = rebalancingComponentWhiteList.address;
       subjectLiquidatorWhitelist = liquidatorWhiteList.address;
+      subjectFeeCalculatorWhitelist = liquidatorWhiteList.address;
       subjectMinimumRebalanceInterval = ONE_DAY_IN_SECONDS;
       subjectMinimumFailRebalancePeriod = ONE_DAY_IN_SECONDS;
       subjectMaximumFailRebalancePeriod = ONE_DAY_IN_SECONDS.mul(30);
@@ -142,6 +146,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         subjectCoreAddress,
         subjectComponentWhitelist,
         subjectLiquidatorWhitelist,
+        subjectFeeCalculatorWhitelist,
         subjectMinimumRebalanceInterval,
         subjectMinimumFailRebalancePeriod,
         subjectMaximumFailRebalancePeriod,
@@ -169,6 +174,13 @@ contract('RebalancingSetTokenV2Factory', accounts => {
 
       const liquidatorWhiteList = await rebalancingTokenFactory.liquidatorWhitelist.callAsync();
       expect(liquidatorWhiteList).to.equal(subjectLiquidatorWhitelist);
+    });
+
+    it('should have the correct feeCalculator whitelist address', async () => {
+      const rebalancingTokenFactory = await subject();
+
+      const feeCalculatorWhitelist = await rebalancingTokenFactory.feeCalculatorWhitelist.callAsync();
+      expect(feeCalculatorWhitelist).to.equal(subjectFeeCalculatorWhitelist);
     });
 
     it('should have the correct minimum rebalance interval', async () => {
@@ -225,9 +237,11 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         core.address,
         rebalancingComponentWhiteList.address,
         liquidatorWhiteList.address,
+        feeCalculatorWhitelist.address
       );
       await coreHelper.addFactoryAsync(core, rebalancingSetTokenFactory);
       await coreHelper.addAddressToWhiteList(liquidatorAccount, liquidatorWhiteList);
+      await coreHelper.addAddressToWhiteList(fixedFeeCalculator.address, feeCalculatorWhitelist);
 
       subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];
@@ -513,6 +527,28 @@ contract('RebalancingSetTokenV2Factory', accounts => {
       });
     });
 
+    describe('when the feeCalculator address is not whitelisted', async () => {
+      beforeEach(async () => {
+        callDataFeeCalculator = nonApprovedLiquidator;
+
+        subjectCallData = SetUtils.generateRebalancingSetTokenV2CallData(
+          callDataManagerAddress,
+          callDataLiquidator,
+          callDataFeeRecipient,
+          callDataFeeCalculator,
+          callDataRebalanceInterval,
+          callDataFailAuctionPeriod,
+          callDataLastRebalanceTimestamp,
+          callDataEntryFee,
+          callDataRebalanceFeeCallData
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe('when the rebalanceInterval is less than the minimum', async () => {
       beforeEach(async () => {
         callDataRebalanceInterval = new BigNumber(5000);
@@ -617,6 +653,7 @@ contract('RebalancingSetTokenV2Factory', accounts => {
         core.address,
         rebalancingComponentWhiteList.address,
         liquidatorWhiteList.address,
+        feeCalculatorWhitelist.address,
       );
       await coreHelper.addFactoryAsync(core, rebalancingSetTokenFactory);
 

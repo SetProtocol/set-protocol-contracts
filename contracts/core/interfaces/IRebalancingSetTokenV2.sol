@@ -125,6 +125,14 @@ interface IRebalancingSetTokenV2 {
         returns (uint256);
 
     /*
+     * Initializes the RebalancingSetToken. Typically called by the Factory during creation
+     */
+    function initialize(
+        bytes calldata _rebalanceFeeCalldata
+    )
+        external;
+
+    /*
      * Set new liquidator address. Only whitelisted addresses are valid.
      */
     function setLiquidator(

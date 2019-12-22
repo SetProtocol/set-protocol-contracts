@@ -55,13 +55,13 @@ contract FailRebalance is
         // Token must be in Rebalance State
         require(
             rebalanceState ==  RebalancingLibrary.State.Rebalance,
-            "Fail: Set must be in Rebalance State"
+            "Must be in Rebalance State"
         );
 
         // Failure triggers must be met
         require(
             liquidatorBreached() || failPeriodBreached(),
-            "Fail: Fail triggers not been breached"
+            "Fail triggers not been breached"
         );
     }
 

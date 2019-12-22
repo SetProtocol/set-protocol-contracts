@@ -61,17 +61,13 @@ contract Issuance is
     {
         require(
             msg.sender == address(core),
-            "Mint: Sender must be core"
+            "Sender must be core"
         );
 
         require(
-            rebalanceState != RebalancingLibrary.State.Rebalance,
-            "Mint: Cannot mint during Rebalance"
-        );
-
-        require(
+            rebalanceState != RebalancingLibrary.State.Rebalance &&
             rebalanceState != RebalancingLibrary.State.Drawdown,
-            "Mint: Cannot mint during Drawdown"
+            "Cant mint during Rebalance or Drawdown"
         );
     }
 
@@ -87,21 +83,21 @@ contract Issuance is
     {
         require(
             rebalanceState != RebalancingLibrary.State.Rebalance,
-            "Burn: Cannot burn during Rebalance"
+            "Cant burn during Rebalance"
         );
 
         if (rebalanceState == RebalancingLibrary.State.Drawdown) {
             // In Drawdown Sets can only be burned as part of the withdrawal process
             require(
                 core.validModules(msg.sender),
-                "Burn: Set cannot be redeemed during Drawdown"
+                "Cant redeem during Drawdown"
             );
         } else {
             // When in non-Rebalance or Drawdown state, check that function caller is Core
             // so that Sets can be redeemed
             require(
                 msg.sender == address(core),
-                "Burn: Sender must be core"
+                "Sender must be core"
             );
         }
     }

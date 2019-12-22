@@ -60,7 +60,7 @@ contract SettleRebalance is
     {
         require(
             rebalanceState == RebalancingLibrary.State.Rebalance,
-            "Settle: State must be Rebalance"
+            "State must be Rebalance"
         );
     }
 
@@ -156,6 +156,10 @@ contract SettleRebalance is
         view
         returns(uint256)
     {
+        // Fee levied to feeRecipient every rebalance, paid during settlement
+        // Represents a decimal value scaled by 1e18 (e.g. 100% = 1e18 and 1% = 1e16)
+        uint256 rebalanceFee = rebalanceFeeCalculator.getFee();
+
         // fee * totalSupply
         uint256 a = rebalanceFee.mul(totalSupply());
 

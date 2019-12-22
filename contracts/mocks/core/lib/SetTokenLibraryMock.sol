@@ -2,8 +2,8 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { ICore } from "../../../core/interfaces/ICore.sol";
 import { SetTokenLibrary } from "../../../core/lib/SetTokenLibrary.sol";
-
 
 // Mock class of SetTokenLibrary
 contract SetTokenLibraryMock {
@@ -32,6 +32,19 @@ contract SetTokenLibraryMock {
         SetTokenLibrary.isMultipleOfSetNaturalUnit(
             _set,
             _quantity
+        );
+    }
+
+    function testRequireValidSet(
+        ICore _core,
+        address _set
+    )
+        external
+        view
+    {
+        SetTokenLibrary.requireValidSet(
+            _core,
+            _set
         );
     }
 

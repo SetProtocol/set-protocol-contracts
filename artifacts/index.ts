@@ -10,6 +10,7 @@ export { ExchangeIssuanceLibrary } from "./ts/ExchangeIssuanceLibrary";
 export { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
 export { LinearAuctionLiquidator } from "./ts/LinearAuctionLiquidator";
 export { FailAuctionLibrary } from "./ts/FailAuctionLibrary";
+export { FixedFeeCalculator } from "./ts/FixedFeeCalculator";
 export { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
 export { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
 export { KyberNetworkWrapper } from "./ts/KyberNetworkWrapper";
@@ -62,6 +63,7 @@ export {
   ExchangeIssuanceLibraryContract,
   ExchangeIssuanceModuleContract,
   FailAuctionLibraryContract,
+  FixedFeeCalculatorContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
   KyberNetworkWrapperContract,

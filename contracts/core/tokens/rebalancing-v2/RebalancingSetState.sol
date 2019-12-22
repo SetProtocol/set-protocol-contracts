@@ -18,8 +18,9 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { ICore } from "../../interfaces/ICore.sol";
-import { IRebalancingSetFactory } from "../../interfaces/IRebalancingSetFactory.sol";
+import { IFeeCalculator } from "../../interfaces/IFeeCalculator.sol";
 import { ILiquidator } from "../../interfaces/ILiquidator.sol";
+import { IRebalancingSetFactory } from "../../interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
@@ -58,6 +59,9 @@ contract RebalancingSetState {
     // The Liquidator interacts closely with the Set during rebalances.
     ILiquidator public liquidator;
 
+    // Contract responsible for calculation of rebalance fees
+    IFeeCalculator public rebalanceFeeCalculator;
+
     // The account that is allowed to make proposals
     address public manager;
 
@@ -77,11 +81,7 @@ contract RebalancingSetState {
     // Fee levied to feeRecipient every mint operation, paid during minting
     // Represents a decimal value scaled by 1e18 (e.g. 100% = 1e18 and 1% = 1e16)
     uint256 public entryFee;
-
-    // Fee levied to feeRecipient every rebalance, paid during settlement
-    // Represents a decimal value scaled by 1e18 (e.g. 100% = 1e18 and 1% = 1e16)
-    uint256 public rebalanceFee;
-
+    
     // ----------------------------------------------------------------------
     // Current State
     // ----------------------------------------------------------------------
@@ -129,7 +129,7 @@ contract RebalancingSetState {
     modifier onlyManager() {
         require(
             msg.sender == manager,
-            "Sender must be manager"
+            "Must be manager"
         );
         _;
     }
@@ -177,12 +177,12 @@ contract RebalancingSetState {
     {
         require(
             rebalanceState != RebalancingLibrary.State.Rebalance,
-            "SetLiquidator: Must not be in Rebalance state"
+            "Must not be Rebalance state"
         );
 
         require(
             liquidatorWhiteList.whiteList(address(_newLiquidator)),
-            "SetLiquidator: Input not whitelisted"
+            "Not whitelisted"
         );
 
         emit NewLiquidatorAdded(address(_newLiquidator), address(liquidator));
@@ -200,6 +200,18 @@ contract RebalancingSetState {
     }
 
     /* ============ Getter Functions ============ */
+
+    /*
+     * Retrieves the current expected fee from the fee calculator
+     * Value is returned as a scale decimal figure.
+     */
+    function rebalanceFee()
+        external
+        view
+        returns (uint256)
+    {
+        return rebalanceFeeCalculator.getFee();
+    }
 
     /*
      * Function for compatability with ISetToken interface. Returns currentSet.
@@ -239,16 +251,5 @@ contract RebalancingSetState {
         returns (bool)
     {
         return _tokenAddress == address(currentSet);
-    }
-
-    /*
-     * Get array version of failedAuctionWithdrawComponents
-     */
-    function getFailedRebalanceComponents()
-        external
-        view
-        returns (address[] memory)
-    {
-        return failedRebalanceComponents;
     }
 }

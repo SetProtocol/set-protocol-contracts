@@ -19,10 +19,12 @@ pragma experimental "ABIEncoderV2";
 
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import { Initializable } from "zos-lib/contracts/Initializable.sol";
 
 import { BackwardsCompatability } from "./rebalancing-v2/BackwardsCompatability.sol";
 import { FailRebalance } from "./rebalancing-v2/FailRebalance.sol";
 import { ICore } from "../interfaces/ICore.sol";
+import { IFeeCalculator } from "../interfaces/IFeeCalculator.sol";
 import { ILiquidator } from "../interfaces/ILiquidator.sol";
 import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
@@ -49,10 +51,13 @@ import { StartRebalance } from "./rebalancing-v2/StartRebalance.sol";
  * - RebalanceAuctionModule execution should be backwards compatible with V1. 
  * - Bidding and auction parameters state no longer live on this contract. They live on the liquidator
  *   BackwardsComptability is used to allow retrieving of previous supported states.
+ * - Introduces entry and rebalance fees, where rebalance fees are configurable based on an external
+ *   fee calculator contract
  */
 contract RebalancingSetTokenV2 is
     ERC20,
     ERC20Detailed,
+    Initializable,
     RebalancingSetState,
     BackwardsCompatability,
     Issuance,
@@ -68,7 +73,7 @@ contract RebalancingSetTokenV2 is
      * Constructor function for Rebalancing Set Token
      *
      * addressConfig [factory, manager, liquidator, initialSet, componentWhiteList, 
-     *                liquidatorWhiteList, feeRecipient]
+     *                liquidatorWhiteList, feeRecipient, rebalanceFeeCalculator]
      * [0]factory                   Factory used to create the Rebalancing Set
      * [1]manager                   Address that is able to propose the next Set
      * [2]liquidator                Address of the liquidator contract
@@ -76,16 +81,16 @@ contract RebalancingSetTokenV2 is
      * [4]componentWhiteList        Whitelist that nextSet components are checked against during propose
      * [5]liquidatorWhiteList       Whitelist of valid liquidators
      * [6]feeRecipient              Address that receives any incentive fees
+     * [7]rebalanceFeeCalculator    Address to retrieve rebalance fee during settlement
      *
      * uintConfig [initialUnitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, 
-     *             lastRebalanceTimestamp, entryFee, rebalanceFee]
+     *             lastRebalanceTimestamp, entryFee]
      * [0]initialUnitShares         Units of currentSet that equals one share
      * [1]naturalUnit               The minimum multiple of Sets that can be issued or redeemed
      * [2]rebalanceInterval:        Minimum amount of time between rebalances
      * [3]rebalanceFailPeriod:      Time after auctionStart where something in the rebalance has gone wrong
      * [4]lastRebalanceTimestamp:   Time of the last rebalance; Allows customized deployments
      * [5]entryFee:                 Mint fee represented in a scaled decimal value (e.g. 100% = 1e18, 1% = 1e16)
-     * [6]rebalanceFee:             Rebalance fee represented in a scaled percentage value
      *
      * @param _addressConfig             List of configuration addresses
      * @param _uintConfig                List of uint addresses
@@ -93,8 +98,8 @@ contract RebalancingSetTokenV2 is
      * @param _symbol                    The symbol of the new RebalancingSetTokenV2
      */
     constructor(
-        address[7] memory _addressConfig,
-        uint256[7] memory _uintConfig,
+        address[8] memory _addressConfig,
+        uint256[6] memory _uintConfig,
         string memory _name,
         string memory _symbol
     )
@@ -112,8 +117,7 @@ contract RebalancingSetTokenV2 is
         componentWhiteList = IWhiteList(_addressConfig[4]);
         liquidatorWhiteList = IWhiteList(_addressConfig[5]);
         feeRecipient = _addressConfig[6];
-        core = ICore(factory.core());
-        vault = IVault(core.vault());
+        rebalanceFeeCalculator = IFeeCalculator(_addressConfig[7]);
 
         unitShares = _uintConfig[0];
         naturalUnit = _uintConfig[1];
@@ -121,8 +125,26 @@ contract RebalancingSetTokenV2 is
         rebalanceFailPeriod = _uintConfig[3];
         lastRebalanceTimestamp = _uintConfig[4];
         entryFee = _uintConfig[5];
-        rebalanceFee = _uintConfig[6];
+
+        core = ICore(factory.core());
+        vault = IVault(core.vault());
         rebalanceState = RebalancingLibrary.State.Default;
+    }
+
+    /*
+     * Intended to be called during creation by the RebalancingSetTokenFactory. Can only be initialized
+     * once. This implementation initializes the rebalance fee.
+     *
+     *
+     * @param _rebalanceFeeCalldata       Bytes encoded rebalance fee represented as a scaled percentage value
+     */
+    function initialize(
+        bytes calldata _rebalanceFeeCalldata
+    )
+        external
+        initializer
+    {
+        rebalanceFeeCalculator.initialize(_rebalanceFeeCalldata);
     }
 
    /* ============ External Functions ============ */
@@ -228,7 +250,7 @@ contract RebalancingSetTokenV2 is
         // The unit shares must result in a quantity greater than the number of natural units outstanding
         require(
             newUnitShares > 0,
-            "Settle: Failed rebalance, unitshares equals 0. Call endFailedRebalance."
+            "Failed rebalance, unitshares is 0."
         );
 
         SettleRebalance.issueNextSet(issueQuantity);

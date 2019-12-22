@@ -11,6 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  FixedFeeCalculatorContract,
   LiquidatorMockContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
@@ -33,6 +34,7 @@ import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -62,6 +64,8 @@ contract('BackwardsCompatability', accounts => {
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
   let liquidatorMock: LiquidatorMockContract;
+  let fixedFeeCalculator: FixedFeeCalculatorContract;
+  let feeCalculatorWhitelist: WhiteListContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -72,6 +76,7 @@ contract('BackwardsCompatability', accounts => {
     blockchain
   );
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   let currentSetToken: SetTokenContract;
   let nextSetToken: SetTokenContract;
@@ -99,10 +104,12 @@ contract('BackwardsCompatability', accounts => {
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
     liquidatorWhitelist = await coreHelper.deployWhiteListAsync();
+    feeCalculatorWhitelist = await coreHelper.deployWhiteListAsync();
     rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
-      liquidatorWhitelist.address
+      liquidatorWhitelist.address,
+      feeCalculatorWhitelist.address
     );
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
@@ -110,6 +117,9 @@ contract('BackwardsCompatability', accounts => {
 
     liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
+
+    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
+    await coreHelper.addAddressToWhiteList(fixedFeeCalculator.address, feeCalculatorWhitelist);
 
     const setTokensToDeploy = 2;
     const setTokens = await rebalancingHelper.createSetTokensAsync(
@@ -133,6 +143,7 @@ contract('BackwardsCompatability', accounts => {
       managerAccount,
       liquidatorMock.address,
       feeRecipient,
+      fixedFeeCalculator.address,
       currentSetToken.address,
       failPeriod,
       new BigNumber(lastRebalanceTimestamp),
@@ -271,6 +282,14 @@ contract('BackwardsCompatability', accounts => {
   });
 
   describe('#getFailedAuctionWithdrawComponents', async () => {
+    beforeEach(async () => {
+      await rebalancingHelper.failRebalanceToDrawdownAsync(
+        rebalancingSetToken,
+        liquidatorMock,
+        rebalanceAuctionModule
+      );
+    });
+
     async function subject(): Promise<Address[]> {
       return rebalancingSetToken.getFailedAuctionWithdrawComponents.callAsync();
     }
@@ -278,10 +297,14 @@ contract('BackwardsCompatability', accounts => {
     it('returns the correct getFailedAuctionWithdrawComponents', async () => {
       const auctionWithdrawComponents = await subject();
 
-      const failedComponents =  await rebalancingSetToken.getFailedRebalanceComponents.callAsync(
-        rebalancingSetToken.address
+      const failedComponents =  await rebalancingHelper.getFailedWithdrawComponentsAsync(
+        currentSetToken,
+        nextSetToken,
       );
-      expect(JSON.stringify(auctionWithdrawComponents)).to.equal(JSON.stringify(failedComponents));
+      const sortedExpected = _.sortBy(failedComponents);
+      const sortActual = _.sortBy(auctionWithdrawComponents);
+
+      expect(JSON.stringify(sortActual)).to.equal(JSON.stringify(sortedExpected));
     });
   });
 

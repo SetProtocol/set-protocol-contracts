@@ -11,11 +11,12 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
-  SetTokenContract,
+  FixedFeeCalculatorContract,
   LiquidatorMockContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
+  SetTokenContract,
   SetTokenFactoryContract,
   TransferProxyContract,
   VaultContract,
@@ -35,6 +36,7 @@ import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -63,6 +65,8 @@ contract('FailRebalance', accounts => {
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
   let liquidatorMock: LiquidatorMockContract;
+  let feeCalculator: FixedFeeCalculatorContract;
+  let feeCalculatorWhitelist: WhiteListContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -73,6 +77,7 @@ contract('FailRebalance', accounts => {
     blockchain
   );
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -97,10 +102,12 @@ contract('FailRebalance', accounts => {
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
     liquidatorWhitelist = await coreHelper.deployWhiteListAsync();
+    feeCalculatorWhitelist = await coreHelper.deployWhiteListAsync();
     rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
-      liquidatorWhitelist.address
+      liquidatorWhitelist.address,
+      feeCalculatorWhitelist.address
     );
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
@@ -108,6 +115,9 @@ contract('FailRebalance', accounts => {
 
     liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
+
+    feeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
+    await coreHelper.addAddressToWhiteList(feeCalculator.address, feeCalculatorWhitelist);
   });
 
   afterEach(async () => {
@@ -148,6 +158,7 @@ contract('FailRebalance', accounts => {
         managerAccount,
         liquidatorMock.address,
         feeRecipient,
+        feeCalculator.address,
         currentSetToken.address,
         failPeriod,
         new BigNumber(lastRebalanceTimestamp),
@@ -400,6 +411,7 @@ contract('FailRebalance', accounts => {
         managerAccount,
         liquidatorMock.address,
         feeRecipient,
+        feeCalculator.address,
         currentSetToken.address,
         failPeriod,
         new BigNumber(lastRebalanceTimestamp),

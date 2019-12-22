@@ -176,6 +176,54 @@ const [
     });
   });
 
+  describe('#testRequireValidSet', async () => {
+    let subjectSet: Address;
+
+    let setToken: SetTokenContract;
+    let naturalUnit: BigNumber;
+
+    beforeEach(async () => {
+      const firstComponent = await erc20Helper.deployTokenAsync(contractDeployer);
+      const secondComponent = await erc20Helper.deployTokenAsync(contractDeployer);
+      const componentTokens = [firstComponent, secondComponent];
+      const setComponentUnit = ether(4);
+      const componentAddresses = componentTokens.map(token => token.address);
+      const componentUnits = componentTokens.map(token => setComponentUnit);
+      naturalUnit = ether(2);
+
+      setToken = await coreHelper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+      );
+
+      subjectSet = setToken.address;
+    });
+
+    async function subject(): Promise<any> {
+      return setTokenLibraryMock.testRequireValidSet.callAsync(
+        core.address,
+        subjectSet,
+      );
+    }
+
+    it('should not revert', async () => {
+      await subject();
+    });
+
+    describe('when the Set is not valid', async () => {
+      beforeEach(async () => {
+        subjectSet = nonComponentAddress;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
   describe('#testGetSetDetails', async () => {
     let subjectSet: Address;
 

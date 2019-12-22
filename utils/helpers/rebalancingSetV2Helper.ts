@@ -128,6 +128,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     manager: Address,
     liquidator: Address,
     feeRecipient: Address,
+    rebalanceFeeCalculator: Address,
     initialSet: Address,
     failRebalancePeriod: BigNumber,
     lastRebalanceTimestamp: BigNumber,
@@ -137,15 +138,18 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
   ): Promise<RebalancingSetTokenV2Contract> {
     // Generate defualt rebalancingSetToken params
     const rebalanceInterval = ONE_DAY_IN_SECONDS;
+    const rebalanceFeeCallData = SetUtils.generateFixedFeeCalculatorCalldata(rebalanceFee);
+
     const callData = SetUtils.generateRebalancingSetTokenV2CallData(
       manager,
       liquidator,
       feeRecipient,
+      rebalanceFeeCalculator,
       rebalanceInterval,
       failRebalancePeriod,
       lastRebalanceTimestamp,
       entryFee,
-      rebalanceFee,
+      rebalanceFeeCallData,
     );
 
     // Create rebalancingSetToken
@@ -217,6 +221,26 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     );
   }
 
+  public async failRebalanceToDrawdownAsync(
+    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    liquidatorMock: LiquidatorMockContract,
+    rebalanceAuctionModule: RebalanceAuctionModuleContract,
+    caller: Address = this._tokenOwnerAddress,
+  ): Promise<void> {
+    const minimumBid = await liquidatorMock.minimumBid.callAsync(rebalancingSetToken.address);
+    await this.placeBidAsync(
+      rebalanceAuctionModule,
+      rebalancingSetToken.address,
+      minimumBid,
+    );
+
+    // Transition to rebalance
+    await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
+    await rebalancingSetToken.endFailedRebalance.sendTransactionAsync(
+      { from: caller, gas: DEFAULT_GAS }
+    );
+  }
+
   public async placeBidAsync(
     rebalanceAuctionModule: RebalanceAuctionModuleContract,
     rebalancingSetTokenAddress: Address,
@@ -239,6 +263,16 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
       { gas: DEFAULT_GAS },
     );
+  }
+
+  public async getFailedWithdrawComponentsAsync(
+    nextSetToken: SetTokenContract,
+    currentSetToken: SetTokenContract,
+  ): Promise<Address[]> {
+    const nextSetComponents: Address[] = await nextSetToken.getComponents.callAsync();
+    const currentSetComponents: Address[] = await currentSetToken.getComponents.callAsync();
+
+    return _.union(currentSetComponents, nextSetComponents);
   }
 
   public async getNextSetIssueQuantity(

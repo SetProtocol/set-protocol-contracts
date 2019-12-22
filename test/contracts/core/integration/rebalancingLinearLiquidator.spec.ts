@@ -11,6 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  FixedFeeCalculatorContract,
   LinearAuctionLiquidatorContract,
   OracleWhiteListContract,
   SetTokenContract,
@@ -39,6 +40,7 @@ import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -68,6 +70,8 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
   let liquidator: LinearAuctionLiquidatorContract;
+  let fixedFeeCalculator: FixedFeeCalculatorContract;
+  let feeCalculatorWhitelist: WhiteListContract;
 
   let name: string;
   let auctionPeriod: BigNumber;
@@ -112,6 +116,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
   );
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
   const libraryMockHelper = new LibraryMockHelper(deployerAccount);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -134,10 +139,12 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
     setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
     liquidatorWhitelist = await coreHelper.deployWhiteListAsync();
+    feeCalculatorWhitelist = await coreHelper.deployWhiteListAsync();
     rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
-      liquidatorWhitelist.address
+      liquidatorWhitelist.address,
+      feeCalculatorWhitelist.address,
     );
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, setTokenFactory);
@@ -204,6 +211,9 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
       name,
     );
     await coreHelper.addAddressToWhiteList(liquidator.address, liquidatorWhitelist);
+
+    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
+    await coreHelper.addAddressToWhiteList(fixedFeeCalculator.address, feeCalculatorWhitelist);
   });
 
   afterEach(async () => {
@@ -233,6 +243,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
         managerAccount,
         liquidator.address,
         feeRecipient,
+        fixedFeeCalculator.address,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -438,6 +449,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
         managerAccount,
         liquidator.address,
         feeRecipient,
+        fixedFeeCalculator.address,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -642,6 +654,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
         managerAccount,
         liquidator.address,
         feeRecipient,
+        fixedFeeCalculator.address,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,

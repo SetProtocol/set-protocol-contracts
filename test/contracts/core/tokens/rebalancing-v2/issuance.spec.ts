@@ -11,6 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  FixedFeeCalculatorContract,
   LiquidatorMockContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
@@ -41,6 +42,7 @@ import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -72,6 +74,8 @@ contract('Issuance', accounts => {
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
   let liquidatorMock: LiquidatorMockContract;
+  let fixedFeeCalculator: FixedFeeCalculatorContract;
+  let feeCalculatorWhitelist: WhiteListContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -82,6 +86,7 @@ contract('Issuance', accounts => {
     blockchain
   );
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -105,10 +110,12 @@ contract('Issuance', accounts => {
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
     liquidatorWhitelist = await coreHelper.deployWhiteListAsync();
+    feeCalculatorWhitelist = await coreHelper.deployWhiteListAsync();
     rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
-      liquidatorWhitelist.address
+      liquidatorWhitelist.address,
+      feeCalculatorWhitelist.address
     );
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
@@ -116,6 +123,9 @@ contract('Issuance', accounts => {
 
     liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
+
+    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
+    await coreHelper.addAddressToWhiteList(fixedFeeCalculator.address, feeCalculatorWhitelist);
   });
 
   afterEach(async () => {
@@ -157,6 +167,7 @@ contract('Issuance', accounts => {
         managerAccount,
         liquidator,
         feeRecipient,
+        fixedFeeCalculator.address,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -326,18 +337,19 @@ contract('Issuance', accounts => {
       const manager = managerAccount;
       const liquidator = liquidatorMock.address;
       const initialSet = currentSetToken.address;
+      const feeCalculator = fixedFeeCalculator.address;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
       const failPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
       const entryFee = ZERO;
-      const rebalanceFee = ZERO;
 
       const rebalancingFactory = await coreHelper.deployRebalancingSetTokenV2FactoryAsync(
         coreMock.address,
         rebalancingComponentWhiteList.address,
         liquidatorWhitelist.address,
+        feeCalculatorWhitelist.address,
       );
 
       await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
@@ -350,6 +362,7 @@ contract('Issuance', accounts => {
           rebalancingComponentWhiteList.address,
           liquidatorWhitelist.address,
           feeRecipient,
+          feeCalculator,
         ],
         [
           initialUnitShares,
@@ -358,8 +371,8 @@ contract('Issuance', accounts => {
           failPeriod,
           new BigNumber(lastRebalanceTimestamp),
           entryFee,
-          rebalanceFee,
         ],
+        '0x00'
       );
 
       subjectIssuer = deployerAccount,
@@ -410,6 +423,7 @@ contract('Issuance', accounts => {
         managerAccount,
         liquidator,
         feeRecipient,
+        fixedFeeCalculator.address,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -494,6 +508,7 @@ contract('Issuance', accounts => {
         managerAccount,
         liquidator,
         feeRecipient,
+        fixedFeeCalculator.address,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,
@@ -625,6 +640,7 @@ contract('Issuance', accounts => {
         managerAccount,
         liquidator,
         feeRecipient,
+        fixedFeeCalculator.address,
         currentSetToken.address,
         failPeriod,
         lastRebalanceTimestamp,

@@ -82,7 +82,8 @@ export function getExpectedNewFeeRecipientAddedLog(
 export function getExpectedRebalanceStartedLog(
   oldSet: Address,
   newSet: Address,
-  timestamp: BigNumber,
+  rebalanceIndex: BigNumber,
+  currentSetQuantity: BigNumber,
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -91,22 +92,31 @@ export function getExpectedRebalanceStartedLog(
     args: {
       oldSet,
       newSet,
-      timestamp,
+      rebalanceIndex,
+      currentSetQuantity,
     },
   }];
 }
 
-export function getExpectedRebalanceFeePaidLog(
+export function getExpectedRebalanceSettledLog(
   feeRecipient: Address,
-  quantity: BigNumber,
+  feeQuantity: BigNumber,
+  feePercentage: BigNumber,
+  rebalanceIndex: BigNumber,
+  issueQuantity: BigNumber,
+  unitShares: BigNumber,
   contractAddress: Address,
 ): Log[] {
   return [{
-    event: 'RebalanceFeePaid',
+    event: 'RebalanceSettled',
     address: contractAddress,
     args: {
       feeRecipient,
-      quantity,
+      feeQuantity,
+      feePercentage,
+      rebalanceIndex,
+      issueQuantity,
+      unitShares,
     },
   }];
 }

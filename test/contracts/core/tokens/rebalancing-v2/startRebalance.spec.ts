@@ -223,15 +223,20 @@ contract('StartRebalance', accounts => {
         expect(rebalanceStartTime).to.be.bignumber.equal(timestamp);
       });
 
-      it('emits the correct RebalanceProposed event', async () => {
+      it('emits the correct RebalanceStarted event', async () => {
         const txHash = await subject();
 
-        const { timestamp } = await web3.eth.getBlock('latest');
+        const rebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
+          const currentSetAmount = await liquidatorMock.startingCurrentSets.callAsync(
+          rebalancingSetToken.address
+        );
+
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
         const expectedLogs = getExpectedRebalanceStartedLog(
           currentSetToken.address,
           nextSetToken.address,
-          new BigNumber(timestamp),
+          rebalanceIndex,
+          currentSetAmount,
           rebalancingSetToken.address,
         );
 

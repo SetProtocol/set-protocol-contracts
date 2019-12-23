@@ -77,7 +77,7 @@ contract PlaceBid is
     {
         require(
             core.validModules(msg.sender),
-            "Sender must be approved module"
+            "Must be from approved module"
         );
 
         validateGetBidPrice(_quantity);

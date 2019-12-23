@@ -34,12 +34,14 @@ export { SettleRebalanceLibrary } from "./ts/SettleRebalanceLibrary";
 export { SetToken } from "./ts/SetToken";
 export { SetTokenFactory } from "./ts/SetTokenFactory";
 export { SetTokenLibrary } from "./ts/SetTokenLibrary";
+export { SocialTradingManagerMock } from "./ts/SocialTradingManagerMock";
 export { StandardTokenMock } from "./ts/StandardTokenMock";
 export { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
 export { StartRebalanceLibrary } from "./ts/StartRebalanceLibrary";
 export { TimeLockUpgrade } from "./ts/TimeLockUpgrade";
 export { TimeLockUpgradeV2 } from "./ts/TimeLockUpgradeV2";
 export { TransferProxy } from "./ts/TransferProxy";
+export { UpdatableOracleMock } from "./ts/UpdatableOracleMock";
 export { Vault } from "./ts/Vault";
 export { WethMock } from "./ts/WethMock";
 export { WhiteList } from "./ts/WhiteList";
@@ -88,6 +90,7 @@ export {
   SetTokenContract,
   SetTokenFactoryContract,
   SetTokenLibraryContract,
+  SocialTradingManagerMockContract,
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   StartRebalanceLibraryContract,
@@ -95,6 +98,7 @@ export {
   TimeLockUpgradeV2Contract,
   TimeLockUpgradeMockContract,
   TransferProxyContract,
+  UpdatableOracleMockContract,
   VaultContract,
   WethMockContract,
   WhiteListContract,

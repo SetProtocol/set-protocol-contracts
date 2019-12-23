@@ -341,7 +341,7 @@ contract('ProtocolViewer', accounts => {
     });
   });
 
-  describe('#fetchRebalanceAuctionStateAsync', async () => {
+  describe('#fetchNewTradingPoolDetails', async () => {
     let rebalancingSetToken: RebalancingSetTokenV2Contract;
 
     let coreMock: CoreMockContract;

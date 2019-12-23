@@ -19,6 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { ERC20Viewer } from "./lib/ERC20Viewer.sol";
 import { RebalancingSetTokenViewer } from "./lib/RebalancingSetTokenViewer.sol";
+import { TradingPoolViewer } from "./lib/TradingPoolViewer.sol";
 
 
 /**
@@ -32,5 +33,6 @@ import { RebalancingSetTokenViewer } from "./lib/RebalancingSetTokenViewer.sol";
  /* solium-disable-next-line no-empty-blocks */
 contract ProtocolViewer is
     ERC20Viewer,
-    RebalancingSetTokenViewer
+    RebalancingSetTokenViewer,
+    TradingPoolViewer
 {}

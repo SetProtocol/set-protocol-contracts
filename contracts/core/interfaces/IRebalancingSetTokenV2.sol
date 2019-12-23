@@ -18,6 +18,7 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
+import { IFeeCalculator } from "./IFeeCalculator.sol";
 import { ILiquidator } from "./ILiquidator.sol";
 import { ISetToken } from "./ISetToken.sol";
 
@@ -105,6 +106,26 @@ interface IRebalancingSetTokenV2 {
         returns (uint256);
 
     /*
+     * Get manager of Rebalancing Set
+     *
+     * @return  manager
+     */
+    function manager()
+        external
+        view
+        returns (address);
+
+    /*
+     * Get feeRecipient of Rebalancing Set
+     *
+     * @return  feeRecipient
+     */
+    function feeRecipient()
+        external
+        view
+        returns (address);
+
+    /*
      * Get entryFee of Rebalancing Set
      *
      * @return  entryFee
@@ -115,14 +136,23 @@ interface IRebalancingSetTokenV2 {
         returns (uint256);
 
     /*
-     * Get rebalanceFee of Rebalancing Set
-     *
-     * @return  rebalanceFee
+     * Retrieves the current expected fee from the fee calculator
+     * Value is returned as a scale decimal figure.
      */
     function rebalanceFee()
         external
         view
         returns (uint256);
+
+    /*
+     * Get calculator contract used to compute rebalance fees
+     *
+     * @return  rebalanceFeeCalculator
+     */
+    function rebalanceFeeCalculator()
+        external
+        view
+        returns (IFeeCalculator);
 
     /*
      * Initializes the RebalancingSetToken. Typically called by the Factory during creation
@@ -245,4 +275,23 @@ interface IRebalancingSetTokenV2 {
         view
         returns (uint256[] memory, uint256[] memory);
 
+    /*
+     * Get name of Rebalancing Set
+     *
+     * @return  name
+     */
+    function name()
+        external
+        view
+        returns (string memory);
+
+    /*
+     * Get symbol of Rebalancing Set
+     *
+     * @return  symbol
+     */
+    function symbol()
+        external
+        view
+        returns (string memory);
 }

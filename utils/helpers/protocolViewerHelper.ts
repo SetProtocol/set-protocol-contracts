@@ -1,14 +1,19 @@
 import { Address } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
 import {
   ERC20ViewerContract,
   ProtocolViewerContract,
-  RebalancingSetTokenViewerContract
+  RebalancingSetTokenViewerContract,
+  SocialTradingManagerMockContract,
+  TradingPoolViewerContract,
 } from '../contracts';
 import { getContractInstance, txnFrom } from '../web3Helper';
 
 const ERC20Viewer = artifacts.require('ERC20Viewer');
 const ProtocolViewer = artifacts.require('ProtocolViewer');
 const RebalancingSetTokenViewer = artifacts.require('RebalancingSetTokenViewer');
+const SocialTradingManagerMock = artifacts.require('SocialTradingManagerMock');
+const TradingPoolViewer = artifacts.require('TradingPoolViewer');
 
 
 export class ProtocolViewerHelper {
@@ -49,6 +54,42 @@ export class ProtocolViewerHelper {
 
     return new RebalancingSetTokenViewerContract(
       getContractInstance(rebalancingSetTokenViewer),
+      txnFrom(from),
+    );
+  }
+
+  public async deployTradingPoolViewerAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<TradingPoolViewerContract> {
+    const
+    tradingPoolViewer = await TradingPoolViewer.new(
+      txnFrom(from)
+    );
+
+    return new TradingPoolViewerContract(
+      getContractInstance(tradingPoolViewer),
+      txnFrom(from),
+    );
+  }
+
+  public async deploySocialTradingManagerMockAsync(
+    tradingPool: Address,
+    trader: Address,
+    allocator: Address,
+    currentAllocation: BigNumber,
+    from: Address = this._contractOwnerAddress
+  ): Promise<SocialTradingManagerMockContract> {
+    const
+    socialManager = await SocialTradingManagerMock.new(
+      tradingPool,
+      trader,
+      allocator,
+      currentAllocation,
+      txnFrom(from)
+    );
+
+    return new SocialTradingManagerMockContract(
+      getContractInstance(socialManager),
       txnFrom(from),
     );
   }

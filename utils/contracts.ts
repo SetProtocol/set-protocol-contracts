@@ -59,6 +59,7 @@ export { SetTokenFactoryContract } from '../types/generated/set_token_factory';
 export { SetTokenLibraryContract } from '../types/generated/set_token_library';
 export { SetTokenLibraryMockContract } from '../types/generated/set_token_library_mock';
 export { SetUSDValuationMockContract } from '../types/generated/set_u_s_d_valuation_mock';
+export { SocialTradingManagerMockContract } from '../types/generated/social_trading_manager_mock';
 export { StandardTokenMockContract } from '../types/generated/standard_token_mock';
 export { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
 export { StartRebalanceLibraryContract } from '../types/generated/start_rebalance_library';
@@ -68,6 +69,7 @@ export { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrad
 export { TimeLockUpgradeV2Contract } from '../types/generated/time_lock_upgrade_v2';
 export { TimeLockUpgradeV2MockContract } from '../types/generated/time_lock_upgrade_v2_mock';
 export { TransferProxyContract } from '../types/generated/transfer_proxy';
+export { TradingPoolViewerContract } from '../types/generated/trading_pool_viewer';
 export { UpdatableConstantAuctionPriceCurveContract } from '../types/generated/updatable_constant_auction_price_curve';
 export { UpdatableOracleMockContract } from '../types/generated/updatable_oracle_mock';
 export { VaultContract } from '../types/generated/vault';

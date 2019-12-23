@@ -20,6 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { ISocialTradingManager } from "set-protocol-strategies/contracts/managers/interfaces/ISocialTradingManager.sol";
 import { SocialTradingLibrary } from "set-protocol-strategies/contracts/managers/lib/SocialTradingLibrary.sol";
 
+import { IFeeCalculator } from "../../core/interfaces/IFeeCalculator.sol";
 import { IRebalancingSetTokenV2 } from "../../core/interfaces/IRebalancingSetTokenV2.sol";
 import { RebalancingLibrary } from "../../core/lib/RebalancingLibrary.sol";
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";
@@ -36,9 +37,23 @@ contract TradingPoolViewer {
 
     struct RebalancingSetInfo {
         address manager;
+        address feeRecipient;
+        ISetToken currentSet;
+        IFeeCalculator rebalanceFeeCalculator;
         uint256 unitShares;
         uint256 naturalUnit;
         uint256 rebalanceInterval;
+        uint256 entryFee;
+        uint256 lastRebalanceTimestamp;
+        RebalancingLibrary.State rebalanceState;
+        string name;
+        string symbol;
+    }
+
+    struct CollateralSetInfo {
+        address[] components;
+        uint256[] units;
+        uint256 naturalUnit;      
     }
 
     function fetchNewTradingPoolDetails(
@@ -46,10 +61,33 @@ contract TradingPoolViewer {
         IRebalancingSetTokenV2 _tradingPool
     )
         external
-        returns (SocialTradingLibrary.PoolInfo memory)
+        returns (SocialTradingLibrary.PoolInfo memory, RebalancingSetInfo memory, CollateralSetInfo memory)
     {
         SocialTradingLibrary.PoolInfo memory poolInfo = _manager.pools(address(_tradingPool));
 
-        return poolInfo;
+        RebalancingSetInfo memory rebalancingSetInfo = RebalancingSetInfo({
+            manager: _tradingPool.manager(),
+            feeRecipient: _tradingPool.feeRecipient(),
+            currentSet: _tradingPool.currentSet(),
+            rebalanceFeeCalculator: _tradingPool.rebalanceFeeCalculator(),
+            unitShares: _tradingPool.unitShares(),
+            naturalUnit: _tradingPool.naturalUnit(),
+            rebalanceInterval: _tradingPool.rebalanceInterval(),
+            entryFee: _tradingPool.entryFee(),
+            lastRebalanceTimestamp: _tradingPool.lastRebalanceTimestamp(),
+            rebalanceState: _tradingPool.rebalanceState(),
+            name: _tradingPool.name(),
+            symbol: _tradingPool.symbol()
+        });
+
+        ISetToken collateralInstance = _tradingPool.currentSet();
+
+        CollateralSetInfo memory collateralSetInfo = CollateralSetInfo({
+            components: collateralInstance.getComponents(),
+            units: collateralInstance.getUnits(),
+            naturalUnit: collateralInstance.naturalUnit()
+        });
+
+        return (poolInfo, rebalancingSetInfo, collateralSetInfo);
     }
 }

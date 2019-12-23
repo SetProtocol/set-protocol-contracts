@@ -1,5 +1,4 @@
 import { Address } from 'set-protocol-utils';
-import { BigNumber } from 'bignumber.js';
 import {
   ERC20ViewerContract,
   ProtocolViewerContract,
@@ -73,18 +72,10 @@ export class ProtocolViewerHelper {
   }
 
   public async deploySocialTradingManagerMockAsync(
-    tradingPool: Address,
-    trader: Address,
-    allocator: Address,
-    currentAllocation: BigNumber,
     from: Address = this._contractOwnerAddress
   ): Promise<SocialTradingManagerMockContract> {
     const
     socialManager = await SocialTradingManagerMock.new(
-      tradingPool,
-      trader,
-      allocator,
-      currentAllocation,
       txnFrom(from)
     );
 

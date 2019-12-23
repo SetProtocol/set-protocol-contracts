@@ -30,13 +30,13 @@ import { ISocialAllocator } from "set-protocol-strategies/contracts/managers/all
 contract SocialTradingManagerMock {
     mapping(address => SocialTradingLibrary.PoolInfo) public pools;
 
-    constructor(
+    function updateRecord(
         address _tradingPool,
         address _trader,
         ISocialAllocator _allocator,
         uint256 _currentAllocation
     )
-        public
+        external
     {
         pools[_tradingPool].trader = _trader;
         pools[_tradingPool].allocator = _allocator;

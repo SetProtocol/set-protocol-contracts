@@ -57,14 +57,11 @@ contract TradingPoolViewer {
     }
 
     function fetchNewTradingPoolDetails(
-        ISocialTradingManager _manager,
         IRebalancingSetTokenV2 _tradingPool
     )
         external
         returns (SocialTradingLibrary.PoolInfo memory, RebalancingSetInfo memory, CollateralSetInfo memory)
     {
-        SocialTradingLibrary.PoolInfo memory poolInfo = _manager.pools(address(_tradingPool));
-
         RebalancingSetInfo memory rebalancingSetInfo = RebalancingSetInfo({
             manager: _tradingPool.manager(),
             feeRecipient: _tradingPool.feeRecipient(),
@@ -80,7 +77,11 @@ contract TradingPoolViewer {
             symbol: _tradingPool.symbol()
         });
 
-        ISetToken collateralInstance = _tradingPool.currentSet();
+        SocialTradingLibrary.PoolInfo memory poolInfo = ISocialTradingManager(rebalancingSetInfo.manager).pools(
+            address(_tradingPool)
+        );
+
+        ISetToken collateralInstance = rebalancingSetInfo.currentSet;
 
         CollateralSetInfo memory collateralSetInfo = CollateralSetInfo({
             components: collateralInstance.getComponents(),

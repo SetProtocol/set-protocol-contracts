@@ -51,10 +51,9 @@ const CoreMock = artifacts.require('CoreMock');
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
-contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
+contract('TradingPoolViewer', accounts => {
   const [
     deployerAccount,
-    managerAccount,
     feeRecipient,
     trader,
     allocator,
@@ -200,8 +199,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
     blockchain.revertAsync();
   });
 
-  describe.only('#fetchNewTradingPoolDetails', async () => {
-    let subjectSocialTradingManager: Address;
+  describe('#fetchNewTradingPoolDetails', async () => {
     let subjectTradingPool: Address;
 
     let currentSetToken: SetTokenContract;
@@ -212,13 +210,15 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
     beforeEach(async () => {
       currentSetToken = set1;
 
+      setManager = await viewerHelper.deploySocialTradingManagerMockAsync();
+
       const failPeriod = ONE_DAY_IN_SECONDS;
       const { timestamp } = await web3.eth.getBlock('latest');
       lastRebalanceTimestamp = timestamp;
       rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
         coreMock,
         rebalancingFactory.address,
-        managerAccount,
+        setManager.address,
         liquidator.address,
         feeRecipient,
         fixedFeeCalculator.address,
@@ -228,20 +228,18 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
       );
 
       currentAllocation = ether(.6);
-      setManager = await viewerHelper.deploySocialTradingManagerMockAsync(
+      await setManager.updateRecord.sendTransactionAsync(
         rebalancingSetToken.address,
         trader,
         allocator,
         currentAllocation
       );
 
-      subjectSocialTradingManager = setManager.address;
       subjectTradingPool = rebalancingSetToken.address;
     });
 
     async function subject(): Promise<any> {
       return poolViewer.fetchNewTradingPoolDetails.callAsync(
-        subjectSocialTradingManager,
         subjectTradingPool
       );
     }
@@ -257,7 +255,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
     it('fetches the correct RebalancingSetTokenV2/TradingPool data', async () => {
       const [ , rbSetData, ] = await subject();
 
-      expect(rbSetData.manager).to.equal(managerAccount);
+      expect(rbSetData.manager).to.equal(setManager.address);
       expect(rbSetData.feeRecipient).to.equal(feeRecipient);
       expect(rbSetData.currentSet).to.equal(currentSetToken.address);
       expect(rbSetData.rebalanceFeeCalculator).to.equal(fixedFeeCalculator.address);

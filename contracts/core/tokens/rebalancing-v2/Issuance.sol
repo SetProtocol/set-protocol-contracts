@@ -40,13 +40,6 @@ contract Issuance is
     using SafeMath for uint256;
     using CommonMath for uint256;
 
-    /* ============ Events ============ */
-
-    event EntryFeePaid(
-        address indexed feeRecipient,
-        uint256 feeQuantity
-    );
-
     /* ============ Internal Functions ============ */
 
     /*
@@ -67,7 +60,7 @@ contract Issuance is
         require(
             rebalanceState != RebalancingLibrary.State.Rebalance &&
             rebalanceState != RebalancingLibrary.State.Drawdown,
-            "Cant mint during Rebalance or Drawdown"
+            "Invalid state"
         );
     }
 
@@ -83,7 +76,7 @@ contract Issuance is
     {
         require(
             rebalanceState != RebalancingLibrary.State.Rebalance,
-            "Cant burn during Rebalance"
+            "Invalid state"
         );
 
         if (rebalanceState == RebalancingLibrary.State.Drawdown) {

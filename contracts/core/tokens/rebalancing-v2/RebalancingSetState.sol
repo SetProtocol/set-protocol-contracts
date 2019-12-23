@@ -151,6 +151,27 @@ contract RebalancingSetState {
         address oldFeeRecipient
     );
 
+    event EntryFeePaid(
+        address indexed feeRecipient,
+        uint256 feeQuantity
+    );
+
+    event RebalanceStarted(
+        address oldSet,
+        address newSet,
+        uint256 rebalanceIndex,
+        uint256 currentSetQuantity
+    );
+
+    event RebalanceSettled(
+        address indexed feeRecipient,
+        uint256 feeQuantity,
+        uint256 feePercentage,
+        uint256 rebalanceIndex,
+        uint256 issueQuantity,
+        uint256 unitShares
+    );
+
     /* ============ Setter Functions ============ */
 
     /*
@@ -177,7 +198,7 @@ contract RebalancingSetState {
     {
         require(
             rebalanceState != RebalancingLibrary.State.Rebalance,
-            "Must not be Rebalance state"
+            "Invalid state"
         );
 
         require(

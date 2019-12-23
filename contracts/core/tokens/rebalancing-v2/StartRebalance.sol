@@ -36,14 +36,6 @@ contract StartRebalance is
 {
     using SafeMath for uint256;
 
-    /* ============ Events ============ */
-
-    event RebalanceStarted(
-        address oldSet,
-        address newSet,
-        uint256 timestamp
-    );
-
     /* ============ Internal Functions ============ */
 
     /**
@@ -64,7 +56,7 @@ contract StartRebalance is
     {
         require(
             rebalanceState == RebalancingLibrary.State.Default,
-            "State must be Default"
+            "Invalid state"
         );
 
         // Enough time must have passed from last rebalance to start a new proposal
@@ -76,14 +68,14 @@ contract StartRebalance is
         // New proposed Set must be a valid Set created by Core
         require(
             core.validSets(address(_nextSet)),
-            "Invalid or disabled Set"
+            "Invalid Set"
         );
 
         // Check proposed components on whitelist. This is to ensure managers are unable to add contract addresses
         // to a propose that prohibit the set from carrying out an auction i.e. a token that only the manager possesses
         require(
             componentWhiteList.areValidAddresses(_nextSet.getComponents()),
-            "Set contains invalid component"
+            "Set has invalid component"
         );
 
         // Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.
@@ -110,19 +102,6 @@ contract StartRebalance is
 
         // Rounds the redemption quantity to a multiple of the current Set natural unit
         return currentSetBalance.sub(currentSetBalance.mod(currentSetNaturalUnit));
-    }
-
-    /**
-     * Redeems the current SetToken into the vault.
-     *
-     * @param _startingCurrentSetQuantity      Amount of currentSets the rebalance is initiated with
-     */
-    function redeemCurrentSet(
-        uint256 _startingCurrentSetQuantity
-    )
-        internal
-    {
-        core.redeemInVault(address(currentSet), _startingCurrentSetQuantity);
     }
 
     /**
@@ -156,8 +135,6 @@ contract StartRebalance is
         nextSet = _nextSet;
         rebalanceState = RebalancingLibrary.State.Rebalance;
         rebalanceStartTime = block.timestamp;
-
-        emit RebalanceStarted(address(currentSet), address(nextSet), block.timestamp);
     }
 
     /* ============ Private Functions ============ */

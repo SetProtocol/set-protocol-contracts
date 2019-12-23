@@ -38,7 +38,7 @@ import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
 
-import { getExpectedRebalanceFeePaidLog } from '@utils/contract_logs/rebalancingSetTokenV2';
+import { getExpectedRebalanceSettledLog } from '@utils/contract_logs/rebalancingSetTokenV2';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -394,15 +394,33 @@ contract('SettleRebalance', accounts => {
         expect(newSupply).to.bignumber.equal(expectedSupply);
       });
 
-      it('emits the RebalancePaidFee log', async () => {
-        const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
+      it('emits the RebalanceSettled log', async () => {
+        const feePercentage = await rebalancingSetToken.rebalanceFee.callAsync();
+        const feeQuantity = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
+        const unitShares = await rebalancingHelper.getExpectedUnitSharesV2(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken,
+          vault
+        );
+        const rebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
+
+        const issueQuantity = await rebalancingHelper.getNextSetIssueQuantity(
+          nextSetToken,
+          rebalancingSetToken,
+          vault
+        );
 
         const txHash = await subject();
 
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-        const expectedLogs = getExpectedRebalanceFeePaidLog(
+        const expectedLogs = getExpectedRebalanceSettledLog(
           feeRecipient,
-          rebalanceFeeInflation,
+          feeQuantity,
+          feePercentage,
+          rebalanceIndex,
+          issueQuantity,
+          unitShares,
           rebalancingSetToken.address
         );
 

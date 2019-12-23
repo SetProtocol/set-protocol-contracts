@@ -171,11 +171,18 @@ contract RebalancingSetTokenV2 is
 
         uint256 startingCurrentSetQuantity = StartRebalance.calculateStartingSetQuantity();
 
-        StartRebalance.redeemCurrentSet(startingCurrentSetQuantity);
+        core.redeemInVault(address(currentSet), startingCurrentSetQuantity);
 
         StartRebalance.liquidatorStartRebalance(_nextSet, startingCurrentSetQuantity, _liquidatorData);
 
         StartRebalance.transitionToRebalance(_nextSet);
+
+        emit RebalanceStarted(
+            address(currentSet),
+            address(nextSet),
+            rebalanceIndex,
+            startingCurrentSetQuantity
+        );
     }
 
     /*
@@ -243,21 +250,32 @@ contract RebalancingSetTokenV2 is
         uint256 issueQuantity = SettleRebalance.calculateNextSetIssueQuantity();
 
         // Calculates fees and mints Rebalancing Set to the feeRecipient, increasing supply
-        SettleRebalance.handleFees();
+        (uint256 feePercent, uint256 feeQuantity) = SettleRebalance.handleFees();
 
         uint256 newUnitShares = SettleRebalance.calculateNextSetNewUnitShares(issueQuantity);
 
         // The unit shares must result in a quantity greater than the number of natural units outstanding
         require(
             newUnitShares > 0,
-            "Failed rebalance, unitshares is 0."
+            "Failed: unitshares is 0."
         );
 
         SettleRebalance.issueNextSet(issueQuantity);
 
         liquidator.settleRebalance();
 
+        // Rebalance index is the current vs next rebalance
+        emit RebalanceSettled(
+            feeRecipient,
+            feeQuantity,
+            feePercent,
+            rebalanceIndex,
+            issueQuantity,
+            newUnitShares
+        );
+
         SettleRebalance.transitionToDefault(newUnitShares);
+
     }
 
     /*

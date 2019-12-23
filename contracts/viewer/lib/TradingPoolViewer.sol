@@ -39,11 +39,11 @@ contract TradingPoolViewer {
         address manager;
         address feeRecipient;
         ISetToken currentSet;
-        IFeeCalculator rebalanceFeeCalculator;
         uint256 unitShares;
         uint256 naturalUnit;
         uint256 rebalanceInterval;
         uint256 entryFee;
+        uint256 rebalanceFee;
         uint256 lastRebalanceTimestamp;
         RebalancingLibrary.State rebalanceState;
         string name;
@@ -66,11 +66,11 @@ contract TradingPoolViewer {
             manager: _tradingPool.manager(),
             feeRecipient: _tradingPool.feeRecipient(),
             currentSet: _tradingPool.currentSet(),
-            rebalanceFeeCalculator: _tradingPool.rebalanceFeeCalculator(),
             unitShares: _tradingPool.unitShares(),
             naturalUnit: _tradingPool.naturalUnit(),
             rebalanceInterval: _tradingPool.rebalanceInterval(),
             entryFee: _tradingPool.entryFee(),
+            rebalanceFee: _tradingPool.rebalanceFee(),
             lastRebalanceTimestamp: _tradingPool.lastRebalanceTimestamp(),
             rebalanceState: _tradingPool.rebalanceState(),
             name: _tradingPool.name(),

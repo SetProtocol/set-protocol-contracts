@@ -136,6 +136,15 @@ interface IRebalancingSetTokenV2 {
         returns (uint256);
 
     /*
+     * Retrieves the current expected fee from the fee calculator
+     * Value is returned as a scale decimal figure.
+     */
+    function rebalanceFee()
+        external
+        view
+        returns (uint256);
+
+    /*
      * Get calculator contract used to compute rebalance fees
      *
      * @return  rebalanceFeeCalculator

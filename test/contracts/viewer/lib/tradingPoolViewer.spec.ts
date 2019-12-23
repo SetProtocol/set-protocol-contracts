@@ -14,7 +14,6 @@ import {
   LinearAuctionLiquidatorContract,
   OracleWhiteListContract,
   SetTokenContract,
-  RebalanceAuctionModuleContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
   SetTokenFactoryContract,
@@ -65,7 +64,6 @@ contract('TradingPoolViewer', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let rebalancingFactory: RebalancingSetTokenV2FactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
@@ -123,9 +121,6 @@ contract('TradingPoolViewer', accounts => {
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
     coreMock = await coreHelper.deployCoreMockAsync(transferProxy, vault);
-
-    rebalanceAuctionModule = await coreHelper.deployRebalanceAuctionModuleAsync(coreMock, vault);
-    await coreHelper.addModuleAsync(coreMock, rebalanceAuctionModule.address);
 
     setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
@@ -258,13 +253,13 @@ contract('TradingPoolViewer', accounts => {
       expect(rbSetData.manager).to.equal(setManager.address);
       expect(rbSetData.feeRecipient).to.equal(feeRecipient);
       expect(rbSetData.currentSet).to.equal(currentSetToken.address);
-      expect(rbSetData.rebalanceFeeCalculator).to.equal(fixedFeeCalculator.address);
       expect(rbSetData.name).to.equal('Rebalancing Set Token');
       expect(rbSetData.symbol).to.equal('RBSET');
       expect(rbSetData.unitShares).to.be.bignumber.equal(DEFAULT_UNIT_SHARES);
       expect(rbSetData.naturalUnit).to.be.bignumber.equal(DEFAULT_REBALANCING_NATURAL_UNIT);
       expect(rbSetData.rebalanceInterval).to.be.bignumber.equal(ONE_DAY_IN_SECONDS);
       expect(rbSetData.entryFee).to.be.bignumber.equal(ZERO);
+      expect(rbSetData.rebalanceFee).to.be.bignumber.equal(ZERO);
       expect(rbSetData.lastRebalanceTimestamp).to.be.bignumber.equal(lastRebalanceTimestamp);
       expect(rbSetData.rebalanceState).to.be.bignumber.equal(ZERO);
     });

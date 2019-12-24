@@ -20,6 +20,8 @@ pragma experimental "ABIEncoderV2";
 import { SocialTradingLibrary } from "set-protocol-strategies/contracts/managers/lib/SocialTradingLibrary.sol";
 import { ISocialAllocator } from "set-protocol-strategies/contracts/managers/allocators/ISocialAllocator.sol";
 
+import { IRebalancingSetTokenV2 } from "../../core/interfaces/IRebalancingSetTokenV2.sol";
+import { ISetToken } from "../../core/interfaces/ISetToken.sol";
 
 /**
  * @title SocialTradingManagerMock
@@ -41,5 +43,18 @@ contract SocialTradingManagerMock {
         pools[_tradingPool].trader = _trader;
         pools[_tradingPool].allocator = _allocator;
         pools[_tradingPool].currentAllocation = _currentAllocation;
+    }
+
+    function rebalance(
+        IRebalancingSetTokenV2 _tradingPool,
+        ISetToken _nextSet,
+        uint256 _newAllocation,
+        bytes calldata _liquidatorData
+    )
+        external
+    {
+        _tradingPool.startRebalance(address(_nextSet), _liquidatorData);
+
+        pools[address(_tradingPool)].currentAllocation = _newAllocation;
     }
 }

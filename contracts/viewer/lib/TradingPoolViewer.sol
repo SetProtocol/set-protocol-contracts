@@ -17,10 +17,12 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
+import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+
 import { ISocialTradingManager } from "set-protocol-strategies/contracts/managers/interfaces/ISocialTradingManager.sol";
 import { SocialTradingLibrary } from "set-protocol-strategies/contracts/managers/lib/SocialTradingLibrary.sol";
 
-import { IFeeCalculator } from "../../core/interfaces/IFeeCalculator.sol";
+import { ILiquidator } from "../../core/interfaces/ILiquidator.sol";
 import { IRebalancingSetTokenV2 } from "../../core/interfaces/IRebalancingSetTokenV2.sol";
 import { RebalancingLibrary } from "../../core/lib/RebalancingLibrary.sol";
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";
@@ -35,7 +37,7 @@ import { ISetToken } from "../../core/interfaces/ISetToken.sol";
  */
 contract TradingPoolViewer {
 
-    struct RebalancingSetInfo {
+    struct TradingPoolCreateInfo {
         address manager;
         address feeRecipient;
         ISetToken currentSet;
@@ -50,19 +52,34 @@ contract TradingPoolViewer {
         string symbol;
     }
 
+    struct TradingPoolRebalanceInfo {
+        uint256 rebalanceStartTime;
+        uint256 timeToPivot;
+        uint256 startPrice;
+        uint256 endPrice;
+        uint256 startingCurrentSets;
+        uint256 remainingCurrentSets;
+        uint256 minimumBid;
+        ISetToken nextSet;
+        ILiquidator liquidator;
+    }
+
     struct CollateralSetInfo {
         address[] components;
         uint256[] units;
-        uint256 naturalUnit;      
+        uint256 naturalUnit;
+        string name;
+        string symbol;    
     }
 
     function fetchNewTradingPoolDetails(
         IRebalancingSetTokenV2 _tradingPool
     )
         external
-        returns (SocialTradingLibrary.PoolInfo memory, RebalancingSetInfo memory, CollateralSetInfo memory)
+        view
+        returns (SocialTradingLibrary.PoolInfo memory, TradingPoolCreateInfo memory, CollateralSetInfo memory)
     {
-        RebalancingSetInfo memory rebalancingSetInfo = RebalancingSetInfo({
+        TradingPoolCreateInfo memory tradingPoolInfo = TradingPoolCreateInfo({
             manager: _tradingPool.manager(),
             feeRecipient: _tradingPool.feeRecipient(),
             currentSet: _tradingPool.currentSet(),
@@ -77,18 +94,63 @@ contract TradingPoolViewer {
             symbol: _tradingPool.symbol()
         });
 
-        SocialTradingLibrary.PoolInfo memory poolInfo = ISocialTradingManager(rebalancingSetInfo.manager).pools(
+        SocialTradingLibrary.PoolInfo memory poolInfo = ISocialTradingManager(tradingPoolInfo.manager).pools(
             address(_tradingPool)
         );
 
-        ISetToken collateralInstance = rebalancingSetInfo.currentSet;
+        CollateralSetInfo memory collateralSetInfo = getCollateralSetInfo(tradingPoolInfo.currentSet);
 
-        CollateralSetInfo memory collateralSetInfo = CollateralSetInfo({
-            components: collateralInstance.getComponents(),
-            units: collateralInstance.getUnits(),
-            naturalUnit: collateralInstance.naturalUnit()
+        return (poolInfo, tradingPoolInfo, collateralSetInfo);
+    }
+
+    function fetchTradingPoolRebalanceDetails(
+        IRebalancingSetTokenV2 _tradingPool
+    )
+        external
+        view
+        returns (SocialTradingLibrary.PoolInfo memory, TradingPoolRebalanceInfo memory, CollateralSetInfo memory)
+    {
+        uint256[] memory auctionParams = _tradingPool.getAuctionPriceParameters();
+        uint256[] memory biddingParams = _tradingPool.getBiddingParameters();
+
+        TradingPoolRebalanceInfo memory tradingPoolInfo = TradingPoolRebalanceInfo({
+            rebalanceStartTime: auctionParams[0],
+            timeToPivot: auctionParams[1],
+            startPrice: auctionParams[2],
+            endPrice: auctionParams[3],
+            startingCurrentSets: _tradingPool.startingCurrentSetAmount(), 
+            remainingCurrentSets: biddingParams[1],
+            minimumBid: biddingParams[0],
+            nextSet: _tradingPool.nextSet(),
+            liquidator: _tradingPool.liquidator()
         });
 
-        return (poolInfo, rebalancingSetInfo, collateralSetInfo);
+        address manager = _tradingPool.manager();
+
+        SocialTradingLibrary.PoolInfo memory poolInfo = ISocialTradingManager(manager).pools(
+            address(_tradingPool)
+        );
+
+        CollateralSetInfo memory collateralSetInfo = getCollateralSetInfo(_tradingPool.nextSet());
+
+        return (poolInfo, tradingPoolInfo, collateralSetInfo);
+    }
+
+    /* ============ Internal Functions ============ */
+
+    function getCollateralSetInfo(
+        ISetToken _collateralSet
+    )
+        internal
+        view
+        returns (CollateralSetInfo memory)
+    {
+        return CollateralSetInfo({
+            components: _collateralSet.getComponents(),
+            units: _collateralSet.getUnits(),
+            naturalUnit: _collateralSet.naturalUnit(),
+            name: ERC20Detailed(address(_collateralSet)).name(),
+            symbol: ERC20Detailed(address(_collateralSet)).symbol()
+        });
     }
 }

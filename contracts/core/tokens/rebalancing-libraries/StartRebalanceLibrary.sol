@@ -202,7 +202,7 @@ library StartRebalanceLibrary {
     }
 
     /**
-     * Create arrays that represents all components in currentSet and nextSet.
+     * Create arrays that represent all components in currentSet and nextSet.
      * Calcualate unit difference between both sets relative to the largest natural
      * unit of the two sets.
      *

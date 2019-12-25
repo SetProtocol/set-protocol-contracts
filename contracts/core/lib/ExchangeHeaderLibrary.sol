@@ -53,8 +53,9 @@ library ExchangeHeaderLibrary {
     /**
      * Function to convert bytes into ExchangeHeader
      *
-     * @param _orderData      Bytes representing the order body information
-     * @return ExchangeHeader  Struct containing data for a batch of exchange orders
+     * @param _orderData        Bytes representing the order body information
+     * @param _offset           Bytes to offset orderData by
+     * @return ExchangeHeader   Struct containing data for a batch of exchange orders
      */
     function parseExchangeHeader(
         bytes memory _orderData,

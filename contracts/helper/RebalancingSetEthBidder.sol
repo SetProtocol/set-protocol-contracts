@@ -43,7 +43,7 @@ contract RebalancingSetEthBidder is
     // Address and instance of RebalanceAuctionModule contract
     IRebalanceAuctionModule public rebalanceAuctionModule;
 
-    // Address and instance of RebalanceAuctionModule contract
+    // Address and instance of TransferProxy contract
     ITransferProxy public transferProxy;
 
     // Address and instance of Wrapped Ether contract

@@ -41,8 +41,6 @@ library PlaceBidLibrary {
      * @param _quantity                 The amount of currentSet to be rebalanced
      * @param _coreAddress              Core address
      * @param _biddingParameters        Struct containing relevant data for calculating token flows
-     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
-     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
      */
     function validatePlaceBid(
         uint256 _quantity,
@@ -51,7 +49,6 @@ library PlaceBidLibrary {
     )
         public
         view
-        returns (uint256)
     {
         // Make sure sender is a module
         require(

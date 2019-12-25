@@ -712,7 +712,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
               currentSetToken.address,
               rebalancingSetToken.address
             );
-            const nextSetIssueQuantity = await rebalancingHelper.getNextSetIssueQuantity(
+            const nextSetIssueQuantity = await rebalancingHelper.getSetIssueQuantity(
               nextSetToken,
               rebalancingSetToken,
               vault,

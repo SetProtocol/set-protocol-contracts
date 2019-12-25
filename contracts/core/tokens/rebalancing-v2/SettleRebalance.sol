@@ -94,22 +94,24 @@ contract SettleRebalance is
     }
 
     /**
-     * Calculate the amount of nextSets to issue by using the component amounts in the
+     * Calculate the amount of Sets to issue by using the component amounts in the
      * vault.
      */
-    function calculateNextSetIssueQuantity()
+    function calculateSetIssueQuantity(
+        ISetToken _setToken
+    )
         internal
         view
         returns (uint256)
     {
         // Collect data necessary to compute issueAmounts
-        SetTokenLibrary.SetDetails memory nextSetToken = SetTokenLibrary.getSetDetails(address(nextSet));
-        uint256 maxIssueAmount = calculateMaxIssueAmount(nextSetToken);
+        SetTokenLibrary.SetDetails memory setToken = SetTokenLibrary.getSetDetails(address(_setToken));
+        uint256 maxIssueAmount = calculateMaxIssueAmount(setToken);
 
         // Issue amount of Sets that is closest multiple of nextNaturalUnit to the maxIssueAmount
         // Since the initial division will round down to the nearest whole number when we multiply
         // by that same number we will return the closest multiple less than the maxIssueAmount
-        uint256 issueAmount = maxIssueAmount.sub(maxIssueAmount.mod(nextSetToken.naturalUnit));
+        uint256 issueAmount = maxIssueAmount.sub(maxIssueAmount.mod(setToken.naturalUnit));
 
         return issueAmount;
     }

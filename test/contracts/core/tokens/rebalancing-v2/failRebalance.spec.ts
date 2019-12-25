@@ -222,15 +222,15 @@ contract('FailRebalance', accounts => {
               currentSetToken.address,
               rebalancingSetToken.address
             );
-            const nextSetIssueQuantity = await rebalancingHelper.getNextSetIssueQuantity(
-              nextSetToken,
+            const currentSetIssueQuantity = await rebalancingHelper.getSetIssueQuantity(
+              currentSetToken,
               rebalancingSetToken,
               vault,
             );
 
             await subject();
 
-            const expectedBalance = existingBalance.add(nextSetIssueQuantity);
+            const expectedBalance = existingBalance.add(currentSetIssueQuantity);
             const newBalance = await vault.balances.callAsync(currentSetToken.address, rebalancingSetToken.address);
             expect(newBalance).to.be.bignumber.equal(expectedBalance);
           });

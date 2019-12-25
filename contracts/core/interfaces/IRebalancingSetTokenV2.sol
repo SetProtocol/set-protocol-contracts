@@ -73,6 +73,16 @@ interface IRebalancingSetTokenV2 {
         returns (uint256);
 
     /*
+     * Get startingCurrentSets of RebalancingSetToken
+     *
+     * @return  startingCurrentSets
+     */
+    function startingCurrentSetAmount()
+        external
+        view
+        returns (uint256);
+
+    /*
      * Get rebalanceInterval of Rebalancing Set
      *
      * @return  rebalanceInterval
@@ -81,6 +91,20 @@ interface IRebalancingSetTokenV2 {
         external
         view
         returns (uint256);
+
+    /*
+     * Get array returning [startTime, timeToPivot, startPrice, endPrice] 
+     *
+     * @return  AuctionPriceParameters
+     */
+    function getAuctionPriceParameters() external view returns (uint256[] memory);
+
+    /*
+     * Get array returning [minimumBid, remainingCurrentSets] 
+     *
+     * @return  BiddingParameters
+     */
+    function getBiddingParameters() external view returns (uint256[] memory);
 
     /*
      * Get rebalanceState of Rebalancing Set

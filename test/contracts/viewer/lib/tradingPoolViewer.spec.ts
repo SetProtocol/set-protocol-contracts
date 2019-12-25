@@ -84,10 +84,15 @@ contract('TradingPoolViewer', accounts => {
   let component2Price: BigNumber;
 
   let set1: SetTokenContract;
+  let set2: SetTokenContract;
 
   let set1Components: Address[];
   let set1Units: BigNumber[];
   let set1NaturalUnit: BigNumber;
+
+  let set2Components: Address[];
+  let set2Units: BigNumber[];
+  let set2NaturalUnit: BigNumber;
 
   let component1Oracle: UpdatableOracleMockContract;
   let component2Oracle: UpdatableOracleMockContract;
@@ -156,6 +161,17 @@ contract('TradingPoolViewer', accounts => {
       set1Components,
       set1Units,
       set1NaturalUnit,
+    );
+
+    set2Components = [component1.address, component2.address];
+    set2Units = [gWei(2), gWei(3)];
+    set2NaturalUnit = gWei(2);
+    set2 = await coreHelper.createSetTokenAsync(
+      coreMock,
+      setTokenFactory.address,
+      set2Components,
+      set2Units,
+      set2NaturalUnit,
     );
 
     component1Price = ether(1);
@@ -270,6 +286,115 @@ contract('TradingPoolViewer', accounts => {
       expect(JSON.stringify(collateralSetData.components)).to.equal(JSON.stringify(set1Components));
       expect(JSON.stringify(collateralSetData.units)).to.equal(JSON.stringify(set1Units));
       expect(collateralSetData.naturalUnit).to.be.bignumber.equal(set1NaturalUnit);
+      expect(collateralSetData.name).to.equal('Set Token');
+      expect(collateralSetData.symbol).to.equal('SET');
+    });
+  });
+
+  describe('#fetchTradingPoolRebalanceDetails', async () => {
+    let subjectTradingPool: Address;
+    let setManager: SocialTradingManagerMockContract;
+
+    let newAllocation: BigNumber;
+    let nextSet: SetTokenContract;
+
+    beforeEach(async () => {
+      const currentSetToken = set1;
+
+      setManager = await viewerHelper.deploySocialTradingManagerMockAsync();
+
+      const failPeriod = ONE_DAY_IN_SECONDS;
+      const { timestamp } = await web3.eth.getBlock('latest');
+      const lastRebalanceTimestamp = timestamp;
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
+        coreMock,
+        rebalancingFactory.address,
+        setManager.address,
+        liquidator.address,
+        feeRecipient,
+        fixedFeeCalculator.address,
+        currentSetToken.address,
+        failPeriod,
+        lastRebalanceTimestamp,
+      );
+
+      const currentAllocation = ether(.6);
+      await setManager.updateRecord.sendTransactionAsync(
+        rebalancingSetToken.address,
+        trader,
+        allocator,
+        currentAllocation
+      );
+
+      // Issue currentSetToken
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        ether(8),
+        {from: deployerAccount}
+      );
+      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      const rebalancingSetQuantityToIssue = ether(7);
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+
+      await blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS);
+
+
+      const liquidatorData = '0x';
+      nextSet = set2;
+      newAllocation = ether(.4);
+      await setManager.rebalance.sendTransactionAsync(
+        rebalancingSetToken.address,
+        nextSet.address,
+        newAllocation,
+        liquidatorData
+      );
+
+      subjectTradingPool = rebalancingSetToken.address;
+    });
+
+    async function subject(): Promise<any> {
+      return poolViewer.fetchTradingPoolRebalanceDetails.callAsync(
+        subjectTradingPool
+      );
+    }
+
+    it('fetches the correct poolInfo data', async () => {
+      const [ poolInfo, , ] = await subject();
+
+      expect(poolInfo.trader).to.equal(trader);
+      expect(poolInfo.allocator).to.equal(allocator);
+      expect(poolInfo.currentAllocation).to.be.bignumber.equal(newAllocation);
+    });
+
+    it('fetches the correct RebalancingSetTokenV2/TradingPool data', async () => {
+      const [ , rbSetData, ] = await subject();
+
+      const auctionPriceParams = await rebalancingSetToken.getAuctionPriceParameters.callAsync();
+      const startingCurrentSets = await rebalancingSetToken.startingCurrentSetAmount.callAsync();
+      const biddingParams = await rebalancingSetToken.getBiddingParameters.callAsync();
+
+      expect(rbSetData.rebalanceStartTime).to.be.bignumber.equal(auctionPriceParams[0]);
+      expect(rbSetData.timeToPivot).to.be.bignumber.equal(auctionPriceParams[1]);
+      expect(rbSetData.startPrice).to.be.bignumber.equal(auctionPriceParams[2]);
+      expect(rbSetData.endPrice).to.be.bignumber.equal(auctionPriceParams[3]);
+      expect(rbSetData.startingCurrentSets).to.be.bignumber.equal(startingCurrentSets);
+      expect(rbSetData.remainingCurrentSets).to.be.bignumber.equal(biddingParams[1]);
+      expect(rbSetData.minimumBid).to.be.bignumber.equal(biddingParams[0]);
+      expect(rbSetData.rebalanceState).to.be.bignumber.equal(new BigNumber(2));
+      expect(rbSetData.nextSet).to.equal(nextSet.address);
+      expect(rbSetData.liquidator).to.equal(liquidator.address);
+    });
+
+    it('fetches the correct CollateralSet data', async () => {
+      const [ , , collateralSetData ] = await subject();
+
+      expect(JSON.stringify(collateralSetData.components)).to.equal(JSON.stringify(set2Components));
+      expect(JSON.stringify(collateralSetData.units)).to.equal(JSON.stringify(set2Units));
+      expect(collateralSetData.naturalUnit).to.be.bignumber.equal(set2NaturalUnit);
+      expect(collateralSetData.name).to.equal('Set Token');
+      expect(collateralSetData.symbol).to.equal('SET');
     });
   });
 });

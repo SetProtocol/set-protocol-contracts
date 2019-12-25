@@ -761,6 +761,7 @@ contract('ProtocolViewer', accounts => {
       expect(rbSetData.startingCurrentSets).to.be.bignumber.equal(startingCurrentSets);
       expect(rbSetData.remainingCurrentSets).to.be.bignumber.equal(biddingParams[1]);
       expect(rbSetData.minimumBid).to.be.bignumber.equal(biddingParams[0]);
+      expect(rbSetData.rebalanceState).to.be.bignumber.equal(new BigNumber(2));
       expect(rbSetData.nextSet).to.equal(nextSet.address);
       expect(rbSetData.liquidator).to.equal(liquidator.address);
     });

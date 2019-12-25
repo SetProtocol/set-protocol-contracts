@@ -60,6 +60,7 @@ contract TradingPoolViewer {
         uint256 startingCurrentSets;
         uint256 remainingCurrentSets;
         uint256 minimumBid;
+        RebalancingLibrary.State rebalanceState;
         ISetToken nextSet;
         ILiquidator liquidator;
     }
@@ -121,6 +122,7 @@ contract TradingPoolViewer {
             startingCurrentSets: _tradingPool.startingCurrentSetAmount(), 
             remainingCurrentSets: biddingParams[1],
             minimumBid: biddingParams[0],
+            rebalanceState: _tradingPool.rebalanceState(),
             nextSet: _tradingPool.nextSet(),
             liquidator: _tradingPool.liquidator()
         });

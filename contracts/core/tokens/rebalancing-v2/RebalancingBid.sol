@@ -69,7 +69,7 @@ contract RebalancingBid is
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
      */
-    function validateRebalancingBid(
+    function validatePlaceBid(
         uint256 _quantity
     )
         internal

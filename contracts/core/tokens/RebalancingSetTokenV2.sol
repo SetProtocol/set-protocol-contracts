@@ -167,7 +167,7 @@ contract RebalancingSetTokenV2 is
         external
         onlyManager
     {
-        RebalancingStart.validateRebalancingStart(_nextSet);
+        RebalancingStart.validateStartRebalance(_nextSet);
 
         uint256 startingCurrentSetQuantity = RebalancingStart.calculateStartingSetQuantity();
 
@@ -225,7 +225,7 @@ contract RebalancingSetTokenV2 is
         external
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        RebalancingBid.validateRebalancingBid(_quantity);
+        RebalancingBid.validatePlaceBid(_quantity);
 
         // Place bid and get back inflow and outflow arrays
         Rebalance.TokenFlow memory tokenFlow = liquidator.placeBid(_quantity);
@@ -289,7 +289,7 @@ contract RebalancingSetTokenV2 is
     function endFailedRebalance()
         public
     {
-        RebalancingFailure.validateRebalancingFailure();
+        RebalancingFailure.validateFailRebalance();
 
         RebalancingLibrary.State newRebalanceState = RebalancingFailure.getNewRebalanceState();
 

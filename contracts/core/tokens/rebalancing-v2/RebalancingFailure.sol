@@ -48,7 +48,7 @@ contract RebalancingFailure is
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
      */
-    function validateRebalancingFailure()
+    function validateFailRebalance()
         internal
         view
     {

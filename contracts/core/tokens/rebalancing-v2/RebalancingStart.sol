@@ -48,7 +48,7 @@ contract RebalancingStart is
      *
      * @param _nextSet                    The Set to rebalance into
      */
-    function validateRebalancingStart(
+    function validateStartRebalance(
         ISetToken _nextSet
     )
         internal

@@ -46,8 +46,8 @@ library ExchangeWrapperLibrary {
     }
 
     /**
-     * components                       A list of the acquired components from exchange wrapper
-     * componentQuantities              A list of the component quantities acquired
+     * receiveTokens                    A list of the acquired components from exchange wrapper
+     * receiveTokenAmounts              A list of the component quantities acquired
      */
     struct ExchangeResults {
         address[] receiveTokens;

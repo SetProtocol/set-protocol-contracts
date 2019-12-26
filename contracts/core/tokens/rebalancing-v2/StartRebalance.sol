@@ -79,7 +79,7 @@ contract StartRebalance is
         );
 
         // Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.
-        // Done to make sure that when calculating token units there will are no rounding errors.
+        // Done to make sure that when calculating token units there will are be rounding errors.
         require(
             naturalUnitsAreValid(currentSet, _nextSet),
             "Invalid natural unit"
@@ -141,7 +141,7 @@ contract StartRebalance is
 
     /**
      * Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.
-     * Done to make sure that when calculating token units there will are no rounding errors.
+     * Done to make sure that when calculating token units there will be no rounding errors.
      *
      * @param _currentSet                 The current base SetToken
      * @param _nextSet                    The proposed SetToken

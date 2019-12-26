@@ -276,7 +276,7 @@ contract('SettleRebalance', accounts => {
           nextSetToken.address,
           rebalancingSetToken.address
         );
-        const nextSetIssueAmount = await rebalancingHelper.getNextSetIssueQuantity(
+        const nextSetIssueAmount = await rebalancingHelper.getSetIssueQuantity(
           nextSetToken,
           rebalancingSetToken,
           vault
@@ -300,7 +300,7 @@ contract('SettleRebalance', accounts => {
           rebalancingSetToken.address
         );
 
-        const nextSetIssueAmount = await rebalancingHelper.getNextSetIssueQuantity(
+        const nextSetIssueAmount = await rebalancingHelper.getSetIssueQuantity(
           nextSetToken,
           rebalancingSetToken,
           vault
@@ -405,7 +405,7 @@ contract('SettleRebalance', accounts => {
         );
         const rebalanceIndex = await rebalancingSetToken.rebalanceIndex.callAsync();
 
-        const issueQuantity = await rebalancingHelper.getNextSetIssueQuantity(
+        const issueQuantity = await rebalancingHelper.getSetIssueQuantity(
           nextSetToken,
           rebalancingSetToken,
           vault

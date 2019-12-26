@@ -275,21 +275,21 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     return _.union(currentSetComponents, nextSetComponents);
   }
 
-  public async getNextSetIssueQuantity(
-    nextSetToken: SetTokenContract,
+  public async getSetIssueQuantity(
+    setToken: SetTokenContract,
     rebalancingSetToken: RebalancingSetTokenV2Contract,
     vault: VaultContract,
   ): Promise<BigNumber> {
     // Calculate max Set issue amount
     const maxIssueAmount = await this.calculateMaxIssueAmount(
-      nextSetToken,
+      setToken,
       rebalancingSetToken,
       vault,
     );
 
-    const nextSetTokenNaturalUnit = await nextSetToken.naturalUnit.callAsync();
+    const setTokenNaturalUnit = await setToken.naturalUnit.callAsync();
 
-    return maxIssueAmount.div(nextSetTokenNaturalUnit).round(0, 3).mul(nextSetTokenNaturalUnit);
+    return maxIssueAmount.div(setTokenNaturalUnit).round(0, 3).mul(setTokenNaturalUnit);
   }
 
   public async calculateMaxIssueAmount(

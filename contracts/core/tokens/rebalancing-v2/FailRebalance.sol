@@ -139,7 +139,7 @@ contract FailRebalance is
         private
     {
         if (_newRebalanceState ==  RebalancingLibrary.State.Default) {
-            uint256 issueQuantity = calculateNextSetIssueQuantity();
+            uint256 issueQuantity = calculateSetIssueQuantity(currentSet);
 
             // If bid not placed, reissue current Set
             core.issueInVault(

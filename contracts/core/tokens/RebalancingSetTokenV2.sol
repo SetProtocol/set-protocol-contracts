@@ -247,7 +247,7 @@ contract RebalancingSetTokenV2 is
     {
         SettleRebalance.validateSettleRebalance();
 
-        uint256 issueQuantity = SettleRebalance.calculateNextSetIssueQuantity();
+        uint256 issueQuantity = SettleRebalance.calculateSetIssueQuantity(nextSet);
 
         // Calculates fees and mints Rebalancing Set to the feeRecipient, increasing supply
         (uint256 feePercent, uint256 feeQuantity) = SettleRebalance.handleFees();

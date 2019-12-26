@@ -29,7 +29,7 @@ jobs:
     docker:
       - image: circleci/node:10.11.0
     working_directory: ~/set-protocol-contracts
-    parallelism: 2
+    parallelism: 3
     steps:
       - setup_remote_docker:
           docker_layer_caching: true

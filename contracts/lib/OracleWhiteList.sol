@@ -151,7 +151,7 @@ contract OracleWhiteList is
     {
         require(
             oracleWhiteList[_tokenAddress] != address(0),
-            "OracleWhiteList.addTokenOraclePair: Token and Oracle pair already exists."
+            "OracleWhiteList.editTokenOraclePair: Token and Oracle pair must exist."
         );
 
         // Set new oracle address for passed token address
@@ -195,7 +195,7 @@ contract OracleWhiteList is
         // Check that passed array length is greater than 0
         require(
             arrayLength > 0,
-            "OracleWhiteList.areValidAddresses: Array length must be greater than 0."
+            "OracleWhiteList.getOracleAddressesByToken: Array length must be greater than 0."
         );
 
         // Instantiate oracle addresses array

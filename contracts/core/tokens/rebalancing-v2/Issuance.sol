@@ -58,8 +58,7 @@ contract Issuance is
         );
 
         require(
-            rebalanceState != RebalancingLibrary.State.Rebalance &&
-            rebalanceState != RebalancingLibrary.State.Drawdown,
+            rebalanceState == RebalancingLibrary.State.Default,
             "Invalid state"
         );
     }

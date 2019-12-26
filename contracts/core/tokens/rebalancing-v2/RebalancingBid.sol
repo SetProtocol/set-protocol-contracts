@@ -26,12 +26,12 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
 
 
 /**
- * @title PlaceBid
+ * @title RebalancingBid
  * @author Set Protocol
  *
  * Implementation of Rebalancing Set Token V2 bidding-related functionality.
  */
-contract PlaceBid is 
+contract RebalancingBid is 
     RebalancingSetState
 {
     using SafeMath for uint256;
@@ -69,7 +69,7 @@ contract PlaceBid is
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
      */
-    function validatePlaceBid(
+    function validateRebalancingBid(
         uint256 _quantity
     )
         internal

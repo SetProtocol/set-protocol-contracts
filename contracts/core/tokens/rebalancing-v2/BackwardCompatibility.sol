@@ -22,7 +22,7 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
 
 
 /**
- * @title BackwardsCompatability
+ * @title BackwardCompatibility
  * @author Set Protocol
  *
  * This module allows full backwards compatability with RebalancingSetTokenV1. It implements
@@ -34,7 +34,7 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
  *.    been a revert.
  * - biddingParameters: RebalancingSetToken V1 biddingParameters reverts on call
  */
-contract BackwardsCompatability is 
+contract BackwardCompatibility is 
     RebalancingSetState
 {
     /* ============ Getters ============ */

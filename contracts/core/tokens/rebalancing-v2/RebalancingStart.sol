@@ -26,12 +26,12 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
 
 
 /**
- * @title StartRebalance
+ * @title RebalancingStart
  * @author Set Protocol
  *
  * Implementation of Rebalancing Set Token V2 start rebalance functionality
  */
-contract StartRebalance is 
+contract RebalancingStart is 
     RebalancingSetState
 {
     using SafeMath for uint256;
@@ -111,7 +111,7 @@ contract StartRebalance is
      * @param _startingCurrentSetQuantity      Amount of currentSets the rebalance is initiated with
      * @param _liquidatorData                  Bytecode formatted data with liquidator-specific arguments
      */
-    function liquidatorStartRebalance(
+    function liquidatorRebalancingStart(
         ISetToken _nextSet,
         uint256 _startingCurrentSetQuantity,
         bytes memory _liquidatorData

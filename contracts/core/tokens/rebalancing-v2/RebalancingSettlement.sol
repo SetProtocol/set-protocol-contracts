@@ -30,11 +30,11 @@ import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 
 /**
- * @title SettleRebalance
+ * @title RebalancingSettlement
  * @author Set Protocol
  *
  */
-contract SettleRebalance is 
+contract RebalancingSettlement is 
     ERC20,
     RebalancingSetState
 {
@@ -47,7 +47,7 @@ contract SettleRebalance is
     /*
      * Validates that the settle function can be called.
      */    
-    function validateSettleRebalance()
+    function validateRebalancingSettlement()
         internal
         view
     {

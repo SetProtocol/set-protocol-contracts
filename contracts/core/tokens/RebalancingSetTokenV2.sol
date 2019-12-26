@@ -21,8 +21,8 @@ import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import { Initializable } from "zos-lib/contracts/Initializable.sol";
 
-import { BackwardsCompatability } from "./rebalancing-v2/BackwardsCompatability.sol";
-import { FailRebalance } from "./rebalancing-v2/FailRebalance.sol";
+import { BackwardCompatibility } from "./rebalancing-v2/BackwardCompatibility.sol";
+import { RebalancingFailure } from "./rebalancing-v2/RebalancingFailure.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IFeeCalculator } from "../interfaces/IFeeCalculator.sol";
 import { ILiquidator } from "../interfaces/ILiquidator.sol";
@@ -31,12 +31,12 @@ import { ISetToken } from "../interfaces/ISetToken.sol";
 import { Issuance } from "./rebalancing-v2/Issuance.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { IWhiteList } from "../interfaces/IWhiteList.sol";
-import { PlaceBid } from "./rebalancing-v2/PlaceBid.sol";
+import { RebalancingBid } from "./rebalancing-v2/RebalancingBid.sol";
 import { Rebalance } from "../lib/Rebalance.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "./rebalancing-v2/RebalancingSetState.sol";
-import { SettleRebalance } from "./rebalancing-v2/SettleRebalance.sol";
-import { StartRebalance } from "./rebalancing-v2/StartRebalance.sol";
+import { RebalancingSettlement } from "./rebalancing-v2/RebalancingSettlement.sol";
+import { RebalancingStart } from "./rebalancing-v2/RebalancingStart.sol";
 
 
 /**
@@ -59,12 +59,12 @@ contract RebalancingSetTokenV2 is
     ERC20Detailed,
     Initializable,
     RebalancingSetState,
-    BackwardsCompatability,
+    BackwardCompatibility,
     Issuance,
-    StartRebalance,
-    PlaceBid,
-    SettleRebalance,
-    FailRebalance
+    RebalancingStart,
+    RebalancingBid,
+    RebalancingSettlement,
+    RebalancingFailure
 {
 
     /* ============ Constructor ============ */
@@ -167,15 +167,15 @@ contract RebalancingSetTokenV2 is
         external
         onlyManager
     {
-        StartRebalance.validateStartRebalance(_nextSet);
+        RebalancingStart.validateStartRebalance(_nextSet);
 
-        uint256 startingCurrentSetQuantity = StartRebalance.calculateStartingSetQuantity();
+        uint256 startingCurrentSetQuantity = RebalancingStart.calculateStartingSetQuantity();
 
         core.redeemInVault(address(currentSet), startingCurrentSetQuantity);
 
-        StartRebalance.liquidatorStartRebalance(_nextSet, startingCurrentSetQuantity, _liquidatorData);
+        RebalancingStart.liquidatorRebalancingStart(_nextSet, startingCurrentSetQuantity, _liquidatorData);
 
-        StartRebalance.transitionToRebalance(_nextSet);
+        RebalancingStart.transitionToRebalance(_nextSet);
 
         emit RebalanceStarted(
             address(currentSet),
@@ -200,7 +200,7 @@ contract RebalancingSetTokenV2 is
         view
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        PlaceBid.validateGetBidPrice(_quantity);
+        RebalancingBid.validateGetBidPrice(_quantity);
 
         return Rebalance.decomposeTokenFlow(
             liquidator.getBidPrice(address(this), _quantity)
@@ -225,12 +225,12 @@ contract RebalancingSetTokenV2 is
         external
         returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        PlaceBid.validatePlaceBid(_quantity);
+        RebalancingBid.validatePlaceBid(_quantity);
 
         // Place bid and get back inflow and outflow arrays
         Rebalance.TokenFlow memory tokenFlow = liquidator.placeBid(_quantity);
 
-        PlaceBid.updateHasBiddedIfNecessary();
+        RebalancingBid.updateHasBiddedIfNecessary();
 
         return Rebalance.decomposeTokenFlow(tokenFlow);
     }
@@ -245,14 +245,14 @@ contract RebalancingSetTokenV2 is
     function settleRebalance()
         external
     {
-        SettleRebalance.validateSettleRebalance();
+        RebalancingSettlement.validateRebalancingSettlement();
 
-        uint256 issueQuantity = SettleRebalance.calculateSetIssueQuantity(nextSet);
+        uint256 issueQuantity = RebalancingSettlement.calculateSetIssueQuantity(nextSet);
 
         // Calculates fees and mints Rebalancing Set to the feeRecipient, increasing supply
-        (uint256 feePercent, uint256 feeQuantity) = SettleRebalance.handleFees();
+        (uint256 feePercent, uint256 feeQuantity) = RebalancingSettlement.handleFees();
 
-        uint256 newUnitShares = SettleRebalance.calculateNextSetNewUnitShares(issueQuantity);
+        uint256 newUnitShares = RebalancingSettlement.calculateNextSetNewUnitShares(issueQuantity);
 
         // The unit shares must result in a quantity greater than the number of natural units outstanding
         require(
@@ -260,7 +260,7 @@ contract RebalancingSetTokenV2 is
             "Failed: unitshares is 0."
         );
 
-        SettleRebalance.issueNextSet(issueQuantity);
+        RebalancingSettlement.issueNextSet(issueQuantity);
 
         liquidator.settleRebalance();
 
@@ -274,7 +274,7 @@ contract RebalancingSetTokenV2 is
             newUnitShares
         );
 
-        SettleRebalance.transitionToDefault(newUnitShares);
+        RebalancingSettlement.transitionToDefault(newUnitShares);
 
     }
 
@@ -289,13 +289,13 @@ contract RebalancingSetTokenV2 is
     function endFailedRebalance()
         public
     {
-        FailRebalance.validateFailRebalance();
+        RebalancingFailure.validateFailRebalance();
 
-        RebalancingLibrary.State newRebalanceState = FailRebalance.getNewRebalanceState();
+        RebalancingLibrary.State newRebalanceState = RebalancingFailure.getNewRebalanceState();
 
         liquidator.endFailedRebalance();
 
-        FailRebalance.transitionToNewState(newRebalanceState);
+        RebalancingFailure.transitionToNewState(newRebalanceState);
     }
 
     /*

@@ -58,7 +58,7 @@ contract RebalancingBid is
 
         require(
             _quantity > 0,
-            "Bid must be > 0"
+            "Bid not > 0"
         );
     }
 
@@ -77,7 +77,7 @@ contract RebalancingBid is
     {
         require(
             core.validModules(msg.sender),
-            "Must be from approved module"
+            "Not approved module"
         );
 
         validateGetBidPrice(_quantity);

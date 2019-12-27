@@ -92,8 +92,13 @@ contract BackwardCompatibility is
         return biddingParams;
     }
 
-    function biddingParameters() external view returns (uint256[] memory) {
-        return getBiddingParameters();
+    function biddingParameters()
+        external
+        view 
+        returns (uint256, uint256)
+    {
+        uint256[] memory biddingParams = getBiddingParameters();
+        return (biddingParams[0], biddingParams[1]);
     }
 
     function getFailedAuctionWithdrawComponents() external view returns (address[] memory) {

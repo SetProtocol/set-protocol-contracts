@@ -66,4 +66,12 @@ library Rebalance {
     {
         return (_tokenFlow.addresses, _tokenFlow.inflow, _tokenFlow.outflow);
     }
+
+    function decomposeTokenFlowToBidPrice(TokenFlow memory _tokenFlow)
+        internal
+        pure
+        returns (uint256[] memory, uint256[] memory)
+    {
+        return (_tokenFlow.inflow, _tokenFlow.outflow);
+    }
 }

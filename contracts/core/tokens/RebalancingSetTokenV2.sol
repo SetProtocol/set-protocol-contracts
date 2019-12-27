@@ -189,7 +189,6 @@ contract RebalancingSetTokenV2 is
      * Get token inflows and outflows required for bid from the Liquidator.
      *
      * @param _quantity               The amount of currentSet to be rebalanced
-     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
      * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
      * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
      */
@@ -198,11 +197,11 @@ contract RebalancingSetTokenV2 is
     )
         public
         view
-        returns (address[] memory, uint256[] memory, uint256[] memory)
+        returns (uint256[] memory, uint256[] memory)
     {
         RebalancingBid.validateGetBidPrice(_quantity);
 
-        return Rebalance.decomposeTokenFlow(
+        return Rebalance.decomposeTokenFlowToBidPrice(
             liquidator.getBidPrice(address(this), _quantity)
         );
     }

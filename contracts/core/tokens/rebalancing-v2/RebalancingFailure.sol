@@ -87,9 +87,29 @@ contract RebalancingFailure is
     )
         internal
     {
-        reissueSetIfRevertToDefault(_newRebalanceState);
+        /*
+         * If the determination is Default State, reissue the Set.
+         */
+        if (_newRebalanceState ==  RebalancingLibrary.State.Default) {
+            uint256 issueQuantity = calculateSetIssueQuantity(currentSet);
 
-        setWithdrawComponentsIfDrawdown(_newRebalanceState);
+            // If bid not placed, reissue current Set
+            core.issueInVault(
+                address(currentSet),
+                issueQuantity
+            );
+        }
+
+        /*
+         * If the determination is Drawdown State, set the drawdown components which is the union of
+         * the current and next Set components.
+         */
+        if (_newRebalanceState ==  RebalancingLibrary.State.Drawdown) {
+            address[] memory currentSetComponents = currentSet.getComponents();
+            address[] memory nextSetComponents = nextSet.getComponents();
+
+            failedRebalanceComponents = currentSetComponents.union(nextSetComponents);
+        }
 
         rebalanceState = _newRebalanceState;
         rebalanceIndex = rebalanceIndex.add(1);
@@ -128,41 +148,5 @@ contract RebalancingFailure is
         uint256 rebalanceFailTime = rebalanceStartTime.add(rebalanceFailPeriod);
 
         return block.timestamp >= rebalanceFailTime;
-    }
-
-    /*
-     * If the determination is Default State, reissue the Set.
-     */
-    function reissueSetIfRevertToDefault(
-        RebalancingLibrary.State _newRebalanceState
-    )
-        private
-    {
-        if (_newRebalanceState ==  RebalancingLibrary.State.Default) {
-            uint256 issueQuantity = calculateSetIssueQuantity(currentSet);
-
-            // If bid not placed, reissue current Set
-            core.issueInVault(
-                address(currentSet),
-                issueQuantity
-            );
-        }
-    }
-
-    /*
-     * If the determination is Drawdown State, set the drawdown components which is the union of
-     * the current and next Set components.
-     */
-    function setWithdrawComponentsIfDrawdown(
-        RebalancingLibrary.State _newRebalanceState
-    )
-        private
-    {
-        if (_newRebalanceState ==  RebalancingLibrary.State.Drawdown) {
-            address[] memory currentSetComponents = currentSet.getComponents();
-            address[] memory nextSetComponents = nextSet.getComponents();
-
-            failedRebalanceComponents = currentSetComponents.union(nextSetComponents);
-        }
     }
 }

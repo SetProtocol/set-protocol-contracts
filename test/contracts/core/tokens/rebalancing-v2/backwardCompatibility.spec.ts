@@ -331,7 +331,7 @@ contract('BackwardsCompatability', accounts => {
   });
 
   describe('#biddingParameters', async () => {
-    async function subject(): Promise<BigNumber[]> {
+    async function subject(): Promise<any> {
       return rebalancingSetToken.biddingParameters.callAsync();
     }
 

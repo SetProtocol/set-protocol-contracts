@@ -54,7 +54,7 @@ contract Issuance is
     {
         require(
             msg.sender == address(core),
-            "Sender must be core"
+            "Not from Core"
         );
 
         require(
@@ -82,14 +82,14 @@ contract Issuance is
             // In Drawdown Sets can only be burned as part of the withdrawal process
             require(
                 core.validModules(msg.sender),
-                "Cant redeem during Drawdown"
+                "Cant be Drawdown"
             );
         } else {
             // When in non-Rebalance or Drawdown state, check that function caller is Core
             // so that Sets can be redeemed
             require(
                 msg.sender == address(core),
-                "Sender must be core"
+                "Not from core"
             );
         }
     }

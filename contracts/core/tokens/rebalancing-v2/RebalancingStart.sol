@@ -62,7 +62,7 @@ contract RebalancingStart is
         // Enough time must have passed from last rebalance to start a new proposal
         require(
             block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
-            "Rebalance interval not elapsed"
+            "Interval not elapsed"
         );
 
         // New proposed Set must be a valid Set created by Core
@@ -75,7 +75,7 @@ contract RebalancingStart is
         // to a propose that prohibit the set from carrying out an auction i.e. a token that only the manager possesses
         require(
             componentWhiteList.areValidAddresses(_nextSet.getComponents()),
-            "Set has invalid component"
+            "Invalid component"
         );
 
         // Check that the proposed set natural unit is a multiple of current set natural unit, or vice versa.

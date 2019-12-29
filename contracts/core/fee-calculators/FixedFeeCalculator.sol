@@ -94,7 +94,7 @@ contract FixedFeeCalculator is IFeeCalculator {
         private
         view
     {
-        ScaleValidations.validateLessThanOneHundredPerecent(_fee);
+        ScaleValidations.validateLessThanEqualOneHundredPercent(_fee);
         
         ScaleValidations.validateMultipleOfBasisPoint(_fee);
     }

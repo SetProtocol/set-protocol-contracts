@@ -37,6 +37,17 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
 contract BackwardCompatibility is 
     RebalancingSetState
 {
+    /* ============ Empty Variables ============ */
+    
+    // Deprecated auctionLibrary. Returns 0x00 to prevent reverts
+    address public auctionLibrary;
+
+    // Deprecated proposal period. Returns 0 to prevent reverts
+    uint256 public proposalPeriod;
+
+    // Deprecated proposal start time. Returns 0 to prevent reverts
+    uint256 public proposalStartTime;
+
     /* ============ Getters ============ */
 
     function getAuctionPriceParameters() external view returns (uint256[] memory) {

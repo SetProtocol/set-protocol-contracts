@@ -28,6 +28,7 @@ import {
   ONE_DAY_IN_SECONDS,
   DEFAULT_UNIT_SHARES,
   DEFAULT_REBALANCING_NATURAL_UNIT,
+  NULL_ADDRESS,
 } from '@utils/constants';
 import {
   getExpectedNewManagerAddedLog,
@@ -54,7 +55,6 @@ const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setPr
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
 contract('RebalancingSetState', accounts => {
@@ -383,6 +383,24 @@ contract('RebalancingSetState', accounts => {
       rebalancingSetToken = await subject();
       const hasBidded = await rebalancingSetToken.hasBidded.callAsync();
       expect(hasBidded).to.equal(false);
+    });
+
+    it('creates a set with the proposalPeriod to 0', async () => {
+      rebalancingSetToken = await subject();
+      const proposalPeriod = await rebalancingSetToken.proposalPeriod.callAsync();
+      expect(proposalPeriod).to.bignumber.equal(0);
+    });
+
+    it('creates a set with the proposalStartTime to 0', async () => {
+      rebalancingSetToken = await subject();
+      const startTime = await rebalancingSetToken.proposalStartTime.callAsync();
+      expect(startTime).to.bignumber.equal(0);
+    });
+
+    it('creates a set with the auctionLibrary to 0', async () => {
+      rebalancingSetToken = await subject();
+      const auctionLibrary = await rebalancingSetToken.auctionLibrary.callAsync();
+      expect(auctionLibrary).to.equal(NULL_ADDRESS);
     });
   });
 

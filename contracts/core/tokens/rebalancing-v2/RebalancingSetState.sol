@@ -199,7 +199,7 @@ contract RebalancingSetState {
         external
         onlyManager
     {
-        ScaleValidations.validateLessThanOneHundredPerecent(_newEntryFee);
+        ScaleValidations.validateLessThanEqualOneHundredPercent(_newEntryFee);
         
         ScaleValidations.validateMultipleOfBasisPoint(_newEntryFee);
 

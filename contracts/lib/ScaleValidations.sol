@@ -25,8 +25,8 @@ library ScaleValidations {
     uint256 private constant ONE_HUNDRED_PERCENT = 10 ** 18;
     uint256 private constant ONE_BASIS_POINT = 10 ** 14;
 
-    function validateLessThanOneHundredPerecent(uint256 _value) internal view {
-        require(_value < ONE_HUNDRED_PERCENT, "Must be < 100%");
+    function validateLessThanEqualOneHundredPercent(uint256 _value) internal view {
+        require(_value <= ONE_HUNDRED_PERCENT, "Must be < 100%");
     }
 
     function validateMultipleOfBasisPoint(uint256 _value) internal view {

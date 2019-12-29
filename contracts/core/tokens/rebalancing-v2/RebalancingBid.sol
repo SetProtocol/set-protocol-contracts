@@ -51,10 +51,7 @@ contract RebalancingBid is
         internal
         view
     {
-        require(
-            rebalanceState == RebalancingLibrary.State.Rebalance,
-            "State must be Rebalance"
-        );
+        validateRebalanceState(RebalancingLibrary.State.Rebalance);
 
         require(
             _quantity > 0,
@@ -75,10 +72,7 @@ contract RebalancingBid is
         internal
         view
     {
-        require(
-            core.validModules(msg.sender),
-            "Not approved module"
-        );
+        validateCallerIsModule();
 
         validateGetBidPrice(_quantity);
     }

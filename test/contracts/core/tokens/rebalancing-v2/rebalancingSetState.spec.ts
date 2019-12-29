@@ -28,10 +28,10 @@ import {
   ONE_DAY_IN_SECONDS,
   DEFAULT_UNIT_SHARES,
   DEFAULT_REBALANCING_NATURAL_UNIT,
-  ZERO,
 } from '@utils/constants';
 import {
   getExpectedNewManagerAddedLog,
+  getExpectedNewEntryFeeLog,
   getExpectedNewLiquidatorAddedLog,
   getExpectedNewFeeRecipientAddedLog
 } from '@utils/contract_logs/rebalancingSetTokenV2';
@@ -102,6 +102,7 @@ contract('RebalancingSetState', accounts => {
   let rebalanceInterval: BigNumber;
   let failPeriod: BigNumber;
   let lastRebalanceTimestamp: BigNumber;
+  let entryFee: BigNumber;
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -152,6 +153,7 @@ contract('RebalancingSetState', accounts => {
     initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
     rebalanceInterval = ONE_DAY_IN_SECONDS;
     failPeriod = ONE_DAY_IN_SECONDS;
+    entryFee = ether(1).div(10);
 
     const { timestamp } = await web3.eth.getBlock('latest');
     lastRebalanceTimestamp = timestamp;
@@ -176,7 +178,7 @@ contract('RebalancingSetState', accounts => {
         rebalanceInterval,
         failPeriod,
         lastRebalanceTimestamp,
-        ZERO, // Entry Fee
+        entryFee,
       ]
     );
   });
@@ -467,6 +469,73 @@ contract('RebalancingSetState', accounts => {
     describe('when the caller is not the current manager', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#setEntryFee', async () => {
+    let subjectNewEntryFee: BigNumber;
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      subjectNewEntryFee = new BigNumber(10 ** 16),
+      subjectCaller = managerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingSetToken.setEntryFee.sendTransactionAsync(
+        subjectNewEntryFee,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('updates to the new entryFee correctly', async () => {
+      await subject();
+
+      const expectedNewFee = await rebalancingSetToken.entryFee.callAsync();
+      expect(subjectNewEntryFee).to.bignumber.equal(expectedNewFee);
+    });
+
+    it('emits the correct NewEntryFeeAdded event', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedNewEntryFeeLog(
+          subjectNewEntryFee,
+          entryFee,
+          rebalancingSetToken.address
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the caller is not the current manager', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the fee is greater than 100%', async () => {
+      beforeEach(async () => {
+        subjectNewEntryFee = ether(1).plus(10 ** 14);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the fee not a multiple of 1 basis point', async () => {
+      beforeEach(async () => {
+        subjectNewEntryFee = new BigNumber(10 ** 14).plus(1);
       });
 
       it('should revert', async () => {

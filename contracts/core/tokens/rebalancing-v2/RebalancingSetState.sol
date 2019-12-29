@@ -17,6 +17,8 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 import { ICore } from "../../interfaces/ICore.sol";
 import { IFeeCalculator } from "../../interfaces/IFeeCalculator.sol";
 import { ILiquidator } from "../../interfaces/ILiquidator.sol";
@@ -25,6 +27,7 @@ import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
+import { ScaleValidations } from "../../../lib/ScaleValidations.sol";
 
 
 /**
@@ -33,6 +36,7 @@ import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
  *
  */
 contract RebalancingSetState {
+    using SafeMath for uint256;
 
     /* ============ State Variables ============ */
 
@@ -127,10 +131,7 @@ contract RebalancingSetState {
     /* ============ Modifier ============ */
 
     modifier onlyManager() {
-        require(
-            msg.sender == manager,
-            "Must be manager"
-        );
+        validateManager();
         _;
     }
 
@@ -144,6 +145,11 @@ contract RebalancingSetState {
     event NewLiquidatorAdded(
         address newLiquidator,
         address oldLiquidator
+    );
+
+    event NewEntryFee(
+        uint256 newEntryFee,
+        uint256 oldEntryFee
     );
 
     event NewFeeRecipient(
@@ -187,6 +193,20 @@ contract RebalancingSetState {
         manager = _newManager;
     }
 
+    function setEntryFee(
+        uint256 _newEntryFee
+    )
+        external
+        onlyManager
+    {
+        ScaleValidations.validateLessThanOneHundredPerecent(_newEntryFee);
+        
+        ScaleValidations.validateMultipleOfBasisPoint(_newEntryFee);
+
+        emit NewEntryFee(_newEntryFee, entryFee);
+        entryFee = _newEntryFee;
+    }
+
     /*
      * Set new liquidator address. Only whitelisted addresses are valid.
      */
@@ -196,10 +216,7 @@ contract RebalancingSetState {
         external
         onlyManager
     {
-        require(
-            rebalanceState != RebalancingLibrary.State.Rebalance,
-            "Invalid state"
-        );
+        validateRebalanceState(RebalancingLibrary.State.Rebalance);
 
         require(
             liquidatorWhiteList.whiteList(address(_newLiquidator)),
@@ -272,5 +289,34 @@ contract RebalancingSetState {
         returns (bool)
     {
         return _tokenAddress == address(currentSet);
+    }
+
+    /* ============ Validations ============ */
+    function validateManager() internal view {
+        require(
+            msg.sender == manager,
+            "Not manager"
+        );
+    }
+
+    function validateCallerIsCore() internal view {
+        require(
+            msg.sender == address(core),
+            "Not Core"
+        );
+    }
+
+    function validateCallerIsModule() internal view {
+        require(
+            core.validModules(msg.sender),
+            "Not approved module"
+        );
+    }
+
+    function validateRebalanceState(RebalancingLibrary.State _requiredState) internal view {
+        require(
+            rebalanceState != _requiredState,
+            "Invalid state"
+        );
     }
 }

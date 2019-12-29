@@ -18,6 +18,20 @@ export function getExpectedTransferLog(
   }];
 }
 
+export function getExpectedNewEntryFeeLog(
+  newEntryFee: BigNumber,
+  oldEntryFee: BigNumber,
+  contractAddress: Address,
+): Log[] {
+  return [{
+    event: 'NewEntryFee',
+    address: contractAddress,
+    args: {
+      newEntryFee,
+      oldEntryFee,
+    },
+  }];
+}
 
 export function getExpectedNewManagerAddedLog(
   newManager: Address,

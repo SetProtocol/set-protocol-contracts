@@ -52,15 +52,9 @@ contract Issuance is
         internal
         view
     {
-        require(
-            msg.sender == address(core),
-            "Not from Core"
-        );
+        validateCallerIsCore();
 
-        require(
-            rebalanceState == RebalancingLibrary.State.Default,
-            "Invalid state"
-        );
+        validateRebalanceStateIs(RebalancingLibrary.State.Default);
     }
 
     /*
@@ -73,24 +67,15 @@ contract Issuance is
         internal
         view
     {
-        require(
-            rebalanceState != RebalancingLibrary.State.Rebalance,
-            "Invalid state"
-        );
+        validateRebalanceStateIsNot(RebalancingLibrary.State.Rebalance);
 
         if (rebalanceState == RebalancingLibrary.State.Drawdown) {
             // In Drawdown Sets can only be burned as part of the withdrawal process
-            require(
-                core.validModules(msg.sender),
-                "Cant be Drawdown"
-            );
+            validateCallerIsModule();
         } else {
             // When in non-Rebalance or Drawdown state, check that function caller is Core
             // so that Sets can be redeemed
-            require(
-                msg.sender == address(core),
-                "Not from core"
-            );
+            validateCallerIsCore();
         }
     }
     /*

@@ -51,10 +51,7 @@ contract RebalancingSettlement is
         internal
         view
     {
-        require(
-            rebalanceState == RebalancingLibrary.State.Rebalance,
-            "State must be Rebalance"
-        );
+        validateRebalanceStateIs(RebalancingLibrary.State.Rebalance);
     }
 
     /*

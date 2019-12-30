@@ -25,6 +25,7 @@ import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
+import { ScaleValidations } from "../../../lib/ScaleValidations.sol";
 
 
 /**
@@ -127,10 +128,7 @@ contract RebalancingSetState {
     /* ============ Modifier ============ */
 
     modifier onlyManager() {
-        require(
-            msg.sender == manager,
-            "Must be manager"
-        );
+        validateManager();
         _;
     }
 
@@ -144,6 +142,11 @@ contract RebalancingSetState {
     event NewLiquidatorAdded(
         address newLiquidator,
         address oldLiquidator
+    );
+
+    event NewEntryFee(
+        uint256 newEntryFee,
+        uint256 oldEntryFee
     );
 
     event NewFeeRecipient(
@@ -185,6 +188,20 @@ contract RebalancingSetState {
     {
         emit NewManagerAdded(_newManager, manager);
         manager = _newManager;
+    }
+
+    function setEntryFee(
+        uint256 _newEntryFee
+    )
+        external
+        onlyManager
+    {
+        ScaleValidations.validateLessThanEqualOneHundredPercent(_newEntryFee);
+
+        ScaleValidations.validateMultipleOfBasisPoint(_newEntryFee);
+
+        emit NewEntryFee(_newEntryFee, entryFee);
+        entryFee = _newEntryFee;
     }
 
     /*
@@ -272,5 +289,41 @@ contract RebalancingSetState {
         returns (bool)
     {
         return _tokenAddress == address(currentSet);
+    }
+
+    /* ============ Validations ============ */
+    function validateManager() internal view {
+        require(
+            msg.sender == manager,
+            "Not manager"
+        );
+    }
+
+    function validateCallerIsCore() internal view {
+        require(
+            msg.sender == address(core),
+            "Not Core"
+        );
+    }
+
+    function validateCallerIsModule() internal view {
+        require(
+            core.validModules(msg.sender),
+            "Not approved module"
+        );
+    }
+
+    function validateRebalanceStateIs(RebalancingLibrary.State _requiredState) internal view {
+        require(
+            rebalanceState == _requiredState,
+            "Invalid state"
+        );
+    }
+
+    function validateRebalanceStateIsNot(RebalancingLibrary.State _requiredState) internal view {
+        require(
+            rebalanceState != _requiredState,
+            "Invalid state"
+        );
     }
 }

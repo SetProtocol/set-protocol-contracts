@@ -22,6 +22,7 @@ import { CommonMath } from "../../lib/CommonMath.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IFeeCalculator } from "../interfaces/IFeeCalculator.sol";
 import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
+import { ScaleValidations } from "../../lib/ScaleValidations.sol";
 
 
 /**
@@ -33,10 +34,6 @@ import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
  */
 contract FixedFeeCalculator is IFeeCalculator {
     using SafeMath for uint256;
-
-    /* ============ Constants ============ */
-
-    uint256 public constant ONE_BASIS_POINT = 10 ** 14;
 
     /* ============ State Variables ============ */
 
@@ -95,15 +92,9 @@ contract FixedFeeCalculator is IFeeCalculator {
         private
         view
     {
-        require(
-            _fee <= CommonMath.scaleFactor(),
-            "Fee must be equal or less than 100%"
-        );
-
-        require(
-            _fee.mod(ONE_BASIS_POINT) == 0,
-            "Fee must be multiple of 0.01%"
-        );
+        ScaleValidations.validateLessThanEqualOneHundredPercent(_fee);
+        
+        ScaleValidations.validateMultipleOfBasisPoint(_fee);
     }
 
     /**

@@ -24,6 +24,14 @@ contract CommonMathMock {
         return CommonMath.safePower(a, pow);
     }
 
+    function testScaleFactor()
+        external
+        pure
+        returns (uint256 result)
+    {
+        return CommonMath.scaleFactor();
+    }
+
     function testScale(
         uint256 a
     )

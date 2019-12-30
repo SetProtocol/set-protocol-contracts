@@ -60,6 +60,29 @@ contract('CommonMathMock', accounts => {
     });
   });
 
+  describe('#testScale', async () => {
+    let subjectValue: BigNumber;
+    const caller: Address = ownerAccount;
+
+    beforeEach(async () => {
+      subjectValue = new BigNumber(2);
+    });
+
+    async function subject(): Promise<BigNumber> {
+      return commonMathLibrary.testScale.callAsync(
+        subjectValue,
+        { from: caller },
+      );
+    }
+
+    it('returns the correct value', async () => {
+      const result = await subject();
+
+      const expectedResult = new BigNumber(subjectValue).mul(10 ** 18);
+      expect(result).to.be.bignumber.equal(expectedResult);
+    });
+  });
+
   describe('#testDeScale', async () => {
     let subjectValue: BigNumber;
     const caller: Address = ownerAccount;

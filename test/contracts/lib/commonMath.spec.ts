@@ -47,25 +47,15 @@ contract('CommonMathMock', accounts => {
     });
   });
 
-  describe('#testScale', async () => {
-    let subjectValue: BigNumber;
-    const caller: Address = ownerAccount;
-
-    beforeEach(async () => {
-      subjectValue = new BigNumber(2);
-    });
-
+  describe('#testScaleFactor', async () => {
     async function subject(): Promise<BigNumber> {
-      return commonMathLibrary.testScale.callAsync(
-        subjectValue,
-        { from: caller },
-      );
+      return commonMathLibrary.testScaleFactor.callAsync();
     }
 
     it('returns the correct value', async () => {
       const result = await subject();
 
-      const expectedResult = new BigNumber(subjectValue).mul(10 ** 18);
+      const expectedResult = new BigNumber(10 ** 18);
       expect(result).to.be.bignumber.equal(expectedResult);
     });
   });

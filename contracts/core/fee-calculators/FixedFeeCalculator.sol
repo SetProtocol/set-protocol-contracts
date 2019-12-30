@@ -35,8 +35,6 @@ import { ScaleValidations } from "../../lib/ScaleValidations.sol";
 contract FixedFeeCalculator is IFeeCalculator {
     using SafeMath for uint256;
 
-    /* ============ Constants ============ */
-
     /* ============ State Variables ============ */
 
     // Mapping between an address and its initialization state

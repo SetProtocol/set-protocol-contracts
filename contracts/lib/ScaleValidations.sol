@@ -22,11 +22,11 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 library ScaleValidations {
     using SafeMath for uint256;
 
-    uint256 private constant ONE_HUNDRED_PERCENT = 10 ** 18;
-    uint256 private constant ONE_BASIS_POINT = 10 ** 14;
+    uint256 private constant ONE_HUNDRED_PERCENT = 10e18;
+    uint256 private constant ONE_BASIS_POINT = 10e14;
 
     function validateLessThanEqualOneHundredPercent(uint256 _value) internal view {
-        require(_value <= ONE_HUNDRED_PERCENT, "Must be < 100%");
+        require(_value <= ONE_HUNDRED_PERCENT, "Must be <= 100%");
     }
 
     function validateMultipleOfBasisPoint(uint256 _value) internal view {

@@ -17,8 +17,6 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
 import { ICore } from "../../interfaces/ICore.sol";
 import { IFeeCalculator } from "../../interfaces/IFeeCalculator.sol";
 import { ILiquidator } from "../../interfaces/ILiquidator.sol";
@@ -36,7 +34,6 @@ import { ScaleValidations } from "../../../lib/ScaleValidations.sol";
  *
  */
 contract RebalancingSetState {
-    using SafeMath for uint256;
 
     /* ============ State Variables ============ */
 

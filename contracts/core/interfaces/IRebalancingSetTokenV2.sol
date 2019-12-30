@@ -203,6 +203,14 @@ interface IRebalancingSetTokenV2 {
         external;
 
     /*
+     * Set new fee entry fee.
+     */
+    function setEntryFee(
+        uint256 _newEntryFee
+    )
+        external;
+
+    /*
      * Initiates the rebalance in coordination with the Liquidator contract. 
      * In this step, we redeem the currentSet and pass relevant information
      * to the liquidator.

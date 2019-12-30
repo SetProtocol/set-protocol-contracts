@@ -51,7 +51,7 @@ contract RebalancingSettlement is
         internal
         view
     {
-        validateRebalanceState(RebalancingLibrary.State.Rebalance);
+        validateRebalanceStateIs(RebalancingLibrary.State.Rebalance);
     }
 
     /*

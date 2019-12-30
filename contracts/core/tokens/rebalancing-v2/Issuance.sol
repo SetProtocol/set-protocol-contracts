@@ -54,7 +54,7 @@ contract Issuance is
     {
         validateCallerIsCore();
 
-        validateRebalanceState(RebalancingLibrary.State.Default);
+        validateRebalanceStateIs(RebalancingLibrary.State.Default);
     }
 
     /*
@@ -67,7 +67,7 @@ contract Issuance is
         internal
         view
     {
-        validateRebalanceState(RebalancingLibrary.State.Rebalance);
+        validateRebalanceStateIsNot(RebalancingLibrary.State.Rebalance);
 
         if (rebalanceState == RebalancingLibrary.State.Drawdown) {
             // In Drawdown Sets can only be burned as part of the withdrawal process

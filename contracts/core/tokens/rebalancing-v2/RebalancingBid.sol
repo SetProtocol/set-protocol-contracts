@@ -51,7 +51,7 @@ contract RebalancingBid is
         internal
         view
     {
-        validateRebalanceState(RebalancingLibrary.State.Rebalance);
+        validateRebalanceStateIs(RebalancingLibrary.State.Rebalance);
 
         require(
             _quantity > 0,

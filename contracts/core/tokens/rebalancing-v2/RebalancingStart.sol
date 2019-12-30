@@ -54,7 +54,7 @@ contract RebalancingStart is
         internal
         view
     {
-        validateRebalanceState(RebalancingLibrary.State.Default);
+        validateRebalanceStateIs(RebalancingLibrary.State.Default);
 
         // Enough time must have passed from last rebalance to start a new proposal
         require(

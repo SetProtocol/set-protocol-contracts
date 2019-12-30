@@ -200,7 +200,7 @@ contract RebalancingSetState {
         onlyManager
     {
         ScaleValidations.validateLessThanEqualOneHundredPercent(_newEntryFee);
-        
+
         ScaleValidations.validateMultipleOfBasisPoint(_newEntryFee);
 
         emit NewEntryFee(_newEntryFee, entryFee);
@@ -216,7 +216,10 @@ contract RebalancingSetState {
         external
         onlyManager
     {
-        validateRebalanceState(RebalancingLibrary.State.Rebalance);
+        require(
+            rebalanceState != RebalancingLibrary.State.Rebalance,
+            "Invalid state"
+        );
 
         require(
             liquidatorWhiteList.whiteList(address(_newLiquidator)),
@@ -313,7 +316,14 @@ contract RebalancingSetState {
         );
     }
 
-    function validateRebalanceState(RebalancingLibrary.State _requiredState) internal view {
+    function validateRebalanceStateIs(RebalancingLibrary.State _requiredState) internal view {
+        require(
+            rebalanceState == _requiredState,
+            "Invalid state"
+        );
+    }
+
+    function validateRebalanceStateIsNot(RebalancingLibrary.State _requiredState) internal view {
         require(
             rebalanceState != _requiredState,
             "Invalid state"

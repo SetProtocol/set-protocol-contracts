@@ -53,7 +53,7 @@ contract RebalancingFailure is
         view
     {
         // Token must be in Rebalance State
-        validateRebalanceState(RebalancingLibrary.State.Rebalance);
+        validateRebalanceStateIs(RebalancingLibrary.State.Rebalance);
 
         // Failure triggers must be met
         require(

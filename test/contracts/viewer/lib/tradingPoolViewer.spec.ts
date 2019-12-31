@@ -218,6 +218,9 @@ contract('TradingPoolViewer', accounts => {
     let lastRebalanceTimestamp: BigNumber;
     let setManager: SocialTradingManagerMockContract;
 
+    let newFee: BigNumber;
+    let feeUpdateTimestamp: BigNumber;
+
     beforeEach(async () => {
       currentSetToken = set1;
 
@@ -246,6 +249,15 @@ contract('TradingPoolViewer', accounts => {
         currentAllocation
       );
 
+      newFee = ether(.02);
+      await setManager.updateFee.sendTransactionAsync(
+        rebalancingSetToken.address,
+        newFee
+      );
+
+      const block = await web3.eth.getBlock('latest');
+      feeUpdateTimestamp = new BigNumber(block.timestamp);
+
       subjectTradingPool = rebalancingSetToken.address;
     });
 
@@ -261,8 +273,8 @@ contract('TradingPoolViewer', accounts => {
       expect(poolInfo.trader).to.equal(trader);
       expect(poolInfo.allocator).to.equal(allocator);
       expect(poolInfo.currentAllocation).to.be.bignumber.equal(currentAllocation);
-      expect(poolInfo.newEntryFee).to.be.bignumber.equal(ZERO);
-      expect(poolInfo.feeUpdateTimestamp).to.be.bignumber.equal(ZERO);
+      expect(poolInfo.newEntryFee).to.be.bignumber.equal(newFee);
+      expect(poolInfo.feeUpdateTimestamp).to.be.bignumber.equal(feeUpdateTimestamp);
     });
 
     it('fetches the correct RebalancingSetTokenV2/TradingPool data', async () => {

@@ -145,7 +145,7 @@ contract TradingPoolViewer {
         view
         returns (uint256[] memory)
     {
-        // Cache length of addresses to fetch states for
+        // Cache length of addresses to fetch entryFees for
         uint256 _poolCount = _tradingPools.length;
         
         // Instantiate output array in memory
@@ -165,7 +165,7 @@ contract TradingPoolViewer {
         view
         returns (uint256[] memory)
     {
-        // Cache length of addresses to fetch states for
+        // Cache length of addresses to fetch rebalanceFees for
         uint256 _poolCount = _tradingPools.length;
         
         // Instantiate output array in memory

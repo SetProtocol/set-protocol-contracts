@@ -209,13 +209,13 @@ contract Auction {
         uint256 currentSetUSDValue = calculateUSDValueOfSet(_currentSet);
         uint256 nextSetUSDValue = calculateUSDValueOfSet(_nextSet);
 
-        // If currentSetValue greater than nextSetValue check to see if requires bump in pricePrecision
-        if (currentSetUSDValue > nextSetUSDValue) {
+        // If currentSetValue is 10x greater than nextSetValue calculate required bump in pricePrecision
+        if (currentSetUSDValue > nextSetUSDValue.mul(10)) {
             // Round up valuation to nearest order of magnitude
             uint256 orderOfMagnitude = CommonMath.ceilLog10(currentSetUSDValue.div(nextSetUSDValue));
 
-            // Apply order of magnitude to pricePrecision, only want increase if value is >10x so subtract
-            // one order of magnitude
+            // Apply order of magnitude to pricePrecision, since Log10 is rounded up subtract 1 order of
+            // magnitude
             return MINIMUM_PRICE_PRECISION.mul(10 ** orderOfMagnitude).div(10);
         }
         

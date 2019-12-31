@@ -132,7 +132,6 @@ contract('Auction', accounts => {
       set2Units,
       set2NaturalUnit,
     );
-
   });
 
   after(async () => {
@@ -312,7 +311,38 @@ contract('Auction', accounts => {
           await coreHelper.getSetInstance(subjectNextSet),
           oracleWhiteList
         );
+        console.log(auctionSetup.pricePrecision);
+        expect(auctionSetup.pricePrecision).to.bignumber.equal(expectedPricePrecision);
+      });
+    });
 
+    describe('when currentSet is 1-2x greater than nextSet', async () => {
+      beforeEach(async () => {
+        const set3Components = [component1.address, component3.address];
+        const set3Units = [gWei(1), gWei(1)];
+        const set3NaturalUnit = gWei(2);
+        const set3 = await coreHelper.createSetTokenAsync(
+          core,
+          setTokenFactory.address,
+          set3Components,
+          set3Units,
+          set3NaturalUnit,
+        );
+
+        subjectNextSet = set3.address;
+      });
+
+      it('sets the correct pricePrecision', async () => {
+        await subject();
+
+        const auctionSetup: any = await auctionMock.auction.callAsync();
+
+        const expectedPricePrecision = await liquidatorHelper.calculatePricePrecisionAsync(
+          await coreHelper.getSetInstance(subjectCurrentSet),
+          await coreHelper.getSetInstance(subjectNextSet),
+          oracleWhiteList
+        );
+        console.log(auctionSetup.pricePrecision);
         expect(auctionSetup.pricePrecision).to.bignumber.equal(expectedPricePrecision);
       });
     });

@@ -261,6 +261,8 @@ contract('TradingPoolViewer', accounts => {
       expect(poolInfo.trader).to.equal(trader);
       expect(poolInfo.allocator).to.equal(allocator);
       expect(poolInfo.currentAllocation).to.be.bignumber.equal(currentAllocation);
+      expect(poolInfo.newEntryFee).to.be.bignumber.equal(ZERO);
+      expect(poolInfo.feeUpdateTimestamp).to.be.bignumber.equal(ZERO);
     });
 
     it('fetches the correct RebalancingSetTokenV2/TradingPool data', async () => {
@@ -366,6 +368,8 @@ contract('TradingPoolViewer', accounts => {
       expect(poolInfo.trader).to.equal(trader);
       expect(poolInfo.allocator).to.equal(allocator);
       expect(poolInfo.currentAllocation).to.be.bignumber.equal(newAllocation);
+      expect(poolInfo.newEntryFee).to.be.bignumber.equal(ZERO);
+      expect(poolInfo.feeUpdateTimestamp).to.be.bignumber.equal(ZERO);
     });
 
     it('fetches the correct RebalancingSetTokenV2/TradingPool data', async () => {
@@ -395,6 +399,129 @@ contract('TradingPoolViewer', accounts => {
       expect(collateralSetData.naturalUnit).to.be.bignumber.equal(set2NaturalUnit);
       expect(collateralSetData.name).to.equal('Set Token');
       expect(collateralSetData.symbol).to.equal('SET');
+    });
+  });
+
+  describe('#batchFetchTradingPoolEntryFees', async () => {
+    let subjectTradingPools: Address[];
+
+    let rebalancingSetToken2: RebalancingSetTokenV2Contract;
+    let entryFee1: BigNumber;
+    let entryFee2: BigNumber;
+
+    beforeEach(async () => {
+      const setManager = await viewerHelper.deploySocialTradingManagerMockAsync();
+
+      const failPeriod = ONE_DAY_IN_SECONDS;
+      const { timestamp } = await web3.eth.getBlock('latest');
+      const lastRebalanceTimestamp = timestamp;
+
+      entryFee1 = ether(.02);
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
+        coreMock,
+        rebalancingFactory.address,
+        setManager.address,
+        liquidator.address,
+        feeRecipient,
+        fixedFeeCalculator.address,
+        set1.address,
+        failPeriod,
+        lastRebalanceTimestamp,
+        entryFee1
+      );
+
+      entryFee2 = ether(.03);
+      rebalancingSetToken2 = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
+        coreMock,
+        rebalancingFactory.address,
+        setManager.address,
+        liquidator.address,
+        feeRecipient,
+        fixedFeeCalculator.address,
+        set1.address,
+        failPeriod,
+        lastRebalanceTimestamp,
+        entryFee2
+      );
+
+      subjectTradingPools = [rebalancingSetToken.address, rebalancingSetToken2.address];
+    });
+
+    async function subject(): Promise<any> {
+      return poolViewer.batchFetchTradingPoolEntryFees.callAsync(
+        subjectTradingPools
+      );
+    }
+
+    it('fetches the correct entryFee array', async () => {
+      const actualEntryFeeArray = await subject();
+
+      const expectedEntryFeeArray = [entryFee1, entryFee2];
+
+      expect(JSON.stringify(actualEntryFeeArray)).to.equal(JSON.stringify(expectedEntryFeeArray));
+    });
+  });
+
+  describe('#batchFetchTradingPoolRebalanceFees', async () => {
+    let subjectTradingPools: Address[];
+
+    let rebalancingSetToken2: RebalancingSetTokenV2Contract;
+    let rebalanceFee1: BigNumber;
+    let rebalanceFee2: BigNumber;
+
+    beforeEach(async () => {
+      const setManager = await viewerHelper.deploySocialTradingManagerMockAsync();
+
+      const failPeriod = ONE_DAY_IN_SECONDS;
+      const { timestamp } = await web3.eth.getBlock('latest');
+      const lastRebalanceTimestamp = timestamp;
+      const entryFee = ether(.02);
+
+      rebalanceFee1 = ether(.002);
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
+        coreMock,
+        rebalancingFactory.address,
+        setManager.address,
+        liquidator.address,
+        feeRecipient,
+        fixedFeeCalculator.address,
+        set1.address,
+        failPeriod,
+        lastRebalanceTimestamp,
+        entryFee,
+        rebalanceFee1
+      );
+
+      rebalanceFee2 = ether(.003);
+      rebalancingSetToken2 = await rebalancingHelper.createDefaultRebalancingSetTokenV2Async(
+        coreMock,
+        rebalancingFactory.address,
+        setManager.address,
+        liquidator.address,
+        feeRecipient,
+        fixedFeeCalculator.address,
+        set1.address,
+        failPeriod,
+        lastRebalanceTimestamp,
+        entryFee,
+        rebalanceFee2
+      );
+
+      subjectTradingPools = [rebalancingSetToken.address, rebalancingSetToken2.address];
+    });
+
+    async function subject(): Promise<any> {
+      return poolViewer.batchFetchTradingPoolRebalanceFees.callAsync(
+        subjectTradingPools
+      );
+    }
+
+    it('fetches the correct rebalanceFee array', async () => {
+      const actualEntryRebalanceArray = await subject();
+
+      const expectedEntryRebalanceArray = [rebalanceFee1, rebalanceFee2];
+
+      expect(JSON.stringify(actualEntryRebalanceArray)).to.equal(JSON.stringify(expectedEntryRebalanceArray));
     });
   });
 });

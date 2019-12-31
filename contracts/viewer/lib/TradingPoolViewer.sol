@@ -138,6 +138,46 @@ contract TradingPoolViewer {
         return (poolInfo, tradingPoolInfo, collateralSetInfo);
     }
 
+    function batchFetchTradingPoolEntryFees(
+        IRebalancingSetTokenV2[] calldata _tradingPools
+    )
+        external
+        view
+        returns (uint256[] memory)
+    {
+        // Cache length of addresses to fetch states for
+        uint256 _poolCount = _tradingPools.length;
+        
+        // Instantiate output array in memory
+        uint256[] memory entryFees = new uint256[](_poolCount);
+
+        for (uint256 i = 0; i < _poolCount; i++) {
+            entryFees[i] = _tradingPools[i].entryFee();
+        }
+
+        return entryFees;
+    }
+
+    function batchFetchTradingPoolRebalanceFees(
+        IRebalancingSetTokenV2[] calldata _tradingPools
+    )
+        external
+        view
+        returns (uint256[] memory)
+    {
+        // Cache length of addresses to fetch states for
+        uint256 _poolCount = _tradingPools.length;
+        
+        // Instantiate output array in memory
+        uint256[] memory rebalanceFees = new uint256[](_poolCount);
+
+        for (uint256 i = 0; i < _poolCount; i++) {
+            rebalanceFees[i] = _tradingPools[i].rebalanceFee();
+        }
+
+        return rebalanceFees;
+    }
+
     /* ============ Internal Functions ============ */
 
     function getCollateralSetInfo(

@@ -383,7 +383,7 @@ contract('LinearAuction', accounts => {
           );
         });
 
-        it('returns the correct result', async () => {
+        it('returns the correct price', async () => {
           const result = await subject();
 
           const { timestamp } = await web3.eth.getBlock('latest');
@@ -394,6 +394,25 @@ contract('LinearAuction', accounts => {
             auctionPeriod,
           );
           expect(result).to.bignumber.equal(currentPrice);
+        });
+      });
+
+      describe('when the timestamp has exceeded the endTime', async () => {
+        beforeEach(async () => {
+          await blockchain.increaseTimeAsync(auctionPeriod.add(100));
+
+          // Do dummy transaction to advance the block
+          await auctionMock.reduceRemainingCurrentSets.sendTransactionAsync(
+            startingCurrentSetQuantity.div(2),
+            { from: subjectCaller, gas: DEFAULT_GAS },
+          );
+        });
+
+        it('returns the correct price / endNumerator', async () => {
+          const result = await subject();
+
+          const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
+          expect(result).to.bignumber.equal(linearAuction.endNumerator);
         });
       });
     });

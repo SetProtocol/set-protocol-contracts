@@ -57,4 +57,14 @@ contract SocialTradingManagerMock {
 
         pools[address(_tradingPool)].currentAllocation = _newAllocation;
     }
+
+    function updateFee(
+        address _tradingPool,
+        uint256 _newFee
+    )
+        external
+    {
+        pools[_tradingPool].newEntryFee = _newFee;
+        pools[_tradingPool].feeUpdateTimestamp = block.timestamp;
+    }
 }

@@ -249,7 +249,9 @@ contract('LinearAuctionLiquidator', accounts => {
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
-      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit);
+      const pricePrecision = auction.auction.pricePrecision;
+      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
+                                          .mul(pricePrecision);
       expect(auction.auction.minimumBid).to.bignumber.equal(expectedMinimumBid);
     });
 
@@ -489,7 +491,12 @@ contract('LinearAuctionLiquidator', accounts => {
 
       describe('when the quantity is not a multiple of the minimumBid', async () => {
         beforeEach(async () => {
-          const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit).div(2);
+          const auction: any = await liquidator.auctions.callAsync(liquidatorProxy.address);
+
+          const pricePrecision = auction.auction.pricePrecision;
+          const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
+                                              .mul(pricePrecision)
+                                              .div(2);
           subjectQuantity = gWei(10).plus(halfMinimumBid);
         });
 

@@ -406,11 +406,11 @@ contract('LinearAuction', accounts => {
           );
         });
 
-        it('returns the correct price / endNumerator', async () => {
+        it('returns the correct price / endPrice', async () => {
           const result = await subject();
 
           const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
-          expect(result).to.bignumber.equal(linearAuction.endNumerator);
+          expect(result).to.bignumber.equal(linearAuction.endPrice);
         });
       });
     });

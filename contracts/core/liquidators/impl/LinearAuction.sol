@@ -112,7 +112,7 @@ contract LinearAuction is Auction {
         address[] memory combinedTokenArray = Auction.getCombinedTokenArray(_currentSet, _nextSet);
         require(
             oracleWhiteList.areValidAddresses(combinedTokenArray),
-            "ExponentialPivotAuctionLiquidator.startRebalance: Passed token does not have matching oracle."
+            "LinearAuction.validateRebalanceComponents: Passed token does not have matching oracle."
         );
     }
 
@@ -153,17 +153,24 @@ contract LinearAuction is Auction {
     }
 
     /**
-     * Returns the linear price based on the current timestamp
+     * Returns the linear price based on the current timestamp. Returns the endNumerator
+     * if time has exceeded the auciton period
      *
      * @param _linearAuction            Linear Auction State object
      * @return price                    uint representing the current price
      */
     function getNumerator(State storage _linearAuction) internal view returns (uint256) {
         uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
-        uint256 range = _linearAuction.endNumerator.sub(_linearAuction.startNumerator);
-        uint256 elapsedPrice = elapsed.mul(range).div(auctionPeriod);
 
-        return _linearAuction.startNumerator.add(elapsedPrice);
+        // If current time has elapsed 
+        if (elapsed >= auctionPeriod) {
+            return _linearAuction.endNumerator;
+        } else {
+            uint256 range = _linearAuction.endNumerator.sub(_linearAuction.startNumerator);
+            uint256 elapsedPrice = elapsed.mul(range).div(auctionPeriod);
+
+            return _linearAuction.startNumerator.add(elapsedPrice);
+        }
     }
 
     /**

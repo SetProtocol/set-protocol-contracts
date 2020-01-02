@@ -146,7 +146,7 @@ contract LinearAuction is Auction {
     }
 
     /**
-     * Returns the linear price based on the current timestamp. Returns the endNumerator
+     * Returns the linear price based on the current timestamp. Returns the endPrice
      * if time has exceeded the auciton period
      *
      * @param _linearAuction            Linear Auction State object
@@ -157,12 +157,12 @@ contract LinearAuction is Auction {
 
         // If current time has elapsed 
         if (elapsed >= auctionPeriod) {
-            return _linearAuction.endNumerator;
+            return _linearAuction.endPrice;
         } else {
-            uint256 range = _linearAuction.endNumerator.sub(_linearAuction.startNumerator);
+            uint256 range = _linearAuction.endPrice.sub(_linearAuction.startPrice);
             uint256 elapsedPrice = elapsed.mul(range).div(auctionPeriod);
 
-            return _linearAuction.startNumerator.add(elapsedPrice);
+            return _linearAuction.startPrice.add(elapsedPrice);
         }
     }
 

@@ -38,8 +38,8 @@ contract LinearAuction is Auction {
     struct State {
         Auction.Setup auction;
         uint256 endTime;
-        uint256 startNumerator;
-        uint256 endNumerator;
+        uint256 startPrice;
+        uint256 endPrice;
     }
 
     /* ============ State Variables ============ */
@@ -94,9 +94,9 @@ contract LinearAuction is Auction {
             _startingCurrentSetQuantity
         );
 
-        uint256 fairValue = calculateFairValue(_currentSet, _nextSet, _linearAuction.auction.pricePrecision);
-        _linearAuction.startNumerator = calculateStartNumerator(fairValue);
-        _linearAuction.endNumerator = calculateEndNumerator(fairValue);
+        uint256 fairValue = calculateFairValue(_currentSet, _nextSet);
+        _linearAuction.startPrice = calculateStartPrice(fairValue);
+        _linearAuction.endPrice = calculateEndPrice(fairValue);
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
 
@@ -135,13 +135,6 @@ contract LinearAuction is Auction {
     }
 
     /**
-     * Returns the linear price based on the current timestamp
-     */
-    function getPrice(State storage _linearAuction) internal view returns (Rebalance.Price memory) {
-        return Rebalance.composePrice(getNumerator(_linearAuction), _linearAuction.auction.pricePrecision);
-    }
-
-    /**
      * Auction failed is defined the timestamp breacnhing the auction end time and
      * the auction not being complete
      */
@@ -159,7 +152,7 @@ contract LinearAuction is Auction {
      * @param _linearAuction            Linear Auction State object
      * @return price                    uint representing the current price
      */
-    function getNumerator(State storage _linearAuction) internal view returns (uint256) {
+    function getPrice(State storage _linearAuction) internal view returns (uint256) {
         uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
 
         // If current time has elapsed 
@@ -175,11 +168,11 @@ contract LinearAuction is Auction {
 
     /**
      * Calculates the fair value based on the USD values of the next and current Sets.
+     * Returns a scaled value
      */
     function calculateFairValue(
         ISetToken _currentSet,
-        ISetToken _nextSet,
-        uint256 _pricePrecision
+        ISetToken _nextSet
     )
         internal
         view
@@ -188,22 +181,22 @@ contract LinearAuction is Auction {
         uint256 currentSetUSDValue = Auction.calculateUSDValueOfSet(_currentSet);
         uint256 nextSetUSDValue = Auction.calculateUSDValueOfSet(_nextSet);
 
-        return nextSetUSDValue.mul(_pricePrecision).div(currentSetUSDValue);
+        return nextSetUSDValue.scale().div(currentSetUSDValue);
     }
 
     /**
-     * Calculates the linear auction start price
+     * Calculates the linear auction start price with a scaled value
      */
-    function calculateStartNumerator(uint256 _fairValue) internal view returns(uint256) {
-        uint256 startRange = _fairValue.mul(rangeStart).div(100);
-        return _fairValue.sub(startRange);
+    function calculateStartPrice(uint256 _fairValueScaled) internal view returns(uint256) {
+        uint256 startRange = _fairValueScaled.mul(rangeStart).div(100);
+        return _fairValueScaled.sub(startRange);
     }
 
     /**
-     * Calculates the linear auction end price
+     * Calculates the linear auction end price with a scaled value
      */
-    function calculateEndNumerator(uint256 _fairValue) internal view returns(uint256) {
-        uint256 endRange = _fairValue.mul(rangeEnd).div(100);
-        return _fairValue.add(endRange);
+    function calculateEndPrice(uint256 _fairValueScaled) internal view returns(uint256) {
+        uint256 endRange = _fairValueScaled.mul(rangeEnd).div(100);
+        return _fairValueScaled.add(endRange);
     }
 }

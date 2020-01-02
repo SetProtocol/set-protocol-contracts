@@ -23,7 +23,7 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
-  ONE_DAY_IN_SECONDS
+  ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
 import { getLinearAuction, TokenFlow } from '@utils/auction';
@@ -210,9 +210,7 @@ contract('LinearAuction', accounts => {
 
       const auction: any = await auctionMock.auction.callAsync();
 
-      const pricePrecision = auction.auction.pricePrecision;
-      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                          .mul(pricePrecision);
+      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit);
       expect(auction.auction.minimumBid).to.bignumber.equal(expectedMinimumBid);
     });
 
@@ -241,7 +239,7 @@ contract('LinearAuction', accounts => {
       expect(auction.auction.pricePrecision).to.bignumber.equal(expectedPricePrecision);
     });
 
-    it('sets the correct startNumerator', async () => {
+    it('sets the correct startPrice', async () => {
       await subject();
 
       const auction: any = await auctionMock.auction.callAsync();
@@ -254,10 +252,10 @@ contract('LinearAuction', accounts => {
       );
       const rangeStart = await auctionMock.rangeStart.callAsync();
       const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
-      expect(auction.startNumerator).to.bignumber.equal(expectedStartPrice);
+      expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
     });
 
-    it('sets the correct endNumerator', async () => {
+    it('sets the correct endPrice', async () => {
       await subject();
 
       const auction: any = await auctionMock.auction.callAsync();
@@ -270,7 +268,7 @@ contract('LinearAuction', accounts => {
       );
       const rangeEnd = await auctionMock.rangeEnd.callAsync();
       const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
-      expect(auction.endNumerator).to.bignumber.equal(expectedEndPrice);
+      expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
     });
 
     describe('when currentSet is greater than 10x the nextSet', async () => {
@@ -303,7 +301,7 @@ contract('LinearAuction', accounts => {
         expect(auction.auction.pricePrecision).to.bignumber.equal(expectedPricePrecision);
       });
 
-      it('sets the correct startNumerator', async () => {
+      it('sets the correct startPrice', async () => {
         await subject();
 
         const auction: any = await auctionMock.auction.callAsync();
@@ -317,10 +315,10 @@ contract('LinearAuction', accounts => {
         const rangeStart = await auctionMock.rangeStart.callAsync();
         const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
 
-        expect(auction.startNumerator).to.bignumber.equal(expectedStartPrice);
+        expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
       });
 
-      it('sets the correct endNumerator', async () => {
+      it('sets the correct endPrice', async () => {
         await subject();
 
         const auction: any = await auctionMock.auction.callAsync();
@@ -334,7 +332,7 @@ contract('LinearAuction', accounts => {
         const rangeEnd = await auctionMock.rangeEnd.callAsync();
         const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
 
-        expect(auction.endNumerator).to.bignumber.equal(expectedEndPrice);
+        expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
       });
     });
   });
@@ -356,9 +354,9 @@ contract('LinearAuction', accounts => {
       );
     });
 
-    describe('#getNumerator', async () => {
+    describe('#getPrice', async () => {
       async function subject(): Promise<BigNumber> {
-        return auctionMock.getNumerator.callAsync();
+        return auctionMock.getPrice.callAsync();
       }
 
       it('returns the correct result', async () => {
@@ -423,7 +421,7 @@ contract('LinearAuction', accounts => {
       }
 
       it('returns the correct numerator', async () => {
-        const { numerator } = await subject();
+        const numerator = await subject();
         const { timestamp } = await web3.eth.getBlock('latest');
         const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
         const currentPrice = await liquidatorHelper.calculateCurrentPrice(
@@ -432,13 +430,6 @@ contract('LinearAuction', accounts => {
           auctionPeriod,
         );
         expect(numerator).to.bignumber.equal(currentPrice);
-      });
-
-      it('returns the correct denominator', async () => {
-        const { denominator } = await subject();
-
-        const linearAuction = getLinearAuction(await auctionMock.auction.callAsync());
-        expect(denominator).to.bignumber.equal(linearAuction.auction.pricePrecision);
       });
     });
 
@@ -464,7 +455,6 @@ contract('LinearAuction', accounts => {
           linearAuction.auction.pricePrecision,
           subjectQuantity,
           currentPrice,
-          linearAuction.auction.pricePrecision,
         );
       });
 
@@ -512,7 +502,6 @@ contract('LinearAuction', accounts => {
             linearAuction.auction.pricePrecision,
             subjectQuantity,
             currentPrice,
-            linearAuction.auction.pricePrecision,
           );
         });
 

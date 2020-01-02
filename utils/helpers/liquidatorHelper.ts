@@ -15,6 +15,7 @@ import {
 import { getContractInstance, txnFrom } from '../web3Helper';
 import {
   ZERO,
+  SCALE_FACTOR,
 } from '../constants';
 import {
   LinearAuction,
@@ -151,21 +152,17 @@ export class LiquidatorHelper {
     setToken: SetTokenContract,
     combinedTokenArray: Address[],
     minimumBid: BigNumber,
-    priceDivisor: BigNumber,
   ): Promise<BigNumber[]> {
     const setTokenComponents = await setToken.getComponents.callAsync();
     const setTokenUnits = await setToken.getUnits.callAsync();
     const setTokenNaturalUnit = await setToken.naturalUnit.callAsync();
-
-    // Calculate minimumBidAmount
-    const maxNaturalUnit = minimumBid.div(priceDivisor);
 
     // Create combined unit array for target Set
     const combinedSetTokenUnits: BigNumber[] = [];
     combinedTokenArray.forEach(address => {
       const index = setTokenComponents.indexOf(address);
       if (index != -1) {
-        const totalTokenAmount = setTokenUnits[index].mul(maxNaturalUnit).div(setTokenNaturalUnit);
+        const totalTokenAmount = setTokenUnits[index].mul(minimumBid).div(setTokenNaturalUnit);
         combinedSetTokenUnits.push(totalTokenAmount);
       } else {
         combinedSetTokenUnits.push(new BigNumber(0));
@@ -180,10 +177,10 @@ export class LiquidatorHelper {
     auctionPeriod: BigNumber
   ): BigNumber {
     const elapsed = timestamp.sub(linearAuction.auction.startTime);
-    const priceRange = new BigNumber(linearAuction.endNumerator).sub(linearAuction.startNumerator);
+    const priceRange = new BigNumber(linearAuction.endPrice).sub(linearAuction.startPrice);
     const elapsedPrice = elapsed.mul(priceRange).div(auctionPeriod).round(0, 3);
 
-    return new BigNumber(linearAuction.startNumerator).add(elapsedPrice);
+    return new BigNumber(linearAuction.startPrice).add(elapsedPrice);
   }
 
   public calculateStartPrice(
@@ -212,7 +209,7 @@ export class LiquidatorHelper {
     const currentSetUSDValue = await this.calculateSetTokenValueAsync(currentSetToken, oracleWhiteList);
     const nextSetUSDValue = await this.calculateSetTokenValueAsync(nextSetToken, oracleWhiteList);
 
-    return nextSetUSDValue.mul(pricePrecision).div(currentSetUSDValue).round(0, 3);
+    return nextSetUSDValue.mul(SCALE_FACTOR).div(currentSetUSDValue).round(0, 3);
   }
 
   public async calculateSetTokenValueAsync(
@@ -292,8 +289,7 @@ export class LiquidatorHelper {
     linearAuction: LinearAuction,
     pricePrecision: BigNumber,
     quantity: BigNumber,
-    priceNumerator: BigNumber,
-    priceDenominator: BigNumber,
+    priceScaled: BigNumber,
   ): TokenFlow {
     const inflow: BigNumber[] = [];
     const outflow: BigNumber[] = [];
@@ -309,17 +305,17 @@ export class LiquidatorHelper {
     const unitsMultiplier = quantity.div(minimumBid).round(0, 3).mul(pricePrecision);
 
     for (let i = 0; i < combinedCurrentSetUnits.length; i++) {
-      const flow = combinedNextSetUnits[i].mul(priceDenominator).sub(combinedCurrentSetUnits[i].mul(priceNumerator));
+      const flow = combinedNextSetUnits[i].mul(SCALE_FACTOR).sub(combinedCurrentSetUnits[i].mul(priceScaled));
       if (flow.greaterThan(0)) {
         const inflowUnit = unitsMultiplier.mul(
-          combinedNextSetUnits[i].mul(priceDenominator).sub(combinedCurrentSetUnits[i].mul(priceNumerator))
-        ).div(priceNumerator).round(0, 3);
+          combinedNextSetUnits[i].mul(SCALE_FACTOR).sub(combinedCurrentSetUnits[i].mul(priceScaled))
+        ).div(priceScaled).round(0, 3);
         inflow.push(inflowUnit);
         outflow.push(ZERO);
       } else {
         const outflowUnit = unitsMultiplier.mul(
-          combinedCurrentSetUnits[i].mul(priceNumerator).sub(combinedNextSetUnits[i].mul(priceDenominator))
-        ).div(priceNumerator).round(0, 3);
+          combinedCurrentSetUnits[i].mul(priceScaled).sub(combinedNextSetUnits[i].mul(SCALE_FACTOR))
+        ).div(priceScaled).round(0, 3);
         outflow.push(outflowUnit);
         inflow.push(ZERO);
       }

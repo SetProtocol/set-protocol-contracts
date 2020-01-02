@@ -242,7 +242,8 @@ contract Auction {
     {
         uint256 currentSetNaturalUnit = _currentSet.naturalUnit();
         uint256 nextNaturalUnit = _nextSet.naturalUnit();
-        return Math.max(currentSetNaturalUnit, nextNaturalUnit);
+        return Math.max(currentSetNaturalUnit, nextNaturalUnit)
+            .mul(_pricePrecision);
     }
 
     /**
@@ -357,11 +358,13 @@ contract Auction {
         returns (uint256[] memory)
     {
         address[] memory combinedTokenArray = _auction.combinedTokenArray;
+        uint256 pricePrecisionMem = _auction.pricePrecision;
         uint256[] memory combinedUnits = new uint256[](combinedTokenArray.length);
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
             combinedUnits[i] = calculateCombinedUnit(
                 _set,
                 _auction.minimumBid,
+                pricePrecisionMem,
                 combinedTokenArray[i]
             );
         }
@@ -374,11 +377,13 @@ contract Auction {
      *
      * @param _setToken                 Information on the SetToken
      * @param _minimumBid               Minimum bid amount
+     * @param _pricePrecision           Price precision used in auction
      * @param _component                Current component in iteration
      * @return                          Unit inflow/outflow
      */
     function calculateCombinedUnit(
         ISetToken _setToken,
+        uint256 _pricePrecision,
         uint256 _minimumBid,
         address _component
     )
@@ -397,7 +402,8 @@ contract Auction {
             return calculateTransferValue(
                 _setToken.getUnits()[indexCurrent],
                 _setToken.naturalUnit(),
-                _minimumBid
+                _minimumBid,
+                _pricePrecision
             );
         }
 
@@ -411,18 +417,20 @@ contract Auction {
      * @param   _unit               Units of the component token
      * @param   _naturalUnit        Natural unit of the Set token
      * @param   _minimumBid         Minimum bid amount
+     * @param   _pricePrecision     Price precision used in auction
      * @return  uint256             Amount of tokens per standard bid amount (minimumBid/priceDivisor)
      */
     function calculateTransferValue(
         uint256 _unit,
         uint256 _naturalUnit,
-        uint256 _minimumBid
+        uint256 _minimumBid,
+        uint256 _pricePrecision
     )
         private
         pure
         returns (uint256)
     {
-        return SetMath.setToComponent(_minimumBid, _unit, _naturalUnit);
+        return SetMath.setToComponent(_minimumBid, _unit, _naturalUnit).div(_pricePrecision);
     }
 
     /**

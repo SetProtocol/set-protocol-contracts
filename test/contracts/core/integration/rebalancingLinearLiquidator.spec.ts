@@ -428,7 +428,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
     });
   });
 
-  describe('#settleRebalance', async () => {
+  describe.only('#settleRebalance', async () => {
     let subjectCaller: Address;
 
     let nextSetToken: SetTokenContract;

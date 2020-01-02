@@ -210,7 +210,9 @@ contract('LinearAuction', accounts => {
 
       const auction: any = await auctionMock.auction.callAsync();
 
-      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit);
+      const pricePrecision = auction.auction.pricePrecision;
+      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
+                                          .mul(pricePrecision);
       expect(auction.auction.minimumBid).to.bignumber.equal(expectedMinimumBid);
     });
 

@@ -48,7 +48,7 @@ contract LinearAuctionMock is LinearAuction {
         return super.hasAuctionFailed(auction);
     }
 
-    function getPrice() external view returns(Rebalance.Price memory) {
+    function getPrice() external view returns(uint256) {
         return super.getPrice(auction);
     }
 
@@ -56,10 +56,6 @@ contract LinearAuctionMock is LinearAuction {
         uint256 _quantity
     ) external view returns (Rebalance.TokenFlow memory) {
         return super.getTokenFlow(auction, _quantity);
-    }
-
-    function getNumerator() external view returns(uint256) {
-        return super.getNumerator(auction);
     }
 
     function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {

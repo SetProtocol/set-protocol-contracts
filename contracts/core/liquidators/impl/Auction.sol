@@ -42,6 +42,7 @@ import { SetUSDValuation } from "../impl/SetUSDValuation.sol";
  */
 contract Auction {
     using SafeMath for uint256;
+    using CommonMath for uint256;
     using AddressArrayUtils for address[];
 
     /* ============ Structs ============ */
@@ -157,12 +158,12 @@ contract Auction {
      *
      * @param _auction              Auction Setup object
      * @param _quantity             Amount of currentSets bidder is seeking to rebalance
-     * @param _price                Struct of auction price numerator and denominator
+     * @param _price                Scaled value representing the auction numeartor
      */
     function calculateTokenFlow(
         Setup storage _auction,
         uint256 _quantity,
-        Rebalance.Price memory _price
+        uint256 _price
     )
         internal
         view
@@ -241,8 +242,7 @@ contract Auction {
     {
         uint256 currentSetNaturalUnit = _currentSet.naturalUnit();
         uint256 nextNaturalUnit = _nextSet.naturalUnit();
-        return Math.max(currentSetNaturalUnit, nextNaturalUnit)
-            .mul(_pricePrecision);
+        return Math.max(currentSetNaturalUnit, nextNaturalUnit);
     }
 
     /**
@@ -271,7 +271,7 @@ contract Auction {
      * @param _currentUnit          Amount of token i in currentSet per minimum bid amount
      * @param _nextSetUnit          Amount of token i in nextSet per minimum bid amount
      * @param _unitsMultiplier      Bid amount normalized to number of minimum bid amounts
-     * @param _price                Struct of auction price numerator and denominator
+     * @param _priceScaled          Auction price as a scaled value
      * @return inflowUnit           Amount of token i transferred into the system
      * @return outflowUnit          Amount of token i transferred to the bidder
      */
@@ -279,7 +279,7 @@ contract Auction {
         uint256 _currentUnit,
         uint256 _nextSetUnit,
         uint256 _unitsMultiplier,
-        Rebalance.Price memory _price
+        uint256 _priceScaled
     )
         internal
         pure
@@ -316,19 +316,19 @@ contract Auction {
         uint256 outflowUnit;
 
         // Use if statement to check if token inflow or outflow
-        if (_nextSetUnit.mul(_price.denominator) > _currentUnit.mul(_price.numerator)) {
+        if (_nextSetUnit.scale() > _currentUnit.mul(_priceScaled)) {
             // Calculate inflow amount
             inflowUnit = _unitsMultiplier.mul(
-                _nextSetUnit.mul(_price.denominator).sub(_currentUnit.mul(_price.numerator))
-            ).div(_price.numerator);
+                _nextSetUnit.scale().sub(_currentUnit.mul(_priceScaled))
+            ).div(_priceScaled);
 
             // Set outflow amount to 0 for component i, since tokens need to be injected in rebalance
             outflowUnit = 0;
         } else {
             // Calculate outflow amount
             outflowUnit = _unitsMultiplier.mul(
-                _currentUnit.mul(_price.numerator).sub(_nextSetUnit.mul(_price.denominator))
-            ).div(_price.numerator);
+                _currentUnit.mul(_priceScaled).sub(_nextSetUnit.scale())
+            ).div(_priceScaled);
 
             // Set inflow amount to 0 for component i, since tokens need to be returned in rebalance
             inflowUnit = 0;
@@ -358,12 +358,10 @@ contract Auction {
     {
         address[] memory combinedTokenArray = _auction.combinedTokenArray;
         uint256[] memory combinedUnits = new uint256[](combinedTokenArray.length);
-        uint256 pricePrecisionMem = _auction.pricePrecision;
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
             combinedUnits[i] = calculateCombinedUnit(
                 _set,
                 _auction.minimumBid,
-                pricePrecisionMem,
                 combinedTokenArray[i]
             );
         }
@@ -376,14 +374,12 @@ contract Auction {
      *
      * @param _setToken                 Information on the SetToken
      * @param _minimumBid               Minimum bid amount
-     * @param _pricePrecision           Price precision used in auction
      * @param _component                Current component in iteration
      * @return                          Unit inflow/outflow
      */
     function calculateCombinedUnit(
         ISetToken _setToken,
         uint256 _minimumBid,
-        uint256 _pricePrecision,
         address _component
     )
         private
@@ -401,8 +397,7 @@ contract Auction {
             return calculateTransferValue(
                 _setToken.getUnits()[indexCurrent],
                 _setToken.naturalUnit(),
-                _minimumBid,
-                _pricePrecision
+                _minimumBid
             );
         }
 
@@ -416,21 +411,18 @@ contract Auction {
      * @param   _unit               Units of the component token
      * @param   _naturalUnit        Natural unit of the Set token
      * @param   _minimumBid         Minimum bid amount
-     * @param   _pricePrecision     Price precision used in auction
      * @return  uint256             Amount of tokens per standard bid amount (minimumBid/priceDivisor)
      */
     function calculateTransferValue(
         uint256 _unit,
         uint256 _naturalUnit,
-        uint256 _minimumBid,
-        uint256 _pricePrecision
+        uint256 _minimumBid
     )
         private
         pure
         returns (uint256)
     {
-        return SetMath.setToComponent(_minimumBid, _unit, _naturalUnit)
-            .div(_pricePrecision);
+        return SetMath.setToComponent(_minimumBid, _unit, _naturalUnit);
     }
 
     /**

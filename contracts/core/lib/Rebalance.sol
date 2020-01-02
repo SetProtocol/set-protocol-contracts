@@ -25,26 +25,10 @@ pragma solidity 0.5.7;
  */
 library Rebalance {
 
-    struct Price {
-        uint256 numerator;
-        uint256 denominator;
-    }
-
     struct TokenFlow {
         address[] addresses;
         uint256[] inflow;
         uint256[] outflow;
-    }
-
-    function composePrice(
-        uint256 _numerator, 
-        uint256 _denominator
-    )
-        internal
-        pure
-        returns(Price memory)
-    {
-        return Price({ numerator: _numerator, denominator: _denominator });
     }
 
     function composeTokenFlow(

@@ -212,9 +212,7 @@ contract('Auction', accounts => {
 
       const auctionSetup: any = await auctionMock.auction.callAsync();
 
-      const pricePrecision = auctionSetup.pricePrecision;
-      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                          .mul(pricePrecision);
+      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit);
       expect(auctionSetup.minimumBid).to.bignumber.equal(expectedMinimumBid);
     });
 
@@ -262,7 +260,6 @@ contract('Auction', accounts => {
         set1,
         combinedTokenArray,
         new BigNumber(auctionSetup.minimumBid),
-        auctionSetup.pricePrecision
       );
 
       expect(JSON.stringify(combinedCurrentSetUnits)).to.equal(JSON.stringify(expectedResult));
@@ -279,7 +276,6 @@ contract('Auction', accounts => {
         set2,
         combinedTokenArray,
         new BigNumber(auctionSetup.minimumBid),
-        auctionSetup.pricePrecision
       );
 
       expect(JSON.stringify(combinedNextSetUnits)).to.equal(JSON.stringify(expectedResult));
@@ -311,7 +307,6 @@ contract('Auction', accounts => {
           await coreHelper.getSetInstance(subjectNextSet),
           oracleWhiteList
         );
-        console.log(auctionSetup.pricePrecision);
         expect(auctionSetup.pricePrecision).to.bignumber.equal(expectedPricePrecision);
       });
     });
@@ -342,14 +337,13 @@ contract('Auction', accounts => {
           await coreHelper.getSetInstance(subjectNextSet),
           oracleWhiteList
         );
-        console.log(auctionSetup.pricePrecision);
         expect(auctionSetup.pricePrecision).to.bignumber.equal(expectedPricePrecision);
       });
     });
 
     describe('when there is insufficient collateral to rebalance', async () => {
       beforeEach(async () => {
-        subjectStartingCurrentSetQuantity = gWei(10);
+        subjectStartingCurrentSetQuantity = gWei(1).div(10);
       });
 
       it('should revert', async () => {
@@ -433,10 +427,7 @@ contract('Auction', accounts => {
 
     describe('when the quantity is not a multiple of the minimumBid', async () => {
       beforeEach(async () => {
-        const auctionSetup: any = await auctionMock.auction.callAsync();
-        const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                            .mul(auctionSetup.pricePrecision)
-                                            .div(2);
+        const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit).div(2);
         subjectQuantity = gWei(10).plus(halfMinimumBid);
       });
 

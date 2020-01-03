@@ -383,8 +383,8 @@ contract Auction {
      */
     function calculateCombinedUnit(
         ISetToken _setToken,
-        uint256 _pricePrecision,
         uint256 _minimumBid,
+        uint256 _pricePrecision,
         address _component
     )
         private
@@ -430,7 +430,8 @@ contract Auction {
         pure
         returns (uint256)
     {
-        return SetMath.setToComponent(_minimumBid, _unit, _naturalUnit).div(_pricePrecision);
+        return SetMath.setToComponent(_minimumBid, _unit, _naturalUnit)
+            .div(_pricePrecision);
     }
 
     /**

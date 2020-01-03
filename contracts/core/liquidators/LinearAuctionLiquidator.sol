@@ -208,7 +208,7 @@ contract LinearAuctionLiquidator is LinearAuction, ILiquidator {
     {
         return RebalancingLibrary.AuctionPriceParameters({
             auctionStartTime: auction(_set).startTime,
-            auctionTimeToPivot: linearAuction(_set).endTime,
+            auctionTimeToPivot: auctionPeriod,
             auctionStartPrice: linearAuction(_set).startNumerator,
             auctionPivotPrice: linearAuction(_set).endNumerator
         });

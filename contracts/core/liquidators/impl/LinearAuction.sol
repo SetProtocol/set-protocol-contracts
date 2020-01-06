@@ -23,6 +23,7 @@ import { Auction } from "./Auction.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { Rebalance } from "../../lib/Rebalance.sol";
+import { TwoAssetAuctionBoundsCalculator } from "./TwoAssetAuctionBoundsCalculator.sol";
 
 
 /**
@@ -31,7 +32,7 @@ import { Rebalance } from "../../lib/Rebalance.sol";
  *
  * Library containing utility functions for computing auction Price for a linear price auction.
  */
-contract LinearAuction is Auction {
+contract LinearAuction is TwoAssetAuctionBoundsCalculator {
     using SafeMath for uint256;
 
     /* ============ Structs ============ */
@@ -62,7 +63,7 @@ contract LinearAuction is Auction {
         uint256 _rangeEnd
     )
         public
-        Auction(_oracleWhiteList)
+        TwoAssetAuctionBoundsCalculator(_oracleWhiteList)
     {
         auctionPeriod = _auctionPeriod;
         rangeStart = _rangeStart;
@@ -95,8 +96,8 @@ contract LinearAuction is Auction {
         );
 
         uint256 fairValue = calculateFairValue(_currentSet, _nextSet);
-        _linearAuction.startPrice = calculateStartPrice(fairValue);
-        _linearAuction.endPrice = calculateEndPrice(fairValue);
+        _linearAuction.startPrice = calculateStartPrice(_linearAuction, fairValue);
+        _linearAuction.endPrice = calculateEndPrice(_linearAuction, fairValue);
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
 
@@ -187,16 +188,40 @@ contract LinearAuction is Auction {
     /**
      * Calculates the linear auction start price with a scaled value
      */
-    function calculateStartPrice(uint256 _fairValueScaled) internal view returns(uint256) {
-        uint256 startRange = _fairValueScaled.mul(rangeStart).div(100);
-        return _fairValueScaled.sub(startRange);
+    function calculateStartPrice(
+        State storage _linearAuction,
+        uint256 _fairValueScaled
+    )
+        internal
+        view
+        returns(uint256)
+    {
+        uint256 startDifference = TwoAssetAuctionBoundsCalculator.calculateAuctionBoundDifference(
+            _linearAuction.auction,
+            _fairValueScaled,
+            rangeStart
+        );
+
+        return _fairValueScaled.sub(startDifference);
     }
 
     /**
      * Calculates the linear auction end price with a scaled value
      */
-    function calculateEndPrice(uint256 _fairValueScaled) internal view returns(uint256) {
-        uint256 endRange = _fairValueScaled.mul(rangeEnd).div(100);
-        return _fairValueScaled.add(endRange);
+    function calculateEndPrice(
+        State storage _linearAuction,
+        uint256 _fairValueScaled
+    )
+        internal
+        view
+        returns(uint256)
+    {
+        uint256 endDifference = TwoAssetAuctionBoundsCalculator.calculateAuctionBoundDifference(
+            _linearAuction.auction,
+            _fairValueScaled,
+            rangeStart
+        );
+
+        return _fairValueScaled.add(endDifference);
     }
 }

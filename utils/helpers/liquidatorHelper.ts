@@ -11,6 +11,7 @@ import {
   LiquidatorProxyContract,
   OracleWhiteListContract,
   SetTokenContract,
+  TwoAssetAuctionBoundsCalculatorMockContract,
 } from '../contracts';
 import { getContractInstance, txnFrom } from '../web3Helper';
 import {
@@ -21,12 +22,14 @@ import {
   LinearAuction,
   TokenFlow
 } from '../auction';
+import { ether } from '@utils/units';
 
 const AuctionMock = artifacts.require('AuctionMock');
 const LinearAuctionLiquidator = artifacts.require('LinearAuctionLiquidator');
 const LinearAuctionMock = artifacts.require('LinearAuctionMock');
 const LiquidatorMock = artifacts.require('LiquidatorMock');
 const LiquidatorProxy = artifacts.require('LiquidatorProxy');
+const TwoAssetAuctionBoundsCalculatorMock = artifacts.require('TwoAssetAuctionBoundsCalculatorMock');
 
 import { ERC20Helper } from './erc20Helper';
 import { LibraryMockHelper } from './libraryMockHelper';
@@ -110,6 +113,21 @@ export class LiquidatorHelper {
     );
   }
 
+  public async deployTwoAssetAuctionBoundsCalculatorMock(
+    oracleWhiteList: Address,
+    from: Address = this._contractOwnerAddress
+  ): Promise<TwoAssetAuctionBoundsCalculatorMockContract> {
+    const twoAssetAuctionBoundsCalculatorMock = await TwoAssetAuctionBoundsCalculatorMock.new(
+      oracleWhiteList,
+      txnFrom(from)
+    );
+
+    return new TwoAssetAuctionBoundsCalculatorMockContract(
+      getContractInstance(twoAssetAuctionBoundsCalculatorMock),
+      txnFrom(from)
+    );
+  }
+
   public async deployLiquidatorMockAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<LiquidatorMockContract> {
@@ -173,6 +191,68 @@ export class LiquidatorHelper {
       }
     });
     return combinedSetTokenUnits;
+  }
+
+  public async calculateAuctionBoundsAsync(
+    combinedTokenArray: Address[],
+    combinedCurrentUnitArray: BigNumber[],
+    combinedNextUnitArray: BigNumber[],
+    fairValue: BigNumber,
+    startBound: BigNumber,
+    endBound: BigNumber,
+    oracleWhiteList: OracleWhiteListContract
+  ): Promise<[BigNumber, BigNumber]> {
+    const [assetOneDecimals, assetTwoDecimals] = await this.getTokensDecimalsAsync(combinedTokenArray);
+
+    const assetOneFullUnit = new BigNumber(10 ** assetOneDecimals.toNumber());
+    const assetTwoFullUnit = new BigNumber(10 ** assetTwoDecimals.toNumber());
+
+    const [assetOnePrice, assetTwoPrice] = await this.getComponentPricesAsync(combinedTokenArray, oracleWhiteList);
+
+    const startValue = this.calculateAuctionBound(
+      combinedCurrentUnitArray,
+      combinedNextUnitArray,
+      assetOneFullUnit,
+      assetTwoFullUnit,
+      assetOnePrice.div(assetTwoPrice),
+      fairValue,
+      startBound
+    );
+
+    const endValue = this.calculateAuctionBound(
+      combinedCurrentUnitArray,
+      combinedNextUnitArray,
+      assetOneFullUnit,
+      assetTwoFullUnit,
+      assetOnePrice.div(assetTwoPrice),
+      fairValue,
+      endBound
+    );
+
+    return [startValue, endValue];
+  }
+
+  public calculateAuctionBound(
+    combinedCurrentUnitArray: BigNumber[],
+    combinedNextUnitArray: BigNumber[],
+    assetOneFullUnit: BigNumber,
+    assetTwoFullUnit: BigNumber,
+    assetPairPrice: BigNumber,
+    fairValue: BigNumber,
+    boundValue: BigNumber
+  ): BigNumber {
+    const numerator = (combinedNextUnitArray[0].mul(ether(1)).sub(fairValue.mul(combinedCurrentUnitArray[0]))).pow(2)
+      .mul(assetTwoFullUnit)
+      .mul(boundValue)
+      .mul(assetPairPrice)
+      .div(100);
+
+    const denominator = combinedNextUnitArray[0].mul(combinedCurrentUnitArray[1]).sub(
+        combinedNextUnitArray[1].mul(combinedCurrentUnitArray[0]))
+      .mul(assetOneFullUnit)
+      .mul(10 ** 18);
+
+    return numerator.div(denominator).abs();
   }
 
   public calculateCurrentPrice(

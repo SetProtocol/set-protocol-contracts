@@ -42,7 +42,7 @@
     "test-nocompile": "yarn transpile && yarn truffle-test-contracts",
     "test-continuous": "yarn deploy-development && truffle test",
     "transpile": "tsc",
-    "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name 'linearAuctionLiquidator.spec.js'`",
+    "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name '*.spec.js'`",
     "prepublishOnly": "yarn dist",
     "flatten": "truffle-flattener contracts/core/[XXX]/[XXX].sol"
   },

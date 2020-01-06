@@ -276,7 +276,7 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
     }
 
     describe('when startRebalance is called from Default State', async () => {
-      it.only('updates the rebalanceState to Rebalance', async () => {
+      it('updates the rebalanceState to Rebalance', async () => {
         await subject();
 
         const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();

@@ -121,7 +121,7 @@ contract('LinearAuctionLiquidator', accounts => {
     );
 
     set2Components = [component1.address, component2.address];
-    set2Units = [gWei(1), gWei(4)];
+    set2Units = [gWei(1), gWei(0.5)];
     set2NaturalUnit = gWei(2);
     set2 = await coreHelper.createSetTokenAsync(
       core,
@@ -280,7 +280,7 @@ contract('LinearAuctionLiquidator', accounts => {
       expect(auction.auction.pricePrecision).to.bignumber.equal(expectedPricePrecision);
     });
 
-    it.only('sets the correct startPrice', async () => {
+    it('sets the correct startPrice', async () => {
       await subject();
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);

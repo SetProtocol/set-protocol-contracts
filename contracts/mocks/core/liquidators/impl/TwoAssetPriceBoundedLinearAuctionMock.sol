@@ -21,6 +21,7 @@ import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20
 import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
 
 import { LinearAuction } from "../../../../core/liquidators/impl/LinearAuction.sol";
+import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";
 import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.sol";
 import { TwoAssetPriceBoundedLinearAuction } from "../../../../core/liquidators/impl/TwoAssetPriceBoundedLinearAuction.sol";
 
@@ -47,6 +48,19 @@ contract TwoAssetPriceBoundedLinearAuctionMock is TwoAssetPriceBoundedLinearAuct
             _rangeEnd
         )
     {}
+
+    // To test
+    function validateTwoAssetPriceBoundedAuctionMock(ISetToken _currentSet,ISetToken _nextSet) external view {
+        validateTwoAssetPriceBoundedAuction(_currentSet, _nextSet);
+    }
+
+    function calculateStartPriceMock(uint256 _fairValueScaled) external view returns(uint256) {    
+        return super.calculateStartPrice(auctionInfo, _fairValueScaled);
+    }
+
+    function calculateEndPriceMock(uint256 _fairValueScaled) external view returns(uint256) {    
+        return super.calculateEndPrice(auctionInfo, _fairValueScaled);
+    }
 
     function calculateAuctionBoundDifferenceMock(
         uint256 _fairValue,

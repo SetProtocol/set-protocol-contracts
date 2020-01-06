@@ -115,7 +115,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         uint256 endDifference = calculateAuctionBoundDifference(
             _linearAuction.auction,
             _fairValueScaled,
-            rangeStart
+            rangeEnd
         );
 
         return _fairValueScaled.add(endDifference);

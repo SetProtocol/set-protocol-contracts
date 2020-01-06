@@ -173,8 +173,8 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
       set1NaturalUnit,
     );
 
-    set2Components = [component2.address, component3.address];
-    set2Units = [gWei(1), gWei(1)];
+    set2Components = [component1.address, component2.address];
+    set2Units = [gWei(1), gWei(2)];
     set2NaturalUnit = customSet2NaturalUnit || gWei(2);
     set2 = await coreHelper.createSetTokenAsync(
       coreMock,
@@ -348,6 +348,27 @@ contract('RebalancingSetV2 - LinearAuctionLiquidator', accounts => {
             nextSetComponents[0],
             { from: deployerAccount }
           );
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when the union of currentSet and nextSet is not 2 components', async () => {
+        beforeEach(async () => {
+          const set3Components = [component1.address, component3.address];
+          const set3Units = [gWei(1), gWei(1)];
+          const set3NaturalUnit = customSet1NaturalUnit || gWei(1);
+          const set3 = await coreHelper.createSetTokenAsync(
+            coreMock,
+            setTokenFactory.address,
+            set3Components,
+            set3Units,
+            set3NaturalUnit,
+          );
+
+          subjectNextSet = set3.address;
         });
 
         it('should revert', async () => {

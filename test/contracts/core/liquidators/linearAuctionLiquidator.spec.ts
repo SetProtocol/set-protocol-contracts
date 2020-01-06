@@ -120,8 +120,8 @@ contract('LinearAuctionLiquidator', accounts => {
       set1NaturalUnit,
     );
 
-    set2Components = [component2.address, component3.address];
-    set2Units = [gWei(1), gWei(1)];
+    set2Components = [component1.address, component2.address];
+    set2Units = [gWei(1), gWei(0.5)];
     set2NaturalUnit = gWei(2);
     set2 = await coreHelper.createSetTokenAsync(
       core,
@@ -325,7 +325,7 @@ contract('LinearAuctionLiquidator', accounts => {
     describe('when the currentSet is > 10x nextSet', async () => {
       beforeEach(async () => {
         const setComponents = [component1.address, component2.address];
-        const setUnits = [gWei(1), gWei(1)];
+        const setUnits = [gWei(1), gWei(2)];
         const setNaturalUnit = gWei(100);
         const set3 = await coreHelper.createSetTokenAsync(
           core,
@@ -340,7 +340,6 @@ contract('LinearAuctionLiquidator', accounts => {
 
       it('sets the correct pricePrecision', async () => {
         await subject();
-
         const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
         const expectedPricePrecision = await liquidatorHelper.calculatePricePrecisionAsync(
@@ -408,9 +407,30 @@ contract('LinearAuctionLiquidator', accounts => {
     describe('when a token does not have a supported oracle', async () => {
       beforeEach(async () => {
         await oracleWhiteList.removeTokenOraclePair.sendTransactionAsync(
-          component3.address,
+          component1.address,
           { from: ownerAccount, gas: DEFAULT_GAS },
         );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the union of the current and next Set is not 2 components', async () => {
+      beforeEach(async () => {
+        const set3Components = [component1.address, component3.address];
+        const set3Units = [gWei(1), gWei(2)];
+        const set3NaturalUnit = gWei(2);
+        const set3 = await coreHelper.createSetTokenAsync(
+          core,
+          setTokenFactory.address,
+          set3Components,
+          set3Units,
+          set3NaturalUnit,
+        );
+
+        subjectNextSet = set3.address;
       });
 
       it('should revert', async () => {

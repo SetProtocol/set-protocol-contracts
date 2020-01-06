@@ -11,7 +11,7 @@ import {
   LiquidatorProxyContract,
   OracleWhiteListContract,
   SetTokenContract,
-  TwoAssetAuctionBoundsCalculatorMockContract,
+  TwoAssetPriceBoundedLinearAuctionMockContract,
 } from '../contracts';
 import { getContractInstance, txnFrom } from '../web3Helper';
 import {
@@ -29,7 +29,7 @@ const LinearAuctionLiquidator = artifacts.require('LinearAuctionLiquidator');
 const LinearAuctionMock = artifacts.require('LinearAuctionMock');
 const LiquidatorMock = artifacts.require('LiquidatorMock');
 const LiquidatorProxy = artifacts.require('LiquidatorProxy');
-const TwoAssetAuctionBoundsCalculatorMock = artifacts.require('TwoAssetAuctionBoundsCalculatorMock');
+const TwoAssetPriceBoundedLinearAuctionMock = artifacts.require('TwoAssetPriceBoundedLinearAuctionMock');
 
 import { ERC20Helper } from './erc20Helper';
 import { LibraryMockHelper } from './libraryMockHelper';
@@ -113,17 +113,23 @@ export class LiquidatorHelper {
     );
   }
 
-  public async deployTwoAssetAuctionBoundsCalculatorMock(
+  public async deployTwoAssetPriceBoundedLinearAuctionMock(
     oracleWhiteList: Address,
+    auctionPeriod: BigNumber,
+    rangeStart: BigNumber,
+    rangeEnd: BigNumber,
     from: Address = this._contractOwnerAddress
-  ): Promise<TwoAssetAuctionBoundsCalculatorMockContract> {
-    const twoAssetAuctionBoundsCalculatorMock = await TwoAssetAuctionBoundsCalculatorMock.new(
+  ): Promise<TwoAssetPriceBoundedLinearAuctionMockContract> {
+    const mockContract = await TwoAssetPriceBoundedLinearAuctionMock.new(
       oracleWhiteList,
+      auctionPeriod,
+      rangeStart,
+      rangeEnd,
       txnFrom(from)
     );
 
-    return new TwoAssetAuctionBoundsCalculatorMockContract(
-      getContractInstance(twoAssetAuctionBoundsCalculatorMock),
+    return new TwoAssetPriceBoundedLinearAuctionMockContract(
+      getContractInstance(mockContract),
       txnFrom(from)
     );
   }

@@ -20,24 +20,32 @@ pragma experimental "ABIEncoderV2";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
 
-import { Auction } from "../../../../core/liquidators/impl/Auction.sol";
+import { LinearAuction } from "../../../../core/liquidators/impl/LinearAuction.sol";
 import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.sol";
-import { TwoAssetAuctionBoundsCalculator } from "../../../../core/liquidators/impl/TwoAssetAuctionBoundsCalculator.sol";
+import { TwoAssetPriceBoundedLinearAuction } from "../../../../core/liquidators/impl/TwoAssetPriceBoundedLinearAuction.sol";
 
 /**
- * @title TwoAssetAuctionBoundsCalculator
+ * @title TwoAssetPriceBoundedLinearAuction
  * @author Set Protocol
  *
  */
-contract TwoAssetAuctionBoundsCalculatorMock is TwoAssetAuctionBoundsCalculator {
+contract TwoAssetPriceBoundedLinearAuctionMock is TwoAssetPriceBoundedLinearAuction {
 
-	Auction.Setup public auctionInfo;
+	LinearAuction.State public auctionInfo;
 
     constructor(
-        IOracleWhiteList _oracleWhiteList
+        IOracleWhiteList _oracleWhiteList,
+        uint256 _auctionPeriod,
+        uint256 _rangeStart,
+        uint256 _rangeEnd
     )
         public
-        TwoAssetAuctionBoundsCalculator(_oracleWhiteList)
+        TwoAssetPriceBoundedLinearAuction(
+            _oracleWhiteList,
+            _auctionPeriod,
+            _rangeStart,
+            _rangeEnd
+        )
     {}
 
     function calculateAuctionBoundDifferenceMock(
@@ -48,7 +56,7 @@ contract TwoAssetAuctionBoundsCalculatorMock is TwoAssetAuctionBoundsCalculator 
         view
         returns (uint256)
     {
-    	return calculateAuctionBoundDifference(auctionInfo, _fairValue, _rangeStart);
+    	return calculateAuctionBoundDifference(auctionInfo.auction, _fairValue, _rangeStart);
     }
 
     function parameterizeAuction(
@@ -58,9 +66,9 @@ contract TwoAssetAuctionBoundsCalculatorMock is TwoAssetAuctionBoundsCalculator 
     )
     	external
     {
-    	auctionInfo.combinedTokenArray = _combinedTokenArray;
-    	auctionInfo.combinedCurrentSetUnits = _combinedCurrentSetUnits;
-    	auctionInfo.combinedNextSetUnits = _combinedNextSetUnits;
+    	auctionInfo.auction.combinedTokenArray = _combinedTokenArray;
+    	auctionInfo.auction.combinedCurrentSetUnits = _combinedCurrentSetUnits;
+    	auctionInfo.auction.combinedNextSetUnits = _combinedNextSetUnits;
     }
 
     function getCombinedTokenArray()
@@ -68,6 +76,6 @@ contract TwoAssetAuctionBoundsCalculatorMock is TwoAssetAuctionBoundsCalculator 
     	view
     	returns(address[] memory)
     {
-    	return auctionInfo.combinedTokenArray;
+    	return auctionInfo.auction.combinedTokenArray;
     }
 }

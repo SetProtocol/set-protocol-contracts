@@ -22,9 +22,10 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
 
 import { Auction } from "./Auction.sol";
-import { LinearAuction } from "./LinearAuction.sol";
 import { CommonMath } from "../../../lib/CommonMath.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
+import { ISetToken } from "../../interfaces/ISetToken.sol";
+import { LinearAuction } from "./LinearAuction.sol";
 
 
 /**
@@ -57,6 +58,28 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
             _rangeEnd
         )
     {}
+
+    /**
+     * Validates that the auction only includes two components and the components are valid.
+     */ 
+    function validateTwoAssetPriceBoundedAuction(
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+    {
+        address[] memory combinedTokenArray = Auction.getCombinedTokenArray(_currentSet, _nextSet);
+        require(
+            combinedTokenArray.length == 2,
+            "TwoAssetPriceBoundedLinearAuction: Only two components are allowed."
+        );
+
+        LinearAuction.validateRebalanceComponents(
+            _currentSet,
+            _nextSet
+        );
+    }
 
     /**
      * Calculates the linear auction start price with a scaled value
@@ -92,7 +115,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         uint256 endDifference = calculateAuctionBoundDifference(
             _linearAuction.auction,
             _fairValueScaled,
-            rangeStart
+            rangeEnd
         );
 
         return _fairValueScaled.add(endDifference);

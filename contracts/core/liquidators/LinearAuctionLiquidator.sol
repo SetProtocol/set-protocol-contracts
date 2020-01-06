@@ -101,7 +101,7 @@ contract LinearAuctionLiquidator is TwoAssetPriceBoundedLinearAuction, ILiquidat
     {
         _liquidatorData; // Pass linting
 
-        LinearAuction.validateRebalanceComponents(
+        TwoAssetPriceBoundedLinearAuction.validateTwoAssetPriceBoundedAuction(
             _currentSet,
             _nextSet
         );

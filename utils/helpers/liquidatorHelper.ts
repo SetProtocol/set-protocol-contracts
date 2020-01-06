@@ -247,18 +247,39 @@ export class LiquidatorHelper {
     fairValue: BigNumber,
     boundValue: BigNumber
   ): BigNumber {
-    const numerator = (combinedNextUnitArray[0].mul(ether(1)).sub(fairValue.mul(combinedCurrentUnitArray[0]))).pow(2)
-      .mul(assetTwoFullUnit)
-      .mul(boundValue)
-      .mul(assetPairPrice)
-      .div(100);
+    let numDifferential;
+    if (combinedNextUnitArray[0].mul(ether(1)).gt(fairValue.mul(combinedCurrentUnitArray[0]))) {
+      numDifferential = combinedNextUnitArray[0].mul(ether(1)).sub(fairValue.mul(combinedCurrentUnitArray[0]));
+    } else {
+      numDifferential = fairValue.mul(combinedCurrentUnitArray[0]).sub(combinedNextUnitArray[0].mul(ether(1)));
+    }
 
-    const denominator = combinedNextUnitArray[0].mul(combinedCurrentUnitArray[1]).sub(
-        combinedNextUnitArray[1].mul(combinedCurrentUnitArray[0]))
-      .mul(assetOneFullUnit)
-      .mul(10 ** 18);
+    let denomDifferential;
+    if (combinedNextUnitArray[0].mul(combinedCurrentUnitArray[1])
+          .gt(combinedNextUnitArray[1].mul(combinedCurrentUnitArray[0]))
+    ) {
+        denomDifferential = combinedNextUnitArray[0]
+                              .mul(combinedCurrentUnitArray[1])
+                              .sub(combinedNextUnitArray[1].mul(combinedCurrentUnitArray[0]));
+    } else {
+        denomDifferential = combinedNextUnitArray[1]
+                              .mul(combinedCurrentUnitArray[0])
+                              .sub(combinedNextUnitArray[0].mul(combinedCurrentUnitArray[1]));
+    }
 
-    return numerator.div(denominator).abs();
+    const calcNumerator = assetTwoFullUnit
+        .mul(numDifferential)
+        .mul(boundValue)
+        .mul(assetPairPrice)
+        .div(100).round(0, 3);
+
+    const calcDenominator = assetOneFullUnit.mul(denomDifferential).mul(ether(1));
+
+    return calcNumerator
+            .mul(ether(1))
+            .div(calcDenominator).round(0, 3)
+            .mul(numDifferential)
+            .div(ether(1)).round(0, 3);
   }
 
   public calculateCurrentPrice(

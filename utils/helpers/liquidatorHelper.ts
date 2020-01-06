@@ -251,14 +251,18 @@ export class LiquidatorHelper {
       .mul(assetTwoFullUnit)
       .mul(boundValue)
       .mul(assetPairPrice)
-      .div(100);
+      .div(100).round(0, 3);
+
+    console.log('Numerator', numerator.toString());
 
     const denominator = combinedNextUnitArray[0].mul(combinedCurrentUnitArray[1]).sub(
         combinedNextUnitArray[1].mul(combinedCurrentUnitArray[0]))
       .mul(assetOneFullUnit)
       .mul(10 ** 18);
 
-    return numerator.div(denominator).abs();
+    console.log('Denominatiro', denominator.toString());
+
+    return numerator.div(denominator).round(0, 3).abs();
   }
 
   public calculateCurrentPrice(

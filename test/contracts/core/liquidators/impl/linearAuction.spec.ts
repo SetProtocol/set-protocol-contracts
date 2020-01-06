@@ -253,7 +253,9 @@ contract('LinearAuction', accounts => {
         auction.auction.pricePrecision,
       );
       const rangeStart = await auctionMock.rangeStart.callAsync();
-      const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
+
+      const negativeRange = fairValue.mul(rangeStart).div(100).round(0, 3);
+      const expectedStartPrice = fairValue.sub(negativeRange);
       expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
     });
 
@@ -269,7 +271,8 @@ contract('LinearAuction', accounts => {
         auction.auction.pricePrecision,
       );
       const rangeEnd = await auctionMock.rangeEnd.callAsync();
-      const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
+      const positiveRange = fairValue.mul(rangeEnd).div(100).round(0, 3);
+      const expectedEndPrice = fairValue.add(positiveRange);
       expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
     });
 
@@ -315,7 +318,8 @@ contract('LinearAuction', accounts => {
           auction.auction.pricePrecision,
         );
         const rangeStart = await auctionMock.rangeStart.callAsync();
-        const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
+        const negativeRange = fairValue.mul(rangeStart).div(100).round(0, 3);
+        const expectedStartPrice = fairValue.sub(negativeRange);
 
         expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
       });
@@ -332,7 +336,8 @@ contract('LinearAuction', accounts => {
           auction.auction.pricePrecision,
         );
         const rangeEnd = await auctionMock.rangeEnd.callAsync();
-        const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
+        const positiveRange = fairValue.mul(rangeEnd).div(100).round(0, 3);
+        const expectedEndPrice = fairValue.add(positiveRange);
 
         expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
       });

@@ -292,7 +292,12 @@ contract('LinearAuctionLiquidator', accounts => {
         auction.auction.pricePrecision,
       );
       const rangeStart = await liquidator.rangeStart.callAsync();
-      const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
+      const expectedStartPrice = await liquidatorHelper.calculateTwoAssetStartPrice(
+        getLinearAuction(auction),
+        fairValue,
+        rangeStart,
+        oracleWhiteList,
+      );
       expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
     });
 
@@ -308,7 +313,12 @@ contract('LinearAuctionLiquidator', accounts => {
         auction.auction.pricePrecision,
       );
       const rangeEnd = await liquidator.rangeEnd.callAsync();
-      const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
+      const expectedEndPrice = await liquidatorHelper.calculateTwoAssetEndPrice(
+        getLinearAuction(auction),
+        fairValue,
+        rangeEnd,
+        oracleWhiteList,
+      );
       expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
     });
 
@@ -354,7 +364,12 @@ contract('LinearAuctionLiquidator', accounts => {
           auction.auction.pricePrecision,
         );
         const rangeStart = await liquidator.rangeStart.callAsync();
-        const expectedStartPrice = liquidatorHelper.calculateStartPrice(fairValue, rangeStart);
+        const expectedStartPrice = await liquidatorHelper.calculateTwoAssetStartPrice(
+          getLinearAuction(auction),
+          fairValue,
+          rangeStart,
+          oracleWhiteList,
+        );
         expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
       });
 
@@ -370,7 +385,12 @@ contract('LinearAuctionLiquidator', accounts => {
           auction.auction.pricePrecision,
         );
         const rangeEnd = await liquidator.rangeEnd.callAsync();
-        const expectedEndPrice = liquidatorHelper.calculateEndPrice(fairValue, rangeEnd);
+        const expectedEndPrice = await liquidatorHelper.calculateTwoAssetEndPrice(
+          getLinearAuction(auction),
+          fairValue,
+          rangeEnd,
+          oracleWhiteList,
+        );
         expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
       });
     });

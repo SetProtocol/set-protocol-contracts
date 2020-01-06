@@ -10,7 +10,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   StandardTokenMockContract,
   OracleWhiteListContract,
-  TwoAssetAuctionBoundsCalculatorMockContract,
+  TwoAssetPriceBoundedLinearAuctionMockContract,
   UpdatableOracleMockContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
@@ -24,12 +24,12 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 
-contract('TwoAssetAuctionBoundsCalculator', accounts => {
+contract('TwoAssetPriceBoundedLinearAuction', accounts => {
   const [
     ownerAccount,
   ] = accounts;
 
-  let boundsCalculator: TwoAssetAuctionBoundsCalculatorMockContract;
+  let boundsCalculator: TwoAssetPriceBoundedLinearAuctionMockContract;
   let oracleWhiteList: OracleWhiteListContract;
 
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
@@ -49,6 +49,10 @@ contract('TwoAssetAuctionBoundsCalculator', accounts => {
   let wrappedBTCOracle: UpdatableOracleMockContract;
   let usdcOracle: UpdatableOracleMockContract;
 
+  let auctionPeriod: BigNumber;
+  let rangeStart: BigNumber;
+  let rangeEnd: BigNumber;
+
   before(async () => {
     wrappedETH = await erc20Helper.deployTokenAsync(ownerAccount, 18);
     wrappedBTC = await erc20Helper.deployTokenAsync(ownerAccount, 8);
@@ -67,12 +71,19 @@ contract('TwoAssetAuctionBoundsCalculator', accounts => {
       [wrappedETHOracle.address, wrappedBTCOracle.address, usdcOracle.address],
     );
 
-    boundsCalculator = await liquidatorHelper.deployTwoAssetAuctionBoundsCalculatorMock(
-      oracleWhiteList.address
+    auctionPeriod = new BigNumber(14400); // 4 hours
+    rangeStart = new BigNumber(3); // 3%
+    rangeEnd = new BigNumber(21); // 21%
+
+    boundsCalculator = await liquidatorHelper.deployTwoAssetPriceBoundedLinearAuctionMock(
+      oracleWhiteList.address,
+      auctionPeriod,
+      rangeStart,
+      rangeEnd,
     );
   });
 
-  describe.only('#calculateStartNumerator', async () => {
+  describe('#calculateAuctionBoundDifference', async () => {
     let subjectFairValue: BigNumber;
     let subjectRangeStart: BigNumber;
 

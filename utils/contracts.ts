@@ -71,8 +71,8 @@ export { TimeLockUpgradeV2MockContract } from '../types/generated/time_lock_upgr
 export { TransferProxyContract } from '../types/generated/transfer_proxy';
 export { TradingPoolViewerContract } from '../types/generated/trading_pool_viewer';
 export {
-  TwoAssetAuctionBoundsCalculatorMockContract
-} from '../types/generated/two_asset_auction_bounds_calculator_mock';
+  TwoAssetPriceBoundedLinearAuctionMockContract
+} from '../types/generated/two_asset_price_bounded_linear_auction_mock';
 export { UpdatableConstantAuctionPriceCurveContract } from '../types/generated/updatable_constant_auction_price_curve';
 export { UpdatableOracleMockContract } from '../types/generated/updatable_oracle_mock';
 export { VaultContract } from '../types/generated/vault';

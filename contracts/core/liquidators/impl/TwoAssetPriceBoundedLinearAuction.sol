@@ -22,16 +22,17 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
 
 import { Auction } from "./Auction.sol";
+import { LinearAuction } from "./LinearAuction.sol";
 import { CommonMath } from "../../../lib/CommonMath.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 
 
 /**
- * @title TwoAssetAuctionBoundsCalculator
+ * @title TwoAssetPriceBoundedLinearAuction
  * @author Set Protocol
  *
  */
-contract TwoAssetAuctionBoundsCalculator is Auction {
+contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     using SafeMath for uint256;
     using CommonMath for uint256;
 
@@ -43,11 +44,60 @@ contract TwoAssetAuctionBoundsCalculator is Auction {
     uint256 constant private ONE_HUNDRED = 100;
 
     constructor(
-        IOracleWhiteList _oracleWhiteList
+        IOracleWhiteList _oracleWhiteList,
+        uint256 _auctionPeriod,
+        uint256 _rangeStart,
+        uint256 _rangeEnd
     )
         public
-        Auction(_oracleWhiteList)
+        LinearAuction(
+            _oracleWhiteList,
+            _auctionPeriod,
+            _rangeStart,
+            _rangeEnd
+        )
     {}
+
+    /**
+     * Calculates the linear auction start price with a scaled value
+     */
+    function calculateStartPrice(
+        State storage _linearAuction,
+        uint256 _fairValueScaled
+    )
+        internal
+        view
+        returns(uint256)
+    {
+        uint256 startDifference = calculateAuctionBoundDifference(
+            _linearAuction.auction,
+            _fairValueScaled,
+            rangeStart
+        );
+
+        return _fairValueScaled.sub(startDifference);
+    }
+
+    /**
+     * Calculates the linear auction end price with a scaled value
+     */
+    function calculateEndPrice(
+        State storage _linearAuction,
+        uint256 _fairValueScaled
+    )
+        internal
+        view
+        returns(uint256)
+    {
+        uint256 endDifference = calculateAuctionBoundDifference(
+            _linearAuction.auction,
+            _fairValueScaled,
+            rangeStart
+        );
+
+        return _fairValueScaled.add(endDifference);
+    }
+
 
     function calculateAuctionBoundDifference(
         Auction.Setup storage _auction,

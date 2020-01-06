@@ -26,6 +26,30 @@ contract LinearAuctionMock is LinearAuction {
         )
     {}
 
+    function calculateStartPrice(
+        State storage _linearAuction,
+        uint256 _fairValueScaled
+    )
+        internal
+        view
+        returns(uint256)
+    {
+        uint256 startRange = _fairValueScaled.mul(rangeStart).div(100);
+        return _fairValueScaled.sub(startRange);
+    }
+
+    function calculateEndPrice(
+        State storage _linearAuction,
+        uint256 _fairValueScaled
+    )
+        internal
+        view
+        returns(uint256)
+    {
+        uint256 endRange = _fairValueScaled.mul(rangeEnd).div(100);
+        return _fairValueScaled.add(endRange);
+    }
+
     function initializeLinearAuction(
         ISetToken _currentSet,
         ISetToken _nextSet,

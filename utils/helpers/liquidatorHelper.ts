@@ -273,20 +273,40 @@ export class LiquidatorHelper {
     return new BigNumber(linearAuction.startPrice).add(elapsedPrice);
   }
 
-  public calculateStartPrice(
+  public async calculateTwoAssetStartPrice(
+    linearAuction: LinearAuction,
     fairValue: BigNumber,
-    rangeStart: BigNumber,
-  ): BigNumber {
-    const negativeRange = fairValue.mul(rangeStart).div(100).round(0, 3);
-    return fairValue.sub(negativeRange);
+    rangeStartPercentage: BigNumber,
+    oracleWhiteList: OracleWhiteListContract,
+  ): Promise<BigNumber> {
+    const [startDifference] = await this.calculateAuctionBoundsAsync(
+      linearAuction.auction.combinedTokenArray,
+      linearAuction.auction.combinedCurrentSetUnits,
+      linearAuction.auction.combinedNextSetUnits,
+      fairValue,
+      rangeStartPercentage,
+      rangeStartPercentage, // Dummy value, unused
+      oracleWhiteList
+    );
+    return fairValue.sub(startDifference);
   }
 
-  public calculateEndPrice(
+  public async calculateTwoAssetEndPrice(
+    linearAuction: LinearAuction,
     fairValue: BigNumber,
-    rangeEnd: BigNumber,
-  ): BigNumber {
-    const positiveRange = fairValue.mul(rangeEnd).div(100).round(0, 3);
-    return fairValue.add(positiveRange);
+    rangeEndPercentage: BigNumber,
+    oracleWhiteList: OracleWhiteListContract,
+  ): Promise<BigNumber> {
+    const [, endDifference] = await this.calculateAuctionBoundsAsync(
+      linearAuction.auction.combinedTokenArray,
+      linearAuction.auction.combinedCurrentSetUnits,
+      linearAuction.auction.combinedNextSetUnits,
+      fairValue,
+      rangeEndPercentage, // Dummy value, unused
+      rangeEndPercentage,
+      oracleWhiteList
+    );
+    return fairValue.add(endDifference);
   }
 
   public async calculateFairValueAsync(

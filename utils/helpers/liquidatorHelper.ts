@@ -15,14 +15,15 @@ import {
 } from '../contracts';
 import { getContractInstance, txnFrom } from '../web3Helper';
 import {
-  ZERO,
+  AUCTION_CURVE_DENOMINATOR,
+  ONE_HUNDRED,
   SCALE_FACTOR,
+  ZERO
 } from '../constants';
 import {
   LinearAuction,
   TokenFlow
 } from '../auction';
-import { ether } from '@utils/units';
 
 const AuctionMock = artifacts.require('AuctionMock');
 const LinearAuctionLiquidator = artifacts.require('LinearAuctionLiquidator');
@@ -200,86 +201,141 @@ export class LiquidatorHelper {
   }
 
   public async calculateAuctionBoundsAsync(
-    combinedTokenArray: Address[],
-    combinedCurrentUnitArray: BigNumber[],
-    combinedNextUnitArray: BigNumber[],
-    fairValue: BigNumber,
+    linearAuction: LinearAuction,
     startBound: BigNumber,
     endBound: BigNumber,
     oracleWhiteList: OracleWhiteListContract
   ): Promise<[BigNumber, BigNumber]> {
-    const [assetOneDecimals, assetTwoDecimals] = await this.getTokensDecimalsAsync(combinedTokenArray);
+    const [assetOneDecimals, assetTwoDecimals] = await this.getTokensDecimalsAsync(
+      linearAuction.auction.combinedTokenArray
+    );
 
     const assetOneFullUnit = new BigNumber(10 ** assetOneDecimals.toNumber());
     const assetTwoFullUnit = new BigNumber(10 ** assetTwoDecimals.toNumber());
 
-    const [assetOnePrice, assetTwoPrice] = await this.getComponentPricesAsync(combinedTokenArray, oracleWhiteList);
+    const [assetOnePrice, assetTwoPrice] = await this.getComponentPricesAsync(
+      linearAuction.auction.combinedTokenArray,
+      oracleWhiteList
+    );
 
-    const startValue = this.calculateAuctionBound(
-      combinedCurrentUnitArray,
-      combinedNextUnitArray,
+    const startValue = this.calculateTwoAssetStartPrice(
+      linearAuction,
       assetOneFullUnit,
       assetTwoFullUnit,
       assetOnePrice.div(assetTwoPrice),
-      fairValue,
       startBound
     );
 
-    const endValue = this.calculateAuctionBound(
-      combinedCurrentUnitArray,
-      combinedNextUnitArray,
+    const endValue = this.calculateTwoAssetEndPrice(
+      linearAuction,
       assetOneFullUnit,
       assetTwoFullUnit,
       assetOnePrice.div(assetTwoPrice),
-      fairValue,
       endBound
     );
 
     return [startValue, endValue];
   }
 
-  public calculateAuctionBound(
-    combinedCurrentUnitArray: BigNumber[],
-    combinedNextUnitArray: BigNumber[],
+  public calculateTwoAssetStartPrice(
+    linearAuction: LinearAuction,
     assetOneFullUnit: BigNumber,
     assetTwoFullUnit: BigNumber,
     assetPairPrice: BigNumber,
-    fairValue: BigNumber,
-    boundValue: BigNumber
+    startBound: BigNumber
   ): BigNumber {
-    let numDifferential;
-    if (combinedNextUnitArray[0].mul(ether(1)).gt(fairValue.mul(combinedCurrentUnitArray[0]))) {
-      numDifferential = combinedNextUnitArray[0].mul(ether(1)).sub(fairValue.mul(combinedCurrentUnitArray[0]));
+    const auctionFairValue = this.calculateAuctionBound(
+      linearAuction,
+      assetOneFullUnit,
+      assetTwoFullUnit,
+      assetPairPrice
+    );
+
+    const tokenFlowIncreasing = this.isTokenFlowIncreasing(
+      linearAuction.auction.combinedCurrentSetUnits[0],
+      linearAuction.auction.combinedNextSetUnits[0],
+      auctionFairValue
+    );
+
+    let startPairPrice: BigNumber;
+    if (tokenFlowIncreasing) {
+      startPairPrice = assetPairPrice.mul(ONE_HUNDRED.sub(startBound)).div(ONE_HUNDRED);
     } else {
-      numDifferential = fairValue.mul(combinedCurrentUnitArray[0]).sub(combinedNextUnitArray[0].mul(ether(1)));
+      startPairPrice = assetPairPrice.mul(ONE_HUNDRED.add(startBound)).div(ONE_HUNDRED);
     }
 
-    let denomDifferential;
-    if (combinedNextUnitArray[0].mul(combinedCurrentUnitArray[1])
-          .gt(combinedNextUnitArray[1].mul(combinedCurrentUnitArray[0]))
-    ) {
-        denomDifferential = combinedNextUnitArray[0]
-                              .mul(combinedCurrentUnitArray[1])
-                              .sub(combinedNextUnitArray[1].mul(combinedCurrentUnitArray[0]));
+    const startValue = this.calculateAuctionBound(
+      linearAuction,
+      assetOneFullUnit,
+      assetTwoFullUnit,
+      startPairPrice
+    );
+    return startValue;
+  }
+
+  public calculateTwoAssetEndPrice(
+    linearAuction: LinearAuction,
+    assetOneFullUnit: BigNumber,
+    assetTwoFullUnit: BigNumber,
+    assetPairPrice: BigNumber,
+    endBound: BigNumber
+  ): BigNumber {
+    const auctionFairValue = this.calculateAuctionBound(
+      linearAuction,
+      assetOneFullUnit,
+      assetTwoFullUnit,
+      assetPairPrice
+    );
+
+    const tokenFlowIncreasing = this.isTokenFlowIncreasing(
+      linearAuction.auction.combinedCurrentSetUnits[0],
+      linearAuction.auction.combinedNextSetUnits[0],
+      auctionFairValue
+    );
+
+    let endPairPrice: BigNumber;
+    if (tokenFlowIncreasing) {
+      endPairPrice = assetPairPrice.mul(ONE_HUNDRED.add(endBound)).div(ONE_HUNDRED);
     } else {
-        denomDifferential = combinedNextUnitArray[1]
-                              .mul(combinedCurrentUnitArray[0])
-                              .sub(combinedNextUnitArray[0].mul(combinedCurrentUnitArray[1]));
+      endPairPrice = assetPairPrice.mul(ONE_HUNDRED.sub(endBound)).div(ONE_HUNDRED);
     }
 
-    const calcNumerator = assetTwoFullUnit
-        .mul(numDifferential)
-        .mul(boundValue)
-        .mul(assetPairPrice)
-        .div(100).round(0, 3);
+    const endValue = this.calculateAuctionBound(
+      linearAuction,
+      assetOneFullUnit,
+      assetTwoFullUnit,
+      endPairPrice
+    );
+    return endValue;
+  }
 
-    const calcDenominator = assetOneFullUnit.mul(denomDifferential).mul(ether(1));
+  public calculateAuctionBound(
+    linearAuction: LinearAuction,
+    assetOneFullUnit: BigNumber,
+    assetTwoFullUnit: BigNumber,
+    targetPrice: BigNumber
+  ): BigNumber {
 
-    return calcNumerator
-            .mul(ether(1))
-            .div(calcDenominator).round(0, 3)
-            .mul(numDifferential)
-            .div(ether(1)).round(0, 3);
+    const combinedNextUnitArray = linearAuction.auction.combinedNextSetUnits;
+    const combinedCurrentUnitArray = linearAuction.auction.combinedCurrentSetUnits;
+
+    const calcNumerator = combinedNextUnitArray[1].mul(AUCTION_CURVE_DENOMINATOR).div(assetTwoFullUnit).add(
+      targetPrice.mul(combinedNextUnitArray[0]).mul(AUCTION_CURVE_DENOMINATOR).div(assetOneFullUnit)
+    );
+
+    const calcDenominator = combinedCurrentUnitArray[1].div(assetTwoFullUnit).add(
+      targetPrice.mul(combinedCurrentUnitArray[0]).div(assetOneFullUnit)
+    );
+
+    return calcNumerator.div(calcDenominator).round(0, 3);
+  }
+
+  public isTokenFlowIncreasing(
+    assetOneCurrentUnit: BigNumber,
+    assetOneNextUnit: BigNumber,
+    fairValue: BigNumber
+  ): boolean {
+    return assetOneNextUnit.mul(AUCTION_CURVE_DENOMINATOR).greaterThan(assetOneCurrentUnit.mul(fairValue));
   }
 
   public calculateCurrentPrice(
@@ -292,42 +348,6 @@ export class LiquidatorHelper {
     const elapsedPrice = elapsed.mul(priceRange).div(auctionPeriod).round(0, 3);
 
     return new BigNumber(linearAuction.startPrice).add(elapsedPrice);
-  }
-
-  public async calculateTwoAssetStartPrice(
-    linearAuction: LinearAuction,
-    fairValue: BigNumber,
-    rangeStartPercentage: BigNumber,
-    oracleWhiteList: OracleWhiteListContract,
-  ): Promise<BigNumber> {
-    const [startDifference] = await this.calculateAuctionBoundsAsync(
-      linearAuction.auction.combinedTokenArray,
-      linearAuction.auction.combinedCurrentSetUnits,
-      linearAuction.auction.combinedNextSetUnits,
-      fairValue,
-      rangeStartPercentage,
-      rangeStartPercentage, // Dummy value, unused
-      oracleWhiteList
-    );
-    return fairValue.sub(startDifference);
-  }
-
-  public async calculateTwoAssetEndPrice(
-    linearAuction: LinearAuction,
-    fairValue: BigNumber,
-    rangeEndPercentage: BigNumber,
-    oracleWhiteList: OracleWhiteListContract,
-  ): Promise<BigNumber> {
-    const [, endDifference] = await this.calculateAuctionBoundsAsync(
-      linearAuction.auction.combinedTokenArray,
-      linearAuction.auction.combinedCurrentSetUnits,
-      linearAuction.auction.combinedNextSetUnits,
-      fairValue,
-      rangeEndPercentage, // Dummy value, unused
-      rangeEndPercentage,
-      oracleWhiteList
-    );
-    return fairValue.add(endDifference);
   }
 
   public async calculateFairValueAsync(

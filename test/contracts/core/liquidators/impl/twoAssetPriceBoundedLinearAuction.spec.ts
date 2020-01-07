@@ -31,7 +31,7 @@ import { expectRevertError } from '@utils/tokenAssertions';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
-const CoreMock = artifacts.require('CoreMock');
+const TwoAssetPriceBoundedLinearAuction = artifacts.require('TwoAssetPriceBoundedLinearAuction');
 
 contract('TwoAssetPriceBoundedLinearAuction', accounts => {
   const [
@@ -68,7 +68,8 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
   let rangeEnd: BigNumber;
 
   before(async () => {
-    ABIDecoder.addABI(CoreMock.abi);
+    ABIDecoder.addABI(TwoAssetPriceBoundedLinearAuction.abi);
+
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
     coreMock = await coreHelper.deployCoreMockAsync(transferProxy, vault);
@@ -106,7 +107,7 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(CoreMock.abi);
+    ABIDecoder.removeABI(TwoAssetPriceBoundedLinearAuction.abi);
   });
 
   describe('#validateTwoAssetPriceBoundedAuction', async () => {
@@ -203,9 +204,7 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     });
   });
 
-  describe('#calculateStartPrice and calculateEndPrice', async () => {
-    let subjectFairValue: BigNumber;
-
+  describe.only('#calculateStartPrice and calculateEndPrice', async () => {
     let combinedTokenArray: Address[];
     let combinedCurrentSetUnits: BigNumber[];
     let combinedNextSetUnits: BigNumber[];
@@ -238,29 +237,23 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
         startPrice: new BigNumber(0),
         endPrice: new BigNumber(0),
       };
-
-      subjectFairValue = ether(5);
     });
 
     async function startPriceSubject(): Promise<BigNumber> {
-      return boundsCalculator.calculateStartPriceMock.callAsync(
-        subjectFairValue,
-      );
+      return boundsCalculator.calculateStartPriceMock.callAsync();
     }
 
     async function endPriceSubject(): Promise<BigNumber> {
-      return boundsCalculator.calculateEndPriceMock.callAsync(
-        subjectFairValue,
-      );
+      return boundsCalculator.calculateEndPriceMock.callAsync();
     }
 
     it('calculates the correct start price value', async () => {
       const result = await startPriceSubject();
 
-      const expectedResult = await liquidatorHelper.calculateTwoAssetStartPrice(
+      const [expectedResult, ] = await liquidatorHelper.calculateAuctionBoundsAsync(
         linearAuction,
-        subjectFairValue,
         rangeStart,
+        rangeEnd,
         oracleWhiteList,
       );
 
@@ -270,9 +263,9 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     it('calculates the correct end price value', async () => {
       const result = await endPriceSubject();
 
-      const expectedResult = await liquidatorHelper.calculateTwoAssetEndPrice(
+      const [, expectedResult] = await liquidatorHelper.calculateAuctionBoundsAsync(
         linearAuction,
-        subjectFairValue,
+        rangeStart,
         rangeEnd,
         oracleWhiteList,
       );
@@ -281,9 +274,8 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     });
   });
 
-  describe('#calculateAuctionBoundDifference', async () => {
-    let subjectFairValue: BigNumber;
-    let subjectRangeStart: BigNumber;
+  describe.only('#calculateAuctionBounds', async () => {
+    let linearAuction: LinearAuction;
 
     let combinedTokenArray: Address[];
     let combinedCurrentSetUnits: BigNumber[];
@@ -296,37 +288,40 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     });
 
     beforeEach(async () => {
-      combinedTokenArray = [wrappedETH.address, usdc.address];
-      combinedCurrentSetUnits = [new BigNumber(10 ** 12), new BigNumber(128)];
-      combinedNextSetUnits = [new BigNumber(10 ** 12), new BigNumber(1152)];
-
       await boundsCalculator.parameterizeAuction.sendTransactionAsync(
         combinedTokenArray,
         combinedCurrentSetUnits,
         combinedNextSetUnits
       );
 
-      subjectFairValue = ether(5);
-      subjectRangeStart = new BigNumber(3);
+      linearAuction = {
+        auction: {
+          pricePrecision: new BigNumber(0),
+          minimumBid: new BigNumber(0),
+          startTime: new BigNumber(0),
+          startingCurrentSets: new BigNumber(0),
+          remainingCurrentSets: new BigNumber(0),
+          combinedTokenArray,
+          combinedCurrentSetUnits,
+          combinedNextSetUnits,
+        },
+        endTime: new BigNumber(0),
+        startPrice: new BigNumber(0),
+        endPrice: new BigNumber(0),
+      };
     });
 
     async function subject(): Promise<BigNumber> {
-      return boundsCalculator.calculateAuctionBoundDifferenceMock.callAsync(
-        subjectFairValue,
-        subjectRangeStart
-      );
+      return boundsCalculator.calculateStartPriceMock.callAsync();
     }
 
-    it('sets the correct oracleWhiteList', async () => {
+    it('gets the correct start bound', async () => {
       const actualStartBound = await subject();
 
       const [expectedStartBound, ] = await liquidatorHelper.calculateAuctionBoundsAsync(
-        combinedTokenArray,
-        combinedCurrentSetUnits,
-        combinedNextSetUnits,
-        subjectFairValue,
-        subjectRangeStart,
-        new BigNumber(21),
+        linearAuction,
+        rangeStart,
+        rangeEnd,
         oracleWhiteList
       );
 
@@ -340,16 +335,13 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
         combinedNextSetUnits = [new BigNumber(1152), new BigNumber(10 ** 12)];
       });
 
-      it('sets the correct oracleWhiteList', async () => {
+      it('gets the correct start bound', async () => {
         const actualStartBound = await subject();
 
         const [expectedStartBound, ] = await liquidatorHelper.calculateAuctionBoundsAsync(
-          combinedTokenArray,
-          combinedCurrentSetUnits,
-          combinedNextSetUnits,
-          subjectFairValue,
-          subjectRangeStart,
-          new BigNumber(21),
+          linearAuction,
+          rangeStart,
+          rangeEnd,
           oracleWhiteList
         );
 
@@ -364,16 +356,13 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
         combinedNextSetUnits = [new BigNumber(9 * 10 ** 12), new BigNumber(128)];
       });
 
-      it('sets the correct oracleWhiteList', async () => {
+      it('gets the correct start bound', async () => {
         const actualStartBound = await subject();
 
         const [expectedStartBound, ] = await liquidatorHelper.calculateAuctionBoundsAsync(
-          combinedTokenArray,
-          combinedCurrentSetUnits,
-          combinedNextSetUnits,
-          subjectFairValue,
-          subjectRangeStart,
-          new BigNumber(21),
+          linearAuction,
+          rangeStart,
+          rangeEnd,
           oracleWhiteList
         );
 
@@ -385,19 +374,16 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
       before(async () => {
         combinedTokenArray = [usdc.address, wrappedETH.address];
         combinedCurrentSetUnits = [new BigNumber(128), new BigNumber(10 ** 12)];
-        combinedNextSetUnits = [new BigNumber(1152), new BigNumber(9 * 10 ** 12)];
+        combinedNextSetUnits = [new BigNumber(128), new BigNumber(9 * 10 ** 12)];
       });
 
-      it('sets the correct oracleWhiteList', async () => {
+      it('gets the correct start bound', async () => {
         const actualStartBound = await subject();
 
         const [expectedStartBound, ] = await liquidatorHelper.calculateAuctionBoundsAsync(
-          combinedTokenArray,
-          combinedCurrentSetUnits,
-          combinedNextSetUnits,
-          subjectFairValue,
-          subjectRangeStart,
-          new BigNumber(21),
+          linearAuction,
+          rangeStart,
+          rangeEnd,
           oracleWhiteList
         );
 
@@ -408,20 +394,17 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     describe('different allocation', async () => {
       before(async () => {
         combinedTokenArray = [wrappedETH.address, usdc.address];
-        combinedCurrentSetUnits = [new BigNumber(10 ** 12), new BigNumber(128)];
-        combinedNextSetUnits = [new BigNumber(10 ** 12), new BigNumber(192)];
+        combinedCurrentSetUnits = [new BigNumber(10 ** 14), new BigNumber(12800)];
+        combinedNextSetUnits = [new BigNumber(10 ** 14), new BigNumber(1267200)];
       });
 
-      it('sets the correct oracleWhiteList', async () => {
+      it('gets the correct start bound', async () => {
         const actualStartBound = await subject();
 
         const [expectedStartBound, ] = await liquidatorHelper.calculateAuctionBoundsAsync(
-          combinedTokenArray,
-          combinedCurrentSetUnits,
-          combinedNextSetUnits,
-          subjectFairValue,
-          subjectRangeStart,
-          new BigNumber(21),
+          linearAuction,
+          rangeStart,
+          rangeEnd,
           oracleWhiteList
         );
 

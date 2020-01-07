@@ -8,11 +8,6 @@ import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.s
 contract AuctionMock is Auction {
     Auction.Setup public auction;
 
-    constructor(IOracleWhiteList _oracleWhiteList)
-        public
-        Auction(_oracleWhiteList)
-    {}
-
     function initializeAuction(
         ISetToken _currentSet,
         ISetToken _nextSet,

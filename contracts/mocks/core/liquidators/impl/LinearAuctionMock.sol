@@ -10,6 +10,10 @@ import { SetUSDValuation } from "../../../../core/liquidators/impl/SetUSDValuati
 
 contract LinearAuctionMock is LinearAuction {
     LinearAuction.State public auction;
+    IOracleWhiteList public oracleWhiteList;
+
+    uint256 public rangeStart; // Percentage below FairValue to begin auction at
+    uint256 public rangeEnd;  // Percentage above FairValue to end auction at
 
     constructor(
         IOracleWhiteList _oracleWhiteList,
@@ -19,35 +23,58 @@ contract LinearAuctionMock is LinearAuction {
     )
         public
         LinearAuction(
-            _oracleWhiteList,
-            _auctionPeriod,
-            _rangeStart,
-            _rangeEnd
+            _auctionPeriod
         )
-    {}
+    {
+        oracleWhiteList = _oracleWhiteList;
+        rangeStart = _rangeStart;
+        rangeEnd = _rangeEnd;
+    }
 
     function calculateStartPrice(
         State storage _linearAuction,
-        uint256 _fairValueScaled
+        ISetToken _currentSet,
+        ISetToken _nextSet
     )
         internal
         view
         returns(uint256)
     {
-        uint256 startRange = _fairValueScaled.mul(rangeStart).div(100);
-        return _fairValueScaled.sub(startRange);
+        uint256 fairValue = calculateFairValue(_currentSet, _nextSet);
+        uint256 startRange = fairValue.mul(rangeStart).div(100);
+        return fairValue.sub(startRange);
     }
 
     function calculateEndPrice(
         State storage _linearAuction,
-        uint256 _fairValueScaled
+        ISetToken _currentSet,
+        ISetToken _nextSet
     )
         internal
         view
         returns(uint256)
     {
-        uint256 endRange = _fairValueScaled.mul(rangeEnd).div(100);
-        return _fairValueScaled.add(endRange);
+        uint256 fairValue = calculateFairValue(_currentSet, _nextSet);
+        uint256 endRange = fairValue.mul(rangeEnd).div(100);
+        return fairValue.add(endRange);
+    }
+
+    /**
+     * Calculates the fair value based on the USD values of the next and current Sets.
+     * Returns a scaled value
+     */
+    function calculateFairValue(
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 currentSetUSDValue = calculateUSDValueOfSet(_currentSet);
+        uint256 nextSetUSDValue = calculateUSDValueOfSet(_nextSet);
+
+        return nextSetUSDValue.scale().div(currentSetUSDValue);
     }
 
     function initializeLinearAuction(
@@ -82,8 +109,14 @@ contract LinearAuctionMock is LinearAuction {
         return super.getTokenFlow(auction, _quantity);
     }
 
+    /**
+     * Calculate USD value of passed Set
+     *
+     * @param _set              Instance of SetToken
+     * @return USDValue         USD Value of the Set Token
+     */
     function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
-        return super.calculateUSDValueOfSet(_set);
+        return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
     }
 }
 

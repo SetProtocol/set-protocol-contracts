@@ -54,23 +54,12 @@ contract TwoAssetPriceBoundedLinearAuctionMock is TwoAssetPriceBoundedLinearAuct
         validateTwoAssetPriceBoundedAuction(_currentSet, _nextSet);
     }
 
-    function calculateStartPriceMock(uint256 _fairValueScaled) external view returns(uint256) {    
-        return super.calculateStartPrice(auctionInfo, _fairValueScaled);
+    function calculateStartPriceMock() external view returns(uint256) {    
+        return super.calculateStartPrice(auctionInfo.auction);
     }
 
-    function calculateEndPriceMock(uint256 _fairValueScaled) external view returns(uint256) {    
-        return super.calculateEndPrice(auctionInfo, _fairValueScaled);
-    }
-
-    function calculateAuctionBoundDifferenceMock(
-        uint256 _fairValue,
-        uint256 _rangeStart
-    )
-        external
-        view
-        returns (uint256)
-    {
-    	return calculateAuctionBoundDifference(auctionInfo.auction, _fairValue, _rangeStart);
+    function calculateEndPriceMock() external view returns(uint256) {    
+        return super.calculateEndPrice(auctionInfo.auction);
     }
 
     function parameterizeAuction(

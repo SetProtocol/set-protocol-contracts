@@ -216,7 +216,7 @@ contract('LinearAuctionLiquidator', accounts => {
     });
   });
 
-  describe('#startRebalance', async () => {
+  describe.only('#startRebalance', async () => {
     let subjectCaller: Address;
     let subjectCurrentSet: Address;
     let subjectNextSet: Address;
@@ -285,17 +285,11 @@ contract('LinearAuctionLiquidator', accounts => {
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
-      const fairValue = await liquidatorHelper.calculateFairValueAsync(
-        set1,
-        set2,
-        oracleWhiteList,
-        auction.auction.pricePrecision,
-      );
       const rangeStart = await liquidator.rangeStart.callAsync();
-      const expectedStartPrice = await liquidatorHelper.calculateTwoAssetStartPrice(
+      const [expectedStartPrice, ] = await liquidatorHelper.calculateAuctionBoundsAsync(
         getLinearAuction(auction),
-        fairValue,
         rangeStart,
+        rangeEnd,
         oracleWhiteList,
       );
       expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
@@ -306,16 +300,10 @@ contract('LinearAuctionLiquidator', accounts => {
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
-      const fairValue = await liquidatorHelper.calculateFairValueAsync(
-        set1,
-        set2,
-        oracleWhiteList,
-        auction.auction.pricePrecision,
-      );
       const rangeEnd = await liquidator.rangeEnd.callAsync();
-      const expectedEndPrice = await liquidatorHelper.calculateTwoAssetEndPrice(
+      const [, expectedEndPrice] = await liquidatorHelper.calculateAuctionBoundsAsync(
         getLinearAuction(auction),
-        fairValue,
+        rangeStart,
         rangeEnd,
         oracleWhiteList,
       );
@@ -356,17 +344,11 @@ contract('LinearAuctionLiquidator', accounts => {
 
         const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
-        const fairValue = await liquidatorHelper.calculateFairValueAsync(
-          await coreHelper.getSetInstance(subjectCurrentSet),
-          await coreHelper.getSetInstance(subjectNextSet),
-          oracleWhiteList,
-          auction.auction.pricePrecision,
-        );
         const rangeStart = await liquidator.rangeStart.callAsync();
-        const expectedStartPrice = await liquidatorHelper.calculateTwoAssetStartPrice(
+        const [expectedStartPrice, ] = await liquidatorHelper.calculateAuctionBoundsAsync(
           getLinearAuction(auction),
-          fairValue,
           rangeStart,
+          rangeEnd,
           oracleWhiteList,
         );
         expect(auction.startPrice).to.bignumber.equal(expectedStartPrice);
@@ -377,16 +359,10 @@ contract('LinearAuctionLiquidator', accounts => {
 
         const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
-        const fairValue = await liquidatorHelper.calculateFairValueAsync(
-          await coreHelper.getSetInstance(subjectCurrentSet),
-          await coreHelper.getSetInstance(subjectNextSet),
-          oracleWhiteList,
-          auction.auction.pricePrecision,
-        );
         const rangeEnd = await liquidator.rangeEnd.callAsync();
-        const expectedEndPrice = await liquidatorHelper.calculateTwoAssetEndPrice(
+        const [, expectedEndPrice] = await liquidatorHelper.calculateAuctionBoundsAsync(
           getLinearAuction(auction),
-          fairValue,
+          rangeStart,
           rangeEnd,
           oracleWhiteList,
         );

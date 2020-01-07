@@ -38,10 +38,11 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     using CommonMath for uint256;
 
     struct AssetInfo {
-        uint256 assetPrice;
+        uint256 price;
         uint256 fullUnit;
     }
 
+    uint256 constant private CURVE_DENOMINATOR = 10 ** 18;
     uint256 constant private ONE_HUNDRED = 100;
 
     constructor(
@@ -85,79 +86,160 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
      * Calculates the linear auction start price with a scaled value
      */
     function calculateStartPrice(
-        State storage _linearAuction,
-        uint256 _fairValueScaled
+        Auction.Setup storage _auction
     )
         internal
         view
         returns(uint256)
     {
-        uint256 startDifference = calculateAuctionBoundDifference(
-            _linearAuction.auction,
-            _fairValueScaled,
-            rangeStart
+        // Get full Unit amount and price for each asset
+        AssetInfo memory assetOne = getAssetInfo(_auction.combinedTokenArray[0]);
+        AssetInfo memory assetTwo = getAssetInfo(_auction.combinedTokenArray[1]);
+
+        // Calculate current asset pair spot price as assetOne/assetTwo
+        uint256 spotPrice = assetOne.price.scale().div(assetTwo.price);
+
+        // Check to see if asset pair price is increasing or decreasing as time passes 
+        bool isTokenFlowIncreasing = isTokenFlowIncreasing(
+            _auction,
+            spotPrice,
+            assetOne.fullUnit,
+            assetTwo.fullUnit 
         );
 
-        return _fairValueScaled.sub(startDifference);
+        // If price implied by token flows is increasing then target price we are using for lower bound
+        // is below current spot price, if flows decreasing set target price above spotPrice
+        uint256 startPairPrice;
+        if (isTokenFlowIncreasing) {
+            startPairPrice = spotPrice.mul(ONE_HUNDRED.sub(rangeStart)).div(ONE_HUNDRED);
+        } else {
+            startPairPrice = spotPrice.mul(ONE_HUNDRED.add(rangeStart)).div(ONE_HUNDRED);  
+        }
+
+        // Convert start asset pair price to equivalent auction price
+        return convertAssetPairPriceToAuctionPrice(
+            _auction,
+            startPairPrice,
+            assetOne.fullUnit,
+            assetTwo.fullUnit
+        );
     }
 
     /**
      * Calculates the linear auction end price with a scaled value
      */
     function calculateEndPrice(
-        State storage _linearAuction,
-        uint256 _fairValueScaled
+        Auction.Setup storage _auction
     )
         internal
         view
         returns(uint256)
     {
-        uint256 endDifference = calculateAuctionBoundDifference(
-            _linearAuction.auction,
-            _fairValueScaled,
-            rangeEnd
+        // Get full Unit amount and price for each asset
+        AssetInfo memory assetOne = getAssetInfo(_auction.combinedTokenArray[0]);
+        AssetInfo memory assetTwo = getAssetInfo(_auction.combinedTokenArray[1]);
+
+        // Calculate current spot price as assetOne/assetTwo
+        uint256 spotPrice = assetOne.price.scale().div(assetTwo.price);
+
+        // Check to see if asset pair price is increasing or decreasing as time passes
+        bool isTokenFlowIncreasing = isTokenFlowIncreasing(
+            _auction,
+            spotPrice,
+            assetOne.fullUnit,
+            assetTwo.fullUnit 
         );
 
-        return _fairValueScaled.add(endDifference);
+        // If price implied by token flows is increasing then target price we are using for upper bound
+        // is above current spot price, if flows decreasing set target price below spotPrice
+        uint256 endPairPrice;
+        if (isTokenFlowIncreasing) {
+            endPairPrice = spotPrice.mul(ONE_HUNDRED.add(rangeEnd)).div(ONE_HUNDRED);
+        } else {
+            endPairPrice = spotPrice.mul(ONE_HUNDRED.sub(rangeEnd)).div(ONE_HUNDRED);  
+        }
+
+        // Convert end asset pair price to equivalent auction price
+        return convertAssetPairPriceToAuctionPrice(
+            _auction,
+            endPairPrice,
+            assetOne.fullUnit,
+            assetTwo.fullUnit
+        );
     }
 
-
-    function calculateAuctionBoundDifference(
+    function isTokenFlowIncreasing(
         Auction.Setup storage _auction,
-        uint256 _fairValue,
-        uint256 _boundValue
+        uint256 _spotPrice,
+        uint256 _assetOneFullUnit,
+        uint256 _assetTwoFullUnit
+    )
+        internal
+        view
+        returns (bool)
+    {
+        // Calculate auction price at current asset pair spot price
+        uint256 auctionFairValue = convertAssetPairPriceToAuctionPrice(
+            _auction,
+            _spotPrice,
+            _assetOneFullUnit,
+            _assetTwoFullUnit        
+        );
+
+        // Equation for assetOne net outflow is assetOneCurrentUnits*auctionPrice - assetOneNextUnits*auctionDenominator.
+        // Thus if assetOneNextUnits*auctionDenominator > assetOneCurrentUnits*auctionPrice then assetOne is
+        // an inflow. When assetOne is an inflow (negative outflow), it implies that assetTwo is an outflow, 
+        // furthermore we are guaranteed that both flows have a positive derivative with respect to auction price (and
+        // auction price always increases). Since we define price as abs(assetTwoOutflow/assetOneOutflow), with assetOneFlow
+        // getting less negative and assetTwoFlow getting more positive it implies that the asset price is increasing as
+        // time passes in the auction. 
+        return _auction.combinedNextSetUnits[0].mul(CURVE_DENOMINATOR) >
+            _auction.combinedCurrentSetUnits[0].mul(auctionFairValue);
+    }
+
+    /**
+     * Convert an asset pair price to the equivalent auction price where a1 refers to assetOne and a2 refers to assetTwo
+     * and subscripts c, n, d mean currentSetUnit, nextSetUnit and fullUnit amount, respectively. aP and aD refer to auction
+     * price and auction denominator:
+     *
+     * assetPrice = abs(assetTwoOutflow/assetOneOutflow)
+     *
+     * assetPrice = ((a2_c/a2_d)*aP - (a2_n/a2_d)*aD) / ((a1_c/a1_d)*aP - (a1_n/a1_d)*aD)
+     *
+     * We know assetPrice so we isolate for aP:
+     *
+     * aP = aD((a2_n/a2_d)+assetPrice*(a1_n/a1_d)) / (a2_c/a2_d)+assetPrice*(a1_c/a1_d)
+     *
+     * This gives us the auction price that matches with the passed asset pair price.
+     */
+    function convertAssetPairPriceToAuctionPrice(
+        Auction.Setup storage _auction,
+        uint256 _targetPrice,
+        uint256 assetOneFullUnit,
+        uint256 assetTwoFullUnit
     )
         internal
         view
         returns (uint256)
     {
-        AssetInfo memory baseAsset = getAssetInfo(_auction.combinedTokenArray[0]);
-        AssetInfo memory quoteAsset = getAssetInfo(_auction.combinedTokenArray[1]);
+        // Calculate the numerator for the above equation. In order to ensure no rounding down errors we distribute the auction
+        // denominator. Additionally, since the price is passed as an 18 decimal number in order to maintain consistency we
+        // have to scale the first term up accordingly
+        uint256 calcNumerator = _auction.combinedNextSetUnits[1].mul(CURVE_DENOMINATOR).scale().div(assetTwoFullUnit).add(
+            _targetPrice.mul(_auction.combinedNextSetUnits[0]).mul(CURVE_DENOMINATOR).div(assetOneFullUnit)
+        );
 
-        uint256 numDifferential;
-        if (_auction.combinedNextSetUnits[0].scale() > _fairValue.mul(_auction.combinedCurrentSetUnits[0])) {
-            numDifferential = _auction.combinedNextSetUnits[0].scale().sub(_fairValue.mul(_auction.combinedCurrentSetUnits[0]));
-        } else {
-            numDifferential = _fairValue.mul(_auction.combinedCurrentSetUnits[0]).sub(_auction.combinedNextSetUnits[0].scale());
-        }
+        // Calculate the denominator for the above equation. As above we we have to scale the first term match the 18 decimal
+        // price. Furthermore since we are not guaranteed that targetPrice * a1_c > a1_d we have to scale the second term and
+        // thus also the first term in order to match (hence the two scale() in the first term)
+        uint256 calcDenominator = _auction.combinedCurrentSetUnits[1].scale().scale().div(assetTwoFullUnit).add(
+           _targetPrice.mul(_auction.combinedCurrentSetUnits[0]).scale().div(assetOneFullUnit) 
+        );
 
-        uint256 denomDifferential;
-        if (_auction.combinedNextSetUnits[0].mul(_auction.combinedCurrentSetUnits[1]) > _auction.combinedNextSetUnits[1].mul(_auction.combinedCurrentSetUnits[0])) {
-            denomDifferential = _auction.combinedNextSetUnits[0].mul(_auction.combinedCurrentSetUnits[1]).sub(_auction.combinedNextSetUnits[1].mul(_auction.combinedCurrentSetUnits[0]));
-        } else {
-            denomDifferential = _auction.combinedNextSetUnits[1].mul(_auction.combinedCurrentSetUnits[0]).sub(_auction.combinedNextSetUnits[0].mul(_auction.combinedCurrentSetUnits[1]));
-        }
-
-        uint256 calcNumerator = quoteAsset.fullUnit
-            .mul(numDifferential)
-            .mul(_boundValue)
-            .mul(baseAsset.assetPrice)
-            .div(quoteAsset.assetPrice)
-            .div(ONE_HUNDRED);
-
-        uint256 calcDenominator = baseAsset.fullUnit.mul(denomDifferential).scale();
-
-        return calcNumerator.scale().div(calcDenominator).mul(numDifferential).deScale();
+        // Here the scale required to account for the 18 decimal price cancels out since it was applied to both the numerator
+        // and denominator. However there was an extra scale applied to the denominator that we need to remove, in order to
+        // do so we'll just apply another scale to the numerator before dividing since 1/(1/10 ** 18) = 10 ** 18!
+        return calcNumerator.scale().div(calcDenominator);
     }
 
     function getAssetInfo(address _asset) internal view returns(AssetInfo memory) {
@@ -167,7 +249,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         uint256 decimals = ERC20Detailed(_asset).decimals();
 
         return AssetInfo({
-            assetPrice: assetPrice,
+            price: assetPrice,
             fullUnit: CommonMath.safePower(10, decimals)
         });
     }

@@ -94,9 +94,8 @@ contract LinearAuction is Auction {
             _startingCurrentSetQuantity
         );
 
-        uint256 fairValue = calculateFairValue(_currentSet, _nextSet);
-        _linearAuction.startPrice = calculateStartPrice(_linearAuction, fairValue);
-        _linearAuction.endPrice = calculateEndPrice(_linearAuction, fairValue);
+        _linearAuction.startPrice = calculateStartPrice(_linearAuction.auction);
+        _linearAuction.endPrice = calculateEndPrice(_linearAuction.auction);
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
 
@@ -147,7 +146,7 @@ contract LinearAuction is Auction {
 
     /**
      * Returns the linear price based on the current timestamp. Returns the endPrice
-     * if time has exceeded the auciton period
+     * if time has exceeded the auction period
      *
      * @param _linearAuction            Linear Auction State object
      * @return price                    uint representing the current price
@@ -189,8 +188,7 @@ contract LinearAuction is Auction {
      * Calculates the linear auction start price with a scaled value
      */
     function calculateStartPrice(
-        State storage _linearAuction,
-        uint256 _fairValueScaled
+        Auction.Setup storage _auction
     )
         internal
         view
@@ -201,8 +199,7 @@ contract LinearAuction is Auction {
      * Calculates the linear auction end price with a scaled value
      */
     function calculateEndPrice(
-        State storage _linearAuction,
-        uint256 _fairValueScaled
+        Auction.Setup storage _auction
     )
         internal
         view

@@ -84,6 +84,12 @@ contract LinearAuction is Auction {
 
         _linearAuction.startPrice = calculateStartPrice(_linearAuction.auction, _currentSet, _nextSet);
         _linearAuction.endPrice = calculateEndPrice(_linearAuction.auction, _currentSet, _nextSet);
+
+        require(
+            _linearAuction.startPrice != _linearAuction.endPrice,
+            "LinearAuction.initializeLinearAuction: NextSet must have different composition from currentSet."
+        );
+
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
 

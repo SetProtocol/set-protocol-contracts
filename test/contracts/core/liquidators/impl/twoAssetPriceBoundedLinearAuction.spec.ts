@@ -258,7 +258,7 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     beforeEach(async () => {
       combinedTokenArray = [wrappedETH.address, usdc.address];
       combinedCurrentSetUnits = [new BigNumber(10 ** 12), new BigNumber(128)];
-      combinedNextSetUnits = [new BigNumber(10 ** 12), new BigNumber(1152)];
+      combinedNextSetUnits = [new BigNumber(10 ** 12), new BigNumber(128)];
 
       await boundsCalculator.parameterizeAuction.sendTransactionAsync(
         combinedTokenArray,
@@ -272,9 +272,9 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
           startTime: new BigNumber(0),
           startingCurrentSets: new BigNumber(0),
           remainingCurrentSets: new BigNumber(0),
-          combinedTokenArray: [wrappedETH.address, usdc.address],
-          combinedCurrentSetUnits: [new BigNumber(10 ** 12), new BigNumber(128)],
-          combinedNextSetUnits: [new BigNumber(10 ** 12), new BigNumber(1152)],
+          combinedTokenArray,
+          combinedCurrentSetUnits,
+          combinedNextSetUnits,
         },
         endTime: new BigNumber(0),
         startPrice: new BigNumber(0),

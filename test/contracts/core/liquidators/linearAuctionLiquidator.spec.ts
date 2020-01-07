@@ -384,6 +384,16 @@ contract('LinearAuctionLiquidator', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when currentSet and nextSet have same composition', async () => {
+      beforeEach(async () => {
+        subjectNextSet = set1.address;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('[CONTEXT] Initialized auction', async () => {

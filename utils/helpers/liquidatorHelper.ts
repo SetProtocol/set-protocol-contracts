@@ -353,7 +353,6 @@ export class LiquidatorHelper {
     currentSetToken: SetTokenContract,
     nextSetToken: SetTokenContract,
     oracleWhiteList: OracleWhiteListContract,
-    pricePrecision: BigNumber,
     from: Address = this._contractOwnerAddress,
   ): Promise<BigNumber> {
     const currentSetUSDValue = await this.calculateSetTokenValueAsync(currentSetToken, oracleWhiteList);
@@ -437,7 +436,6 @@ export class LiquidatorHelper {
 
   public constructTokenFlow(
     linearAuction: LinearAuction,
-    pricePrecision: BigNumber,
     quantity: BigNumber,
     priceScaled: BigNumber,
   ): TokenFlow {
@@ -452,7 +450,7 @@ export class LiquidatorHelper {
       minimumBid,
     } = linearAuction.auction;
 
-    const unitsMultiplier = quantity.div(minimumBid).round(0, 3).mul(pricePrecision);
+    const unitsMultiplier = quantity.div(minimumBid).round(0, 3);
 
     for (let i = 0; i < combinedCurrentSetUnits.length; i++) {
       const flow = combinedNextSetUnits[i].mul(SCALE_FACTOR).sub(combinedCurrentSetUnits[i].mul(priceScaled));

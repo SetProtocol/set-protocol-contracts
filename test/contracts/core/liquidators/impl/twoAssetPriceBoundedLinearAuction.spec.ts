@@ -31,6 +31,7 @@ import { expectRevertError } from '@utils/tokenAssertions';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const Core = artifacts.require('Core');
 const TwoAssetPriceBoundedLinearAuction = artifacts.require('TwoAssetPriceBoundedLinearAuction');
 
 contract('TwoAssetPriceBoundedLinearAuction', accounts => {
@@ -68,6 +69,7 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
   let rangeEnd: BigNumber;
 
   before(async () => {
+    ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(TwoAssetPriceBoundedLinearAuction.abi);
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
@@ -107,7 +109,30 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
   });
 
   after(async () => {
+    ABIDecoder.removeABI(Core.abi);
     ABIDecoder.removeABI(TwoAssetPriceBoundedLinearAuction.abi);
+  });
+
+  describe('#constructor', async () => {
+    it('sets the correct auctionPeriod', async () => {
+      const result = await boundsCalculator.auctionPeriod.callAsync();
+      expect(result).to.bignumber.equal(auctionPeriod);
+    });
+
+    it('sets the correct rangeStart', async () => {
+      const result = await boundsCalculator.rangeStart.callAsync();
+      expect(result).to.bignumber.equal(rangeStart);
+    });
+
+    it('sets the correct rangeEnd', async () => {
+      const result = await boundsCalculator.rangeEnd.callAsync();
+      expect(result).to.bignumber.equal(rangeEnd);
+    });
+
+    it('sets the correct oracleWhiteList', async () => {
+      const result = await boundsCalculator.oracleWhiteList.callAsync();
+      expect(result).to.equal(oracleWhiteList.address);
+    });
   });
 
   describe('#validateTwoAssetPriceBoundedAuction', async () => {
@@ -202,6 +227,23 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when a passed token does not have matching oracle', async () => {
+      before(async () => {
+        const nonOracleComponent = await erc20Helper.deployTokenAsync(deployerAccount, 6);
+
+        customComponents2 = [wrappedETH.address, nonOracleComponent.address];
+      });
+
+      after(async () => {
+        customComponents1 = undefined;
+        customComponents2 = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#calculateStartPrice and calculateEndPrice', async () => {
@@ -224,7 +266,6 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
 
       linearAuction = {
         auction: {
-          pricePrecision: new BigNumber(0),
           minimumBid: new BigNumber(0),
           startTime: new BigNumber(0),
           startingCurrentSets: new BigNumber(0),
@@ -296,7 +337,6 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
 
       linearAuction = {
         auction: {
-          pricePrecision: new BigNumber(0),
           minimumBid: new BigNumber(0),
           startTime: new BigNumber(0),
           startingCurrentSets: new BigNumber(0),

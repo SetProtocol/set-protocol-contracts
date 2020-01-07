@@ -32,7 +32,7 @@ contract LinearAuctionMock is LinearAuction {
     }
 
     function calculateStartPrice(
-        State storage _linearAuction,
+        Auction.Setup storage _auction,
         ISetToken _currentSet,
         ISetToken _nextSet
     )
@@ -46,7 +46,7 @@ contract LinearAuctionMock is LinearAuction {
     }
 
     function calculateEndPrice(
-        State storage _linearAuction,
+        Auction.Setup storage _auction,
         ISetToken _currentSet,
         ISetToken _nextSet
     )

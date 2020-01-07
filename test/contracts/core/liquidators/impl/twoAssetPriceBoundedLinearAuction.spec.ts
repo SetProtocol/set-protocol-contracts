@@ -221,6 +221,9 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
       after(async () => {
         customComponents1 = undefined;
         customComponents2 = undefined;
+
+        customUnits1 = undefined;
+        customUnits2 = undefined;
       });
 
       it('should revert', async () => {
@@ -236,7 +239,6 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
       });
 
       after(async () => {
-        customComponents1 = undefined;
         customComponents2 = undefined;
       });
 

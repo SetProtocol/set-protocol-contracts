@@ -204,7 +204,7 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     });
   });
 
-  describe.only('#calculateStartPrice and calculateEndPrice', async () => {
+  describe('#calculateStartPrice and calculateEndPrice', async () => {
     let combinedTokenArray: Address[];
     let combinedCurrentSetUnits: BigNumber[];
     let combinedNextSetUnits: BigNumber[];
@@ -274,7 +274,7 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     });
   });
 
-  describe.only('#calculateAuctionBounds', async () => {
+  describe('#calculateAuctionBounds', async () => {
     let linearAuction: LinearAuction;
 
     let combinedTokenArray: Address[];

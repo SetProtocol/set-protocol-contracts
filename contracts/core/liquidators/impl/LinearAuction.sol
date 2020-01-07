@@ -20,7 +20,6 @@ pragma experimental "ABIEncoderV2";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { Auction } from "./Auction.sol";
-import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { Rebalance } from "../../lib/Rebalance.sol";
 
@@ -44,29 +43,18 @@ contract LinearAuction is Auction {
 
     /* ============ State Variables ============ */
     uint256 public auctionPeriod; // Length in seconds of auction
-    uint256 public rangeStart; // Percentage below FairValue to begin auction at
-    uint256 public rangeEnd;  // Percentage above FairValue to end auction at
 
     /**
      * LinearAuction constructor
      *
-     * @param _oracleWhiteList        Oracle WhiteList instance
      * @param _auctionPeriod          Length of auction
-     * @param _rangeStart             Percentage below FairValue to begin auction at
-     * @param _rangeEnd               Percentage above FairValue to end auction at
      */
     constructor(
-        IOracleWhiteList _oracleWhiteList,
-        uint256 _auctionPeriod,
-        uint256 _rangeStart,
-        uint256 _rangeEnd
+        uint256 _auctionPeriod
     )
         public
-        Auction(_oracleWhiteList)
     {
         auctionPeriod = _auctionPeriod;
-        rangeStart = _rangeStart;
-        rangeEnd = _rangeEnd;
     }
 
     /* ============ Internal Functions ============ */
@@ -94,26 +82,12 @@ contract LinearAuction is Auction {
             _startingCurrentSetQuantity
         );
 
-        _linearAuction.startPrice = calculateStartPrice(_linearAuction.auction);
-        _linearAuction.endPrice = calculateEndPrice(_linearAuction.auction);
+        _linearAuction.startPrice = calculateStartPrice(_linearAuction.auction, _currentSet, _nextSet);
+        _linearAuction.endPrice = calculateEndPrice(_linearAuction.auction, _currentSet, _nextSet);
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
 
     /* ============ Internal View Functions ============ */
-
-    function validateRebalanceComponents(
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        internal
-        view
-    {
-        address[] memory combinedTokenArray = Auction.getCombinedTokenArray(_currentSet, _nextSet);
-        require(
-            oracleWhiteList.areValidAddresses(combinedTokenArray),
-            "LinearAuction.validateRebalanceComponents: Passed token does not have matching oracle."
-        );
-    }
 
     /**
      * Returns the TokenFlow based on the current price
@@ -166,29 +140,13 @@ contract LinearAuction is Auction {
     }
 
     /**
-     * Calculates the fair value based on the USD values of the next and current Sets.
-     * Returns a scaled value
-     */
-    function calculateFairValue(
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 currentSetUSDValue = Auction.calculateUSDValueOfSet(_currentSet);
-        uint256 nextSetUSDValue = Auction.calculateUSDValueOfSet(_nextSet);
-
-        return nextSetUSDValue.scale().div(currentSetUSDValue);
-    }
-
-    /**
      * Abstract function that must be implemented.
      * Calculates the linear auction start price with a scaled value
      */
     function calculateStartPrice(
-        Auction.Setup storage _auction
+        Auction.Setup storage _auction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
     )
         internal
         view
@@ -199,7 +157,9 @@ contract LinearAuction is Auction {
      * Calculates the linear auction end price with a scaled value
      */
     function calculateEndPrice(
-        Auction.Setup storage _auction
+        Auction.Setup storage _auction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
     )
         internal
         view

@@ -54,10 +54,9 @@ export class LiquidatorHelper {
   /* ============ Deployment ============ */
 
   public async deployAuctionMockAsync(
-    oracleWhiteList: Address,
     from: Address = this._contractOwnerAddress
   ): Promise<AuctionMockContract> {
-    const auctionMock = await AuctionMock.new(oracleWhiteList, txnFrom(from));
+    const auctionMock = await AuctionMock.new(txnFrom(from));
 
     return new AuctionMockContract(getContractInstance(auctionMock), txnFrom(from));
   }

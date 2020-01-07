@@ -54,12 +54,16 @@ contract TwoAssetPriceBoundedLinearAuctionMock is TwoAssetPriceBoundedLinearAuct
         validateTwoAssetPriceBoundedAuction(_currentSet, _nextSet);
     }
 
-    function calculateStartPriceMock() external view returns(uint256) {    
-        return super.calculateStartPrice(auctionInfo.auction);
+    function calculateStartPriceMock() external view returns(uint256) {   
+        ISetToken currentSet = ISetToken(address(0));
+        ISetToken nextSet = ISetToken(address(0));
+        return super.calculateStartPrice(auctionInfo.auction, currentSet, nextSet);
     }
 
     function calculateEndPriceMock() external view returns(uint256) {    
-        return super.calculateEndPrice(auctionInfo.auction);
+        ISetToken currentSet = ISetToken(address(0));
+        ISetToken nextSet = ISetToken(address(0));
+        return super.calculateEndPrice(auctionInfo.auction, currentSet, nextSet);
     }
 
     function parameterizeAuction(

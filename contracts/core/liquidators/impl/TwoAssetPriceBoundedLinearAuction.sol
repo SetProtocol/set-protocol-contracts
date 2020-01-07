@@ -45,6 +45,17 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     uint256 constant private CURVE_DENOMINATOR = 10 ** 18;
     uint256 constant private ONE_HUNDRED = 100;
 
+    IOracleWhiteList public oracleWhiteList;
+    uint256 public rangeStart; // Percentage below FairValue to begin auction at
+    uint256 public rangeEnd;  // Percentage above FairValue to end auction at
+
+    /**
+     * LinearAuction constructor
+     *
+     * @param _auctionPeriod          Length of auction
+     * @param _rangeStart             Percentage below FairValue to begin auction at
+     * @param _rangeEnd               Percentage above FairValue to end auction at
+     */
     constructor(
         IOracleWhiteList _oracleWhiteList,
         uint256 _auctionPeriod,
@@ -52,13 +63,12 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         uint256 _rangeEnd
     )
         public
-        LinearAuction(
-            _oracleWhiteList,
-            _auctionPeriod,
-            _rangeStart,
-            _rangeEnd
-        )
-    {}
+        LinearAuction(_auctionPeriod)
+    {
+        oracleWhiteList = _oracleWhiteList;
+        rangeStart = _rangeStart;
+        rangeEnd = _rangeEnd;
+    }
 
     /**
      * Validates that the auction only includes two components and the components are valid.
@@ -76,9 +86,9 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
             "TwoAssetPriceBoundedLinearAuction: Only two components are allowed."
         );
 
-        LinearAuction.validateRebalanceComponents(
-            _currentSet,
-            _nextSet
+        require(
+            oracleWhiteList.areValidAddresses(combinedTokenArray),
+            "TwoAssetPriceBoundedLinearAuction: Passed token does not have matching oracle."
         );
     }
 
@@ -86,7 +96,9 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
      * Calculates the linear auction start price with a scaled value
      */
     function calculateStartPrice(
-        Auction.Setup storage _auction
+        Auction.Setup storage _auction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
     )
         internal
         view
@@ -129,7 +141,9 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
      * Calculates the linear auction end price with a scaled value
      */
     function calculateEndPrice(
-        Auction.Setup storage _auction
+        Auction.Setup storage _auction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
     )
         internal
         view

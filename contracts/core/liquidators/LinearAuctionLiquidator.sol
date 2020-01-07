@@ -209,7 +209,7 @@ contract LinearAuctionLiquidator is TwoAssetPriceBoundedLinearAuction, ILiquidat
     {
         return RebalancingLibrary.AuctionPriceParameters({
             auctionStartTime: auction(_set).startTime,
-            auctionTimeToPivot: linearAuction(_set).endTime,
+            auctionTimeToPivot: auctionPeriod,
             auctionStartPrice: linearAuction(_set).startPrice,
             auctionPivotPrice: linearAuction(_set).endPrice
         });

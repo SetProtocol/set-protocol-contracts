@@ -769,7 +769,7 @@ contract('LinearAuctionLiquidator', accounts => {
 
         const linearAuction = getLinearAuction(await liquidator.auctions.callAsync(subjectSet));
         expect(auctionStartTime).to.bignumber.equal(linearAuction.auction.startTime);
-        expect(auctionTimeToPivot).to.bignumber.equal(linearAuction.endTime);
+        expect(auctionTimeToPivot).to.bignumber.equal(auctionPeriod);
         expect(auctionStartPrice).to.bignumber.equal(linearAuction.startPrice);
         expect(auctionPivotPrice).to.bignumber.equal(linearAuction.endPrice);
       });

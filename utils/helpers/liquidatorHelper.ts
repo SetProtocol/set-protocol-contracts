@@ -154,43 +154,21 @@ export class LiquidatorHelper {
     return combinedUnits.map(unit => unit.mul(quantity).div(naturalUnit));
   }
 
-  public async calculatePricePrecisionAsync(
-    currentSet: SetTokenContract,
-    nextSet: SetTokenContract,
-    oracleWhiteList: OracleWhiteListContract
-  ): Promise<BigNumber> {
-    const currentSetValue = await this.calculateSetTokenValueAsync(currentSet, oracleWhiteList);
-    const nextSetValue = await this.calculateSetTokenValueAsync(nextSet, oracleWhiteList);
-    const minimumPricePrecision = new BigNumber(1000);
-
-    if (currentSetValue.greaterThan(nextSetValue)) {
-      const orderOfMag = this._libraryMockHelper.ceilLog10(currentSetValue.div(nextSetValue));
-
-      return minimumPricePrecision.mul(10 ** (orderOfMag.toNumber() - 1));
-    }
-
-    return minimumPricePrecision;
-  }
-
   public async constructCombinedUnitArrayAsync(
     setToken: SetTokenContract,
     combinedTokenArray: Address[],
     minimumBid: BigNumber,
-    priceDivisor: BigNumber,
   ): Promise<BigNumber[]> {
     const setTokenComponents = await setToken.getComponents.callAsync();
     const setTokenUnits = await setToken.getUnits.callAsync();
     const setTokenNaturalUnit = await setToken.naturalUnit.callAsync();
-
-    // Calculate minimumBidAmount
-    const maxNaturalUnit = minimumBid.div(priceDivisor);
 
     // Create combined unit array for target Set
     const combinedSetTokenUnits: BigNumber[] = [];
     combinedTokenArray.forEach(address => {
       const index = setTokenComponents.indexOf(address);
       if (index != -1) {
-        const totalTokenAmount = setTokenUnits[index].mul(maxNaturalUnit).div(setTokenNaturalUnit);
+        const totalTokenAmount = setTokenUnits[index].mul(minimumBid).div(setTokenNaturalUnit);
         combinedSetTokenUnits.push(totalTokenAmount);
       } else {
         combinedSetTokenUnits.push(new BigNumber(0));

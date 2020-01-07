@@ -14,9 +14,7 @@ import {
   SetTokenFactoryContract,
   StandardTokenMockContract,
   AuctionMockContract,
-  OracleWhiteListContract,
   TransferProxyContract,
-  UpdatableOracleMockContract,
   VaultContract,
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
@@ -29,7 +27,6 @@ import { ether, gWei } from '@utils/units';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 
 BigNumberSetup.configure();
@@ -55,19 +52,10 @@ contract('Auction', accounts => {
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
   const erc20Helper = new ERC20Helper(ownerAccount);
   const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper);
-  const libraryMockHelper = new LibraryMockHelper(ownerAccount);
 
   let component1: StandardTokenMockContract;
   let component2: StandardTokenMockContract;
   let component3: StandardTokenMockContract;
-
-  let component1Price: BigNumber;
-  let component2Price: BigNumber;
-  let component3Price: BigNumber;
-
-  let component1Oracle: UpdatableOracleMockContract;
-  let component2Oracle: UpdatableOracleMockContract;
-  let component3Oracle: UpdatableOracleMockContract;
 
   let set1: SetTokenContract;
   let set2: SetTokenContract;
@@ -96,19 +84,6 @@ contract('Auction', accounts => {
     component1 = await erc20Helper.deployTokenAsync(ownerAccount);
     component2 = await erc20Helper.deployTokenAsync(ownerAccount);
     component3 = await erc20Helper.deployTokenAsync(ownerAccount);
-
-    component1Price = ether(1);
-    component2Price = ether(2);
-    component3Price = ether(1);
-
-    component1Oracle = await libraryMockHelper.deployUpdatableOracleMockAsync(component1Price);
-    component2Oracle = await libraryMockHelper.deployUpdatableOracleMockAsync(component2Price);
-    component3Oracle = await libraryMockHelper.deployUpdatableOracleMockAsync(component3Price);
-
-    oracleWhiteList = await coreHelper.deployOracleWhiteListAsync(
-      [component1.address, component2.address, component3.address],
-      [component1Oracle.address, component2Oracle.address, component3Oracle.address],
-    );
 
     set1Components = [component1.address, component2.address];
     set1Units = [gWei(1), gWei(1)];

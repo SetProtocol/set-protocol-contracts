@@ -84,18 +84,22 @@ export class RebalancingSetBidderHelper {
       // Check if address is cToken
       if (combinedTokenArray[i] === targetCTokenAddress) {
         const cTokenConversion = cTokenExchangeRate.div(10 ** 18);
-        const newInflow = expectedTokenFlows['inflowArray'][i].gt(0)
-          ? expectedTokenFlows['inflowArray'][i]
+        let newInflow = expectedTokenFlows['inflowArray'][i]
             .mul(cTokenConversion)
-            .add(1)
-            .round(0, BigNumber.ROUND_DOWN)
-          : new BigNumber(0);
-        const newOutflow = expectedTokenFlows['outflowArray'][i].gt(0)
-          ? expectedTokenFlows['outflowArray'][i]
+            .round(0, BigNumber.ROUND_DOWN);
+
+        newInflow = newInflow.div(cTokenConversion).gte(expectedTokenFlows['inflowArray'][i])
+          ? newInflow
+          : newInflow.add(1);
+
+        let newOutflow = expectedTokenFlows['outflowArray'][i]
             .mul(cTokenConversion)
-            .add(1)
-            .round(0, BigNumber.ROUND_DOWN)
-          : new BigNumber(0);
+            .round(0, BigNumber.ROUND_DOWN);
+
+        newOutflow = newOutflow.div(cTokenConversion).gte(expectedTokenFlows['outflowArray'][i])
+          ? newOutflow
+          : newOutflow.add(1);
+
         inflowArray.push(newInflow);
         outflowArray.push(newOutflow);
       } else {

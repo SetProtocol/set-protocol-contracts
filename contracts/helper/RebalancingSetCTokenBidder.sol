@@ -207,15 +207,23 @@ contract RebalancingSetCTokenBidder is
             if (currentComponent == address(targetCToken)) {
                 combinedTokenArray[i] = underlyingAddress;
 
-                // Replace flows with required amount of inflow. Calculated as cToken quantity * exchangeRate / scalingFactor.
-                // Add 1 at the end to account for rounding error
+                // Replace inflow and outflow with required amount of underlying. 
+                // Calculated as cToken quantity * exchangeRate / scalingFactor.
                 uint256 exchangeRate = targetCToken.exchangeRateStored();
-                inflowArray[i] = inflowArray[i] > 0 
-                    ? inflowArray[i].mul(exchangeRate).div(scalingFactor).add(1)
-                    : inflowArray[i];
-                outflowArray[i] = outflowArray[i] > 0
-                    ? outflowArray[i].mul(exchangeRate).div(scalingFactor).add(1)
-                    : outflowArray[i];
+                uint256 currentInflowQuantity = inflowArray[i];
+                uint256 currentOutflowQuantity = outflowArray[i];
+
+                inflowArray[i] = currentInflowQuantity.mul(exchangeRate).div(scalingFactor);
+                outflowArray[i] = currentOutflowQuantity.mul(exchangeRate).div(scalingFactor);
+
+                // Check for rounding error and add 1 if needed
+                inflowArray[i] = inflowArray[i].mul(scalingFactor).div(exchangeRate) >= currentInflowQuantity
+                    ? inflowArray[i]
+                    : inflowArray[i].add(1);
+
+                outflowArray[i] = outflowArray[i].mul(scalingFactor).div(exchangeRate) >= currentOutflowQuantity
+                    ? outflowArray[i]
+                    : outflowArray[i].add(1);
             }
         }
 
@@ -256,13 +264,17 @@ contract RebalancingSetCTokenBidder is
                 // ensure underlying allowance to cToken and then mint cTokens
                 if (currentComponent == address(targetCToken)) {
                     // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / scalingFactor.
-                    // Add 1 at the end to account for rounding error
                     uint256 exchangeRate = targetCToken.exchangeRateCurrent();
                     uint256 underlyingAmount = 
                         currentComponentQuantity
                         .mul(exchangeRate)
-                        .div(scalingFactor)
-                        .add(1);
+                        .div(scalingFactor);
+
+                    // Check for rounding error and add 1 if needed
+                    underlyingAmount = 
+                        underlyingAmount.mul(scalingFactor).div(exchangeRate) >= currentComponentQuantity
+                        ? underlyingAmount
+                        : underlyingAmount.add(1);
 
                     // Transfer underlying tokens to contract
                     ERC20Wrapper.transferFrom(

@@ -41,7 +41,7 @@ import { CoreHelper } from '@utils/helpers/coreHelper';
 import { CompoundHelper } from '@utils/helpers/compoundHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
-import { RebalancingSetBidderHelper } from '@utils/helpers/RebalancingSetBidderHelper';
+import { RebalancingSetBidderHelper } from '@utils/helpers/rebalancingSetBidderHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -996,10 +996,8 @@ contract('RebalancingSetCTokenBidder', accounts => {
       const decTwo = await cTokenSetToken.naturalUnit.callAsync();
       minBid = new BigNumber(Math.max(decOne.toNumber(), decTwo.toNumber()) * 1000);
 
-      subjectCaller = deployerAccount;
       subjectQuantity = minBid;
       subjectRebalancingSetToken = rebalancingSetToken.address;
-      subjectExecutePartialQuantity = false;
 
       // Transition to rebalance
       await rebalancingHelper.defaultTransitionToRebalanceAsync(

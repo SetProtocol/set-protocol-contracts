@@ -372,6 +372,20 @@ contract('StartRebalance', accounts => {
         });
       });
 
+      describe('when the rebalancing set supply is 0', async () => {
+        beforeEach(async () => {
+          // Redeem all supply
+          await coreMock.redeem.sendTransactionAsync(
+            rebalancingSetToken.address,
+            rebalancingSetQuantityToIssue
+          );
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
       describe('when the rebalance interval has not elapsed', async () => {
         beforeEach(async () => {
           subjectTimeFastForward = ONE_DAY_IN_SECONDS.sub(10);

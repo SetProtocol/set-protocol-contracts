@@ -17,6 +17,7 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
+import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -32,6 +33,7 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
  * Implementation of Rebalancing Set Token V2 start rebalance functionality
  */
 contract RebalancingStart is 
+    ERC20,
     RebalancingSetState
 {
     using SafeMath for uint256;
@@ -60,6 +62,12 @@ contract RebalancingStart is
         require(
             block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
             "Interval not elapsed"
+        );
+
+        // Must be a positive supply of the Set
+        require(
+            totalSupply() > 0,
+            "Invalid supply"
         );
 
         // New proposed Set must be a valid Set created by Core

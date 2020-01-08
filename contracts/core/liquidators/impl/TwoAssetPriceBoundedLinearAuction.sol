@@ -50,7 +50,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     uint256 public rangeEnd;  // Percentage above FairValue to end auction at
 
     /**
-     * LinearAuction constructor
+     * TwoAssetPriceBoundedLinearAuction constructor
      *
      * @param _auctionPeriod          Length of auction
      * @param _rangeStart             Percentage below FairValue to begin auction at
@@ -93,7 +93,12 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     }
 
     /**
-     * Calculates the linear auction start price with a scaled value
+     * Calculates the linear auction start price. A target asset pair (i.e. ETH/DAI) price is calculated
+     * to start the auction at, that asset pair price is then translated into the equivalent auction price.
+     *
+     * @param _auction            Auction object
+     * @param _currentSet         CurrentSet, unused in this implementation
+     * @param _nextSet            NextSet, unused in this implementation
      */
     function calculateStartPrice(
         Auction.Setup storage _auction,
@@ -138,7 +143,12 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     }
 
     /**
-     * Calculates the linear auction end price with a scaled value
+     * Calculates the linear auction end price. A target asset pair (i.e. ETH/DAI) price is calculated
+     * to end the auction at, that asset pair price is then translated into the equivalent auction price.
+     *
+     * @param _auction            Auction object
+     * @param _currentSet         CurrentSet, unused in this implementation
+     * @param _nextSet            NextSet, unused in this implementation
      */
     function calculateEndPrice(
         Auction.Setup storage _auction,
@@ -182,6 +192,26 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         );
     }
 
+    /**
+     * Determines if asset pair price is increasing or decreasing as time passed in auction. Used to set the
+     * auction price bounds. Below a refers to any asset and subscripts c, n, d mean currentSetUnit, nextSetUnit 
+     * and fullUnit amount, respectively. pP and pD refer to auction price and auction denominator. Asset pair
+     * price is defined as such:
+     *
+     * assetPrice = abs(assetTwoOutflow/assetOneOutflow)
+     *
+     * The equation for an outflow is given by (a_c/a_d)*pP - (a_n/a_d)*pD). It can be proven that the derivative
+     * of this equation is always increasing. Thus by determining the sign of the assetOneOutflow (where a negative
+     * amount signifies an inflow) it can be determined whether the asset pair price is increasing or decreasing.
+     *
+     * For example, if assetOneOutflow is negative it means that the denominator is getting smaller as time passes
+     * and thus the assetPrice is increasing during the auction. 
+     *
+     * @param _auction              Auction object
+     * @param _spotPrice            Current spot price provided by asset oracles
+     * @param _assetOneFullUnit     Units in one full unit of assetOne
+     * @param _assetTwoFullUnit     Units in one full unit of assetTwo
+     */
     function isTokenFlowIncreasing(
         Auction.Setup storage _auction,
         uint256 _spotPrice,
@@ -200,31 +230,31 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
             _assetTwoFullUnit        
         );
 
-        // Equation for assetOne net outflow is assetOneCurrentUnits*auctionPrice - assetOneNextUnits*auctionDenominator.
-        // Thus if assetOneNextUnits*auctionDenominator > assetOneCurrentUnits*auctionPrice then assetOne is
-        // an inflow. When assetOne is an inflow (negative outflow), it implies that assetTwo is an outflow, 
-        // furthermore we are guaranteed that both flows have a positive derivative with respect to auction price (and
-        // auction price always increases). Since we define price as abs(assetTwoOutflow/assetOneOutflow), with assetOneFlow
-        // getting less negative and assetTwoFlow getting more positive it implies that the asset price is increasing as
-        // time passes in the auction. 
+        // Determine whether outflow for assetOne is posistive or negative, if positive then asset pair price is
+        // increasing, else decreasing.
         return _auction.combinedNextSetUnits[0].mul(CURVE_DENOMINATOR) >
             _auction.combinedCurrentSetUnits[0].mul(auctionFairValue);
     }
 
     /**
      * Convert an asset pair price to the equivalent auction price where a1 refers to assetOne and a2 refers to assetTwo
-     * and subscripts c, n, d mean currentSetUnit, nextSetUnit and fullUnit amount, respectively. aP and aD refer to auction
+     * and subscripts c, n, d mean currentSetUnit, nextSetUnit and fullUnit amount, respectively. pP and pD refer to auction
      * price and auction denominator:
      *
      * assetPrice = abs(assetTwoOutflow/assetOneOutflow)
      *
-     * assetPrice = ((a2_c/a2_d)*aP - (a2_n/a2_d)*aD) / ((a1_c/a1_d)*aP - (a1_n/a1_d)*aD)
+     * assetPrice = ((a2_c/a2_d)*pP - (a2_n/a2_d)*pD) / ((a1_c/a1_d)*pP - (a1_n/a1_d)*pD)
      *
-     * We know assetPrice so we isolate for aP:
+     * We know assetPrice so we isolate for pP:
      *
-     * aP = aD((a2_n/a2_d)+assetPrice*(a1_n/a1_d)) / (a2_c/a2_d)+assetPrice*(a1_c/a1_d)
+     * pP = pD((a2_n/a2_d)+assetPrice*(a1_n/a1_d)) / (a2_c/a2_d)+assetPrice*(a1_c/a1_d)
      *
      * This gives us the auction price that matches with the passed asset pair price.
+     *
+     * @param _auction              Auction object
+     * @param _targetPrice          Target asset pair price
+     * @param _assetOneFullUnit     Units in one full unit of assetOne
+     * @param _assetTwoFullUnit     Units in one full unit of assetTwo
      */
     function convertAssetPairPriceToAuctionPrice(
         Auction.Setup storage _auction,
@@ -251,11 +281,16 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         );
 
         // Here the scale required to account for the 18 decimal price cancels out since it was applied to both the numerator
-        // and denominator. However there was an extra scale applied to the denominator that we need to remove, in order to
+        // and denominator. However, there was an extra scale applied to the denominator that we need to remove, in order to
         // do so we'll just apply another scale to the numerator before dividing since 1/(1/10 ** 18) = 10 ** 18!
         return calcNumerator.scale().div(calcDenominator);
     }
 
+    /**
+     * Get fullUnit amount and price of given asset.
+     *
+     * @param _asset            Address of auction to get information from
+     */
     function getAssetInfo(address _asset) internal view returns(AssetInfo memory) {
         address assetOracle = oracleWhiteList.getOracleAddressByToken(_asset);
         uint256 assetPrice = IOracle(assetOracle).read();

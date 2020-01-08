@@ -22,12 +22,10 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
 
 import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
-import { CommonMath } from "../../../lib/CommonMath.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { Rebalance } from "../../lib/Rebalance.sol";
 import { SetMath } from "../../lib/SetMath.sol";
-import { SetUSDValuation } from "../impl/SetUSDValuation.sol";
 
 
 /**
@@ -53,6 +51,9 @@ contract Auction {
         uint256[] combinedCurrentSetUnits;
         uint256[] combinedNextSetUnits;
     }
+
+    /* ============ Structs ============ */
+    uint256 constant private CURVE_DENOMINATOR = 10 ** 18;
 
     /* ============ Auction Struct Methods ============ */
 
@@ -138,7 +139,7 @@ contract Auction {
      *
      * @param _auction              Auction Setup object
      * @param _quantity             Amount of currentSets bidder is seeking to rebalance
-     * @param _price                Scaled value representing the auction numeartor
+     * @param _price                Value representing the auction numeartor
      */
     function calculateTokenFlow(
         Setup storage _auction,
@@ -221,7 +222,7 @@ contract Auction {
      * @param _currentUnit          Amount of token i in currentSet per minimum bid amount
      * @param _nextSetUnit          Amount of token i in nextSet per minimum bid amount
      * @param _unitsMultiplier      Bid amount normalized to number of minimum bid amounts
-     * @param _priceScaled          Auction price as a scaled value
+     * @param _price                Auction price numerator with 10 ** 18 as denominator
      * @return inflowUnit           Amount of token i transferred into the system
      * @return outflowUnit          Amount of token i transferred to the bidder
      */
@@ -229,7 +230,7 @@ contract Auction {
         uint256 _currentUnit,
         uint256 _nextSetUnit,
         uint256 _unitsMultiplier,
-        uint256 _priceScaled
+        uint256 _price
     )
         internal
         pure
@@ -266,19 +267,19 @@ contract Auction {
         uint256 outflowUnit;
 
         // Use if statement to check if token inflow or outflow
-        if (_nextSetUnit.scale() > _currentUnit.mul(_priceScaled)) {
+        if (_nextSetUnit.mul(CURVE_DENOMINATOR) > _currentUnit.mul(_price)) {
             // Calculate inflow amount
             inflowUnit = _unitsMultiplier.mul(
-                _nextSetUnit.scale().sub(_currentUnit.mul(_priceScaled))
-            ).div(_priceScaled);
+                _nextSetUnit.mul(CURVE_DENOMINATOR).sub(_currentUnit.mul(_price))
+            ).div(_price);
 
             // Set outflow amount to 0 for component i, since tokens need to be injected in rebalance
             outflowUnit = 0;
         } else {
             // Calculate outflow amount
             outflowUnit = _unitsMultiplier.mul(
-                _currentUnit.mul(_priceScaled).sub(_nextSetUnit.scale())
-            ).div(_priceScaled);
+                _currentUnit.mul(_price).sub(_nextSetUnit.mul(CURVE_DENOMINATOR))
+            ).div(_price);
 
             // Set inflow amount to 0 for component i, since tokens need to be returned in rebalance
             inflowUnit = 0;

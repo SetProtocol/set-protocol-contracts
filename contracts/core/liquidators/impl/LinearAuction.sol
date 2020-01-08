@@ -125,7 +125,7 @@ contract LinearAuction is Auction {
     }
 
     /**
-     * Returns the linear price based on the current timestamp. Returns the endPrice
+     * Returns the price based on the current timestamp. Returns the endPrice
      * if time has exceeded the auction period
      *
      * @param _linearAuction            Linear Auction State object
@@ -147,7 +147,7 @@ contract LinearAuction is Auction {
 
     /**
      * Abstract function that must be implemented.
-     * Calculates the linear auction start price with a scaled value
+     * Calculates the linear auction start price
      */
     function calculateStartPrice(
         Auction.Setup storage _auction,
@@ -160,7 +160,7 @@ contract LinearAuction is Auction {
 
     /**
      * Abstract function that must be implemented.
-     * Calculates the linear auction end price with a scaled value
+     * Calculates the linear auction end price
      */
     function calculateEndPrice(
         Auction.Setup storage _auction,

@@ -140,13 +140,16 @@ contract('RebalancingSetState', accounts => {
 
     liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
-
     [ initialSetToken, nextSetToken ] = await rebalancingHelper.createSetTokensAsync(
       coreMock,
       factory.address,
       transferProxy.address,
-      2
+      2,
+      undefined,
+      managerAccount,
     );
+
+
     manager = managerAccount;
     liquidator = liquidatorMock.address;
     initialUnitShares = DEFAULT_UNIT_SHARES;
@@ -181,6 +184,8 @@ contract('RebalancingSetState', accounts => {
         entryFee,
       ]
     );
+
+    await coreMock.addSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(deployerAccount));
   });
 
   afterEach(async () => {
@@ -625,16 +630,16 @@ contract('RebalancingSetState', accounts => {
 
     describe('when startRebalance is called from Rebalance State', async () => {
       beforeEach(async () => {
-      const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
-      await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
+        const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+        await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
 
-       await rebalancingHelper.transitionToRebalanceV2Async(
-         coreMock,
-         rebalancingComponentWhiteList,
-         rebalancingSetToken,
-         nextSetToken,
-         managerAccount
-       );
+        await rebalancingHelper.transitionToRebalanceV2Async(
+          coreMock,
+          rebalancingComponentWhiteList,
+          rebalancingSetToken,
+          nextSetToken,
+          managerAccount
+        );
       });
 
       it('should revert', async () => {

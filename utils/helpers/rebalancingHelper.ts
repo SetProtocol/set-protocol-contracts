@@ -153,8 +153,8 @@ export class RebalancingHelper {
     let naturalUnit: BigNumber;
     const setTokenArray: SetTokenContract[] = [];
 
-    const components = await this._erc20Helper.deployTokensAsync(tokenCount + 1, this._tokenOwnerAddress);
-    await this._erc20Helper.approveTransfersAsync(components, transferProxy);
+    const components = await this._erc20Helper.deployTokensAsync(tokenCount + 1, from);
+    await this._erc20Helper.approveTransfersAsync(components, transferProxy, from);
 
     const indexArray = _.times(tokenCount, Number);
     for (const index in indexArray) {
@@ -187,6 +187,12 @@ export class RebalancingHelper {
         setComponentAddresses,
         setComponentUnits,
         naturalUnit,
+      );
+
+      await setToken.approve.sendTransactionAsync(
+        transferProxy,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        txnFrom(from)
       );
 
       setTokenArray.push(setToken);

@@ -38,7 +38,6 @@ import { SetMath } from "../../lib/SetMath.sol";
  */
 contract Auction {
     using SafeMath for uint256;
-    using CommonMath for uint256;
     using AddressArrayUtils for address[];
 
     /* ============ Structs ============ */

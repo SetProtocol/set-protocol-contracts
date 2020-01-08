@@ -259,8 +259,8 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     function convertAssetPairPriceToAuctionPrice(
         Auction.Setup storage _auction,
         uint256 _targetPrice,
-        uint256 assetOneFullUnit,
-        uint256 assetTwoFullUnit
+        uint256 _assetOneFullUnit,
+        uint256 _assetTwoFullUnit
     )
         internal
         view
@@ -269,15 +269,15 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         // Calculate the numerator for the above equation. In order to ensure no rounding down errors we distribute the auction
         // denominator. Additionally, since the price is passed as an 18 decimal number in order to maintain consistency we
         // have to scale the first term up accordingly
-        uint256 calcNumerator = _auction.combinedNextSetUnits[1].mul(CURVE_DENOMINATOR).scale().div(assetTwoFullUnit).add(
-            _targetPrice.mul(_auction.combinedNextSetUnits[0]).mul(CURVE_DENOMINATOR).div(assetOneFullUnit)
+        uint256 calcNumerator = _auction.combinedNextSetUnits[1].mul(CURVE_DENOMINATOR).scale().div(_assetTwoFullUnit).add(
+            _targetPrice.mul(_auction.combinedNextSetUnits[0]).mul(CURVE_DENOMINATOR).div(_assetOneFullUnit)
         );
 
         // Calculate the denominator for the above equation. As above we we have to scale the first term match the 18 decimal
         // price. Furthermore since we are not guaranteed that targetPrice * a1_c > a1_d we have to scale the second term and
         // thus also the first term in order to match (hence the two scale() in the first term)
-        uint256 calcDenominator = _auction.combinedCurrentSetUnits[1].scale().scale().div(assetTwoFullUnit).add(
-           _targetPrice.mul(_auction.combinedCurrentSetUnits[0]).scale().div(assetOneFullUnit) 
+        uint256 calcDenominator = _auction.combinedCurrentSetUnits[1].scale().scale().div(_assetTwoFullUnit).add(
+           _targetPrice.mul(_auction.combinedCurrentSetUnits[0]).scale().div(_assetOneFullUnit) 
         );
 
         // Here the scale required to account for the 18 decimal price cancels out since it was applied to both the numerator

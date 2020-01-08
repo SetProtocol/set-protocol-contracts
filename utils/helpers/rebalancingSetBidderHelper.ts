@@ -85,10 +85,16 @@ export class RebalancingSetBidderHelper {
       if (combinedTokenArray[i] === targetCTokenAddress) {
         const cTokenConversion = cTokenExchangeRate.div(10 ** 18);
         const newInflow = expectedTokenFlows['inflowArray'][i].gt(0)
-          ? expectedTokenFlows['inflowArray'][i].mul(cTokenConversion).add(1).round(0, BigNumber.ROUND_DOWN)
+          ? expectedTokenFlows['inflowArray'][i]
+            .mul(cTokenConversion)
+            .add(1)
+            .round(0, BigNumber.ROUND_DOWN)
           : new BigNumber(0);
         const newOutflow = expectedTokenFlows['outflowArray'][i].gt(0)
-          ? expectedTokenFlows['outflowArray'][i].mul(cTokenConversion).add(1).round(0, BigNumber.ROUND_DOWN)
+          ? expectedTokenFlows['outflowArray'][i]
+            .mul(cTokenConversion)
+            .add(1)
+            .round(0, BigNumber.ROUND_DOWN)
           : new BigNumber(0);
         inflowArray.push(newInflow);
         outflowArray.push(newOutflow);

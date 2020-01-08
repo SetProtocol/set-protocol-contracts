@@ -41,7 +41,7 @@ import { BidPlacedWithEth } from '@utils/contract_logs/rebalancingSetEthBidder';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
-import { RebalancingSetBidderHelper } from '@utils/helpers/RebalancingSetBidderHelper';
+import { RebalancingSetBidderHelper } from '@utils/helpers/rebalancingSetBidderHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

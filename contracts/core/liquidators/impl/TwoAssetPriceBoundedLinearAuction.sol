@@ -33,6 +33,8 @@ import { LinearAuction } from "./LinearAuction.sol";
  * @title TwoAssetPriceBoundedLinearAuction
  * @author Set Protocol
  *
+ * Contract to calculate minimumBid and auction start bounds for auctions containing only
+ * an asset pair. 
  */
 contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     using SafeMath for uint256;
@@ -100,6 +102,20 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         );
     }
 
+    /**
+     * Calculates the minimumBid. First calculates the minimum token flow for the pair at fair value using
+     * maximum natural unit of two Sets. If that token flow is below 1000 units then calculate minimumBid
+     * as such:
+     *
+     * minimumBid = maxNaturalUnit*1000/min(tokenFlow)
+     *
+     * Else, set minimumBid equal to maxNaturalUnit. This is to ensure that around fair value there is ample
+     * granualarity in asset pair price changes and not large discontinuities.
+     *
+     * @param _auction            Auction object
+     * @param _currentSet         CurrentSet, unused in this implementation
+     * @param _nextSet            NextSet, unused in this implementation
+     */
     function calculateMinimumBid(
         Auction.Setup storage _auction,
         ISetToken _currentSet,
@@ -126,6 +142,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
 
         uint256 minimumBidMultiplier = 0;
         for (uint8 i = 0; i < _auction.combinedTokenArray.length; i++) {
+            // Get token flow at fair value for asset i
             (
                 uint256 tokenInflowScaled,
                 uint256 tokenOutflowScaled
@@ -136,13 +153,18 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
                 auctionFairValue
             );
 
+            // One returned number from previous function will be zero so use max to get tokenFlow
             uint256 tokenFlowScaled = Math.max(tokenInflowScaled, tokenOutflowScaled);
 
+            // Divide minimum spot token flow (1000 units) by token flow if more than minimumBidMultiplier
+            // update minimumBidMultiplier
             minimumBidMultiplier = MIN_SPOT_TOKEN_FLOW_SCALED.div(tokenFlowScaled) > minimumBidMultiplier ?
                 MIN_SPOT_TOKEN_FLOW_SCALED.div(tokenFlowScaled) : 
                 minimumBidMultiplier;
         }
 
+        // Add one to minimumBidMulitplier to prevent any rounding errors from creating flows less than 1000
+        // Multiply the minimumBidMultiplier by maxNaturalUnit to get minimumBid
         return _auction.maxNaturalUnit.mul(minimumBidMultiplier.add(1));
     }
 

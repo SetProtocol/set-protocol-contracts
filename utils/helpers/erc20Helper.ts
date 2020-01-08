@@ -323,6 +323,15 @@ export class ERC20Helper {
     return supplies;
   }
 
+  public async getTokenInstanceAsync(
+    token: Address,
+  ): Promise<StandardTokenMockContract> {
+    return new StandardTokenMockContract(
+      getContractInstance(StandardTokenMock, token),
+      { from: this._senderAccountAddress },
+    );
+  }
+
   public async retrieveTokenInstancesAsync(
     tokens: Address[],
   ): Promise<StandardTokenMockContract[]> {

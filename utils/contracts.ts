@@ -42,6 +42,7 @@ export { ProtocolViewerContract } from '../types/generated/protocol_viewer';
 export { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 export { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
 export { RebalancingSetEthBidderContract } from '../types/generated/rebalancing_set_eth_bidder';
+export { RebalancingSetCTokenBidderContract } from '../types/generated/rebalancing_set_c_token_bidder';
 export {
   RebalancingSetExchangeIssuanceModuleContract,
 } from '../types/generated/rebalancing_set_exchange_issuance_module';

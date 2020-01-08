@@ -200,7 +200,7 @@ contract('Auction', accounts => {
       const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
         set1,
         combinedTokenArray,
-        new BigNumber(auctionSetup.minimumBid),
+        new BigNumber(auctionSetup.maxNaturalUnit),
       );
 
       expect(JSON.stringify(combinedCurrentSetUnits)).to.equal(JSON.stringify(expectedResult));
@@ -216,7 +216,7 @@ contract('Auction', accounts => {
       const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
         set2,
         combinedTokenArray,
-        new BigNumber(auctionSetup.minimumBid),
+        new BigNumber(auctionSetup.maxNaturalUnit),
       );
 
       expect(JSON.stringify(combinedNextSetUnits)).to.equal(JSON.stringify(expectedResult));

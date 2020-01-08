@@ -23,6 +23,7 @@ export interface TokenFlow {
 }
 
 export interface Auction {
+  maxNaturalUnit: BigNumber;
   minimumBid: BigNumber;
   startTime: BigNumber;
   startingCurrentSets: BigNumber;
@@ -40,10 +41,12 @@ export function getLinearAuction(input: any): LinearAuction {
     remainingCurrentSets,
     combinedCurrentSetUnits,
     combinedNextSetUnits,
+    maxNaturalUnit,
   } = input.auction;
 
   return {
     auction: {
+      maxNaturalUnit: new BigNumber(maxNaturalUnit),
       minimumBid: new BigNumber(minimumBid),
       startTime: new BigNumber(startTime),
       startingCurrentSets: new BigNumber(startingCurrentSets),

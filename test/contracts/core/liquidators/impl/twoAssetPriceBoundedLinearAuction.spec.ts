@@ -55,14 +55,17 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
   let wrappedETH: StandardTokenMockContract;
   let wrappedBTC: StandardTokenMockContract;
   let usdc: StandardTokenMockContract;
+  let dai: StandardTokenMockContract;
 
   let wrappedETHPrice: BigNumber;
   let wrappedBTCPrice: BigNumber;
   let usdcPrice: BigNumber;
+  let daiPrice: BigNumber;
 
   let wrappedETHOracle: UpdatableOracleMockContract;
   let wrappedBTCOracle: UpdatableOracleMockContract;
   let usdcOracle: UpdatableOracleMockContract;
+  let daiOracle: UpdatableOracleMockContract;
 
   let auctionPeriod: BigNumber;
   let rangeStart: BigNumber;
@@ -82,18 +85,21 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     wrappedETH = await erc20Helper.deployTokenAsync(deployerAccount, 18);
     wrappedBTC = await erc20Helper.deployTokenAsync(deployerAccount, 8);
     usdc = await erc20Helper.deployTokenAsync(deployerAccount, 6);
+    dai = await erc20Helper.deployTokenAsync(deployerAccount, 18);
 
     wrappedETHPrice = ether(128);
     wrappedBTCPrice = ether(7500);
     usdcPrice = ether(1);
+    daiPrice = ether(1);
 
     wrappedETHOracle = await libraryMockHelper.deployUpdatableOracleMockAsync(wrappedETHPrice);
     wrappedBTCOracle = await libraryMockHelper.deployUpdatableOracleMockAsync(wrappedBTCPrice);
     usdcOracle = await libraryMockHelper.deployUpdatableOracleMockAsync(usdcPrice);
+    daiOracle = await libraryMockHelper.deployUpdatableOracleMockAsync(daiPrice);
 
     oracleWhiteList = await coreHelper.deployOracleWhiteListAsync(
-      [wrappedETH.address, wrappedBTC.address, usdc.address],
-      [wrappedETHOracle.address, wrappedBTCOracle.address, usdcOracle.address],
+      [wrappedETH.address, wrappedBTC.address, usdc.address, dai.address],
+      [wrappedETHOracle.address, wrappedBTCOracle.address, usdcOracle.address, daiOracle.address],
     );
 
     auctionPeriod = new BigNumber(14400); // 4 hours
@@ -248,17 +254,57 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     });
   });
 
-  describe('#calculateStartPrice and calculateEndPrice', async () => {
+  describe('#calculateMinimumBid', async () => {
+    let set1: SetTokenContract;
+    let set2: SetTokenContract;
+
+    let set1Components: Address[];
+    let set2Components: Address[];
+
+    let set1Units: BigNumber[];
+    let set2Units: BigNumber[];
+
+    let set1NaturalUnit: BigNumber;
+    let set2NaturalUnit: BigNumber;
     let combinedTokenArray: Address[];
     let combinedCurrentSetUnits: BigNumber[];
     let combinedNextSetUnits: BigNumber[];
 
     let linearAuction: LinearAuction;
 
+    let subjectCurrentSet: Address;
+    let subjectNextSet: Address;
+
+    before(async () => {
+      set1Components = [wrappedBTC.address, usdc.address];
+      set1Units = [new BigNumber(100), new BigNumber(7500)];
+      set1NaturalUnit = new BigNumber(10 ** 12);
+
+      set2Components = [wrappedBTC.address, usdc.address];
+      set2Units = [new BigNumber(100), new BigNumber(7806)];
+      set2NaturalUnit = new BigNumber(10 ** 12);
+    });
+
     beforeEach(async () => {
-      combinedTokenArray = [wrappedETH.address, usdc.address];
-      combinedCurrentSetUnits = [new BigNumber(10 ** 12), new BigNumber(128)];
-      combinedNextSetUnits = [new BigNumber(10 ** 12), new BigNumber(128)];
+      set1 = await coreHelper.createSetTokenAsync(
+        coreMock,
+        setTokenFactory.address,
+        set1Components,
+        set1Units,
+        set1NaturalUnit,
+      );
+
+      set2 = await coreHelper.createSetTokenAsync(
+        coreMock,
+        setTokenFactory.address,
+        set2Components,
+        set2Units,
+        set2NaturalUnit,
+      );
+
+      combinedTokenArray = set1Components;
+      combinedCurrentSetUnits = set1Units;
+      combinedNextSetUnits = set2Units;
 
       await boundsCalculator.parameterizeAuction.sendTransactionAsync(
         combinedTokenArray,
@@ -268,6 +314,91 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
 
       linearAuction = {
         auction: {
+          maxNaturalUnit: BigNumber.max(set1NaturalUnit, set2NaturalUnit),
+          minimumBid: new BigNumber(0),
+          startTime: new BigNumber(0),
+          startingCurrentSets: new BigNumber(0),
+          remainingCurrentSets: new BigNumber(0),
+          combinedTokenArray,
+          combinedCurrentSetUnits,
+          combinedNextSetUnits,
+        },
+        endTime: new BigNumber(0),
+        startPrice: new BigNumber(0),
+        endPrice: new BigNumber(0),
+      };
+
+      subjectCurrentSet = set1.address;
+      subjectNextSet = set2.address;
+    });
+
+    async function subject(): Promise<BigNumber> {
+      return boundsCalculator.calculateMinimumBid.callAsync(
+        subjectCurrentSet,
+        subjectNextSet
+      );
+    }
+
+    it('calculates the correct minimumBid', async () => {
+      const result = await subject();
+
+      const expectedResult = await liquidatorHelper.calculateMinimumBidAsync(
+        linearAuction,
+        set1,
+        set2,
+        wrappedBTCPrice.div(usdcPrice),
+      );
+
+      expect(result).to.bignumber.equal(expectedResult);
+    });
+
+    describe('when using assets that do not require a bump in minimumBid', async () => {
+      before(async () => {
+        set1Components = [wrappedETH.address, dai.address];
+        set1Units = [new BigNumber(10 ** 6), new BigNumber(128 * 10 ** 6)];
+        set1NaturalUnit = new BigNumber(10 ** 6);
+
+        set2Components = [wrappedETH.address, dai.address];
+        set2Units = [new BigNumber(10 ** 6), new BigNumber(133224489)];
+        set2NaturalUnit = new BigNumber(10 ** 6);
+      });
+
+      it('calculates the correct minimumBid', async () => {
+        const result = await subject();
+
+        const expectedResult = await liquidatorHelper.calculateMinimumBidAsync(
+          linearAuction,
+          set1,
+          set2,
+          wrappedETHPrice.div(usdcPrice)
+        );
+
+        expect(result).to.bignumber.equal(expectedResult);
+      });
+    });
+  });
+
+  describe('#calculateStartPrice and calculateEndPrice', async () => {
+    let combinedTokenArray: Address[];
+    let combinedCurrentSetUnits: BigNumber[];
+    let combinedNextSetUnits: BigNumber[];
+
+    let linearAuction: LinearAuction;
+
+    beforeEach(async () => {
+      combinedTokenArray = [wrappedBTC.address, usdc.address];
+      combinedCurrentSetUnits = [new BigNumber(100), new BigNumber(7500)];
+      combinedNextSetUnits = [new BigNumber(100), new BigNumber(7806)];
+
+      await boundsCalculator.parameterizeAuction.sendTransactionAsync(
+        combinedTokenArray,
+        combinedCurrentSetUnits,
+        combinedNextSetUnits
+      );
+
+      linearAuction = {
+        auction: {
+          maxNaturalUnit: new BigNumber(10 ** 12),
           minimumBid: new BigNumber(0),
           startTime: new BigNumber(0),
           startingCurrentSets: new BigNumber(0),
@@ -339,6 +470,7 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
 
       linearAuction = {
         auction: {
+          maxNaturalUnit: new BigNumber(10 ** 12),
           minimumBid: new BigNumber(0),
           startTime: new BigNumber(0),
           startingCurrentSets: new BigNumber(0),

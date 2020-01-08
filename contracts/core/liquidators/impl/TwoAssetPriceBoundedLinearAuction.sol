@@ -18,6 +18,7 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
 
@@ -37,14 +38,19 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     using SafeMath for uint256;
     using CommonMath for uint256;
 
+    /* ============ Struct ============ */
     struct AssetInfo {
         uint256 price;
         uint256 fullUnit;
     }
 
+    /* ============ Constants ============ */
     uint256 constant private CURVE_DENOMINATOR = 10 ** 18;
+    // Minimum token flow allowed at spot price in auction
+    uint256 constant private MIN_SPOT_TOKEN_FLOW_SCALED = 10 ** 21;
     uint256 constant private ONE_HUNDRED = 100;
 
+    /* ============ State Variables ============ */
     IOracleWhiteList public oracleWhiteList;
     uint256 public rangeStart; // Percentage below FairValue to begin auction at
     uint256 public rangeEnd;  // Percentage above FairValue to end auction at
@@ -70,6 +76,8 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         rangeEnd = _rangeEnd;
     }
 
+    /* ============ Internal Functions ============ */
+
     /**
      * Validates that the auction only includes two components and the components are valid.
      */ 
@@ -90,6 +98,52 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
             oracleWhiteList.areValidAddresses(combinedTokenArray),
             "TwoAssetPriceBoundedLinearAuction: Passed token does not have matching oracle."
         );
+    }
+
+    function calculateMinimumBid(
+        Auction.Setup storage _auction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        // Get full Unit amount and price for each asset
+        AssetInfo memory assetOne = getAssetInfo(_auction.combinedTokenArray[0]);
+        AssetInfo memory assetTwo = getAssetInfo(_auction.combinedTokenArray[1]);
+
+        // Calculate current spot price as assetOne/assetTwo
+        uint256 spotPrice = calculateSpotPrice(assetOne.price, assetTwo.price);
+
+        // Calculate auction price at current asset pair spot price
+        uint256 auctionFairValue = convertAssetPairPriceToAuctionPrice(
+            _auction,
+            spotPrice,
+            assetOne.fullUnit,
+            assetTwo.fullUnit
+        );
+
+        uint256 minimumBidMultiplier = 0;
+        for (uint8 i = 0; i < _auction.combinedTokenArray.length; i++) {
+            (
+                uint256 tokenInflowScaled,
+                uint256 tokenOutflowScaled
+            ) = Auction.calculateInflowOutflow(
+                _auction.combinedCurrentSetUnits[i],
+                _auction.combinedNextSetUnits[i],
+                10 ** 18,
+                auctionFairValue
+            );
+
+            uint256 tokenFlowScaled = Math.max(tokenInflowScaled, tokenOutflowScaled);
+
+            minimumBidMultiplier = MIN_SPOT_TOKEN_FLOW_SCALED.div(tokenFlowScaled) > minimumBidMultiplier ?
+                MIN_SPOT_TOKEN_FLOW_SCALED.div(tokenFlowScaled) : 
+                minimumBidMultiplier;
+        }
+
+        return _auction.maxNaturalUnit.mul(minimumBidMultiplier.add(1));
     }
 
     /**
@@ -114,7 +168,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         AssetInfo memory assetTwo = getAssetInfo(_auction.combinedTokenArray[1]);
 
         // Calculate current asset pair spot price as assetOne/assetTwo
-        uint256 spotPrice = assetOne.price.scale().div(assetTwo.price);
+        uint256 spotPrice = calculateSpotPrice(assetOne.price, assetTwo.price);
 
         // Check to see if asset pair price is increasing or decreasing as time passes 
         bool isTokenFlowIncreasing = isTokenFlowIncreasing(
@@ -164,7 +218,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         AssetInfo memory assetTwo = getAssetInfo(_auction.combinedTokenArray[1]);
 
         // Calculate current spot price as assetOne/assetTwo
-        uint256 spotPrice = assetOne.price.scale().div(assetTwo.price);
+        uint256 spotPrice = calculateSpotPrice(assetOne.price, assetTwo.price);
 
         // Check to see if asset pair price is increasing or decreasing as time passes
         bool isTokenFlowIncreasing = isTokenFlowIncreasing(
@@ -192,6 +246,8 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         );
     }
 
+    /* ============ Private Functions ============ */
+
     /**
      * Determines if asset pair price is increasing or decreasing as time passed in auction. Used to set the
      * auction price bounds. Below a refers to any asset and subscripts c, n, d mean currentSetUnit, nextSetUnit 
@@ -218,7 +274,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         uint256 _assetOneFullUnit,
         uint256 _assetTwoFullUnit
     )
-        internal
+        private
         view
         returns (bool)
     {
@@ -230,7 +286,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
             _assetTwoFullUnit        
         );
 
-        // Determine whether outflow for assetOne is posistive or negative, if positive then asset pair price is
+        // Determine whether outflow for assetOne is positive or negative, if positive then asset pair price is
         // increasing, else decreasing.
         return _auction.combinedNextSetUnits[0].mul(CURVE_DENOMINATOR) >
             _auction.combinedCurrentSetUnits[0].mul(auctionFairValue);
@@ -262,7 +318,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         uint256 _assetOneFullUnit,
         uint256 _assetTwoFullUnit
     )
-        internal
+        private
         view
         returns (uint256)
     {
@@ -291,7 +347,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
      *
      * @param _asset            Address of auction to get information from
      */
-    function getAssetInfo(address _asset) internal view returns(AssetInfo memory) {
+    function getAssetInfo(address _asset) private view returns(AssetInfo memory) {
         address assetOracle = oracleWhiteList.getOracleAddressByToken(_asset);
         uint256 assetPrice = IOracle(assetOracle).read();
 
@@ -301,5 +357,12 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
             price: assetPrice,
             fullUnit: CommonMath.safePower(10, decimals)
         });
+    }
+
+    /**
+     * Calculate asset pair price given two prices.
+     */
+    function calculateSpotPrice(uint256 _assetOnePrice, uint256 _assetTwoPrice) private view returns(uint256) {
+        return _assetOnePrice.scale().div(_assetTwoPrice);
     }
 }

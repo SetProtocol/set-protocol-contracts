@@ -38,11 +38,11 @@ import { SetMath } from "../../lib/SetMath.sol";
  */
 contract Auction {
     using SafeMath for uint256;
-    using CommonMath for uint256;
     using AddressArrayUtils for address[];
 
     /* ============ Structs ============ */
     struct Setup {
+        uint256 maxNaturalUnit;
         uint256 minimumBid;
         uint256 startTime;
         uint256 startingCurrentSets;
@@ -73,7 +73,19 @@ contract Auction {
     )
         internal
     {
-        uint256 minimumBid = calculateMinimumBid(_currentSet, _nextSet);
+        _auction.maxNaturalUnit = Math.max(
+            _currentSet.naturalUnit(),
+            _nextSet.naturalUnit()
+        );
+
+        _auction.startingCurrentSets = _startingCurrentSetQuantity;
+        _auction.remainingCurrentSets = _startingCurrentSetQuantity;
+        _auction.startTime = block.timestamp;
+        _auction.combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
+        _auction.combinedCurrentSetUnits = calculateCombinedUnitArray(_auction, _currentSet);
+        _auction.combinedNextSetUnits = calculateCombinedUnitArray(_auction, _nextSet);
+
+        uint256 minimumBid = calculateMinimumBid(_auction, _currentSet, _nextSet);
         
         // remainingCurrentSets must be greater than minimumBid or no bidding would be allowed
         require(
@@ -82,12 +94,6 @@ contract Auction {
         );
 
         _auction.minimumBid = minimumBid;
-        _auction.startingCurrentSets = _startingCurrentSetQuantity;
-        _auction.remainingCurrentSets = _startingCurrentSetQuantity;
-        _auction.startTime = block.timestamp;
-        _auction.combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
-        _auction.combinedCurrentSetUnits = calculateCombinedUnitArray(_auction, _currentSet);
-        _auction.combinedNextSetUnits = calculateCombinedUnitArray(_auction, _nextSet);
     }
 
     function reduceRemainingCurrentSets(Setup storage _auction, uint256 _quantity) internal {
@@ -151,7 +157,7 @@ contract Auction {
         returns (Rebalance.TokenFlow memory)
     {
         // Normalized quantity amount
-        uint256 unitsMultiplier = _quantity.div(_auction.minimumBid);
+        uint256 unitsMultiplier = _quantity.div(_auction.maxNaturalUnit);
 
         address[] memory memCombinedTokenArray = _auction.combinedTokenArray;
 
@@ -177,24 +183,22 @@ contract Auction {
     }
 
     /**
-     * Calculate the minimumBid allowed for the rebalance
+     * Abstract function that must be implemented.
+     * Calculate the minimumBid allowed for the rebalance.
      *
-     * @param _currentSet               The Set to rebalance from
-     * @param _nextSet                  The Set to rebalance to
-     * @return                          Minimum bid amount
+     * @param _auction            Auction object
+     * @param _currentSet         The Set to rebalance from
+     * @param _nextSet            The Set to rebalance to
+     * @return                    Minimum bid amount
      */
     function calculateMinimumBid(
+        Setup storage _auction,
         ISetToken _currentSet,
         ISetToken _nextSet
     )
         internal
         view
-        returns (uint256)
-    {
-        uint256 currentSetNaturalUnit = _currentSet.naturalUnit();
-        uint256 nextNaturalUnit = _nextSet.naturalUnit();
-        return Math.max(currentSetNaturalUnit, nextNaturalUnit);
-    }
+        returns (uint256);
 
     /**
      * Computes the union of the currentSet and nextSet components
@@ -312,7 +316,7 @@ contract Auction {
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
             combinedUnits[i] = calculateCombinedUnit(
                 _set,
-                _auction.minimumBid,
+                _auction.maxNaturalUnit,
                 combinedTokenArray[i]
             );
         }
@@ -324,13 +328,13 @@ contract Auction {
      * Calculations the unit amount of Token to include in the the combined Set units.
      *
      * @param _setToken                 Information on the SetToken
-     * @param _minimumBid               Minimum bid amount
+     * @param _maxNaturalUnit           Max natural unit of two sets in rebalance
      * @param _component                Current component in iteration
      * @return                          Unit inflow/outflow
      */
     function calculateCombinedUnit(
         ISetToken _setToken,
-        uint256 _minimumBid,
+        uint256 _maxNaturalUnit,
         address _component
     )
         private
@@ -348,7 +352,7 @@ contract Auction {
             return calculateTransferValue(
                 _setToken.getUnits()[indexCurrent],
                 _setToken.naturalUnit(),
-                _minimumBid
+                _maxNaturalUnit
             );
         }
 
@@ -361,18 +365,18 @@ contract Auction {
      *
      * @param   _unit               Units of the component token
      * @param   _naturalUnit        Natural unit of the Set token
-     * @param   _minimumBid         Minimum bid amount
+     * @param   _maxNaturalUnit     Max natural unit of two sets in rebalance
      * @return  uint256             Amount of tokens per standard bid amount (minimumBid/priceDivisor)
      */
     function calculateTransferValue(
         uint256 _unit,
         uint256 _naturalUnit,
-        uint256 _minimumBid
+        uint256 _maxNaturalUnit
     )
         private
         pure
         returns (uint256)
     {
-        return SetMath.setToComponent(_minimumBid, _unit, _naturalUnit);
+        return SetMath.setToComponent(_maxNaturalUnit, _unit, _naturalUnit);
     }
 }

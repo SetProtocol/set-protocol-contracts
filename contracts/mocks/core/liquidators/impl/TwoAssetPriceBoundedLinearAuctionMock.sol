@@ -18,6 +18,7 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
 
 import { LinearAuction } from "../../../../core/liquidators/impl/LinearAuction.sol";
@@ -52,6 +53,15 @@ contract TwoAssetPriceBoundedLinearAuctionMock is TwoAssetPriceBoundedLinearAuct
     // To test
     function validateTwoAssetPriceBoundedAuctionMock(ISetToken _currentSet,ISetToken _nextSet) external view {
         validateTwoAssetPriceBoundedAuction(_currentSet, _nextSet);
+    }
+
+    function calculateMinimumBid(ISetToken _currentSet, ISetToken _nextSet) external returns(uint256) {
+        auctionInfo.auction.maxNaturalUnit = Math.max(
+            _currentSet.naturalUnit(),
+            _nextSet.naturalUnit()
+        );
+
+        return super.calculateMinimumBid(auctionInfo.auction, _currentSet, _nextSet);
     }
 
     function calculateStartPriceMock() external view returns(uint256) {   

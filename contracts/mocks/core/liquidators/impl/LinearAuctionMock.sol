@@ -1,7 +1,10 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
+import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
+
 import { Auction } from "../../../../core/liquidators/impl/Auction.sol";
+import { CommonMath } from "../../../../lib/CommonMath.sol";
 import { LinearAuction } from "../../../../core/liquidators/impl/LinearAuction.sol";
 import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";
@@ -9,6 +12,8 @@ import { Rebalance } from "../../../../core/lib/Rebalance.sol";
 import { SetUSDValuation } from "../../../../core/liquidators/impl/SetUSDValuation.sol";
 
 contract LinearAuctionMock is LinearAuction {
+    using CommonMath for uint256;
+    
     LinearAuction.State public auction;
     IOracleWhiteList public oracleWhiteList;
 
@@ -117,6 +122,21 @@ contract LinearAuctionMock is LinearAuction {
      */
     function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
         return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
+    }
+
+    function calculateMinimumBid(
+        Setup storage _auction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        return Math.max(
+            _currentSet.naturalUnit(),
+            _nextSet.naturalUnit()
+        );
     }
 }
 

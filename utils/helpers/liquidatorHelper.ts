@@ -24,7 +24,7 @@ import {
   LinearAuction,
   TokenFlow
 } from '../auction';
-import { ether } from '@utils/units';
+import { ether } from '../units';
 
 const AuctionMock = artifacts.require('AuctionMock');
 const LinearAuctionLiquidator = artifacts.require('LinearAuctionLiquidator');

@@ -26,7 +26,7 @@ import {
   ZERO,
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
-import { ether } from '@utils/units';
+import { ether } from '../units';
 import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
 
 import { RebalancingHelper } from './rebalancingHelper';

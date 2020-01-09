@@ -19,6 +19,7 @@ import {
   UpdatableOracleMockContract,
   VaultContract,
 } from '@utils/contracts';
+import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import {
@@ -306,6 +307,16 @@ contract('LinearAuction', accounts => {
         const expectedEndPrice = fairValue.add(positiveRange);
 
         expect(auction.endPrice).to.bignumber.equal(expectedEndPrice);
+      });
+    });
+
+    describe('when there is insufficient collateral to rebalance', async () => {
+      beforeEach(async () => {
+        subjectStartingCurrentSetQuantity = gWei(0.5);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

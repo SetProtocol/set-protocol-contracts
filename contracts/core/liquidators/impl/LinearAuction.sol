@@ -82,13 +82,18 @@ contract LinearAuction is Auction {
             _startingCurrentSetQuantity
         );
 
+        uint256 minimumBid = calculateMinimumBid(_linearAuction.auction, _currentSet, _nextSet);
+        
+        // remainingCurrentSets must be greater than minimumBid or no bidding would be allowed
+        require(
+            _startingCurrentSetQuantity >= minimumBid,
+            "Auction.initializeAuction: Not enough collateral to rebalance"
+        );
+
+        _linearAuction.auction.minimumBid = minimumBid;
+
         _linearAuction.startPrice = calculateStartPrice(_linearAuction.auction, _currentSet, _nextSet);
         _linearAuction.endPrice = calculateEndPrice(_linearAuction.auction, _currentSet, _nextSet);
-
-        require(
-            _linearAuction.startPrice != _linearAuction.endPrice,
-            "LinearAuction.initializeLinearAuction: NextSet must have different composition from currentSet."
-        );
 
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
@@ -144,6 +149,24 @@ contract LinearAuction is Auction {
             return _linearAuction.startPrice.add(elapsedPrice);
         }
     }
+
+    /**
+     * Abstract function that must be implemented.
+     * Calculate the minimumBid allowed for the rebalance.
+     *
+     * @param _auction            Auction object
+     * @param _currentSet         The Set to rebalance from
+     * @param _nextSet            The Set to rebalance to
+     * @return                    Minimum bid amount
+     */
+    function calculateMinimumBid(
+        Setup storage _auction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+        returns (uint256);
 
     /**
      * Abstract function that must be implemented.

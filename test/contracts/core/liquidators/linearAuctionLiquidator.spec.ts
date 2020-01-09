@@ -30,7 +30,7 @@ import {
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 import { ether, gWei } from '@utils/units';
-import { getLinearAuction, TokenFlow } from '@utils/auction';
+import { getLinearAuction, LinearAuction, TokenFlow } from '@utils/auction';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
@@ -217,6 +217,8 @@ contract('LinearAuctionLiquidator', accounts => {
   });
 
   describe('#startRebalance', async () => {
+    let linearAuction: LinearAuction;
+
     let subjectCaller: Address;
     let subjectCurrentSet: Address;
     let subjectNextSet: Address;
@@ -224,6 +226,39 @@ contract('LinearAuctionLiquidator', accounts => {
     let subjectLiquidatorData: string;
 
     beforeEach(async () => {
+      const maxNaturalUnit = BigNumber.max(
+        await set1.naturalUnit.callAsync(),
+        await set2.naturalUnit.callAsync()
+      );
+
+      const combinedTokenArray = _.union(set1Components, set2Components);
+      const combinedCurrentSetUnits = await liquidatorHelper.constructCombinedUnitArrayAsync(
+        set1,
+        combinedTokenArray,
+        maxNaturalUnit,
+      );
+      const combinedNextSetUnits = await liquidatorHelper.constructCombinedUnitArrayAsync(
+        set2,
+        combinedTokenArray,
+        maxNaturalUnit,
+      );
+
+      linearAuction = {
+        auction: {
+          maxNaturalUnit,
+          minimumBid: new BigNumber(0),
+          startTime: new BigNumber(0),
+          startingCurrentSets: new BigNumber(0),
+          remainingCurrentSets: new BigNumber(0),
+          combinedTokenArray,
+          combinedCurrentSetUnits,
+          combinedNextSetUnits,
+        },
+        endTime: new BigNumber(0),
+        startPrice: new BigNumber(0),
+        endPrice: new BigNumber(0),
+      };
+
       subjectCaller = functionCaller;
       subjectCurrentSet = set1.address;
       subjectNextSet = set2.address;
@@ -249,7 +284,13 @@ contract('LinearAuctionLiquidator', accounts => {
 
       const auction: any = await liquidator.auctions.callAsync(subjectCaller);
 
-      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit);
+      const expectedMinimumBid = await liquidatorHelper.calculateMinimumBidAsync(
+        linearAuction,
+        set1,
+        set2,
+        component1Price.div(component2Price)
+      );
+
       expect(auction.auction.minimumBid).to.bignumber.equal(expectedMinimumBid);
     });
 
@@ -378,16 +419,6 @@ contract('LinearAuctionLiquidator', accounts => {
         );
 
         subjectNextSet = set3.address;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when currentSet and nextSet have same composition', async () => {
-      beforeEach(async () => {
-        subjectNextSet = set1.address;
       });
 
       it('should revert', async () => {

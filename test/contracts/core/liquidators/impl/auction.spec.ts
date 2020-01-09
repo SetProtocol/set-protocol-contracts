@@ -148,15 +148,6 @@ contract('Auction', accounts => {
       );
     }
 
-    it('sets the correct minimumBid', async () => {
-      await subject();
-
-      const auctionSetup: any = await auctionMock.auction.callAsync();
-
-      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit);
-      expect(auctionSetup.minimumBid).to.bignumber.equal(expectedMinimumBid);
-    });
-
     it('sets the correct startTime', async () => {
       await subject();
 
@@ -200,7 +191,7 @@ contract('Auction', accounts => {
       const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
         set1,
         combinedTokenArray,
-        new BigNumber(auctionSetup.minimumBid),
+        new BigNumber(auctionSetup.maxNaturalUnit),
       );
 
       expect(JSON.stringify(combinedCurrentSetUnits)).to.equal(JSON.stringify(expectedResult));
@@ -216,20 +207,10 @@ contract('Auction', accounts => {
       const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
         set2,
         combinedTokenArray,
-        new BigNumber(auctionSetup.minimumBid),
+        new BigNumber(auctionSetup.maxNaturalUnit),
       );
 
       expect(JSON.stringify(combinedNextSetUnits)).to.equal(JSON.stringify(expectedResult));
-    });
-
-    describe('when there is insufficient collateral to rebalance', async () => {
-      beforeEach(async () => {
-        subjectStartingCurrentSetQuantity = gWei(0.5);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
     });
   });
 

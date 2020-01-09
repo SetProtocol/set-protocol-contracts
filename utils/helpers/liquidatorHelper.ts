@@ -24,6 +24,7 @@ import {
   LinearAuction,
   TokenFlow
 } from '../auction';
+import { ether } from '@utils/units';
 
 const AuctionMock = artifacts.require('AuctionMock');
 const LinearAuctionLiquidator = artifacts.require('LinearAuctionLiquidator');
@@ -175,6 +176,53 @@ export class LiquidatorHelper {
       }
     });
     return combinedSetTokenUnits;
+  }
+
+  public async calculateMinimumBidAsync(
+    linearAuction: LinearAuction,
+    currentSet: SetTokenContract,
+    nextSet: SetTokenContract,
+    assetPairPrice: BigNumber,
+  ): Promise<BigNumber> {
+    const maxNaturalUnit = BigNumber.max(
+      await currentSet.naturalUnit.callAsync(),
+      await nextSet.naturalUnit.callAsync()
+    );
+
+    const [assetOneDecimals, assetTwoDecimals] = await this.getTokensDecimalsAsync(
+      linearAuction.auction.combinedTokenArray
+    );
+
+    const assetOneFullUnit = new BigNumber(10 ** assetOneDecimals.toNumber());
+    const assetTwoFullUnit = new BigNumber(10 ** assetTwoDecimals.toNumber());
+
+    const auctionFairValue = this.calculateAuctionBound(
+      linearAuction,
+      assetOneFullUnit,
+      assetTwoFullUnit,
+      assetPairPrice
+    );
+
+    const tokenFlow = this.constructTokenFlow(
+      linearAuction,
+      maxNaturalUnit.mul(ether(1)),
+      auctionFairValue
+    );
+
+    const tokenFlowList = [
+      BigNumber.max(tokenFlow.inflow[0], tokenFlow.outflow[0]),
+      BigNumber.max(tokenFlow.inflow[1], tokenFlow.outflow[1]),
+    ];
+
+    let minimumBidMultiplier: BigNumber = ZERO;
+    for (let i = 0; i < linearAuction.auction.combinedTokenArray.length; i++) {
+      const currentMinBidMultiplier = ether(1000).div(tokenFlowList[i]).round(0, 2);
+      minimumBidMultiplier = currentMinBidMultiplier.greaterThan(minimumBidMultiplier) ?
+        currentMinBidMultiplier :
+        minimumBidMultiplier;
+    }
+
+    return maxNaturalUnit.mul(minimumBidMultiplier);
   }
 
   public async calculateAuctionBoundsAsync(
@@ -425,10 +473,10 @@ export class LiquidatorHelper {
       combinedTokenArray,
       combinedCurrentSetUnits,
       combinedNextSetUnits,
-      minimumBid,
+      maxNaturalUnit,
     } = linearAuction.auction;
 
-    const unitsMultiplier = quantity.div(minimumBid).round(0, 3);
+    const unitsMultiplier = quantity.div(maxNaturalUnit).round(0, 3);
 
     for (let i = 0; i < combinedCurrentSetUnits.length; i++) {
       const flow = combinedNextSetUnits[i].mul(SCALE_FACTOR).sub(combinedCurrentSetUnits[i].mul(priceScaled));

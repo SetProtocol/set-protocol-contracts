@@ -134,6 +134,18 @@ contract LiquidatorMock is
         _combinedNextSetUnits = getCombinedUnitsArray(_nextSet, _combinedTokenArray);
     }
 
+    function setAuctionPriceParameters(
+        uint256 _auctionStartTime,
+        uint256 _auctionTimeToPivot,
+        uint256 _auctionStartPrice,
+        uint256 _auctionPivotPrice
+    ) external {
+        auctionPriceParams.auctionStartTime = _auctionStartTime;
+        auctionPriceParams.auctionTimeToPivot = _auctionTimeToPivot;
+        auctionPriceParams.auctionStartPrice = _auctionStartPrice;
+        auctionPriceParams.auctionPivotPrice = _auctionPivotPrice;
+    }
+
     function settleRebalance() external {
         hasSettled = true;
     }

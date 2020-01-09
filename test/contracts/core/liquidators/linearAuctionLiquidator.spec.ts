@@ -216,7 +216,7 @@ contract('LinearAuctionLiquidator', accounts => {
     });
   });
 
-  describe.only('#startRebalance', async () => {
+  describe('#startRebalance', async () => {
     let linearAuction: LinearAuction;
 
     let subjectCaller: Address;

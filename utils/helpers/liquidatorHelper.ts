@@ -216,8 +216,9 @@ export class LiquidatorHelper {
 
     let minimumBidMultiplier: BigNumber = ZERO;
     for (let i = 0; i < linearAuction.auction.combinedTokenArray.length; i++) {
-      minimumBidMultiplier = ether(1000).div(tokenFlowList[i]).round(0, 2).greaterThan(minimumBidMultiplier) ?
-        ether(1000).div(tokenFlowList[i]).round(0, 3) :
+      const currentMinBidMultiplier = ether(1000).div(tokenFlowList[i]).round(0, 2);
+      minimumBidMultiplier = currentMinBidMultiplier.greaterThan(minimumBidMultiplier) ?
+        currentMinBidMultiplier :
         minimumBidMultiplier;
     }
 

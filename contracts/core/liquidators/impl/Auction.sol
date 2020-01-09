@@ -84,16 +84,6 @@ contract Auction {
         _auction.combinedTokenArray = getCombinedTokenArray(_currentSet, _nextSet);
         _auction.combinedCurrentSetUnits = calculateCombinedUnitArray(_auction, _currentSet);
         _auction.combinedNextSetUnits = calculateCombinedUnitArray(_auction, _nextSet);
-
-        uint256 minimumBid = calculateMinimumBid(_auction, _currentSet, _nextSet);
-        
-        // remainingCurrentSets must be greater than minimumBid or no bidding would be allowed
-        require(
-            _startingCurrentSetQuantity >= minimumBid,
-            "Auction.initializeAuction: Not enough collateral to rebalance"
-        );
-
-        _auction.minimumBid = minimumBid;
     }
 
     function reduceRemainingCurrentSets(Setup storage _auction, uint256 _quantity) internal {
@@ -181,24 +171,6 @@ contract Auction {
 
         return Rebalance.composeTokenFlow(memCombinedTokenArray, inflowUnitArray, outflowUnitArray);
     }
-
-    /**
-     * Abstract function that must be implemented.
-     * Calculate the minimumBid allowed for the rebalance.
-     *
-     * @param _auction            Auction object
-     * @param _currentSet         The Set to rebalance from
-     * @param _nextSet            The Set to rebalance to
-     * @return                    Minimum bid amount
-     */
-    function calculateMinimumBid(
-        Setup storage _auction,
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        internal
-        view
-        returns (uint256);
 
     /**
      * Computes the union of the currentSet and nextSet components

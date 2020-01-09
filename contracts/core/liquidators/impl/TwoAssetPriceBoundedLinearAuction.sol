@@ -48,6 +48,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
 
     /* ============ Constants ============ */
     uint256 constant private CURVE_DENOMINATOR = 10 ** 18;
+    uint256 constant private ONE = 1;
     // Minimum token flow allowed at spot price in auction
     uint256 constant private MIN_SPOT_TOKEN_FLOW_SCALED = 10 ** 21;
     uint256 constant private ONE_HUNDRED = 100;
@@ -142,14 +143,15 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
 
         uint256 minimumBidMultiplier = 0;
         for (uint8 i = 0; i < _auction.combinedTokenArray.length; i++) {
-            // Get token flow at fair value for asset i
+            // Get token flow at fair value for asset i, using an amount equal to ONE maxNaturalUnit
+            // Hence the ONE.scale()
             (
                 uint256 tokenInflowScaled,
                 uint256 tokenOutflowScaled
             ) = Auction.calculateInflowOutflow(
                 _auction.combinedCurrentSetUnits[i],
                 _auction.combinedNextSetUnits[i],
-                10 ** 18,
+                ONE.scale(),
                 auctionFairValue
             );
 
@@ -158,14 +160,14 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
 
             // Divide minimum spot token flow (1000 units) by token flow if more than minimumBidMultiplier
             // update minimumBidMultiplier
-            minimumBidMultiplier = MIN_SPOT_TOKEN_FLOW_SCALED.div(tokenFlowScaled) > minimumBidMultiplier ?
-                MIN_SPOT_TOKEN_FLOW_SCALED.div(tokenFlowScaled) : 
+            uint256 currentMinBidMultiplier = MIN_SPOT_TOKEN_FLOW_SCALED.divCeil(tokenFlowScaled);
+            minimumBidMultiplier = currentMinBidMultiplier > minimumBidMultiplier ?
+                currentMinBidMultiplier : 
                 minimumBidMultiplier;
         }
 
-        // Add one to minimumBidMulitplier to prevent any rounding errors from creating flows less than 1000
         // Multiply the minimumBidMultiplier by maxNaturalUnit to get minimumBid
-        return _auction.maxNaturalUnit.mul(minimumBidMultiplier.add(1));
+        return _auction.maxNaturalUnit.mul(minimumBidMultiplier);
     }
 
     /**

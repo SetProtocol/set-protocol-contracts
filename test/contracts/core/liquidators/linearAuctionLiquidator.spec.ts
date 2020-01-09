@@ -216,7 +216,7 @@ contract('LinearAuctionLiquidator', accounts => {
     });
   });
 
-  describe('#startRebalance', async () => {
+  describe.only('#startRebalance', async () => {
     let linearAuction: LinearAuction;
 
     let subjectCaller: Address;
@@ -419,16 +419,6 @@ contract('LinearAuctionLiquidator', accounts => {
         );
 
         subjectNextSet = set3.address;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when currentSet and nextSet have same composition', async () => {
-      beforeEach(async () => {
-        subjectNextSet = set1.address;
       });
 
       it('should revert', async () => {

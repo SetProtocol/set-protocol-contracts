@@ -7,8 +7,8 @@ import {
 export interface LinearAuction {
   auction: Auction;
   endTime: BigNumber;
-  startNumerator: BigNumber;
-  endNumerator: BigNumber;
+  startPrice: BigNumber;
+  endPrice: BigNumber;
 }
 
 export interface Price {
@@ -23,7 +23,7 @@ export interface TokenFlow {
 }
 
 export interface Auction {
-  pricePrecision: BigNumber;
+  maxNaturalUnit: BigNumber;
   minimumBid: BigNumber;
   startTime: BigNumber;
   startingCurrentSets: BigNumber;
@@ -35,18 +35,18 @@ export interface Auction {
 
 export function getLinearAuction(input: any): LinearAuction {
   const {
-    pricePrecision,
     minimumBid,
     startTime,
     startingCurrentSets,
     remainingCurrentSets,
     combinedCurrentSetUnits,
     combinedNextSetUnits,
+    maxNaturalUnit,
   } = input.auction;
 
   return {
     auction: {
-      pricePrecision: new BigNumber(pricePrecision),
+      maxNaturalUnit: new BigNumber(maxNaturalUnit),
       minimumBid: new BigNumber(minimumBid),
       startTime: new BigNumber(startTime),
       startingCurrentSets: new BigNumber(startingCurrentSets),
@@ -56,7 +56,7 @@ export function getLinearAuction(input: any): LinearAuction {
       combinedNextSetUnits: combinedNextSetUnits.map(v => new BigNumber(v)),
     },
     endTime: new BigNumber(input.endTime),
-    startNumerator: new BigNumber(input.startNumerator),
-    endNumerator: new BigNumber(input.endNumerator),
+    startPrice: new BigNumber(input.startPrice),
+    endPrice: new BigNumber(input.endPrice),
   };
 }

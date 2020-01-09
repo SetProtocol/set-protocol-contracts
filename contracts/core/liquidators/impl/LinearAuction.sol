@@ -20,7 +20,6 @@ pragma experimental "ABIEncoderV2";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { Auction } from "./Auction.sol";
-import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { Rebalance } from "../../lib/Rebalance.sol";
 
@@ -38,35 +37,24 @@ contract LinearAuction is Auction {
     struct State {
         Auction.Setup auction;
         uint256 endTime;
-        uint256 startNumerator;
-        uint256 endNumerator;
+        uint256 startPrice;
+        uint256 endPrice;
     }
 
     /* ============ State Variables ============ */
     uint256 public auctionPeriod; // Length in seconds of auction
-    uint256 public rangeStart; // Percentage below FairValue to begin auction at
-    uint256 public rangeEnd;  // Percentage above FairValue to end auction at
 
     /**
      * LinearAuction constructor
      *
-     * @param _oracleWhiteList        Oracle WhiteList instance
      * @param _auctionPeriod          Length of auction
-     * @param _rangeStart             Percentage below FairValue to begin auction at
-     * @param _rangeEnd               Percentage above FairValue to end auction at
      */
     constructor(
-        IOracleWhiteList _oracleWhiteList,
-        uint256 _auctionPeriod,
-        uint256 _rangeStart,
-        uint256 _rangeEnd
+        uint256 _auctionPeriod
     )
         public
-        Auction(_oracleWhiteList)
     {
         auctionPeriod = _auctionPeriod;
-        rangeStart = _rangeStart;
-        rangeEnd = _rangeEnd;
     }
 
     /* ============ Internal Functions ============ */
@@ -94,27 +82,23 @@ contract LinearAuction is Auction {
             _startingCurrentSetQuantity
         );
 
-        uint256 fairValue = calculateFairValue(_currentSet, _nextSet, _linearAuction.auction.pricePrecision);
-        _linearAuction.startNumerator = calculateStartNumerator(fairValue);
-        _linearAuction.endNumerator = calculateEndNumerator(fairValue);
+        uint256 minimumBid = calculateMinimumBid(_linearAuction.auction, _currentSet, _nextSet);
+        
+        // remainingCurrentSets must be greater than minimumBid or no bidding would be allowed
+        require(
+            _startingCurrentSetQuantity >= minimumBid,
+            "Auction.initializeAuction: Not enough collateral to rebalance"
+        );
+
+        _linearAuction.auction.minimumBid = minimumBid;
+
+        _linearAuction.startPrice = calculateStartPrice(_linearAuction.auction, _currentSet, _nextSet);
+        _linearAuction.endPrice = calculateEndPrice(_linearAuction.auction, _currentSet, _nextSet);
+
         _linearAuction.endTime = block.timestamp.add(auctionPeriod);
     }
 
     /* ============ Internal View Functions ============ */
-
-    function validateRebalanceComponents(
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        internal
-        view
-    {
-        address[] memory combinedTokenArray = Auction.getCombinedTokenArray(_currentSet, _nextSet);
-        require(
-            oracleWhiteList.areValidAddresses(combinedTokenArray),
-            "LinearAuction.validateRebalanceComponents: Passed token does not have matching oracle."
-        );
-    }
 
     /**
      * Returns the TokenFlow based on the current price
@@ -135,13 +119,6 @@ contract LinearAuction is Auction {
     }
 
     /**
-     * Returns the linear price based on the current timestamp
-     */
-    function getPrice(State storage _linearAuction) internal view returns (Rebalance.Price memory) {
-        return Rebalance.composePrice(getNumerator(_linearAuction), _linearAuction.auction.pricePrecision);
-    }
-
-    /**
      * Auction failed is defined the timestamp breacnhing the auction end time and
      * the auction not being complete
      */
@@ -153,57 +130,67 @@ contract LinearAuction is Auction {
     }
 
     /**
-     * Returns the linear price based on the current timestamp. Returns the endNumerator
-     * if time has exceeded the auciton period
+     * Returns the price based on the current timestamp. Returns the endPrice
+     * if time has exceeded the auction period
      *
      * @param _linearAuction            Linear Auction State object
      * @return price                    uint representing the current price
      */
-    function getNumerator(State storage _linearAuction) internal view returns (uint256) {
+    function getPrice(State storage _linearAuction) internal view returns (uint256) {
         uint256 elapsed = block.timestamp.sub(_linearAuction.auction.startTime);
 
         // If current time has elapsed 
         if (elapsed >= auctionPeriod) {
-            return _linearAuction.endNumerator;
+            return _linearAuction.endPrice;
         } else {
-            uint256 range = _linearAuction.endNumerator.sub(_linearAuction.startNumerator);
+            uint256 range = _linearAuction.endPrice.sub(_linearAuction.startPrice);
             uint256 elapsedPrice = elapsed.mul(range).div(auctionPeriod);
 
-            return _linearAuction.startNumerator.add(elapsedPrice);
+            return _linearAuction.startPrice.add(elapsedPrice);
         }
     }
 
     /**
-     * Calculates the fair value based on the USD values of the next and current Sets.
+     * Abstract function that must be implemented.
+     * Calculate the minimumBid allowed for the rebalance.
+     *
+     * @param _auction            Auction object
+     * @param _currentSet         The Set to rebalance from
+     * @param _nextSet            The Set to rebalance to
+     * @return                    Minimum bid amount
      */
-    function calculateFairValue(
+    function calculateMinimumBid(
+        Setup storage _auction,
         ISetToken _currentSet,
-        ISetToken _nextSet,
-        uint256 _pricePrecision
+        ISetToken _nextSet
     )
         internal
         view
-        returns (uint256)
-    {
-        uint256 currentSetUSDValue = Auction.calculateUSDValueOfSet(_currentSet);
-        uint256 nextSetUSDValue = Auction.calculateUSDValueOfSet(_nextSet);
-
-        return nextSetUSDValue.mul(_pricePrecision).div(currentSetUSDValue);
-    }
+        returns (uint256);
 
     /**
+     * Abstract function that must be implemented.
      * Calculates the linear auction start price
      */
-    function calculateStartNumerator(uint256 _fairValue) internal view returns(uint256) {
-        uint256 startRange = _fairValue.mul(rangeStart).div(100);
-        return _fairValue.sub(startRange);
-    }
+    function calculateStartPrice(
+        Auction.Setup storage _auction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+        returns(uint256);
 
     /**
+     * Abstract function that must be implemented.
      * Calculates the linear auction end price
      */
-    function calculateEndNumerator(uint256 _fairValue) internal view returns(uint256) {
-        uint256 endRange = _fairValue.mul(rangeEnd).div(100);
-        return _fairValue.add(endRange);
-    }
+    function calculateEndPrice(
+        Auction.Setup storage _auction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+        returns(uint256);
 }

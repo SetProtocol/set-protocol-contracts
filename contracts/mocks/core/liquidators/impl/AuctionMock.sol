@@ -1,5 +1,7 @@
 pragma solidity 0.5.7;
 
+import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
+
 import { Auction } from "../../../../core/liquidators/impl/Auction.sol";
 import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";
 import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.sol";
@@ -7,11 +9,6 @@ import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.s
 // Mock contract implementation of Auction with extra functions for testing
 contract AuctionMock is Auction {
     Auction.Setup public auction;
-
-    constructor(IOracleWhiteList _oracleWhiteList)
-        public
-        Auction(_oracleWhiteList)
-    {}
 
     function initializeAuction(
         ISetToken _currentSet,
@@ -21,6 +18,8 @@ contract AuctionMock is Auction {
         external
     {
         super.initializeAuction(auction, _currentSet, _nextSet, _startingCurrentSetQuantity);
+
+        auction.minimumBid = calculateMinimumBid(auction, _currentSet, _nextSet);
     }
 
     function reduceRemainingCurrentSets(
@@ -57,6 +56,21 @@ contract AuctionMock is Auction {
 
     function combinedNextSetUnits() external view returns(uint256[] memory) {
         return auction.combinedNextSetUnits;
+    }
+
+    function calculateMinimumBid(
+        Setup storage _auction,
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        return Math.max(
+            _currentSet.naturalUnit(),
+            _nextSet.naturalUnit()
+        );
     }
 }
 

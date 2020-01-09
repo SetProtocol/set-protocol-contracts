@@ -14,9 +14,7 @@ import {
   SetTokenFactoryContract,
   StandardTokenMockContract,
   AuctionMockContract,
-  OracleWhiteListContract,
   TransferProxyContract,
-  UpdatableOracleMockContract,
   VaultContract,
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
@@ -29,7 +27,6 @@ import { ether, gWei } from '@utils/units';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 
 BigNumberSetup.configure();
@@ -51,24 +48,14 @@ contract('Auction', accounts => {
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
   let auctionMock: AuctionMockContract;
-  let oracleWhiteList: OracleWhiteListContract;
 
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
   const erc20Helper = new ERC20Helper(ownerAccount);
   const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper);
-  const libraryMockHelper = new LibraryMockHelper(ownerAccount);
 
   let component1: StandardTokenMockContract;
   let component2: StandardTokenMockContract;
   let component3: StandardTokenMockContract;
-
-  let component1Price: BigNumber;
-  let component2Price: BigNumber;
-  let component3Price: BigNumber;
-
-  let component1Oracle: UpdatableOracleMockContract;
-  let component2Oracle: UpdatableOracleMockContract;
-  let component3Oracle: UpdatableOracleMockContract;
 
   let set1: SetTokenContract;
   let set2: SetTokenContract;
@@ -97,19 +84,6 @@ contract('Auction', accounts => {
     component1 = await erc20Helper.deployTokenAsync(ownerAccount);
     component2 = await erc20Helper.deployTokenAsync(ownerAccount);
     component3 = await erc20Helper.deployTokenAsync(ownerAccount);
-
-    component1Price = ether(1);
-    component2Price = ether(2);
-    component3Price = ether(1);
-
-    component1Oracle = await libraryMockHelper.deployUpdatableOracleMockAsync(component1Price);
-    component2Oracle = await libraryMockHelper.deployUpdatableOracleMockAsync(component2Price);
-    component3Oracle = await libraryMockHelper.deployUpdatableOracleMockAsync(component3Price);
-
-    oracleWhiteList = await coreHelper.deployOracleWhiteListAsync(
-      [component1.address, component2.address, component3.address],
-      [component1Oracle.address, component2Oracle.address, component3Oracle.address],
-    );
 
     set1Components = [component1.address, component2.address];
     set1Units = [gWei(1), gWei(1)];
@@ -147,25 +121,6 @@ contract('Auction', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#constructor', async () => {
-    let subjectWhiteList: Address;
-
-    beforeEach(async () => {
-      subjectWhiteList = oracleWhiteList.address;
-    });
-
-    async function subject(): Promise<any> {
-      return liquidatorHelper.deployAuctionMockAsync(subjectWhiteList);
-    }
-
-    it('sets the correct oracleWhiteList', async () => {
-      auctionMock = await subject();
-
-      const actualOracleWhiteList = await auctionMock.oracleWhiteList.callAsync();
-      expect(actualOracleWhiteList).to.bignumber.equal(oracleWhiteList.address);
-    });
-  });
-
   describe('#initializeAuction', async () => {
     let subjectCaller: Address;
     let subjectCurrentSet: Address;
@@ -173,7 +128,7 @@ contract('Auction', accounts => {
     let subjectStartingCurrentSetQuantity: BigNumber;
 
     beforeEach(async () => {
-      auctionMock = await liquidatorHelper.deployAuctionMockAsync(oracleWhiteList.address);
+      auctionMock = await liquidatorHelper.deployAuctionMockAsync();
 
       subjectCaller = functionCaller;
       subjectCurrentSet = set1.address;
@@ -192,31 +147,6 @@ contract('Auction', accounts => {
         { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
-
-    it('sets the correct pricePrecision', async () => {
-      await subject();
-
-      const auctionSetup: any = await auctionMock.auction.callAsync();
-
-      const expectedPricePrecision = await liquidatorHelper.calculatePricePrecisionAsync(
-        set1,
-        set2,
-        oracleWhiteList
-      );
-
-      expect(auctionSetup.pricePrecision).to.bignumber.equal(expectedPricePrecision);
-    });
-
-    it('sets the correct minimumBid', async () => {
-      await subject();
-
-      const auctionSetup: any = await auctionMock.auction.callAsync();
-
-      const pricePrecision = auctionSetup.pricePrecision;
-      const expectedMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                          .mul(pricePrecision);
-      expect(auctionSetup.minimumBid).to.bignumber.equal(expectedMinimumBid);
-    });
 
     it('sets the correct startTime', async () => {
       await subject();
@@ -261,8 +191,7 @@ contract('Auction', accounts => {
       const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
         set1,
         combinedTokenArray,
-        new BigNumber(auctionSetup.minimumBid),
-        auctionSetup.pricePrecision
+        new BigNumber(auctionSetup.maxNaturalUnit),
       );
 
       expect(JSON.stringify(combinedCurrentSetUnits)).to.equal(JSON.stringify(expectedResult));
@@ -278,83 +207,10 @@ contract('Auction', accounts => {
       const expectedResult = await liquidatorHelper.constructCombinedUnitArrayAsync(
         set2,
         combinedTokenArray,
-        new BigNumber(auctionSetup.minimumBid),
-        auctionSetup.pricePrecision
+        new BigNumber(auctionSetup.maxNaturalUnit),
       );
 
       expect(JSON.stringify(combinedNextSetUnits)).to.equal(JSON.stringify(expectedResult));
-    });
-
-    describe('when currentSet is greater than 10x the nextSet', async () => {
-      beforeEach(async () => {
-        const setComponents = [component1.address, component2.address];
-        const setUnits = [gWei(1), gWei(1)];
-        const setNaturalUnit = gWei(300);
-        const set3 = await coreHelper.createSetTokenAsync(
-          core,
-          setTokenFactory.address,
-          setComponents,
-          setUnits,
-          setNaturalUnit,
-        );
-
-        subjectNextSet = set3.address;
-      });
-
-      it('sets the correct pricePrecision', async () => {
-        await subject();
-
-        const auctionSetup: any = await auctionMock.auction.callAsync();
-
-        const expectedPricePrecision = await liquidatorHelper.calculatePricePrecisionAsync(
-          await coreHelper.getSetInstance(subjectCurrentSet),
-          await coreHelper.getSetInstance(subjectNextSet),
-          oracleWhiteList
-        );
-        console.log(auctionSetup.pricePrecision);
-        expect(auctionSetup.pricePrecision).to.bignumber.equal(expectedPricePrecision);
-      });
-    });
-
-    describe('when currentSet is 1-2x greater than nextSet', async () => {
-      beforeEach(async () => {
-        const set3Components = [component1.address, component3.address];
-        const set3Units = [gWei(1), gWei(1)];
-        const set3NaturalUnit = gWei(2);
-        const set3 = await coreHelper.createSetTokenAsync(
-          core,
-          setTokenFactory.address,
-          set3Components,
-          set3Units,
-          set3NaturalUnit,
-        );
-
-        subjectNextSet = set3.address;
-      });
-
-      it('sets the correct pricePrecision', async () => {
-        await subject();
-
-        const auctionSetup: any = await auctionMock.auction.callAsync();
-
-        const expectedPricePrecision = await liquidatorHelper.calculatePricePrecisionAsync(
-          await coreHelper.getSetInstance(subjectCurrentSet),
-          await coreHelper.getSetInstance(subjectNextSet),
-          oracleWhiteList
-        );
-        console.log(auctionSetup.pricePrecision);
-        expect(auctionSetup.pricePrecision).to.bignumber.equal(expectedPricePrecision);
-      });
-    });
-
-    describe('when there is insufficient collateral to rebalance', async () => {
-      beforeEach(async () => {
-        subjectStartingCurrentSetQuantity = gWei(10);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
     });
   });
 
@@ -366,7 +222,7 @@ contract('Auction', accounts => {
     let subjectReductionQuantity: BigNumber;
 
     beforeEach(async () => {
-      auctionMock = await liquidatorHelper.deployAuctionMockAsync(oracleWhiteList.address);
+      auctionMock = await liquidatorHelper.deployAuctionMockAsync();
 
       subjectCaller = functionCaller;
       startingCurrentSetQuantity = ether(10);
@@ -405,7 +261,7 @@ contract('Auction', accounts => {
     let subjectQuantity: BigNumber;
 
     beforeEach(async () => {
-      auctionMock = await liquidatorHelper.deployAuctionMockAsync(oracleWhiteList.address);
+      auctionMock = await liquidatorHelper.deployAuctionMockAsync();
 
       subjectCaller = functionCaller;
       startingCurrentSetQuantity = ether(10);
@@ -433,10 +289,7 @@ contract('Auction', accounts => {
 
     describe('when the quantity is not a multiple of the minimumBid', async () => {
       beforeEach(async () => {
-        const auctionSetup: any = await auctionMock.auction.callAsync();
-        const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit)
-                                            .mul(auctionSetup.pricePrecision)
-                                            .div(2);
+        const halfMinimumBid = BigNumber.max(set1NaturalUnit, set2NaturalUnit).div(2);
         subjectQuantity = gWei(10).plus(halfMinimumBid);
       });
 
@@ -464,7 +317,7 @@ contract('Auction', accounts => {
     let customReductionQuantity: BigNumber;
 
     beforeEach(async () => {
-      auctionMock = await liquidatorHelper.deployAuctionMockAsync(oracleWhiteList.address);
+      auctionMock = await liquidatorHelper.deployAuctionMockAsync();
 
       subjectCaller = functionCaller;
       startingCurrentSetQuantity = ether(10);
@@ -513,7 +366,7 @@ contract('Auction', accounts => {
     let startingCurrentSetQuantity: BigNumber;
 
     beforeEach(async () => {
-      auctionMock = await liquidatorHelper.deployAuctionMockAsync(oracleWhiteList.address);
+      auctionMock = await liquidatorHelper.deployAuctionMockAsync();
 
       subjectCaller = functionCaller;
     });

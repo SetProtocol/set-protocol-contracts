@@ -2,6 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import { ether } from '../utils/units';
 
 export const AUCTION_TIME_INCREMENT = new BigNumber(30); // Unix seconds
+export const AUCTION_CURVE_DENOMINATOR = ether(1);
 export const DEFAULT_AUCTION_PRICE_NUMERATOR = new BigNumber(1374);
 export const DEFAULT_AUCTION_PRICE_DIVISOR = new BigNumber(1000);
 export const DEFAULT_GAS = 19000000;
@@ -17,6 +18,7 @@ export const EMPTY_BYTESTRING: string = '0x00';
 export const KYBER_RESERVE_CONFIGURED_RATE: BigNumber = new BigNumber('321556325999999997');
 export const NULL_ADDRESS: string = '0x0000000000000000000000000000000000000000';
 export const ONE: BigNumber = new BigNumber(1);
+export const ONE_HUNDRED = new BigNumber(100);
 export const ONE_DAY_IN_SECONDS = new BigNumber(86400);
 export const ONE_HOUR_IN_SECONDS = new BigNumber(3600);
 export const SCALE_FACTOR = ether(1);

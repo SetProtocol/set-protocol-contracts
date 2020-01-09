@@ -104,6 +104,17 @@ library CommonMath {
     }
 
     /**
+    * @dev Performs division where if there is a modulo, the value is rounded up
+    */
+    function divCeil(uint256 a, uint256 b)
+        internal
+        pure
+        returns(uint256)
+    {
+        return a.mod(b) > 0 ? a.div(b).add(1) : a.div(b);
+    }
+
+    /**
      * Checks for rounding errors and returns value of potential partial amounts of a principal
      *
      * @param  _principal       Number fractional amount is derived from

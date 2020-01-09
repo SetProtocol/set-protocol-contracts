@@ -52,6 +52,17 @@ contract CommonMathMock {
         return CommonMath.deScale(a);
     }
 
+    function testDivCeil(
+        uint256 a,
+        uint256 b
+    )
+        external
+        pure
+        returns(uint256)
+    {
+        return CommonMath.divCeil(a, b);
+    }
+
      function testGetPartialAmount(
         uint256 _principal,
         uint256 _numerator,

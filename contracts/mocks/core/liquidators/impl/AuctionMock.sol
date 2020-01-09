@@ -18,6 +18,8 @@ contract AuctionMock is Auction {
         external
     {
         super.initializeAuction(auction, _currentSet, _nextSet, _startingCurrentSetQuantity);
+
+        auction.minimumBid = calculateMinimumBid(auction, _currentSet, _nextSet);
     }
 
     function reduceRemainingCurrentSets(

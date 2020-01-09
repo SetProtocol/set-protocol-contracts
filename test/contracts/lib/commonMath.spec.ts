@@ -176,8 +176,8 @@ contract('CommonMathMock', accounts => {
     const caller: Address = ownerAccount;
 
     beforeEach(async () => {
-      subjectA = new BigNumber(5);
-      subjectB = new BigNumber(2);
+      subjectA = new BigNumber(26);
+      subjectB = new BigNumber(11);
     });
 
     async function subject(): Promise<BigNumber> {
@@ -197,7 +197,7 @@ contract('CommonMathMock', accounts => {
 
     describe('when there is no rounding', async () => {
       beforeEach(async () => {
-        subjectA = new BigNumber(4);
+        subjectA = new BigNumber(6);
         subjectB = new BigNumber(2);
       });
 

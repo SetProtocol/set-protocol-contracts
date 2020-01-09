@@ -111,7 +111,7 @@ library CommonMath {
         pure
         returns(uint256)
     {
-        return a.mod(b) > 0 ? a.div(2).add(1) : a.div(b);
+        return a.mod(b) > 0 ? a.div(b).add(1) : a.div(b);
     }
 
     /**

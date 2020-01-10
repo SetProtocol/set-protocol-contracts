@@ -59,7 +59,7 @@ contract BackwardCompatibility is
         auctionPriceParams[0] = params.auctionStartTime;
         auctionPriceParams[1] = params.auctionTimeToPivot;
         auctionPriceParams[2] = params.auctionStartPrice;
-        auctionPriceParams[2] = params.auctionPivotPrice;
+        auctionPriceParams[3] = params.auctionPivotPrice;
 
         return auctionPriceParams;
     }

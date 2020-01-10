@@ -319,6 +319,16 @@ contract('LinearAuction', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when there is insufficient collateral to rebalance', async () => {
+      beforeEach(async () => {
+        subjectStartingCurrentSetQuantity = gWei(199);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('[CONTEXT] Initialized auction', async () => {

@@ -81,6 +81,31 @@ export class CompoundHelper {
     );
   }
 
+  public async deployMockCDAI(
+    underlying: Address,
+    admin: Address,
+  ): Promise<string> {
+    const config = {
+      'name': 'C_DAI',
+      'symbol': 'cDAI',
+      'decimals': new BigNumber(8),
+      'underlying': underlying,
+      'contract': 'CErc20',
+      'initial_exchange_rate_mantissa': new BigNumber('200000000000000'),
+    };
+
+    return await this.deployCToken(
+      config.underlying,
+      this.comptroller,
+      this.interestRateModel,
+      config.initial_exchange_rate_mantissa,
+      config.symbol,
+      config.name,
+      config.decimals,
+      this.admin,
+    );
+  }
+
   // cToken must be enabled before minting or accruing interest is allowed
   public async enableCToken(cToken: Address): Promise<void> {
     const ComptrollerContract = new web3.eth.Contract(ComptrollerABI, this.comptroller);

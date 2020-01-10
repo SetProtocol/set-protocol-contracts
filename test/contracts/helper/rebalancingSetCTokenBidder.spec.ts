@@ -67,8 +67,11 @@ contract('RebalancingSetCTokenBidder', accounts => {
   let rebalancingComponentWhiteList: WhiteListContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
   let constantAuctionPriceCurve: ConstantAuctionPriceCurveContract;
-  let targetCToken: StandardTokenMockContract;
-  let underlying: StandardTokenMockContract;
+  let cUSDCInstance: StandardTokenMockContract;
+  let usdcInstance: StandardTokenMockContract;
+  let cDAIInstance: StandardTokenMockContract;
+  let daiInstance: StandardTokenMockContract;
+
   let rebalancingSetCTokenBidder: RebalancingSetCTokenBidderContract;
   let dataDescription: string;
 
@@ -110,31 +113,45 @@ contract('RebalancingSetCTokenBidder', accounts => {
     await rebalancingHelper.addPriceLibraryAsync(coreMock, constantAuctionPriceCurve);
 
     // Set up Compound USDC token
-    const usdc: StandardTokenMockContract = await erc20Helper.deployTokenAsync(
+    usdcInstance = await erc20Helper.deployTokenAsync(
       deployerAccount,
       6,
     );
-
-    const cUSDCAddress = await compoundHelper.deployMockCUSDC(usdc.address, deployerAccount);
+    const cUSDCAddress = await compoundHelper.deployMockCUSDC(usdcInstance.address, deployerAccount);
     await compoundHelper.enableCToken(cUSDCAddress);
-
     // Set the Borrow Rate
     await compoundHelper.setBorrowRate(cUSDCAddress, new BigNumber('43084603999'));
 
     await erc20Helper.approveTransferAsync(
-      usdc,
+      usdcInstance,
       cUSDCAddress,
       deployerAccount
     );
+    cUSDCInstance = await erc20Helper.getTokenInstanceAsync(cUSDCAddress);
 
-    targetCToken = await erc20Helper.getTokenInstanceAsync(cUSDCAddress);
-    underlying = usdc;
-    dataDescription = 'cUSDC Bidder Contract';
+    // Set up Compound DAI token
+    daiInstance = await erc20Helper.deployTokenAsync(
+      deployerAccount,
+      18,
+    );
+    const cDAIAddress = await compoundHelper.deployMockCDAI(daiInstance.address, deployerAccount);
+    await compoundHelper.enableCToken(cDAIAddress);
+    // Set the Borrow Rate
+    await compoundHelper.setBorrowRate(cDAIAddress, new BigNumber('29313252165'));
+
+    await erc20Helper.approveTransferAsync(
+      daiInstance,
+      cDAIAddress,
+      deployerAccount
+    );
+    cDAIInstance = await erc20Helper.getTokenInstanceAsync(cDAIAddress);
+
+    dataDescription = 'cDAI cUSDC Bidder Contract';
     rebalancingSetCTokenBidder = await rebalancingSetBidderHelper.deployRebalancingSetCTokenBidderAsync(
       rebalanceAuctionModuleMock.address,
       transferProxy.address,
-      targetCToken.address,
-      underlying.address,
+      [cUSDCInstance.address, cDAIInstance.address],
+      [usdcInstance.address, daiInstance.address],
       dataDescription,
     );
   });
@@ -165,16 +182,11 @@ contract('RebalancingSetCTokenBidder', accounts => {
       expect(actualProxyAddress).to.equal(transferProxy.address);
     });
 
-    it('should contain the correct address of target cToken', async () => {
-      const actualTargetCTokenAddress = await rebalancingSetCTokenBidder.targetCToken.callAsync();
-
-      expect(actualTargetCTokenAddress).to.equal(targetCToken.address);
-    });
-
-    it('should contain the correct address of the underlying token', async () => {
-      const actualUnderlyingAddress = await rebalancingSetCTokenBidder.underlyingAddress.callAsync();
-
-      expect(actualUnderlyingAddress).to.equal(underlying.address);
+    it('should contain the correct cTokens to underlying', async () => {
+      const actualDAIAddress = await rebalancingSetCTokenBidder.cTokenToUnderlying.callAsync(cDAIInstance.address);
+      const actualUSDCAddress = await rebalancingSetCTokenBidder.cTokenToUnderlying.callAsync(cUSDCInstance.address);
+      expect(actualDAIAddress).to.equal(daiInstance.address);
+      expect(actualUSDCAddress).to.equal(usdcInstance.address);
     });
 
     it('should contain the correct data description', async () => {
@@ -184,27 +196,37 @@ contract('RebalancingSetCTokenBidder', accounts => {
     });
 
     it('should have unlimited allowance for underlying to cToken contract', async () => {
-      const underlyingAllowance = await underlying.allowance.callAsync(
+      const underlyingUSDCAllowance = await usdcInstance.allowance.callAsync(
         rebalancingSetCTokenBidder.address,
-        targetCToken.address,
+        cUSDCInstance.address,
+      );
+      const underlyingDAIAllowance = await daiInstance.allowance.callAsync(
+        rebalancingSetCTokenBidder.address,
+        cDAIInstance.address,
       );
       const expectedUnderlyingAllowance = UNLIMITED_ALLOWANCE_IN_BASE_UNITS;
 
-      expect(underlyingAllowance).to.bignumber.equal(expectedUnderlyingAllowance);
+      expect(underlyingUSDCAllowance).to.bignumber.equal(expectedUnderlyingAllowance);
+      expect(underlyingDAIAllowance).to.bignumber.equal(expectedUnderlyingAllowance);
     });
 
     it('should have unlimited allowance for cToken to transferProxy contract', async () => {
-      const cTokenAllowance = await targetCToken.allowance.callAsync(
+      const cUSDCAllowance = await cUSDCInstance.allowance.callAsync(
+        rebalancingSetCTokenBidder.address,
+        transferProxy.address,
+      );
+      const cDAIAllowance = await cUSDCInstance.allowance.callAsync(
         rebalancingSetCTokenBidder.address,
         transferProxy.address,
       );
       const expectedCTokenAllowance = UNLIMITED_ALLOWANCE_IN_BASE_UNITS;
 
-      expect(cTokenAllowance).to.bignumber.equal(expectedCTokenAllowance);
+      expect(cUSDCAllowance).to.bignumber.equal(expectedCTokenAllowance);
+      expect(cDAIAllowance).to.bignumber.equal(expectedCTokenAllowance);
     });
   });
 
-  describe('#bidAndWithdraw', async () => {
+  describe.only('#bidAndWithdraw', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectQuantity: BigNumber;
     let subjectExecutePartialQuantity: boolean;
@@ -255,12 +277,12 @@ contract('RebalancingSetCTokenBidder', accounts => {
       );
 
       // ----------------------------------------------------------------------
-      // Create Set with a cToken component
+      // Create Set with 2 cToken components
       // ----------------------------------------------------------------------
 
       // Create component tokens for Set containing the target cToken
-      cTokenBaseSetComponent = targetCToken;
-      cTokenBaseSetComponent2 = await erc20Helper.deployTokenAsync(deployerAccount);
+      cTokenBaseSetComponent = cUSDCInstance;
+      cTokenBaseSetComponent2 = cDAIInstance;
 
       // Create the Set (default is 2 components)
       const nextComponentAddresses = [
@@ -345,10 +367,10 @@ contract('RebalancingSetCTokenBidder', accounts => {
           constantAuctionPriceCurve.address,
           managerAccount
         );
-        // Approve tokens to rebalancingSetCTokenBidder contract
+        // Approve underlying tokens to rebalancingSetCTokenBidder contract
         await erc20Helper.approveTransfersAsync([
-          underlying, // Approve underlying for transfer
-          cTokenBaseSetComponent2,
+          usdcInstance,
+          daiInstance,
         ], rebalancingSetCTokenBidder.address);
       });
 
@@ -362,12 +384,13 @@ contract('RebalancingSetCTokenBidder', accounts => {
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
         // Get current exchange rate
-        const cTokenExchangeRate = await compoundHelper.getExchangeRateCurrent(targetCToken.address);
+        const cTokenExchangeRate = await compoundHelper.getExchangeRateCurrent(cUSDCInstance.address);
         // Replace expected token flow arrays with cToken underlying
         const expectedTokenFlowsUnderlying = rebalancingSetBidderHelper.replaceFlowsWithCTokenUnderlyingAsync(
           expectedTokenFlows,
           combinedTokenArray,
-          targetCToken.address,
+          [cUSDCInstance.address, cDAIInstance.address],
+          [usdcInstance.address, daiInstance.address],
           cTokenExchangeRate,
         );
 
@@ -378,14 +401,20 @@ contract('RebalancingSetCTokenBidder', accounts => {
           subjectCaller
         );
 
-        const oldUnderlyingTokenBalance = await erc20Helper.getTokenBalances(
-          [underlying],
+        const oldUnderlyingTokenBalances = await erc20Helper.getTokenBalances(
+          [usdcInstance, daiInstance],
           subjectCaller
         );
         // Replace cToken balance with underlying token balance
-        const oldReceiverTokenUnderlyingBalances = _.map(oldReceiverTokenBalances, (balance, index) =>
-          combinedTokenArray[index] === targetCToken.address ? oldUnderlyingTokenBalance[0] : balance
-        );
+        const oldReceiverTokenUnderlyingBalances = _.map(oldReceiverTokenBalances, (balance, index) => {
+          if (combinedTokenArray[index] === cUSDCInstance.address) {
+            return oldUnderlyingTokenBalances[0];
+          } else if (combinedTokenArray[index] === cDAIInstance.address) {
+            return oldUnderlyingTokenBalances[1];
+          } else {
+            return balance;
+          }
+        });
 
         await subject();
 
@@ -393,14 +422,20 @@ contract('RebalancingSetCTokenBidder', accounts => {
           tokenInstances,
           subjectCaller
         );
-        const newUnderlyingTokenBalance = await erc20Helper.getTokenBalances(
-          [underlying],
+        const newUnderlyingTokenBalances = await erc20Helper.getTokenBalances(
+          [usdcInstance, daiInstance],
           subjectCaller
         );
         // Replace cToken balance with underlying token balance
-        const newReceiverTokenUnderlyingBalances = _.map(newReceiverTokenBalances, (balance, index) =>
-          combinedTokenArray[index] === targetCToken.address ? newUnderlyingTokenBalance[0] : balance
-        );
+        const newReceiverTokenUnderlyingBalances = _.map(newReceiverTokenBalances, (balance, index) => {
+          if (combinedTokenArray[index] === cUSDCInstance.address) {
+            return newUnderlyingTokenBalances[0];
+          } else if (combinedTokenArray[index] === cDAIInstance.address) {
+            return newUnderlyingTokenBalances[1];
+          } else {
+            return balance;
+          }
+        });
 
         const expectedReceiverBalances = _.map(oldReceiverTokenUnderlyingBalances, (balance, index) =>
           balance
@@ -528,12 +563,13 @@ contract('RebalancingSetCTokenBidder', accounts => {
 
           const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
-          const cTokenExchangeRate = await compoundHelper.getExchangeRateCurrent(targetCToken.address);
+          const cTokenExchangeRate = await compoundHelper.getExchangeRateCurrent(cUSDCInstance.address);
           // Replace expected token flow arrays with cToken underlying
           const expectedTokenFlowsUnderlying = rebalancingSetBidderHelper.replaceFlowsWithCTokenUnderlyingAsync(
             expectedTokenFlows,
             combinedTokenArray,
-            targetCToken.address,
+            [cUSDCInstance.address, cDAIInstance.address],
+            [usdcInstance.address, daiInstance.address],
             cTokenExchangeRate,
           );
 
@@ -544,14 +580,20 @@ contract('RebalancingSetCTokenBidder', accounts => {
             subjectCaller
           );
 
-          const oldUnderlyingTokenBalance = await erc20Helper.getTokenBalances(
-            [underlying],
+          const oldUnderlyingTokenBalances = await erc20Helper.getTokenBalances(
+            [usdcInstance, daiInstance],
             subjectCaller
           );
           // Replace cToken balance with underlying token balance
-          const oldReceiverTokenUnderlyingBalances = _.map(oldReceiverTokenBalances, (balance, index) =>
-            combinedTokenArray[index] === targetCToken.address ? oldUnderlyingTokenBalance[0] : balance
-          );
+          const oldReceiverTokenUnderlyingBalances = _.map(oldReceiverTokenBalances, (balance, index) => {
+            if (combinedTokenArray[index] === cUSDCInstance.address) {
+              return oldUnderlyingTokenBalances[0];
+            } else if (combinedTokenArray[index] === cDAIInstance.address) {
+              return oldUnderlyingTokenBalances[1];
+            } else {
+              return balance;
+            }
+          });
 
           await subject();
 
@@ -559,14 +601,20 @@ contract('RebalancingSetCTokenBidder', accounts => {
             tokenInstances,
             subjectCaller
           );
-          const newUnderlyingTokenBalance = await erc20Helper.getTokenBalances(
-            [underlying],
+          const newUnderlyingTokenBalances = await erc20Helper.getTokenBalances(
+            [usdcInstance, daiInstance],
             subjectCaller
           );
           // Replace cToken balance with underlying token balance
-          const newReceiverTokenUnderlyingBalances = _.map(newReceiverTokenBalances, (balance, index) =>
-            combinedTokenArray[index] === targetCToken.address ? newUnderlyingTokenBalance[0] : balance
-          );
+          const newReceiverTokenUnderlyingBalances = _.map(newReceiverTokenBalances, (balance, index) => {
+            if (combinedTokenArray[index] === cUSDCInstance.address) {
+              return newUnderlyingTokenBalances[0];
+            } else if (combinedTokenArray[index] === cDAIInstance.address) {
+              return newUnderlyingTokenBalances[1];
+            } else {
+              return balance;
+            }
+          });
 
           const expectedReceiverBalances = _.map(oldReceiverTokenUnderlyingBalances, (balance, index) =>
             balance
@@ -659,15 +707,19 @@ contract('RebalancingSetCTokenBidder', accounts => {
         // Approve tokens, mint cToken and issue cTokenSetToken
         const baseSetIssueQuantity = ether(1);
 
-        await erc20Helper.approveTransfersAsync([underlying], cTokenBaseSetComponent.address);
+        await erc20Helper.approveTransfersAsync([usdcInstance], cTokenBaseSetComponent.address);
+        await erc20Helper.approveTransfersAsync([daiInstance], cTokenBaseSetComponent2.address);
         await compoundHelper.mintCToken(
           cTokenBaseSetComponent.address,
           new BigNumber(10 ** 18)
         );
+        await compoundHelper.mintCToken(
+          cTokenBaseSetComponent2.address,
+          new BigNumber(10 ** 22)
+        );
 
         await erc20Helper.approveTransfersAsync(
-          [cTokenBaseSetComponent,
-          cTokenBaseSetComponent2],
+          [cTokenBaseSetComponent, cTokenBaseSetComponent2],
           transferProxy.address
         );
         await coreMock.issue.sendTransactionAsync(
@@ -709,8 +761,6 @@ contract('RebalancingSetCTokenBidder', accounts => {
         await erc20Helper.approveTransfersAsync([
           defaultBaseSetComponent,
           defaultBaseSetComponent2,
-          underlying, // Approve underlying for transfer
-          cTokenBaseSetComponent2,
         ], rebalancingSetCTokenBidder.address);
       });
 
@@ -723,12 +773,13 @@ contract('RebalancingSetCTokenBidder', accounts => {
 
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
-        const cTokenExchangeRate = await compoundHelper.getExchangeRateCurrent(targetCToken.address);
+        const cTokenExchangeRate = await compoundHelper.getExchangeRateCurrent(cUSDCInstance.address);
         // Replace expected token flow arrays with cToken underlying
         const expectedTokenFlowsUnderlying = rebalancingSetBidderHelper.replaceFlowsWithCTokenUnderlyingAsync(
           expectedTokenFlows,
           combinedTokenArray,
-          targetCToken.address,
+          [cUSDCInstance.address, cDAIInstance.address],
+          [usdcInstance.address, daiInstance.address],
           cTokenExchangeRate,
         );
 
@@ -739,28 +790,40 @@ contract('RebalancingSetCTokenBidder', accounts => {
           subjectCaller
         );
 
-        const oldUnderlyingTokenBalance = await erc20Helper.getTokenBalances(
-          [underlying],
+        const oldUnderlyingTokenBalances = await erc20Helper.getTokenBalances(
+          [usdcInstance, daiInstance],
           subjectCaller
         );
         // Replace cToken balance with underlying token balance
-        const oldReceiverTokenUnderlyingBalances = _.map(oldReceiverTokenBalances, (balance, index) =>
-          combinedTokenArray[index] === targetCToken.address ? oldUnderlyingTokenBalance[0] : balance
-        );
+        const oldReceiverTokenUnderlyingBalances = _.map(oldReceiverTokenBalances, (balance, index) => {
+          if (combinedTokenArray[index] === cUSDCInstance.address) {
+            return oldUnderlyingTokenBalances[0];
+          } else if (combinedTokenArray[index] === cDAIInstance.address) {
+            return oldUnderlyingTokenBalances[1];
+          } else {
+            return balance;
+          }
+        });
 
         await subject();
         const newReceiverTokenBalances = await erc20Helper.getTokenBalances(
           tokenInstances,
           subjectCaller
         );
-        const newUnderlyingTokenBalance = await erc20Helper.getTokenBalances(
-          [underlying],
+        const newUnderlyingTokenBalances = await erc20Helper.getTokenBalances(
+          [usdcInstance, daiInstance],
           subjectCaller
         );
         // Replace cToken balance with underlying token balance
-        const newReceiverTokenUnderlyingBalances = _.map(newReceiverTokenBalances, (balance, index) =>
-          combinedTokenArray[index] === targetCToken.address ? newUnderlyingTokenBalance[0] : balance
-        );
+        const newReceiverTokenUnderlyingBalances = _.map(newReceiverTokenBalances, (balance, index) => {
+          if (combinedTokenArray[index] === cUSDCInstance.address) {
+            return newUnderlyingTokenBalances[0];
+          } else if (combinedTokenArray[index] === cDAIInstance.address) {
+            return newUnderlyingTokenBalances[1];
+          } else {
+            return balance;
+          }
+        });
 
         const expectedReceiverBalances = _.map(oldReceiverTokenUnderlyingBalances, (balance, index) =>
           balance
@@ -772,7 +835,7 @@ contract('RebalancingSetCTokenBidder', accounts => {
       });
     });
 
-    describe('when target cToken is neither inflow nor outflow in a bid', async () => {
+    describe('when cTokens are neither inflow nor outflow in a bid', async () => {
       beforeEach(async () => {
         // Create the Rebalancing Set with the default component
         proposalPeriod = ONE_DAY_IN_SECONDS;
@@ -932,12 +995,12 @@ contract('RebalancingSetCTokenBidder', accounts => {
       );
 
       // ----------------------------------------------------------------------
-      // Create Set with a cToken component
+      // Create Set with 2 cToken components
       // ----------------------------------------------------------------------
 
       // Create component tokens for Set containing the target cToken
-      cTokenBaseSetComponent = targetCToken;
-      cTokenBaseSetComponent2 = await erc20Helper.deployTokenAsync(deployerAccount);
+      cTokenBaseSetComponent = cUSDCInstance;
+      cTokenBaseSetComponent2 = cDAIInstance;
 
       // Create the Set (default is 2 components)
       const nextComponentAddresses = [
@@ -1008,11 +1071,6 @@ contract('RebalancingSetCTokenBidder', accounts => {
         constantAuctionPriceCurve.address,
         managerAccount
       );
-      // Approve tokens to rebalancingSetCTokenBidder contract
-      await erc20Helper.approveTransfersAsync([
-        underlying, // Approve underlying for transfer
-        cTokenBaseSetComponent2,
-      ], rebalancingSetCTokenBidder.address);
     });
 
     async function subject(): Promise<any> {
@@ -1037,15 +1095,16 @@ contract('RebalancingSetCTokenBidder', accounts => {
 
       const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
       const expectedCombinedTokenArray = _.map(combinedTokenArray, token =>
-        token === targetCToken.address ? underlying.address : token
+        token === cUSDCInstance.address ? usdcInstance.address : token
       );
       // Get exchange rate stored
-      const cTokenExchangeRate = await compoundHelper.getExchangeRate(targetCToken.address);
+      const cTokenExchangeRate = await compoundHelper.getExchangeRate(cUSDCInstance.address);
       // Replace expected token flow arrays with cToken underlying
       const expectedTokenFlowsUnderlying = rebalancingSetBidderHelper.replaceFlowsWithCTokenUnderlyingAsync(
         expectedTokenFlows,
         combinedTokenArray,
-        targetCToken.address,
+        [cUSDCInstance.address, cDAIInstance.address],
+        [usdcInstance.address, daiInstance.address],
         cTokenExchangeRate,
       );
 

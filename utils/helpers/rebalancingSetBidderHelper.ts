@@ -47,8 +47,8 @@ export class RebalancingSetBidderHelper {
   public async deployRebalancingSetCTokenBidderAsync(
     rebalanceAuctionModuleAddress: Address,
     transferProxyAddress: Address,
-    targetCTokenAddress: Address,
-    underlyingAddress: Address,
+    cTokenAddressesArray: Address[],
+    underlyingAddressesArray: Address[],
     dataDescription: string,
     from: Address = this._contractOwnerAddress
   ): Promise<RebalancingSetCTokenBidderContract> {
@@ -59,8 +59,8 @@ export class RebalancingSetBidderHelper {
     const rebalancingSetCTokenBidderContract = await RebalancingSetCTokenBidder.new(
       rebalanceAuctionModuleAddress,
       transferProxyAddress,
-      targetCTokenAddress,
-      underlyingAddress,
+      cTokenAddressesArray,
+      underlyingAddressesArray,
       dataDescription,
       txnFrom(from)
     );
@@ -74,15 +74,21 @@ export class RebalancingSetBidderHelper {
   public replaceFlowsWithCTokenUnderlyingAsync(
     expectedTokenFlows: any,
     combinedTokenArray: Address[],
-    targetCTokenAddress: Address,
+    cTokenAddressesArray: Address[],
+    underlyingAddressesArray: Address[],
     cTokenExchangeRate: BigNumber,
   ): any {
     const inflowArray: BigNumber[] = [];
     const outflowArray: BigNumber[] = [];
 
+    const cTokenToUnderlyingObject = this.constructCTokenToUnderlyingObject(
+      cTokenAddressesArray,
+      underlyingAddressesArray
+    );
+    console.log(cTokenToUnderlyingObject);
     for (let i = 0; i < combinedTokenArray.length; i++) {
       // Check if address is cToken
-      if (combinedTokenArray[i] === targetCTokenAddress) {
+      if (cTokenToUnderlyingObject[combinedTokenArray[i]]) {
         const cTokenConversion = cTokenExchangeRate.div(10 ** 18);
         let newInflow = expectedTokenFlows['inflowArray'][i]
             .mul(cTokenConversion)
@@ -109,5 +115,17 @@ export class RebalancingSetBidderHelper {
     }
 
     return { inflowArray, outflowArray };
+  }
+
+  public constructCTokenToUnderlyingObject(
+    cTokenAddressesArray: Address[],
+    underlyingAddressesArray: Address[],
+  ): any {
+    return cTokenAddressesArray.reduce((accumulator: object, currentValue: Address, index: number) => {
+      return {
+        ...accumulator,
+        [currentValue]: underlyingAddressesArray[index],
+      };
+    }, {});
   }
 }

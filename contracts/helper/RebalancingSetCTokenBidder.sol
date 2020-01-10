@@ -47,16 +47,10 @@ contract RebalancingSetCTokenBidder is
     // Address and instance of TransferProxy contract
     ITransferProxy public transferProxy;
 
-    // Address and instance of CToken contract
-    ICToken public targetCToken;
-
-    // Address of underlying of the target CToken contract
-    address public underlyingAddress;
+    // Mapping of cToken address to underlying address
+    mapping (address => address) public cTokenToUnderlying;
 
     string public dataDescription;
-
-    // Exchange Rate values are scaled by 1e18
-    uint256 internal constant scalingFactor = 10 ** 18;
 
     /* ============ Events ============ */
 
@@ -72,47 +66,51 @@ contract RebalancingSetCTokenBidder is
      *
      * @param _rebalanceAuctionModule   The address of RebalanceAuctionModule
      * @param _transferProxy            The address of TransferProxy
-     * @param _targetCToken                   The address of the target cToken
-     * @param _underlyingAddress        The address of the target cToken's underlying
+     * @param _cTokenArray              The address array of the target cToken
+     * @param _underlyingArray          The address array of the target cToken's underlying
      * @param _dataDescription          Description of contract for Etherscan / other applications
      */
     constructor(
         IRebalanceAuctionModule _rebalanceAuctionModule,
         ITransferProxy _transferProxy,
-        ICToken _targetCToken,
-        address _underlyingAddress,
+        address[] memory _cTokenArray,
+        address[] memory _underlyingArray,
         string memory _dataDescription
     )
         public
     {
-        // Commit the RebalanceAuctionModule instance
         rebalanceAuctionModule = _rebalanceAuctionModule;
 
-        // Commit the TransferProxy instance
         transferProxy = _transferProxy;
 
-        // Commit the target cToken instance
-        targetCToken = _targetCToken;
-
-        // Commit the underlying address of the cToken
-        underlyingAddress = _underlyingAddress;
-
-        // Commit the contract description
         dataDescription = _dataDescription;
 
-        // Add approvals of the underlying token to the cToken contract
-        ERC20Wrapper.approve(
-            _underlyingAddress,
-            address(_targetCToken),
-            CommonMath.maxUInt256()
+        require (
+            _cTokenArray.length == _underlyingArray.length,
+            "RebalancingSetCTokenBidder.constructor: cToken address array must be same length as underlying addresses array"
         );
 
-        // Add approvals of the cToken to the transferProxy contract
-        ERC20Wrapper.approve(
-            address(_targetCToken),
-            address(_transferProxy),
-            CommonMath.maxUInt256()
-        );
+        for (uint256 i = 0; i < _cTokenArray.length; i++) {
+            address cTokenAddress = _cTokenArray[i];
+            address underlyingAddress = _underlyingArray[i];
+
+            // Initialize mapping
+            cTokenToUnderlying[cTokenAddress] = underlyingAddress;
+
+            // Add approvals of the underlying token to the cToken contract
+            ERC20Wrapper.approve(
+                underlyingAddress,
+                cTokenAddress,
+                CommonMath.maxUInt256()
+            );
+
+            // Add approvals of the cToken to the transferProxy contract
+            ERC20Wrapper.approve(
+                cTokenAddress,
+                address(_transferProxy),
+                CommonMath.maxUInt256()
+            );
+        }
     }
 
     /* ============ External Functions ============ */
@@ -204,24 +202,24 @@ contract RebalancingSetCTokenBidder is
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
             address currentComponent = combinedTokenArray[i];
 
-            if (currentComponent == address(targetCToken)) {
-                combinedTokenArray[i] = underlyingAddress;
+            if (cTokenToUnderlying[currentComponent] != address(0)) {
+                combinedTokenArray[i] = cTokenToUnderlying[currentComponent];
 
                 // Replace inflow and outflow with required amount of underlying. 
-                // Calculated as cToken quantity * exchangeRate / scalingFactor.
-                uint256 exchangeRate = targetCToken.exchangeRateStored();
+                // Calculated as cToken quantity * exchangeRate / 10 ** 18.
+                uint256 exchangeRate = ICToken(currentComponent).exchangeRateStored();
                 uint256 currentInflowQuantity = inflowArray[i];
                 uint256 currentOutflowQuantity = outflowArray[i];
 
-                inflowArray[i] = currentInflowQuantity.mul(exchangeRate).div(scalingFactor);
-                outflowArray[i] = currentOutflowQuantity.mul(exchangeRate).div(scalingFactor);
+                inflowArray[i] = currentInflowQuantity.mul(exchangeRate).div(CommonMath.scaleFactor());
+                outflowArray[i] = currentOutflowQuantity.mul(exchangeRate).div(CommonMath.scaleFactor());
 
                 // Check for rounding error and add 1 if needed
-                inflowArray[i] = inflowArray[i].mul(scalingFactor).div(exchangeRate) >= currentInflowQuantity
+                inflowArray[i] = inflowArray[i].mul(CommonMath.scaleFactor()).div(exchangeRate) >= currentInflowQuantity
                     ? inflowArray[i]
                     : inflowArray[i].add(1);
 
-                outflowArray[i] = outflowArray[i].mul(scalingFactor).div(exchangeRate) >= currentOutflowQuantity
+                outflowArray[i] = outflowArray[i].mul(CommonMath.scaleFactor()).div(exchangeRate) >= currentOutflowQuantity
                     ? outflowArray[i]
                     : outflowArray[i].add(1);
             }
@@ -260,19 +258,21 @@ contract RebalancingSetCTokenBidder is
                     currentComponentQuantity
                 );
 
-                // If the target cToken, calculate required underlying tokens, transfer to contract, 
+                // If cToken, calculate required underlying tokens, transfer to contract, 
                 // ensure underlying allowance to cToken and then mint cTokens
-                if (currentComponent == address(targetCToken)) {
-                    // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / scalingFactor.
-                    uint256 exchangeRate = targetCToken.exchangeRateCurrent();
+                if (cTokenToUnderlying[currentComponent] != address(0)) {
+                    address underlyingAddress = cTokenToUnderlying[currentComponent];
+
+                    // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
+                    uint256 exchangeRate = ICToken(currentComponent).exchangeRateCurrent();
                     uint256 underlyingAmount = 
                         currentComponentQuantity
                         .mul(exchangeRate)
-                        .div(scalingFactor);
+                        .div(CommonMath.scaleFactor());
 
                     // Check for rounding error and add 1 if needed
                     underlyingAmount = 
-                        underlyingAmount.mul(scalingFactor).div(exchangeRate) >= currentComponentQuantity
+                        underlyingAmount.mul(CommonMath.scaleFactor()).div(exchangeRate) >= currentComponentQuantity
                         ? underlyingAmount
                         : underlyingAmount.add(1);
 
@@ -288,12 +288,12 @@ contract RebalancingSetCTokenBidder is
                     ERC20Wrapper.ensureAllowance(
                         underlyingAddress,
                         address(this),
-                        address(targetCToken),
+                        address(currentComponent),
                         underlyingAmount
                     );
 
                     // Mint cToken using underlying
-                    targetCToken.mint(underlyingAmount);
+                    ICToken(currentComponent).mint(underlyingAmount);
                 } else {
                     // Transfer non-cTokens to contract
                     ERC20Wrapper.transferFrom(
@@ -330,9 +330,11 @@ contract RebalancingSetCTokenBidder is
 
             // Check component balance is greater than 0
             if (currentComponentBalance > 0) {
-                if (currentComponent == address(targetCToken)) {
+                // Check if cToken
+                if (cTokenToUnderlying[currentComponent] != address(0)) {
+                    address underlyingAddress = cTokenToUnderlying[currentComponent];
                     // Redeem cToken into underlying
-                    targetCToken.redeem(currentComponentBalance);
+                    ICToken(currentComponent).redeem(currentComponentBalance);
 
                     // Get balance of underlying in contract
                     uint256 underlyingComponentBalance = ERC20Wrapper.balanceOf(

@@ -86,8 +86,8 @@ contract LinearAuction is Auction {
         
         // remainingCurrentSets must be greater than minimumBid or no bidding would be allowed
         require(
-            _startingCurrentSetQuantity >= minimumBid,
-            "Auction.initializeAuction: Not enough collateral to rebalance"
+            _startingCurrentSetQuantity.div(minimumBid) >= 100,
+            "Auction.initializeAuction: Minimum bid must be less than 1% of collateral."
         );
 
         _linearAuction.auction.minimumBid = minimumBid;

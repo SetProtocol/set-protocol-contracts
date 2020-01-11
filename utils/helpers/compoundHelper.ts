@@ -91,7 +91,7 @@ export class CompoundHelper {
       'decimals': new BigNumber(8),
       'underlying': underlying,
       'contract': 'CErc20',
-      'initial_exchange_rate_mantissa': new BigNumber('200000000000000'),
+      'initial_exchange_rate_mantissa': new BigNumber('20000000000000000'),
     };
 
     return await this.deployCToken(

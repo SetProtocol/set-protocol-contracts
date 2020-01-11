@@ -226,7 +226,7 @@ contract('RebalancingSetCTokenBidder', accounts => {
     });
   });
 
-  describe.only('#bidAndWithdraw', async () => {
+  describe('#bidAndWithdraw', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectQuantity: BigNumber;
     let subjectExecutePartialQuantity: boolean;
@@ -384,14 +384,15 @@ contract('RebalancingSetCTokenBidder', accounts => {
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
         // Get current exchange rate
-        const cTokenExchangeRate = await compoundHelper.getExchangeRateCurrent(cUSDCInstance.address);
+        const cUSDCExchangeRate = await compoundHelper.getExchangeRateCurrent(cUSDCInstance.address);
+        const cDAIExchangeRate = await compoundHelper.getExchangeRateCurrent(cDAIInstance.address);
         // Replace expected token flow arrays with cToken underlying
         const expectedTokenFlowsUnderlying = rebalancingSetBidderHelper.replaceFlowsWithCTokenUnderlyingAsync(
           expectedTokenFlows,
           combinedTokenArray,
           [cUSDCInstance.address, cDAIInstance.address],
           [usdcInstance.address, daiInstance.address],
-          cTokenExchangeRate,
+          [cUSDCExchangeRate, cDAIExchangeRate],
         );
 
         const tokenInstances = await erc20Helper.retrieveTokenInstancesAsync(combinedTokenArray);
@@ -563,14 +564,15 @@ contract('RebalancingSetCTokenBidder', accounts => {
 
           const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
-          const cTokenExchangeRate = await compoundHelper.getExchangeRateCurrent(cUSDCInstance.address);
+          const cUSDCExchangeRate = await compoundHelper.getExchangeRateCurrent(cUSDCInstance.address);
+          const cDAIExchangeRate = await compoundHelper.getExchangeRateCurrent(cDAIInstance.address);
           // Replace expected token flow arrays with cToken underlying
           const expectedTokenFlowsUnderlying = rebalancingSetBidderHelper.replaceFlowsWithCTokenUnderlyingAsync(
             expectedTokenFlows,
             combinedTokenArray,
             [cUSDCInstance.address, cDAIInstance.address],
             [usdcInstance.address, daiInstance.address],
-            cTokenExchangeRate,
+            [cUSDCExchangeRate, cDAIExchangeRate],
           );
 
           const tokenInstances = await erc20Helper.retrieveTokenInstancesAsync(combinedTokenArray);
@@ -773,14 +775,15 @@ contract('RebalancingSetCTokenBidder', accounts => {
 
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
-        const cTokenExchangeRate = await compoundHelper.getExchangeRateCurrent(cUSDCInstance.address);
+        const cUSDCExchangeRate = await compoundHelper.getExchangeRateCurrent(cUSDCInstance.address);
+        const cDAIExchangeRate = await compoundHelper.getExchangeRateCurrent(cDAIInstance.address);
         // Replace expected token flow arrays with cToken underlying
         const expectedTokenFlowsUnderlying = rebalancingSetBidderHelper.replaceFlowsWithCTokenUnderlyingAsync(
           expectedTokenFlows,
           combinedTokenArray,
           [cUSDCInstance.address, cDAIInstance.address],
           [usdcInstance.address, daiInstance.address],
-          cTokenExchangeRate,
+          [cUSDCExchangeRate, cDAIExchangeRate],
         );
 
         const tokenInstances = await erc20Helper.retrieveTokenInstancesAsync(combinedTokenArray);
@@ -1094,18 +1097,25 @@ contract('RebalancingSetCTokenBidder', accounts => {
       );
 
       const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
-      const expectedCombinedTokenArray = _.map(combinedTokenArray, token =>
-        token === cUSDCInstance.address ? usdcInstance.address : token
-      );
+      const expectedCombinedTokenArray = _.map(combinedTokenArray, token => {
+        if (token === cUSDCInstance.address) {
+          return usdcInstance.address;
+        } else if (token === cDAIInstance.address) {
+          return daiInstance.address;
+        } else {
+          return token;
+        }
+      });
       // Get exchange rate stored
-      const cTokenExchangeRate = await compoundHelper.getExchangeRate(cUSDCInstance.address);
+      const cUSDCExchangeRate = await compoundHelper.getExchangeRate(cUSDCInstance.address);
+      const cDAIExchangeRate = await compoundHelper.getExchangeRate(cDAIInstance.address);
       // Replace expected token flow arrays with cToken underlying
       const expectedTokenFlowsUnderlying = rebalancingSetBidderHelper.replaceFlowsWithCTokenUnderlyingAsync(
         expectedTokenFlows,
         combinedTokenArray,
         [cUSDCInstance.address, cDAIInstance.address],
         [usdcInstance.address, daiInstance.address],
-        cTokenExchangeRate,
+        [cUSDCExchangeRate, cDAIExchangeRate],
       );
 
       expect(

@@ -76,20 +76,25 @@ export class RebalancingSetBidderHelper {
     combinedTokenArray: Address[],
     cTokenAddressesArray: Address[],
     underlyingAddressesArray: Address[],
-    cTokenExchangeRate: BigNumber,
+    cTokenExchangeRateArray: BigNumber[],
   ): any {
     const inflowArray: BigNumber[] = [];
     const outflowArray: BigNumber[] = [];
 
-    const cTokenToUnderlyingObject = this.constructCTokenToUnderlyingObject(
+    const cTokenToUnderlyingObject = this.constructObjectFromArray(
       cTokenAddressesArray,
       underlyingAddressesArray
     );
-    console.log(cTokenToUnderlyingObject);
+
+    const cTokenToExchangeRateObject = this.constructObjectFromArray(
+      cTokenAddressesArray,
+      cTokenExchangeRateArray
+    );
+
     for (let i = 0; i < combinedTokenArray.length; i++) {
       // Check if address is cToken
       if (cTokenToUnderlyingObject[combinedTokenArray[i]]) {
-        const cTokenConversion = cTokenExchangeRate.div(10 ** 18);
+        const cTokenConversion = cTokenToExchangeRateObject[combinedTokenArray[i]].div(10 ** 18);
         let newInflow = expectedTokenFlows['inflowArray'][i]
             .mul(cTokenConversion)
             .round(0, BigNumber.ROUND_DOWN);
@@ -117,14 +122,14 @@ export class RebalancingSetBidderHelper {
     return { inflowArray, outflowArray };
   }
 
-  public constructCTokenToUnderlyingObject(
-    cTokenAddressesArray: Address[],
-    underlyingAddressesArray: Address[],
+  public constructObjectFromArray(
+    array1: any[],
+    array2: any[],
   ): any {
-    return cTokenAddressesArray.reduce((accumulator: object, currentValue: Address, index: number) => {
+    return array1.reduce((accumulator: object, currentValue: any, index: number) => {
       return {
         ...accumulator,
-        [currentValue]: underlyingAddressesArray[index],
+        [currentValue]: array2[index],
       };
     }, {});
   }

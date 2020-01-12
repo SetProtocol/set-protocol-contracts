@@ -85,16 +85,11 @@ contract RebalancingSetCTokenBidder is
 
         dataDescription = _dataDescription;
 
-        require (
-            _cTokenArray.length == _underlyingArray.length,
-            "RebalancingSetCTokenBidder.constructor: cToken address array must be same length as underlying addresses array"
-        );
-
         for (uint256 i = 0; i < _cTokenArray.length; i++) {
             address cTokenAddress = _cTokenArray[i];
             address underlyingAddress = _underlyingArray[i];
 
-            // Initialize mapping
+            // Initialize mapping of cToken to underlying
             cTokenToUnderlying[cTokenAddress] = underlyingAddress;
 
             // Add approvals of the underlying token to the cToken contract

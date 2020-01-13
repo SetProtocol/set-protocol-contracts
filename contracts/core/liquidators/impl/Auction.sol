@@ -17,19 +17,15 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfaces/IOracle.sol";
 
 import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
-import { CommonMath } from "../../../lib/CommonMath.sol";
 import { ICore } from "../../interfaces/ICore.sol";
-import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { Rebalance } from "../../lib/Rebalance.sol";
 import { SetMath } from "../../lib/SetMath.sol";
-import { SetUSDValuation } from "../impl/SetUSDValuation.sol";
 
 
 /**
@@ -46,7 +42,7 @@ contract Auction {
 
     /* ============ Structs ============ */
     struct Setup {
-        uint256 pricePrecision;
+        uint256 maxNaturalUnit;
         uint256 minimumBid;
         uint256 startTime;
         uint256 startingCurrentSets;
@@ -56,20 +52,8 @@ contract Auction {
         uint256[] combinedNextSetUnits;
     }
 
-    /* ============ Constants ============ */
-    uint256 constant public MINIMUM_PRICE_PRECISION = 1000;
-
-    /* ============ State Variables ============ */
-    IOracleWhiteList public oracleWhiteList;
-
-    /**
-     * Auction constructor
-     *
-     * @param _oracleWhiteList        Oracle WhiteList instance
-     */
-    constructor(IOracleWhiteList _oracleWhiteList) public {
-        oracleWhiteList = _oracleWhiteList;
-    }
+    /* ============ Structs ============ */
+    uint256 constant private CURVE_DENOMINATOR = 10 ** 18;
 
     /* ============ Auction Struct Methods ============ */
 
@@ -89,17 +73,11 @@ contract Auction {
     )
         internal
     {
-        _auction.pricePrecision = calculatePricePrecision(_currentSet, _nextSet);
-        
-        uint256 minimumBid = calculateMinimumBid(_currentSet, _nextSet, _auction.pricePrecision);
-        
-        // remainingCurrentSets must be greater than minimumBid or no bidding would be allowed
-        require(
-            _startingCurrentSetQuantity >= minimumBid,
-            "Auction.initializeAuction: Not enough collateral to rebalance"
+        _auction.maxNaturalUnit = Math.max(
+            _currentSet.naturalUnit(),
+            _nextSet.naturalUnit()
         );
 
-        _auction.minimumBid = minimumBid;
         _auction.startingCurrentSets = _startingCurrentSetQuantity;
         _auction.remainingCurrentSets = _startingCurrentSetQuantity;
         _auction.startTime = block.timestamp;
@@ -157,19 +135,19 @@ contract Auction {
      *
      * @param _auction              Auction Setup object
      * @param _quantity             Amount of currentSets bidder is seeking to rebalance
-     * @param _price                Struct of auction price numerator and denominator
+     * @param _price                Value representing the auction numeartor
      */
     function calculateTokenFlow(
         Setup storage _auction,
         uint256 _quantity,
-        Rebalance.Price memory _price
+        uint256 _price
     )
         internal
         view
         returns (Rebalance.TokenFlow memory)
     {
         // Normalized quantity amount
-        uint256 unitsMultiplier = _quantity.div(_auction.minimumBid).mul(_auction.pricePrecision);
+        uint256 unitsMultiplier = _quantity.div(_auction.maxNaturalUnit);
 
         address[] memory memCombinedTokenArray = _auction.combinedTokenArray;
 
@@ -192,57 +170,6 @@ contract Auction {
         }
 
         return Rebalance.composeTokenFlow(memCombinedTokenArray, inflowUnitArray, outflowUnitArray);
-    }
-
-    /**
-     * Calculates the price precision based on the USD values of the next and current Sets.
-     */
-    function calculatePricePrecision(
-        ISetToken _currentSet,
-        ISetToken _nextSet
-    )
-        internal
-        view
-        returns (uint256)
-    {
-        // Value the sets
-        uint256 currentSetUSDValue = calculateUSDValueOfSet(_currentSet);
-        uint256 nextSetUSDValue = calculateUSDValueOfSet(_nextSet);
-
-        // If currentSetValue is 10x greater than nextSetValue calculate required bump in pricePrecision
-        if (currentSetUSDValue > nextSetUSDValue.mul(10)) {
-            // Round up valuation to nearest order of magnitude
-            uint256 orderOfMagnitude = CommonMath.ceilLog10(currentSetUSDValue.div(nextSetUSDValue));
-
-            // Apply order of magnitude to pricePrecision, since Log10 is rounded up subtract 1 order of
-            // magnitude
-            return MINIMUM_PRICE_PRECISION.mul(10 ** orderOfMagnitude).div(10);
-        }
-        
-        return MINIMUM_PRICE_PRECISION;
-    }
-
-    /**
-     * Calculate the minimumBid allowed for the rebalance
-     *
-     * @param _currentSet               The Set to rebalance from
-     * @param _nextSet                  The Set to rebalance to
-     * @param _pricePrecision           Price precision used in auction
-     * @return                          Minimum bid amount
-     */
-    function calculateMinimumBid(
-        ISetToken _currentSet,
-        ISetToken _nextSet,
-        uint256 _pricePrecision
-    )
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 currentSetNaturalUnit = _currentSet.naturalUnit();
-        uint256 nextNaturalUnit = _nextSet.naturalUnit();
-        return Math.max(currentSetNaturalUnit, nextNaturalUnit)
-            .mul(_pricePrecision);
     }
 
     /**
@@ -271,7 +198,7 @@ contract Auction {
      * @param _currentUnit          Amount of token i in currentSet per minimum bid amount
      * @param _nextSetUnit          Amount of token i in nextSet per minimum bid amount
      * @param _unitsMultiplier      Bid amount normalized to number of minimum bid amounts
-     * @param _price                Struct of auction price numerator and denominator
+     * @param _price                Auction price numerator with 10 ** 18 as denominator
      * @return inflowUnit           Amount of token i transferred into the system
      * @return outflowUnit          Amount of token i transferred to the bidder
      */
@@ -279,7 +206,7 @@ contract Auction {
         uint256 _currentUnit,
         uint256 _nextSetUnit,
         uint256 _unitsMultiplier,
-        Rebalance.Price memory _price
+        uint256 _price
     )
         internal
         pure
@@ -316,19 +243,19 @@ contract Auction {
         uint256 outflowUnit;
 
         // Use if statement to check if token inflow or outflow
-        if (_nextSetUnit.mul(_price.denominator) > _currentUnit.mul(_price.numerator)) {
+        if (_nextSetUnit.mul(CURVE_DENOMINATOR) > _currentUnit.mul(_price)) {
             // Calculate inflow amount
             inflowUnit = _unitsMultiplier.mul(
-                _nextSetUnit.mul(_price.denominator).sub(_currentUnit.mul(_price.numerator))
-            ).div(_price.numerator);
+                _nextSetUnit.mul(CURVE_DENOMINATOR).sub(_currentUnit.mul(_price))
+            ).div(_price);
 
             // Set outflow amount to 0 for component i, since tokens need to be injected in rebalance
             outflowUnit = 0;
         } else {
             // Calculate outflow amount
             outflowUnit = _unitsMultiplier.mul(
-                _currentUnit.mul(_price.numerator).sub(_nextSetUnit.mul(_price.denominator))
-            ).div(_price.numerator);
+                _currentUnit.mul(_price).sub(_nextSetUnit.mul(CURVE_DENOMINATOR))
+            ).div(_price);
 
             // Set inflow amount to 0 for component i, since tokens need to be returned in rebalance
             inflowUnit = 0;
@@ -358,12 +285,10 @@ contract Auction {
     {
         address[] memory combinedTokenArray = _auction.combinedTokenArray;
         uint256[] memory combinedUnits = new uint256[](combinedTokenArray.length);
-        uint256 pricePrecisionMem = _auction.pricePrecision;
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
             combinedUnits[i] = calculateCombinedUnit(
                 _set,
-                _auction.minimumBid,
-                pricePrecisionMem,
+                _auction.maxNaturalUnit,
                 combinedTokenArray[i]
             );
         }
@@ -375,15 +300,13 @@ contract Auction {
      * Calculations the unit amount of Token to include in the the combined Set units.
      *
      * @param _setToken                 Information on the SetToken
-     * @param _minimumBid               Minimum bid amount
-     * @param _pricePrecision           Price precision used in auction
+     * @param _maxNaturalUnit           Max natural unit of two sets in rebalance
      * @param _component                Current component in iteration
      * @return                          Unit inflow/outflow
      */
     function calculateCombinedUnit(
         ISetToken _setToken,
-        uint256 _minimumBid,
-        uint256 _pricePrecision,
+        uint256 _maxNaturalUnit,
         address _component
     )
         private
@@ -401,8 +324,7 @@ contract Auction {
             return calculateTransferValue(
                 _setToken.getUnits()[indexCurrent],
                 _setToken.naturalUnit(),
-                _minimumBid,
-                _pricePrecision
+                _maxNaturalUnit
             );
         }
 
@@ -415,31 +337,18 @@ contract Auction {
      *
      * @param   _unit               Units of the component token
      * @param   _naturalUnit        Natural unit of the Set token
-     * @param   _minimumBid         Minimum bid amount
-     * @param   _pricePrecision     Price precision used in auction
+     * @param   _maxNaturalUnit     Max natural unit of two sets in rebalance
      * @return  uint256             Amount of tokens per standard bid amount (minimumBid/priceDivisor)
      */
     function calculateTransferValue(
         uint256 _unit,
         uint256 _naturalUnit,
-        uint256 _minimumBid,
-        uint256 _pricePrecision
+        uint256 _maxNaturalUnit
     )
         private
         pure
         returns (uint256)
     {
-        return SetMath.setToComponent(_minimumBid, _unit, _naturalUnit)
-            .div(_pricePrecision);
-    }
-
-    /**
-     * Calculate USD value of passed Set
-     *
-     * @param _set              Instance of SetToken
-     * @return USDValue         USD Value of the Set Token
-     */
-    function calculateUSDValueOfSet(ISetToken _set) internal view returns(uint256) {
-        return SetUSDValuation.calculateSetTokenDollarValue(_set, oracleWhiteList);
+        return SetMath.setToComponent(_maxNaturalUnit, _unit, _naturalUnit);
     }
 }

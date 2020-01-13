@@ -170,6 +170,46 @@ contract('CommonMathMock', accounts => {
     });
   });
 
+  describe('#testDivCeil', async () => {
+    let subjectA: BigNumber;
+    let subjectB: BigNumber;
+    const caller: Address = ownerAccount;
+
+    beforeEach(async () => {
+      subjectA = new BigNumber(26);
+      subjectB = new BigNumber(11);
+    });
+
+    async function subject(): Promise<BigNumber> {
+      return commonMathLibrary.testDivCeil.callAsync(
+        subjectA,
+        subjectB,
+        { from: caller },
+      );
+    }
+
+    it('returns the correct value', async () => {
+      const result = await subject();
+
+      const expectedResult = new BigNumber(3);
+      expect(result).to.be.bignumber.equal(expectedResult);
+    });
+
+    describe('when there is no rounding', async () => {
+      beforeEach(async () => {
+        subjectA = new BigNumber(6);
+        subjectB = new BigNumber(2);
+      });
+
+      it('returns the correct value', async () => {
+        const result = await subject();
+
+        const expectedResult = new BigNumber(subjectA).div(subjectB);
+        expect(result).to.be.bignumber.equal(expectedResult);
+      });
+    });
+  });
+
   describe('getPartialAmount', async () => {
     let subjectPrincipal: BigNumber;
     let subjectNumerator: BigNumber;

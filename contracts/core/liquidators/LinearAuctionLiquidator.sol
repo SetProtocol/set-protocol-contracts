@@ -27,6 +27,7 @@ import { Auction } from "./impl/Auction.sol";
 import { LinearAuction } from "./impl/LinearAuction.sol";
 import { Rebalance } from "../lib/Rebalance.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
+import { TwoAssetPriceBoundedLinearAuction } from "./impl/TwoAssetPriceBoundedLinearAuction.sol";
 
 
 /**
@@ -36,7 +37,7 @@ import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
  * Contract that holds all the state and functionality required for setting up, returning prices, and tearing
  * down linear auction rebalances for RebalancingSetTokens.
  */
-contract LinearAuctionLiquidator is LinearAuction, ILiquidator {
+contract LinearAuctionLiquidator is TwoAssetPriceBoundedLinearAuction, ILiquidator {
     using SafeMath for uint256;
 
     ICore public core;
@@ -68,7 +69,7 @@ contract LinearAuctionLiquidator is LinearAuction, ILiquidator {
         string memory _name
     )
         public
-        LinearAuction(
+        TwoAssetPriceBoundedLinearAuction(
             _oracleWhiteList,
             _auctionPeriod,
             _rangeStart,
@@ -100,7 +101,7 @@ contract LinearAuctionLiquidator is LinearAuction, ILiquidator {
     {
         _liquidatorData; // Pass linting
 
-        LinearAuction.validateRebalanceComponents(
+        TwoAssetPriceBoundedLinearAuction.validateTwoAssetPriceBoundedAuction(
             _currentSet,
             _nextSet
         );
@@ -209,8 +210,8 @@ contract LinearAuctionLiquidator is LinearAuction, ILiquidator {
         return RebalancingLibrary.AuctionPriceParameters({
             auctionStartTime: auction(_set).startTime,
             auctionTimeToPivot: auctionPeriod,
-            auctionStartPrice: linearAuction(_set).startNumerator,
-            auctionPivotPrice: linearAuction(_set).endNumerator
+            auctionStartPrice: linearAuction(_set).startPrice,
+            auctionPivotPrice: linearAuction(_set).endPrice
         });
     }
 

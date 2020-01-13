@@ -28,7 +28,7 @@ import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
-import { getWeb3 } from '@utils/web3Helper';
+import { getWeb3, txnFrom } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
@@ -173,6 +173,26 @@ contract('BackwardsCompatability', accounts => {
   });
 
   describe('#getAuctionPriceParameters', async () => {
+    let startTime: BigNumber;
+    let endTime: BigNumber;
+    let startPrice: BigNumber;
+    let endPrice: BigNumber;
+
+    beforeEach(async () => {
+      startTime = new BigNumber(1);
+      endTime = new BigNumber(2);
+      startPrice = new BigNumber(3);
+      endPrice = new BigNumber(4);
+
+      await liquidatorMock.setAuctionPriceParameters.sendTransactionAsync(
+        startTime,
+        endTime,
+        startPrice,
+        endPrice,
+        txnFrom(deployerAccount)
+      );
+    });
+
     async function subject(): Promise<BigNumber[]> {
       return rebalancingSetToken.getAuctionPriceParameters.callAsync();
     }
@@ -183,6 +203,12 @@ contract('BackwardsCompatability', accounts => {
       const expectedResult =  await liquidatorMock.getAuctionPriceParameters.callAsync(
         rebalancingSetToken.address
       );
+
+      expect(retrievedResult[0]).to.bignumber.equal(startTime);
+      expect(retrievedResult[1]).to.bignumber.equal(endTime);
+      expect(retrievedResult[2]).to.bignumber.equal(startPrice);
+      expect(retrievedResult[3]).to.bignumber.equal(endPrice);
+
       expect(JSON.stringify(retrievedResult)).to.equal(JSON.stringify(expectedResult));
     });
   });

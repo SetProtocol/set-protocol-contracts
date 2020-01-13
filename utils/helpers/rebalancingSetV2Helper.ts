@@ -26,8 +26,8 @@ import {
   ZERO,
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
-
-import { getWeb3, getContractInstance } from '../web3Helper';
+import { ether } from '../units';
+import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
 
 import { RebalancingHelper } from './rebalancingHelper';
 
@@ -172,6 +172,27 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     liquidatorData: string = EMPTY_BYTESTRING,
 
   ): Promise<void> {
+    const currentSupply = await rebalancingSetToken.totalSupply.callAsync();
+    if (currentSupply.eq(new BigNumber(0))) {
+      const currentSetMintQuantity = ether(8);
+      const currentSetToken = await rebalancingSetToken.currentSet.callAsync();
+
+      // Issue currentSetToken
+      await core.issue.sendTransactionAsync(
+        currentSetToken,
+        currentSetMintQuantity,
+        txnFrom(caller)
+      );
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      const rebalancingSetQuantityToIssue = ether(7);
+      await core.issue.sendTransactionAsync(
+        rebalancingSetToken.address,
+        rebalancingSetQuantityToIssue,
+        txnFrom(caller)
+      );
+    }
+
     const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
     await this._coreHelper.addTokensToWhiteList(
       nextSetTokenComponentAddresses,

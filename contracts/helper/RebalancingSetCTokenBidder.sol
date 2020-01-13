@@ -21,12 +21,11 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../lib/CommonMath.sol";
+import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
+import { ICToken } from "../core/interfaces/ICToken.sol";
 import { IRebalanceAuctionModule } from "../core/interfaces/IRebalanceAuctionModule.sol";
 import { IRebalancingSetToken } from "../core/interfaces/IRebalancingSetToken.sol";
 import { ITransferProxy } from "../core/interfaces/ITransferProxy.sol";
-import { ICToken } from "./interfaces/ICToken.sol";
-
-import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 
 
 /**
@@ -128,16 +127,15 @@ contract RebalancingSetCTokenBidder is
         external
         nonReentrant
     {
-        // Get token addresses
-        address[] memory combinedTokenArray = _rebalancingSetToken.getCombinedTokenArray();
-
-        // Get inflow and outflow arrays for the given bid quantity
+        /// Get token flow arrays for the given bid quantity
+        address[] memory combinedTokenArray;
         uint256[] memory inflowArray;
         uint256[] memory outflowArray;
         (
+            combinedTokenArray,
             inflowArray,
             outflowArray
-        ) = _rebalancingSetToken.getBidPrice(_quantity);
+        ) = getTokenFlows(_rebalancingSetToken, _quantity);
 
         // Ensure allowances and transfer auction tokens or underlying from user
         depositComponents(
@@ -168,30 +166,29 @@ contract RebalancingSetCTokenBidder is
      * Get token inflows and outflows and combined token array denominated in underlying required
      * for bid for a given rebalancing Set token.
      *
-     * @param _quantity               The amount of currentSet to be rebalanced
      * @param _rebalancingSetToken    The rebalancing Set Token instance
+     * @param _quantity               The amount of currentSet to be rebalanced
+     * @return combinedTokenArray     Array of token addresses
      * @return inflowArray            Array of amount of tokens inserted into system in bid
      * @return outflowArray           Array of amount of tokens returned from system in bid
-     * @return combinedTokenArray     Array of token addresses
      */
-    function getBidPriceAndAddressArray(
-        uint256 _quantity,
-        IRebalancingSetToken _rebalancingSetToken
+    function getAddressAndBidPriceArray(
+        IRebalancingSetToken _rebalancingSetToken,
+        uint256 _quantity
     )
         public
         view
-        returns (uint256[] memory, uint256[] memory, address[] memory)
+        returns (address[] memory, uint256[] memory, uint256[] memory)
     {
-        // Get token addresses
-        address[] memory combinedTokenArray = _rebalancingSetToken.getCombinedTokenArray();
-
-        // Get inflow and outflow arrays for the given bid quantity
+        // Get token flow arrays for the given bid quantity
+        address[] memory combinedTokenArray;
         uint256[] memory inflowArray;
         uint256[] memory outflowArray;
         (
+            combinedTokenArray,
             inflowArray,
             outflowArray
-        ) = _rebalancingSetToken.getBidPrice(_quantity);
+        ) = getTokenFlows(_rebalancingSetToken, _quantity);
 
         // Loop through the combined token addresses array and replace with underlying address
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
@@ -220,7 +217,7 @@ contract RebalancingSetCTokenBidder is
             }
         }
 
-        return (inflowArray, outflowArray, combinedTokenArray);
+        return (combinedTokenArray, inflowArray, outflowArray);
     }
 
     /* ============ Private Functions ============ */
@@ -302,7 +299,7 @@ contract RebalancingSetCTokenBidder is
         }
     }
 
-     /**
+    /**
      * After bidding, loop through token address array and redeem any cTokens 
      * and transfer token components to user
      *
@@ -353,5 +350,36 @@ contract RebalancingSetCTokenBidder is
                 }
             }
         }
+    }
+
+    /**
+     * Get token flows array of addresses, inflows and outflows
+     *
+     * @param  _rebalancingSetToken   The rebalancing Set Token instance
+     * @param  _quantity              The amount of currentSet to be rebalanced
+     * @return combinedTokenArray     Array of token addresses
+     * @return inflowArray            Array of amount of tokens inserted into system in bid
+     * @return outflowArray           Array of amount of tokens returned from system in bid
+     */
+    function getTokenFlows(
+        IRebalancingSetToken _rebalancingSetToken,
+        uint256 _quantity
+    )
+        internal
+        view
+        returns (address[] memory, uint256[] memory, uint256[] memory)
+    {
+       // Get token addresses
+        address[] memory combinedTokenArray = _rebalancingSetToken.getCombinedTokenArray();
+
+        // Get inflow and outflow arrays for the given bid quantity
+        uint256[] memory inflowArray;
+        uint256[] memory outflowArray;
+        (
+            inflowArray,
+            outflowArray
+        ) = _rebalancingSetToken.getBidPrice(_quantity);
+
+        return (combinedTokenArray, inflowArray, outflowArray);
     }
 }

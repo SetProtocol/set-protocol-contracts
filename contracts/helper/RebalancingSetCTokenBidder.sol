@@ -21,6 +21,7 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../lib/CommonMath.sol";
+import { CompoundUtils } from "../lib/CompoundUtils.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 import { ICToken } from "../core/interfaces/ICToken.sol";
 import { IRebalanceAuctionModule } from "../core/interfaces/IRebalanceAuctionModule.sol";
@@ -192,28 +193,19 @@ contract RebalancingSetCTokenBidder is
 
         // Loop through the combined token addresses array and replace with underlying address
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
-            address currentComponent = combinedTokenArray[i];
+            address currentComponentAddress = combinedTokenArray[i];
 
-            if (cTokenToUnderlying[currentComponent] != address(0)) {
-                combinedTokenArray[i] = cTokenToUnderlying[currentComponent];
+            if (cTokenToUnderlying[currentComponentAddress] != address(0)) {
+                combinedTokenArray[i] = cTokenToUnderlying[currentComponentAddress];
 
                 // Replace inflow and outflow with required amount of underlying. 
                 // Calculated as cToken quantity * exchangeRate / 10 ** 18.
-                uint256 exchangeRate = ICToken(currentComponent).exchangeRateStored();
+                uint256 exchangeRate = ICToken(currentComponentAddress).exchangeRateStored();
                 uint256 currentInflowQuantity = inflowArray[i];
                 uint256 currentOutflowQuantity = outflowArray[i];
 
-                inflowArray[i] = currentInflowQuantity.mul(exchangeRate).div(CommonMath.scaleFactor());
-                outflowArray[i] = currentOutflowQuantity.mul(exchangeRate).div(CommonMath.scaleFactor());
-
-                // Check for rounding error and add 1 if needed
-                inflowArray[i] = inflowArray[i].mul(CommonMath.scaleFactor()).div(exchangeRate) >= currentInflowQuantity
-                    ? inflowArray[i]
-                    : inflowArray[i].add(1);
-
-                outflowArray[i] = outflowArray[i].mul(CommonMath.scaleFactor()).div(exchangeRate) >= currentOutflowQuantity
-                    ? outflowArray[i]
-                    : outflowArray[i].add(1);
+                inflowArray[i] = CompoundUtils.calculateUnderlyingUnits(currentInflowQuantity, exchangeRate);
+                outflowArray[i] = CompoundUtils.calculateUnderlyingUnits(currentOutflowQuantity, exchangeRate);
             }
         }
 
@@ -237,14 +229,14 @@ contract RebalancingSetCTokenBidder is
     {
         // Loop through the combined token addresses array and deposit inflow amounts
         for (uint256 i = 0; i < _combinedTokenArray.length; i++) {
-            address currentComponent = _combinedTokenArray[i];
+            address currentComponentAddress = _combinedTokenArray[i];
             uint256 currentComponentQuantity = _inflowArray[i];
 
             // Check component inflow is greater than 0
             if (currentComponentQuantity > 0) {
                 // Ensure allowance for components to transferProxy
                 ERC20Wrapper.ensureAllowance(
-                    address(currentComponent),
+                    currentComponentAddress,
                     address(this),
                     address(transferProxy),
                     currentComponentQuantity
@@ -252,44 +244,36 @@ contract RebalancingSetCTokenBidder is
 
                 // If cToken, calculate required underlying tokens, transfer to contract, 
                 // ensure underlying allowance to cToken and then mint cTokens
-                if (cTokenToUnderlying[currentComponent] != address(0)) {
-                    address underlyingAddress = cTokenToUnderlying[currentComponent];
+                if (cTokenToUnderlying[currentComponentAddress] != address(0)) {
+                    ICToken cTokenInstance = ICToken(currentComponentAddress);
+                    address underlyingAddress = cTokenToUnderlying[currentComponentAddress];
 
                     // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
-                    uint256 exchangeRate = ICToken(currentComponent).exchangeRateCurrent();
-                    uint256 underlyingAmount = 
-                        currentComponentQuantity
-                        .mul(exchangeRate)
-                        .div(CommonMath.scaleFactor());
-
-                    // Check for rounding error and add 1 if needed
-                    underlyingAmount = 
-                        underlyingAmount.mul(CommonMath.scaleFactor()).div(exchangeRate) >= currentComponentQuantity
-                        ? underlyingAmount
-                        : underlyingAmount.add(1);
+                    uint256 exchangeRate = cTokenInstance.exchangeRateCurrent();
+                    uint256 underlyingQuantity = CompoundUtils.calculateUnderlyingUnits(currentComponentQuantity, exchangeRate);
 
                     // Transfer underlying tokens to contract
                     ERC20Wrapper.transferFrom(
                         underlyingAddress,
                         msg.sender,
                         address(this),
-                        underlyingAmount
+                        underlyingQuantity
                     );
 
                     // Ensure allowance for underlying token to cToken contract
                     ERC20Wrapper.ensureAllowance(
                         underlyingAddress,
                         address(this),
-                        address(currentComponent),
-                        underlyingAmount
+                        address(cTokenInstance),
+                        underlyingQuantity
                     );
 
                     // Mint cToken using underlying
-                    ICToken(currentComponent).mint(underlyingAmount);
+                    cTokenInstance.mint(underlyingQuantity);
                 } else {
                     // Transfer non-cTokens to contract
                     ERC20Wrapper.transferFrom(
-                        address(currentComponent),
+                        currentComponentAddress,
                         msg.sender,
                         address(this),
                         currentComponentQuantity
@@ -312,21 +296,21 @@ contract RebalancingSetCTokenBidder is
     {
         // Loop through the combined token addresses array and withdraw leftover amounts
         for (uint256 i = 0; i < _combinedTokenArray.length; i++) {
-            address currentComponent = _combinedTokenArray[i];
+            address currentComponentAddress = _combinedTokenArray[i];
             
             // Get balance of tokens in contract
             uint256 currentComponentBalance = ERC20Wrapper.balanceOf(
-                currentComponent,
+                currentComponentAddress,
                 address(this)
             );
 
             // Check component balance is greater than 0
             if (currentComponentBalance > 0) {
                 // Check if cToken
-                if (cTokenToUnderlying[currentComponent] != address(0)) {
-                    address underlyingAddress = cTokenToUnderlying[currentComponent];
+                if (cTokenToUnderlying[currentComponentAddress] != address(0)) {
+                    address underlyingAddress = cTokenToUnderlying[currentComponentAddress];
                     // Redeem cToken into underlying
-                    ICToken(currentComponent).redeem(currentComponentBalance);
+                    ICToken(currentComponentAddress).redeem(currentComponentBalance);
 
                     // Get balance of underlying in contract
                     uint256 underlyingComponentBalance = ERC20Wrapper.balanceOf(
@@ -343,7 +327,7 @@ contract RebalancingSetCTokenBidder is
                 } else {
                     // Withdraw non cTokens from the contract and send to the user
                     ERC20Wrapper.transfer(
-                        address(currentComponent),
+                        currentComponentAddress,
                         msg.sender,
                         currentComponentBalance
                     );
@@ -355,11 +339,11 @@ contract RebalancingSetCTokenBidder is
     /**
      * Get token flows array of addresses, inflows and outflows
      *
-     * @param  _rebalancingSetToken   The rebalancing Set Token instance
-     * @param  _quantity              The amount of currentSet to be rebalanced
-     * @return combinedTokenArray     Array of token addresses
-     * @return inflowArray            Array of amount of tokens inserted into system in bid
-     * @return outflowArray           Array of amount of tokens returned from system in bid
+     * @param    _rebalancingSetToken   The rebalancing Set Token instance
+     * @param    _quantity              The amount of currentSet to be rebalanced
+     * @return   combinedTokenArray     Array of token addresses
+     * @return   inflowArray            Array of amount of tokens inserted into system in bid
+     * @return   outflowArray           Array of amount of tokens returned from system in bid
      */
     function getTokenFlows(
         IRebalancingSetToken _rebalancingSetToken,

@@ -5,6 +5,7 @@ import {
   CoreContract,
   Bytes32LibraryMockContract,
   CommonMathMockContract,
+  CompoundUtilsMockContract,
   CoreIssuanceLibraryMockContract,
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryMockContract,
@@ -28,6 +29,7 @@ const Bytes32LibraryMock = artifacts.require('Bytes32LibraryMock');
 const CommonMathMock = artifacts.require('CommonMathMock');
 const CommonValidationsLibrary = artifacts.require('CommonValidationsLibrary');
 const CommonValidationsLibraryMock = artifacts.require('CommonValidationsLibraryMock');
+const CompoundUtilsMock = artifacts.require('CompoundUtilsMock');
 const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreIssuanceLibraryMock = artifacts.require('CoreIssuanceLibraryMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
@@ -87,6 +89,14 @@ export class LibraryMockHelper {
       getContractInstance(truffleCommonMathLibrary),
       txnFrom(from),
     );
+  }
+
+  public async deployCompoundUtilsLibraryMockAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<CompoundUtilsMockContract> {
+    const compoundUtilsMockContract = await CompoundUtilsMock.new(txnFrom(from));
+
+    return new CompoundUtilsMockContract(getContractInstance(compoundUtilsMockContract), txnFrom(from));
   }
 
   public async deployCoreIssuanceLibraryAsync(

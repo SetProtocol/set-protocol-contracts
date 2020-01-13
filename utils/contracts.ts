@@ -6,6 +6,7 @@ export { Bytes32LibraryMockContract } from '../types/generated/bytes32_library_m
 export { CommonMathMockContract } from '../types/generated/common_math_mock';
 export { CommonValidationsLibraryContract } from '../types/generated/common_validations_library';
 export { CommonValidationsLibraryMockContract } from '../types/generated/common_validations_library_mock';
+export { CompoundUtilsMockContract } from '../types/generated/compound_utils_mock';
 export { ConstantAuctionPriceCurveContract } from '../types/generated/constant_auction_price_curve';
 export { CoreContract } from '../types/generated/core';
 export { CoreIssuanceLibraryContract } from '../types/generated/core_issuance_library';

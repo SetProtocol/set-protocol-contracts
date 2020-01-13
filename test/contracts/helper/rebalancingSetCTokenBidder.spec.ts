@@ -949,7 +949,7 @@ contract('RebalancingSetCTokenBidder', accounts => {
     });
   });
 
-  describe('#getBidPriceAndAddressArray', async () => {
+  describe('#getAddressAndBidPriceArray', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectQuantity: BigNumber;
     let proposalPeriod: BigNumber;
@@ -1077,17 +1077,17 @@ contract('RebalancingSetCTokenBidder', accounts => {
     });
 
     async function subject(): Promise<any> {
-      return rebalancingSetCTokenBidder.getBidPriceAndAddressArray.callAsync(
-        subjectQuantity,
+      return rebalancingSetCTokenBidder.getAddressAndBidPriceArray.callAsync(
         subjectRebalancingSetToken,
+        subjectQuantity,
       );
     }
 
     it('should return the correct inflow, outflow and address arrays', async () => {
       const [
+        actualAddressArray,
         actualInflowUnitArray,
         actualOutflowUnitArray,
-        actualAddressArray,
       ] = await subject();
 
       const expectedTokenFlows = await rebalancingHelper.constructInflowOutflowArraysAsync(

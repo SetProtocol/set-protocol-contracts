@@ -16,6 +16,8 @@
 
 pragma solidity 0.5.7;
 
+import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
+
 
 /**
  * @title Rebalance
@@ -57,5 +59,34 @@ library Rebalance {
         returns (uint256[] memory, uint256[] memory)
     {
         return (_tokenFlow.inflow, _tokenFlow.outflow);
+    }
+
+    /**
+     * Get token flows array of addresses, inflows and outflows
+     *
+     * @param    _rebalancingSetToken   The rebalancing Set Token instance
+     * @param    _quantity              The amount of currentSet to be rebalanced
+     * @return   combinedTokenArray     Array of token addresses
+     * @return   inflowArray            Array of amount of tokens inserted into system in bid
+     * @return   outflowArray           Array of amount of tokens returned from system in bid
+     */
+    function getTokenFlows(
+        IRebalancingSetToken _rebalancingSetToken,
+        uint256 _quantity
+    )
+        internal
+        view
+        returns (address[] memory, uint256[] memory, uint256[] memory)
+    {
+        // Get token addresses
+        address[] memory combinedTokenArray = _rebalancingSetToken.getCombinedTokenArray();
+
+        // Get inflow and outflow arrays for the given bid quantity
+        (
+            uint256[] memory inflowArray,
+            uint256[] memory outflowArray
+        ) = _rebalancingSetToken.getBidPrice(_quantity);
+
+        return (combinedTokenArray, inflowArray, outflowArray);
     }
 }

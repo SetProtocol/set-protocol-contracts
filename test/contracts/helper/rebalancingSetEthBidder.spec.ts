@@ -41,7 +41,7 @@ import { BidPlacedWithEth } from '@utils/contract_logs/rebalancingSetEthBidder';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
-import { RebalancingSetEthBidderHelper } from '@utils/helpers/rebalancingSetEthBidderHelper';
+import { RebalancingSetBidderHelper } from '@utils/helpers/rebalancingSetBidderHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -80,7 +80,7 @@ contract('RebalancingSetEthBidder', accounts => {
     erc20Helper,
     blockchain
   );
-  const rebalancingSetEthBidderHelper = new RebalancingSetEthBidderHelper(deployerAccount);
+  const rebalancingSetBidderHelper = new RebalancingSetBidderHelper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -110,7 +110,7 @@ contract('RebalancingSetEthBidder', accounts => {
 
     weth = await erc20Helper.deployWrappedEtherAsync(deployerAccount, ZERO);
 
-    rebalancingSetEthBidder = await rebalancingSetEthBidderHelper.deployRebalancingSetEthBidderAsync(
+    rebalancingSetEthBidder = await rebalancingSetBidderHelper.deployRebalancingSetEthBidderAsync(
       rebalanceAuctionModuleMock.address,
       transferProxy.address,
       weth.address,

@@ -6,6 +6,7 @@ export { Bytes32LibraryMockContract } from '../types/generated/bytes32_library_m
 export { CommonMathMockContract } from '../types/generated/common_math_mock';
 export { CommonValidationsLibraryContract } from '../types/generated/common_validations_library';
 export { CommonValidationsLibraryMockContract } from '../types/generated/common_validations_library_mock';
+export { CompoundUtilsMockContract } from '../types/generated/compound_utils_mock';
 export { ConstantAuctionPriceCurveContract } from '../types/generated/constant_auction_price_curve';
 export { CoreContract } from '../types/generated/core';
 export { CoreIssuanceLibraryContract } from '../types/generated/core_issuance_library';
@@ -41,7 +42,9 @@ export { ProposeLibraryContract } from '../types/generated/propose_library';
 export { ProtocolViewerContract } from '../types/generated/protocol_viewer';
 export { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 export { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
+export { RebalanceMockContract } from '../types/generated/rebalance_mock';
 export { RebalancingSetEthBidderContract } from '../types/generated/rebalancing_set_eth_bidder';
+export { RebalancingSetCTokenBidderContract } from '../types/generated/rebalancing_set_c_token_bidder';
 export {
   RebalancingSetExchangeIssuanceModuleContract,
 } from '../types/generated/rebalancing_set_exchange_issuance_module';
@@ -58,6 +61,7 @@ export { SetTokenContract } from '../types/generated/set_token';
 export { SetTokenFactoryContract } from '../types/generated/set_token_factory';
 export { SetTokenLibraryContract } from '../types/generated/set_token_library';
 export { SetTokenLibraryMockContract } from '../types/generated/set_token_library_mock';
+export { RebalanceStateSetTokenMockContract } from '../types/generated/rebalance_state_set_token_mock';
 export { SetUSDValuationMockContract } from '../types/generated/set_u_s_d_valuation_mock';
 export { SocialTradingManagerMockContract } from '../types/generated/social_trading_manager_mock';
 export { StandardTokenMockContract } from '../types/generated/standard_token_mock';

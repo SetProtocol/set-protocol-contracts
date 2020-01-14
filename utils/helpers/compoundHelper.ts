@@ -66,7 +66,32 @@ export class CompoundHelper {
       'decimals': new BigNumber(8),
       'underlying': underlying,
       'contract': 'CErc20',
-      'initial_exchange_rate_mantissa': new BigNumber('10000000000000000'),
+      'initial_exchange_rate_mantissa': new BigNumber('200000000000000'),
+    };
+
+    return await this.deployCToken(
+      config.underlying,
+      this.comptroller,
+      this.interestRateModel,
+      config.initial_exchange_rate_mantissa,
+      config.symbol,
+      config.name,
+      config.decimals,
+      this.admin,
+    );
+  }
+
+  public async deployMockCDAI(
+    underlying: Address,
+    admin: Address,
+  ): Promise<string> {
+    const config = {
+      'name': 'C_DAI',
+      'symbol': 'cDAI',
+      'decimals': new BigNumber(8),
+      'underlying': underlying,
+      'contract': 'CErc20',
+      'initial_exchange_rate_mantissa': new BigNumber('20000000000000000'),
     };
 
     return await this.deployCToken(
@@ -141,6 +166,13 @@ export class CompoundHelper {
     cToken: Address,
   ): Promise<BigNumber> {
     const exchangeRate: number = await this.cTokenInstance(cToken).methods.exchangeRateStored().call();
+    return new BigNumber(exchangeRate);
+  }
+
+  public async getExchangeRateCurrent(
+    cToken: Address,
+  ): Promise<BigNumber> {
+    const exchangeRate: number = await this.cTokenInstance(cToken).methods.exchangeRateCurrent().call();
     return new BigNumber(exchangeRate);
   }
 

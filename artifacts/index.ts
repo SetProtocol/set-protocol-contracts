@@ -24,6 +24,7 @@ export { ProposeLibrary } from "./ts/ProposeLibrary";
 export { ProtocolViewer } from "./ts/ProtocolViewer";
 export { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
 export { RebalancingSetIssuanceModule } from "./ts/RebalancingSetIssuanceModule";
+export { RebalancingSetCTokenBidder } from "./ts/RebalancingSetCTokenBidder";
 export { RebalancingSetEthBidder } from "./ts/RebalancingSetEthBidder";
 export { RebalancingSetExchangeIssuanceModule } from "./ts/RebalancingSetExchangeIssuanceModule";
 export { RebalancingSetToken } from "./ts/RebalancingSetToken";
@@ -79,6 +80,7 @@ export {
   ProposeLibraryContract,
   ProtocolViewerContract,
   RebalanceAuctionModuleContract,
+  RebalancingSetCTokenBidderContract,
   RebalancingSetEthBidderContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetIssuanceModuleContract,

@@ -10,6 +10,8 @@ import {
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryMockContract,
   PlaceBidMockContract,
+  RebalanceMockContract,
+  RebalanceStateSetTokenMockContract,
   RebalancingSetIssuanceMockContract,
   SetMathMockContract,
   SetTokenLibraryMockContract,
@@ -36,10 +38,12 @@ const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
 const PlaceBidMock = artifacts.require('PlaceBidMock');
+const RebalanceMock = artifacts.require('RebalanceMock');
 const RebalancingSetIssuanceMock = artifacts.require('RebalancingSetIssuanceMock');
 const SetMathMock = artifacts.require('SetMathMock');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
 const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
+const RebalanceStateSetTokenMock = artifacts.require('RebalanceStateSetTokenMock');
 const SetUSDValuationMock = artifacts.require('SetUSDValuationMock');
 const TokenFlushMock = artifacts.require('TokenFlushMock');
 const UpdatableOracleMock = artifacts.require('UpdatableOracleMock');
@@ -148,6 +152,36 @@ export class LibraryMockHelper {
       getContractInstance(tokenFlushMockContract),
       txnFrom(from),
     );
+  }
+
+  public async deployRebalanceMockAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<RebalanceMockContract> {
+    const rebalanceMockContract = await RebalanceMock.new(txnFrom(from));
+
+    return new RebalanceMockContract(getContractInstance(rebalanceMockContract), txnFrom(from));
+  }
+
+  public async deployRebalanceStateSetTokenMockAsync(
+    combinedTokenArray: Address[],
+    inflowArray: BigNumber[],
+    outflowArray: BigNumber[],
+    name: string = 'Rebalancing Set Token',
+    symbol: string = 'RBSET',
+    decimals: BigNumber = new BigNumber(18),
+    from: Address = this._contractOwnerAddress
+  ): Promise<RebalanceStateSetTokenMockContract> {
+    const rebalanceStateSetTokenMock = await RebalanceStateSetTokenMock.new(
+      name,
+      symbol,
+      decimals,
+      combinedTokenArray,
+      inflowArray,
+      outflowArray,
+      txnFrom(from)
+    );
+
+    return new RebalanceStateSetTokenMockContract(getContractInstance(rebalanceStateSetTokenMock), txnFrom(from));
   }
 
   public async deployRebalancingSetIssuanceMockAsync(

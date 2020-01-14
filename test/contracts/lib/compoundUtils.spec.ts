@@ -38,7 +38,7 @@ contract('CompoundUtilsMock', accounts => {
     });
 
     async function subject(): Promise<BigNumber> {
-      return compoundUtilsLibrary.testCalculateUnderlyingUnits.callAsync(
+      return compoundUtilsLibrary.testConvertCTokenToUnderlying.callAsync(
         subjectCTokenUnits,
         subjectExchangeRate,
         { from: caller },

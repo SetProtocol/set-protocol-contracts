@@ -42,6 +42,7 @@ export { ProposeLibraryContract } from '../types/generated/propose_library';
 export { ProtocolViewerContract } from '../types/generated/protocol_viewer';
 export { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 export { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
+export { RebalanceMockContract } from '../types/generated/rebalance_mock';
 export { RebalancingSetEthBidderContract } from '../types/generated/rebalancing_set_eth_bidder';
 export { RebalancingSetCTokenBidderContract } from '../types/generated/rebalancing_set_c_token_bidder';
 export {
@@ -60,6 +61,7 @@ export { SetTokenContract } from '../types/generated/set_token';
 export { SetTokenFactoryContract } from '../types/generated/set_token_factory';
 export { SetTokenLibraryContract } from '../types/generated/set_token_library';
 export { SetTokenLibraryMockContract } from '../types/generated/set_token_library_mock';
+export { RebalanceStateSetTokenMockContract } from '../types/generated/rebalance_state_set_token_mock';
 export { SetUSDValuationMockContract } from '../types/generated/set_u_s_d_valuation_mock';
 export { SocialTradingManagerMockContract } from '../types/generated/social_trading_manager_mock';
 export { StandardTokenMockContract } from '../types/generated/standard_token_mock';

@@ -30,7 +30,7 @@ library CompoundUtils
 {
     using SafeMath for uint256;
 
-    function calculateUnderlyingUnits(
+    function convertCTokenToUnderlying(
         uint256 _cTokenUnits,
         uint256 _exchangeRate
     )

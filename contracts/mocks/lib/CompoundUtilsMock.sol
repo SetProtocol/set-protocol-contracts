@@ -5,7 +5,7 @@ import { CompoundUtils } from "../../lib/CompoundUtils.sol";
 
 // Mock contract implementation of CompoundUtils functions
 contract CompoundUtilsMock {
-    function testCalculateUnderlyingUnits(
+    function testConvertCTokenToUnderlying(
         uint256 _cTokenUnits,
         uint256 _exchangeRate
     )
@@ -13,7 +13,7 @@ contract CompoundUtilsMock {
         pure
         returns (uint256)
     {
-        return CompoundUtils.calculateUnderlyingUnits(
+        return CompoundUtils.convertCTokenToUnderlying(
             _cTokenUnits,
             _exchangeRate
         );

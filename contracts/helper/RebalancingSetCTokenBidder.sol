@@ -182,11 +182,7 @@ contract RebalancingSetCTokenBidder is
     )
         external
         view
-        returns (
-            address[] memory,
-            uint256[] memory,
-            uint256[] memory
-        )
+        returns (address[] memory, uint256[] memory, uint256[] memory)
     {
         // Get token flow arrays for the given bid quantity
         (

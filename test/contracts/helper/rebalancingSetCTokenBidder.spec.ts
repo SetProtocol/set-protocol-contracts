@@ -224,6 +224,20 @@ contract('RebalancingSetCTokenBidder', accounts => {
       expect(cUSDCAllowance).to.bignumber.equal(expectedCTokenAllowance);
       expect(cDAIAllowance).to.bignumber.equal(expectedCTokenAllowance);
     });
+
+    describe('when cToken array and underlying array are not the same length', async () => {
+      it('should revert', async () => {
+        await expectRevertError(
+          rebalancingSetBidderHelper.deployRebalancingSetCTokenBidderAsync(
+            rebalanceAuctionModuleMock.address,
+            transferProxy.address,
+            [cUSDCInstance.address], // Missing cDAI address
+            [usdcInstance.address, daiInstance.address],
+            dataDescription,
+          )
+        );
+      });
+    });
   });
 
   describe('#bidAndWithdraw', async () => {

@@ -86,6 +86,11 @@ contract RebalancingSetCTokenBidder is
 
         dataDescription = _dataDescription;
 
+        require(
+            _cTokenArray.length == _underlyingArray.length,
+            "RebalancingSetCTokenBidder.constructor: cToken array and underlying array must be same length"
+        );
+
         for (uint256 i = 0; i < _cTokenArray.length; i++) {
             address cTokenAddress = _cTokenArray[i];
             address underlyingAddress = _underlyingArray[i];
@@ -132,14 +137,14 @@ contract RebalancingSetCTokenBidder is
         // Get token flow arrays for the given bid quantity
         (
             address[] memory combinedTokenArray,
-            uint256[] memory inflowArray,
-            uint256[] memory outflowArray
+            uint256[] memory inflowUnitsArray,
+            uint256[] memory outflowUnitsArray
         ) = Rebalance.getTokenFlows(_rebalancingSetToken, _quantity);
 
         // Ensure allowances and transfer auction tokens or underlying from user
         depositComponents(
             combinedTokenArray,
-            inflowArray
+            inflowUnitsArray
         );
 
         // Bid in auction
@@ -168,8 +173,8 @@ contract RebalancingSetCTokenBidder is
      * @param _rebalancingSetToken    The rebalancing Set Token instance
      * @param _quantity               The amount of currentSet to be rebalanced
      * @return combinedTokenArray     Array of token addresses
-     * @return inflowArray            Array of amount of tokens inserted into system in bid
-     * @return outflowArray           Array of amount of tokens returned from system in bid
+     * @return inflowUnitsArray       Array of amount of tokens inserted into system in bid
+     * @return outflowUnitsArray      Array of amount of tokens returned from system in bid
      */
     function getAddressAndBidPriceArray(
         IRebalancingSetToken _rebalancingSetToken,
@@ -177,34 +182,40 @@ contract RebalancingSetCTokenBidder is
     )
         external
         view
-        returns (address[] memory, uint256[] memory, uint256[] memory)
+        returns (
+            address[] memory,
+            uint256[] memory,
+            uint256[] memory
+        )
     {
         // Get token flow arrays for the given bid quantity
         (
             address[] memory combinedTokenArray,
-            uint256[] memory inflowArray,
-            uint256[] memory outflowArray
+            uint256[] memory inflowUnitsArray,
+            uint256[] memory outflowUnitsArray
         ) = Rebalance.getTokenFlows(_rebalancingSetToken, _quantity);
 
         // Loop through the combined token addresses array and replace with underlying address
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
             address currentComponentAddress = combinedTokenArray[i];
 
-            if (cTokenToUnderlying[currentComponentAddress] != address(0)) {
-                combinedTokenArray[i] = cTokenToUnderlying[currentComponentAddress];
+            // Check if current component address is a cToken
+            address underlyingAddress = cTokenToUnderlying[currentComponentAddress];
+            if (underlyingAddress != address(0)) {
+                combinedTokenArray[i] = underlyingAddress;
 
                 // Replace inflow and outflow with required amount of underlying. 
                 // Calculated as cToken quantity * exchangeRate / 10 ** 18.
                 uint256 exchangeRate = ICToken(currentComponentAddress).exchangeRateStored();
-                uint256 currentInflowQuantity = inflowArray[i];
-                uint256 currentOutflowQuantity = outflowArray[i];
+                uint256 currentInflowQuantity = inflowUnitsArray[i];
+                uint256 currentOutflowQuantity = outflowUnitsArray[i];
 
-                inflowArray[i] = CompoundUtils.convertCTokenToUnderlying(currentInflowQuantity, exchangeRate);
-                outflowArray[i] = CompoundUtils.convertCTokenToUnderlying(currentOutflowQuantity, exchangeRate);
+                inflowUnitsArray[i] = CompoundUtils.convertCTokenToUnderlying(currentInflowQuantity, exchangeRate);
+                outflowUnitsArray[i] = CompoundUtils.convertCTokenToUnderlying(currentOutflowQuantity, exchangeRate);
             }
         }
 
-        return (combinedTokenArray, inflowArray, outflowArray);
+        return (combinedTokenArray, inflowUnitsArray, outflowUnitsArray);
     }
 
     /* ============ Private Functions ============ */
@@ -214,18 +225,18 @@ contract RebalancingSetCTokenBidder is
      * into this helper contract.
      *
      * @param  _combinedTokenArray            Array of token addresses
-     * @param  _inflowArray                   Array of inflow token units
+     * @param  _inflowUnitsArray              Array of inflow token units
      */
     function depositComponents(
         address[] memory _combinedTokenArray,
-        uint256[] memory _inflowArray
+        uint256[] memory _inflowUnitsArray
     )
         private
     {
         // Loop through the combined token addresses array and deposit inflow amounts
         for (uint256 i = 0; i < _combinedTokenArray.length; i++) {
             address currentComponentAddress = _combinedTokenArray[i];
-            uint256 currentComponentQuantity = _inflowArray[i];
+            uint256 currentComponentQuantity = _inflowUnitsArray[i];
 
             // Check component inflow is greater than 0
             if (currentComponentQuantity > 0) {
@@ -264,7 +275,10 @@ contract RebalancingSetCTokenBidder is
                     );
 
                     // Mint cToken using underlying
-                    cTokenInstance.mint(underlyingQuantity);
+                    require(
+                        cTokenInstance.mint(underlyingQuantity) == 0,
+                        "RebalancingSetCTokenBidder.bidAndWithdraw: Error minting cToken"
+                    );
                 } else {
                     // Transfer non-cTokens to contract
                     ERC20Wrapper.transferFrom(
@@ -302,10 +316,13 @@ contract RebalancingSetCTokenBidder is
             // Check component balance is greater than 0
             if (currentComponentBalance > 0) {
                 // Check if cToken
-                if (cTokenToUnderlying[currentComponentAddress] != address(0)) {
-                    address underlyingAddress = cTokenToUnderlying[currentComponentAddress];
+                address underlyingAddress = cTokenToUnderlying[currentComponentAddress];
+                if (underlyingAddress != address(0)) {
                     // Redeem cToken into underlying
-                    ICToken(currentComponentAddress).redeem(currentComponentBalance);
+                    require(
+                        ICToken(currentComponentAddress).redeem(currentComponentBalance) == 0,
+                        "RebalancingSetCTokenBidder.bidAndWithdraw: Erroring redeeming cToken"
+                    );
 
                     // Get balance of underlying in contract
                     uint256 underlyingComponentBalance = ERC20Wrapper.balanceOf(

@@ -9,6 +9,7 @@ import { BigNumber } from 'bignumber.js';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  BadCTokenMockContract,
   ConstantAuctionPriceCurveContract,
   CoreMockContract,
   RebalanceAuctionModuleMockContract,
@@ -145,15 +146,7 @@ contract('RebalancingSetCTokenBidder', accounts => {
       deployerAccount
     );
     cDAIInstance = await erc20Helper.getTokenInstanceAsync(cDAIAddress);
-
     dataDescription = 'cDAI cUSDC Bidder Contract';
-    rebalancingSetCTokenBidder = await rebalancingSetBidderHelper.deployRebalancingSetCTokenBidderAsync(
-      rebalanceAuctionModuleMock.address,
-      transferProxy.address,
-      [cUSDCInstance.address, cDAIInstance.address],
-      [usdcInstance.address, daiInstance.address],
-      dataDescription,
-    );
   });
 
   after(async () => {
@@ -164,6 +157,14 @@ contract('RebalancingSetCTokenBidder', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
+
+    rebalancingSetCTokenBidder = await rebalancingSetBidderHelper.deployRebalancingSetCTokenBidderAsync(
+      rebalanceAuctionModuleMock.address,
+      transferProxy.address,
+      [cUSDCInstance.address, cDAIInstance.address],
+      [usdcInstance.address, daiInstance.address],
+      dataDescription,
+    );
   });
 
   afterEach(async () => {
@@ -704,6 +705,17 @@ contract('RebalancingSetCTokenBidder', accounts => {
           await expectRevertError(subject());
         });
       });
+
+      describe('when minting a cToken is returning a nonzero number', async () => {
+        beforeEach(async () => {
+          // Comptroller disables minting for cTokens
+          await compoundHelper.disableCTokenMinting();
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
     });
 
     describe('when target cToken is an outflow in a bid', async () => {
@@ -849,6 +861,25 @@ contract('RebalancingSetCTokenBidder', accounts => {
         );
 
         expect(JSON.stringify(newReceiverTokenUnderlyingBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
+      });
+
+      describe('when redeeming a cToken is returning a nonzero number', async () => {
+        beforeEach(async () => {
+          let badCTokenMock: BadCTokenMockContract;
+          badCTokenMock = await compoundHelper.deployCTokenWithInvalidMintAndRedeemAsync(deployerAccount);
+
+          rebalancingSetCTokenBidder = await rebalancingSetBidderHelper.deployRebalancingSetCTokenBidderAsync(
+            rebalanceAuctionModuleMock.address,
+            transferProxy.address,
+            [badCTokenMock.address, cDAIInstance.address], // Replace with bad cToken mock
+            [usdcInstance.address, daiInstance.address],
+            dataDescription,
+          );
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
     });
 

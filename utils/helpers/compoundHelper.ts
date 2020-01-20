@@ -3,10 +3,10 @@ import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 
-import { getWeb3 } from '../web3Helper';
+import { getContractInstance, getWeb3 } from '../web3Helper';
 import { ether } from '../units';
 
-import { DEFAULT_GAS } from '../constants';
+import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY } from '../constants';
 
 import { ComptrollerABI } from '../external/abis/compound/ComptrollerABI';
 import { CErc20ABI } from '../external/abis/compound/CErc20ABI';
@@ -14,7 +14,10 @@ import { InterestRateModelABI } from '../external/abis/compound/InterestRateMode
 
 import { CONTRACTS, PERMISSIONED_ACCOUNTS, BYTECODE } from '../compoundSnapshotAddresses';
 
+import { BadCTokenMockContract } from '../contracts';
+
 const web3 = getWeb3();
+const BadCTokenMock = artifacts.require('BadCTokenMock');
 
 export class CompoundHelper {
   private _senderAccountAddress: Address;
@@ -81,6 +84,23 @@ export class CompoundHelper {
     );
   }
 
+  public async deployCTokenWithInvalidMintAndRedeemAsync(
+    initialAccount: Address
+  ): Promise<BadCTokenMockContract> {
+    const truffleMockToken = await BadCTokenMock.new(
+      initialAccount,
+      DEPLOYED_TOKEN_QUANTITY,
+      'Mock CToken Bad Mint Redeem',
+      'BAD',
+      { from: this._senderAccountAddress, gas: DEFAULT_GAS },
+    );
+
+    return new BadCTokenMockContract(
+      getContractInstance(truffleMockToken),
+      { from: this._senderAccountAddress },
+    );
+  }
+
   public async deployMockCDAI(
     underlying: Address,
     admin: Address,
@@ -117,6 +137,19 @@ export class CompoundHelper {
       from: this._senderAccountAddress,
       to: this.comptroller,
       data: supportMarketData,
+      gas: DEFAULT_GAS,
+    });
+  }
+
+  public async disableCTokenMinting(): Promise<void> {
+    const ComptrollerContract = new web3.eth.Contract(ComptrollerABI, this.comptroller);
+
+    const setMintPausedData = ComptrollerContract.methods._setMintPaused(true).encodeABI();
+
+    await web3.eth.sendTransaction({
+      from: this.admin,
+      to: this.comptroller,
+      data: setMintPausedData,
       gas: DEFAULT_GAS,
     });
   }

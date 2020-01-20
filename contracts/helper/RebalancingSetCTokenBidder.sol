@@ -271,8 +271,9 @@ contract RebalancingSetCTokenBidder is
                     );
 
                     // Mint cToken using underlying
+                    uint256 mintResponse = cTokenInstance.mint(underlyingQuantity);
                     require(
-                        cTokenInstance.mint(underlyingQuantity) == 0,
+                        mintResponse == 0,
                         "RebalancingSetCTokenBidder.bidAndWithdraw: Error minting cToken"
                     );
                 } else {
@@ -315,8 +316,9 @@ contract RebalancingSetCTokenBidder is
                 address underlyingAddress = cTokenToUnderlying[currentComponentAddress];
                 if (underlyingAddress != address(0)) {
                     // Redeem cToken into underlying
+                    uint256 mintResponse = ICToken(currentComponentAddress).redeem(currentComponentBalance);
                     require(
-                        ICToken(currentComponentAddress).redeem(currentComponentBalance) == 0,
+                        mintResponse == 0,
                         "RebalancingSetCTokenBidder.bidAndWithdraw: Erroring redeeming cToken"
                     );
 

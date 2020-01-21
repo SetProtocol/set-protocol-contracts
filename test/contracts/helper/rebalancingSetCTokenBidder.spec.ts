@@ -1094,7 +1094,7 @@ contract('RebalancingSetCTokenBidder', accounts => {
         cUSDCAddress,
         deployerAccount
       );
-      cUSDCInstance = badCUSDCInstance || await erc20Helper.getTokenInstanceAsync(cUSDCAddress);
+      cUSDCInstance = await erc20Helper.getTokenInstanceAsync(cUSDCAddress);
 
       // Set up Compound DAI token
       daiInstance = await erc20Helper.deployTokenAsync(

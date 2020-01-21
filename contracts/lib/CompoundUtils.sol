@@ -30,16 +30,24 @@ library CompoundUtils
 {
     using SafeMath for uint256;
 
+    /*
+     * Utility function to convert a specified amount of cTokens to underlying 
+     * token based on the cToken's exchange rate
+     *
+     * @param _cTokenAmount         Amount of cTokens that will be converted to underlying
+     * @param _cTokenExchangeRate   Exchange rate for the cToken
+     * @return underlyingAmount     Amount of underlying ERC20 tokens
+     */
     function convertCTokenToUnderlying(
-        uint256 _cTokenUnits,
-        uint256 _exchangeRate
+        uint256 _cTokenAmount,
+        uint256 _cTokenExchangeRate
     )
     internal
     pure
     returns (uint256)
     {
-        // Underlying units is calculated as cToken quantity * exchangeRate / 10 ** 18.
-        uint256 a = _cTokenUnits.mul(_exchangeRate);
+        // Underlying units is calculated as cToken quantity * exchangeRate divided by 10 ** 18 and rounded up.
+        uint256 a = _cTokenAmount.mul(_cTokenExchangeRate);
         uint256 b = CommonMath.scaleFactor();
 
         // Round value up

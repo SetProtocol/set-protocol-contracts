@@ -68,13 +68,6 @@ contract('RebalancingSetCTokenBidder', accounts => {
   let rebalancingComponentWhiteList: WhiteListContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
   let constantAuctionPriceCurve: ConstantAuctionPriceCurveContract;
-  let cUSDCInstance: StandardTokenMockContract;
-  let usdcInstance: StandardTokenMockContract;
-  let cDAIInstance: StandardTokenMockContract;
-  let daiInstance: StandardTokenMockContract;
-
-  let rebalancingSetCTokenBidder: RebalancingSetCTokenBidderContract;
-  let dataDescription: string;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const compoundHelper = new CompoundHelper(deployerAccount);
@@ -112,41 +105,6 @@ contract('RebalancingSetCTokenBidder', accounts => {
     await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
     await rebalancingHelper.addPriceLibraryAsync(coreMock, constantAuctionPriceCurve);
-
-    // Set up Compound USDC token
-    usdcInstance = await erc20Helper.deployTokenAsync(
-      deployerAccount,
-      6,
-    );
-    const cUSDCAddress = await compoundHelper.deployMockCUSDC(usdcInstance.address, deployerAccount);
-    await compoundHelper.enableCToken(cUSDCAddress);
-    // Set the Borrow Rate
-    await compoundHelper.setBorrowRate(cUSDCAddress, new BigNumber('43084603999'));
-
-    await erc20Helper.approveTransferAsync(
-      usdcInstance,
-      cUSDCAddress,
-      deployerAccount
-    );
-    cUSDCInstance = await erc20Helper.getTokenInstanceAsync(cUSDCAddress);
-
-    // Set up Compound DAI token
-    daiInstance = await erc20Helper.deployTokenAsync(
-      deployerAccount,
-      18,
-    );
-    const cDAIAddress = await compoundHelper.deployMockCDAI(daiInstance.address, deployerAccount);
-    await compoundHelper.enableCToken(cDAIAddress);
-    // Set the Borrow Rate
-    await compoundHelper.setBorrowRate(cDAIAddress, new BigNumber('29313252165'));
-
-    await erc20Helper.approveTransferAsync(
-      daiInstance,
-      cDAIAddress,
-      deployerAccount
-    );
-    cDAIInstance = await erc20Helper.getTokenInstanceAsync(cDAIAddress);
-    dataDescription = 'cDAI cUSDC Bidder Contract';
   });
 
   after(async () => {
@@ -157,14 +115,6 @@ contract('RebalancingSetCTokenBidder', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
-
-    rebalancingSetCTokenBidder = await rebalancingSetBidderHelper.deployRebalancingSetCTokenBidderAsync(
-      rebalanceAuctionModuleMock.address,
-      transferProxy.address,
-      [cUSDCInstance.address, cDAIInstance.address],
-      [usdcInstance.address, daiInstance.address],
-      dataDescription,
-    );
   });
 
   afterEach(async () => {
@@ -172,6 +122,59 @@ contract('RebalancingSetCTokenBidder', accounts => {
   });
 
   describe('#constructor', async () => {
+    let cUSDCInstance: StandardTokenMockContract;
+    let usdcInstance: StandardTokenMockContract;
+    let cDAIInstance: StandardTokenMockContract;
+    let daiInstance: StandardTokenMockContract;
+
+    let rebalancingSetCTokenBidder: RebalancingSetCTokenBidderContract;
+    let dataDescription: string;
+
+    before(async () => {
+      // Set up Compound USDC token
+      usdcInstance = await erc20Helper.deployTokenAsync(
+        deployerAccount,
+        6,
+      );
+      const cUSDCAddress = await compoundHelper.deployMockCUSDC(usdcInstance.address, deployerAccount);
+      await compoundHelper.enableCToken(cUSDCAddress);
+      // Set the Borrow Rate
+      await compoundHelper.setBorrowRate(cUSDCAddress, new BigNumber('43084603999'));
+
+      await erc20Helper.approveTransferAsync(
+        usdcInstance,
+        cUSDCAddress,
+        deployerAccount
+      );
+      cUSDCInstance = await erc20Helper.getTokenInstanceAsync(cUSDCAddress);
+
+      // Set up Compound DAI token
+      daiInstance = await erc20Helper.deployTokenAsync(
+        deployerAccount,
+        18,
+      );
+      const cDAIAddress = await compoundHelper.deployMockCDAI(daiInstance.address, deployerAccount);
+      await compoundHelper.enableCToken(cDAIAddress);
+      // Set the Borrow Rate
+      await compoundHelper.setBorrowRate(cDAIAddress, new BigNumber('29313252165'));
+
+      await erc20Helper.approveTransferAsync(
+        daiInstance,
+        cDAIAddress,
+        deployerAccount
+      );
+      cDAIInstance = await erc20Helper.getTokenInstanceAsync(cDAIAddress);
+      dataDescription = 'cDAI cUSDC Bidder Contract';
+
+      rebalancingSetCTokenBidder = await rebalancingSetBidderHelper.deployRebalancingSetCTokenBidderAsync(
+        rebalanceAuctionModuleMock.address,
+        transferProxy.address,
+        [cUSDCInstance.address, cDAIInstance.address],
+        [usdcInstance.address, daiInstance.address],
+        dataDescription,
+      );
+    });
+
     it('should contain the correct address of the rebalance auction module', async () => {
       const actualRebalanceAuctionModuleAddress = await rebalancingSetCTokenBidder.rebalanceAuctionModule.callAsync();
       expect(actualRebalanceAuctionModuleAddress).to.equal(rebalanceAuctionModuleMock.address);
@@ -242,6 +245,16 @@ contract('RebalancingSetCTokenBidder', accounts => {
   });
 
   describe('#bidAndWithdraw', async () => {
+    let cUSDCInstance: StandardTokenMockContract;
+    let usdcInstance: StandardTokenMockContract;
+    let cDAIInstance: StandardTokenMockContract;
+    let daiInstance: StandardTokenMockContract;
+
+    let rebalancingSetCTokenBidder: RebalancingSetCTokenBidderContract;
+    let dataDescription: string;
+
+    let badCUSDCInstance: BadCTokenMockContract;
+
     let subjectRebalancingSetToken: Address;
     let subjectQuantity: BigNumber;
     let subjectExecutePartialQuantity: boolean;
@@ -266,6 +279,49 @@ contract('RebalancingSetCTokenBidder', accounts => {
     let minBid: BigNumber;
 
     beforeEach(async () => {
+      // Set up Compound USDC token
+      usdcInstance = await erc20Helper.deployTokenAsync(
+        deployerAccount,
+        6,
+      );
+      const cUSDCAddress = await compoundHelper.deployMockCUSDC(usdcInstance.address, deployerAccount);
+      await compoundHelper.enableCToken(cUSDCAddress);
+      // Set the Borrow Rate
+      await compoundHelper.setBorrowRate(cUSDCAddress, new BigNumber('43084603999'));
+
+      await erc20Helper.approveTransferAsync(
+        usdcInstance,
+        cUSDCAddress,
+        deployerAccount
+      );
+      cUSDCInstance = badCUSDCInstance || await erc20Helper.getTokenInstanceAsync(cUSDCAddress);
+
+      // Set up Compound DAI token
+      daiInstance = await erc20Helper.deployTokenAsync(
+        deployerAccount,
+        18,
+      );
+      const cDAIAddress = await compoundHelper.deployMockCDAI(daiInstance.address, deployerAccount);
+      await compoundHelper.enableCToken(cDAIAddress);
+      // Set the Borrow Rate
+      await compoundHelper.setBorrowRate(cDAIAddress, new BigNumber('29313252165'));
+
+      await erc20Helper.approveTransferAsync(
+        daiInstance,
+        cDAIAddress,
+        deployerAccount
+      );
+      cDAIInstance = await erc20Helper.getTokenInstanceAsync(cDAIAddress);
+      dataDescription = 'cDAI cUSDC Bidder Contract';
+
+      rebalancingSetCTokenBidder = await rebalancingSetBidderHelper.deployRebalancingSetCTokenBidderAsync(
+        rebalanceAuctionModuleMock.address,
+        transferProxy.address,
+        [cUSDCInstance.address, cDAIInstance.address],
+        [usdcInstance.address, daiInstance.address],
+        dataDescription,
+      );
+
       // ----------------------------------------------------------------------
       // Create Set with no cToken component
       // ----------------------------------------------------------------------
@@ -706,10 +762,13 @@ contract('RebalancingSetCTokenBidder', accounts => {
         });
       });
 
-      describe('when minting a cToken is returning a nonzero number', async () => {
-        beforeEach(async () => {
-          // Comptroller disables minting for cTokens
-          await compoundHelper.disableCTokenMinting();
+      describe('when minting a cToken is returning a nonzero response', async () => {
+        before(async () => {
+          badCUSDCInstance = await compoundHelper.deployCTokenWithInvalidMintAndRedeemAsync(deployerAccount);
+        });
+
+        after(async () => {
+          badCUSDCInstance = undefined;
         });
 
         it('should revert', async () => {
@@ -863,18 +922,13 @@ contract('RebalancingSetCTokenBidder', accounts => {
         expect(JSON.stringify(newReceiverTokenUnderlyingBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
       });
 
-      describe('when redeeming a cToken is returning a nonzero number', async () => {
-        beforeEach(async () => {
-          let badCTokenMock: BadCTokenMockContract;
-          badCTokenMock = await compoundHelper.deployCTokenWithInvalidMintAndRedeemAsync(deployerAccount);
+      describe('when redeeming a cToken is returning a nonzero response', async () => {
+        before(async () => {
+          badCUSDCInstance = await compoundHelper.deployCTokenWithInvalidMintAndRedeemAsync(deployerAccount);
+        });
 
-          rebalancingSetCTokenBidder = await rebalancingSetBidderHelper.deployRebalancingSetCTokenBidderAsync(
-            rebalanceAuctionModuleMock.address,
-            transferProxy.address,
-            [badCTokenMock.address, cDAIInstance.address], // Replace with bad cToken mock
-            [usdcInstance.address, daiInstance.address],
-            dataDescription,
-          );
+        after(async () => {
+          badCUSDCInstance = undefined;
         });
 
         it('should revert', async () => {
@@ -995,6 +1049,14 @@ contract('RebalancingSetCTokenBidder', accounts => {
   });
 
   describe('#getAddressAndBidPriceArray', async () => {
+    let cUSDCInstance: StandardTokenMockContract;
+    let usdcInstance: StandardTokenMockContract;
+    let cDAIInstance: StandardTokenMockContract;
+    let daiInstance: StandardTokenMockContract;
+
+    let rebalancingSetCTokenBidder: RebalancingSetCTokenBidderContract;
+    let dataDescription: string;
+
     let subjectRebalancingSetToken: Address;
     let subjectQuantity: BigNumber;
     let proposalPeriod: BigNumber;
@@ -1017,6 +1079,49 @@ contract('RebalancingSetCTokenBidder', accounts => {
     let minBid: BigNumber;
 
     beforeEach(async () => {
+      // Set up Compound USDC token
+      usdcInstance = await erc20Helper.deployTokenAsync(
+        deployerAccount,
+        6,
+      );
+      const cUSDCAddress = await compoundHelper.deployMockCUSDC(usdcInstance.address, deployerAccount);
+      await compoundHelper.enableCToken(cUSDCAddress);
+      // Set the Borrow Rate
+      await compoundHelper.setBorrowRate(cUSDCAddress, new BigNumber('43084603999'));
+
+      await erc20Helper.approveTransferAsync(
+        usdcInstance,
+        cUSDCAddress,
+        deployerAccount
+      );
+      cUSDCInstance = badCUSDCInstance || await erc20Helper.getTokenInstanceAsync(cUSDCAddress);
+
+      // Set up Compound DAI token
+      daiInstance = await erc20Helper.deployTokenAsync(
+        deployerAccount,
+        18,
+      );
+      const cDAIAddress = await compoundHelper.deployMockCDAI(daiInstance.address, deployerAccount);
+      await compoundHelper.enableCToken(cDAIAddress);
+      // Set the Borrow Rate
+      await compoundHelper.setBorrowRate(cDAIAddress, new BigNumber('29313252165'));
+
+      await erc20Helper.approveTransferAsync(
+        daiInstance,
+        cDAIAddress,
+        deployerAccount
+      );
+      cDAIInstance = await erc20Helper.getTokenInstanceAsync(cDAIAddress);
+      dataDescription = 'cDAI cUSDC Bidder Contract';
+
+      rebalancingSetCTokenBidder = await rebalancingSetBidderHelper.deployRebalancingSetCTokenBidderAsync(
+        rebalanceAuctionModuleMock.address,
+        transferProxy.address,
+        [cUSDCInstance.address, cDAIInstance.address],
+        [usdcInstance.address, daiInstance.address],
+        dataDescription,
+      );
+
       // ----------------------------------------------------------------------
       // Create Set with no cToken component
       // ----------------------------------------------------------------------

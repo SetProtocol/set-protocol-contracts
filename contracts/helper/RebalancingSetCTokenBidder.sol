@@ -246,9 +246,9 @@ contract RebalancingSetCTokenBidder is
 
                 // If cToken, calculate required underlying tokens, transfer to contract, 
                 // ensure underlying allowance to cToken and then mint cTokens
-                if (cTokenToUnderlying[currentComponentAddress] != address(0)) {
+                address underlyingAddress = cTokenToUnderlying[currentComponentAddress];
+                if (underlyingAddress != address(0)) {
                     ICToken cTokenInstance = ICToken(currentComponentAddress);
-                    address underlyingAddress = cTokenToUnderlying[currentComponentAddress];
 
                     // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
                     uint256 exchangeRate = cTokenInstance.exchangeRateCurrent();

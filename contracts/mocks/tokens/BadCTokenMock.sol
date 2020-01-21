@@ -3,7 +3,7 @@ pragma solidity 0.5.7;
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 contract BadCTokenMock is ERC20 {
-  uint256 constant public decimals = 18;
+  uint256 constant public decimals = 8;
   string public name;
   string public symbol;
   address public underlyingToken;
@@ -25,7 +25,7 @@ contract BadCTokenMock is ERC20 {
   * @dev Mint function that returns a nonzero number which is an error on Compound
   * @param _value The amount of cTokens to be minted.
   */
-  function mint(uint256 _value) public returns (uint256) {
+  function mint(uint _value) public returns (uint) {
     return 1;
   }
 
@@ -33,13 +33,13 @@ contract BadCTokenMock is ERC20 {
   * @dev Redeem function that returns a nonzero number which is an error on Compound
   * @param _value The amount of cTokens to be redeemed.
   */
-  function redeem(uint256 _value) public returns (uint256) {
+  function redeem(uint _value) public returns (uint) {
     return 1;
   }
 
   function exchangeRateCurrent()
     public
-    returns (uint256)
+    returns (uint)
   {
     return 200000000000000;
   }
@@ -47,7 +47,7 @@ contract BadCTokenMock is ERC20 {
   function exchangeRateStored()
     public
     view
-    returns (uint256)
+    returns (uint)
   {
     return 200000000000000;
   }

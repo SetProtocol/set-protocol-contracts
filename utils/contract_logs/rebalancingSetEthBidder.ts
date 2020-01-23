@@ -1,8 +1,10 @@
 import { Address, Log } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
 
 export function BidPlacedWithEth(
   rebalancingSetToken: Address,
   bidder: Address,
+  quantity: BigNumber,
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -11,6 +13,7 @@ export function BidPlacedWithEth(
     args: {
       rebalancingSetToken,
       bidder,
+      quantity,
     },
   }];
 }

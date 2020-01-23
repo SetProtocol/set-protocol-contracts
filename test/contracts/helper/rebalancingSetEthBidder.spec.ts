@@ -402,6 +402,7 @@ contract('RebalancingSetEthBidder', accounts => {
         const expectedLogs = BidPlacedWithEth(
           rebalancingSetToken.address,
           subjectCaller,
+          subjectQuantity,
           rebalancingSetEthBidder.address
         );
 
@@ -552,6 +553,7 @@ contract('RebalancingSetEthBidder', accounts => {
           const expectedLogs = BidPlacedWithEth(
             rebalancingSetToken.address,
             subjectCaller,
+            subjectQuantity,
             rebalancingSetEthBidder.address
           );
 

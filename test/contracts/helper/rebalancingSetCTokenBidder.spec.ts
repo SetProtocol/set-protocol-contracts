@@ -564,6 +564,7 @@ contract('RebalancingSetCTokenBidder', accounts => {
         const expectedLogs = BidPlacedCToken(
           rebalancingSetToken.address,
           subjectCaller,
+          subjectQuantity,
           rebalancingSetCTokenBidder.address
         );
 
@@ -745,6 +746,7 @@ contract('RebalancingSetCTokenBidder', accounts => {
           const expectedLogs = BidPlacedCToken(
             rebalancingSetToken.address,
             subjectCaller,
+            subjectQuantity,
             rebalancingSetCTokenBidder.address
           );
 

@@ -53,7 +53,8 @@ contract RebalancingSetEthBidder is
 
     event BidPlacedWithEth(
         address indexed rebalancingSetToken,
-        address indexed bidder
+        address indexed bidder,
+        uint256 quantity
     );
 
     /* ============ Constructor ============ */
@@ -166,7 +167,8 @@ contract RebalancingSetEthBidder is
         // Log bid placed with Eth event
         emit BidPlacedWithEth(
             address(_rebalancingSetToken),
-            msg.sender
+            msg.sender,
+            _quantity
         );
     }
 

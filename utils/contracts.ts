@@ -53,8 +53,10 @@ export { RebalancingSetIssuanceModuleContract } from '../types/generated/rebalan
 export { RebalancingSetIssuanceMockContract } from '../types/generated/rebalancing_set_issuance_mock';
 export { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_token';
 export { RebalancingSetTokenV2Contract } from '../types/generated/rebalancing_set_token_v2';
+export { RebalancingSetTokenV3Contract } from '../types/generated/rebalancing_set_token_v3';
 export { RebalancingSetTokenFactoryContract } from '../types/generated/rebalancing_set_token_factory';
 export { RebalancingSetTokenV2FactoryContract } from '../types/generated/rebalancing_set_token_v2_factory';
+export { RebalancingSetTokenV3FactoryContract } from '../types/generated/rebalancing_set_token_v3_factory';
 export { RebalancingSetTokenViewerContract } from '../types/generated/rebalancing_set_token_viewer';
 export { SettleRebalanceLibraryContract } from '../types/generated/settle_rebalance_library';
 export { SetMathMockContract } from '../types/generated/set_math_mock';

@@ -1,5 +1,5 @@
 /*
-    Copyright 2019 Set Labs Inc.
+    Copyright 2020 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import { RebalancingSetState } from "../rebalancing-v2/RebalancingSetState.sol";
 /**
  * @title IncentiveFee
  * @author Set Protocol
- *
  */
 contract IncentiveFee is 
     ERC20,
@@ -46,6 +45,9 @@ contract IncentiveFee is
 
     /* ============ Internal Functions ============ */
 
+    /*
+     * The Rebalancing SetToken must be in Default state.
+     */
     function validateFeeActualization() internal view {
         validateRebalanceStateIs(RebalancingLibrary.State.Default);
     }

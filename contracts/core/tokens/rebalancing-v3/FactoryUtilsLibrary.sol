@@ -1,5 +1,5 @@
 /*
-    Copyright 2019 Set Labs Inc.
+    Copyright 2020 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -24,6 +24,10 @@ import { Bytes32Library } from "../../../lib/Bytes32Library.sol";
 import { LibBytes } from "../../../external/0x/LibBytes.sol";
 
 
+/*
+ * We segmented the FactoryUtils into it's own library to lower RebalancingSetTokenV3Factory
+ * deployed bytecode size.
+ */
 library FactoryUtilsLibrary {
     using SafeMath for uint256;
     using LibBytes for bytes;
@@ -41,6 +45,9 @@ library FactoryUtilsLibrary {
         bytes rebalanceFeeCalculatorData;
     }
 
+    /*
+     * Provides validations
+     */
     function validateRebalanceSetCalldata(
         InitRebalancingParameters memory _parameters,
         address liquidatorWhitelist,
@@ -87,6 +94,21 @@ library FactoryUtilsLibrary {
         );
     }
 
+    /**
+     * Parses the calldata, which is configured as follows:
+     *
+     * 
+     * | CallData                   | Location                      |
+     * |----------------------------|-------------------------------|
+     * | manager                    | 32                            |
+     * | liquidator                 | 64                            |
+     * | feeRecipient               | 96                            |
+     * | rebalanceFeeCalculator     | 128                           |
+     * | rebalanceInterval          | 160                           |
+     * | rebalanceFailPeriod        | 192                           |
+     * | entryFee                   | 224                           |
+     * | rebalanceFeeCalculatorData | 256 to end                    |
+     */
     function parseRebalanceSetCallData(
         bytes memory _callData
     )

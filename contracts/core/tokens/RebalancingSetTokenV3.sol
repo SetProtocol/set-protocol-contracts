@@ -1,5 +1,5 @@
 /*
-    Copyright 2019 Set Labs Inc.
+    Copyright 2020 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -111,7 +111,14 @@ contract RebalancingSetTokenV3 is
 
         RebalancingSettlement.transitionToDefault(newUnitShares);
     }
-
+    /*
+     * During the Default stage, the incentive / rebalance Fee can be triggered. This will
+     * retrieve the current inflation fee from the fee calulator and mint the according
+     * inflation to the feeRecipient. The unit shares is then adjusted based on the new
+     * supply.
+     *
+     * Anyone can call this function.
+     */
     function actualizeFee()
         external
     {

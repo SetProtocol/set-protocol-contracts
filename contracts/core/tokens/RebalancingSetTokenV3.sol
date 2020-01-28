@@ -17,26 +17,9 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
-import { Initializable } from "zos-lib/contracts/Initializable.sol";
-
-import { BackwardCompatibility } from "./rebalancing-v2/BackwardCompatibility.sol";
-import { RebalancingFailure } from "./rebalancing-v2/RebalancingFailure.sol";
-import { ICore } from "../interfaces/ICore.sol";
-import { IFeeCalculator } from "../interfaces/IFeeCalculator.sol";
-import { ILiquidator } from "../interfaces/ILiquidator.sol";
-import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol";
-import { ISetToken } from "../interfaces/ISetToken.sol";
-import { Issuance } from "./rebalancing-v2/Issuance.sol";
-import { IVault } from "../interfaces/IVault.sol";
-import { IWhiteList } from "../interfaces/IWhiteList.sol";
-import { RebalancingBid } from "./rebalancing-v2/RebalancingBid.sol";
-import { Rebalance } from "../lib/Rebalance.sol";
-import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
-import { RebalancingSetState } from "./rebalancing-v2/RebalancingSetState.sol";
 import { RebalancingSettlement } from "./rebalancing-v2/RebalancingSettlement.sol";
-import { RebalancingStart } from "./rebalancing-v2/RebalancingStart.sol";
+import { IncentiveFee } from "./rebalancing-v3/IncentiveFee.sol";
+import { RebalancingSetTokenV2 } from "./RebalancingSetTokenV2.sol";
 
 
 /**
@@ -47,26 +30,9 @@ import { RebalancingStart } from "./rebalancing-v2/RebalancingStart.sol";
  * - Separating incentive fees from the settlement process.
  */
 contract RebalancingSetTokenV3 is
-    ERC20,
-    ERC20Detailed,
-    Initializable,
-    RebalancingSetState,
-    BackwardCompatibility,
-    Issuance,
-    RebalancingStart,
-    RebalancingBid,
-    RebalancingSettlement,
-    RebalancingFailure
+    IncentiveFee,
+    RebalancingSetTokenV2
 {
-    /* ============ Constructor ============ */
-
-    event IncentiveFeePaid(
-        address indexed feeRecipient,
-        uint256 feeQuantity,
-        uint256 feePercentage,
-        uint256 newUnitShares
-    );
-    
     /* ============ Constructor ============ */
 
     /**
@@ -94,8 +60,8 @@ contract RebalancingSetTokenV3 is
      *
      * @param _addressConfig             List of configuration addresses
      * @param _uintConfig                List of uint addresses
-     * @param _name                      The name of the new RebalancingSetTokenV3
-     * @param _symbol                    The symbol of the new RebalancingSetTokenV3
+     * @param _name                      The name of the new RebalancingSetTokenV2
+     * @param _symbol                    The symbol of the new RebalancingSetTokenV2
      */
     constructor(
         address[8] memory _addressConfig,
@@ -104,135 +70,13 @@ contract RebalancingSetTokenV3 is
         string memory _symbol
     )
         public
-        ERC20Detailed(
+        RebalancingSetTokenV2(
+            _addressConfig,
+            _uintConfig,
             _name,
-            _symbol,
-            18
+            _symbol
         )
-    {
-        factory = IRebalancingSetFactory(_addressConfig[0]);
-        manager = _addressConfig[1];
-        liquidator = ILiquidator(_addressConfig[2]);
-        currentSet = ISetToken(_addressConfig[3]);
-        componentWhiteList = IWhiteList(_addressConfig[4]);
-        liquidatorWhiteList = IWhiteList(_addressConfig[5]);
-        feeRecipient = _addressConfig[6];
-        rebalanceFeeCalculator = IFeeCalculator(_addressConfig[7]);
-
-        unitShares = _uintConfig[0];
-        naturalUnit = _uintConfig[1];
-        rebalanceInterval = _uintConfig[2];
-        rebalanceFailPeriod = _uintConfig[3];
-        lastRebalanceTimestamp = _uintConfig[4];
-        entryFee = _uintConfig[5];
-
-        core = ICore(factory.core());
-        vault = IVault(core.vault());
-        rebalanceState = RebalancingLibrary.State.Default;
-    }
-
-    /*
-     * Intended to be called during creation by the RebalancingSetTokenFactory. Can only be initialized
-     * once. This implementation initializes the rebalance fee.
-     *
-     *
-     * @param _rebalanceFeeCalldata       Bytes encoded rebalance fee represented as a scaled percentage value
-     */
-    function initialize(
-        bytes calldata _rebalanceFeeCalldata
-    )
-        external
-        initializer
-    {
-        rebalanceFeeCalculator.initialize(_rebalanceFeeCalldata);
-    }
-
-   /* ============ External Functions ============ */
-
-    /*
-     * Initiates the rebalance in coordination with the Liquidator contract. 
-     * In this step, we redeem the currentSet and pass relevant information
-     * to the liquidator.
-     *
-     * @param _nextSet                      The Set to rebalance into
-     * @param _liquidatorData               Bytecode formatted data with liquidator-specific arguments
-     *
-     * Can only be called if the rebalance interval has elapsed.
-     * Can only be called by manager.
-     */
-    function startRebalance(
-        ISetToken _nextSet,
-        bytes calldata _liquidatorData
-    )
-        external
-        onlyManager
-    {
-        RebalancingStart.validateStartRebalance(_nextSet);
-
-        uint256 startingCurrentSetQuantity = RebalancingStart.calculateStartingSetQuantity();
-
-        core.redeemInVault(address(currentSet), startingCurrentSetQuantity);
-
-        RebalancingStart.liquidatorRebalancingStart(_nextSet, startingCurrentSetQuantity, _liquidatorData);
-
-        RebalancingStart.transitionToRebalance(_nextSet);
-
-        emit RebalanceStarted(
-            address(currentSet),
-            address(nextSet),
-            rebalanceIndex,
-            startingCurrentSetQuantity
-        );
-    }
-
-    /*
-     * Get token inflows and outflows required for bid from the Liquidator.
-     *
-     * @param _quantity               The amount of currentSet to be rebalanced
-     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
-     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
-     */
-    function getBidPrice(
-        uint256 _quantity
-    )
-        public
-        view
-        returns (uint256[] memory, uint256[] memory)
-    {
-        RebalancingBid.validateGetBidPrice(_quantity);
-
-        return Rebalance.decomposeTokenFlowToBidPrice(
-            liquidator.getBidPrice(address(this), _quantity)
-        );
-    }
-
-    /*
-     * Place bid during rebalance auction. 
-     * 
-     * The intended caller is the RebalanceAuctionModule, which must be approved by Core.
-     * Call Flow:
-     * RebalanceAuctionModule -> RebalancingSetTokenV3 -> Liquidator
-     *
-     * @param _quantity                 The amount of currentSet to be rebalanced
-     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
-     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
-     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
-     */
-    function placeBid(
-        uint256 _quantity
-    )
-        external
-        returns (address[] memory, uint256[] memory, uint256[] memory)
-    {
-        RebalancingBid.validatePlaceBid(_quantity);
-
-        // Place bid and get back inflow and outflow arrays
-        Rebalance.TokenFlow memory tokenFlow = liquidator.placeBid(_quantity);
-
-        RebalancingBid.updateHasBiddedIfNecessary();
-
-        return Rebalance.decomposeTokenFlow(tokenFlow);
-    }
+    {}
 
     /*
      * After a successful rebalance, the new Set is issued. If there is a rebalance fee,
@@ -269,26 +113,6 @@ contract RebalancingSetTokenV3 is
         RebalancingSettlement.transitionToDefault(newUnitShares);
     }
 
-    /*
-     * Ends a rebalance if there are any signs that there is a failure. 
-     * Possible failure reasons:
-     * 1. The rebalance has elapsed the failRebalancePeriod
-     * 2. The liquidator responds that the rebalance has failed
-     * 
-     * Move to Drawdown state if bids have been placed. Reset to Default state if no bids placed.
-     */
-    function endFailedRebalance()
-        public
-    {
-        RebalancingFailure.validateFailRebalance();
-
-        RebalancingLibrary.State newRebalanceState = RebalancingFailure.getNewRebalanceState();
-
-        liquidator.endFailedRebalance();
-
-        RebalancingFailure.transitionToNewState(newRebalanceState);
-    }
-
     function actualizeFee()
         external
     {
@@ -312,54 +136,6 @@ contract RebalancingSetTokenV3 is
         );
     }
 
-    /*
-     * Mint set token for given address. If there if is an entryFee, calculates the fee and mints
-     * the rebalancing SetToken to the feeRecipient.
-     * 
-     * Can only be called by Core contract.
-     *
-     * @param  _issuer      The address of the issuing account
-     * @param  _quantity    The number of sets to attribute to issuer
-     */
-    function mint(
-        address _issuer,
-        uint256 _quantity
-    )
-        external
-    {
-        Issuance.validateMint();
-
-        uint256 issueQuantityNetOfFees = Issuance.handleEntryFees(_quantity);
-
-        ERC20._mint(_issuer, issueQuantityNetOfFees);
-    }
-
-    /*
-     * Burn set token for given address. Can only be called by authorized contracts.
-     *
-     * @param  _from        The address of the redeeming account
-     * @param  _quantity    The number of sets to burn from redeemer
-     */
-    function burn(
-        address _from,
-        uint256 _quantity
-    )
-        external
-    {
-        Issuance.validateBurn();
-
-        ERC20._burn(_from, _quantity);
-    }
-
-    /* ============ Backwards Compatability ============ */
-
-    /*
-     * Alias for endFailedRebalance
-     */
-    function endFailedAuction() external {
-        endFailedRebalance();
-    }
-
     /* ============ V3 Internal Functions ============ */
 
     function validateUnitShares(uint256 _newUnitShares) internal view {
@@ -368,14 +144,5 @@ contract RebalancingSetTokenV3 is
             _newUnitShares > 0,
             "Unitshares is 0"
         );        
-    }
-
-    function calculateNewUnitShares() internal view returns(uint256) {
-        uint256 currentSetAmount = vault.getOwnerBalance(
-            address(currentSet),
-            address(this)
-        );
-
-        return currentSetAmount.mul(naturalUnit).div(totalSupply());
     }
 }

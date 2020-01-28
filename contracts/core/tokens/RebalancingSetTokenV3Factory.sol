@@ -24,6 +24,7 @@ import { ILiquidator } from "../interfaces/ILiquidator.sol";
 import { IRebalancingSetTokenV2 } from "../interfaces/IRebalancingSetTokenV2.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { RebalancingSetTokenV3 } from "./RebalancingSetTokenV3.sol";
+import { RebalancingSetTokenV2Factory } from "./RebalancingSetTokenV2Factory.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IWhiteList } from "../interfaces/IWhiteList.sol";
 
@@ -36,39 +37,7 @@ import { IWhiteList } from "../interfaces/IWhiteList.sol";
  * RebalancingSetTokenV2s deployed by the factory can only have their mint and burn functions
  * called by Core
  */
-contract RebalancingSetTokenV3Factory {
-    using LibBytes for bytes;
-    using Bytes32Library for bytes32;
-
-    /* ============ State Variables ============ */
-
-    // Address of the Core contract used to verify factory when creating a Set
-    ICore public core;
-
-    // Address of the WhiteList contract used to verify the tokens in a rebalance proposal
-    IWhiteList public rebalanceComponentWhitelist;
-
-    // Whitelist contract for approved liquidators
-    IWhiteList public liquidatorWhitelist;
-
-    // Whitelist contract for approved fee calcualtors
-    IWhiteList public feeCalculatorWhitelist;
-
-    // Minimum amount of time between rebalances in seconds
-    uint256 public minimumRebalanceInterval;
-
-    // Minimum fail auction period
-    uint256 public minimumFailRebalancePeriod;
-
-    // Maximum fail auction period
-    uint256 public maximumFailRebalancePeriod;
-
-    // Minimum number for the token natural unit
-    // The bounds are used for calculations of unitShares and in settlement
-    uint256 public minimumNaturalUnit;
-
-    // Maximum number for the token natural unit
-    uint256 public maximumNaturalUnit;
+contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
 
     /* ============ Constructor ============ */
 
@@ -96,22 +65,25 @@ contract RebalancingSetTokenV3Factory {
         uint256 _maximumNaturalUnit
     )
         public
-    {
-        core = _core;
-        rebalanceComponentWhitelist = _componentWhitelist;
-        liquidatorWhitelist = _liquidatorWhitelist;
-        feeCalculatorWhitelist = _feeCalculatorWhitelist;
-        minimumRebalanceInterval = _minimumRebalanceInterval;
-        minimumFailRebalancePeriod = _minimumFailRebalancePeriod;
-        maximumFailRebalancePeriod = _maximumFailRebalancePeriod;
-        minimumNaturalUnit = _minimumNaturalUnit;
-        maximumNaturalUnit = _maximumNaturalUnit;
-    }
+        RebalancingSetTokenV2Factory(
+            _core,
+            _componentWhitelist,
+            _liquidatorWhitelist,
+            _feeCalculatorWhitelist,
+            _minimumRebalanceInterval,
+            _minimumFailRebalancePeriod,
+            _maximumFailRebalancePeriod,
+            _minimumNaturalUnit,
+            _maximumNaturalUnit
+        )
+    {}
 
     /* ============ External Functions ============ */
 
     /**
-     * Deploys a new RebalancingSetTokenV2 contract, conforming to IFactory
+     * Overrides the RebalancingSetTokenV2Factory createSet function.
+     * 
+     * Deploys a new RebalancingSetTokenV3 contract, conforming to IFactory
      * Can only be called by core contracts.
      *
      * 
@@ -146,34 +118,13 @@ contract RebalancingSetTokenV3Factory {
         external
         returns (address)
     {
-        require(
-            msg.sender == address(core),
-            "Must be core"
-        );
-
-        // Ensure component array only includes one address which will be the currentSet
-        require(
-            _components.length == 1 && 
-            _units.length == 1,
-            "Components & units len != 1"
-        );
-
-        require(
-            _units[0] > 0,
-            "UnitShares not > 0"
-        );
-
         address startingSet = _components[0];
 
-        // Expect Set to rebalance to be valid and enabled Set
-        require(
-            core.validSets(startingSet),
-            "Bad Set"
-        );
-
-        require(
-            _naturalUnit >= minimumNaturalUnit && _naturalUnit <= maximumNaturalUnit,
-            "Bad natural unit"
+        validateRebalancingSet(
+            _components,
+            _units,
+            startingSet,
+            _naturalUnit
         );
 
         FactoryUtilsLibrary.InitRebalancingParameters memory parameters =
@@ -217,5 +168,45 @@ contract RebalancingSetTokenV3Factory {
         IRebalancingSetTokenV2(rebalancingSet).initialize(parameters.rebalanceFeeCalculatorData);
 
         return rebalancingSet;
+    }
+
+    /* ============ Internal Functions ============ */
+
+    function validateRebalancingSet(
+        address[] memory _components,
+        uint256[] memory _units,
+        address _startingSet,
+        uint256 _naturalUnit
+    )
+        internal
+        view
+    {
+        require(
+            msg.sender == address(core),
+            "Must be core"
+        );
+
+        require(
+            _units[0] > 0,
+            "UnitShares not > 0"
+        );
+
+        // Ensure component array only includes one address which will be the currentSet
+        require(
+            _components.length == 1 && 
+            _units.length == 1,
+            "Components & units len != 1"
+        );
+
+        // Expect Set to rebalance to be valid and enabled Set
+        require(
+            core.validSets(_startingSet),
+            "Bad Set"
+        );
+
+        require(
+            _naturalUnit >= minimumNaturalUnit && _naturalUnit <= maximumNaturalUnit,
+            "Bad natural unit"
+        );
     }
 }

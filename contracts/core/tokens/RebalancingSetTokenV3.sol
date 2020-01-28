@@ -79,6 +79,8 @@ contract RebalancingSetTokenV3 is
     {}
 
     /*
+     * Overrides the RebalancingSetTokenV2 settleRebalance function.
+     *
      * After a successful rebalance, the new Set is issued. 
      * Full issuance functionality is now returned to set owners.
      *

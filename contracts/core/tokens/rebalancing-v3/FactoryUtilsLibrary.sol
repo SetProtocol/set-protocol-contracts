@@ -19,6 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { ICore } from "../../interfaces/ICore.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
 import { Bytes32Library } from "../../../lib/Bytes32Library.sol";
 import { LibBytes } from "../../../external/0x/LibBytes.sol";
@@ -46,7 +47,7 @@ library FactoryUtilsLibrary {
     }
 
     /*
-     * Provides validations
+     * Provides set calldata validations
      */
     function validateRebalanceSetCalldata(
         InitRebalancingParameters memory _parameters,

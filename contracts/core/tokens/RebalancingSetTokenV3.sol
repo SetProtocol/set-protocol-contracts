@@ -295,8 +295,7 @@ contract RebalancingSetTokenV3 is
         // Calculates fees and mints Rebalancing Set to the feeRecipient, increasing supply
         (uint256 feePercent, uint256 feeQuantity) = RebalancingSettlement.handleFees();
 
-        uint256 issueQuantity = RebalancingSettlement.calculateSetIssueQuantity(currentSet);
-        uint256 newUnitShares = RebalancingSettlement.calculateNextSetNewUnitShares(issueQuantity);
+        uint256 newUnitShares = calculateNewUnitShares();
 
         // The unit shares must result in a quantity greater than the number of natural units outstanding
         validateUnitShares(newUnitShares);
@@ -361,11 +360,22 @@ contract RebalancingSetTokenV3 is
         endFailedRebalance();
     }
 
+    /* ============ V3 Internal Functions ============ */
+
     function validateUnitShares(uint256 _newUnitShares) internal view {
         // The unit shares must result in a quantity greater than the number of natural units outstanding
         require(
             _newUnitShares > 0,
             "Unitshares is 0"
         );        
+    }
+
+    function calculateNewUnitShares() internal view returns(uint256) {
+        uint256 currentSetAmount = vault.getOwnerBalance(
+            address(currentSet),
+            address(this)
+        );
+
+        return currentSetAmount.mul(naturalUnit).div(totalSupply());
     }
 }

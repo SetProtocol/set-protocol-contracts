@@ -341,7 +341,7 @@ export class RebalancingSetV3Helper extends RebalancingHelper {
     return maxIssueAmount;
   }
 
-  // Simplified: quantity * fee / 10e18
+// Simplified: quantity * fee / 10e18
   public async calculateEntryFee(
     rebalancingSetToken: RebalancingSetTokenV3Contract,
     quantity: BigNumber
@@ -361,6 +361,22 @@ export class RebalancingSetV3Helper extends RebalancingHelper {
     const totalSupply = await rebalancingSetToken.totalSupply.callAsync();
 
     return rebalanceFee.mul(totalSupply).div(SCALE_FACTOR.sub(rebalanceFee)).round(0, 3);
+  }
+
+  public async getExpectedIncentiveFeeUnitShares(
+    rebalancingSetToken: RebalancingSetTokenV3Contract,
+    currentSet: SetTokenContract,
+    vault: VaultContract
+  ): Promise<BigNumber> {
+    const totalSupply = await rebalancingSetToken.totalSupply.callAsync();
+    const naturalUnit = await rebalancingSetToken.naturalUnit.callAsync();
+
+    const currentSetAmount = await vault.getOwnerBalance.callAsync(
+      currentSet.address,
+      rebalancingSetToken.address,
+    );
+
+    return currentSetAmount.mul(naturalUnit).div(totalSupply).round(0, 3);
   }
 
   public async getExpectedUnitSharesV3(

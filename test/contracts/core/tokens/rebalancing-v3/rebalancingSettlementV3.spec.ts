@@ -208,7 +208,7 @@ contract('RebalancingSetTokenV3: Settlement', accounts => {
 
     describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
       beforeEach(async () => {
-       await rebalancingHelper.transitionToRebalanceV3Async(
+       await rebalancingHelper.transitionToRebalanceV2Async(
          coreMock,
          rebalancingComponentWhiteList,
          rebalancingSetToken,
@@ -324,7 +324,7 @@ contract('RebalancingSetTokenV3: Settlement', accounts => {
       });
 
       it('updates the unitShares amount correctly', async () => {
-        const expectedUnitShares = await rebalancingHelper.getExpectedUnitSharesV3(
+        const expectedUnitShares = await rebalancingHelper.getExpectedUnitSharesV2(
           coreMock,
           rebalancingSetToken,
           nextSetToken,
@@ -347,7 +347,7 @@ contract('RebalancingSetTokenV3: Settlement', accounts => {
       });
 
       it('emits the RebalanceSettled log', async () => {
-        const unitShares = await rebalancingHelper.getExpectedUnitSharesV3(
+        const unitShares = await rebalancingHelper.getExpectedUnitSharesV2(
           coreMock,
           rebalancingSetToken,
           nextSetToken,
@@ -394,7 +394,7 @@ contract('RebalancingSetTokenV3: Settlement', accounts => {
       });
 
       beforeEach(async () => {
-       await rebalancingHelper.transitionToRebalanceV3Async(
+       await rebalancingHelper.transitionToRebalanceV2Async(
          coreMock,
          rebalancingComponentWhiteList,
          rebalancingSetToken,
@@ -423,7 +423,7 @@ contract('RebalancingSetTokenV3: Settlement', accounts => {
 
     describe('when settleRebalance is called from Drawdown State', async () => {
       beforeEach(async () => {
-        await rebalancingHelper.transitionToDrawdownV3Async(
+        await rebalancingHelper.transitionToDrawdownV2Async(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,

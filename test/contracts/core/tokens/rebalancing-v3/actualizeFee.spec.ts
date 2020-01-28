@@ -261,7 +261,7 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
 
     describe('when actualizeFee is called from Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingHelper.transitionToRebalanceV3Async(
+        await rebalancingHelper.transitionToRebalanceV2Async(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,
@@ -277,7 +277,7 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
 
     describe('when actualizeFee is called from Drawdown State', async () => {
       beforeEach(async () => {
-        await rebalancingHelper.transitionToDrawdownV3Async(
+        await rebalancingHelper.transitionToDrawdownV2Async(
           coreMock,
           rebalancingComponentWhiteList,
           rebalancingSetToken,

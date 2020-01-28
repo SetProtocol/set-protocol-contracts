@@ -158,7 +158,7 @@ contract('RebalancingSetTokenV3: Settlement', accounts => {
       currentSetToken = setTokens[0];
       nextSetToken = setTokens[1];
 
-      rebalanceFee = customRebalanceFee || ZERO;
+      rebalanceFee = ZERO;
 
       const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
       await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);

@@ -146,13 +146,13 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
         factory.address,
         transferProxy.address,
         setTokensToDeploy,
-        undefined || setTokenNaturalUnits
+        undefined
       );
 
       currentSetToken = setTokens[0];
       nextSetToken = setTokens[1];
 
-      rebalanceFee = customRebalanceFee || new BigNumber(10 ** 17);
+      rebalanceFee = new BigNumber(10 ** 17);
 
       const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
       await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
@@ -167,7 +167,7 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
         fixedFeeCalculator.address,
         currentSetToken.address,
         failPeriod,
-        rebalancingSetUnitShares,
+        undefined,
         ZERO, // entryFee
         rebalanceFee,
       );

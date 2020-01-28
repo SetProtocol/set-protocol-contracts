@@ -79,8 +79,7 @@ contract RebalancingSetTokenV3 is
     {}
 
     /*
-     * After a successful rebalance, the new Set is issued. If there is a rebalance fee,
-     * the fee is paid via inflation of the Rebalancing Set to the feeRecipient.
+     * After a successful rebalance, the new Set is issued. 
      * Full issuance functionality is now returned to set owners.
      *
      * Anyone can call this function.
@@ -116,10 +115,13 @@ contract RebalancingSetTokenV3 is
     function actualizeFee()
         external
     {
+        IncentiveFee.validateFeeActualization();
+
         // Calculates fees and mints Rebalancing Set to the feeRecipient, increasing supply
         (uint256 feePercent, uint256 feeQuantity) = RebalancingSettlement.handleFees();
 
-        uint256 newUnitShares = calculateNewUnitShares();
+        // The minting of new supply changes the unit Shares
+        uint256 newUnitShares = IncentiveFee.calculateNewUnitShares();
 
         // The unit shares must result in a quantity greater than the number of natural units outstanding
         validateUnitShares(newUnitShares);

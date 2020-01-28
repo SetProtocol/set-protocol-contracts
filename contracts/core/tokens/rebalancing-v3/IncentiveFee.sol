@@ -20,6 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
+import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "../rebalancing-v2/RebalancingSetState.sol";
 
 
@@ -45,6 +46,15 @@ contract IncentiveFee is
 
     /* ============ Internal Functions ============ */
 
+    function validateFeeActualization() internal view {
+        validateRebalanceStateIs(RebalancingLibrary.State.Default);
+    }
+
+    /*
+     * After the minting of new inflation fees, the unit shares must be updated.
+     * The formula is as follows:
+     * newUnitShares = currentSetAmount * rebalanceSetNaturalUnit / rebalanceSetTotalSupply
+     */
     function calculateNewUnitShares() internal view returns(uint256) {
         uint256 currentSetAmount = vault.getOwnerBalance(
             address(currentSet),

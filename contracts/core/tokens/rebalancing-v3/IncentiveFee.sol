@@ -20,7 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
-import { RebalancingSetState } from "../rebalancing-V2/RebalancingSetState.sol";
+import { RebalancingSetState } from "../rebalancing-v2/RebalancingSetState.sol";
 
 
 /**
@@ -42,6 +42,8 @@ contract IncentiveFee is
         uint256 feePercentage,
         uint256 newUnitShares
     );
+
+    /* ============ Internal Functions ============ */
 
     function calculateNewUnitShares() internal view returns(uint256) {
         uint256 currentSetAmount = vault.getOwnerBalance(

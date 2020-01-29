@@ -73,7 +73,6 @@ contract FixedFeeCalculator is IFeeCalculator {
      */
     function getFee()
         external
-        view
         returns(uint256)
     {
         return fees[msg.sender];

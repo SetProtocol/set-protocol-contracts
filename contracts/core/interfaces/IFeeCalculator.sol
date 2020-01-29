@@ -32,6 +32,5 @@ interface IFeeCalculator {
 
     function getFee()
         external
-        view
         returns(uint256);
 }

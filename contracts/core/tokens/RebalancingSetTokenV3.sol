@@ -17,8 +17,8 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { RebalancingSettlement } from "./rebalancing-v2/RebalancingSettlement.sol";
 import { IncentiveFee } from "./rebalancing-v3/IncentiveFee.sol";
+import { RebalancingSettlement } from "./rebalancing-v2/RebalancingSettlement.sol";
 import { RebalancingSetTokenV2 } from "./RebalancingSetTokenV2.sol";
 
 
@@ -82,37 +82,37 @@ contract RebalancingSetTokenV3 is
      * Overrides the RebalancingSetTokenV2 settleRebalance function.
      *
      * After a successful rebalance, the new Set is issued. 
-     * Full issuance functionality is now returned to set owners.
+     * Full issuance functionality is now returned to set owners. No fees are captured.
      *
      * Anyone can call this function.
      */
     function settleRebalance()
         external
     {
+        // It can only be callable in the Default state
         RebalancingSettlement.validateRebalancingSettlement();
 
         uint256 issueQuantity = RebalancingSettlement.calculateSetIssueQuantity(nextSet);
         uint256 newUnitShares = RebalancingSettlement.calculateNextSetNewUnitShares(issueQuantity);
 
-        // The unit shares must result in a quantity greater than the number of natural units outstanding
         validateUnitShares(newUnitShares);
 
         RebalancingSettlement.issueNextSet(issueQuantity);
 
         liquidator.settleRebalance();
 
-        // Rebalance index is the current vs next rebalance
         emit RebalanceSettled(
             address(0),      // No longer used
             0,               // No longer used
             0,               // No longer used
-            rebalanceIndex,
+            rebalanceIndex,  // Current Rebalance index
             issueQuantity,
             newUnitShares
         );
 
         RebalancingSettlement.transitionToDefault(newUnitShares);
     }
+
     /*
      * During the Default stage, the incentive / rebalance Fee can be triggered. This will
      * retrieve the current inflation fee from the fee calulator and mint the according
@@ -132,13 +132,12 @@ contract RebalancingSetTokenV3 is
         // The minting of new supply changes the unit Shares
         uint256 newUnitShares = IncentiveFee.calculateNewUnitShares();
 
-        // The unit shares must result in a quantity greater than the number of natural units outstanding
         validateUnitShares(newUnitShares);
 
         // Set the new unit shares
         unitShares = newUnitShares;
 
-        // Emit event
+        // Emit IncentiveFeePaid event
         emit IncentiveFeePaid(
             feeRecipient,
             feeQuantity,
@@ -148,9 +147,12 @@ contract RebalancingSetTokenV3 is
     }
 
     /* ============ V3 Internal Functions ============ */
-
+    
+    /*
+     * The unit shares must result in a quantity greater than the number of natural units outstanding.
+     * In other words, it must be greater than 0
+     */
     function validateUnitShares(uint256 _newUnitShares) internal view {
-        // The unit shares must result in a quantity greater than the number of natural units outstanding
         require(
             _newUnitShares > 0,
             "Unitshares is 0"

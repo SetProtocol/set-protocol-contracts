@@ -71,7 +71,7 @@ contract IncentiveFee is
     }
 
     /**
-     * Returns the new rebalance fee. The calculation for the fee involves implying
+     * Returns the new incentive fee. The calculation for the fee involves implying
      * mint quantity so that the feeRecipient owns the fee percentage of the entire
      * supply of the Set. 
      * 
@@ -81,21 +81,21 @@ contract IncentiveFee is
      * The simplified formula utilized below is:
      * feeQuantity = fee * totalSupply / (scaleFactor - fee)
      *
-     * @param   _rebalanceFeePercent    Fee levied to feeRecipient every rebalance, paid during settlement
+     * @param   _feePercentage          Fee levied to feeRecipient
      * @return  uint256                 New RebalancingSet issue quantity
      */
     function calculateIncentiveFeeInflation(
-        uint256 _rebalanceFeePercent
+        uint256 _feePercentage
     )
         internal
         view
         returns(uint256)
     {
         // fee * totalSupply
-        uint256 a = _rebalanceFeePercent.mul(totalSupply());
+        uint256 a = _feePercentage.mul(totalSupply());
 
         // ScaleFactor (10e18) - fee
-        uint256 b = CommonMath.scaleFactor().sub(_rebalanceFeePercent);
+        uint256 b = CommonMath.scaleFactor().sub(_feePercentage);
         
         return a.div(b);
     }

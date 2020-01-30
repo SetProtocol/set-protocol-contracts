@@ -1,5 +1,5 @@
 /*
-    Copyright 2019 Set Labs Inc.
+    Copyright 2020 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -22,28 +22,24 @@ import { FactoryUtilsLibrary } from "./rebalancing-v3/FactoryUtilsLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { ILiquidator } from "../interfaces/ILiquidator.sol";
 import { IRebalancingSetTokenV2 } from "../interfaces/IRebalancingSetTokenV2.sol";
-import { LibBytes } from "../../external/0x/LibBytes.sol";
-import { RebalancingSetTokenV3 } from "./RebalancingSetTokenV3.sol";
-import { RebalancingSetTokenV2Factory } from "./RebalancingSetTokenV2Factory.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IWhiteList } from "../interfaces/IWhiteList.sol";
+import { LibBytes } from "../../external/0x/LibBytes.sol";
+import { RebalancingSetTokenV2Factory } from "./RebalancingSetTokenV2Factory.sol";
+import { RebalancingSetTokenV3 } from "./RebalancingSetTokenV3.sol";
 
 
 /**
  * @title RebalancingSetTokenV3Factory
  * @author Set Protocol
  *
- * RebalancingSetTokenV3Factory is a smart contract used to deploy new RebalancingSetTokenV2 contracts.
- * RebalancingSetTokenV2s deployed by the factory can only have their mint and burn functions
- * called by Core
+ * RebalancingSetTokenV3Factory is a smart contract used to deploy new RebalancingSetTokenV3 contracts.
  */
 contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
 
     /* ============ Constructor ============ */
 
     /**
-     * Set core. Also requires a minimum rebalance interval and minimum proposal periods that are enforced
-     * on RebalancingSetTokenV2
      *
      * @param  _core                       Address of deployed core contract
      * @param  _componentWhitelist         Address of component whitelist contract
@@ -100,9 +96,9 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
      *
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
-     * -- Unused natural unit parameters, passed in to conform to IFactory --
-     * @param  _name           The bytes32 encoded name of the new RebalancingSetTokenV2
-     * @param  _symbol         The bytes32 encoded symbol of the new RebalancingSetTokenV2
+     * @param  _naturalUnit    Minimum issuable amount of the RebalancingSetTokenV3
+     * @param  _name           The bytes32 encoded name of the new RebalancingSetTokenV3
+     * @param  _symbol         The bytes32 encoded symbol of the new RebalancingSetTokenV3
      * @param  _callData       Byte string containing additional call parameters
      * 
      * @return setToken        The address of the newly created SetToken
@@ -118,6 +114,7 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
         external
         returns (address)
     {
+        // The starting currentSet is the first component
         address startingSet = _components[0];
 
         validateRebalancingSet(
@@ -127,9 +124,11 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
             _naturalUnit
         );
 
+        // Parse the calldata
         FactoryUtilsLibrary.InitRebalancingParameters memory parameters =
             FactoryUtilsLibrary.parseRebalanceSetCallData(_callData);
 
+        // Ensure validit of rebalancing Set calldata
         FactoryUtilsLibrary.validateRebalanceSetCalldata(
             parameters,
             address(liquidatorWhitelist),
@@ -164,7 +163,7 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
             )
         );
 
-        // Initaializes the RebalancingSetToken
+        // Initaializes the RebalancingSetToken using the V2 interface (as the interface has not changed)
         IRebalancingSetTokenV2(rebalancingSet).initialize(parameters.rebalanceFeeCalculatorData);
 
         return rebalancingSet;
@@ -204,6 +203,7 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
             "Bad Set"
         );
 
+        // Natural unit must be within minimum and maximum bounds
         require(
             _naturalUnit >= minimumNaturalUnit && _naturalUnit <= maximumNaturalUnit,
             "Bad natural unit"

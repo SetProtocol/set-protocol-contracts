@@ -10,6 +10,7 @@ export { ExchangeIssuanceLibrary } from "./ts/ExchangeIssuanceLibrary";
 export { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
 export { LinearAuctionLiquidator } from "./ts/LinearAuctionLiquidator";
 export { FailAuctionLibrary } from "./ts/FailAuctionLibrary";
+export { FactoryUtilsLibrary } from "./ts/FactoryUtilsLibrary";
 export { FixedFeeCalculator } from "./ts/FixedFeeCalculator";
 export { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
 export { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
@@ -31,6 +32,8 @@ export { RebalancingSetToken } from "./ts/RebalancingSetToken";
 export { RebalancingSetTokenFactory } from "./ts/RebalancingSetTokenFactory";
 export { RebalancingSetTokenV2 } from "./ts/RebalancingSetTokenV2";
 export { RebalancingSetTokenV2Factory } from "./ts/RebalancingSetTokenV2Factory";
+export { RebalancingSetTokenV3 } from "./ts/RebalancingSetTokenV3";
+export { RebalancingSetTokenV3Factory } from "./ts/RebalancingSetTokenV3Factory";
 export { SettleRebalanceLibrary } from "./ts/SettleRebalanceLibrary";
 export { SetToken } from "./ts/SetToken";
 export { SetTokenFactory } from "./ts/SetTokenFactory";
@@ -66,6 +69,7 @@ export {
   ExchangeIssuanceLibraryContract,
   ExchangeIssuanceModuleContract,
   FailAuctionLibraryContract,
+  FactoryUtilsLibraryContract,
   FixedFeeCalculatorContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
@@ -88,6 +92,8 @@ export {
   RebalancingSetTokenFactoryContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV2FactoryContract,
+  RebalancingSetTokenV3Contract,
+  RebalancingSetTokenV3FactoryContract,
   SettleRebalanceLibraryContract,
   SetTokenContract,
   SetTokenFactoryContract,

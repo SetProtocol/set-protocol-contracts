@@ -22,6 +22,7 @@ export { ExchangeIssuanceLibraryMockContract } from '../types/generated/exchange
 export { ExchangeIssuanceModuleContract } from '../types/generated/exchange_issuance_module';
 export { FailAuctionLibraryContract } from '../types/generated/fail_auction_library';
 export { FeeCalculatorMockContract } from '../types/generated/fee_calculator_mock';
+export { FixedFeeCalculatorMockContract } from '../types/generated/fixed_fee_calculator_mock';
 export { FeedFactoryContract } from '../types/generated/feed_factory';
 export { FixedFeeCalculatorContract } from '../types/generated/fixed_fee_calculator';
 export { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';

@@ -168,6 +168,6 @@ export class RebalancingSetV3Helper extends RebalancingSetV2Helper {
       rebalancingSetToken.address,
     );
 
-    return currentSetAmount.mul(naturalUnit).div(totalSupply).round(0, 3);
+    return currentSetAmount.mul(naturalUnit).div(totalSupply).round(0, 2);
   }
 }

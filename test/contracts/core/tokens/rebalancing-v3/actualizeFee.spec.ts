@@ -11,7 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
-  FixedFeeCalculatorContract,
+  FixedFeeCalculatorMockContract,
   SetTokenContract,
   LiquidatorMockContract,
   RebalanceAuctionModuleContract,
@@ -68,7 +68,7 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
   let rebalancingComponentWhiteList: WhiteListContract;
   let liquidatorWhitelist: WhiteListContract;
   let liquidatorMock: LiquidatorMockContract;
-  let fixedFeeCalculator: FixedFeeCalculatorContract;
+  let fixedFeeCalculator: FixedFeeCalculatorMockContract;
   let feeCalculatorWhitelist: WhiteListContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
@@ -120,7 +120,7 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
     liquidatorMock = await liquidatorHelper.deployLiquidatorMockAsync();
     await coreHelper.addAddressToWhiteList(liquidatorMock.address, liquidatorWhitelist);
 
-    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
+    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorMockAsync();
     await coreHelper.addAddressToWhiteList(fixedFeeCalculator.address, feeCalculatorWhitelist);
   });
 
@@ -247,6 +247,13 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
       );
       const newUnitShares = await rebalancingSetToken.unitShares.callAsync();
       expect(newUnitShares).to.be.bignumber.equal(unitShares);
+    });
+
+    it('properly calls the updateAndGetFee function', async () => {
+      await subject();
+
+      const isCalled = await fixedFeeCalculator.isCalled.callAsync();
+      expect(isCalled).to.equal(true);
     });
 
     describe('when actualizeFee is called but unitShares is 0', async () => {

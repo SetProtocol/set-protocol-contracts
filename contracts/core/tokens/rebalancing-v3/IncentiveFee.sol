@@ -35,6 +35,7 @@ contract IncentiveFee is
     RebalancingSetState
 {
     using SafeMath for uint256;
+    using CommonMath for uint256;
 
     /* ============ Events ============ */
 
@@ -118,6 +119,6 @@ contract IncentiveFee is
             address(this)
         );
 
-        return currentSetAmount.mul(naturalUnit).div(totalSupply());
+        return currentSetAmount.mul(naturalUnit).divCeil(totalSupply());
     }
 }

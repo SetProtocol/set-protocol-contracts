@@ -61,7 +61,7 @@ contract IncentiveFee is
     {
         // Represents a decimal value scaled by 1e18 (e.g. 100% = 1e18 and 1% = 1e16)
         uint256 feePercent = rebalanceFeeCalculator.updateAndGetFee();
-        uint256 feeQuantity = calculateRebalanceFeeInflation(feePercent);
+        uint256 feeQuantity = calculateIncentiveFeeInflation(feePercent);
 
         if (feeQuantity > 0) {
             ERC20._mint(feeRecipient, feeQuantity);
@@ -84,7 +84,7 @@ contract IncentiveFee is
      * @param   _rebalanceFeePercent    Fee levied to feeRecipient every rebalance, paid during settlement
      * @return  uint256                 New RebalancingSet issue quantity
      */
-    function calculateRebalanceFeeInflation(
+    function calculateIncentiveFeeInflation(
         uint256 _rebalanceFeePercent
     )
         internal

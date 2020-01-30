@@ -20,8 +20,10 @@ pragma experimental "ABIEncoderV2";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
+import { CommonMath } from "../../../lib/CommonMath.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "../rebalancing-v2/RebalancingSetState.sol";
+import { RebalancingSettlement } from "../rebalancing-v2/RebalancingSettlement.sol";
 
 
 /**
@@ -44,6 +46,59 @@ contract IncentiveFee is
     );
 
     /* ============ Internal Functions ============ */
+
+    /**
+     * Calculates the fee and mints the rebalancing SetToken quantity to the recipient.
+     * The minting is done without an increase to the total collateral controlled by the 
+     * rebalancing SetToken. In effect, the existing holders are paying the fee via inflation.
+     *
+     * @return feePercentage
+     * @return feeQuantity
+     */
+    function handleFees()
+        internal
+        returns (uint256, uint256)
+    {
+        // Represents a decimal value scaled by 1e18 (e.g. 100% = 1e18 and 1% = 1e16)
+        uint256 feePercent = rebalanceFeeCalculator.updateAndGetFee();
+        uint256 feeQuantity = calculateRebalanceFeeInflation(feePercent);
+
+        if (feeQuantity > 0) {
+            ERC20._mint(feeRecipient, feeQuantity);
+        }
+
+        return (feePercent, feeQuantity);
+    }
+
+    /**
+     * Returns the new rebalance fee. The calculation for the fee involves implying
+     * mint quantity so that the feeRecipient owns the fee percentage of the entire
+     * supply of the Set. 
+     * 
+     * The formula to solve for fee is:
+     * feeQuantity / feeQuantity + totalSupply = fee / scaleFactor
+     *
+     * The simplified formula utilized below is:
+     * feeQuantity = fee * totalSupply / (scaleFactor - fee)
+     *
+     * @param   _rebalanceFeePercent    Fee levied to feeRecipient every rebalance, paid during settlement
+     * @return  uint256                 New RebalancingSet issue quantity
+     */
+    function calculateRebalanceFeeInflation(
+        uint256 _rebalanceFeePercent
+    )
+        internal
+        view
+        returns(uint256)
+    {
+        // fee * totalSupply
+        uint256 a = _rebalanceFeePercent.mul(totalSupply());
+
+        // ScaleFactor (10e18) - fee
+        uint256 b = CommonMath.scaleFactor().sub(_rebalanceFeePercent);
+        
+        return a.div(b);
+    }
 
     /*
      * The Rebalancing SetToken must be in Default state.

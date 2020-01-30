@@ -193,4 +193,34 @@ contract('FixedFeeCalculator', accounts => {
       expect(fee).to.bignumber.equal(feeQuantity);
     });
   });
+
+  describe('#updateAndGetFee', async () => {
+    let feeQuantity: BigNumber;
+
+    beforeEach(async () => {
+      await coreMock.addSet.sendTransactionAsync(feeCalculatorMock.address, txnFrom(ownerAccount));
+
+      feeQuantity = ether(1);
+      const feeData = feeCalculatorHelper.generateFixedRebalanceFeeCallData(feeQuantity);
+      await feeCalculatorMock.testInitialize.sendTransactionAsync(
+        feeCalculator.address,
+        feeData,
+        txnFrom(ownerAccount)
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return feeCalculatorMock.testUpdateAndGetFee.sendTransactionAsync(
+        feeCalculator.address,
+        txnFrom(ownerAccount)
+      );
+    }
+
+    it('returns the correct fee', async () => {
+      await subject();
+      const fee = await feeCalculatorMock.feeValue.callAsync();
+
+      expect(fee).to.bignumber.equal(feeQuantity);
+    });
+  });
 });

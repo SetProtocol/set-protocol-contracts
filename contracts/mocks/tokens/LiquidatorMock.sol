@@ -219,16 +219,16 @@ contract LiquidatorMock is
 
     function getCombinedUnitsArray(
         ISetToken _setToken,
-        address[] memory _combinedTokenArray
+        address[] memory combinedTokenArray_
     )
         private
         view
         returns (uint256[] memory)
     {
-        uint256[] memory combinedUnits = new uint256[](_combinedTokenArray.length);
+        uint256[] memory combinedUnits = new uint256[](combinedTokenArray_.length);
 
-        for (uint256 i = 0; i < _combinedTokenArray.length; i++) {
-            address currentComponent = _combinedTokenArray[i];
+        for (uint256 i = 0; i < combinedTokenArray_.length; i++) {
+            address currentComponent = combinedTokenArray_[i];
 
             (uint256 indexCurrent, bool isComponent) = _setToken.getComponents().indexOf(currentComponent);
 

@@ -127,7 +127,7 @@ contract RebalancingSetTokenV3 is
         IncentiveFee.validateFeeActualization();
 
         // Calculates fees and mints Rebalancing Set to the feeRecipient, increasing supply
-        (uint256 feePercent, uint256 feeQuantity) = RebalancingSettlement.handleFees();
+        (uint256 feePercent, uint256 feeQuantity) = IncentiveFee.handleFees();
 
         // The minting of new supply changes the unit Shares
         uint256 newUnitShares = IncentiveFee.calculateNewUnitShares();

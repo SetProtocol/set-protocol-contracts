@@ -22,6 +22,7 @@ export { ExchangeIssuanceLibraryMockContract } from '../types/generated/exchange
 export { ExchangeIssuanceModuleContract } from '../types/generated/exchange_issuance_module';
 export { FailAuctionLibraryContract } from '../types/generated/fail_auction_library';
 export { FeeCalculatorMockContract } from '../types/generated/fee_calculator_mock';
+export { FixedFeeCalculatorMockContract } from '../types/generated/fixed_fee_calculator_mock';
 export { FeedFactoryContract } from '../types/generated/feed_factory';
 export { FixedFeeCalculatorContract } from '../types/generated/fixed_fee_calculator';
 export { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
@@ -53,8 +54,10 @@ export { RebalancingSetIssuanceModuleContract } from '../types/generated/rebalan
 export { RebalancingSetIssuanceMockContract } from '../types/generated/rebalancing_set_issuance_mock';
 export { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_token';
 export { RebalancingSetTokenV2Contract } from '../types/generated/rebalancing_set_token_v2';
+export { RebalancingSetTokenV3Contract } from '../types/generated/rebalancing_set_token_v3';
 export { RebalancingSetTokenFactoryContract } from '../types/generated/rebalancing_set_token_factory';
 export { RebalancingSetTokenV2FactoryContract } from '../types/generated/rebalancing_set_token_v2_factory';
+export { RebalancingSetTokenV3FactoryContract } from '../types/generated/rebalancing_set_token_v3_factory';
 export { RebalancingSetTokenViewerContract } from '../types/generated/rebalancing_set_token_viewer';
 export { SettleRebalanceLibraryContract } from '../types/generated/settle_rebalance_library';
 export { SetMathMockContract } from '../types/generated/set_math_mock';

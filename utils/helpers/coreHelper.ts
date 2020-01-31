@@ -15,6 +15,7 @@ import {
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   RebalancingSetTokenV2FactoryContract,
+  RebalancingSetTokenV3FactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   TimeLockUpgradeMockContract,
@@ -43,6 +44,7 @@ const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreMock = artifacts.require('CoreMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
+const FactoryUtilsLibrary = artifacts.require('FactoryUtilsLibrary');
 const OracleWhiteList = artifacts.require('OracleWhiteList');
 const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
 const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
@@ -50,6 +52,7 @@ const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const RebalancingSetTokenV2Factory = artifacts.require('RebalancingSetTokenV2Factory');
+const RebalancingSetTokenV3Factory = artifacts.require('RebalancingSetTokenV3Factory');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
 const SetTokenLibrary = artifacts.require('SetTokenLibrary');
@@ -203,6 +206,43 @@ export class CoreHelper {
     );
 
     return new RebalancingSetTokenV2FactoryContract(
+      getContractInstance(truffleTokenFactory),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployRebalancingSetTokenV3FactoryAsync(
+    coreAddress: Address,
+    componentWhitelistAddress: Address,
+    liquidatorWhitelistAddress: Address,
+    feeCalculatorWhitelistAddress: Address,
+    minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
+    minimumFailRebalancePeriod: BigNumber = ONE_DAY_IN_SECONDS,
+    maximumFailRebalancePeriod: BigNumber = ONE_DAY_IN_SECONDS.mul(30),
+    minimumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MINIMUM_NATURAL_UNIT,
+    maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingSetTokenV3FactoryContract> {
+    const factoryUtilsLibrary = await FactoryUtilsLibrary.new(
+      { from: this._contractOwnerAddress },
+    );
+
+    await RebalancingSetTokenV3Factory.link('FactoryUtilsLibrary', factoryUtilsLibrary.address);
+
+    const truffleTokenFactory = await RebalancingSetTokenV3Factory.new(
+      coreAddress,
+      componentWhitelistAddress,
+      liquidatorWhitelistAddress,
+      feeCalculatorWhitelistAddress,
+      minimumRebalanceInterval,
+      minimumFailRebalancePeriod,
+      maximumFailRebalancePeriod,
+      minimumNaturalUnit,
+      maximumNaturalUnit,
+      { from },
+    );
+
+    return new RebalancingSetTokenV3FactoryContract(
       getContractInstance(truffleTokenFactory),
       { from, gas: DEFAULT_GAS },
     );

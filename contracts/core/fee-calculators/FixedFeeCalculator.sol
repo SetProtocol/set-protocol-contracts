@@ -79,6 +79,16 @@ contract FixedFeeCalculator is IFeeCalculator {
         return fees[msg.sender];
     }
 
+    /**
+     * Same as getFee, but a non-view function.
+     */
+    function updateAndGetFee()
+        external
+        returns(uint256)
+    {
+        return fees[msg.sender];
+    }
+
     /* ============ Private Functions ============ */
 
     /**

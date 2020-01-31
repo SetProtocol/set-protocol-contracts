@@ -10,6 +10,7 @@ import {
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenV2Contract,
+  RebalancingSetTokenV3Contract,
   VaultContract,
   WhiteListContract,
 } from '../contracts';
@@ -35,6 +36,7 @@ const web3 = getWeb3();
 const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
+declare type RebalancingV2LikeContract = RebalancingSetTokenV2Contract | RebalancingSetTokenV3Contract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 
@@ -166,7 +168,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
   public async transitionToRebalanceV2Async(
     core: CoreLikeContract,
     rebalancingComponentWhiteList: WhiteListContract,
-    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    rebalancingSetToken: RebalancingV2LikeContract,
     nextSetToken: SetTokenContract,
     caller: Address,
     liquidatorData: string = EMPTY_BYTESTRING,
@@ -211,7 +213,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
   public async transitionToDrawdownV2Async(
     core: CoreLikeContract,
     rebalancingComponentWhiteList: WhiteListContract,
-    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    rebalancingSetToken: RebalancingV2LikeContract,
     rebalanceAuctionModule: RebalanceAuctionModuleContract,
     liquidatorMock: LiquidatorMockContract,
     nextSetToken: SetTokenContract,
@@ -243,7 +245,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
   }
 
   public async failRebalanceToDrawdownAsync(
-    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    rebalancingSetToken: RebalancingV2LikeContract,
     liquidatorMock: LiquidatorMockContract,
     rebalanceAuctionModule: RebalanceAuctionModuleContract,
     caller: Address = this._tokenOwnerAddress,
@@ -298,7 +300,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
 
   public async getSetIssueQuantity(
     setToken: SetTokenContract,
-    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    rebalancingSetToken: RebalancingV2LikeContract,
     vault: VaultContract,
   ): Promise<BigNumber> {
     // Calculate max Set issue amount
@@ -315,7 +317,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
 
   public async calculateMaxIssueAmount(
     nextSetToken: SetTokenContract,
-    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    rebalancingSetToken: RebalancingV2LikeContract,
     vault: VaultContract,
   ): Promise<BigNumber> {
     // Start with a big number
@@ -343,7 +345,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
 
   // Simplified: quantity * fee / 10e18
   public async calculateEntryFee(
-    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    rebalancingSetToken: RebalancingV2LikeContract,
     quantity: BigNumber
   ): Promise<BigNumber> {
     const entryFee = await rebalancingSetToken.entryFee.callAsync();
@@ -355,7 +357,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
   // Math: newShares / (newShares + oldShares) = percentFee
   // Simplified: fee * oldShare / (scaleFactor - fee)
   public async calculateRebalanceFeeInflation(
-    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    rebalancingSetToken: RebalancingV2LikeContract,
   ): Promise<BigNumber> {
     const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
     const totalSupply = await rebalancingSetToken.totalSupply.callAsync();
@@ -365,7 +367,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
 
   public async getExpectedUnitSharesV2(
     core: CoreMockContract,
-    rebalancingSetToken: RebalancingSetTokenV2Contract,
+    rebalancingSetToken: RebalancingV2LikeContract,
     newSet: SetTokenContract,
     vault: VaultContract
   ): Promise<BigNumber> {

@@ -594,7 +594,7 @@ contract('PerformanceFeeCalculator', accounts => {
     });
   });
 
-  describe.only('#updateAndGetFee', async () => {
+  describe('#updateAndGetFee', async () => {
     let subjectIncreaseChainTime: BigNumber;
 
     let rebalancingSetToken: RebalancingSetFeeMockContract;

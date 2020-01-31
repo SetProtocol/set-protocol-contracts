@@ -28,6 +28,8 @@ import { ether, gWei } from '@utils/units';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { OracleHelper } from '@utils/helpers/oracleHelper';
+import { ValuationHelper } from '@utils/helpers/valuationHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -51,7 +53,9 @@ contract('Auction', accounts => {
 
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
   const erc20Helper = new ERC20Helper(ownerAccount);
-  const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper);
+  const oracleHelper = new OracleHelper(ownerAccount);
+  const valuationHelper = new ValuationHelper(ownerAccount, coreHelper, erc20Helper, oracleHelper);
+  const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper, oracleHelper, valuationHelper);
 
   let component1: StandardTokenMockContract;
   let component2: StandardTokenMockContract;

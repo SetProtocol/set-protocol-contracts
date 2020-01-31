@@ -24,8 +24,9 @@ import { LinearAuction } from '@utils/auction';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { OracleHelper } from '@utils/helpers/oracleHelper';
+import { ValuationHelper } from '@utils/helpers/valuationHelper';
 import { expectRevertError } from '@utils/tokenAssertions';
 
 BigNumberSetup.configure();
@@ -49,8 +50,9 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
-  const libraryMockHelper = new LibraryMockHelper(deployerAccount);
+  const oracleHelper = new OracleHelper(deployerAccount);
+  const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, oracleHelper, valuationHelper);
 
   let wrappedETH: StandardTokenMockContract;
   let wrappedBTC: StandardTokenMockContract;
@@ -92,10 +94,10 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     usdcPrice = ether(1);
     daiPrice = ether(1);
 
-    wrappedETHOracle = await libraryMockHelper.deployUpdatableOracleMockAsync(wrappedETHPrice);
-    wrappedBTCOracle = await libraryMockHelper.deployUpdatableOracleMockAsync(wrappedBTCPrice);
-    usdcOracle = await libraryMockHelper.deployUpdatableOracleMockAsync(usdcPrice);
-    daiOracle = await libraryMockHelper.deployUpdatableOracleMockAsync(daiPrice);
+    wrappedETHOracle = await oracleHelper.deployUpdatableOracleMockAsync(wrappedETHPrice);
+    wrappedBTCOracle = await oracleHelper.deployUpdatableOracleMockAsync(wrappedBTCPrice);
+    usdcOracle = await oracleHelper.deployUpdatableOracleMockAsync(usdcPrice);
+    daiOracle = await oracleHelper.deployUpdatableOracleMockAsync(daiPrice);
 
     oracleWhiteList = await coreHelper.deployOracleWhiteListAsync(
       [wrappedETH.address, wrappedBTC.address, usdc.address, dai.address],

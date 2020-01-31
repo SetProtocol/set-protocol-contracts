@@ -27,7 +27,8 @@ import { ether, gWei } from '@utils/units';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
-import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { OracleHelper } from '@utils/helpers/oracleHelper';
+import { ValuationHelper } from '@utils/helpers/valuationHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -51,7 +52,8 @@ contract('SetValuation', accounts => {
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
   const erc20Helper = new ERC20Helper(ownerAccount);
   const libraryMockHelper = new LibraryMockHelper(ownerAccount);
-  const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper);
+  const oracleHelper = new OracleHelper(ownerAccount);
+  const valuationHelper = new ValuationHelper(ownerAccount, coreHelper, erc20Helper, oracleHelper);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -114,8 +116,8 @@ contract('SetValuation', accounts => {
       component1Price = ether(1);
       component2Price = ether(2);
 
-      component1Oracle = await libraryMockHelper.deployUpdatableOracleMockAsync(component1Price);
-      component2Oracle = await libraryMockHelper.deployUpdatableOracleMockAsync(component2Price);
+      component1Oracle = await oracleHelper.deployUpdatableOracleMockAsync(component1Price);
+      component2Oracle = await oracleHelper.deployUpdatableOracleMockAsync(component2Price);
 
       oracleWhiteList = await coreHelper.deployOracleWhiteListAsync(
         [component1.address, component2.address],
@@ -136,7 +138,7 @@ contract('SetValuation', accounts => {
     it('calculates the correct USD value', async () => {
       const result = await subject();
 
-      const expectedResult = await liquidatorHelper.calculateSetTokenValueAsync(
+      const expectedResult = await valuationHelper.calculateSetTokenValueAsync(
         set1,
         oracleWhiteList,
       );

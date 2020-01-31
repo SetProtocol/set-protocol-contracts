@@ -43,11 +43,12 @@ import { Blockchain } from '@utils/blockchain';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
-import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { OracleHelper } from '@utils/helpers/oracleHelper';
 import { ProtocolViewerHelper } from '@utils/helpers/protocolViewerHelper';
 import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
+import { ValuationHelper } from '@utils/helpers/valuationHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -77,6 +78,11 @@ contract('ProtocolViewer', accounts => {
     erc20Helper,
     blockchain
   );
+  const oracleHelper = new OracleHelper(deployerAccount);
+  const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, oracleHelper, valuationHelper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount, valuationHelper);
+  const viewerHelper = new ProtocolViewerHelper(deployerAccount);
 
   let protocolViewer: ProtocolViewerContract;
 
@@ -376,18 +382,12 @@ contract('ProtocolViewer', accounts => {
     let component1Oracle: UpdatableOracleMockContract;
     let component2Oracle: UpdatableOracleMockContract;
 
-    const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
-    const erc20Helper = new ERC20Helper(deployerAccount);
     const rebalancingHelper = new RebalancingSetV2Helper(
       deployerAccount,
       coreHelper,
       erc20Helper,
       blockchain
     );
-    const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
-    const libraryMockHelper = new LibraryMockHelper(deployerAccount);
-    const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
-    const viewerHelper = new ProtocolViewerHelper(deployerAccount);
 
     let currentSetToken: SetTokenContract;
     let currentAllocation: BigNumber;
@@ -438,8 +438,8 @@ contract('ProtocolViewer', accounts => {
       component1Price = ether(1);
       component2Price = ether(2);
 
-      component1Oracle = await libraryMockHelper.deployUpdatableOracleMockAsync(component1Price);
-      component2Oracle = await libraryMockHelper.deployUpdatableOracleMockAsync(component2Price);
+      component1Oracle = await oracleHelper.deployUpdatableOracleMockAsync(component1Price);
+      component2Oracle = await oracleHelper.deployUpdatableOracleMockAsync(component2Price);
 
       oracleWhiteList = await coreHelper.deployOracleWhiteListAsync(
         [component1.address, component2.address],

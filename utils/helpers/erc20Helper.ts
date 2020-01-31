@@ -345,4 +345,17 @@ export class ERC20Helper {
 
     return tokenPromises;
   }
+
+  public async getTokensDecimalsAsync(
+    tokens: Address[],
+  ): Promise<BigNumber[]> {
+    const tokenInstances = await this.retrieveTokenInstancesAsync(
+      tokens
+    );
+
+    const tokenDecimalPromises = _.map(tokenInstances, async token => {
+      return await token.decimals.callAsync();
+    });
+    return await Promise.all(tokenDecimalPromises);
+  }
 }

@@ -33,7 +33,8 @@ import { SetUSDValuation } from "../liquidators/impl/SetUSDValuation.sol";
  * @author Set Protocol
  *
  * Smart contract that stores and returns fees (represented as scaled decimal values). Fees are
- * determined based on performance of the Set and a streaming fee.
+ * determined based on performance of the Set and a streaming fee. Set values can be denominated
+ * in any any asset based on oracle white list used in deploy.
  */
 contract PerformanceFeeCalculator is IFeeCalculator {
 
@@ -51,13 +52,13 @@ contract PerformanceFeeCalculator is IFeeCalculator {
 
     /* ============ Structs ============ */
     struct FeeState {
-        uint256 profitFeeFrequency;
-        uint256 highWatermarkResetFrequency;
-        uint256 profitFeePercentage;
-        uint256 streamingFeePercentage;
-        uint256 highWatermark;
-        uint256 lastProfitFeeTimestamp;
-        uint256 lastStreamingFeeTimestamp;
+        uint256 profitFeeFrequency;             // Time required between accruing profit fees
+        uint256 highWatermarkResetFrequency;    // Time required after last profit fee to reset high watermark
+        uint256 profitFeePercentage;            // Percent of profits that accrue to manager
+        uint256 streamingFeePercentage;         // Percent of Set that accrues to manager each year
+        uint256 highWatermark;                  // Value of Set at last profit fee accrual
+        uint256 lastProfitFeeTimestamp;         // Timestamp last profit fee was accrued
+        uint256 lastStreamingFeeTimestamp;      // Timestamp last streaming fee was accrued
     }
 
     struct InitFeeParameters {
@@ -81,6 +82,16 @@ contract PerformanceFeeCalculator is IFeeCalculator {
 
     /* ============ Constructor ============ */
 
+    /**
+     * Constructor function for PerformanceFeeCalculator
+     *
+     * @param _core                                 Core instance
+     * @param _oracleWhiteList                      Oracle white list instance
+     * @param _maximumProfitFeePercentage           Maximum percent of profit fee scaled by 1e18
+     *                                              (e.g. 100% = 1e18 and 1% = 1e16)
+     * @param _maximumStreamingFeePercentage        Maximum percent of streaming fee scaled by 1e18
+     *                                              (e.g. 100% = 1e18 and 1% = 1e16)
+     */
     constructor(
         ICore _core,
         IOracleWhiteList _oracleWhiteList,
@@ -97,11 +108,21 @@ contract PerformanceFeeCalculator is IFeeCalculator {
 
     /* ============ External Functions ============ */
 
+    /*
+     * Called by RebalancingSetToken, parses bytedata then assigns to correct FeeState struct. 
+     *
+     * @param  _feeCalculatorData       Bytestring encoding fee parameters for RebalancingSetToken
+     */
     function initialize(
         bytes calldata _feeCalculatorData
     )
         external
     {
+        require(
+            core.validSets(msg.sender),
+            "PerformanceFeeCalculator.initialize: Caller must be valid Set."
+        );
+
         InitFeeParameters memory parameters = parsePerformanceFeeCallData(_feeCalculatorData);
 
         validateFeeParameters(parameters);

@@ -35,9 +35,11 @@ import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { RebalancingSetV3Helper } from '@utils/helpers/rebalancingSetV3Helper';
-import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
+import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { OracleHelper } from '@utils/helpers/oracleHelper';
+import { RebalancingSetV3Helper } from '@utils/helpers/rebalancingSetV3Helper';
+import { ValuationHelper } from '@utils/helpers/valuationHelper';
 
 import { getExpectedRebalanceSettledLog } from '@utils/contract_logs/rebalancingSetTokenV2';
 
@@ -80,8 +82,10 @@ contract('RebalancingSetTokenV3: Settlement', accounts => {
     erc20Helper,
     blockchain
   );
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
-  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
+  const oracleHelper = new OracleHelper(deployerAccount);
+  const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, oracleHelper, valuationHelper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount, valuationHelper);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);

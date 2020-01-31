@@ -206,6 +206,7 @@ contract('PerformanceFeeCalculator', accounts => {
 
     let rebalancingSetToken: RebalancingSetFeeMockContract;
     let usdDenominated: boolean;
+    let addValidSet: boolean;
     let profitFeeFrequency: BigNumber;
     let highWatermarkResetFrequency: BigNumber;
     let profitFeePercentage: BigNumber;
@@ -213,6 +214,7 @@ contract('PerformanceFeeCalculator', accounts => {
 
     before(async () => {
       usdDenominated = true;
+      addValidSet = true;
 
       profitFeeFrequency = ONE_DAY_IN_SECONDS.mul(30);
       highWatermarkResetFrequency = ONE_DAY_IN_SECONDS.mul(365);
@@ -249,7 +251,9 @@ contract('PerformanceFeeCalculator', accounts => {
         feeCalculator.address
       );
 
-      await coreMock.addSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(ownerAccount));
+      if (addValidSet) {
+        await coreMock.addSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(ownerAccount));
+      }
 
       subjectCalculatorData = feeCalculatorHelper.generatePerformanceFeeCallData(
         profitFeeFrequency,
@@ -406,6 +410,20 @@ contract('PerformanceFeeCalculator', accounts => {
 
       after(async () => {
         highWatermarkResetFrequency = ONE_DAY_IN_SECONDS.mul(365);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when a valid Set is not caller', async () => {
+      before(async () => {
+        addValidSet = false;
+      });
+
+      after(async () => {
+        addValidSet = true;
       });
 
       it('should revert', async () => {

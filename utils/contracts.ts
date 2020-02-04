@@ -1,3 +1,4 @@
+export { AddressToAddressWhitelistContract } from '../types/generated/address_to_address_white_list';
 export { AuctionMockContract } from '../types/generated/auction_mock';
 export { AuthorizableContract } from '../types/generated/authorizable';
 export { BadTokenMockContract } from '../types/generated/bad_token_mock';

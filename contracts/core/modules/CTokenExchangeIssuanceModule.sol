@@ -24,7 +24,7 @@ import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ExchangeIssuanceLibrary } from "./lib/ExchangeIssuanceLibrary.sol";
 import { ExchangeIssuanceModule } from "./ExchangeIssuanceModule.sol";
 import { ICToken } from "../interfaces/ICToken.sol";
-import { IOracleWhitelist } from "../interfaces/IOracleWhitelist.sol";
+import { IAddressToAddressWhiteList } from "../interfaces/IAddressToAddressWhiteList.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
 
@@ -47,10 +47,8 @@ contract CTokenExchangeIssuanceModule is
     // Address of TransferProxy contract
     address public transferProxy;
 
-    // Address and instance of OracleWhitelist contract
-    // NOTE: The OracleWhitelist contract can be reused for storing a mapping of cToken to underlying tokens
-    // and the ability for the owner to add/remove cTokens from the mapping
-    IOracleWhitelist public cTokenWhitelist;
+    // Address and instance of AddressToAddressWhiteList contract
+    IAddressToAddressWhiteList public cTokenWhitelist;
 
     /* ============ Constructor ============ */
 
@@ -65,7 +63,7 @@ contract CTokenExchangeIssuanceModule is
         address _core,
         address _vault,
         address _transferProxy,
-        IOracleWhitelist _cTokenWhitelist
+        IAddressToAddressWhiteList _cTokenWhitelist
     )
         public
         ExchangeIssuanceModule(
@@ -76,7 +74,29 @@ contract CTokenExchangeIssuanceModule is
         transferProxy = _transferProxy;
         cTokenWhitelist = _cTokenWhitelist;
 
-        cTokenWhitelist.get
+        address[] memory cTokenAddresses = cTokenWhitelist.validAddresses();
+
+        for (uint256 i = 0; i < cTokenAddresses.length; i++) {
+            address cTokenAddress = cTokenAddresses[i];
+            address underlyingAddress = cTokenWhitelist.getValueTypeAddressByKey();
+
+            // Initialize mapping of cToken to underlying
+            cTokenToUnderlying[cTokenAddress] = underlyingAddress;
+
+            // Add approvals of the underlying token to the cToken contract
+            ERC20Wrapper.approve(
+                underlyingAddress,
+                cTokenAddress,
+                CommonMath.maxUInt256()
+            );
+
+            // Add approvals of the cToken to the transferProxy contract
+            ERC20Wrapper.approve(
+                cTokenAddress,
+                address(_transferProxy),
+                CommonMath.maxUInt256()
+            );
+        }
     }
 
     /* ============ Public Functions ============ */

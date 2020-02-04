@@ -17,30 +17,30 @@
 pragma solidity 0.5.7;
 
 /**
- * @title ICTokenWhiteList
+ * @title IAddressToAddressWhiteList
  * @author Set Protocol
  *
- * The ICTokenWhiteList interface exposes the whitelist mapping to check components
+ * The IAddressToAddressWhiteList interface exposes the whitelist mapping to check components
  */
-interface ICTokenWhiteList {
+interface IAddressToAddressWhiteList {
 
     /* ============ External Functions ============ */
 
     /**
-     * Returns underlying of passed cToken address (not in array form)
+     * Returns value of key type address passed in (not in array form)
      *
-     * @param  _cTokenAddress       Address to check
+     * @param  _keyTypeAddress     Address to check
      * @return bool                Whether passed in address is whitelisted
      */
-    function cTokenWhiteList(
-        address _cTokenAddress
+    function addressToAddressWhiteList(
+        address _keyTypeAddress
     )
         external
         view
         returns (address);
 
     /**
-     * Verifies an array of cToken addresses against the whitelist
+     * Verifies an array of key type addresses against the whitelist
      *
      * @param  _addresses    Array of addresses to verify
      * @return bool          Whether all addresses in the list are whitelisted
@@ -53,22 +53,27 @@ interface ICTokenWhiteList {
         returns (bool);
 
     /**
-     * Return array of underlying addresses based on passed in cToken addresses 
+     * Return array of addresses based on passed in key type addresses 
      *
-     * @param  _cTokenAddresses   Array of cToken addresses to get underlying addresses for
-     * @return address[]          Array of underlying addresses
+     * @param  _keyTypeAddresses  Array of addresses to mapped addresses for
+     * @return address[]          Array of value type addresses
      */
-    function getUnderlyingAddressesByCToken(
-        address[] calldata _cTokenAddresses
+    function getValueTypeAddressesByKey(
+        address[] calldata _keyTypeAddresses
     )
         external
         view
         returns (address[] memory);
 
-    function getUnderlyingAddressByCToken(
-        address _token
+    function getValueTypeAddressByKey(
+        address _keyTypeAddress
     )
         external
         view
         returns (address);
+
+    function validAddresses()
+        external
+        view
+        returns (address[] memory);
 }

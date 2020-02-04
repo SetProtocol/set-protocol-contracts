@@ -69,7 +69,6 @@ export {
   ExchangeIssuanceLibraryContract,
   ExchangeIssuanceModuleContract,
   FailAuctionLibraryContract,
-  FactoryUtilsLibraryContract,
   FixedFeeCalculatorContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,

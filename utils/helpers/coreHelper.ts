@@ -3,6 +3,7 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 
 import {
+  AddressToAddressWhiteListContract,
   AuthorizableContract,
   CoreContract,
   CoreMockContract,
@@ -45,6 +46,7 @@ const CoreMock = artifacts.require('CoreMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
 const FactoryUtilsLibrary = artifacts.require('FactoryUtilsLibrary');
+const AddressToAddressWhiteList = artifacts.require('AddressToAddressWhiteList');
 const OracleWhiteList = artifacts.require('OracleWhiteList');
 const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
 const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
@@ -453,6 +455,23 @@ export class CoreHelper {
     );
 
     return new OracleWhiteListContract(
+      getContractInstance(truffleWhiteList),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployAddressToAddressWhiteListAsync(
+    initialKeyTypeAddresses: Address[] = [],
+    initialValueTypeAddresses: Address[] = [],
+    from: Address = this._tokenOwnerAddress
+  ): Promise<AddressToAddressWhiteListContract> {
+    const truffleWhiteList = await AddressToAddressWhiteList.new(
+      initialKeyTypeAddresses,
+      initialValueTypeAddresses,
+      { from },
+    );
+
+    return new AddressToAddressWhiteListContract(
       getContractInstance(truffleWhiteList),
       { from, gas: DEFAULT_GAS },
     );

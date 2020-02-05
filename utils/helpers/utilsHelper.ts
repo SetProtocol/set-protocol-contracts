@@ -14,7 +14,7 @@ const AddressToAddressWhiteList = artifacts.require('AddressToAddressWhiteList')
 export class UtilsHelper {
   private _tokenOwnerAddress: Address;
 
-  constructor(tokenOwnerAddress: Address, contractOwnerAddress: Address) {
+  constructor(tokenOwnerAddress: Address) {
     this._tokenOwnerAddress = tokenOwnerAddress;
   }
 

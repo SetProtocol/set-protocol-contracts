@@ -16,7 +16,7 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 
-import { CoreHelper } from '@utils/helpers/coreHelper';
+import { UtilsHelper } from '@utils/helpers/utilsHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -42,7 +42,7 @@ contract('AddressToAddressWhiteList', accounts => {
 
   let addressToAddressWhiteList: AddressToAddressWhiteListContract;
 
-  const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
+  const utilsHelper = new UtilsHelper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(AddressToAddressWhiteList.abi);
@@ -80,7 +80,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
 
     async function subject(): Promise<AddressToAddressWhiteListContract> {
-      return await coreHelper.deployAddressToAddressWhiteListAsync(
+      return await utilsHelper.deployAddressToAddressWhiteListAsync(
         subjectInitialKeyTypeAddresses,
         subjectInitialValueTypeAddresses,
         subjectCaller
@@ -121,7 +121,7 @@ contract('AddressToAddressWhiteList', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      addressToAddressWhiteList = await coreHelper.deployAddressToAddressWhiteListAsync(
+      addressToAddressWhiteList = await utilsHelper.deployAddressToAddressWhiteListAsync(
         [firstKeyTypeAddress, secondKeyTypeAddress],
         [firstValueTypeAddress, secondValueTypeAddress]
       );
@@ -198,7 +198,7 @@ contract('AddressToAddressWhiteList', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      addressToAddressWhiteList = await coreHelper.deployAddressToAddressWhiteListAsync(
+      addressToAddressWhiteList = await utilsHelper.deployAddressToAddressWhiteListAsync(
         [firstKeyTypeAddress, secondKeyTypeAddress, thirdKeyTypeAddress],
         [firstValueTypeAddress, secondValueTypeAddress, thirdValueTypeAddress]
       );
@@ -271,7 +271,7 @@ contract('AddressToAddressWhiteList', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      addressToAddressWhiteList = await coreHelper.deployAddressToAddressWhiteListAsync(
+      addressToAddressWhiteList = await utilsHelper.deployAddressToAddressWhiteListAsync(
         [firstKeyTypeAddress, secondKeyTypeAddress],
         [firstValueTypeAddress, secondValueTypeAddress]
       );
@@ -346,7 +346,7 @@ contract('AddressToAddressWhiteList', accounts => {
     let subjectAddressesToVerify: Address[];
 
     beforeEach(async () => {
-      addressToAddressWhiteList = await coreHelper.deployAddressToAddressWhiteListAsync(
+      addressToAddressWhiteList = await utilsHelper.deployAddressToAddressWhiteListAsync(
         [firstKeyTypeAddress, secondKeyTypeAddress, thirdKeyTypeAddress],
         [firstValueTypeAddress, secondValueTypeAddress, thirdValueTypeAddress]
       );
@@ -396,7 +396,7 @@ contract('AddressToAddressWhiteList', accounts => {
     let subjectKeyTypeAddress: Address;
 
     beforeEach(async () => {
-      addressToAddressWhiteList = await coreHelper.deployAddressToAddressWhiteListAsync(
+      addressToAddressWhiteList = await utilsHelper.deployAddressToAddressWhiteListAsync(
         [firstKeyTypeAddress],
         [firstValueTypeAddress]
       );
@@ -429,7 +429,7 @@ contract('AddressToAddressWhiteList', accounts => {
     let subjectKeyTypeAddresses: Address[];
 
     beforeEach(async () => {
-      addressToAddressWhiteList = await coreHelper.deployAddressToAddressWhiteListAsync(
+      addressToAddressWhiteList = await utilsHelper.deployAddressToAddressWhiteListAsync(
         [firstKeyTypeAddress, secondKeyTypeAddress, thirdKeyTypeAddress],
         [firstValueTypeAddress, secondValueTypeAddress, thirdValueTypeAddress]
       );

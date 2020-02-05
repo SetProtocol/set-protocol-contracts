@@ -129,7 +129,10 @@ contract CTokenExchangeIssuanceModule is
         );
 
         // Execute the exchange orders using the encoded order data
-        executeOrders(_exchangeIssuanceParams, _orderData);
+        executeExchangeOrders(_orderData);
+
+        // Validate balances of tokens received
+        validatePostExchangeReceiveTokens(_exchangeIssuanceParams);
         
         // Issue Set to the caller
         coreInstance.issueModule(
@@ -187,7 +190,10 @@ contract CTokenExchangeIssuanceModule is
         );
 
         // Executes the orders, depositing tokens into the Vault to the user
-        executeOrders(_exchangeIssuanceParams, _orderData);
+        executeExchangeOrders(_orderData);
+
+        // Validate balances of tokens received
+        validatePostExchangeReceiveTokens(_exchangeIssuanceParams);
 
         // Withdraw receive tokens from the Vault to the user
         coreInstance.batchWithdrawModule(
@@ -212,6 +218,30 @@ contract CTokenExchangeIssuanceModule is
     /* ============ Private Functions ============ */
 
     /**
+     * Checks post-exchange receive balances.
+     *
+     * @param _exchangeIssuanceParams              A Struct containing exchange issuance metadata
+     */
+    function validatePostExchangeReceiveTokens(
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
+    )
+        private
+    {
+        // Calculate expected receive token balances after exchange orders executed
+        uint256[] memory requiredBalances = calculateReceiveTokenBalances(
+            _exchangeIssuanceParams
+        );
+
+        // Check that sender's receive tokens in Vault have been incremented correctly
+        ExchangeIssuanceLibrary.validatePostExchangeReceiveTokenBalances(
+            vault,
+            _exchangeIssuanceParams.receiveTokens,
+            requiredBalances,
+            msg.sender
+        );
+    }
+
+    /**
      * Calculates required tokens to receive, executes orders, and checks post-exchange receive balances.
      *
      * @param _exchangeIssuanceParams              A Struct containing exchange issuance metadata
@@ -223,13 +253,14 @@ contract CTokenExchangeIssuanceModule is
     )
         private
     {
+
+        // Execute exchange orders
+        executeExchangeOrders(_orderData);
+
         // Calculate expected receive token balances after exchange orders executed
         uint256[] memory requiredBalances = calculateReceiveTokenBalances(
             _exchangeIssuanceParams
         );
-
-        // Execute exchange orders
-        executeExchangeOrders(_orderData);
 
         // Check that sender's receive tokens in Vault have been incremented correctly
         ExchangeIssuanceLibrary.validatePostExchangeReceiveTokenBalances(

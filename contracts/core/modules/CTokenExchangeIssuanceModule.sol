@@ -129,7 +129,7 @@ contract CTokenExchangeIssuanceModule is
         );
 
         // Execute the exchange orders using the encoded order data
-        executeOrdersAndMintCToken(_exchangeIssuanceParams, _orderData);
+        executeOrders(_exchangeIssuanceParams, _orderData);
         
         // Issue Set to the caller
         coreInstance.issueModule(

@@ -182,7 +182,7 @@ contract AddressToAddressWhiteList is
      * @param  _keyTypeAddresses   Array of key type addresses to get value type addresses for
      * @return address[]           Array of value type addresses
      */
-    function getValueTypeAddressesByKey(
+    function getAddressValuesByKeys(
         address[] calldata _keyTypeAddresses
     )
         external
@@ -195,7 +195,7 @@ contract AddressToAddressWhiteList is
         // Check that passed array length is greater than 0
         require(
             arrayLength > 0,
-            "AddressToAddressWhiteList.getValueTypeAddressesByKey: Array length must be greater than 0."
+            "AddressToAddressWhiteList.getAddressValuesByKeys: Array length must be greater than 0."
         );
 
         // Instantiate value type addresses array
@@ -203,7 +203,7 @@ contract AddressToAddressWhiteList is
 
         for (uint256 i = 0; i < arrayLength; i++) {
             // Get value type address for key type address at index i
-            valueTypeAddresses[i] = getValueTypeAddressByKey(
+            valueTypeAddresses[i] = getAddressValueByKey(
                 _keyTypeAddresses[i]
             );
         }
@@ -217,7 +217,7 @@ contract AddressToAddressWhiteList is
      * @param  _keyTypeAddress    Address of key type
      * @return address            Address associated with _keyTypeAddress 
      */
-    function getValueTypeAddressByKey(
+    function getAddressValueByKey(
         address _keyTypeAddress
     )
         public
@@ -227,7 +227,7 @@ contract AddressToAddressWhiteList is
         // Require key to have matching value type address
         require(
             addressToAddressWhiteList[_keyTypeAddress] != address(0),
-            "AddressToAddressWhiteList.getValueTypeAddressByKey: No value for that address."
+            "AddressToAddressWhiteList.getAddressValueByKey: No value for that address."
         );
 
         // Return address associated with key

@@ -392,7 +392,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
   });
 
-  describe('#getValueTypeAddressByKey', async () => {
+  describe('#getAddressValueByKey', async () => {
     let subjectKeyTypeAddress: Address;
 
     beforeEach(async () => {
@@ -405,7 +405,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
 
     async function subject(): Promise<Address> {
-      return await addressToAddressWhiteList.getValueTypeAddressByKey.callAsync(subjectKeyTypeAddress);
+      return await addressToAddressWhiteList.getAddressValueByKey.callAsync(subjectKeyTypeAddress);
     }
 
     it('returns array of value type addresses', async () => {
@@ -425,7 +425,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
   });
 
-  describe('#getValueTypeAddressesByKey', async () => {
+  describe('#getAddressValuesByKeys', async () => {
     let subjectKeyTypeAddresses: Address[];
 
     beforeEach(async () => {
@@ -438,7 +438,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
 
     async function subject(): Promise<Address[]> {
-      return await addressToAddressWhiteList.getValueTypeAddressesByKey.callAsync(subjectKeyTypeAddresses);
+      return await addressToAddressWhiteList.getAddressValuesByKeys.callAsync(subjectKeyTypeAddresses);
     }
 
     it('returns array of value type addresses', async () => {

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 export { AddressToAddressWhitelistContract } from '../types/generated/address_to_address_white_list';
+=======
+export { AddressToAddressWhiteListContract } from '../types/generated/address_to_address_white_list';
+>>>>>>> 1b1c0063495a0b1fa99eadacf3148f92fae3fc4d
 export { AuctionMockContract } from '../types/generated/auction_mock';
 export { AuthorizableContract } from '../types/generated/authorizable';
 export { BadTokenMockContract } from '../types/generated/bad_token_mock';

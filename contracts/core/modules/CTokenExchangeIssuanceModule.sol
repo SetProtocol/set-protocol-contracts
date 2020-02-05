@@ -58,12 +58,13 @@ contract CTokenExchangeIssuanceModule is
      * @param _core                The address of Core
      * @param _vault               The address of Vault
      * @param _transferProxy       The address of TransferProxy
+     * @param _cTokenWhiteList     The instance of cTokenWhiteList contract
      */
     constructor(
         address _core,
         address _vault,
         address _transferProxy,
-        IAddressToAddressWhiteList _cTokenWhitelist
+        IAddressToAddressWhiteList _cTokenWhiteList
     )
         public
         ExchangeIssuanceModule(
@@ -72,16 +73,13 @@ contract CTokenExchangeIssuanceModule is
         )
     {
         transferProxy = _transferProxy;
-        cTokenWhitelist = _cTokenWhitelist;
+        cTokenWhitelist = _cTokenWhiteList;
 
-        address[] memory cTokenAddresses = cTokenWhitelist.validAddresses();
+        address[] memory cTokenAddresses = _cTokenWhitelist.validAddresses();
 
         for (uint256 i = 0; i < cTokenAddresses.length; i++) {
             address cTokenAddress = cTokenAddresses[i];
-            address underlyingAddress = cTokenWhitelist.getValueTypeAddressByKey();
-
-            // Initialize mapping of cToken to underlying
-            cTokenToUnderlying[cTokenAddress] = underlyingAddress;
+            address underlyingAddress = cTokenWhitelist.getAddressValueByKey(cTokenAddress);
 
             // Add approvals of the underlying token to the cToken contract
             ERC20Wrapper.approve(
@@ -93,7 +91,7 @@ contract CTokenExchangeIssuanceModule is
             // Add approvals of the cToken to the transferProxy contract
             ERC20Wrapper.approve(
                 cTokenAddress,
-                address(_transferProxy),
+                _transferProxy,
                 CommonMath.maxUInt256()
             );
         }
@@ -117,7 +115,7 @@ contract CTokenExchangeIssuanceModule is
         // Ensures validity of exchangeIssuanceParams
         validateExchangeIssuanceParams(_exchangeIssuanceParams);
 
-        // Validate that all receiveTokens are components of the SEt
+        // Validate that all receiveTokens are components of the Set
         SetTokenLibrary.validateTokensAreComponents(
             _exchangeIssuanceParams.setAddress,
             _exchangeIssuanceParams.receiveTokens
@@ -131,9 +129,7 @@ contract CTokenExchangeIssuanceModule is
         );
 
         // Execute the exchange orders using the encoded order data
-        executeOrders(_exchangeIssuanceParams, _orderData);
-
-        mintCTokens();
+        executeOrdersAndMintCToken(_exchangeIssuanceParams, _orderData);
         
         // Issue Set to the caller
         coreInstance.issueModule(

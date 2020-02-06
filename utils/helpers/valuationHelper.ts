@@ -6,6 +6,7 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import {
   OracleWhiteListContract,
   RebalancingSetFeeMockContract,
+  RebalancingSetTokenV2Contract,
   RebalancingSetTokenV3Contract,
   SetTokenContract,
 } from '../contracts';
@@ -72,7 +73,7 @@ export class ValuationHelper {
   }
 
   public async calculateRebalancingSetTokenValueAsync(
-    rebalancingSetToken: RebalancingSetFeeMockContract | RebalancingSetTokenV3Contract,
+    rebalancingSetToken: RebalancingSetFeeMockContract | RebalancingSetTokenV2Contract | RebalancingSetTokenV3Contract,
     oracleWhiteList: OracleWhiteListContract
   ): Promise<BigNumber> {
     const currentSetAddress = await rebalancingSetToken.currentSet.callAsync();

@@ -3,8 +3,9 @@ require('module-alias/register');
 import * as ABIDecoder from 'abi-decoder';
 import * as _ from 'lodash';
 import * as chai from 'chai';
-import { BigNumber } from 'bignumber.js';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -27,6 +28,9 @@ import {
   ONE_DAY_IN_SECONDS,
   ONE_YEAR_IN_SECONDS
 } from '@utils/constants';
+import {
+  getExpectedFeeActualizedLog
+} from '@utils/contract_logs/performanceFeeCalculator';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
@@ -40,7 +44,9 @@ const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
-const FixedFeeCalculator = artifacts.require('FixedFeeCalculator');
+const PerformanceFeeCalculator = artifacts.require('PerformanceFeeCalculator');
+const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
+const setTestUtils = new SetTestUtils(web3);
 
 contract('PerformanceFeeCalculator', accounts => {
   const [
@@ -84,7 +90,7 @@ contract('PerformanceFeeCalculator', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(FixedFeeCalculator.abi);
+    ABIDecoder.addABI(PerformanceFeeCalculator.abi);
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -97,7 +103,7 @@ contract('PerformanceFeeCalculator', accounts => {
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(FixedFeeCalculator.abi);
+    ABIDecoder.removeABI(PerformanceFeeCalculator.abi);
   });
 
   beforeEach(async () => {
@@ -762,6 +768,42 @@ contract('PerformanceFeeCalculator', accounts => {
       expect(postFeeState.highWatermark).to.bignumber.equal(expectedHighWatermark);
     });
 
+    it('emits the correct FeeActualized log', async () => {
+      const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+      const txHash = await subject();
+
+      const lastBlock = await web3.eth.getBlock('latest');
+
+      const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+        rebalancingSetToken,
+        usdOracleWhiteList,
+      );
+      const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
+        preFeeState,
+        rebalancingSetValue,
+        usdOracleWhiteList,
+        new BigNumber(lastBlock.timestamp)
+      );
+      const expectedInflationFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
+        preFeeState,
+        rebalancingSetValue,
+        usdOracleWhiteList,
+        new BigNumber(lastBlock.timestamp)
+      );
+
+      const expectedLogs = getExpectedFeeActualizedLog(
+        rebalancingSetToken.address,
+        expectedHighWatermark,
+        expectedInflationFee,
+        feeCalculator.address
+      );
+
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
     describe('when time since last profit fee does not exceed fee frequency', async () => {
       beforeEach(async () => {
         subjectIncreaseChainTime = ONE_DAY_IN_SECONDS.mul(15);
@@ -818,6 +860,37 @@ contract('PerformanceFeeCalculator', accounts => {
         const postFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
 
         expect(postFeeState.highWatermark).to.bignumber.equal(preFeeState.highWatermark);
+      });
+
+      it('emits the correct FeeActualized log', async () => {
+        const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+        const txHash = await subject();
+
+        const lastBlock = await web3.eth.getBlock('latest');
+
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          usdOracleWhiteList,
+        );
+
+        const expectedInflationFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
+          preFeeState,
+          rebalancingSetValue,
+          usdOracleWhiteList,
+          new BigNumber(lastBlock.timestamp)
+        );
+
+        const expectedLogs = getExpectedFeeActualizedLog(
+          rebalancingSetToken.address,
+          preFeeState.highWatermark,
+          expectedInflationFee,
+          feeCalculator.address
+        );
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
       });
     });
 
@@ -895,6 +968,42 @@ contract('PerformanceFeeCalculator', accounts => {
         const postFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
         expect(postFeeState.highWatermark).to.bignumber.equal(expectedHighWatermark);
       });
+
+      it('emits the correct FeeActualized log', async () => {
+        const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+        const txHash = await subject();
+
+        const lastBlock = await web3.eth.getBlock('latest');
+
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          usdOracleWhiteList,
+        );
+        const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
+          preFeeState,
+          rebalancingSetValue,
+          usdOracleWhiteList,
+          new BigNumber(lastBlock.timestamp)
+        );
+        const expectedInflationFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
+          preFeeState,
+          rebalancingSetValue,
+          usdOracleWhiteList,
+          new BigNumber(lastBlock.timestamp)
+        );
+
+        const expectedLogs = getExpectedFeeActualizedLog(
+          rebalancingSetToken.address,
+          expectedHighWatermark,
+          expectedInflationFee,
+          feeCalculator.address
+        );
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
     });
 
     describe('when value denominated in ETH', async () => {
@@ -970,6 +1079,42 @@ contract('PerformanceFeeCalculator', accounts => {
 
         const postFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
         expect(postFeeState.highWatermark).to.bignumber.equal(expectedHighWatermark);
+      });
+
+      it('emits the correct FeeActualized log', async () => {
+        const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+        const txHash = await subject();
+
+        const lastBlock = await web3.eth.getBlock('latest');
+
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          ethOracleWhiteList,
+        );
+        const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
+          preFeeState,
+          rebalancingSetValue,
+          ethOracleWhiteList,
+          new BigNumber(lastBlock.timestamp)
+        );
+        const expectedInflationFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
+          preFeeState,
+          rebalancingSetValue,
+          ethOracleWhiteList,
+          new BigNumber(lastBlock.timestamp)
+        );
+
+        const expectedLogs = getExpectedFeeActualizedLog(
+          rebalancingSetToken.address,
+          expectedHighWatermark,
+          expectedInflationFee,
+          feeCalculator.address
+        );
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
       });
     });
   });

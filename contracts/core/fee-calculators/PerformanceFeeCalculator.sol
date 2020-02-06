@@ -1,5 +1,5 @@
 /*
-    Copyright 2019 Set Labs Inc.
+    Copyright 2020 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -43,9 +43,8 @@ contract PerformanceFeeCalculator is IFeeCalculator {
 
     /* ============ Events ============ */
 
-    event FeeAcutalized(
+    event FeeActualized(
         address indexed rebalancingSetToken,
-        uint256 oldHighWatermark,
         uint256 newHighWatermark,
         uint256 inflationFee
     );
@@ -131,27 +130,28 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         feeState[msg.sender].streamingFeePercentage = parameters.streamingFeePercentage;
         feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
         feeState[msg.sender].lastStreamingFeeTimestamp = block.timestamp;
-        feeState[msg.sender].highWatermark = calculateRebalancingSetValue(msg.sender);
+        feeState[msg.sender].highWatermark = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
     }
 
     /*
      * Calculates total inflation percentage in order to accrue fees to manager. Profit fee calculations
      * are net of streaming fees, so streaming fees are applied first then profit fees are calculated.  
      *
-     * @param  uint256       Percent inflation of supply
+     * @return  uint256       Percent inflation of supply
      */
     function getFee()
         external
         view
         returns (uint256)
     {
+        require(
+            core.validSets(msg.sender),
+            "PerformanceFeeCalculator.getFee: Caller must be valid RebalancingSetToken."
+        );
+
         uint256 streamingFee = calculateStreamingFee();
 
-        // If time since last profit fee exceeds profitFeeFrequency then calculate profit fee else 0.
-        uint256 profitFee = 0;
-        if (exceedsProfitFeeFrequency()) {
-            profitFee = calculateProfitFee(streamingFee);
-        }
+        uint256 profitFee = calculateProfitFee(streamingFee);
 
         return streamingFee.add(profitFee);
     }
@@ -162,21 +162,29 @@ contract PerformanceFeeCalculator is IFeeCalculator {
      * Additionally, fee state is set timestamps are updated for each fee type and the high watermark is
      * reset if time since last profit fee exceeds the highWatermarkResetFrequency. 
      *
-     * @param  uint256       Percent inflation of supply
+     * @preturn  uint256       Percent inflation of supply
      */
     function updateAndGetFee()
         external
         returns (uint256)
     {
+        require(
+            core.validSets(msg.sender),
+            "PerformanceFeeCalculator.getFee: Caller must be valid RebalancingSetToken."
+        );
+
         uint256 streamingFee = calculateStreamingFee();
 
-        uint256 profitFee = 0;
-        if (exceedsProfitFeeFrequency()) {
-            profitFee = calculateProfitFee(streamingFee);
-        }
+        uint256 profitFee = calculateProfitFee(streamingFee);
 
         // Update fee state based off fees collected
         updateFeeState(streamingFee, profitFee);
+
+        emit FeeActualized(
+            msg.sender,
+            highWatermark(msg.sender),
+            streamingFee.add(profitFee)
+        );
 
         return streamingFee.add(profitFee);
     }
@@ -197,20 +205,18 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         // Set streaming fee timestamp
         feeState[msg.sender].lastStreamingFeeTimestamp = block.timestamp;
 
-        uint256 rebalancingSetValue = calculateRebalancingSetValue(msg.sender);
+        uint256 rebalancingSetValue = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
         uint256 postStreamingValue = rebalancingSetValue.mul(ONE_HUNDRED_PERCENT.sub(_streamingFee)).deScale();
+
         // If profit fee then set new high watermark and profit fee timestamp
         if (_profitFee > 0) {
             feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
             feeState[msg.sender].highWatermark = postStreamingValue;
-            return;
-        }
-
-        // If no profit fee and last profit fee was more than highWatermarkResetFrequency seconds ago then reset
-        // high watermark
-        if (block.timestamp.sub(lastProfitFeeTimestamp(msg.sender)) >= highWatermarkResetFrequency(msg.sender)) {
+        } else if (timeSinceLastProfitFee(msg.sender) >= highWatermarkResetFrequency(msg.sender)) {
+            // If no profit fee and last profit fee was more than highWatermarkResetFrequency seconds ago then reset
+            // high watermark
             feeState[msg.sender].highWatermark = postStreamingValue;
-            feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
+            feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;            
         }
     }
 
@@ -306,51 +312,39 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         view
         returns(uint256)
     {
-        // Calculate post streaming value and get high watermark
-        uint256 rebalancingSetValue = calculateRebalancingSetValue(msg.sender);
-        uint256 postStreamingValue = rebalancingSetValue.mul(ONE_HUNDRED_PERCENT.sub(_streamingFee)).deScale(); 
-        uint256 highWatermark = highWatermark(msg.sender);
+        // If time since last profit fee exceeds profitFeeFrequency then calculate profit fee else 0.
+        if (exceedsProfitFeeFrequency(msg.sender)) {
+            // Calculate post streaming value and get high watermark
+            uint256 rebalancingSetValue = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
+            uint256 postStreamingValue = rebalancingSetValue.mul(ONE_HUNDRED_PERCENT.sub(_streamingFee)).deScale(); 
+            uint256 highWatermark = highWatermark(msg.sender);
 
-        // Subtract high watermark from post streaming fee value, unless less than 0 set to 0
-        uint256 gainedValue = postStreamingValue > highWatermark ? postStreamingValue.sub(highWatermark) : 0;
+            // Subtract high watermark from post streaming fee value, unless less than 0 set to 0
+            uint256 gainedValue = postStreamingValue > highWatermark ? postStreamingValue.sub(highWatermark) : 0;
 
-        // Determine percent fee in terms of current rebalancing Set value
-        return gainedValue.mul(profitFeePercentage(msg.sender)).div(rebalancingSetValue);
-    }
+            // Determine percent fee in terms of current rebalancing Set value
+            return gainedValue.mul(profitFeePercentage(msg.sender)).div(rebalancingSetValue);
+        }
 
-    /**
-     * Calculates value of RebalancingSetToken.
-     *
-     * @return uint256        Streaming fee
-     */
-    function calculateRebalancingSetValue(
-        address _rebalancingSetTokenAddress
-    )
-        internal
-        view
-        returns (uint256)
-    {
-        IRebalancingSetTokenV2 rebalancingSetToken = IRebalancingSetTokenV2(_rebalancingSetTokenAddress);
-
-        uint256 unitShares = rebalancingSetToken.unitShares();
-        uint256 naturalUnit = rebalancingSetToken.naturalUnit();
-        ISetToken currentSet = rebalancingSetToken.currentSet();
-
-        // Calculate collateral value
-        uint256 collateralValue = SetUSDValuation.calculateSetTokenDollarValue(
-            currentSet,
-            oracleWhiteList
-        );
-
-        // Value of rebalancing set is collateralValue times unitShares divided by naturalUnit
-        return collateralValue.mul(unitShares).div(naturalUnit);
+        return 0;
     }
 
     /**
      * Checks if time since last profit fee exceeds profitFeeFrequency
+     *
+     * @return  bool
      */
-    function exceedsProfitFeeFrequency() internal view returns (bool) {
-        return block.timestamp.sub(lastProfitFeeTimestamp(msg.sender)) > profitFeeFrequency(msg.sender);
+    function exceedsProfitFeeFrequency(address _set) internal view returns (bool) {
+        return timeSinceLastProfitFee(_set) > profitFeeFrequency(_set);
+    }
+
+    /**
+     * Checks if time since last profit fee exceeds profitFeeFrequency
+     *
+     * @return  uint256     Time since last profit fee accrued
+     */
+    function timeSinceLastProfitFee(address _set) internal view returns (uint256) {
+        return block.timestamp.sub(lastProfitFeeTimestamp(_set));
     }
 
     function lastStreamingFeeTimestamp(address _set) internal view returns (uint256) {

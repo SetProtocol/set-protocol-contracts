@@ -113,7 +113,7 @@ contract('SetValuation', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe.only('#calculateRebalancingSetValue', async () => {
+  describe('#calculateRebalancingSetValue', async () => {
     let subjectSet: Address;
     let subjectOracle: Address;
 

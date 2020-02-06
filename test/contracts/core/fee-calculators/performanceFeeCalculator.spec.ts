@@ -618,6 +618,16 @@ contract('PerformanceFeeCalculator', accounts => {
         expect(accruedFee).to.bignumber.equal(expectedFee);
       });
     });
+
+    describe('when caller is not enabled Set', async () => {
+      beforeEach(async () => {
+        coreMock.disableSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(ownerAccount));
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#updateAndGetFee', async () => {
@@ -1115,6 +1125,16 @@ contract('PerformanceFeeCalculator', accounts => {
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+    });
+
+    describe('when caller is not enabled Set', async () => {
+      beforeEach(async () => {
+        coreMock.disableSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(ownerAccount));
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

@@ -80,7 +80,7 @@ contract('BackwardsCompatability', accounts => {
   const oracleHelper = new OracleHelper(deployerAccount);
   const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, oracleHelper, valuationHelper);
-  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount, valuationHelper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   let currentSetToken: SetTokenContract;
   let nextSetToken: SetTokenContract;

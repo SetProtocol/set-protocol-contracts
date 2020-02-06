@@ -78,7 +78,7 @@ contract('PerformanceFeeCalculator', accounts => {
   const erc20Helper = new ERC20Helper(ownerAccount);
   const oracleHelper = new OracleHelper(ownerAccount);
   const valuationHelper = new ValuationHelper(ownerAccount, coreHelper, erc20Helper, oracleHelper);
-  const feeCalculatorHelper = new FeeCalculatorHelper(ownerAccount, valuationHelper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(ownerAccount);
 
   let feeCalculator: PerformanceFeeCalculatorContract;
 
@@ -416,20 +416,6 @@ contract('PerformanceFeeCalculator', accounts => {
         await expectRevertError(subject());
       });
     });
-
-    describe('when a valid Set is not caller', async () => {
-      before(async () => {
-        addValidSet = false;
-      });
-
-      after(async () => {
-        addValidSet = true;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
   });
 
   describe('#getFee', async () => {
@@ -522,9 +508,13 @@ contract('PerformanceFeeCalculator', accounts => {
 
       const lastBlock = await web3.eth.getBlock('latest');
 
+      const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+        rebalancingSetToken,
+        usdOracleWhiteList,
+      );
       const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
         feeState,
-        rebalancingSetToken,
+        rebalancingSetValue,
         usdOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
@@ -544,9 +534,13 @@ contract('PerformanceFeeCalculator', accounts => {
 
         const lastBlock = await web3.eth.getBlock('latest');
 
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          usdOracleWhiteList,
+        );
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
-          rebalancingSetToken,
+          rebalancingSetValue,
           usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
@@ -573,9 +567,13 @@ contract('PerformanceFeeCalculator', accounts => {
 
         const lastBlock = await web3.eth.getBlock('latest');
 
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          usdOracleWhiteList,
+        );
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
-          rebalancingSetToken,
+          rebalancingSetValue,
           usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
@@ -600,9 +598,13 @@ contract('PerformanceFeeCalculator', accounts => {
 
         const lastBlock = await web3.eth.getBlock('latest');
 
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          ethOracleWhiteList,
+        );
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
-          rebalancingSetToken,
+          rebalancingSetValue,
           ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
@@ -703,9 +705,13 @@ contract('PerformanceFeeCalculator', accounts => {
 
       const accruedFee = await rebalancingSetToken.fee.callAsync();
 
+      const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+        rebalancingSetToken,
+        usdOracleWhiteList,
+      );
       const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
         feeState,
-        rebalancingSetToken,
+        rebalancingSetValue,
         usdOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
@@ -740,9 +746,13 @@ contract('PerformanceFeeCalculator', accounts => {
 
       const lastBlock = await web3.eth.getBlock('latest');
 
-      const expectedHighWatermark: any = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
-        preFeeState,
+      const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
         rebalancingSetToken,
+        usdOracleWhiteList,
+      );
+      const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
+        preFeeState,
+        rebalancingSetValue,
         usdOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
@@ -766,9 +776,13 @@ contract('PerformanceFeeCalculator', accounts => {
 
         const accruedFee = await rebalancingSetToken.fee.callAsync();
 
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          usdOracleWhiteList,
+        );
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
-          rebalancingSetToken,
+          rebalancingSetValue,
           usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
@@ -827,9 +841,13 @@ contract('PerformanceFeeCalculator', accounts => {
 
         const accruedFee = await rebalancingSetToken.fee.callAsync();
 
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          usdOracleWhiteList,
+        );
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
-          rebalancingSetToken,
+          rebalancingSetValue,
           usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
@@ -847,25 +865,29 @@ contract('PerformanceFeeCalculator', accounts => {
       });
 
       it('does not reset lastProfitFeeTimestamp', async () => {
-        const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
-
         await subject();
+
+        const lastBlock = await web3.eth.getBlock('latest');
 
         const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
 
-        expect(feeState.lastProfitFeeTimestamp).to.bignumber.equal(preFeeState.lastProfitFeeTimestamp);
+        expect(feeState.lastProfitFeeTimestamp).to.bignumber.equal(lastBlock.timestamp);
       });
 
-      it('does not reset highWatermark', async () => {
+      it('does reset the highWatermark', async () => {
         const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
 
         await subject();
 
         const lastBlock = await web3.eth.getBlock('latest');
 
-        const expectedHighWatermark: any = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
-          preFeeState,
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
           rebalancingSetToken,
+          usdOracleWhiteList,
+        );
+        const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
+          preFeeState,
+          rebalancingSetValue,
           usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
@@ -895,9 +917,13 @@ contract('PerformanceFeeCalculator', accounts => {
 
         const accruedFee = await rebalancingSetToken.fee.callAsync();
 
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          ethOracleWhiteList,
+        );
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
-          rebalancingSetToken,
+          rebalancingSetValue,
           ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
@@ -931,9 +957,13 @@ contract('PerformanceFeeCalculator', accounts => {
 
         const lastBlock = await web3.eth.getBlock('latest');
 
-        const expectedHighWatermark: any = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
-          preFeeState,
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
           rebalancingSetToken,
+          ethOracleWhiteList,
+        );
+        const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
+          preFeeState,
+          rebalancingSetValue,
           ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );

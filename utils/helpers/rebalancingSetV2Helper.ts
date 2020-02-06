@@ -357,12 +357,10 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
   // Math: newShares / (newShares + oldShares) = percentFee
   // Simplified: fee * oldShare / (scaleFactor - fee)
   public async calculateRebalanceFeeInflation(
-    rebalancingSetToken: RebalancingV2LikeContract,
+    feePercentage: BigNumber,
+    totalSupply: BigNumber
   ): Promise<BigNumber> {
-    const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
-    const totalSupply = await rebalancingSetToken.totalSupply.callAsync();
-
-    return rebalanceFee.mul(totalSupply).div(SCALE_FACTOR.sub(rebalanceFee)).round(0, 3);
+    return feePercentage.mul(totalSupply).div(SCALE_FACTOR.sub(feePercentage)).round(0, 3);
   }
 
   public async getExpectedUnitSharesV2(
@@ -377,6 +375,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     const newSetNaturalUnit = await newSet.naturalUnit.callAsync();
     const components = await newSet.getComponents.callAsync();
     const units = await newSet.getUnits.callAsync();
+    const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
 
     // Figure out how many new Sets can be issued from balance in Vault, if less than previously calculated
     // amount, then set that to maxIssueAmount
@@ -393,7 +392,10 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
     // Divide maxIssueAmount by this to find unitShares, remultiply unitShares by issued amount of rebalancing-
     // SetToken in natural units to get amount of new Sets to issue
     const issueAmount = maxIssueAmount.div(newSetNaturalUnit).round(0, 3).mul(newSetNaturalUnit);
-    const rebalancingInflation = await this.calculateRebalanceFeeInflation(rebalancingSetToken);
+    const rebalancingInflation = await this.calculateRebalanceFeeInflation(
+      rebalanceFee,
+      totalSupply
+    );
     const postFeeTotalySupply = totalSupply.plus(rebalancingInflation);
 
     const naturalUnitsOutstanding = postFeeTotalySupply.div(rebalancingNaturalUnit);

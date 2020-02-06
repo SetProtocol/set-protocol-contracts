@@ -118,11 +118,6 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     )
         external
     {
-        require(
-            core.validSets(msg.sender),
-            "PerformanceFeeCalculator.initialize: Caller must be valid Set."
-        );
-
         // Parse fee data into struct
         InitFeeParameters memory parameters = parsePerformanceFeeCallData(_feeCalculatorData);
 
@@ -215,6 +210,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         // high watermark
         if (block.timestamp.sub(lastProfitFeeTimestamp(msg.sender)) >= highWatermarkResetFrequency(msg.sender)) {
             feeState[msg.sender].highWatermark = postStreamingValue;
+            feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
         }
     }
 

@@ -170,4 +170,27 @@ export class RebalancingSetV3Helper extends RebalancingSetV2Helper {
 
     return currentSetAmount.mul(naturalUnit).div(totalSupply).round(0, 2);
   }
+
+  public generateRebalancingSetTokenV3CallData(
+    managerAddress: Address,
+    liquidatorAddress: Address,
+    feeRecipient: Address,
+    rebalanceFeeCalculator: Address,
+    rebalanceInterval: BigNumber,
+    failRebalancePeriod: BigNumber,
+    lastRebalanceTimestamp: BigNumber,
+    entryFee: BigNumber,
+    rebalanceFeeCalculatorCalldata: Buffer[],
+  ): string {
+    return SetTestUtils.bufferArrayToHex([
+      SetUtils.paddedBufferForPrimitive(managerAddress),
+      SetUtils.paddedBufferForPrimitive(liquidatorAddress),
+      SetUtils.paddedBufferForPrimitive(feeRecipient),
+      SetUtils.paddedBufferForPrimitive(rebalanceFeeCalculator),
+      SetUtils.paddedBufferForBigNumber(rebalanceInterval),
+      SetUtils.paddedBufferForBigNumber(failRebalancePeriod),
+      SetUtils.paddedBufferForBigNumber(lastRebalanceTimestamp),
+      SetUtils.paddedBufferForBigNumber(entryFee),
+    ].concat(rebalanceFeeCalculatorCalldata));
+  }
 }

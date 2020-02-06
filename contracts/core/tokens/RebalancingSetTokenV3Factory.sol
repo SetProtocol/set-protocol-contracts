@@ -163,7 +163,7 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
             )
         );
 
-        // Initaializes the RebalancingSetToken using the V2 interface (as the interface has not changed)
+        // Initializes the RebalancingSetToken using the V2 interface (as the interface has not changed)
         IRebalancingSetTokenV2(rebalancingSet).initialize(parameters.rebalanceFeeCalculatorData);
 
         return rebalancingSet;

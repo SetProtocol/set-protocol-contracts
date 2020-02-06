@@ -84,7 +84,7 @@ contract('SettleRebalance', accounts => {
   const oracleHelper = new OracleHelper(deployerAccount);
   const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, oracleHelper, valuationHelper);
-  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount, valuationHelper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -379,7 +379,11 @@ contract('SettleRebalance', accounts => {
       });
 
       it('mints the correct Rebalancing Set to the feeRecipient', async () => {
-        const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
+        const previousSupply = await rebalancingSetToken.totalSupply.callAsync();
+        const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(
+          rebalanceFee,
+          previousSupply
+        );
 
         await subject();
 
@@ -389,7 +393,10 @@ contract('SettleRebalance', accounts => {
 
       it('increments the totalSupply properly', async () => {
         const previousSupply = await rebalancingSetToken.totalSupply.callAsync();
-        const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
+        const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(
+          rebalanceFee,
+          previousSupply
+        );
         const expectedSupply = previousSupply.plus(rebalanceFeeInflation);
 
         await subject();
@@ -400,7 +407,11 @@ contract('SettleRebalance', accounts => {
 
       it('emits the RebalanceSettled log', async () => {
         const feePercentage = await rebalancingSetToken.rebalanceFee.callAsync();
-        const feeQuantity = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
+        const previousSupply = await rebalancingSetToken.totalSupply.callAsync();
+        const feeQuantity = await rebalancingHelper.calculateRebalanceFeeInflation(
+          feePercentage,
+          previousSupply
+        );
         const unitShares = await rebalancingHelper.getExpectedUnitSharesV2(
           coreMock,
           rebalancingSetToken,

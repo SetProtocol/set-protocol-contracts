@@ -35,9 +35,7 @@ import { getWeb3 } from '@utils/web3Helper';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
-import { OracleHelper } from '@utils/helpers/oracleHelper';
 import { RebalancingSetV3Helper } from '@utils/helpers/rebalancingSetV3Helper';
-import { ValuationHelper } from '@utils/helpers/valuationHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -74,10 +72,8 @@ contract('RebalancingSetTokenV3Factory', accounts => {
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
-  const oracleHelper = new OracleHelper(deployerAccount);
   const rebalanceHelper = new RebalancingSetV3Helper(deployerAccount, coreHelper, erc20Helper, blockchain);
-  const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
-  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount, valuationHelper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);

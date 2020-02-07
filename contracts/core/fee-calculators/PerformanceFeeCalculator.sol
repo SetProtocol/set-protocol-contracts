@@ -46,7 +46,8 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     event FeeActualized(
         address indexed rebalancingSetToken,
         uint256 newHighWatermark,
-        uint256 inflationFee
+        uint256 profitFee,
+        uint256 streamingFee
     );
 
     /* ============ Structs ============ */
@@ -170,7 +171,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     {
         require(
             core.validSets(msg.sender),
-            "PerformanceFeeCalculator.getFee: Caller must be valid RebalancingSetToken."
+            "PerformanceFeeCalculator.updateAndGetFee: Caller must be valid RebalancingSetToken."
         );
 
         uint256 streamingFee = calculateStreamingFee();
@@ -183,7 +184,8 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         emit FeeActualized(
             msg.sender,
             highWatermark(msg.sender),
-            streamingFee.add(profitFee)
+            profitFee,
+            streamingFee
         );
 
         return streamingFee.add(profitFee);
@@ -260,7 +262,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     function validateFeeParameters(
         InitFeeParameters memory parameters
     )
-        private
+        internal
         view
     {
         require(

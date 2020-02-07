@@ -26,7 +26,8 @@ import { getWeb3, txnFrom } from '@utils/web3Helper';
 import { ether } from '@utils/units';
 import {
   ONE_DAY_IN_SECONDS,
-  ONE_YEAR_IN_SECONDS
+  ONE_YEAR_IN_SECONDS,
+  ZERO
 } from '@utils/constants';
 import {
   getExpectedFeeActualizedLog
@@ -795,17 +796,21 @@ contract('PerformanceFeeCalculator', accounts => {
         usdOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
-      const expectedInflationFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
+      const expectedStreamingFee = await feeCalculatorHelper.calculateAccruedStreamingFee(
+        preFeeState.streamingFeePercentage,
+        new BigNumber(lastBlock.timestamp).sub(preFeeState.lastStreamingFeeTimestamp)
+      );
+      const expectedProfitFee = await feeCalculatorHelper.calculateAccruedProfitFeeAsync(
         preFeeState,
         rebalancingSetValue,
-        usdOracleWhiteList,
-        new BigNumber(lastBlock.timestamp)
+        expectedStreamingFee
       );
 
       const expectedLogs = getExpectedFeeActualizedLog(
         rebalancingSetToken.address,
         expectedHighWatermark,
-        expectedInflationFee,
+        expectedProfitFee,
+        expectedStreamingFee,
         feeCalculator.address
       );
 
@@ -879,22 +884,16 @@ contract('PerformanceFeeCalculator', accounts => {
 
         const lastBlock = await web3.eth.getBlock('latest');
 
-        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
-          rebalancingSetToken,
-          usdOracleWhiteList,
-        );
-
-        const expectedInflationFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
-          preFeeState,
-          rebalancingSetValue,
-          usdOracleWhiteList,
-          new BigNumber(lastBlock.timestamp)
+        const expectedStreamingFee = await feeCalculatorHelper.calculateAccruedStreamingFee(
+          preFeeState.streamingFeePercentage,
+          new BigNumber(lastBlock.timestamp).sub(preFeeState.lastStreamingFeeTimestamp)
         );
 
         const expectedLogs = getExpectedFeeActualizedLog(
           rebalancingSetToken.address,
           preFeeState.highWatermark,
-          expectedInflationFee,
+          ZERO,
+          expectedStreamingFee,
           feeCalculator.address
         );
 
@@ -996,17 +995,21 @@ contract('PerformanceFeeCalculator', accounts => {
           usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
-        const expectedInflationFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
+        const expectedStreamingFee = await feeCalculatorHelper.calculateAccruedStreamingFee(
+          preFeeState.streamingFeePercentage,
+          new BigNumber(lastBlock.timestamp).sub(preFeeState.lastStreamingFeeTimestamp)
+        );
+        const expectedProfitFee = await feeCalculatorHelper.calculateAccruedProfitFeeAsync(
           preFeeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
-          new BigNumber(lastBlock.timestamp)
+          expectedStreamingFee
         );
 
         const expectedLogs = getExpectedFeeActualizedLog(
           rebalancingSetToken.address,
           expectedHighWatermark,
-          expectedInflationFee,
+          expectedProfitFee,
+          expectedStreamingFee,
           feeCalculator.address
         );
 
@@ -1102,23 +1105,28 @@ contract('PerformanceFeeCalculator', accounts => {
           rebalancingSetToken,
           ethOracleWhiteList,
         );
+
         const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
           preFeeState,
           rebalancingSetValue,
           ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
-        const expectedInflationFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
+        const expectedStreamingFee = await feeCalculatorHelper.calculateAccruedStreamingFee(
+          preFeeState.streamingFeePercentage,
+          new BigNumber(lastBlock.timestamp).sub(preFeeState.lastStreamingFeeTimestamp)
+        );
+        const expectedProfitFee = await feeCalculatorHelper.calculateAccruedProfitFeeAsync(
           preFeeState,
           rebalancingSetValue,
-          ethOracleWhiteList,
-          new BigNumber(lastBlock.timestamp)
+          expectedStreamingFee
         );
 
         const expectedLogs = getExpectedFeeActualizedLog(
           rebalancingSetToken.address,
           expectedHighWatermark,
-          expectedInflationFee,
+          expectedProfitFee,
+          expectedStreamingFee,
           feeCalculator.address
         );
 

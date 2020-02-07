@@ -4,7 +4,8 @@ import { Address, Log } from 'set-protocol-utils';
 export function getExpectedFeeActualizedLog(
   rebalancingSetToken: Address,
   newHighWatermark: BigNumber,
-  inflationFee: BigNumber,
+  profitFee: BigNumber,
+  streamingFee: BigNumber,
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -13,7 +14,8 @@ export function getExpectedFeeActualizedLog(
     args: {
       rebalancingSetToken,
       newHighWatermark,
-      inflationFee,
+      profitFee,
+      streamingFee,
     },
   }];
 }

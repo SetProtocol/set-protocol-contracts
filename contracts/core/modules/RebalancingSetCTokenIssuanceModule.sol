@@ -21,6 +21,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { CompoundUtils } from "../../lib/CompoundUtils.sol";
+import { ICToken } from "../interfaces/ICToken.sol";
 import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IWETH } from "../../lib/IWETH.sol";

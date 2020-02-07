@@ -6,6 +6,7 @@ import {
   AuthorizableContract,
   CoreContract,
   CoreMockContract,
+  CTokenExchangeIssuanceModuleContract,
   ExchangeIssuanceModuleContract,
   OracleWhiteListContract,
   RebalancingSetExchangeIssuanceModuleContract,
@@ -42,6 +43,7 @@ const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
 const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreMock = artifacts.require('CoreMock');
+const CTokenExchangeIssuanceModule = artifacts.require('CTokenExchangeIssuanceModule');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
 const FactoryUtilsLibrary = artifacts.require('FactoryUtilsLibrary');
@@ -509,6 +511,34 @@ export class CoreHelper {
 
     return new ExchangeIssuanceModuleContract(
       getContractInstance(truffleExchangeIssuanceModule),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployCTokenExchangeIssuanceModuleAsync(
+    core: Address,
+    vault: Address,
+    transferProxy: Address,
+    cTokenWhiteList: Address,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<CTokenExchangeIssuanceModuleContract> {
+    await this.linkSetTokenLibraryAsync(CTokenExchangeIssuanceModule);
+
+    const erc20WrapperLibrary = await ERC20Wrapper.new(
+      { from: this._contractOwnerAddress },
+    );
+    await CTokenExchangeIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+
+    const truffleCTokenExchangeIssuanceModule = await CTokenExchangeIssuanceModule.new(
+      core,
+      vault,
+      transferProxy,
+      cTokenWhiteList,
+      { from },
+    );
+
+    return new CTokenExchangeIssuanceModuleContract(
+      getContractInstance(truffleCTokenExchangeIssuanceModule),
       { from, gas: DEFAULT_GAS },
     );
   }

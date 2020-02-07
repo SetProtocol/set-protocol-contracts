@@ -1,4 +1,4 @@
-export { AddressToAddressWhitelistContract } from '../types/generated/address_to_address_white_list';
+export { AddressToAddressWhiteListContract } from '../types/generated/address_to_address_white_list';
 export { AuctionMockContract } from '../types/generated/auction_mock';
 export { AuthorizableContract } from '../types/generated/authorizable';
 export { BadTokenMockContract } from '../types/generated/bad_token_mock';
@@ -14,6 +14,7 @@ export { CoreContract } from '../types/generated/core';
 export { CoreIssuanceLibraryContract } from '../types/generated/core_issuance_library';
 export { CoreIssuanceLibraryMockContract } from '../types/generated/core_issuance_library_mock';
 export { CoreMockContract } from '../types/generated/core_mock';
+export { CTokenExchangeIssuanceModuleContract } from '../types/generated/c_token_exchange_issuance_module';
 export { ERC20ViewerContract } from '../types/generated/erc20_viewer';
 export { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 export { ERC20WrapperContract } from '../types/generated/erc20_wrapper';

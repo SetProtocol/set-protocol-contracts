@@ -58,14 +58,14 @@ interface IAddressToAddressWhiteList {
      * @param  _keyTypeAddresses  Array of addresses to mapped addresses for
      * @return address[]          Array of value type addresses
      */
-    function getValueTypeAddressesByKey(
+    function getAddressValuesByKeys(
         address[] calldata _keyTypeAddresses
     )
         external
         view
         returns (address[] memory);
 
-    function getValueTypeAddressByKey(
+    function getAddressValueByKey(
         address _keyTypeAddress
     )
         external

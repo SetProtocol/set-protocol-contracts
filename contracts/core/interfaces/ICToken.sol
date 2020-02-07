@@ -55,4 +55,6 @@ interface ICToken {
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
     function redeem(uint redeemTokens) external returns (uint);
+
+    function redeemUnderlying(uint redeemUnderlyingTokens) external returns (uint);
 }

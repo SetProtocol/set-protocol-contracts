@@ -263,17 +263,17 @@ contract CTokenExchangeIssuanceModule is
         private
     {
         for (uint256 i = 0; i < _receiveTokens.length; i++) {
-            address currentTokenAddress = _receiveTokens[i];
-            uint256 currentTokenAmount = _receiveTokenAmounts[i];
+            address currentComponentAddress = _receiveTokens[i];
+            uint256 currentComponentQuantity = _receiveTokenAmounts[i];
 
             // If cToken, calculate required underlying tokens and transfer to module
-            address underlyingAddress = cTokenWhiteList.addressToAddressWhiteList(currentTokenAddress);
+            address underlyingAddress = cTokenWhiteList.addressToAddressWhiteList(currentComponentAddress);
             if (underlyingAddress != address(0)) {
-                ICToken cTokenInstance = ICToken(currentTokenAddress);
+                ICToken cTokenInstance = ICToken(currentComponentAddress);
 
                 // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
                 uint256 exchangeRate = cTokenInstance.exchangeRateCurrent();
-                uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(currentTokenAmount, exchangeRate);
+                uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(currentComponentQuantity, exchangeRate);
                 
                 // Withdraw send tokens from vault (owned by order sender) to the module
                 coreInstance.withdrawModule(
@@ -300,18 +300,18 @@ contract CTokenExchangeIssuanceModule is
 
                 // Ensure allowance for cToken to transferProxy
                 ERC20Wrapper.ensureAllowance(
-                    currentTokenAddress,
+                    currentComponentAddress,
                     address(this),
                     transferProxy,
-                    currentTokenAmount
+                    currentComponentQuantity
                 );
 
                 // Deposit transformed cTokens to vault (owned by order sender)
                 coreInstance.depositModule(
                     address(this),
                     msg.sender,
-                    currentTokenAddress,
-                    currentTokenAmount
+                    currentComponentAddress,
+                    currentComponentQuantity
                 );
             }
         }
@@ -332,25 +332,25 @@ contract CTokenExchangeIssuanceModule is
         private
     {
         for (uint256 i = 0; i < _sendTokens.length; i++) {
-            address currentTokenAddress = _sendTokens[i];
-            uint256 currentTokenAmount = _sendTokenAmounts[i];
+            address currentComponentAddress = _sendTokens[i];
+            uint256 currentComponentQuantity = _sendTokenAmounts[i];
 
             // Withdraw send tokens from vault (owned by this contract) to the module
             coreInstance.withdrawModule(
                 address(this),
                 address(this),
-                currentTokenAddress,
-                currentTokenAmount
+                currentComponentAddress,
+                currentComponentQuantity
             );
 
             // If cToken redeem cToken and replace send token and amounts with underlying
-            address underlyingAddress = cTokenWhiteList.addressToAddressWhiteList(currentTokenAddress);
+            address underlyingAddress = cTokenWhiteList.addressToAddressWhiteList(currentComponentAddress);
             if (underlyingAddress != address(0)) {
 
-                ICToken cTokenInstance = ICToken(currentTokenAddress);
+                ICToken cTokenInstance = ICToken(currentComponentAddress);
 
                 // Redeem cToken to underlying
-                uint256 redeemResponse = cTokenInstance.redeem(currentTokenAmount);
+                uint256 redeemResponse = cTokenInstance.redeem(currentComponentQuantity);
                 require(
                     redeemResponse == 0,
                     "CTokenExchangeIssuanceModule.exchangeRedeem: Error redeeming cToken"
@@ -358,10 +358,11 @@ contract CTokenExchangeIssuanceModule is
 
                 // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
                 uint256 exchangeRate = cTokenInstance.exchangeRateCurrent();
-                uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(currentTokenAmount, exchangeRate);
+                uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(currentComponentQuantity, exchangeRate);
                 
-                currentTokenAddress = underlyingAddress;
-                currentTokenAmount = underlyingQuantity;
+                // Replace current token address and amounts with underlying address and amounts
+                currentComponentAddress = underlyingAddress;
+                currentComponentQuantity = underlyingQuantity;
             }
 
             // Get exchange address from state mapping based on header exchange info
@@ -369,8 +370,8 @@ contract CTokenExchangeIssuanceModule is
 
             // Transfer send tokens to the appropriate exchange wrapper
             coreInstance.transferModule(
-                currentTokenAddress,
-                currentTokenAmount,
+                currentComponentAddress,
+                currentComponentQuantity,
                 address(this),
                 exchangeWrapper
             );

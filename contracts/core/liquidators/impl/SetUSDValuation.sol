@@ -25,6 +25,7 @@ import { IOracle } from "set-protocol-strategies/contracts/meta-oracles/interfac
 import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
+import { IRebalancingSetTokenV2 } from "../../interfaces/IRebalancingSetTokenV2.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { SetMath } from "../../lib/SetMath.sol";
 
@@ -42,6 +43,36 @@ library SetUSDValuation {
     uint256 constant public SET_FULL_UNIT = 10 ** 18;
 
     /* ============ SetToken Valuation Helpers ============ */
+
+
+    /**
+     * Calculates value of RebalancingSetToken.
+     *
+     * @return uint256        Streaming fee
+     */
+    function calculateRebalancingSetValue(
+        address _rebalancingSetTokenAddress,
+        IOracleWhiteList _oracleWhitelist
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        IRebalancingSetTokenV2 rebalancingSetToken = IRebalancingSetTokenV2(_rebalancingSetTokenAddress);
+
+        uint256 unitShares = rebalancingSetToken.unitShares();
+        uint256 naturalUnit = rebalancingSetToken.naturalUnit();
+        ISetToken currentSet = rebalancingSetToken.currentSet();
+
+        // Calculate collateral value
+        uint256 collateralValue = calculateSetTokenDollarValue(
+            currentSet,
+            _oracleWhitelist
+        );
+
+        // Value of rebalancing set is collateralValue times unitShares divided by naturalUnit
+        return collateralValue.mul(unitShares).div(naturalUnit);
+    }
 
     /*
      * Calculates the USD Value of a full unit Set Token

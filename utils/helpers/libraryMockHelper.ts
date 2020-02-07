@@ -18,15 +18,13 @@ import {
   SetUSDValuationMockContract,
   TransferProxyContract,
   TokenFlushMockContract,
-  UpdatableOracleMockContract,
   VaultContract,
   ZeroExOrderLibraryMockContract
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
-import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
-import { DEFAULT_GAS, ZERO } from '../constants';
+import { getContractInstance, txnFrom } from '../web3Helper';
+import { ZERO } from '../constants';
 
-const web3 = getWeb3();
 const Bytes32LibraryMock = artifacts.require('Bytes32LibraryMock');
 const CommonMathMock = artifacts.require('CommonMathMock');
 const CommonValidationsLibrary = artifacts.require('CommonValidationsLibrary');
@@ -46,7 +44,6 @@ const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
 const RebalanceStateSetTokenMock = artifacts.require('RebalanceStateSetTokenMock');
 const SetUSDValuationMock = artifacts.require('SetUSDValuationMock');
 const TokenFlushMock = artifacts.require('TokenFlushMock');
-const UpdatableOracleMock = artifacts.require('UpdatableOracleMock');
 const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
 
 
@@ -252,49 +249,6 @@ export class LibraryMockHelper {
     return new SetUSDValuationMockContract(
       getContractInstance(setValuationMockContract),
       txnFrom(from),
-    );
-  }
-
-  public async deployUpdatableOracleMocksAsync(
-    startingPrices: BigNumber[],
-    from: Address = this._contractOwnerAddress
-  ): Promise<UpdatableOracleMockContract[]> {
-    const mockOracles: UpdatableOracleMockContract[] = [];
-    const oraclePromises = _.map(startingPrices, async price => {
-      return await UpdatableOracleMock.new(
-        price,
-        txnFrom(from)
-      );
-    });
-
-    await Promise.all(oraclePromises).then(oracles => {
-      _.each(oracles, oracleMock => {
-        mockOracles.push(new UpdatableOracleMockContract(
-          new web3.eth.Contract(oracleMock.abi, oracleMock.address),
-          txnFrom(from)
-        ));
-      });
-    });
-
-    return mockOracles;
-  }
-
-  public async deployUpdatableOracleMockAsync(
-    price: BigNumber,
-    from: Address = this._contractOwnerAddress
-  ): Promise<UpdatableOracleMockContract> {
-    const oracleMock = await UpdatableOracleMock.new(price, txnFrom(from));
-
-    return new UpdatableOracleMockContract(getContractInstance(oracleMock), txnFrom(from));
-  }
-
-  public getUpdatableOracleMockInstance(
-     oracleAddress: Address,
-     from: Address = this._contractOwnerAddress,
-  ): UpdatableOracleMockContract {
-    return new UpdatableOracleMockContract(
-      getContractInstance(UpdatableOracleMock, oracleAddress),
-      { from, gas: DEFAULT_GAS },
     );
   }
 

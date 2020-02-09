@@ -458,7 +458,7 @@ contract('CTokenExchangeIssuanceModule', accounts => {
       await expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });
 
-    it.only('transfers the maker token amount from the maker to the 0x maker', async () => {
+    it('transfers the maker token amount from the maker to the 0x maker', async () => {
       const zeroExMakerPaymentTokenBalance = await sendToken.balanceOf.callAsync(zeroExOrderMaker);
 
       await subject();

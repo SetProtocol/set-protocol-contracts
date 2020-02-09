@@ -143,7 +143,7 @@ contract CTokenExchangeIssuanceModule is
         // Execute the exchange orders using the encoded order data and deposits tokens in vault
         executeExchangeOrders(_orderData);
 
-        // Withdraw underlying tokens required, mint cTokens in the module, and return to vault under sender address
+        // Withdraw underlying tokens required from vault, mint cTokens in the module, and return to vault under sender address
         mintCTokens(
             _exchangeIssuanceParams.receiveTokens,
             _exchangeIssuanceParams.receiveTokenAmounts
@@ -283,7 +283,8 @@ contract CTokenExchangeIssuanceModule is
                     underlyingQuantity
                 );
 
-                // Ensure allowance for underlying token to cToken contract
+                // Ensure allowance for underlying token to cToken contract. This is for the case if we add a new cToken to
+                // whitelist
                 ERC20Wrapper.ensureAllowance(
                     underlyingAddress,
                     address(this),
@@ -298,7 +299,7 @@ contract CTokenExchangeIssuanceModule is
                     "CTokenExchangeIssuanceModule.exchangeIssue: Error minting cToken"
                 );
 
-                // Ensure allowance for cToken to transferProxy
+                // Ensure allowance for cToken to transferProxy. This is for the case if we add a new cToken to the whitelist
                 ERC20Wrapper.ensureAllowance(
                     currentComponentAddress,
                     address(this),
@@ -382,7 +383,7 @@ contract CTokenExchangeIssuanceModule is
      * Transfers send tokens from the user to the appropriate exchange wrapper. Used in exchange issue
      *
      * @param _sendTokenExchangeIds            List of exchange wrapper enumerations corresponding to 
-     *                                              the wrapper that will handle the component
+     *                                         the wrapper that will handle the component
      * @param _sendTokens                      Array of addresses of the payment tokens
      * @param _sendTokenAmounts                Array of amounts of payment Tokens
      */

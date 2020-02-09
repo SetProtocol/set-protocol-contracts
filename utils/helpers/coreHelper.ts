@@ -9,6 +9,7 @@ import {
   CTokenExchangeIssuanceModuleContract,
   ExchangeIssuanceModuleContract,
   OracleWhiteListContract,
+  RebalancingSetCTokenIssuanceModuleContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetIssuanceModuleContract,
   RebalanceAuctionModuleContract,
@@ -48,6 +49,7 @@ const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
 const FactoryUtilsLibrary = artifacts.require('FactoryUtilsLibrary');
 const OracleWhiteList = artifacts.require('OracleWhiteList');
+const RebalancingSetCTokenIssuanceModule = artifacts.require('RebalancingSetCTokenIssuanceModule');
 const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
 const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
@@ -539,6 +541,35 @@ export class CoreHelper {
 
     return new CTokenExchangeIssuanceModuleContract(
       getContractInstance(truffleCTokenExchangeIssuanceModule),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployRebalancingSetCTokenIssuanceModuleAsync(
+    core: Address,
+    vault: Address,
+    transferProxy: Address,
+    weth: Address,
+    cTokenWhiteList: Address,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingSetCTokenIssuanceModuleContract> {
+    const erc20WrapperLibrary = await ERC20Wrapper.new(
+      { from: this._contractOwnerAddress },
+    );
+
+    await RebalancingSetCTokenIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+
+    const truffleModule = await RebalancingSetCTokenIssuanceModule.new(
+      core,
+      vault,
+      transferProxy,
+      weth,
+      cTokenWhiteList,
+      { from },
+    );
+
+    return new RebalancingSetCTokenIssuanceModuleContract(
+      getContractInstance(truffleModule),
       { from, gas: DEFAULT_GAS },
     );
   }

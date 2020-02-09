@@ -50,6 +50,7 @@ export { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance
 export { RebalanceMockContract } from '../types/generated/rebalance_mock';
 export { RebalancingSetEthBidderContract } from '../types/generated/rebalancing_set_eth_bidder';
 export { RebalancingSetCTokenBidderContract } from '../types/generated/rebalancing_set_c_token_bidder';
+export { RebalancingSetCTokenIssuanceModuleContract } from '../types/generated/rebalancing_set_c_token_issuance_module';
 export {
   RebalancingSetExchangeIssuanceModuleContract,
 } from '../types/generated/rebalancing_set_exchange_issuance_module';

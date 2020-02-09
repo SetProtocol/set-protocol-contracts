@@ -283,8 +283,7 @@ contract CTokenExchangeIssuanceModule is
                     underlyingQuantity
                 );
 
-                // Ensure allowance for underlying token to cToken contract. This is for the case if we add a new cToken to
-                // whitelist
+                // Ensure allowance for underlying token to cToken contract.
                 ERC20Wrapper.ensureAllowance(
                     underlyingAddress,
                     address(this),
@@ -365,6 +364,14 @@ contract CTokenExchangeIssuanceModule is
                 currentComponentAddress = underlyingAddress;
                 currentComponentQuantity = underlyingQuantity;
             }
+
+            // Ensure allowance for current component to transferProxy.
+            ERC20Wrapper.ensureAllowance(
+                currentComponentAddress,
+                address(this),
+                transferProxy,
+                currentComponentQuantity
+            );
 
             // Get exchange address from state mapping based on header exchange info
             address exchangeWrapper = coreInstance.exchangeIds(_sendTokenExchangeIds[i]);

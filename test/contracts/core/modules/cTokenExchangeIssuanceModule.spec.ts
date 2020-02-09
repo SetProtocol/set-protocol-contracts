@@ -28,7 +28,10 @@ import {
 import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
+import {
+  DEFAULT_GAS,
+  UNLIMITED_ALLOWANCE_IN_BASE_UNITS
+} from '@utils/constants';
 import { LogExchangeIssue, LogExchangeRedeem } from '@utils/contract_logs/exchangeIssuanceModule';
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { getWeb3 } from '@utils/web3Helper';
@@ -812,10 +815,11 @@ contract('CTokenExchangeIssuanceModule', accounts => {
       const firstComponentUnderlying = usdcInstance;
       const secondComponentUnderlying = daiInstance;
 
+      const nonCTokenComponent = await erc20Helper.deployTokenAsync(contractDeployer);
       nonExchangedComponent = await erc20Helper.deployTokenAsync(contractDeployer);
       receiveToken = await erc20Helper.deployTokenAsync(kyberReserveOperator);
 
-      const componentTokens = [firstComponent, secondComponent, nonExchangedComponent];
+      const componentTokens = [firstComponent, secondComponent, nonCTokenComponent, nonExchangedComponent];
       setComponentUnit = ether(4);
       const componentAddresses = componentTokens.map(token => token.address);
       const componentUnits = componentTokens.map(token => setComponentUnit);
@@ -831,17 +835,19 @@ contract('CTokenExchangeIssuanceModule', accounts => {
 
       zeroExOrderMakerTokenAmount = ether(4);
       const kyberDestinationTokenQuantity = ether(3);
-      totalReceiveToken = zeroExOrderMakerTokenAmount.add(kyberDestinationTokenQuantity);
+      // Total all 3 order amounts
+      totalReceiveToken = zeroExOrderMakerTokenAmount.mul(2).add(kyberDestinationTokenQuantity);
 
       exchangeRedeemSetAddress = setToken.address;
       exchangeRedeemQuantity = customExchangeRedeemQuantity || ether(4);
 
       exchangeRedeemSendTokenExchanges =
-        [SetUtils.EXCHANGES.KYBER, SetUtils.EXCHANGES.ZERO_EX];
+        [SetUtils.EXCHANGES.KYBER, SetUtils.EXCHANGES.ZERO_EX, SetUtils.EXCHANGES.ZERO_EX];
 
-      exchangeRedeemSendTokens = customExchangeRedeemSendTokens || [firstComponent.address, secondComponent.address];
+      exchangeRedeemSendTokens =
+        customExchangeRedeemSendTokens || [firstComponent.address, secondComponent.address, nonCTokenComponent.address];
       exchangeRedeemSendTokenAmounts =
-        customExchangeRedeemSendTokenAmounts || _.map(componentUnits.slice(0, 2), unit => unit
+        customExchangeRedeemSendTokenAmounts || _.map(componentUnits.slice(0, 3), unit => unit
           .mul(exchangeRedeemQuantity)
           .div(naturalUnit)
         );
@@ -917,8 +923,27 @@ contract('CTokenExchangeIssuanceModule', accounts => {
         zeroExOrderTakerTokenAmount,                       // amount of zeroExOrder to fill
       );
 
-      subjectExchangeOrdersData =
-        customSubjectExchangeOrdersData || setUtils.generateSerializedOrders([zeroExOrder, kyberTrade]);
+      // Create 0x order for the non cToken component, using ether(4) sendToken as default
+      const nonCTokenZeroExOrderTakerTokenAmount = exchangeRedeemSendTokenAmounts[2];
+      const nonCTokenZeroExOrder = await setUtils.generateZeroExSignedFillOrder(
+        NULL_ADDRESS,                                      // senderAddress
+        zeroExOrderMaker,                                  // makerAddress
+        NULL_ADDRESS,                                      // takerAddress
+        ZERO,                                              // makerFee
+        ZERO,                                              // takerFee
+        zeroExOrderMakerTokenAmount,                       // makerAssetAmount
+        nonCTokenZeroExOrderTakerTokenAmount,              // takerAssetAmount
+        receiveToken.address,                              // makerAssetAddress
+        nonCTokenComponent.address,                        // takerAssetAddress
+        SetUtils.generateSalt(),                           // salt
+        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,             // exchangeAddress
+        NULL_ADDRESS,                                      // feeRecipientAddress
+        SetTestUtils.generateTimestamp(10000),             // expirationTimeSeconds
+        nonCTokenZeroExOrderTakerTokenAmount,              // amount of zeroExOrder to fill
+      );
+
+      subjectExchangeOrdersData = customSubjectExchangeOrdersData
+        || setUtils.generateSerializedOrders([zeroExOrder, kyberTrade, nonCTokenZeroExOrder]);
 
       // Approve the receive token to the 0x maker
       await erc20Helper.approveTransfersAsync(
@@ -931,7 +956,7 @@ contract('CTokenExchangeIssuanceModule', accounts => {
       await erc20Helper.transferTokenAsync(
         receiveToken,
         zeroExOrderMaker,
-        zeroExOrderMakerTokenAmount,
+        zeroExOrderMakerTokenAmount.mul(2),
         kyberReserveOperator,
       );
 
@@ -966,7 +991,7 @@ contract('CTokenExchangeIssuanceModule', accounts => {
       );
 
       await erc20Helper.approveTransfersAsync(
-        [firstComponent, secondComponent, nonExchangedComponent],
+        [firstComponent, secondComponent, nonCTokenComponent, nonExchangedComponent],
         transferProxy.address,
         contractDeployer
       );
@@ -1007,7 +1032,7 @@ contract('CTokenExchangeIssuanceModule', accounts => {
       await assertTokenBalanceAsync(setToken, existingBalance.sub(exchangeRedeemQuantity), exchangeIssuanceCaller);
     });
 
-    it('increments the correct amount of Sent token', async () => {
+    it('increments the correct amount of received token', async () => {
       const existingBalance = await receiveToken.balanceOf.callAsync(exchangeIssuanceCaller);
 
       await subject();
@@ -1066,7 +1091,12 @@ contract('CTokenExchangeIssuanceModule', accounts => {
         await compoundHelper.enableCToken(secondComponentAddress);
         const secondComponent = await erc20Helper.getTokenInstanceAsync(secondComponentAddress);
 
-        customExchangeRedeemSendTokens = [firstComponent.address, secondComponent.address];
+        const thirdComponent = await erc20Helper.deployTokenAsync(
+          contractDeployer,
+          18,
+        );
+
+        customExchangeRedeemSendTokens = [firstComponent.address, secondComponent.address, thirdComponent.address];
       });
 
       after(async () => {
@@ -1112,7 +1142,7 @@ contract('CTokenExchangeIssuanceModule', accounts => {
 
     describe('when send quantities is zero', async () => {
       before(async () => {
-        customExchangeRedeemSendTokenAmounts = [ZERO, ZERO];
+        customExchangeRedeemSendTokenAmounts = [ZERO, ZERO, ZERO];
         customSourceTokenRateCalculationQuantity = ether(1);
         customZeroExOrderTakerTokenAmount = ether(1);
         customMinimumConversionRate = ether(1);
@@ -1132,7 +1162,7 @@ contract('CTokenExchangeIssuanceModule', accounts => {
 
     describe('when there are fewer receive tokens than expected', async () => {
       before(async () => {
-        customExchangeRedeemReceiveTokenAmounts = [totalReceiveToken.times(2)];
+        customExchangeRedeemReceiveTokenAmounts = [totalReceiveToken.times(3)];
       });
 
      after(async () => {

@@ -229,7 +229,13 @@ export class CompoundHelper {
     cTokenQuantity: BigNumber
   ): Promise<BigNumber> {
     const exchangeRate: number = await this.cTokenInstance(cToken).methods.exchangeRateStored().call();
-    return cTokenQuantity.mul(exchangeRate).div(ether(1));
+    let underlyingAmount = cTokenQuantity.mul(exchangeRate).div(ether(1)).round(0, BigNumber.ROUND_DOWN);
+
+    underlyingAmount = underlyingAmount.mul(ether(1)).div(exchangeRate).gte(cTokenQuantity)
+      ? underlyingAmount
+      : underlyingAmount.add(1);
+
+    return underlyingAmount;
   }
 
   // Retrieve # of cTokens expected from Underlying Quantity

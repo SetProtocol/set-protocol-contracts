@@ -942,7 +942,7 @@ contract('CTokenExchangeIssuanceModule', accounts => {
         nonCTokenZeroExOrderTakerTokenAmount,              // amount of zeroExOrder to fill
       );
 
-      subjectExchangeOrdersData = customSubjectExchangeOrdersData 
+      subjectExchangeOrdersData = customSubjectExchangeOrdersData
         || setUtils.generateSerializedOrders([zeroExOrder, kyberTrade, nonCTokenZeroExOrder]);
 
       // Approve the receive token to the 0x maker

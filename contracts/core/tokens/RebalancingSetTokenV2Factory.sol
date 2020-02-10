@@ -250,7 +250,7 @@ contract RebalancingSetTokenV2Factory {
             )
         );
 
-        // Initaializes the RebalancingSetToken
+        // Initializes the RebalancingSetToken
         IRebalancingSetTokenV2(rebalancingSet).initialize(parameters.rebalanceFeeCalculatorData);
 
         return rebalancingSet;

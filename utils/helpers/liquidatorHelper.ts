@@ -1,7 +1,6 @@
 import * as _ from 'lodash';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
-import * as setProtocolUtils from 'set-protocol-utils';
 
 import {
   AuctionMockContract,
@@ -34,22 +33,25 @@ const LiquidatorProxy = artifacts.require('LiquidatorProxy');
 const TwoAssetPriceBoundedLinearAuctionMock = artifacts.require('TwoAssetPriceBoundedLinearAuctionMock');
 
 import { ERC20Helper } from './erc20Helper';
-import { LibraryMockHelper } from './libraryMockHelper';
-
-const { SetProtocolUtils: SetUtils } = setProtocolUtils;
-const {
-  SET_FULL_TOKEN_UNITS,
-} = SetUtils.CONSTANTS;
+import { OracleHelper } from './oracleHelper';
+import { ValuationHelper } from './valuationHelper';
 
 export class LiquidatorHelper {
   private _contractOwnerAddress: Address;
   private _erc20Helper: ERC20Helper;
-  private _libraryMockHelper: LibraryMockHelper;
+  private _oracleHelper: OracleHelper;
+  private _valuationHelper: ValuationHelper;
 
-  constructor(contractOwnerAddress: Address, erc20Helper: ERC20Helper) {
+  constructor(
+    contractOwnerAddress: Address,
+    erc20Helper: ERC20Helper,
+    oracleHelper: OracleHelper,
+    valuationHelper: ValuationHelper
+  ) {
     this._contractOwnerAddress = contractOwnerAddress;
     this._erc20Helper = erc20Helper;
-    this._libraryMockHelper = new LibraryMockHelper(contractOwnerAddress);
+    this._oracleHelper = oracleHelper;
+    this._valuationHelper = valuationHelper;
   }
 
   /* ============ Deployment ============ */
@@ -189,7 +191,7 @@ export class LiquidatorHelper {
       await nextSet.naturalUnit.callAsync()
     );
 
-    const [assetOneDecimals, assetTwoDecimals] = await this.getTokensDecimalsAsync(
+    const [assetOneDecimals, assetTwoDecimals] = await this._erc20Helper.getTokensDecimalsAsync(
       linearAuction.auction.combinedTokenArray
     );
 
@@ -231,14 +233,14 @@ export class LiquidatorHelper {
     endBound: BigNumber,
     oracleWhiteList: OracleWhiteListContract
   ): Promise<[BigNumber, BigNumber]> {
-    const [assetOneDecimals, assetTwoDecimals] = await this.getTokensDecimalsAsync(
+    const [assetOneDecimals, assetTwoDecimals] = await this._erc20Helper.getTokensDecimalsAsync(
       linearAuction.auction.combinedTokenArray
     );
 
     const assetOneFullUnit = new BigNumber(10 ** assetOneDecimals.toNumber());
     const assetTwoFullUnit = new BigNumber(10 ** assetTwoDecimals.toNumber());
 
-    const [assetOnePrice, assetTwoPrice] = await this.getComponentPricesAsync(
+    const [assetOnePrice, assetTwoPrice] = await this._oracleHelper.getComponentPricesAsync(
       linearAuction.auction.combinedTokenArray,
       oracleWhiteList
     );
@@ -381,83 +383,13 @@ export class LiquidatorHelper {
     oracleWhiteList: OracleWhiteListContract,
     from: Address = this._contractOwnerAddress,
   ): Promise<BigNumber> {
-    const currentSetUSDValue = await this.calculateSetTokenValueAsync(currentSetToken, oracleWhiteList);
-    const nextSetUSDValue = await this.calculateSetTokenValueAsync(nextSetToken, oracleWhiteList);
-
-    return nextSetUSDValue.mul(SCALE_FACTOR).div(currentSetUSDValue).round(0, 3);
-  }
-
-  public async calculateSetTokenValueAsync(
-    setToken: SetTokenContract,
-    oracleWhiteList: OracleWhiteListContract,
-    from: Address = this._contractOwnerAddress,
-  ): Promise<BigNumber> {
-    const componentTokens = await setToken.getComponents.callAsync();
-
-    const tokenPrices = await this.getComponentPricesAsync(
-      componentTokens,
+    const currentSetUSDValue = await this._valuationHelper.calculateSetTokenValueAsync(
+      currentSetToken,
       oracleWhiteList
     );
-    const componentUnits = await setToken.getUnits.callAsync();
-    const setNaturalUnit = await setToken.naturalUnit.callAsync();
-    const componentDecimals = await this.getTokensDecimalsAsync(componentTokens);
+    const nextSetUSDValue = await this._valuationHelper.calculateSetTokenValueAsync(nextSetToken, oracleWhiteList);
 
-    let setTokenPrice = ZERO;
-    for (let i = 0; i < componentUnits.length; i++) {
-      const tokenUnitsInFullSet = SET_FULL_TOKEN_UNITS
-                                    .mul(componentUnits[i])
-                                    .div(setNaturalUnit)
-                                    .round(0, 3);
-      const componentValue = this.computeTokenDollarAmount(
-        tokenPrices[i],
-        tokenUnitsInFullSet,
-        componentDecimals[i],
-      );
-      setTokenPrice = setTokenPrice.add(componentValue);
-    }
-
-    return setTokenPrice;
-  }
-
-  public async getTokensDecimalsAsync(
-    tokens: Address[],
-  ): Promise<BigNumber[]> {
-    const tokenInstances = await this._erc20Helper.retrieveTokenInstancesAsync(
-      tokens
-    );
-
-    const tokenDecimalPromises = _.map(tokenInstances, async token => {
-      return await token.decimals.callAsync();
-    });
-    return await Promise.all(tokenDecimalPromises);
-  }
-
-  public async getComponentPricesAsync(
-    components: Address[],
-    oracleWhiteList: OracleWhiteListContract,
-    from: Address = this._contractOwnerAddress
-  ): Promise<BigNumber[]> {
-    const componentOracles = await oracleWhiteList.getOracleAddressesByToken.callAsync(components);
-
-    const oracleInstances = _.map(componentOracles, address => {
-      return this._libraryMockHelper.getUpdatableOracleMockInstance(address);
-    });
-
-    const oraclePricePromises = _.map(oracleInstances, async oracle => {
-      return await oracle.read.callAsync();
-    });
-    return await Promise.all(oraclePricePromises);
-  }
-
-  private computeTokenDollarAmount(
-    tokenPrice: BigNumber,
-    unitsInFullSet: BigNumber,
-    tokenDecimals: BigNumber,
-  ): BigNumber {
-    return tokenPrice
-             .mul(unitsInFullSet)
-             .div(10 ** tokenDecimals.toNumber())
-             .round(0, 3);
+    return nextSetUSDValue.mul(SCALE_FACTOR).div(currentSetUSDValue).round(0, 3);
   }
 
   public constructTokenFlow(

@@ -1,4 +1,4 @@
-export { AddressToAddressWhitelistContract } from '../types/generated/address_to_address_white_list';
+export { AddressToAddressWhiteListContract } from '../types/generated/address_to_address_white_list';
 export { AuctionMockContract } from '../types/generated/auction_mock';
 export { AuthorizableContract } from '../types/generated/authorizable';
 export { BadTokenMockContract } from '../types/generated/bad_token_mock';
@@ -22,6 +22,7 @@ export { ExchangeIssuanceLibraryContract } from '../types/generated/exchange_iss
 export { ExchangeIssuanceLibraryMockContract } from '../types/generated/exchange_issuance_library_mock';
 export { ExchangeIssuanceModuleContract } from '../types/generated/exchange_issuance_module';
 export { FailAuctionLibraryContract } from '../types/generated/fail_auction_library';
+export { FactoryUtilsLibraryContract } from '../types/generated/factory_utils_library';
 export { FeeCalculatorMockContract } from '../types/generated/fee_calculator_mock';
 export { FixedFeeCalculatorMockContract } from '../types/generated/fixed_fee_calculator_mock';
 export { FeedFactoryContract } from '../types/generated/feed_factory';
@@ -38,6 +39,7 @@ export { MedianContract } from '../types/generated/median';
 export { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 export { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 export { OracleWhiteListContract } from '../types/generated/oracle_white_list';
+export { PerformanceFeeCalculatorContract } from '../types/generated/performance_fee_calculator';
 export { PlaceBidLibraryContract } from '../types/generated/place_bid_library';
 export { PlaceBidMockContract } from '../types/generated/place_bid_mock';
 export { PriceFeedContract } from '../types/generated/price_feed';
@@ -47,6 +49,7 @@ export { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auc
 export { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
 export { RebalanceMockContract } from '../types/generated/rebalance_mock';
 export { RebalancingSetEthBidderContract } from '../types/generated/rebalancing_set_eth_bidder';
+export { RebalancingSetFeeMockContract } from '../types/generated/rebalancing_set_fee_mock';
 export { RebalancingSetCTokenBidderContract } from '../types/generated/rebalancing_set_c_token_bidder';
 export {
   RebalancingSetExchangeIssuanceModuleContract,

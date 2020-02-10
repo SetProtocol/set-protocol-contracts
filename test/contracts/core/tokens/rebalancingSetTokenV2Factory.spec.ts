@@ -34,8 +34,8 @@ import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
+import { RebalancingSetV2Helper } from '@utils/helpers/rebalancingSetV2Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

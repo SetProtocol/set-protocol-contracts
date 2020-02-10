@@ -34,9 +34,11 @@ import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { RebalancingSetV3Helper } from '@utils/helpers/rebalancingSetV3Helper';
-import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
+import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { OracleHelper } from '@utils/helpers/oracleHelper';
+import { RebalancingSetV3Helper } from '@utils/helpers/rebalancingSetV3Helper';
+import { ValuationHelper } from '@utils/helpers/valuationHelper';
 
 import { getExpectedIncentiveFeePaidLog } from '@utils/contract_logs/rebalancingSetTokenV3';
 
@@ -79,7 +81,9 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
     erc20Helper,
     blockchain
   );
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper);
+  const oracleHelper = new OracleHelper(deployerAccount);
+  const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, oracleHelper, valuationHelper);
   const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   before(async () => {
@@ -195,7 +199,11 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
     }
 
     it('mints the correct Rebalancing Set to the feeRecipient', async () => {
-      const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
+      const previousSupply = await rebalancingSetToken.totalSupply.callAsync();
+      const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(
+        rebalanceFee,
+        previousSupply
+      );
 
       await subject();
 
@@ -205,7 +213,10 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
 
     it('increments the totalSupply properly', async () => {
       const previousSupply = await rebalancingSetToken.totalSupply.callAsync();
-      const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
+      const rebalanceFeeInflation = await rebalancingHelper.calculateRebalanceFeeInflation(
+        rebalanceFee,
+        previousSupply
+      );
       const expectedSupply = previousSupply.plus(rebalanceFeeInflation);
 
       await subject();
@@ -216,7 +227,11 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
 
     it('emits the RebalanceSettled log', async () => {
       const feePercentage = await rebalancingSetToken.rebalanceFee.callAsync();
-      const feeQuantity = await rebalancingHelper.calculateRebalanceFeeInflation(rebalancingSetToken);
+      const previousSupply = await rebalancingSetToken.totalSupply.callAsync();
+      const feeQuantity = await rebalancingHelper.calculateRebalanceFeeInflation(
+        feePercentage,
+        previousSupply
+      );
 
       const txHash = await subject();
 

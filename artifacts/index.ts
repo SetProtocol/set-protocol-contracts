@@ -20,6 +20,7 @@ export { Median } from "./ts/Median";
 export { NoDecimalTokenMock } from "./ts/NoDecimalTokenMock";
 export { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
 export { OracleWhiteList } from "./ts/OracleWhiteList";
+export { PerformanceFeeCalculator } from "./ts/PerformanceFeeCalculator";
 export { PlaceBidLibrary } from "./ts/PlaceBidLibrary";
 export { ProposeLibrary } from "./ts/ProposeLibrary";
 export { ProtocolViewer } from "./ts/ProtocolViewer";
@@ -80,6 +81,7 @@ export {
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
   OracleWhiteListContract,
+  PerformanceFeeCalculatorContract,
   PlaceBidLibraryContract,
   ProposeLibraryContract,
   ProtocolViewerContract,

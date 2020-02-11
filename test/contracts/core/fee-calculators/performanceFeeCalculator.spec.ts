@@ -10,6 +10,9 @@ import { BigNumber } from 'bignumber.js';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  UpdatableOracleMockContract
+} from 'set-protocol-oracles';
+import {
   CoreMockContract,
   OracleWhiteListContract,
   PerformanceFeeCalculatorContract,
@@ -17,7 +20,6 @@ import {
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
-  UpdatableOracleMockContract,
   VaultContract,
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';

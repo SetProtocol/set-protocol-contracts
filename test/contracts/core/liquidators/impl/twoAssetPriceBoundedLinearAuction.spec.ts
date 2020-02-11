@@ -9,6 +9,9 @@ import { Address } from 'set-protocol-utils';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  UpdatableOracleMockContract
+} from 'set-protocol-oracles';
+import {
   CoreMockContract,
   OracleWhiteListContract,
   SetTokenContract,
@@ -16,7 +19,6 @@ import {
   StandardTokenMockContract,
   TwoAssetPriceBoundedLinearAuctionMockContract,
   TransferProxyContract,
-  UpdatableOracleMockContract,
   VaultContract,
 } from '@utils/contracts';
 import { ether, gWei } from '@utils/units';

@@ -23,7 +23,6 @@ import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { CommonMath } from "../../../lib/CommonMath.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
 import { RebalancingSetState } from "../rebalancing-v2/RebalancingSetState.sol";
-import { RebalancingSettlement } from "../rebalancing-v2/RebalancingSettlement.sol";
 
 
 /**

@@ -14,7 +14,7 @@ import { DEFAULT_GAS } from '../constants';
 
 const web3 = getWeb3();
 
-const UpdatableOracleMock = artifacts.require('set-protocol-oracles/Median');
+const UpdatableOracleMock = artifacts.require('set-protocol-oracles/UpdatableOracleMock');
 
 export class OracleHelper {
   private _contractOwnerAddress: Address;

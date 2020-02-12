@@ -9,12 +9,12 @@ import {
   UpdatableOracleMockContract
 } from 'set-protocol-oracles';
 
-import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
+import { getWeb3, getContractInstance, importFromOracles, txnFrom } from '../web3Helper';
 import { DEFAULT_GAS } from '../constants';
 
 const web3 = getWeb3();
 
-const UpdatableOracleMock = artifacts.require('set-protocol-oracles/UpdatableOracleMock');
+const UpdatableOracleMock = importFromOracles('UpdatableOracleMock');
 
 export class OracleHelper {
   private _contractOwnerAddress: Address;

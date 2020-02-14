@@ -128,7 +128,7 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
         FactoryUtilsLibrary.InitRebalancingParameters memory parameters =
             FactoryUtilsLibrary.parseRebalanceSetCallData(_callData);
 
-        // Ensure validit of rebalancing Set calldata
+        // Ensure validity of rebalancing Set calldata
         FactoryUtilsLibrary.validateRebalanceSetCalldata(
             parameters,
             address(liquidatorWhitelist),
@@ -185,16 +185,16 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
             "Must be core"
         );
 
-        require(
-            _units[0] > 0,
-            "UnitShares not > 0"
-        );
-
         // Ensure component array only includes one address which will be the currentSet
         require(
             _components.length == 1 && 
             _units.length == 1,
-            "Components & units len != 1"
+            "Components or units len != 1"
+        );
+
+        require(
+            _units[0] > 0,
+            "UnitShares not > 0"
         );
 
         // Expect Set to rebalance to be valid and enabled Set

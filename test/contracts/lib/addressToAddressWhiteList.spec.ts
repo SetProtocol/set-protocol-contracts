@@ -7,7 +7,7 @@ import { Address, Log } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
-import { AddressToAddressPairAdded, AddressToAddressPairRemoved } from '@utils/contract_logs/addressToAddressWhiteList';
+import { PairAdded, PairRemoved } from '@utils/contract_logs/addressToAddressWhiteList';
 import { AddressToAddressWhiteListContract } from '@utils/contracts';
 import {
   NULL_ADDRESS
@@ -94,7 +94,7 @@ contract('AddressToAddressWhiteList', accounts => {
       expect(addresses).to.deep.equal(subjectInitialKeyTypeAddresses);
 
       subjectInitialKeyTypeAddresses.forEach(async (address, index) => {
-        const valueTypeAddress = await addressToAddressWhiteList.addressToAddressWhiteList.callAsync(address);
+        const valueTypeAddress = await addressToAddressWhiteList.keysToValues.callAsync(address);
         expect(valueTypeAddress).to.equal(subjectInitialValueTypeAddresses[index]);
       });
     });
@@ -115,7 +115,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
   });
 
-  describe('#addAddressToAddressPair', async () => {
+  describe('#addPair', async () => {
     let subjectKeyTypeToAdd: Address;
     let subjectValueTypeToAdd: Address;
     let subjectCaller: Address;
@@ -132,7 +132,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return await addressToAddressWhiteList.addAddressToAddressPair.sendTransactionAsync(
+      return await addressToAddressWhiteList.addPair.sendTransactionAsync(
         subjectKeyTypeToAdd,
         subjectValueTypeToAdd,
         { from: subjectCaller }
@@ -151,19 +151,19 @@ contract('AddressToAddressWhiteList', accounts => {
 
     it('adds the token address to the whitelist mapping with correct value type address', async () => {
       const existingValueTypeAddress =
-        await addressToAddressWhiteList.addressToAddressWhiteList.callAsync(subjectKeyTypeToAdd);
+        await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyTypeToAdd);
       expect(existingValueTypeAddress).to.equal(NULL_ADDRESS);
 
       await subject();
 
-      const valueTypeAddress = await addressToAddressWhiteList.addressToAddressWhiteList.callAsync(subjectKeyTypeToAdd);
+      const valueTypeAddress = await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyTypeToAdd);
       expect(valueTypeAddress).to.equal(subjectValueTypeToAdd);
     });
 
-    it('emits a AddressToAddressPairAdded event', async () => {
+    it('emits a PairAdded event', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-      const expectedLogs: Log[] = AddressToAddressPairAdded(
+      const expectedLogs: Log[] = PairAdded(
         addressToAddressWhiteList.address,
         subjectKeyTypeToAdd,
         subjectValueTypeToAdd
@@ -193,7 +193,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
   });
 
-  describe('#removeAddressToAddressPair', async () => {
+  describe('#removePair', async () => {
     let subjectKeyToRemove: Address;
     let subjectCaller: Address;
 
@@ -208,7 +208,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return await addressToAddressWhiteList.removeAddressToAddressPair.sendTransactionAsync(
+      return await addressToAddressWhiteList.removePair.sendTransactionAsync(
         subjectKeyToRemove,
         { from: subjectCaller }
       );
@@ -224,19 +224,19 @@ contract('AddressToAddressWhiteList', accounts => {
 
     it('updates the address in the whitelist mapping to null address', async () => {
       const existingValueTypeAddress =
-        await addressToAddressWhiteList.addressToAddressWhiteList.callAsync(subjectKeyToRemove);
+        await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyToRemove);
       expect(existingValueTypeAddress).to.equal(thirdValueTypeAddress);
 
       await subject();
 
-      const valueTypeAddress = await addressToAddressWhiteList.addressToAddressWhiteList.callAsync(subjectKeyToRemove);
+      const valueTypeAddress = await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyToRemove);
       expect(valueTypeAddress).to.equal(NULL_ADDRESS);
     });
 
-    it('emits a AddressToAddressPairRemoved event', async () => {
+    it('emits a PairRemoved event', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-      const expectedLogs: Log[] = AddressToAddressPairRemoved(
+      const expectedLogs: Log[] = PairRemoved(
         addressToAddressWhiteList.address,
         subjectKeyToRemove,
         thirdValueTypeAddress
@@ -265,7 +265,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
   });
 
-  describe('#editAddressToAddressPair', async () => {
+  describe('#editPair', async () => {
     let subjectKeyTypeToAdd: Address;
     let subjectValueTypeToAdd: Address;
     let subjectCaller: Address;
@@ -282,7 +282,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return await addressToAddressWhiteList.editAddressToAddressPair.sendTransactionAsync(
+      return await addressToAddressWhiteList.editPair.sendTransactionAsync(
         subjectKeyTypeToAdd,
         subjectValueTypeToAdd,
         { from: subjectCaller }
@@ -300,19 +300,19 @@ contract('AddressToAddressWhiteList', accounts => {
 
     it('adds the token address to the whitelist mapping with correct value type address', async () => {
       const existingValueTypeAddress =
-        await addressToAddressWhiteList.addressToAddressWhiteList.callAsync(subjectKeyTypeToAdd);
+        await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyTypeToAdd);
       expect(existingValueTypeAddress).to.equal(secondValueTypeAddress);
 
       await subject();
 
-      const valueTypeAddress = await addressToAddressWhiteList.addressToAddressWhiteList.callAsync(subjectKeyTypeToAdd);
+      const valueTypeAddress = await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyTypeToAdd);
       expect(valueTypeAddress).to.equal(subjectValueTypeToAdd);
     });
 
-    it('emits a AddressToAddressPairAdded event', async () => {
+    it('emits a PairAdded event', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-      const expectedLogs: Log[] = AddressToAddressPairAdded(
+      const expectedLogs: Log[] = PairAdded(
         addressToAddressWhiteList.address,
         subjectKeyTypeToAdd,
         subjectValueTypeToAdd
@@ -392,7 +392,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
   });
 
-  describe('#getAddressValueByKey', async () => {
+  describe('#getValue', async () => {
     let subjectKeyTypeAddress: Address;
 
     beforeEach(async () => {
@@ -405,7 +405,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
 
     async function subject(): Promise<Address> {
-      return await addressToAddressWhiteList.getAddressValueByKey.callAsync(subjectKeyTypeAddress);
+      return await addressToAddressWhiteList.getValue.callAsync(subjectKeyTypeAddress);
     }
 
     it('returns array of value type addresses', async () => {
@@ -425,7 +425,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
   });
 
-  describe('#getAddressValuesByKeys', async () => {
+  describe('#getValues', async () => {
     let subjectKeyTypeAddresses: Address[];
 
     beforeEach(async () => {
@@ -438,7 +438,7 @@ contract('AddressToAddressWhiteList', accounts => {
     });
 
     async function subject(): Promise<Address[]> {
-      return await addressToAddressWhiteList.getAddressValuesByKeys.callAsync(subjectKeyTypeAddresses);
+      return await addressToAddressWhiteList.getValues.callAsync(subjectKeyTypeAddresses);
     }
 
     it('returns array of value type addresses', async () => {

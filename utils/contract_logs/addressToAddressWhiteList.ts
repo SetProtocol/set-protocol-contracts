@@ -1,31 +1,31 @@
 import { Address, Log } from 'set-protocol-utils';
 
 
-export function AddressToAddressPairAdded(
+export function PairAdded(
   _contractAddress: Address,
-  _keyTypeAddress: Address,
-  _valueTypeAddress: Address,
+  _key: Address,
+  _value: Address,
 ): Log[] {
   return [{
-    event: 'AddressToAddressPairAdded',
+    event: 'PairAdded',
     address: _contractAddress,
     args: {
-      _keyTypeAddress,
-      _valueTypeAddress,
+      _key,
+      _value,
     },
   }];
 }
-export function AddressToAddressPairRemoved(
+export function PairRemoved(
   _contractAddress: Address,
-  _keyTypeAddress: Address,
-  _valueTypeAddress: Address,
+  _key: Address,
+  _value: Address,
 ): Log[] {
   return [{
-    event: 'AddressToAddressPairRemoved',
+    event: 'PairRemoved',
     address: _contractAddress,
     args: {
-      _keyTypeAddress,
-      _valueTypeAddress,
+      _key,
+      _value,
     },
   }];
 }

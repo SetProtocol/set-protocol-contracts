@@ -30,6 +30,7 @@ import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertio
 import { Blockchain } from '@utils/blockchain';
 import {
   DEFAULT_GAS,
+  DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS
 } from '@utils/constants';
 import { LogExchangeIssue, LogExchangeRedeem } from '@utils/contract_logs/exchangeIssuanceModule';
@@ -211,6 +212,7 @@ contract('CTokenExchangeIssuanceModule', accounts => {
     let subjectExchangeOrdersData: Bytes;
 
     let naturalUnit: BigNumber;
+    let setComponentUnit: BigNumber;
     let setToken: SetTokenContract;
     let sendToken: StandardTokenMockContract;
 
@@ -239,6 +241,8 @@ contract('CTokenExchangeIssuanceModule', accounts => {
     let customExchangeIssueSendTokenAmounts: BigNumber[];
     let customExchangeIssueReceiveTokens: Address[];
     let customExchangeIssueReceiveTokenAmounts: BigNumber[];
+    let customSendToken: StandardTokenMockContract;
+    let customSendTokenUnderlying: StandardTokenMockContract;
     let customSubjectExchangeOrdersData: Bytes;
     let customZeroExOrderMakerTokenAmount: BigNumber;
 
@@ -264,10 +268,11 @@ contract('CTokenExchangeIssuanceModule', accounts => {
       // Include order for non cToken component
       const nonCTokenComponent = await erc20Helper.deployTokenAsync(zeroExOrderMaker);
 
-      sendToken = await erc20Helper.deployTokenAsync(exchangeIssuanceCaller);
+      sendToken = customSendTokenUnderlying || await erc20Helper.deployTokenAsync(exchangeIssuanceCaller);
+      const sendTokenComponent = customSendToken || sendToken;
 
-      const componentTokens = [firstComponent, secondComponent, nonCTokenComponent];
-      const setComponentUnit = ether(4);
+      const componentTokens = [firstComponent, secondComponent, nonCTokenComponent, sendTokenComponent];
+      setComponentUnit = ether(4);
       const componentAddresses = componentTokens.map(token => token.address);
       const componentUnits = componentTokens.map(token => setComponentUnit);
       naturalUnit = ether(2);
@@ -296,10 +301,10 @@ contract('CTokenExchangeIssuanceModule', accounts => {
 
       const zeroExTakerTokenQuantity = zeroExOrderTakerAssetAmount || ether(4);
       const kyberSourceTokenQuantity = kyberTradeSourceTokenUtilized.add(kyberTradeSourceTokenChange);
-      // Both 0x orders will be for ether(4)
+      // 2 0x orders, 1 kyber order, 1 direct issue
       totalSendToken = zeroExTakerTokenQuantity.mul(2).add(kyberSourceTokenQuantity);
 
-      // Create issuance order, submitting ether(30) makerToken for ether(4) of the Set with 3 components
+      // Create issuance order, submitting ether(30) makerToken for ether(4) of the Set with 4 components
       exchangeIssueSetAddress = customExchangeIssueSetAddress || setToken.address;
 
       exchangeIssueQuantity = customExchangeIssueQuantity || ether(4);
@@ -328,7 +333,7 @@ contract('CTokenExchangeIssuanceModule', accounts => {
         ];
 
       exchangeIssueReceiveTokenAmounts =
-        customExchangeIssueReceiveTokenAmounts || _.map(componentUnits, unit => unit
+        customExchangeIssueReceiveTokenAmounts || _.map(componentUnits.slice(0, 3), unit => unit
           .mul(exchangeIssueQuantity)
           .div(naturalUnit)
         );
@@ -453,8 +458,9 @@ contract('CTokenExchangeIssuanceModule', accounts => {
       const existingBalance = await sendToken.balanceOf.callAsync(exchangeIssuanceCaller);
 
       await subject();
-
+      const nonExchangedSendToken = setComponentUnit.mul(exchangeIssueQuantity).div(naturalUnit);
       const expectedNewBalance = existingBalance.sub(totalSendToken)
+                                                .sub(nonExchangedSendToken)
                                                 .add(kyberTradeSourceTokenChange);
       const newBalance = await sendToken.balanceOf.callAsync(exchangeIssuanceCaller);
 
@@ -487,6 +493,41 @@ contract('CTokenExchangeIssuanceModule', accounts => {
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when a non exchanged component is underlying of a cToken', async () => {
+      before(async () => {
+        customSendTokenUnderlying = await erc20Helper.deployTokenAsync(
+          exchangeIssuanceCaller,
+          18,
+        );
+        const nonExchangedComponentAddress =
+          await compoundHelper.deployMockCDAI(customSendTokenUnderlying.address, contractDeployer);
+        await compoundHelper.enableCToken(nonExchangedComponentAddress);
+        await compoundHelper.setBorrowRate(nonExchangedComponentAddress, new BigNumber('29313252165'));
+        customSendToken = await erc20Helper.getTokenInstanceAsync(nonExchangedComponentAddress);
+      });
+
+      beforeEach(async () => {
+        await cTokenWhiteList.addPair.sendTransactionAsync(
+          customSendToken.address,
+          customSendTokenUnderlying.address,
+          { gas: DEFAULT_GAS }
+        );
+      });
+
+      after(async () => {
+        customSendToken = undefined;
+        customSendTokenUnderlying = undefined;
+      });
+
+      it('mints the correct quantity of the set for the sender', async () => {
+        const existingBalance = await setToken.balanceOf.callAsync(exchangeIssuanceCaller);
+
+        await subject();
+
+        await assertTokenBalanceAsync(setToken, existingBalance.add(exchangeIssueQuantity), exchangeIssuanceCaller);
+      });
     });
 
     describe('when a receiveToken is not a component of the Set', async () => {
@@ -727,7 +768,6 @@ contract('CTokenExchangeIssuanceModule', accounts => {
       });
     });
 
-
     describe('when the send token amounts is 0', async () => {
       before(async () => {
         customExchangeIssueSendTokenAmounts = [ZERO, ZERO];
@@ -768,6 +808,8 @@ contract('CTokenExchangeIssuanceModule', accounts => {
     let receiveToken: StandardTokenMockContract;
 
     let nonExchangedComponent: StandardTokenMockContract;
+    let customNonExchangedComponent: StandardTokenMockContract;
+    let customNonExchangedComponentUnderlying: StandardTokenMockContract;
 
     let totalReceiveToken: BigNumber;
 
@@ -816,7 +858,7 @@ contract('CTokenExchangeIssuanceModule', accounts => {
       const secondComponentUnderlying = daiInstance;
 
       const nonCTokenComponent = await erc20Helper.deployTokenAsync(contractDeployer);
-      nonExchangedComponent = await erc20Helper.deployTokenAsync(contractDeployer);
+      nonExchangedComponent = customNonExchangedComponent || await erc20Helper.deployTokenAsync(contractDeployer);
       receiveToken = await erc20Helper.deployTokenAsync(kyberReserveOperator);
 
       const componentTokens = [firstComponent, secondComponent, nonCTokenComponent, nonExchangedComponent];
@@ -1069,6 +1111,55 @@ contract('CTokenExchangeIssuanceModule', accounts => {
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when a non exchanged component is underlying of a cToken', async () => {
+      before(async () => {
+        customNonExchangedComponentUnderlying = await erc20Helper.deployTokenAsync(
+          contractDeployer,
+          18,
+        );
+        const nonExchangedComponentAddress =
+          await compoundHelper.deployMockCDAI(customNonExchangedComponentUnderlying.address, contractDeployer);
+        await compoundHelper.enableCToken(nonExchangedComponentAddress);
+        await compoundHelper.setBorrowRate(nonExchangedComponentAddress, new BigNumber('29313252165'));
+        customNonExchangedComponent = await erc20Helper.getTokenInstanceAsync(nonExchangedComponentAddress);
+
+        await erc20Helper.approveTransfersAsync(
+          [customNonExchangedComponentUnderlying],
+          customNonExchangedComponent.address
+        );
+        await compoundHelper.mintCToken(
+          customNonExchangedComponent.address,
+          DEPLOYED_TOKEN_QUANTITY,
+        );
+      });
+
+      beforeEach(async () => {
+        await cTokenWhiteList.addPair.sendTransactionAsync(
+          customNonExchangedComponent.address,
+          customNonExchangedComponentUnderlying.address,
+          { gas: DEFAULT_GAS }
+        );
+      });
+
+      after(async () => {
+        customNonExchangedComponent = undefined;
+        customNonExchangedComponentUnderlying = undefined;
+      });
+
+      it('returns the correct quantity of non-exchanged underlying tokens', async () => {
+        const existingBalance = await customNonExchangedComponentUnderlying.balanceOf.callAsync(exchangeIssuanceCaller);
+        await subject();
+
+        const incrementQuantity = setComponentUnit.mul(exchangeRedeemQuantity).div(naturalUnit);
+        const underlyingIncrementQuantity =
+          await compoundHelper.cTokenToUnderlying(nonExchangedComponent.address, incrementQuantity);
+        const expectedNewBalance = existingBalance.add(underlyingIncrementQuantity);
+        const newBalance = await customNonExchangedComponentUnderlying.balanceOf.callAsync(exchangeIssuanceCaller);
+
+        await expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
+      });
     });
 
     describe('when a sendToken is not a component of the Set', async () => {

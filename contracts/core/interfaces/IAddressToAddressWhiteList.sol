@@ -29,49 +29,60 @@ interface IAddressToAddressWhiteList {
     /**
      * Returns value of key type address passed in (not in array form)
      *
-     * @param  _keyTypeAddress     Address to check
+     * @param  _key     Address to check
      * @return bool                Whether passed in address is whitelisted
      */
-    function addressToAddressWhiteList(
-        address _keyTypeAddress
+    function keysToValues(
+        address _key
     )
         external
         view
         returns (address);
 
     /**
-     * Verifies an array of key type addresses against the whitelist
+     * Verifies an array of addresses against the whitelist
      *
-     * @param  _addresses    Array of addresses to verify
-     * @return bool          Whether all addresses in the list are whitelisted
+     * @param  _keys                Array of key type addresses to check if value exists
+     * @return bool                 Whether all addresses in the list are whitelisted
      */
     function areValidAddresses(
-        address[] calldata _addresses
+        address[] calldata _keys
     )
         external
         view
         returns (bool);
 
     /**
-     * Return array of addresses based on passed in key type addresses 
+     * Return array of value type addresses based on passed in key type addresses 
      *
-     * @param  _keyTypeAddresses  Array of addresses to mapped addresses for
-     * @return address[]          Array of value type addresses
+     * @param  _key                Array of key type addresses to get value type addresses for
+     * @return address[]           Array of value type addresses
      */
-    function getAddressValuesByKeys(
-        address[] calldata _keyTypeAddresses
+    function getValues(
+        address[] calldata _key
     )
         external
         view
         returns (address[] memory);
 
-    function getAddressValueByKey(
-        address _keyTypeAddress
+    /**
+     * Return value type address associated with a passed key type address 
+     *
+     * @param  _key               Address of key type
+     * @return address            Address associated with _key 
+     */
+    function getValue(
+        address _key
     )
         external
         view
         returns (address);
 
+    /**
+     * Return array of all whitelisted addresses
+     *
+     * @return address[]      Array of key type addresses
+     */
     function validAddresses()
         external
         view

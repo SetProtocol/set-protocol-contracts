@@ -9,6 +9,7 @@ import {
   CTokenExchangeIssuanceModuleContract,
   ExchangeIssuanceModuleContract,
   OracleWhiteListContract,
+  RebalancingSetCTokenExchangeIssuanceModuleContract,
   RebalancingSetCTokenIssuanceModuleContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetIssuanceModuleContract,
@@ -49,6 +50,7 @@ const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
 const FactoryUtilsLibrary = artifacts.require('FactoryUtilsLibrary');
 const OracleWhiteList = artifacts.require('OracleWhiteList');
+const RebalancingSetCTokenExchangeIssuanceModule = artifacts.require('RebalancingSetCTokenExchangeIssuanceModule');
 const RebalancingSetCTokenIssuanceModule = artifacts.require('RebalancingSetCTokenIssuanceModule');
 const RebalancingSetExchangeIssuanceModule = artifacts.require('RebalancingSetExchangeIssuanceModule');
 const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
@@ -541,6 +543,37 @@ export class CoreHelper {
 
     return new CTokenExchangeIssuanceModuleContract(
       getContractInstance(truffleCTokenExchangeIssuanceModule),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployRebalancingSetCTokenExchangeIssuanceModuleAsync(
+    core: Address,
+    transferProxy: Address,
+    exchangeIssuanceModule: Address,
+    wrappedEther: Address,
+    vault: Address,
+    cTokenWhiteList: Address,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingSetCTokenExchangeIssuanceModuleContract> {
+    const erc20WrapperLibrary = await ERC20Wrapper.new(
+      { from: this._contractOwnerAddress },
+    );
+
+    await RebalancingSetCTokenExchangeIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+
+    const truffleModule = await RebalancingSetCTokenExchangeIssuanceModule.new(
+      core,
+      transferProxy,
+      exchangeIssuanceModule,
+      wrappedEther,
+      vault,
+      cTokenWhiteList,
+      { from },
+    );
+
+    return new RebalancingSetCTokenExchangeIssuanceModuleContract(
+      getContractInstance(truffleModule),
       { from, gas: DEFAULT_GAS },
     );
   }

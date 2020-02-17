@@ -21,6 +21,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { CompoundUtils } from "../../lib/CompoundUtils.sol";
+import { CTokenModuleCoreState } from "./lib/CTokenModuleCoreState.sol";
 import { ICToken } from "../interfaces/ICToken.sol";
 import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
@@ -35,17 +36,13 @@ import { RebalancingSetIssuanceModule } from "./RebalancingSetIssuanceModule.sol
  * @author Set Protocol
  *
  * A module that includes functions for issuing / redeeming rebalancing SetToken from its base components, cToken 
- * underlying components, and Ether
+ * underlying components, and Ether. Note: This module is not compatible with Compound Ether (cETH).
  */
 contract RebalancingSetCTokenIssuanceModule is
-    RebalancingSetIssuanceModule
+    RebalancingSetIssuanceModule,
+    CTokenModuleCoreState
 {
     using SafeMath for uint256;
-
-    /* ============ State Variables ============ */
-
-    // Address and instance of AddressToAddressWhiteList contract
-    IAddressToAddressWhiteList public cTokenWhiteList;
 
     /* ============ Constructor ============ */
 
@@ -72,37 +69,11 @@ contract RebalancingSetCTokenIssuanceModule is
             _transferProxy,
             _weth
         )
-    {
-        cTokenWhiteList = _cTokenWhiteList;
-
-        address[] memory cTokenAddresses = _cTokenWhiteList.validAddresses();
-
-        for (uint256 i = 0; i < cTokenAddresses.length; i++) {
-            address cTokenAddress = cTokenAddresses[i];
-            address underlyingAddress = cTokenWhiteList.getAddressValueByKey(cTokenAddress);
-
-            // Add approvals of the underlying token to the cToken contract
-            ERC20Wrapper.approve(
-                underlyingAddress,
-                cTokenAddress,
-                CommonMath.maxUInt256()
-            );
-
-            // Add approvals of the underlying token to the transferProxy contract
-            ERC20Wrapper.approve(
-                underlyingAddress,
-                _transferProxy,
-                CommonMath.maxUInt256()
-            );
-
-            // Add approvals of the cToken to the transferProxy contract
-            ERC20Wrapper.approve(
-                cTokenAddress,
-                _transferProxy,
-                CommonMath.maxUInt256()
-            );
-        }
-    }
+        CTokenModuleCoreState(
+            _transferProxy,
+            _cTokenWhiteList
+        )
+    {}
 
     /* ============ External Functions ============ */
 
@@ -372,7 +343,7 @@ contract RebalancingSetCTokenIssuanceModule is
         uint256[] memory baseSetUnits = baseSet.getUnits();
         uint256 baseSetNaturalUnit = baseSet.naturalUnit();
 
-       // Loop through the base SetToken components and deposit components 
+        // Loop through the base SetToken components and deposit components 
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
             address currentComponentAddress = baseSetComponents[i];
             uint256 currentUnit = baseSetUnits[i];
@@ -381,7 +352,7 @@ contract RebalancingSetCTokenIssuanceModule is
             uint256 currentComponentQuantity = _baseSetQuantity.div(baseSetNaturalUnit).mul(currentUnit);
 
             // If cToken, calculate required underlying tokens and transfer to module
-            address underlyingAddress = cTokenWhiteList.addressToAddressWhiteList(currentComponentAddress);
+            address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
             if (underlyingAddress != address(0)) {
                 // Deposit underlying components and mint cToken
                 depositAndMintCToken(
@@ -397,7 +368,8 @@ contract RebalancingSetCTokenIssuanceModule is
                     "RebalancingSetCTokenIssuanceModule.depositComponentsHandleCTokensAndEth: Not enough ether included for base SetToken"
                 );
 
-                // wrap the required ether quantity
+                // Wrap the required ether quantity
+                // NOTE: Weth is wrapped but does not get deposited to vault. When issuing, WETH is pulled from contract to vault
                 weth.deposit.value(currentComponentQuantity)();
 
                 // Ensure weth allowance
@@ -462,12 +434,18 @@ contract RebalancingSetCTokenIssuanceModule is
             "CTokenExchangeIssuanceModule.exchangeIssue: Error minting cToken"
         );
 
+        // Get balance of cTokens minted in the contract
+        uint256 cTokenQuantity = ERC20Wrapper.balanceOf(
+            address(_cTokenComponent),
+            address(this)
+        );
+
         // Ensure allowance for cToken to transferProxy. This is for cases if we add a new cToken to the whitelist
         ERC20Wrapper.ensureAllowance(
             _cTokenComponent,
             address(this),
             transferProxy,
-            _cTokenQuantity
+            cTokenQuantity
         );
 
         // Deposit transformed cTokens to vault (owned by this contract)
@@ -475,7 +453,7 @@ contract RebalancingSetCTokenIssuanceModule is
             address(this),
             address(this),
             _cTokenComponent,
-            _cTokenQuantity
+            cTokenQuantity
         );
     }
 
@@ -503,7 +481,7 @@ contract RebalancingSetCTokenIssuanceModule is
             );
 
             // If cToken, calculate required underlying tokens and transfer to module
-            address underlyingAddress = cTokenWhiteList.addressToAddressWhiteList(currentComponentAddress);
+            address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
             if (underlyingAddress != address(0)) {
                 // Redeem underlying components send to user
                 redeemCTokenAndWithdraw(
@@ -574,12 +552,10 @@ contract RebalancingSetCTokenIssuanceModule is
             "CTokenExchangeIssuanceModule.exchangeRedeem: Error redeeming cToken"
         );
 
-        // Ensure allowance for underlying to transferProxy. This is for cases if we add a new cToken to the whitelist
-        ERC20Wrapper.ensureAllowance(
+         // Get balance of underlying after cToken redemption and override
+        underlyingQuantity = ERC20Wrapper.balanceOf(
             _underlyingComponent,
-            address(this),
-            transferProxy,
-            underlyingQuantity
+            address(this)
         );
 
         // Transfer underlying component from the module to the user

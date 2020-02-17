@@ -52,6 +52,9 @@ export { RebalanceMockContract } from '../types/generated/rebalance_mock';
 export { RebalancingSetEthBidderContract } from '../types/generated/rebalancing_set_eth_bidder';
 export { RebalancingSetFeeMockContract } from '../types/generated/rebalancing_set_fee_mock';
 export { RebalancingSetCTokenBidderContract } from '../types/generated/rebalancing_set_c_token_bidder';
+export {
+  RebalancingSetCTokenExchangeIssuanceModuleContract,
+} from '../types/generated/rebalancing_set_c_token_exchange_issuance_module';
 export { RebalancingSetCTokenIssuanceModuleContract } from '../types/generated/rebalancing_set_c_token_issuance_module';
 export {
   RebalancingSetExchangeIssuanceModuleContract,

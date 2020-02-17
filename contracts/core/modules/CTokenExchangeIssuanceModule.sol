@@ -21,6 +21,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { CompoundUtils } from "../../lib/CompoundUtils.sol";
+import { CTokenModuleCoreState } from "./lib/CTokenModuleCoreState.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ExchangeIssuanceLibrary } from "./lib/ExchangeIssuanceLibrary.sol";
 import { ExchangeIssuanceModule } from "./ExchangeIssuanceModule.sol";
@@ -38,17 +39,10 @@ import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
  * the issuance and redemption of Sets containing cTokens using exchange orders and Compound functions
  */
 contract CTokenExchangeIssuanceModule is
-    ExchangeIssuanceModule
+    ExchangeIssuanceModule,
+    CTokenModuleCoreState
 {
     using SafeMath for uint256;
-
-    /* ============ State Variables ============ */
-
-    // Address of TransferProxy contract
-    address public transferProxy;
-
-    // Address and instance of AddressToAddressWhiteList contract
-    IAddressToAddressWhiteList public cTokenWhiteList;
 
     /* ============ Constructor ============ */
 
@@ -71,38 +65,11 @@ contract CTokenExchangeIssuanceModule is
             _core,
             _vault
         )
-    {
-        transferProxy = _transferProxy;
-        cTokenWhiteList = _cTokenWhiteList;
-
-        address[] memory cTokenAddresses = _cTokenWhiteList.validAddresses();
-
-        for (uint256 i = 0; i < cTokenAddresses.length; i++) {
-            address cTokenAddress = cTokenAddresses[i];
-            address underlyingAddress = cTokenWhiteList.getAddressValueByKey(cTokenAddress);
-
-            // Add approvals of the underlying token to the cToken contract
-            ERC20Wrapper.approve(
-                underlyingAddress,
-                cTokenAddress,
-                CommonMath.maxUInt256()
-            );
-
-            // Add approvals of the underlying token to the transferProxy contract
-            ERC20Wrapper.approve(
-                underlyingAddress,
-                _transferProxy,
-                CommonMath.maxUInt256()
-            );
-
-            // Add approvals of the cToken to the transferProxy contract
-            ERC20Wrapper.approve(
-                cTokenAddress,
-                _transferProxy,
-                CommonMath.maxUInt256()
-            );
-        }
-    }
+        CTokenModuleCoreState(
+            _transferProxy,
+            _cTokenWhiteList
+        )
+    {}
 
     /* ============ Public Functions ============ */
 
@@ -144,7 +111,7 @@ contract CTokenExchangeIssuanceModule is
         executeExchangeOrders(_orderData);
 
         // Withdraw underlying tokens required from vault, mint cTokens in the module, and return to vault under sender address
-        mintCTokens(
+        mintCTokensFromExchangedComponents(
             _exchangeIssuanceParams.receiveTokens,
             _exchangeIssuanceParams.receiveTokenAmounts
         );
@@ -155,6 +122,12 @@ contract CTokenExchangeIssuanceModule is
             _exchangeIssuanceParams.receiveTokens,
             requiredBalances,
             msg.sender
+        );
+
+        // Transfer remaining required underlying components from caller to module, mint cTokens and deposit in vault to caller
+        mintCTokensFromCaller(
+            _exchangeIssuanceParams.setAddress,
+            _exchangeIssuanceParams.quantity
         );
         
         // Issue Set to the caller
@@ -211,7 +184,7 @@ contract CTokenExchangeIssuanceModule is
         );
 
         // Withdraw underlying tokens required, redeem cTokens in the module, and send to exchange wrapper
-        redeemCTokensAndTransferSendTokensToExchangeWrappers(
+        redeemCTokensAndTransferToExchangeWrappers(
             _exchangeIssuanceParams.sendTokenExchangeIds,
             _exchangeIssuanceParams.sendTokens,
             _exchangeIssuanceParams.sendTokenAmounts
@@ -253,10 +226,10 @@ contract CTokenExchangeIssuanceModule is
     /**
      * Withdraw required underlying from vault, mint required amount of cTokens, and deposit back into vault
      *
-     * @param _receiveTokens              A Struct containing exchange issuance metadata
-     * @param _receiveTokenAmounts        A Struct containing exchange issuance metadata
+     * @param _receiveTokens              Array of SetToken component addresses to receive
+     * @param _receiveTokenAmounts        Array of SetToken component required quantities to receive
      */
-    function mintCTokens(
+    function mintCTokensFromExchangedComponents(
         address[] memory _receiveTokens,
         uint256[] memory _receiveTokenAmounts
     )
@@ -267,7 +240,7 @@ contract CTokenExchangeIssuanceModule is
             uint256 currentComponentQuantity = _receiveTokenAmounts[i];
 
             // If cToken, calculate required underlying tokens and transfer to module
-            address underlyingAddress = cTokenWhiteList.addressToAddressWhiteList(currentComponentAddress);
+            address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
             if (underlyingAddress != address(0)) {
                 ICToken cTokenInstance = ICToken(currentComponentAddress);
 
@@ -283,33 +256,118 @@ contract CTokenExchangeIssuanceModule is
                     underlyingQuantity
                 );
 
-                // Ensure allowance for underlying token to cToken contract.
+                // Mint cToken and deposit to vault under sender
+                mintCToken(cTokenInstance, underlyingAddress, underlyingQuantity);
+            }
+        }
+    }
+
+    /**
+     * Transfer non-exchanged underlying tokens from caller, mint cTokens and deposit to the Vault under sender
+     * to the caller
+     *
+     * @param  _setAddress   Address of the Set
+     * @param  _quantity     Quantity of the Set to issue
+     */
+    function mintCTokensFromCaller(
+        address _setAddress,
+        uint256 _quantity
+    )
+        private
+    {
+        // Get SetToken details
+        ISetToken baseSet = ISetToken(_setAddress);
+
+        address[] memory baseSetComponents = baseSet.getComponents();
+        uint256[] memory baseSetUnits = baseSet.getUnits();
+        uint256 baseSetNaturalUnit = baseSet.naturalUnit();
+
+        for (uint256 i = 0; i < baseSetComponents.length; i++) {
+            address currentComponentAddress = baseSetComponents[i];
+            // Get component quantity in vault
+            uint256 currentComponentQuantity = vaultInstance.getOwnerBalance(currentComponentAddress, msg.sender);
+            
+            // Calculate required component quantity
+            uint256 requiredQuantity = _quantity.div(baseSetNaturalUnit).mul(baseSetUnits[i]);
+
+            // If cToken and balance of cToken in vault is less than required for issuing the Set
+            // transfer difference from user and mint cToken
+            address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
+            if (underlyingAddress != address(0) && currentComponentQuantity < requiredQuantity) {
+                // Calculate amount of remaining cTokens needed to issue Set
+                uint256 quantityToMint = requiredQuantity - currentComponentQuantity;
+
+                ICToken cTokenInstance = ICToken(currentComponentAddress);
+
+                // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
+                uint256 exchangeRate = cTokenInstance.exchangeRateCurrent();
+                uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(quantityToMint, exchangeRate);
+                
+                // Transfer underlying from caller to module
+                coreInstance.transferModule(
+                    underlyingAddress,
+                    underlyingQuantity,
+                    msg.sender,
+                    address(this)
+                );
+
+                // Mint cToken and deposit to vault under sender
+                mintCToken(cTokenInstance, underlyingAddress, underlyingQuantity);
+            }
+        }           
+    }
+
+    /**
+     * Withdraw required underlying from vault, redeem required amount of cTokens, and transfer to exchange wrappers
+     *
+     * @param _sendTokenExchangeIds    List of exchange wrapper enumerations corresponding to 
+     * @param _sendTokens              Array of SetToken component addresses to send
+     * @param _sendTokenAmounts        Array of SetToken component required quantities to send
+     */
+    function redeemCTokensAndTransferToExchangeWrappers(
+        uint8[] memory _sendTokenExchangeIds,
+        address[] memory _sendTokens,
+        uint256[] memory _sendTokenAmounts
+    )
+        private
+    {
+        for (uint256 i = 0; i < _sendTokens.length; i++) {
+            address exchangeWrapper = coreInstance.exchangeIds(_sendTokenExchangeIds[i]);
+            address currentComponentAddress = _sendTokens[i];
+            uint256 currentComponentQuantity = _sendTokenAmounts[i];
+
+            // If cToken redeem cToken and replace send token and amounts with underlying
+            address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
+            if (underlyingAddress != address(0)) {
+                // Withdraw cToken send tokens from vault (owned by this contract) to the module and redeem cToken
+                redeemCToken(currentComponentAddress, currentComponentQuantity);
+
+                // Get balance of underlying after cToken redemption.
+                uint256 underlyingQuantity = ERC20Wrapper.balanceOf(
+                    underlyingAddress,
+                    address(this)
+                );
+
+                // Ensure allowance for underlying component to transferProxy.
                 ERC20Wrapper.ensureAllowance(
                     underlyingAddress,
                     address(this),
-                    address(cTokenInstance),
+                    transferProxy,
                     underlyingQuantity
                 );
 
-                // Mint cToken using underlying
-                uint256 mintResponse = cTokenInstance.mint(underlyingQuantity);
-                require(
-                    mintResponse == 0,
-                    "CTokenExchangeIssuanceModule.exchangeIssue: Error minting cToken"
-                );
-
-                // Ensure allowance for cToken to transferProxy. This is for the case if we add a new cToken to the whitelist
-                ERC20Wrapper.ensureAllowance(
-                    currentComponentAddress,
+                // Transfer send tokens to the appropriate exchange wrapper
+                coreInstance.transferModule(
+                    underlyingAddress,
+                    underlyingQuantity,
                     address(this),
-                    transferProxy,
-                    currentComponentQuantity
+                    exchangeWrapper
                 );
-
-                // Deposit transformed cTokens to vault (owned by order sender)
-                coreInstance.depositModule(
+            } else {
+                // Withdraw non cToken send tokens from vault (owned by this contract) to the appropriate exchange wrapper
+                coreInstance.withdrawModule(
                     address(this),
-                    msg.sender,
+                    exchangeWrapper,
                     currentComponentAddress,
                     currentComponentQuantity
                 );
@@ -318,72 +376,85 @@ contract CTokenExchangeIssuanceModule is
     }
 
     /**
-     * Withdraw required underlying from vault, redeem required amount of cTokens, and transfer to exchange wrappers
+     * Mint cToken and deposit in vault under sender
      *
-     * @param _sendTokenExchangeIds    List of exchange wrapper enumerations corresponding to 
-     * @param _sendTokens              A Struct containing exchange issuance metadata
-     * @param _sendTokenAmounts        A Struct containing exchange issuance metadata
+     * @param _cToken                Instance of cToken component to mint
+     * @param _underlyingAddress     Underlying component address
+     * @param _underlyingQuantity    Quantity of underlying to mint
      */
-    function redeemCTokensAndTransferSendTokensToExchangeWrappers(
-        uint8[] memory _sendTokenExchangeIds,
-        address[] memory _sendTokens,
-        uint256[] memory _sendTokenAmounts
+    function mintCToken(
+        ICToken _cToken,
+        address _underlyingAddress,
+        uint256 _underlyingQuantity
+    )
+        private
+    {        
+        // Ensure allowance for underlying token to cToken contract.
+        ERC20Wrapper.ensureAllowance(
+            _underlyingAddress,
+            address(this),
+            address(_cToken),
+            _underlyingQuantity
+        );
+
+        // Mint cToken using underlying
+        uint256 mintResponse = _cToken.mint(_underlyingQuantity);
+        require(
+            mintResponse == 0,
+            "CTokenExchangeIssuanceModule.mintCToken: Error minting cToken"
+        );
+
+        // Get balance of cTokens minted in the contract
+        uint256 cTokenQuantity = ERC20Wrapper.balanceOf(
+            address(_cToken),
+            address(this)
+        );
+
+        // Ensure allowance for cToken to transferProxy. This is for the case if we add a new cToken to the whitelist
+        ERC20Wrapper.ensureAllowance(
+            address(_cToken),
+            address(this),
+            transferProxy,
+            cTokenQuantity
+        );
+
+        // Deposit transformed cTokens to vault (owned by order sender)
+        coreInstance.depositModule(
+            address(this),
+            msg.sender,
+            address(_cToken),
+            cTokenQuantity
+        );
+    }
+
+    /**
+     * Withdraw cToken from vault, and redeem cToken in module
+     *
+     * @param _cToken                cToken component to redeem
+     * @param _cTokenQuantity        Quantity of cToken to redeem
+     */
+    function redeemCToken(
+        address _cToken,
+        uint256 _cTokenQuantity
     )
         private
     {
-        for (uint256 i = 0; i < _sendTokens.length; i++) {
-            address currentComponentAddress = _sendTokens[i];
-            uint256 currentComponentQuantity = _sendTokenAmounts[i];
+        // Withdraw cToken send tokens from vault (owned by this contract) to the module
+        coreInstance.withdrawModule(
+            address(this),
+            address(this),
+            _cToken,
+            _cTokenQuantity
+        );
 
-            // Withdraw send tokens from vault (owned by this contract) to the module
-            coreInstance.withdrawModule(
-                address(this),
-                address(this),
-                currentComponentAddress,
-                currentComponentQuantity
-            );
+        ICToken cTokenInstance = ICToken(_cToken);
 
-            // If cToken redeem cToken and replace send token and amounts with underlying
-            address underlyingAddress = cTokenWhiteList.addressToAddressWhiteList(currentComponentAddress);
-            if (underlyingAddress != address(0)) {
-
-                ICToken cTokenInstance = ICToken(currentComponentAddress);
-
-                // Redeem cToken to underlying
-                uint256 redeemResponse = cTokenInstance.redeem(currentComponentQuantity);
-                require(
-                    redeemResponse == 0,
-                    "CTokenExchangeIssuanceModule.exchangeRedeem: Error redeeming cToken"
-                );
-
-                // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
-                uint256 exchangeRate = cTokenInstance.exchangeRateCurrent();
-                uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(currentComponentQuantity, exchangeRate);
-                
-                // Replace current token address and amounts with underlying address and amounts
-                currentComponentAddress = underlyingAddress;
-                currentComponentQuantity = underlyingQuantity;
-            }
-
-            // Ensure allowance for current component to transferProxy.
-            ERC20Wrapper.ensureAllowance(
-                currentComponentAddress,
-                address(this),
-                transferProxy,
-                currentComponentQuantity
-            );
-
-            // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = coreInstance.exchangeIds(_sendTokenExchangeIds[i]);
-
-            // Transfer send tokens to the appropriate exchange wrapper
-            coreInstance.transferModule(
-                currentComponentAddress,
-                currentComponentQuantity,
-                address(this),
-                exchangeWrapper
-            );
-        }
+        // Redeem cToken to underlying
+        uint256 redeemResponse = cTokenInstance.redeem(_cTokenQuantity);
+        require(
+            redeemResponse == 0,
+            "CTokenExchangeIssuanceModule.redeemCToken: Error redeeming cToken"
+        );
     }
 
     /**
@@ -416,7 +487,7 @@ contract CTokenExchangeIssuanceModule is
     }
 
     /**
-     * Withdraws any remaining un-exchanged components from the Vault in the posession of this contract
+     * Withdraws any remaining un-exchanged cToken and non cToken components from the Vault in the possession of this contract
      * to the caller
      *
      * @param  _setAddress   Address of the Base Set
@@ -427,20 +498,48 @@ contract CTokenExchangeIssuanceModule is
         private
     {
         address[] memory baseSetComponents = ISetToken(_setAddress).getComponents();
-        uint256[] memory baseSetWithdrawQuantities = new uint256[](baseSetComponents.length);
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
-            uint256 withdrawQuantity = vaultInstance.getOwnerBalance(baseSetComponents[i], address(this));
-            if (withdrawQuantity > 0) {
-                baseSetWithdrawQuantities[i] = withdrawQuantity;    
-            }
-        }
+            address currentComponentAddress = baseSetComponents[i];
+            uint256 currentComponentQuantity = vaultInstance.getOwnerBalance(currentComponentAddress, address(this));
 
-        // Return the unexchanged components to the user
-        coreInstance.batchWithdrawModule(
-            address(this),
-            msg.sender,
-            baseSetComponents,
-            baseSetWithdrawQuantities
-        );            
+            // Remaining cTokens are redeemed to underlying and all tokens are sent to the caller
+            if (currentComponentQuantity > 0) {
+                address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
+                if (underlyingAddress != address(0)) {
+                    // Withdraw cToken send tokens from vault (owned by this contract) to the module and redeem
+                    redeemCToken(currentComponentAddress, currentComponentQuantity);
+
+                    // Get balance of underlying after cToken redemption.
+                    uint256 underlyingQuantity = ERC20Wrapper.balanceOf(
+                        underlyingAddress,
+                        address(this)
+                    );
+
+                    // Ensure allowance for underlying component to transferProxy.
+                    ERC20Wrapper.ensureAllowance(
+                        underlyingAddress,
+                        address(this),
+                        transferProxy,
+                        underlyingQuantity
+                    );
+
+                    // Transfer underlying components to caller
+                    coreInstance.transferModule(
+                        underlyingAddress,
+                        underlyingQuantity,
+                        address(this),
+                        msg.sender
+                    );
+                } else {
+                    // Return the unexchanged non cToken components to the caller
+                    coreInstance.withdrawModule(
+                        address(this),
+                        msg.sender,
+                        currentComponentAddress,
+                        currentComponentQuantity
+                    );  
+                }
+            }
+        }           
     }
 }

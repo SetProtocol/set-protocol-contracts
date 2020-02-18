@@ -12,7 +12,7 @@ import {
   RebalancingSetFeeMockContract,
 } from '../contracts';
 import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
-import { ether } from '@utils/units';
+import { ether } from '../units';
 import {
   ONE_YEAR_IN_SECONDS,
   ZERO

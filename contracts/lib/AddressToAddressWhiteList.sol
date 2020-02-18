@@ -27,7 +27,7 @@ import { AddressArrayUtils } from "./AddressArrayUtils.sol";
  * @title AddressToAddressWhiteList
  * @author Set Protocol
  *
- * WhiteList that matches whitelisted an address to another addresses
+ * WhiteList that matches addresses to other addresses
  */
 contract AddressToAddressWhiteList is
     Ownable,
@@ -37,19 +37,19 @@ contract AddressToAddressWhiteList is
 
     /* ============ State Variables ============ */
 
-    address[] public addresses;
-    mapping(address => address) public addressToAddressWhiteList;
+    address[] public keys;
+    mapping(address => address) public whitelist;
 
     /* ============ Events ============ */
 
-    event AddressToAddressPairAdded(
-        address _keyTypeAddress,
-        address _valueTypeAddress
+    event PairAdded(
+        address _key,
+        address _value
     );
 
-    event AddressToAddressPairRemoved(
-        address _keyTypeAddress,
-        address _valueTypeAddress
+    event PairRemoved(
+        address _key,
+        address _value
     );
 
     /* ============ Constructor ============ */
@@ -59,28 +59,28 @@ contract AddressToAddressWhiteList is
      *
      * Allow initial addresses to be passed in so a separate transaction is not required for each.
      * Each key type address passed is matched with a corresponding value type token address at the same index.
-     * The _initialKeyTypeAddresses and _initialValueTypeAddresses arrays must be equal length.
+     * The _initialKeys and _initialValues arrays must be equal length.
      *
-     * @param _initialKeyTypeAddresses         Starting set of key type addresses to whitelist
-     * @param _initialValueTypeAddresses       Starting set of value type addresses to whitelist
+     * @param _initialKeys         Starting set of key type addresses to whitelist
+     * @param _initialValues       Starting set of value type addresses to whitelist
      */
     constructor(
-        address[] memory _initialKeyTypeAddresses,
-        address[] memory _initialValueTypeAddresses
+        address[] memory _initialKeys,
+        address[] memory _initialValues
     )
         public
     {
         require(
-            _initialKeyTypeAddresses.length == _initialValueTypeAddresses.length,
+            _initialKeys.length == _initialValues.length,
             "AddressToAddressWhiteList.constructor: Address array lengths must match."
         );
 
         // Add each of initial addresses to state
-        for (uint256 i = 0; i < _initialKeyTypeAddresses.length; i++) {
-            address keyTypeAddressToAdd = _initialKeyTypeAddresses[i];
+        for (uint256 i = 0; i < _initialKeys.length; i++) {
+            address keyTypeAddressToAdd = _initialKeys[i];
 
-            addresses.push(keyTypeAddressToAdd);
-            addressToAddressWhiteList[keyTypeAddressToAdd] = _initialValueTypeAddresses[i];
+            keys.push(keyTypeAddressToAdd);
+            whitelist[keyTypeAddressToAdd] = _initialValues[i];
         }
     }
 
@@ -89,77 +89,77 @@ contract AddressToAddressWhiteList is
     /**
      * Add an address to the whitelist
      *
-     * @param _keyTypeAddress     Key type address to add to the whitelist
-     * @param _valueTypeAddress   Value type address to add to the whitelist under _keyTypeAddress
+     * @param _key     Key type address to add to the whitelist
+     * @param _value   Value type address to add to the whitelist under _key
      */
-    function addAddressToAddressPair(
-        address _keyTypeAddress,
-        address _valueTypeAddress
+    function addPair(
+        address _key,
+        address _value
     )
         external
         onlyOwner
         timeLockUpgrade
     {
         require(
-            addressToAddressWhiteList[_keyTypeAddress] == address(0),
-            "AddressToAddressWhiteList.addAddressToAddressPair: Address pair already exists."
+            whitelist[_key] == address(0),
+            "AddressToAddressWhiteList.addPair: Address pair already exists."
         );
 
-        addresses.push(_keyTypeAddress);
-        addressToAddressWhiteList[_keyTypeAddress] = _valueTypeAddress;
+        keys.push(_key);
+        whitelist[_key] = _value;
 
-        emit AddressToAddressPairAdded(_keyTypeAddress, _valueTypeAddress);
+        emit PairAdded(_key, _value);
     }
 
     /**
      * Remove a address to address pair from the whitelist
      *
-     * @param _keyTypeAddress    Key type address to remove to the whitelist
+     * @param _key    Key type address to remove to the whitelist
      */
-    function removeAddressToAddressPair(
-        address _keyTypeAddress
+    function removePair(
+        address _key
     )
         external
         onlyOwner
     {
-        address valueTypeAddress = addressToAddressWhiteList[_keyTypeAddress];
+        address valueTypeAddress = whitelist[_key];
 
         require(
             valueTypeAddress != address(0),
-            "AddressToAddressWhiteList.removeAddressToAddressPair: key type address is not current whitelisted."
+            "AddressToAddressWhiteList.removePair: key type address is not current whitelisted."
         );
 
-        addresses = addresses.remove(_keyTypeAddress);
-        addressToAddressWhiteList[_keyTypeAddress] = address(0);
+        keys = keys.remove(_key);
+        whitelist[_key] = address(0);
 
-        emit AddressToAddressPairRemoved(_keyTypeAddress, valueTypeAddress);
+        emit PairRemoved(_key, valueTypeAddress);
     }
 
     /**
      * Edit value type address associated with a key
      *
-     * @param _keyTypeAddress       Key type address to add to the whitelist
-     * @param _valueTypeAddress     Value type address to add to the whitelist under _keyTypeAddress
+     * @param _key       Key type address to add to the whitelist
+     * @param _value     Value type address to add to the whitelist under _key
      */
-    function editAddressToAddressPair(
-        address _keyTypeAddress,
-        address _valueTypeAddress
+    function editPair(
+        address _key,
+        address _value
     )
         external
         onlyOwner
         timeLockUpgrade
     {
         require(
-            addressToAddressWhiteList[_keyTypeAddress] != address(0),
-            "AddressToAddressWhiteList.editAddressToAddressPair: Address pair must exist."
+            whitelist[_key] != address(0),
+            "AddressToAddressWhiteList.editPair: Address pair must exist."
         );
 
         // Set new value type address for passed key type address
-        addressToAddressWhiteList[_keyTypeAddress] = _valueTypeAddress;
+        whitelist[_key] = _value;
 
-        emit AddressToAddressPairAdded(
-            _keyTypeAddress,
-            _valueTypeAddress
+        emit PairAdded(
+            _key,
+            _value
         );
     }
 
@@ -173,29 +173,29 @@ contract AddressToAddressWhiteList is
         view
         returns (address[] memory)
     {
-        return addresses;
+        return keys;
     }
 
     /**
      * Return array of value type addresses based on passed in key type addresses 
      *
-     * @param  _keyTypeAddresses   Array of key type addresses to get value type addresses for
+     * @param  _key                Array of key type addresses to get value type addresses for
      * @return address[]           Array of value type addresses
      */
-    function getAddressValuesByKeys(
-        address[] calldata _keyTypeAddresses
+    function getValues(
+        address[] calldata _key
     )
         external
         view
         returns (address[] memory)
     {
         // Get length of passed array
-        uint256 arrayLength = _keyTypeAddresses.length;
+        uint256 arrayLength = _key.length;
 
         // Check that passed array length is greater than 0
         require(
             arrayLength > 0,
-            "AddressToAddressWhiteList.getAddressValuesByKeys: Array length must be greater than 0."
+            "AddressToAddressWhiteList.getValues: Array length must be greater than 0."
         );
 
         // Instantiate value type addresses array
@@ -203,8 +203,8 @@ contract AddressToAddressWhiteList is
 
         for (uint256 i = 0; i < arrayLength; i++) {
             // Get value type address for key type address at index i
-            valueTypeAddresses[i] = getAddressValueByKey(
-                _keyTypeAddresses[i]
+            valueTypeAddresses[i] = getValue(
+                _key[i]
             );
         }
 
@@ -214,11 +214,11 @@ contract AddressToAddressWhiteList is
     /**
      * Return value type address associated with a passed key type address 
      *
-     * @param  _keyTypeAddress    Address of key type
-     * @return address            Address associated with _keyTypeAddress 
+     * @param  _key               Address of key type
+     * @return address            Address associated with _key 
      */
-    function getAddressValueByKey(
-        address _keyTypeAddress
+    function getValue(
+        address _key
     )
         public
         view
@@ -226,29 +226,29 @@ contract AddressToAddressWhiteList is
     {
         // Require key to have matching value type address
         require(
-            addressToAddressWhiteList[_keyTypeAddress] != address(0),
-            "AddressToAddressWhiteList.getAddressValueByKey: No value for that address."
+            whitelist[_key] != address(0),
+            "AddressToAddressWhiteList.getValue: No value for that address."
         );
 
         // Return address associated with key
-        return addressToAddressWhiteList[_keyTypeAddress];       
+        return whitelist[_key];       
     }
 
     /**
      * Verifies an array of addresses against the whitelist
      *
-     * @param  _keyTypeAddresses    Array of key type addresses to check if value exists
+     * @param  _keys                Array of key type addresses to check if value exists
      * @return bool                 Whether all addresses in the list are whitelisted
      */
     function areValidAddresses(
-        address[] calldata _keyTypeAddresses
+        address[] calldata _keys
     )
         external
         view
         returns (bool)
     {
         // Get length of passed array
-        uint256 arrayLength = _keyTypeAddresses.length;
+        uint256 arrayLength = _keys.length;
 
         // Check that passed array length is greater than 0
         require(
@@ -258,7 +258,7 @@ contract AddressToAddressWhiteList is
 
         for (uint256 i = 0; i < arrayLength; i++) {
             // Return false if key type address doesn't have matching value type address
-            if (addressToAddressWhiteList[_keyTypeAddresses[i]] == address(0)) {
+            if (whitelist[_keys[i]] == address(0)) {
                 return false;
             }
         }

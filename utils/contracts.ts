@@ -14,6 +14,7 @@ export { CoreContract } from '../types/generated/core';
 export { CoreIssuanceLibraryContract } from '../types/generated/core_issuance_library';
 export { CoreIssuanceLibraryMockContract } from '../types/generated/core_issuance_library_mock';
 export { CoreMockContract } from '../types/generated/core_mock';
+export { CTokenExchangeIssuanceModuleContract } from '../types/generated/c_token_exchange_issuance_module';
 export { ERC20ViewerContract } from '../types/generated/erc20_viewer';
 export { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 export { ERC20WrapperContract } from '../types/generated/erc20_wrapper';
@@ -51,6 +52,10 @@ export { RebalanceMockContract } from '../types/generated/rebalance_mock';
 export { RebalancingSetEthBidderContract } from '../types/generated/rebalancing_set_eth_bidder';
 export { RebalancingSetFeeMockContract } from '../types/generated/rebalancing_set_fee_mock';
 export { RebalancingSetCTokenBidderContract } from '../types/generated/rebalancing_set_c_token_bidder';
+export {
+  RebalancingSetCTokenExchangeIssuanceModuleContract,
+} from '../types/generated/rebalancing_set_c_token_exchange_issuance_module';
+export { RebalancingSetCTokenIssuanceModuleContract } from '../types/generated/rebalancing_set_c_token_issuance_module';
 export {
   RebalancingSetExchangeIssuanceModuleContract,
 } from '../types/generated/rebalancing_set_exchange_issuance_module';

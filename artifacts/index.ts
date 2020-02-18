@@ -16,7 +16,6 @@ export { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
 export { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
 export { KyberNetworkWrapper } from "./ts/KyberNetworkWrapper";
 export { LinearAuctionPriceCurve } from "./ts/LinearAuctionPriceCurve";
-export { Median } from "./ts/Median";
 export { NoDecimalTokenMock } from "./ts/NoDecimalTokenMock";
 export { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
 export { OracleWhiteList } from "./ts/OracleWhiteList";
@@ -46,7 +45,6 @@ export { StartRebalanceLibrary } from "./ts/StartRebalanceLibrary";
 export { TimeLockUpgrade } from "./ts/TimeLockUpgrade";
 export { TimeLockUpgradeV2 } from "./ts/TimeLockUpgradeV2";
 export { TransferProxy } from "./ts/TransferProxy";
-export { UpdatableOracleMock } from "./ts/UpdatableOracleMock";
 export { Vault } from "./ts/Vault";
 export { WethMock } from "./ts/WethMock";
 export { WhiteList } from "./ts/WhiteList";
@@ -77,7 +75,6 @@ export {
   KyberNetworkWrapperContract,
   LinearAuctionLiquidatorContract,
   LinearAuctionPriceCurveContract,
-  MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
   OracleWhiteListContract,
@@ -108,7 +105,6 @@ export {
   TimeLockUpgradeV2Contract,
   TimeLockUpgradeMockContract,
   TransferProxyContract,
-  UpdatableOracleMockContract,
   VaultContract,
   WethMockContract,
   WhiteListContract,

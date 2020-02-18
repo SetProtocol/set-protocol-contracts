@@ -22,26 +22,23 @@ import { IAddressToAddressWhiteList } from "../../interfaces/IAddressToAddressWh
 
 
 /**
- * @title CTokenModuleCoreState
+ * @title CTokenWhiteListed
  * @author Set Protocol
  *
- * The CTokenModuleCoreState library maintains Core-related state for modules that interact with cTokens.
+ * The CTokenWhiteListed library maintains cToken related state for modules that interact with cTokens.
  *
  */
-contract CTokenModuleCoreState {
+contract CTokenWhiteListed {
 
     /* ============ State Variables ============ */
-
-    // Address of transferProxy contract
-    address public transferProxy;
 
     // Address and instance of AddressToAddressWhiteList contract
     IAddressToAddressWhiteList public cTokenWhiteList; 
 
-    /* ============ Public Getters ============ */
+    /* ============ Constructor ============ */
 
     /**
-     * Constructor function for CTokenModuleCoreState
+     * Constructor function for CTokenWhiteListed
      *
      * @param _transferProxy       The address of TransferProxy
      * @param _cTokenWhiteList     The instance of cTokenWhiteList contract
@@ -52,9 +49,10 @@ contract CTokenModuleCoreState {
     )
         public
     {
-        transferProxy = _transferProxy;
+        // Note: transferProxy is not committed here. Only used for token approvals
         cTokenWhiteList = _cTokenWhiteList;
 
+        // Note: We do not expect there to be many validAddresses, so we won't hit gas limit
         address[] memory cTokenAddresses = _cTokenWhiteList.validAddresses();
 
         for (uint256 i = 0; i < cTokenAddresses.length; i++) {

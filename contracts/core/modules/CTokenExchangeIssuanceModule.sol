@@ -21,7 +21,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { CompoundUtils } from "../../lib/CompoundUtils.sol";
-import { CTokenModuleCoreState } from "./lib/CTokenModuleCoreState.sol";
+import { CTokenWhiteListed } from "./lib/CTokenWhiteListed.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ExchangeIssuanceLibrary } from "./lib/ExchangeIssuanceLibrary.sol";
 import { ExchangeIssuanceModule } from "./ExchangeIssuanceModule.sol";
@@ -40,9 +40,14 @@ import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
  */
 contract CTokenExchangeIssuanceModule is
     ExchangeIssuanceModule,
-    CTokenModuleCoreState
+    CTokenWhiteListed
 {
     using SafeMath for uint256;
+
+    /* ============ State Variables ============ */
+
+    // Address of transferProxy
+    address public transferProxy;
 
     /* ============ Constructor ============ */
 
@@ -65,11 +70,13 @@ contract CTokenExchangeIssuanceModule is
             _core,
             _vault
         )
-        CTokenModuleCoreState(
+        CTokenWhiteListed(
             _transferProxy,
             _cTokenWhiteList
         )
-    {}
+    {
+        transferProxy = _transferProxy;
+    }
 
     /* ============ Public Functions ============ */
 
@@ -240,7 +247,7 @@ contract CTokenExchangeIssuanceModule is
             uint256 currentComponentQuantity = _receiveTokenAmounts[i];
 
             // If cToken, calculate required underlying tokens and transfer to module
-            address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
+            address underlyingAddress = cTokenWhiteList.whitelist(currentComponentAddress);
             if (underlyingAddress != address(0)) {
                 ICToken cTokenInstance = ICToken(currentComponentAddress);
 
@@ -292,7 +299,7 @@ contract CTokenExchangeIssuanceModule is
 
             // If cToken and balance of cToken in vault is less than required for issuing the Set
             // transfer difference from user and mint cToken
-            address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
+            address underlyingAddress = cTokenWhiteList.whitelist(currentComponentAddress);
             if (underlyingAddress != address(0) && currentComponentQuantity < requiredQuantity) {
                 // Calculate amount of remaining cTokens needed to issue Set
                 uint256 quantityToMint = requiredQuantity - currentComponentQuantity;
@@ -337,7 +344,7 @@ contract CTokenExchangeIssuanceModule is
             uint256 currentComponentQuantity = _sendTokenAmounts[i];
 
             // If cToken redeem cToken and replace send token and amounts with underlying
-            address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
+            address underlyingAddress = cTokenWhiteList.whitelist(currentComponentAddress);
             if (underlyingAddress != address(0)) {
                 // Withdraw cToken send tokens from vault (owned by this contract) to the module and redeem cToken
                 redeemCToken(currentComponentAddress, currentComponentQuantity);
@@ -504,7 +511,7 @@ contract CTokenExchangeIssuanceModule is
 
             // Remaining cTokens are redeemed to underlying and all tokens are sent to the caller
             if (currentComponentQuantity > 0) {
-                address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
+                address underlyingAddress = cTokenWhiteList.whitelist(currentComponentAddress);
                 if (underlyingAddress != address(0)) {
                     // Withdraw cToken send tokens from vault (owned by this contract) to the module and redeem
                     redeemCToken(currentComponentAddress, currentComponentQuantity);

@@ -21,7 +21,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { CompoundUtils } from "../../lib/CompoundUtils.sol";
-import { CTokenModuleCoreState } from "./lib/CTokenModuleCoreState.sol";
+import { CTokenWhiteListed } from "./lib/CTokenWhiteListed.sol";
 import { ICToken } from "../interfaces/ICToken.sol";
 import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
@@ -40,7 +40,7 @@ import { RebalancingSetIssuanceModule } from "./RebalancingSetIssuanceModule.sol
  */
 contract RebalancingSetCTokenIssuanceModule is
     RebalancingSetIssuanceModule,
-    CTokenModuleCoreState
+    CTokenWhiteListed
 {
     using SafeMath for uint256;
 
@@ -69,7 +69,7 @@ contract RebalancingSetCTokenIssuanceModule is
             _transferProxy,
             _weth
         )
-        CTokenModuleCoreState(
+        CTokenWhiteListed(
             _transferProxy,
             _cTokenWhiteList
         )
@@ -352,7 +352,7 @@ contract RebalancingSetCTokenIssuanceModule is
             uint256 currentComponentQuantity = _baseSetQuantity.div(baseSetNaturalUnit).mul(currentUnit);
 
             // If cToken, calculate required underlying tokens and transfer to module
-            address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
+            address underlyingAddress = cTokenWhiteList.whitelist(currentComponentAddress);
             if (underlyingAddress != address(0)) {
                 // Deposit underlying components and mint cToken
                 depositAndMintCToken(
@@ -481,7 +481,7 @@ contract RebalancingSetCTokenIssuanceModule is
             );
 
             // If cToken, calculate required underlying tokens and transfer to module
-            address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
+            address underlyingAddress = cTokenWhiteList.whitelist(currentComponentAddress);
             if (underlyingAddress != address(0)) {
                 // Redeem underlying components send to user
                 redeemCTokenAndWithdraw(

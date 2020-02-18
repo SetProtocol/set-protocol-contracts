@@ -38,7 +38,7 @@ contract AddressToAddressWhiteList is
     /* ============ State Variables ============ */
 
     address[] public keys;
-    mapping(address => address) public keysToValues;
+    mapping(address => address) public whitelist;
 
     /* ============ Events ============ */
 
@@ -80,7 +80,7 @@ contract AddressToAddressWhiteList is
             address keyTypeAddressToAdd = _initialKeys[i];
 
             keys.push(keyTypeAddressToAdd);
-            keysToValues[keyTypeAddressToAdd] = _initialValues[i];
+            whitelist[keyTypeAddressToAdd] = _initialValues[i];
         }
     }
 
@@ -101,12 +101,12 @@ contract AddressToAddressWhiteList is
         timeLockUpgrade
     {
         require(
-            keysToValues[_key] == address(0),
+            whitelist[_key] == address(0),
             "AddressToAddressWhiteList.addPair: Address pair already exists."
         );
 
         keys.push(_key);
-        keysToValues[_key] = _value;
+        whitelist[_key] = _value;
 
         emit PairAdded(_key, _value);
     }
@@ -122,7 +122,7 @@ contract AddressToAddressWhiteList is
         external
         onlyOwner
     {
-        address valueTypeAddress = keysToValues[_key];
+        address valueTypeAddress = whitelist[_key];
 
         require(
             valueTypeAddress != address(0),
@@ -130,7 +130,7 @@ contract AddressToAddressWhiteList is
         );
 
         keys = keys.remove(_key);
-        keysToValues[_key] = address(0);
+        whitelist[_key] = address(0);
 
         emit PairRemoved(_key, valueTypeAddress);
     }
@@ -150,12 +150,12 @@ contract AddressToAddressWhiteList is
         timeLockUpgrade
     {
         require(
-            keysToValues[_key] != address(0),
+            whitelist[_key] != address(0),
             "AddressToAddressWhiteList.editPair: Address pair must exist."
         );
 
         // Set new value type address for passed key type address
-        keysToValues[_key] = _value;
+        whitelist[_key] = _value;
 
         emit PairAdded(
             _key,
@@ -226,12 +226,12 @@ contract AddressToAddressWhiteList is
     {
         // Require key to have matching value type address
         require(
-            keysToValues[_key] != address(0),
+            whitelist[_key] != address(0),
             "AddressToAddressWhiteList.getValue: No value for that address."
         );
 
         // Return address associated with key
-        return keysToValues[_key];       
+        return whitelist[_key];       
     }
 
     /**
@@ -258,7 +258,7 @@ contract AddressToAddressWhiteList is
 
         for (uint256 i = 0; i < arrayLength; i++) {
             // Return false if key type address doesn't have matching value type address
-            if (keysToValues[_keys[i]] == address(0)) {
+            if (whitelist[_keys[i]] == address(0)) {
                 return false;
             }
         }

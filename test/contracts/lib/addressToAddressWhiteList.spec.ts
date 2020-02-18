@@ -94,7 +94,7 @@ contract('AddressToAddressWhiteList', accounts => {
       expect(addresses).to.deep.equal(subjectInitialKeyTypeAddresses);
 
       subjectInitialKeyTypeAddresses.forEach(async (address, index) => {
-        const valueTypeAddress = await addressToAddressWhiteList.keysToValues.callAsync(address);
+        const valueTypeAddress = await addressToAddressWhiteList.whitelist.callAsync(address);
         expect(valueTypeAddress).to.equal(subjectInitialValueTypeAddresses[index]);
       });
     });
@@ -151,12 +151,12 @@ contract('AddressToAddressWhiteList', accounts => {
 
     it('adds the token address to the whitelist mapping with correct value type address', async () => {
       const existingValueTypeAddress =
-        await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyTypeToAdd);
+        await addressToAddressWhiteList.whitelist.callAsync(subjectKeyTypeToAdd);
       expect(existingValueTypeAddress).to.equal(NULL_ADDRESS);
 
       await subject();
 
-      const valueTypeAddress = await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyTypeToAdd);
+      const valueTypeAddress = await addressToAddressWhiteList.whitelist.callAsync(subjectKeyTypeToAdd);
       expect(valueTypeAddress).to.equal(subjectValueTypeToAdd);
     });
 
@@ -224,12 +224,12 @@ contract('AddressToAddressWhiteList', accounts => {
 
     it('updates the address in the whitelist mapping to null address', async () => {
       const existingValueTypeAddress =
-        await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyToRemove);
+        await addressToAddressWhiteList.whitelist.callAsync(subjectKeyToRemove);
       expect(existingValueTypeAddress).to.equal(thirdValueTypeAddress);
 
       await subject();
 
-      const valueTypeAddress = await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyToRemove);
+      const valueTypeAddress = await addressToAddressWhiteList.whitelist.callAsync(subjectKeyToRemove);
       expect(valueTypeAddress).to.equal(NULL_ADDRESS);
     });
 
@@ -300,12 +300,12 @@ contract('AddressToAddressWhiteList', accounts => {
 
     it('adds the token address to the whitelist mapping with correct value type address', async () => {
       const existingValueTypeAddress =
-        await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyTypeToAdd);
+        await addressToAddressWhiteList.whitelist.callAsync(subjectKeyTypeToAdd);
       expect(existingValueTypeAddress).to.equal(secondValueTypeAddress);
 
       await subject();
 
-      const valueTypeAddress = await addressToAddressWhiteList.keysToValues.callAsync(subjectKeyTypeToAdd);
+      const valueTypeAddress = await addressToAddressWhiteList.whitelist.callAsync(subjectKeyTypeToAdd);
       expect(valueTypeAddress).to.equal(subjectValueTypeToAdd);
     });
 

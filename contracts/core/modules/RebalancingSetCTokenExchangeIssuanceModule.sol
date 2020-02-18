@@ -21,6 +21,7 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../../lib/CommonMath.sol";
+import { CTokenWhiteListed } from "./lib/CTokenWhiteListed.sol";
 import { ExchangeIssuanceLibrary } from "./lib/ExchangeIssuanceLibrary.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { IAddressToAddressWhiteList } from "../interfaces/IAddressToAddressWhiteList.sol";
@@ -43,14 +44,10 @@ import { RebalancingSetExchangeIssuanceModule } from "./RebalancingSetExchangeIs
  * decentralized exchanges. If cToken, the module handles redeeming cToken during redemption process
  */
 contract RebalancingSetCTokenExchangeIssuanceModule is
-    RebalancingSetExchangeIssuanceModule
+    RebalancingSetExchangeIssuanceModule,
+    CTokenWhiteListed
 {
     using SafeMath for uint256;
-
-    /* ============ State Variables ============ */
-
-    // Address and instance of AddressToAddressWhiteList
-    IAddressToAddressWhiteList public cTokenWhiteList;
 
     /* ============ Constructor ============ */
 
@@ -79,9 +76,11 @@ contract RebalancingSetCTokenExchangeIssuanceModule is
             _wrappedEther,
             _vault
         )
-    {
-        cTokenWhiteList = _cTokenWhiteList;
-    }
+        CTokenWhiteListed(
+            address(_transferProxy),
+            _cTokenWhiteList
+        )
+    {}
 
     /* ============ Private Functions ============ */
 
@@ -104,7 +103,7 @@ contract RebalancingSetCTokenExchangeIssuanceModule is
             address currentComponentAddress = baseSetComponents[i];
             uint256 currentComponentQuantity = ERC20Wrapper.balanceOf(baseSetComponents[i], address(this));
 
-            address underlyingAddress = cTokenWhiteList.keysToValues(currentComponentAddress);
+            address underlyingAddress = cTokenWhiteList.whitelist(currentComponentAddress);
             if (underlyingAddress != address(0)) {
                 // Get balance of underlying
                 uint256 underlyingQuantity = ERC20Wrapper.balanceOf(

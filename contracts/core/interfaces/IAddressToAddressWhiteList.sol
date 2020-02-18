@@ -32,7 +32,7 @@ interface IAddressToAddressWhiteList {
      * @param  _key     Address to check
      * @return bool                Whether passed in address is whitelisted
      */
-    function keysToValues(
+    function whitelist(
         address _key
     )
         external

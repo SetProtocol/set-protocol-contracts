@@ -19,7 +19,6 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import { Bytes32Library } from "../../../lib/Bytes32Library.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
 import { LibBytes } from "../../../external/0x/LibBytes.sol";
@@ -32,7 +31,6 @@ import { LibBytes } from "../../../external/0x/LibBytes.sol";
 library FactoryUtilsLibrary {
     using SafeMath for uint256;
     using LibBytes for bytes;
-    using Bytes32Library for bytes32;
 
     struct InitRebalancingParameters {
         address manager;
@@ -51,18 +49,18 @@ library FactoryUtilsLibrary {
      */
     function validateRebalanceSetCalldata(
         InitRebalancingParameters memory _parameters,
-        address liquidatorWhitelist,
-        address feeCalculatorWhitelist,
-        uint256 minimumRebalanceInterval,
-        uint256 minimumFailRebalancePeriod,
-        uint256 maximumFailRebalancePeriod
+        address _liquidatorWhitelist,
+        address _feeCalculatorWhitelist,
+        uint256 _minimumRebalanceInterval,
+        uint256 _minimumFailRebalancePeriod,
+        uint256 _maximumFailRebalancePeriod
     )
         public
         view
     {
         require(
             _parameters.manager != address(0),
-            "Bad manager"
+            "Null manager"
         );
 
         require(
@@ -73,24 +71,24 @@ library FactoryUtilsLibrary {
         // Require liquidator address is non-zero and is whitelisted by the liquidatorWhitelist
         require(
             _parameters.liquidator != address(0) && 
-            IWhiteList(liquidatorWhitelist).whiteList(_parameters.liquidator),
+            IWhiteList(_liquidatorWhitelist).whiteList(_parameters.liquidator),
             "Bad liquidator"
         );
 
-        // Require rebalance fee is whitelisted by the liquidatorWhitelist
+        // Require rebalance fee calculator is whitelisted by the liquidatorWhitelist
         require(
-            IWhiteList(feeCalculatorWhitelist).whiteList(address(_parameters.rebalanceFeeCalculator)),
+            IWhiteList(_feeCalculatorWhitelist).whiteList(address(_parameters.rebalanceFeeCalculator)),
             "Bad fee calculator"
         );
 
         require(
-            _parameters.rebalanceInterval >= minimumRebalanceInterval,
+            _parameters.rebalanceInterval >= _minimumRebalanceInterval,
             "Bad Rebalance interval"
         ); 
 
         require(
-            _parameters.rebalanceFailPeriod >= minimumFailRebalancePeriod &&
-            _parameters.rebalanceFailPeriod <= maximumFailRebalancePeriod,
+            _parameters.rebalanceFailPeriod >= _minimumFailRebalancePeriod &&
+            _parameters.rebalanceFailPeriod <= _maximumFailRebalancePeriod,
             "Bad Fail Period"
         );
     }

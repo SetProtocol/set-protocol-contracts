@@ -106,8 +106,6 @@ contract RebalancingSettlement is
         uint256 maxIssueAmount = calculateMaxIssueAmount(setToken);
 
         // Issue amount of Sets that is closest multiple of nextNaturalUnit to the maxIssueAmount
-        // Since the initial division will round down to the nearest whole number when we multiply
-        // by that same number we will return the closest multiple less than the maxIssueAmount
         uint256 issueAmount = maxIssueAmount.sub(maxIssueAmount.mod(setToken.naturalUnit));
 
         return issueAmount;

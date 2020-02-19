@@ -9,6 +9,9 @@ import { Address } from 'set-protocol-utils';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  UpdatableOracleMockContract
+} from 'set-protocol-oracles';
+import {
   ConstantAuctionPriceCurveContract,
   CoreMockContract,
   FixedFeeCalculatorContract,
@@ -25,7 +28,6 @@ import {
   SocialTradingManagerMockContract,
   StandardTokenMockContract,
   TransferProxyContract,
-  UpdatableOracleMockContract,
   VaultContract,
   WhiteListContract,
 } from '@utils/contracts';

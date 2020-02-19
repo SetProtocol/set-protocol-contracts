@@ -26,7 +26,6 @@ export { FailAuctionLibraryContract } from '../types/generated/fail_auction_libr
 export { FactoryUtilsLibraryContract } from '../types/generated/factory_utils_library';
 export { FeeCalculatorMockContract } from '../types/generated/fee_calculator_mock';
 export { FixedFeeCalculatorMockContract } from '../types/generated/fixed_fee_calculator_mock';
-export { FeedFactoryContract } from '../types/generated/feed_factory';
 export { FixedFeeCalculatorContract } from '../types/generated/fixed_fee_calculator';
 export { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
 export { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
@@ -36,14 +35,12 @@ export { LinearAuctionMockContract } from '../types/generated/linear_auction_moc
 export { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
 export { LiquidatorMockContract } from '../types/generated/liquidator_mock';
 export { LiquidatorProxyContract } from '../types/generated/liquidator_proxy';
-export { MedianContract } from '../types/generated/median';
 export { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 export { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 export { OracleWhiteListContract } from '../types/generated/oracle_white_list';
 export { PerformanceFeeCalculatorContract } from '../types/generated/performance_fee_calculator';
 export { PlaceBidLibraryContract } from '../types/generated/place_bid_library';
 export { PlaceBidMockContract } from '../types/generated/place_bid_mock';
-export { PriceFeedContract } from '../types/generated/price_feed';
 export { ProposeLibraryContract } from '../types/generated/propose_library';
 export { ProtocolViewerContract } from '../types/generated/protocol_viewer';
 export { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
@@ -91,7 +88,6 @@ export {
   TwoAssetPriceBoundedLinearAuctionMockContract
 } from '../types/generated/two_asset_price_bounded_linear_auction_mock';
 export { UpdatableConstantAuctionPriceCurveContract } from '../types/generated/updatable_constant_auction_price_curve';
-export { UpdatableOracleMockContract } from '../types/generated/updatable_oracle_mock';
 export { VaultContract } from '../types/generated/vault';
 export { WethMockContract } from '../types/generated/weth_mock';
 export { WhiteListContract } from '../types/generated/white_list';

@@ -104,28 +104,28 @@ export class FeeCalculatorHelper {
   }
 
   public generatePerformanceFeeCallData(
-    profitFrequency: BigNumber,
-    highWatermarkResetFrequency: BigNumber,
+    profitPeriod: BigNumber,
+    highWatermarkResetPeriod: BigNumber,
     profitFeePercentage: BigNumber,
     streamingFeePercentage: BigNumber,
   ): string {
     return SetTestUtils.bufferArrayToHex([
-      SetUtils.paddedBufferForBigNumber(profitFrequency),
-      SetUtils.paddedBufferForBigNumber(highWatermarkResetFrequency),
+      SetUtils.paddedBufferForBigNumber(profitPeriod),
+      SetUtils.paddedBufferForBigNumber(highWatermarkResetPeriod),
       SetUtils.paddedBufferForBigNumber(profitFeePercentage),
       SetUtils.paddedBufferForBigNumber(streamingFeePercentage),
     ]);
   }
 
   public generatePerformanceFeeCallDataBuffer(
-    profitFrequency: BigNumber,
-    highWatermarkResetFrequency: BigNumber,
+    profitPeriod: BigNumber,
+    highWatermarkResetPeriod: BigNumber,
     profitFeePercentage: BigNumber,
     streamingFeePercentage: BigNumber,
   ): Buffer[] {
     return [
-      SetUtils.paddedBufferForBigNumber(profitFrequency),
-      SetUtils.paddedBufferForBigNumber(highWatermarkResetFrequency),
+      SetUtils.paddedBufferForBigNumber(profitPeriod),
+      SetUtils.paddedBufferForBigNumber(highWatermarkResetPeriod),
       SetUtils.paddedBufferForBigNumber(profitFeePercentage),
       SetUtils.paddedBufferForBigNumber(streamingFeePercentage),
     ];
@@ -134,7 +134,6 @@ export class FeeCalculatorHelper {
   public async calculateAccruedFeesAsync(
     feeState: any,
     rebalancingSetTokenValue: BigNumber,
-    oracleWhiteList: OracleWhiteListContract,
     timeStamp: BigNumber
   ): Promise<BigNumber> {
     const elapsedTime = timeStamp.sub(new BigNumber(feeState.lastStreamingFeeTimestamp));
@@ -142,7 +141,7 @@ export class FeeCalculatorHelper {
     const streamingFee = this.calculateAccruedStreamingFee(new BigNumber(feeState.streamingFeePercentage), elapsedTime);
 
     let profitFee: BigNumber = ZERO;
-    if (timeStamp.sub(new BigNumber(feeState.lastProfitFeeTimestamp)).gt(new BigNumber(feeState.profitFeeFrequency))) {
+    if (timeStamp.sub(new BigNumber(feeState.lastProfitFeeTimestamp)).gt(new BigNumber(feeState.profitFeePeriod))) {
       profitFee = this.calculateAccruedProfitFeeAsync(feeState, rebalancingSetTokenValue, streamingFee);
     }
 
@@ -152,14 +151,13 @@ export class FeeCalculatorHelper {
   public async calculateNewHighWatermarkAsync(
     feeState: any,
     rebalancingSetTokenValue: BigNumber,
-    oracleWhiteList: OracleWhiteListContract,
     timeStamp: BigNumber
   ): Promise<BigNumber> {
     const elapsedTime = timeStamp.sub(new BigNumber(feeState.lastStreamingFeeTimestamp));
 
     const streamingFee = this.calculateAccruedStreamingFee(new BigNumber(feeState.streamingFeePercentage), elapsedTime);
 
-    return rebalancingSetTokenValue.mul(ether(1).sub(streamingFee)).div(ether(1)).round(0, 3);
+    return rebalancingSetTokenValue.sub(rebalancingSetTokenValue.mul(streamingFee).div(ether(1)).round(0, 3));
   }
 
   public calculateAccruedProfitFeeAsync(
@@ -167,8 +165,7 @@ export class FeeCalculatorHelper {
     rebalancingSetValue: BigNumber,
     streamingFee: BigNumber
   ): BigNumber {
-
-    const postStreamingValue = rebalancingSetValue.mul(ether(1).sub(streamingFee)).div(ether(1)).round(0, 3);
+    const postStreamingValue = rebalancingSetValue.sub(rebalancingSetValue.mul(streamingFee).div(ether(1)).round(0, 3));
 
     const gainedValue = postStreamingValue.gt(feeState.highWatermark) ?
       postStreamingValue.sub(feeState.highWatermark) :

@@ -32,7 +32,8 @@ import {
   ZERO
 } from '@utils/constants';
 import {
-  getExpectedFeeActualizedLog
+  getExpectedFeeActualizationLog,
+  getExpectedFeeInitializationLog
 } from '@utils/contract_logs/performanceFeeCalculator';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
@@ -216,8 +217,8 @@ contract('PerformanceFeeCalculator', accounts => {
     let rebalancingSetToken: RebalancingSetFeeMockContract;
     let usdDenominated: boolean;
     let addValidSet: boolean;
-    let profitFeeFrequency: BigNumber;
-    let highWatermarkResetFrequency: BigNumber;
+    let profitFeePeriod: BigNumber;
+    let highWatermarkResetPeriod: BigNumber;
     let profitFeePercentage: BigNumber;
     let streamingFeePercentage: BigNumber;
 
@@ -225,8 +226,8 @@ contract('PerformanceFeeCalculator', accounts => {
       usdDenominated = true;
       addValidSet = true;
 
-      profitFeeFrequency = ONE_DAY_IN_SECONDS.mul(30);
-      highWatermarkResetFrequency = ONE_DAY_IN_SECONDS.mul(365);
+      profitFeePeriod = ONE_DAY_IN_SECONDS.mul(30);
+      highWatermarkResetPeriod = ONE_DAY_IN_SECONDS.mul(365);
       profitFeePercentage = ether(.2);
       streamingFeePercentage = ether(.02);
     });
@@ -265,8 +266,8 @@ contract('PerformanceFeeCalculator', accounts => {
       }
 
       subjectCalculatorData = feeCalculatorHelper.generatePerformanceFeeCallData(
-        profitFeeFrequency,
-        highWatermarkResetFrequency,
+        profitFeePeriod,
+        highWatermarkResetPeriod,
         profitFeePercentage,
         streamingFeePercentage
       );
@@ -276,18 +277,18 @@ contract('PerformanceFeeCalculator', accounts => {
       return rebalancingSetToken.initialize.sendTransactionAsync(subjectCalculatorData);
     }
 
-    it('sets the profit fee frequency correctly', async () => {
+    it('sets the profit fee period correctly', async () => {
       await subject();
 
       const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
-      expect(feeState.profitFeeFrequency).to.be.bignumber.equal(profitFeeFrequency);
+      expect(feeState.profitFeePeriod).to.be.bignumber.equal(profitFeePeriod);
     });
 
-    it('sets the high watermark reset frequency correctly', async () => {
+    it('sets the high watermark reset period correctly', async () => {
       await subject();
 
       const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
-      expect(feeState.highWatermarkResetFrequency).to.be.bignumber.equal(highWatermarkResetFrequency);
+      expect(feeState.highWatermarkResetPeriod).to.be.bignumber.equal(highWatermarkResetPeriod);
     });
 
     it('sets the profit fee percentage correctly', async () => {
@@ -332,6 +333,34 @@ contract('PerformanceFeeCalculator', accounts => {
 
       const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
       expect(feeState.highWatermark).to.be.bignumber.equal(expectedHighWatermark);
+    });
+
+    it('emits the correct FeeInitialization log', async () => {
+      const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+      const txHash = await subject();
+
+      const lastBlock = await web3.eth.getBlock('latest');
+
+      const expectedHighWatermark = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+        rebalancingSetToken,
+        usdOracleWhiteList
+      );
+      const expectedLogs = getExpectedFeeInitializationLog(
+        rebalancingSetToken.address,
+        profitFeePeriod,
+        highWatermarkResetPeriod,
+        profitFeePercentage,
+        streamingFeePercentage,
+        expectedHighWatermark,
+        new BigNumber(lastBlock.timestamp),
+        new BigNumber(lastBlock.timestamp),
+        feeCalculator.address
+      );
+
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when eth denominated oracles are used', async () => {
@@ -412,13 +441,13 @@ contract('PerformanceFeeCalculator', accounts => {
       });
     });
 
-    describe('when the profit fee frequency is less than high watermark reset frequency', async () => {
+    describe('when the profit fee period is less than high watermark reset period', async () => {
       before(async () => {
-        highWatermarkResetFrequency = ONE_DAY_IN_SECONDS;
+        highWatermarkResetPeriod = ONE_DAY_IN_SECONDS;
       });
 
       after(async () => {
-        highWatermarkResetFrequency = ONE_DAY_IN_SECONDS.mul(365);
+        highWatermarkResetPeriod = ONE_DAY_IN_SECONDS.mul(365);
       });
 
       it('should revert', async () => {
@@ -435,8 +464,8 @@ contract('PerformanceFeeCalculator', accounts => {
     let updatedBTCPrice: BigNumber;
     let updatedETHPrice: BigNumber;
 
-    let profitFeeFrequency: BigNumber;
-    let highWatermarkResetFrequency: BigNumber;
+    let profitFeePeriod: BigNumber;
+    let highWatermarkResetPeriod: BigNumber;
     let profitFeePercentage: BigNumber;
     let streamingFeePercentage: BigNumber;
 
@@ -445,8 +474,8 @@ contract('PerformanceFeeCalculator', accounts => {
       updatedBTCPrice = ether(8000);
       updatedETHPrice = ether(140);
 
-      profitFeeFrequency = ONE_DAY_IN_SECONDS.mul(30);
-      highWatermarkResetFrequency = ONE_YEAR_IN_SECONDS;
+      profitFeePeriod = ONE_DAY_IN_SECONDS.mul(30);
+      highWatermarkResetPeriod = ONE_YEAR_IN_SECONDS;
       profitFeePercentage = ether(.2);
       streamingFeePercentage = ether(.02);
     });
@@ -483,8 +512,8 @@ contract('PerformanceFeeCalculator', accounts => {
       await coreMock.addSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(ownerAccount));
 
       const calculatorData = feeCalculatorHelper.generatePerformanceFeeCallData(
-        profitFeeFrequency,
-        highWatermarkResetFrequency,
+        profitFeePeriod,
+        highWatermarkResetPeriod,
         profitFeePercentage,
         streamingFeePercentage
       );
@@ -524,14 +553,13 @@ contract('PerformanceFeeCalculator', accounts => {
       const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
         feeState,
         rebalancingSetValue,
-        usdOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
 
       expect(accruedFee).to.bignumber.equal(expectedFee);
     });
 
-    describe('when time since last profit fee does not exceed fee frequency', async () => {
+    describe('when time since last profit fee does not exceed fee period', async () => {
       beforeEach(async () => {
         subjectIncreaseChainTime = ONE_DAY_IN_SECONDS.mul(15);
       });
@@ -550,7 +578,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -583,7 +610,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -614,7 +640,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
           rebalancingSetValue,
-          ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -641,8 +666,8 @@ contract('PerformanceFeeCalculator', accounts => {
     let updatedBTCPrice: BigNumber;
     let updatedETHPrice: BigNumber;
 
-    let profitFeeFrequency: BigNumber;
-    let highWatermarkResetFrequency: BigNumber;
+    let profitFeePeriod: BigNumber;
+    let highWatermarkResetPeriod: BigNumber;
     let profitFeePercentage: BigNumber;
     let streamingFeePercentage: BigNumber;
 
@@ -651,8 +676,8 @@ contract('PerformanceFeeCalculator', accounts => {
       updatedBTCPrice = ether(8000);
       updatedETHPrice = ether(140);
 
-      profitFeeFrequency = ONE_DAY_IN_SECONDS.mul(30);
-      highWatermarkResetFrequency = ONE_YEAR_IN_SECONDS;
+      profitFeePeriod = ONE_DAY_IN_SECONDS.mul(30);
+      highWatermarkResetPeriod = ONE_YEAR_IN_SECONDS;
       profitFeePercentage = ether(.2);
       streamingFeePercentage = ether(.02);
     });
@@ -689,8 +714,8 @@ contract('PerformanceFeeCalculator', accounts => {
       await coreMock.addSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(ownerAccount));
 
       const calculatorData = feeCalculatorHelper.generatePerformanceFeeCallData(
-        profitFeeFrequency,
-        highWatermarkResetFrequency,
+        profitFeePeriod,
+        highWatermarkResetPeriod,
         profitFeePercentage,
         streamingFeePercentage
       );
@@ -731,7 +756,6 @@ contract('PerformanceFeeCalculator', accounts => {
       const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
         feeState,
         rebalancingSetValue,
-        usdOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
 
@@ -772,7 +796,6 @@ contract('PerformanceFeeCalculator', accounts => {
       const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
         preFeeState,
         rebalancingSetValue,
-        usdOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
 
@@ -781,7 +804,7 @@ contract('PerformanceFeeCalculator', accounts => {
       expect(postFeeState.highWatermark).to.bignumber.equal(expectedHighWatermark);
     });
 
-    it('emits the correct FeeActualized log', async () => {
+    it('emits the correct FeeActualization log', async () => {
       const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
 
       const txHash = await subject();
@@ -795,7 +818,6 @@ contract('PerformanceFeeCalculator', accounts => {
       const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
         preFeeState,
         rebalancingSetValue,
-        usdOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
       const expectedStreamingFee = await feeCalculatorHelper.calculateAccruedStreamingFee(
@@ -808,7 +830,7 @@ contract('PerformanceFeeCalculator', accounts => {
         expectedStreamingFee
       );
 
-      const expectedLogs = getExpectedFeeActualizedLog(
+      const expectedLogs = getExpectedFeeActualizationLog(
         rebalancingSetToken.address,
         expectedHighWatermark,
         expectedProfitFee,
@@ -821,7 +843,7 @@ contract('PerformanceFeeCalculator', accounts => {
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
-    describe('when time since last profit fee does not exceed fee frequency', async () => {
+    describe('when time since last profit fee does not exceed fee period', async () => {
       beforeEach(async () => {
         subjectIncreaseChainTime = ONE_DAY_IN_SECONDS.mul(15);
       });
@@ -842,7 +864,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -879,7 +900,7 @@ contract('PerformanceFeeCalculator', accounts => {
         expect(postFeeState.highWatermark).to.bignumber.equal(preFeeState.highWatermark);
       });
 
-      it('emits the correct FeeActualized log', async () => {
+      it('emits the correct FeeActualization log', async () => {
         const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
 
         const txHash = await subject();
@@ -891,7 +912,7 @@ contract('PerformanceFeeCalculator', accounts => {
           new BigNumber(lastBlock.timestamp).sub(preFeeState.lastStreamingFeeTimestamp)
         );
 
-        const expectedLogs = getExpectedFeeActualizedLog(
+        const expectedLogs = getExpectedFeeActualizationLog(
           rebalancingSetToken.address,
           preFeeState.highWatermark,
           ZERO,
@@ -932,7 +953,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
         expect(accruedFee).to.bignumber.equal(expectedFee);
@@ -972,7 +992,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
           preFeeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -980,7 +999,7 @@ contract('PerformanceFeeCalculator', accounts => {
         expect(postFeeState.highWatermark).to.bignumber.equal(expectedHighWatermark);
       });
 
-      it('emits the correct FeeActualized log', async () => {
+      it('emits the correct FeeActualization log', async () => {
         const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
 
         const txHash = await subject();
@@ -994,7 +1013,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
           preFeeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
         const expectedStreamingFee = await feeCalculatorHelper.calculateAccruedStreamingFee(
@@ -1007,7 +1025,7 @@ contract('PerformanceFeeCalculator', accounts => {
           expectedStreamingFee
         );
 
-        const expectedLogs = getExpectedFeeActualizedLog(
+        const expectedLogs = getExpectedFeeActualizationLog(
           rebalancingSetToken.address,
           expectedHighWatermark,
           expectedProfitFee,
@@ -1048,7 +1066,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFee = await feeCalculatorHelper.calculateAccruedFeesAsync(
           feeState,
           rebalancingSetValue,
-          ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
         expect(accruedFee).to.bignumber.equal(expectedFee);
@@ -1088,7 +1105,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
           preFeeState,
           rebalancingSetValue,
-          ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -1096,7 +1112,7 @@ contract('PerformanceFeeCalculator', accounts => {
         expect(postFeeState.highWatermark).to.bignumber.equal(expectedHighWatermark);
       });
 
-      it('emits the correct FeeActualized log', async () => {
+      it('emits the correct FeeActualization log', async () => {
         const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
 
         const txHash = await subject();
@@ -1111,7 +1127,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedHighWatermark = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
           preFeeState,
           rebalancingSetValue,
-          ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
         const expectedStreamingFee = await feeCalculatorHelper.calculateAccruedStreamingFee(
@@ -1124,7 +1139,7 @@ contract('PerformanceFeeCalculator', accounts => {
           expectedStreamingFee
         );
 
-        const expectedLogs = getExpectedFeeActualizedLog(
+        const expectedLogs = getExpectedFeeActualizationLog(
           rebalancingSetToken.address,
           expectedHighWatermark,
           expectedProfitFee,

@@ -286,7 +286,6 @@ contract('PerformanceFeeCalculator', accounts => {
       const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
         preFeeState,
         rebalancingSetValue,
-        usdOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
 
@@ -314,7 +313,6 @@ contract('PerformanceFeeCalculator', accounts => {
       const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
         preFeeState,
         rebalancingSetValue,
-        usdOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
 
@@ -373,7 +371,6 @@ contract('PerformanceFeeCalculator', accounts => {
       const expectedHighWatermark: any = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
         preFeeState,
         rebalancingSetValue,
-        usdOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
 
@@ -406,7 +403,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
           preFeeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -434,7 +430,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
           preFeeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -516,7 +511,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
           preFeeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -544,7 +538,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
           preFeeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -603,7 +596,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedHighWatermark: any = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
           preFeeState,
           rebalancingSetValue,
-          usdOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -700,7 +692,6 @@ contract('PerformanceFeeCalculator', accounts => {
       const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
         preFeeState,
         rebalancingSetValue,
-        ethOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
 
@@ -728,7 +719,6 @@ contract('PerformanceFeeCalculator', accounts => {
       const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
         preFeeState,
         rebalancingSetValue,
-        ethOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
 
@@ -788,7 +778,6 @@ contract('PerformanceFeeCalculator', accounts => {
       const expectedHighWatermark: any = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
         preFeeState,
         rebalancingSetValue,
-        ethOracleWhiteList,
         new BigNumber(lastBlock.timestamp)
       );
 
@@ -821,7 +810,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
           preFeeState,
           rebalancingSetValue,
-          ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -849,7 +837,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
           preFeeState,
           rebalancingSetValue,
-          ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -932,7 +919,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
           preFeeState,
           rebalancingSetValue,
-          ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -960,7 +946,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedFeePercentage = await feeCalculatorHelper.calculateAccruedFeesAsync(
           preFeeState,
           rebalancingSetValue,
-          ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 
@@ -1019,7 +1004,6 @@ contract('PerformanceFeeCalculator', accounts => {
         const expectedHighWatermark: any = await feeCalculatorHelper.calculateNewHighWatermarkAsync(
           preFeeState,
           rebalancingSetValue,
-          ethOracleWhiteList,
           new BigNumber(lastBlock.timestamp)
         );
 

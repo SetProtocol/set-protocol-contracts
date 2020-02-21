@@ -43,17 +43,28 @@ contract PerformanceFeeCalculator is IFeeCalculator {
 
     /* ============ Events ============ */
 
-    event FeeActualized(
+    event FeeActualization(
         address indexed rebalancingSetToken,
         uint256 newHighWatermark,
         uint256 profitFee,
         uint256 streamingFee
     );
 
+    event FeeInitialization(
+        address indexed rebalancingSetToken,
+        uint256 profitFeePeriod,
+        uint256 highWatermarkResetPeriod,
+        uint256 profitFeePercentage,
+        uint256 streamingFeePercentage,
+        uint256 highWatermark,
+        uint256 lastProfitFeeTimestamp,
+        uint256 lastStreamingFeeTimestamp
+    );
+
     /* ============ Structs ============ */
     struct FeeState {
-        uint256 profitFeeFrequency;             // Time required between accruing profit fees
-        uint256 highWatermarkResetFrequency;    // Time required after last profit fee to reset high watermark 
+        uint256 profitFeePeriod;                // Time required between accruing profit fees
+        uint256 highWatermarkResetPeriod;       // Time required after last profit fee to reset high watermark
         uint256 profitFeePercentage;            // Percent of profits that accrue to manager
         uint256 streamingFeePercentage;         // Percent of Set that accrues to manager each year
         uint256 highWatermark;                  // Value of Set at last profit fee accrual
@@ -62,15 +73,15 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     }
 
     struct InitFeeParameters {
-        uint256 profitFeeFrequency;
-        uint256 highWatermarkResetFrequency;
+        uint256 profitFeePeriod;
+        uint256 highWatermarkResetPeriod;
         uint256 profitFeePercentage;
-        uint256 streamingFeePercentage;        
+        uint256 streamingFeePercentage;
     }
 
     /* ============ Constants ============ */
     // 365.25 days used to represent the year
-    uint256 private constant ONE_YEAR_IN_SECONDS = 31557600;
+    uint256 private constant ONE_YEAR_IN_SECONDS = 365.25 days;
     uint256 private constant ONE_HUNDRED_PERCENT = 1e18;
 
     /* ============ State Variables ============ */
@@ -109,7 +120,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     /* ============ External Functions ============ */
 
     /*
-     * Called by RebalancingSetToken, parses bytedata then assigns to correct FeeState struct. 
+     * Called by RebalancingSetToken, parses bytedata then assigns to correct FeeState struct.
      *
      * @param  _feeCalculatorData       Bytestring encoding fee parameters for RebalancingSetToken
      */
@@ -123,20 +134,34 @@ contract PerformanceFeeCalculator is IFeeCalculator {
 
         // Validate fee data
         validateFeeParameters(parameters);
+        uint256 highWatermark = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
 
         // Set fee state for new caller
-        feeState[msg.sender].profitFeeFrequency = parameters.profitFeeFrequency;
-        feeState[msg.sender].highWatermarkResetFrequency = parameters.highWatermarkResetFrequency;
-        feeState[msg.sender].profitFeePercentage = parameters.profitFeePercentage;
-        feeState[msg.sender].streamingFeePercentage = parameters.streamingFeePercentage;
-        feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
-        feeState[msg.sender].lastStreamingFeeTimestamp = block.timestamp;
-        feeState[msg.sender].highWatermark = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
+        FeeState storage feeInfo = feeState[msg.sender];
+
+        feeInfo.profitFeePeriod = parameters.profitFeePeriod;
+        feeInfo.highWatermarkResetPeriod = parameters.highWatermarkResetPeriod;
+        feeInfo.profitFeePercentage = parameters.profitFeePercentage;
+        feeInfo.streamingFeePercentage = parameters.streamingFeePercentage;
+        feeInfo.lastProfitFeeTimestamp = block.timestamp;
+        feeInfo.lastStreamingFeeTimestamp = block.timestamp;
+        feeInfo.highWatermark = highWatermark;
+
+        emit FeeInitialization(
+            msg.sender,
+            parameters.profitFeePeriod,
+            parameters.highWatermarkResetPeriod,
+            parameters.profitFeePercentage,
+            parameters.streamingFeePercentage,
+            highWatermark,
+            block.timestamp,
+            block.timestamp
+        );
     }
 
     /*
      * Calculates total inflation percentage in order to accrue fees to manager. Profit fee calculations
-     * are net of streaming fees, so streaming fees are applied first then profit fees are calculated.  
+     * are net of streaming fees, so streaming fees are applied first then profit fees are calculated.
      *
      * @return  uint256       Percent inflation of supply
      */
@@ -145,23 +170,19 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         view
         returns (uint256)
     {
-        require(
-            core.validSets(msg.sender),
-            "PerformanceFeeCalculator.getFee: Caller must be valid RebalancingSetToken."
-        );
-
-        uint256 streamingFee = calculateStreamingFee();
-
-        uint256 profitFee = calculateProfitFee(streamingFee);
+        (
+            uint256 streamingFee,
+            uint256 profitFee
+        ) = calculateFees();
 
         return streamingFee.add(profitFee);
     }
 
     /*
      * Calculates total inflation percentage in order to accrue fees to manager. Profit fee calculations
-     * are net of streaming fees, so streaming fees are applied first then profit fees are calculated. 
+     * are net of streaming fees, so streaming fees are applied first then profit fees are calculated.
      * Additionally, fee state is set timestamps are updated for each fee type and the high watermark is
-     * reset if time since last profit fee exceeds the highWatermarkResetFrequency. 
+     * reset if time since last profit fee exceeds the highWatermarkResetPeriod.
      *
      * @preturn  uint256       Percent inflation of supply
      */
@@ -169,19 +190,15 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         external
         returns (uint256)
     {
-        require(
-            core.validSets(msg.sender),
-            "PerformanceFeeCalculator.updateAndGetFee: Caller must be valid RebalancingSetToken."
-        );
-
-        uint256 streamingFee = calculateStreamingFee();
-
-        uint256 profitFee = calculateProfitFee(streamingFee);
+        (
+            uint256 streamingFee,
+            uint256 profitFee
+        ) = calculateFees();
 
         // Update fee state based off fees collected
         updateFeeState(streamingFee, profitFee);
 
-        emit FeeActualized(
+        emit FeeActualization(
             msg.sender,
             highWatermark(msg.sender),
             profitFee,
@@ -191,12 +208,12 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         return streamingFee.add(profitFee);
     }
 
-    /* ============ Private Functions ============ */
+    /* ============ Internal Functions ============ */
 
     /**
      * Updates fee state after a fee has been accrued. Streaming timestamp is always updated. Profit timestamp
      * is only updated if profit fee is collected. High watermark timestamp is updated if profit fee collected
-     * or if a highWatermarkResetFrequency amount of time has passed since last profit fee collection.
+     * or if a highWatermarkResetPeriod amount of time has passed since last profit fee collection.
      */
     function updateFeeState(
         uint256 _streamingFee,
@@ -208,56 +225,23 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         feeState[msg.sender].lastStreamingFeeTimestamp = block.timestamp;
 
         uint256 rebalancingSetValue = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
-        uint256 postStreamingValue = rebalancingSetValue.mul(ONE_HUNDRED_PERCENT.sub(_streamingFee)).deScale();
+        uint256 postStreamingValue = calculatePostStreamingValue(rebalancingSetValue, _streamingFee);
 
         // If profit fee then set new high watermark and profit fee timestamp
         if (_profitFee > 0) {
             feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
             feeState[msg.sender].highWatermark = postStreamingValue;
-        } else if (timeSinceLastProfitFee(msg.sender) >= highWatermarkResetFrequency(msg.sender)) {
-            // If no profit fee and last profit fee was more than highWatermarkResetFrequency seconds ago then reset
+        } else if (timeSinceLastProfitFee(msg.sender) >= highWatermarkResetPeriod(msg.sender)) {
+            // If no profit fee and last profit fee was more than highWatermarkResetPeriod seconds ago then reset
             // high watermark
             feeState[msg.sender].highWatermark = postStreamingValue;
-            feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;            
+            feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
         }
-    }
-
-    /**
-     * Parses passed in fee parameters from bytestring.
-     *
-     * 
-     * | CallData                     | Location                      |
-     * |------------------------------|-------------------------------|
-     * | profitFeeFrequency           | 32                            |
-     * | highWatermarkResetFrequency  | 64                            |
-     * | profitFeePercentage          | 96                            |
-     * | streamingFeePercentage       | 128                           |
-     *
-     * @param  _callData            Byte string containing fee parameter data
-     * @return feeParameters        Fee parameters
-     */
-    function parsePerformanceFeeCallData(
-        bytes memory _callData
-    )
-        private
-        pure
-        returns (InitFeeParameters memory)
-    {
-        InitFeeParameters memory parameters;
-
-        assembly {
-            mstore(parameters,           mload(add(_callData, 32)))   // profitFeeFrequency
-            mstore(add(parameters, 32),  mload(add(_callData, 64)))   // highWatermarkResetFrequency
-            mstore(add(parameters, 64),  mload(add(_callData, 96)))   // profitFeePercentage
-            mstore(add(parameters, 96),  mload(add(_callData, 128)))  // streamingFeePercentage
-        }
-
-        return parameters;
     }
 
     /*
      * Validates fee parameters. Ensures that both fees are below the max fee percentages and that they are
-     * multiples of a basis point. Also makes sure highWatermarkResetFrequency is greater than profitFeeFrequency.
+     * multiples of a basis point. Also makes sure highWatermarkResetPeriod is greater than profitFeePeriod.
      */
     function validateFeeParameters(
         InitFeeParameters memory parameters
@@ -279,9 +263,32 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         ScaleValidations.validateMultipleOfBasisPoint(parameters.streamingFeePercentage);
 
         require(
-            parameters.highWatermarkResetFrequency >= parameters.profitFeeFrequency,
+            parameters.highWatermarkResetPeriod >= parameters.profitFeePeriod,
             "PerformanceFeeCalculator.validateFeeParameters: Fee collection frequency must exceed highWatermark reset."
         );
+    }
+
+    /**
+     * Verifies caller is valid Set. Calculates and returns streaming and profit fee.
+     *
+     * @return  uint256     Streaming Fee
+     * @return  uint256     Profit Fee
+     */
+    function calculateFees()
+        internal
+        view
+        returns (uint256, uint256)
+    {
+        require(
+            core.validSets(msg.sender),
+            "PerformanceFeeCalculator.updateAndGetFee: Caller must be valid RebalancingSetToken."
+        );
+
+        uint256 streamingFee = calculateStreamingFee();
+
+        uint256 profitFee = calculateProfitFee(streamingFee);
+
+        return (streamingFee, profitFee);
     }
 
     /**
@@ -314,11 +321,11 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         view
         returns(uint256)
     {
-        // If time since last profit fee exceeds profitFeeFrequency then calculate profit fee else 0.
-        if (exceedsProfitFeeFrequency(msg.sender)) {
+        // If time since last profit fee exceeds profitFeePeriod then calculate profit fee else 0.
+        if (exceedsProfitFeePeriod(msg.sender)) {
             // Calculate post streaming value and get high watermark
             uint256 rebalancingSetValue = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
-            uint256 postStreamingValue = rebalancingSetValue.mul(ONE_HUNDRED_PERCENT.sub(_streamingFee)).deScale(); 
+            uint256 postStreamingValue = calculatePostStreamingValue(rebalancingSetValue, _streamingFee);
             uint256 highWatermark = highWatermark(msg.sender);
 
             // Subtract high watermark from post streaming fee value, unless less than 0 set to 0
@@ -326,22 +333,38 @@ contract PerformanceFeeCalculator is IFeeCalculator {
 
             // Determine percent fee in terms of current rebalancing Set value
             return gainedValue.mul(profitFeePercentage(msg.sender)).div(rebalancingSetValue);
+        } else {
+            return 0;
         }
+    }
 
-        return 0;
+   /**
+     * Calculates Rebalancing Set Token value after streaming fees accounted for.
+     *
+     * @return  uint256     Post streaming fee value
+     */
+    function calculatePostStreamingValue(
+        uint256 _rebalancingSetValue,
+        uint256 _streamingFee
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        return _rebalancingSetValue.sub(_rebalancingSetValue.mul(_streamingFee).deScale());
     }
 
     /**
-     * Checks if time since last profit fee exceeds profitFeeFrequency
+     * Checks if time since last profit fee exceeds profitFeePeriod
      *
      * @return  bool
      */
-    function exceedsProfitFeeFrequency(address _set) internal view returns (bool) {
-        return timeSinceLastProfitFee(_set) > profitFeeFrequency(_set);
+    function exceedsProfitFeePeriod(address _set) internal view returns (bool) {
+        return timeSinceLastProfitFee(_set) > profitFeePeriod(_set);
     }
 
     /**
-     * Checks if time since last profit fee exceeds profitFeeFrequency
+     * Checks if time since last profit fee exceeds profitFeePeriod
      *
      * @return  uint256     Time since last profit fee accrued
      */
@@ -365,15 +388,49 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         return feeState[_set].profitFeePercentage;
     }
 
-    function profitFeeFrequency(address _set) internal view returns (uint256) {
-        return feeState[_set].profitFeeFrequency;
+    function profitFeePeriod(address _set) internal view returns (uint256) {
+        return feeState[_set].profitFeePeriod;
     }
 
     function highWatermark(address _set) internal view returns(uint256) {
         return feeState[_set].highWatermark;
     }
 
-    function highWatermarkResetFrequency(address _set) internal view returns(uint256) {
-        return feeState[_set].highWatermarkResetFrequency;
+    function highWatermarkResetPeriod(address _set) internal view returns(uint256) {
+        return feeState[_set].highWatermarkResetPeriod;
+    }
+
+    /* ============ Internal Functions ============ */
+    
+    /**
+     * Parses passed in fee parameters from bytestring.
+     *
+     * | CallData                     | Location                      |
+     * |------------------------------|-------------------------------|
+     * | profitFeePeriod           | 32                            |
+     * | highWatermarkResetPeriod  | 64                            |
+     * | profitFeePercentage          | 96                            |
+     * | streamingFeePercentage       | 128                           |
+     *
+     * @param  _callData            Byte string containing fee parameter data
+     * @return feeParameters        Fee parameters
+     */
+    function parsePerformanceFeeCallData(
+        bytes memory _callData
+    )
+        private
+        pure
+        returns (InitFeeParameters memory)
+    {
+        InitFeeParameters memory parameters;
+
+        assembly {
+            mstore(parameters,           mload(add(_callData, 32)))   // profitFeePeriod
+            mstore(add(parameters, 32),  mload(add(_callData, 64)))   // highWatermarkResetPeriod
+            mstore(add(parameters, 64),  mload(add(_callData, 96)))   // profitFeePercentage
+            mstore(add(parameters, 96),  mload(add(_callData, 128)))  // streamingFeePercentage
+        }
+
+        return parameters;
     }
 }

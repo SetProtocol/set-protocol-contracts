@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { Address, Log } from 'set-protocol-utils';
 
-export function getExpectedFeeActualizedLog(
+export function getExpectedFeeActualizationLog(
   rebalancingSetToken: Address,
   newHighWatermark: BigNumber,
   profitFee: BigNumber,
@@ -9,13 +9,40 @@ export function getExpectedFeeActualizedLog(
   contractAddress: Address,
 ): Log[] {
   return [{
-    event: 'FeeActualized',
+    event: 'FeeActualization',
     address: contractAddress,
     args: {
       rebalancingSetToken,
       newHighWatermark,
       profitFee,
       streamingFee,
+    },
+  }];
+}
+
+export function getExpectedFeeInitializationLog(
+  rebalancingSetToken: Address,
+  profitFeePeriod: BigNumber,
+  highWatermarkResetPeriod: BigNumber,
+  profitFeePercentage: BigNumber,
+  streamingFeePercentage: BigNumber,
+  highWatermark: BigNumber,
+  lastProfitFeeTimestamp: BigNumber,
+  lastStreamingFeeTimestamp: BigNumber,
+  contractAddress: Address,
+): Log[] {
+  return [{
+    event: 'FeeInitialization',
+    address: contractAddress,
+    args: {
+      rebalancingSetToken,
+      profitFeePeriod,
+      highWatermarkResetPeriod,
+      profitFeePercentage,
+      streamingFeePercentage,
+      highWatermark,
+      lastProfitFeeTimestamp,
+      lastStreamingFeeTimestamp
     },
   }];
 }

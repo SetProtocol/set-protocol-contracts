@@ -3,6 +3,7 @@ export { CommonValidationsLibrary } from "./ts/CommonValidationsLibrary";
 export { ConstantAuctionPriceCurve } from "./ts/ConstantAuctionPriceCurve";
 export { Core } from "./ts/Core";
 export { CoreIssuanceLibrary } from "./ts/CoreIssuanceLibrary";
+export { CTokenExchangeIssuanceModule } from "./ts/CTokenExchangeIssuanceModule";
 export { ERC20 } from "./ts/ERC20";
 export { ERC20Detailed } from "./ts/ERC20Detailed";
 export { ERC20Wrapper } from "./ts/ERC20Wrapper";
@@ -26,6 +27,8 @@ export { ProtocolViewer } from "./ts/ProtocolViewer";
 export { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
 export { RebalancingSetIssuanceModule } from "./ts/RebalancingSetIssuanceModule";
 export { RebalancingSetCTokenBidder } from "./ts/RebalancingSetCTokenBidder";
+export { RebalancingSetCTokenExchangeIssuanceModule } from "./ts/RebalancingSetCTokenExchangeIssuanceModule";
+export { RebalancingSetCTokenIssuanceModule } from "./ts/RebalancingSetCTokenIssuanceModule";
 export { RebalancingSetEthBidder } from "./ts/RebalancingSetEthBidder";
 export { RebalancingSetExchangeIssuanceModule } from "./ts/RebalancingSetExchangeIssuanceModule";
 export { RebalancingSetToken } from "./ts/RebalancingSetToken";
@@ -62,6 +65,7 @@ export {
   CoreContract,
   CoreIssuanceLibraryContract,
   CoreMockContract,
+  CTokenExchangeIssuanceModule,
   ERC20DetailedContract,
   ERC20WrapperContract,
   ERC20WrapperMockContract,
@@ -84,6 +88,8 @@ export {
   ProtocolViewerContract,
   RebalanceAuctionModuleContract,
   RebalancingSetCTokenBidderContract,
+  RebalancingSetCTokenExchangeIssuanceModule,
+  RebalancingSetCTokenIssuanceModule,
   RebalancingSetEthBidderContract,
   RebalancingSetExchangeIssuanceModuleContract,
   RebalancingSetIssuanceModuleContract,

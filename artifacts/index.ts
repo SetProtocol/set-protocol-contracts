@@ -1,3 +1,4 @@
+export { AddressToAddressWhiteList } from "./ts/AddressToAddressWhiteList";
 export { BadTokenMock } from "./ts/BadTokenMock";
 export { CommonValidationsLibrary } from "./ts/CommonValidationsLibrary";
 export { ConstantAuctionPriceCurve } from "./ts/ConstantAuctionPriceCurve";
@@ -55,6 +56,7 @@ export { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
 
 // Export abi-gen contract wrappers
 export {
+  AddressToAddressWhiteListContract,
   AuthorizableContract,
   BadTokenMockContract,
   BaseContract,

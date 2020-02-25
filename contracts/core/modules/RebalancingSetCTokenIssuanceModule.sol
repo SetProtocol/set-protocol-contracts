@@ -35,7 +35,7 @@ import { RebalancingSetIssuanceModule } from "./RebalancingSetIssuanceModule.sol
  * @title RebalancingSetCTokenIssuanceModule
  * @author Set Protocol
  *
- * A module that includes functions for issuing / redeeming rebalancing SetToken from its base components, cToken 
+ * A module that includes functions for issuing / redeeming rebalancing SetToken from its base components, cToken
  * underlying components, and Ether. Note: This module is not compatible with Compound Ether (cETH).
  */
 contract RebalancingSetCTokenIssuanceModule is
@@ -79,16 +79,16 @@ contract RebalancingSetCTokenIssuanceModule is
 
     /**
      * Issue a rebalancing SetToken using the base components of the base SetToken. If the base component is a supported
-     * cToken, retrieve the underlying from the user and mint the cToken. The base SetToken is then issued 
+     * cToken, retrieve the underlying from the user and mint the cToken. The base SetToken is then issued
      * into the rebalancing SetToken. The base SetToken quantity issued is calculated by taking the rebalancing SetToken's quantity,
-     * unit shares, and natural unit. If the calculated quantity is not a multiple of the natural unit of the base SetToken, 
+     * unit shares, and natural unit. If the calculated quantity is not a multiple of the natural unit of the base SetToken,
      * the quantity is rounded up to the base SetToken natural unit.
      * NOTE: Potential to receive more baseSet than expected if someone transfers some to this module.
      * Be careful with balance checks.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing SetToken to issue
      * @param  _rebalancingSetQuantity   The issuance quantity of rebalancing SetToken
-     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user
      *                                   or left in the vault
      */
     function issueRebalancingSet(
@@ -130,8 +130,8 @@ contract RebalancingSetCTokenIssuanceModule is
     }
 
     /**
-     * Issue a rebalancing SetToken using the base components and ether of the base SetToken. If the base component 
-     * is a supported cToken, retrieve the underlying from the user and mint the cToken. The ether is wrapped 
+     * Issue a rebalancing SetToken using the base components and ether of the base SetToken. If the base component
+     * is a supported cToken, retrieve the underlying from the user and mint the cToken. The ether is wrapped
      * into wrapped Ether and utilized in issuance.
      * The base SetToken is then issued and reissued into the rebalancing SetToken. Read more about base SetToken quantity
      * in the issueRebalancingSet function.
@@ -140,7 +140,7 @@ contract RebalancingSetCTokenIssuanceModule is
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing SetToken to issue
      * @param  _rebalancingSetQuantity   The issuance quantity of rebalancing SetToken
-     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user
      *                                     or left in the vault
      */
     function issueRebalancingSetWrappingEther(
@@ -201,7 +201,7 @@ contract RebalancingSetCTokenIssuanceModule is
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing SetToken to redeem
      * @param  _rebalancingSetQuantity   The Quantity of the rebalancing SetToken to redeem
-     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user
      *                                     or left in the vault
      */
     function redeemRebalancingSet(
@@ -257,14 +257,14 @@ contract RebalancingSetCTokenIssuanceModule is
 
     /**
      * Redeems a rebalancing SetToken into the base components of the base SetToken. If a supported cToken, then base components
-     * are redeemed for the underlying and sent back to user. Unwraps wrapped ether and sends eth to the user. 
+     * are redeemed for the underlying and sent back to user. Unwraps wrapped ether and sends eth to the user.
      * If no wrapped ether in Set then will REVERT.
      * NOTE: Potential to receive more baseSet and ether dust than expected if someone transfers some to this module.
      * Be careful with balance checks.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing SetToken to redeem
      * @param  _rebalancingSetQuantity   The Quantity of the rebalancing SetToken to redeem
-     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transferred to the user 
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transferred to the user
      *                                   or left in the vault
      */
     function redeemRebalancingSetUnwrappingEther(
@@ -343,7 +343,7 @@ contract RebalancingSetCTokenIssuanceModule is
         uint256[] memory baseSetUnits = baseSet.getUnits();
         uint256 baseSetNaturalUnit = baseSet.naturalUnit();
 
-        // Loop through the base SetToken components and deposit components 
+        // Loop through the base SetToken components and deposit components
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
             address currentComponentAddress = baseSetComponents[i];
             uint256 currentUnit = baseSetUnits[i];
@@ -386,7 +386,7 @@ contract RebalancingSetCTokenIssuanceModule is
                     address(this),
                     currentComponentAddress,
                     currentComponentQuantity
-                );                
+                );
             }
         }
     }
@@ -402,7 +402,7 @@ contract RebalancingSetCTokenIssuanceModule is
         address _cTokenComponent,
         uint256 _cTokenQuantity,
         address _underlyingComponent
-    ) 
+    )
         private
     {
         ICToken cTokenInstance = ICToken(_cTokenComponent);
@@ -410,7 +410,7 @@ contract RebalancingSetCTokenIssuanceModule is
         // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
         uint256 exchangeRate = cTokenInstance.exchangeRateCurrent();
         uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(_cTokenQuantity, exchangeRate);
-        
+
         // Transfer components to this module
         coreInstance.transferModule(
             _underlyingComponent,
@@ -490,7 +490,7 @@ contract RebalancingSetCTokenIssuanceModule is
                     underlyingAddress
                 );
             }
-            else if (_unwrapEth && currentComponentAddress == address(weth)) { 
+            else if (_unwrapEth && currentComponentAddress == address(weth)) {
                 // If address is weth, withdraw weth and transfer eth to sender
                 // Transfer the wrapped ether to this address from the Vault
                 coreInstance.withdrawModule(
@@ -536,7 +536,7 @@ contract RebalancingSetCTokenIssuanceModule is
         // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
         uint256 exchangeRate = cTokenInstance.exchangeRateCurrent();
         uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(_cTokenQuantity, exchangeRate);
-        
+
         // Transfer the cToken to this address from the Vault
         coreInstance.withdrawModule(
             address(this),

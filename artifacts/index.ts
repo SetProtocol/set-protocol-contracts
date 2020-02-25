@@ -130,3 +130,7 @@ export {
   RebalancingSetV2Helper,
   ValuationHelper
 } from '../utils/helpers';
+
+export {
+  Blockchain
+} from '../utils/blockchain'

@@ -119,3 +119,14 @@ export {
   ZeroExExchangeWrapperContract,
   ZeroExOrderLibraryMockContract,
 } from "../utils/contracts";
+
+export { 
+  CoreHelper,
+  ERC20Helper,
+  FeeCalculatorHelper,
+  LiquidatorHelper,
+  OracleHelper,
+  RebalancingHelper,
+  RebalancingSetV2Helper,
+  ValuationHelper
+} from '../utils/helpers';

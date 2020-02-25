@@ -139,7 +139,7 @@ contract RebalancingSetExchangeIssuanceModule is
      * @param  _rebalancingSetQuantity   Quantity of the rebalancing Set
      * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
      * @param  _orderData                Bytecode encoding exchange data for acquiring base set components
-     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transferred to the user 
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transferred to the user
      *                                     or left in the vault
      */
     function issueRebalancingSetWithEther(
@@ -199,7 +199,7 @@ contract RebalancingSetExchangeIssuanceModule is
      * @param  _paymentTokenQuantity     Quantity of the payment token
      * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
      * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
-     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user
      *                                     or left in the vault
      */
     function issueRebalancingSetWithERC20(
@@ -260,7 +260,7 @@ contract RebalancingSetExchangeIssuanceModule is
      * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
      * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
      * @param  _orderData                Bytecode encoding exchange data for disposing base set components
-     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user
      *                                     or left in the vault
      */
     function redeemRebalancingSetIntoEther(
@@ -300,7 +300,7 @@ contract RebalancingSetExchangeIssuanceModule is
         uint256 wethBalance = ERC20Wrapper.balanceOf(address(wethInstance), address(this));
         if (wethBalance > 0) {
             wethInstance.withdraw(wethBalance);
-            msg.sender.transfer(wethBalance);            
+            msg.sender.transfer(wethBalance);
         }
 
         address baseSetAddress = _exchangeIssuanceParams.setAddress;
@@ -333,7 +333,7 @@ contract RebalancingSetExchangeIssuanceModule is
      * @param  _outputTokenAddress       Address of the resulting ERC20 token sent to the user
      * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
      * @param  _orderData                Bytecode formatted data with exchange data for disposing base set components
-     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user
      *                                     or left in the vault
      */
     function redeemRebalancingSetIntoERC20(
@@ -431,7 +431,7 @@ contract RebalancingSetExchangeIssuanceModule is
             _rebalancingSetQuantity > 0,
             "RebalancingSetExchangeIssuance.validateExchangeIssuanceInputs: Quantity must be > 0"
         );
-        
+
         // Make sure Issuance quantity is multiple of the rebalancing SetToken natural unit
         require(
             _rebalancingSetQuantity.mod(_rebalancingSetAddress.naturalUnit()) == 0,
@@ -464,7 +464,7 @@ contract RebalancingSetExchangeIssuanceModule is
      * issue the Rebalancing SetToken. The payment token can be utilized as a component of the base SetToken.
      * All remaining tokens / change are flushed and returned to the user.
      *
-     * Note: We do not validate the rebalancing SetToken quantity and the exchangeIssuanceParams base SetToken 
+     * Note: We do not validate the rebalancing SetToken quantity and the exchangeIssuanceParams base SetToken
      * quantity. Thus there could be extra base SetToken (or change) generated.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
@@ -473,7 +473,7 @@ contract RebalancingSetExchangeIssuanceModule is
      * @param  _paymentTokenQuantity     Quantity of the payment token
      * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
      * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
-     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user 
+     * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transfered to the user
      *                                     or left in the vault
      */
     function issueRebalancingSetInternal(
@@ -547,7 +547,7 @@ contract RebalancingSetExchangeIssuanceModule is
      * Redeems a Rebalancing Set into the receiveToken. The Rebalancing Set is redeemed into the Base Set, and
      * Base Set components are traded for the receiveToken located in this contract.
      *
-     * Note: We do not validate the rebalancing SetToken quantity and the exchangeIssuanceParams base SetToken 
+     * Note: We do not validate the rebalancing SetToken quantity and the exchangeIssuanceParams base SetToken
      * quantity. Thus there could be extra base SetToken (or change) generated.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
@@ -591,7 +591,7 @@ contract RebalancingSetExchangeIssuanceModule is
             address(this),
             baseSetAddress,
             baseSetVaultQuantity
-        ); 
+        );
 
         // Redeem base SetToken into components and perform trades / exchanges
         // into the receiveToken. The receiveTokens are transferred to this contract
@@ -599,6 +599,6 @@ contract RebalancingSetExchangeIssuanceModule is
         exchangeIssuanceModuleInstance.exchangeRedeem(
             _exchangeIssuanceParams,
             _orderData
-        );     
+        );
     }
 }

@@ -136,7 +136,7 @@ contract CTokenExchangeIssuanceModule is
             _exchangeIssuanceParams.setAddress,
             _exchangeIssuanceParams.quantity
         );
-        
+
         // Issue Set to the caller
         coreInstance.issueModule(
             msg.sender,
@@ -155,9 +155,9 @@ contract CTokenExchangeIssuanceModule is
     }
 
     /**
-     * Redeems a Set, redeems cToken to underlying, and performs trades via exchange wrappers for specified receive tokens. 
+     * Redeems a Set, redeems cToken to underlying, and performs trades via exchange wrappers for specified receive tokens.
      * The receive tokens are attributed to the caller.
-     * 
+     *
      * @param _exchangeIssuanceParams              A Struct containing exchange issuance metadata
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
@@ -254,7 +254,7 @@ contract CTokenExchangeIssuanceModule is
                 // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
                 uint256 exchangeRate = cTokenInstance.exchangeRateCurrent();
                 uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(currentComponentQuantity, exchangeRate);
-                
+
                 // Withdraw send tokens from vault (owned by order sender) to the module
                 coreInstance.withdrawModule(
                     msg.sender,
@@ -293,7 +293,7 @@ contract CTokenExchangeIssuanceModule is
             address currentComponentAddress = baseSetComponents[i];
             // Get component quantity in vault
             uint256 currentComponentQuantity = vaultInstance.getOwnerBalance(currentComponentAddress, msg.sender);
-            
+
             // Calculate required component quantity
             uint256 requiredQuantity = _quantity.div(baseSetNaturalUnit).mul(baseSetUnits[i]);
 
@@ -309,7 +309,7 @@ contract CTokenExchangeIssuanceModule is
                 // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
                 uint256 exchangeRate = cTokenInstance.exchangeRateCurrent();
                 uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(quantityToMint, exchangeRate);
-                
+
                 // Transfer underlying from caller to module
                 coreInstance.transferModule(
                     underlyingAddress,
@@ -321,13 +321,13 @@ contract CTokenExchangeIssuanceModule is
                 // Mint cToken and deposit to vault under sender
                 mintCToken(cTokenInstance, underlyingAddress, underlyingQuantity);
             }
-        }           
+        }
     }
 
     /**
      * Withdraw required underlying from vault, redeem required amount of cTokens, and transfer to exchange wrappers
      *
-     * @param _sendTokenExchangeIds    List of exchange wrapper enumerations corresponding to 
+     * @param _sendTokenExchangeIds    List of exchange wrapper enumerations corresponding to
      * @param _sendTokens              Array of SetToken component addresses to send
      * @param _sendTokenAmounts        Array of SetToken component required quantities to send
      */
@@ -395,7 +395,7 @@ contract CTokenExchangeIssuanceModule is
         uint256 _underlyingQuantity
     )
         private
-    {        
+    {
         // Ensure allowance for underlying token to cToken contract.
         ERC20Wrapper.ensureAllowance(
             _underlyingAddress,
@@ -467,7 +467,7 @@ contract CTokenExchangeIssuanceModule is
     /**
      * Transfers send tokens from the user to the appropriate exchange wrapper. Used in exchange issue
      *
-     * @param _sendTokenExchangeIds            List of exchange wrapper enumerations corresponding to 
+     * @param _sendTokenExchangeIds            List of exchange wrapper enumerations corresponding to
      *                                         the wrapper that will handle the component
      * @param _sendTokens                      Array of addresses of the payment tokens
      * @param _sendTokenAmounts                Array of amounts of payment Tokens
@@ -544,9 +544,9 @@ contract CTokenExchangeIssuanceModule is
                         msg.sender,
                         currentComponentAddress,
                         currentComponentQuantity
-                    );  
+                    );
                 }
             }
-        }           
+        }
     }
 }

@@ -24,7 +24,6 @@ export { OracleWhiteList } from "./ts/OracleWhiteList";
 export { PerformanceFeeCalculator } from "./ts/PerformanceFeeCalculator";
 export { PlaceBidLibrary } from "./ts/PlaceBidLibrary";
 export { ProposeLibrary } from "./ts/ProposeLibrary";
-export { ProtocolViewer } from "./ts/ProtocolViewer";
 export { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
 export { RebalancingSetIssuanceModule } from "./ts/RebalancingSetIssuanceModule";
 export { RebalancingSetCTokenBidder } from "./ts/RebalancingSetCTokenBidder";
@@ -87,7 +86,6 @@ export {
   PerformanceFeeCalculatorContract,
   PlaceBidLibraryContract,
   ProposeLibraryContract,
-  ProtocolViewerContract,
   RebalanceAuctionModuleContract,
   RebalancingSetCTokenBidderContract,
   RebalancingSetCTokenExchangeIssuanceModuleContract,
@@ -121,12 +119,23 @@ export {
 } from "../utils/contracts";
 
 export { 
+  CompoundHelper,
   CoreHelper,
   ERC20Helper,
+  ExchangeHelper,
   FeeCalculatorHelper,
+  KyberNetworkHelper,
+  LibraryMockHelper,
   LiquidatorHelper,
   OracleHelper,
   RebalancingHelper,
+  RebalancingSetBidderHelper,
   RebalancingSetV2Helper,
+  RebalancingSetV3Helper,
+  UtilsHelper,
   ValuationHelper
 } from '../utils/helpers';
+
+export {
+  Blockchain
+} from '../utils/blockchain'

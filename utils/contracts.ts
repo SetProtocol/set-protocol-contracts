@@ -15,7 +15,6 @@ export { CoreIssuanceLibraryContract } from '../types/generated/core_issuance_li
 export { CoreIssuanceLibraryMockContract } from '../types/generated/core_issuance_library_mock';
 export { CoreMockContract } from '../types/generated/core_mock';
 export { CTokenExchangeIssuanceModuleContract } from '../types/generated/c_token_exchange_issuance_module';
-export { ERC20ViewerContract } from '../types/generated/erc20_viewer';
 export { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 export { ERC20WrapperContract } from '../types/generated/erc20_wrapper';
 export { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
@@ -42,7 +41,6 @@ export { PerformanceFeeCalculatorContract } from '../types/generated/performance
 export { PlaceBidLibraryContract } from '../types/generated/place_bid_library';
 export { PlaceBidMockContract } from '../types/generated/place_bid_mock';
 export { ProposeLibraryContract } from '../types/generated/propose_library';
-export { ProtocolViewerContract } from '../types/generated/protocol_viewer';
 export { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 export { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
 export { RebalanceMockContract } from '../types/generated/rebalance_mock';
@@ -64,7 +62,6 @@ export { RebalancingSetTokenV3Contract } from '../types/generated/rebalancing_se
 export { RebalancingSetTokenFactoryContract } from '../types/generated/rebalancing_set_token_factory';
 export { RebalancingSetTokenV2FactoryContract } from '../types/generated/rebalancing_set_token_v2_factory';
 export { RebalancingSetTokenV3FactoryContract } from '../types/generated/rebalancing_set_token_v3_factory';
-export { RebalancingSetTokenViewerContract } from '../types/generated/rebalancing_set_token_viewer';
 export { SettleRebalanceLibraryContract } from '../types/generated/settle_rebalance_library';
 export { SetMathMockContract } from '../types/generated/set_math_mock';
 export { SetTokenContract } from '../types/generated/set_token';
@@ -83,7 +80,6 @@ export { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrad
 export { TimeLockUpgradeV2Contract } from '../types/generated/time_lock_upgrade_v2';
 export { TimeLockUpgradeV2MockContract } from '../types/generated/time_lock_upgrade_v2_mock';
 export { TransferProxyContract } from '../types/generated/transfer_proxy';
-export { TradingPoolViewerContract } from '../types/generated/trading_pool_viewer';
 export {
   TwoAssetPriceBoundedLinearAuctionMockContract
 } from '../types/generated/two_asset_price_bounded_linear_auction_mock';

@@ -1,8 +1,15 @@
+export { CompoundHelper } from './compoundHelper';
 export { CoreHelper } from './coreHelper';
 export { ERC20Helper } from './erc20Helper';
+export { ExchangeHelper } from './exchangeHelper';
 export { FeeCalculatorHelper } from './feeCalculatorHelper';
+export { KyberNetworkHelper } from './kyberNetworkHelper';
+export { LibraryMockHelper } from './libraryMockHelper';
 export { LiquidatorHelper } from './liquidatorHelper';
 export { OracleHelper } from './oracleHelper';
 export { RebalancingHelper } from './rebalancingHelper';
+export { RebalancingSetBidderHelper } from './rebalancingSetBidderHelper';
 export { RebalancingSetV2Helper } from './rebalancingSetV2Helper';
+export { RebalancingSetV3Helper } from './rebalancingSetV3Helper';
+export { UtilsHelper } from './utilsHelper';
 export { ValuationHelper } from './valuationHelper';

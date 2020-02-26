@@ -34,7 +34,7 @@ import { getLinearAuction, TokenFlow } from '@utils/auction';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
-import { OracleHelper } from '@utils/helpers/oracleHelper';
+import { OracleHelper } from 'set-protocol-oracles';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
 
 BigNumberSetup.configure();
@@ -61,7 +61,7 @@ contract('LinearAuction', accounts => {
   const erc20Helper = new ERC20Helper(ownerAccount);
   const oracleHelper = new OracleHelper(ownerAccount);
   const valuationHelper = new ValuationHelper(ownerAccount, coreHelper, erc20Helper, oracleHelper);
-  const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper, oracleHelper, valuationHelper);
+  const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper, valuationHelper);
 
   let auctionPeriod: BigNumber;
   let rangeStart: BigNumber;

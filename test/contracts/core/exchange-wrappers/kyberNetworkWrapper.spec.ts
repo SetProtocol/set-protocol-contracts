@@ -33,7 +33,6 @@ const { expect } = chai;
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const blockchain = new Blockchain(web3);
 
-
 contract('KyberNetworkWrapper', accounts => {
   const [
     deployerAccount,

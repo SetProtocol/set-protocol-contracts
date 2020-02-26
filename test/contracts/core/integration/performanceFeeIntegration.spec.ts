@@ -35,7 +35,7 @@ import {
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
-import { OracleHelper } from '@utils/helpers/oracleHelper';
+import { OracleHelper } from 'set-protocol-oracles';
 import { RebalancingSetV3Helper } from '@utils/helpers/rebalancingSetV3Helper';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
 

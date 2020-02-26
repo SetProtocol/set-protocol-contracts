@@ -28,12 +28,12 @@ import {
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 import { ether } from '../units';
-import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
+import { getWeb3, getContractInstance, importArtifactsFromSource, txnFrom } from '../web3Helper';
 
 import { RebalancingHelper } from './rebalancingHelper';
 
 const web3 = getWeb3();
-const RebalancingSetTokenV2 = artifacts.require('RebalancingSetTokenV2');
+const RebalancingSetTokenV2 = importArtifactsFromSource('RebalancingSetTokenV2');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 declare type RebalancingV2LikeContract = RebalancingSetTokenV2Contract | RebalancingSetTokenV3Contract;

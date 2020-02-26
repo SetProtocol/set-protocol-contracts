@@ -16,7 +16,7 @@ import {
 
 import { CoreHelper } from './coreHelper';
 import { ERC20Helper } from './erc20Helper';
-import { OracleHelper } from './oracleHelper';
+import { OracleHelper } from 'set-protocol-oracles';
 
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const {
@@ -47,7 +47,7 @@ export class ValuationHelper {
   ): Promise<BigNumber> {
     const componentTokens = await setToken.getComponents.callAsync();
 
-    const tokenPrices = await this._oracleHelper.getComponentPricesAsync(
+    const tokenPrices = await this.getComponentPricesAsync(
       componentTokens,
       oracleWhiteList
     );
@@ -96,5 +96,22 @@ export class ValuationHelper {
              .mul(unitsInFullSet)
              .div(10 ** tokenDecimals.toNumber())
              .round(0, 3);
+  }
+
+  public async getComponentPricesAsync(
+    components: Address[],
+    oracleWhiteList: OracleWhiteListContract,
+    from: Address = this._contractOwnerAddress
+  ): Promise<BigNumber[]> {
+    const componentOracles = await oracleWhiteList.getOracleAddressesByToken.callAsync(components);
+
+    const oracleInstances = _.map(componentOracles, address => {
+      return this._oracleHelper.getUpdatableOracleMockInstance(address);
+    });
+
+    const oraclePricePromises = _.map(oracleInstances, async oracle => {
+      return await oracle.read.callAsync();
+    });
+    return await Promise.all(oraclePricePromises);
   }
 }

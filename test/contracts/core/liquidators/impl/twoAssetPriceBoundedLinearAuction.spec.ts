@@ -27,7 +27,7 @@ import { LinearAuction } from '@utils/auction';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
-import { OracleHelper } from '@utils/helpers/oracleHelper';
+import { OracleHelper } from 'set-protocol-oracles';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
 import { expectRevertError } from '@utils/tokenAssertions';
 
@@ -54,7 +54,7 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
   const erc20Helper = new ERC20Helper(deployerAccount);
   const oracleHelper = new OracleHelper(deployerAccount);
   const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
-  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, oracleHelper, valuationHelper);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, valuationHelper);
 
   let wrappedETH: StandardTokenMockContract;
   let wrappedBTC: StandardTokenMockContract;

@@ -39,14 +39,6 @@ export const blankTxn = async (from: string) => {
   });
 };
 
-export const importFromOracles = (contractName: string) => {
-  const data = require('set-protocol-oracles/build/contracts/' + contractName + '.json');
-  const instance = contract(data);
-  instance.setProvider(web3.currentProvider);
-
-  return instance;
-}
-
 export const importArtifactsFromSource = (contractName: string) => {
   let instance;
   try {

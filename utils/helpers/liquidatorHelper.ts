@@ -33,24 +33,20 @@ const LiquidatorProxy = importArtifactsFromSource('LiquidatorProxy');
 const TwoAssetPriceBoundedLinearAuctionMock = importArtifactsFromSource('TwoAssetPriceBoundedLinearAuctionMock');
 
 import { ERC20Helper } from './erc20Helper';
-import { OracleHelper } from './oracleHelper';
 import { ValuationHelper } from './valuationHelper';
 
 export class LiquidatorHelper {
   private _contractOwnerAddress: Address;
   private _erc20Helper: ERC20Helper;
-  private _oracleHelper: OracleHelper;
   private _valuationHelper: ValuationHelper;
 
   constructor(
     contractOwnerAddress: Address,
     erc20Helper: ERC20Helper,
-    oracleHelper: OracleHelper,
     valuationHelper: ValuationHelper
   ) {
     this._contractOwnerAddress = contractOwnerAddress;
     this._erc20Helper = erc20Helper;
-    this._oracleHelper = oracleHelper;
     this._valuationHelper = valuationHelper;
   }
 
@@ -240,7 +236,7 @@ export class LiquidatorHelper {
     const assetOneFullUnit = new BigNumber(10 ** assetOneDecimals.toNumber());
     const assetTwoFullUnit = new BigNumber(10 ** assetTwoDecimals.toNumber());
 
-    const [assetOnePrice, assetTwoPrice] = await this._oracleHelper.getComponentPricesAsync(
+    const [assetOnePrice, assetTwoPrice] = await this._valuationHelper.getComponentPricesAsync(
       linearAuction.auction.combinedTokenArray,
       oracleWhiteList
     );

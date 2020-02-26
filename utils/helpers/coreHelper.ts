@@ -50,7 +50,9 @@ const ERC20Wrapper = importArtifactsFromSource('ERC20Wrapper');
 const ExchangeIssuanceModule = importArtifactsFromSource('ExchangeIssuanceModule');
 const FactoryUtilsLibrary = importArtifactsFromSource('FactoryUtilsLibrary');
 const OracleWhiteList = importArtifactsFromSource('OracleWhiteList');
-const RebalancingSetCTokenExchangeIssuanceModule = importArtifactsFromSource('RebalancingSetCTokenExchangeIssuanceModule');
+const RebalancingSetCTokenExchangeIssuanceModule = importArtifactsFromSource(
+  'RebalancingSetCTokenExchangeIssuanceModule'
+);
 const RebalancingSetCTokenIssuanceModule = importArtifactsFromSource('RebalancingSetCTokenIssuanceModule');
 const RebalancingSetExchangeIssuanceModule = importArtifactsFromSource('RebalancingSetExchangeIssuanceModule');
 const RebalancingSetIssuanceModule = importArtifactsFromSource('RebalancingSetIssuanceModule');

@@ -19,15 +19,15 @@ import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from '../constants';
-import { getContractInstance } from '../web3Helper';
+import { getContractInstance, importArtifactsFromSource } from '../web3Helper';
 
-const BadTokenMock = artifacts.require('BadTokenMock');
-const InvalidReturnTokenMock = artifacts.require('InvalidReturnTokenMock');
-const NoDecimalTokenMock = artifacts.require('NoDecimalTokenMock');
-const NoXferReturnTokenMock = artifacts.require('NoXferReturnTokenMock');
-const StandardTokenMock = artifacts.require('StandardTokenMock');
-const StandardTokenWithFeeMock = artifacts.require('StandardTokenWithFeeMock');
-const WethMock = artifacts.require('WethMock');
+const BadTokenMock = importArtifactsFromSource('BadTokenMock');
+const InvalidReturnTokenMock = importArtifactsFromSource('InvalidReturnTokenMock');
+const NoDecimalTokenMock = importArtifactsFromSource('NoDecimalTokenMock');
+const NoXferReturnTokenMock = importArtifactsFromSource('NoXferReturnTokenMock');
+const StandardTokenMock = importArtifactsFromSource('StandardTokenMock');
+const StandardTokenWithFeeMock = importArtifactsFromSource('StandardTokenWithFeeMock');
+const WethMock = importArtifactsFromSource('WethMock');
 
 
 export class ERC20Helper {

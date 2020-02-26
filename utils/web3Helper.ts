@@ -43,5 +43,21 @@ export const importFromOracles = (contractName: string) => {
   const data = require('set-protocol-oracles/build/contracts/' + contractName + '.json');
   const instance = contract(data);
   instance.setProvider(web3.currentProvider);
+
+  return instance;
+}
+
+export const importArtifactsFromSource = (contractName: string) => {
+  let instance;
+  console.log(contractName);
+  try {
+    instance = artifacts.require(contractName);
+  } catch (e) {
+    console.log(e);
+    const data = require('set-protocol-contracts/build/contracts/' + contractName + '.json');
+    instance = contract(data);
+    instance.setProvider(web3.currentProvider);
+  }
+
   return instance;
 };

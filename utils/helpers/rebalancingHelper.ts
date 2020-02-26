@@ -31,17 +31,17 @@ import {
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 
 import { Blockchain } from '../blockchain';
-import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
+import { getWeb3, getContractInstance, importArtifactsFromSource, txnFrom } from '../web3Helper';
 
 import { CoreHelper } from './coreHelper';
 import { ERC20Helper } from './erc20Helper';
 
 const web3 = getWeb3();
-const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
-const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
-const RebalancingSetToken = artifacts.require('RebalancingSetToken');
-const SetToken = artifacts.require('SetToken');
-const UpdatableConstantAuctionPriceCurve = artifacts.require('UpdatableConstantAuctionPriceCurve');
+const ConstantAuctionPriceCurve = importArtifactsFromSource('ConstantAuctionPriceCurve');
+const LinearAuctionPriceCurve = importArtifactsFromSource('LinearAuctionPriceCurve');
+const RebalancingSetToken = importArtifactsFromSource('RebalancingSetToken');
+const SetToken = importArtifactsFromSource('SetToken');
+const UpdatableConstantAuctionPriceCurve = importArtifactsFromSource('UpdatableConstantAuctionPriceCurve');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;

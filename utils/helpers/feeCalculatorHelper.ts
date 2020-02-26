@@ -11,7 +11,7 @@ import {
   PerformanceFeeCalculatorContract,
   RebalancingSetFeeMockContract,
 } from '../contracts';
-import { getWeb3, getContractInstance, txnFrom } from '../web3Helper';
+import { getWeb3, getContractInstance, importArtifactsFromSource, txnFrom } from '../web3Helper';
 import { ether } from '../units';
 import {
   ONE_YEAR_IN_SECONDS,
@@ -19,11 +19,11 @@ import {
 } from '../constants';
 
 
-const FixedFeeCalculator = artifacts.require('FixedFeeCalculator');
-const FixedFeeCalculatorMock = artifacts.require('FixedFeeCalculatorMock');
-const FeeCalculatorMock = artifacts.require('FeeCalculatorMock');
-const PerformanceFeeCalculator = artifacts.require('PerformanceFeeCalculator');
-const RebalancingSetFeeMock = artifacts.require('RebalancingSetFeeMock');
+const FixedFeeCalculator = importArtifactsFromSource('FixedFeeCalculator');
+const FixedFeeCalculatorMock = importArtifactsFromSource('FixedFeeCalculatorMock');
+const FeeCalculatorMock = importArtifactsFromSource('FeeCalculatorMock');
+const PerformanceFeeCalculator = importArtifactsFromSource('PerformanceFeeCalculator');
+const RebalancingSetFeeMock = importArtifactsFromSource('RebalancingSetFeeMock');
 
 const web3 = getWeb3();
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;

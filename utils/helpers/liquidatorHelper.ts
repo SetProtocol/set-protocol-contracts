@@ -12,7 +12,7 @@ import {
   SetTokenContract,
   TwoAssetPriceBoundedLinearAuctionMockContract,
 } from '../contracts';
-import { getContractInstance, txnFrom } from '../web3Helper';
+import { getContractInstance, importArtifactsFromSource, txnFrom } from '../web3Helper';
 import {
   AUCTION_CURVE_DENOMINATOR,
   ONE_HUNDRED,
@@ -25,12 +25,12 @@ import {
 } from '../auction';
 import { ether } from '../units';
 
-const AuctionMock = artifacts.require('AuctionMock');
-const LinearAuctionLiquidator = artifacts.require('LinearAuctionLiquidator');
-const LinearAuctionMock = artifacts.require('LinearAuctionMock');
-const LiquidatorMock = artifacts.require('LiquidatorMock');
-const LiquidatorProxy = artifacts.require('LiquidatorProxy');
-const TwoAssetPriceBoundedLinearAuctionMock = artifacts.require('TwoAssetPriceBoundedLinearAuctionMock');
+const AuctionMock = importArtifactsFromSource('AuctionMock');
+const LinearAuctionLiquidator = importArtifactsFromSource('LinearAuctionLiquidator');
+const LinearAuctionMock = importArtifactsFromSource('LinearAuctionMock');
+const LiquidatorMock = importArtifactsFromSource('LiquidatorMock');
+const LiquidatorProxy = importArtifactsFromSource('LiquidatorProxy');
+const TwoAssetPriceBoundedLinearAuctionMock = importArtifactsFromSource('TwoAssetPriceBoundedLinearAuctionMock');
 
 import { ERC20Helper } from './erc20Helper';
 import { OracleHelper } from './oracleHelper';

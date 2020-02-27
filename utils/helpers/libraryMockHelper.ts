@@ -22,29 +22,34 @@ import {
   ZeroExOrderLibraryMockContract
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
-import { getContractInstance, txnFrom } from '../web3Helper';
+import {
+  getContractInstance,
+  linkLibrariesToDeploy,
+  importArtifactsFromSource,
+  txnFrom
+} from '../web3Helper';
 import { ZERO } from '../constants';
 
-const Bytes32LibraryMock = artifacts.require('Bytes32LibraryMock');
-const CommonMathMock = artifacts.require('CommonMathMock');
-const CommonValidationsLibrary = artifacts.require('CommonValidationsLibrary');
-const CommonValidationsLibraryMock = artifacts.require('CommonValidationsLibraryMock');
-const CompoundUtilsMock = artifacts.require('CompoundUtilsMock');
-const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
-const CoreIssuanceLibraryMock = artifacts.require('CoreIssuanceLibraryMock');
-const ERC20Wrapper = artifacts.require('ERC20Wrapper');
-const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
-const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
-const PlaceBidMock = artifacts.require('PlaceBidMock');
-const RebalanceMock = artifacts.require('RebalanceMock');
-const RebalancingSetIssuanceMock = artifacts.require('RebalancingSetIssuanceMock');
-const SetMathMock = artifacts.require('SetMathMock');
-const SetTokenLibrary = artifacts.require('SetTokenLibrary');
-const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
-const RebalanceStateSetTokenMock = artifacts.require('RebalanceStateSetTokenMock');
-const SetUSDValuationMock = artifacts.require('SetUSDValuationMock');
-const TokenFlushMock = artifacts.require('TokenFlushMock');
-const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
+const Bytes32LibraryMock = importArtifactsFromSource('Bytes32LibraryMock');
+const CommonMathMock = importArtifactsFromSource('CommonMathMock');
+const CommonValidationsLibrary = importArtifactsFromSource('CommonValidationsLibrary');
+const CommonValidationsLibraryMock = importArtifactsFromSource('CommonValidationsLibraryMock');
+const CompoundUtilsMock = importArtifactsFromSource('CompoundUtilsMock');
+const CoreIssuanceLibrary = importArtifactsFromSource('CoreIssuanceLibrary');
+const CoreIssuanceLibraryMock = importArtifactsFromSource('CoreIssuanceLibraryMock');
+const ERC20Wrapper = importArtifactsFromSource('ERC20Wrapper');
+const ERC20WrapperMock = importArtifactsFromSource('ERC20WrapperMock');
+const ExchangeIssuanceLibraryMock = importArtifactsFromSource('ExchangeIssuanceLibraryMock');
+const PlaceBidMock = importArtifactsFromSource('PlaceBidMock');
+const RebalanceMock = importArtifactsFromSource('RebalanceMock');
+const RebalancingSetIssuanceMock = importArtifactsFromSource('RebalancingSetIssuanceMock');
+const SetMathMock = importArtifactsFromSource('SetMathMock');
+const SetTokenLibrary = importArtifactsFromSource('SetTokenLibrary');
+const SetTokenLibraryMock = importArtifactsFromSource('SetTokenLibraryMock');
+const RebalanceStateSetTokenMock = importArtifactsFromSource('RebalanceStateSetTokenMock');
+const SetUSDValuationMock = importArtifactsFromSource('SetUSDValuationMock');
+const TokenFlushMock = importArtifactsFromSource('TokenFlushMock');
+const ZeroExOrderLibraryMock = importArtifactsFromSource('ZeroExOrderLibraryMock');
 
 
 export class LibraryMockHelper {
@@ -59,11 +64,7 @@ export class LibraryMockHelper {
   public async deployCommonValidationsLibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<CommonValidationsLibraryMockContract> {
-    const truffleCommonValidationsLibrary = await CommonValidationsLibrary.new(
-      { from: this._contractOwnerAddress },
-    );
-
-    await CommonValidationsLibraryMock.link('CommonValidationsLibrary', truffleCommonValidationsLibrary.address);
+    await linkLibrariesToDeploy(CommonValidationsLibraryMock, [CommonValidationsLibrary], this._contractOwnerAddress);
 
     const commonValidationsMockContract = await CommonValidationsLibraryMock.new(txnFrom(from));
 
@@ -103,11 +104,7 @@ export class LibraryMockHelper {
   public async deployCoreIssuanceLibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<CoreIssuanceLibraryMockContract> {
-    const truffleCoreIssuanceLibrary = await CoreIssuanceLibrary.new(
-      { from: this._contractOwnerAddress },
-    );
-
-    await CoreIssuanceLibraryMock.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
+    await linkLibrariesToDeploy(CoreIssuanceLibraryMock, [CoreIssuanceLibrary], this._contractOwnerAddress);
 
     const truffleCoreIssuanceLibraryMock = await CoreIssuanceLibraryMock.new(txnFrom(from));
 
@@ -134,9 +131,7 @@ export class LibraryMockHelper {
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<TokenFlushMockContract> {
-   const truffleERC20Wrapper = await ERC20Wrapper.new({ from: this._contractOwnerAddress });
-
-    await TokenFlushMock.link('ERC20Wrapper', truffleERC20Wrapper.address);
+    await linkLibrariesToDeploy(TokenFlushMock, [ERC20Wrapper], this._contractOwnerAddress);
 
     const tokenFlushMockContract = await TokenFlushMock.new(
       core.address,
@@ -186,11 +181,7 @@ export class LibraryMockHelper {
     vault: VaultContract,
     from: Address = this._contractOwnerAddress
   ): Promise<RebalancingSetIssuanceMockContract> {
-    const truffleERC20Wrapper = await ERC20Wrapper.new(
-      { from: this._contractOwnerAddress },
-    );
-
-    await RebalancingSetIssuanceMock.link('ERC20Wrapper', truffleERC20Wrapper.address);
+    await linkLibrariesToDeploy(RebalancingSetIssuanceMock, [ERC20Wrapper], this._contractOwnerAddress);
 
     const rebalancingSetIssuanceMockContract = await RebalancingSetIssuanceMock.new(
       core.address,
@@ -229,9 +220,7 @@ export class LibraryMockHelper {
   public async deploySetTokenLibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<SetTokenLibraryMockContract> {
-    const truffleSetTokenLibrary = await SetTokenLibrary.new(txnFrom(from));
-
-    await SetTokenLibraryMock.link('SetTokenLibrary', truffleSetTokenLibrary.address);
+    await linkLibrariesToDeploy(SetTokenLibraryMock, [SetTokenLibrary], this._contractOwnerAddress);
 
     const setTokenLibraryMockContract = await SetTokenLibraryMock.new(txnFrom(from));
 

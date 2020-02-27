@@ -85,6 +85,7 @@ export class RebalancingHelper {
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenContract> {
     await this._coreHelper.linkRebalancingLibrariesAsync(RebalancingSetToken);
+
     const truffleRebalancingToken = await RebalancingSetToken.new(
       factory,
       tokenManager,

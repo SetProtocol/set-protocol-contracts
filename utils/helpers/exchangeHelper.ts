@@ -9,7 +9,7 @@ import {
 }  from '../contracts';
 
 import { DEFAULT_GAS } from '../constants';
-import { getContractInstance } from '../web3Helper';
+import { getContractInstance, linkLibrariesToDeploy } from '../web3Helper';
 
 import { CoreHelper } from './coreHelper';
 
@@ -36,11 +36,8 @@ export class ExchangeHelper {
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<KyberNetworkWrapperContract> {
-    const truffleERC20Wrapper = await ERC20Wrapper.new(
-      { from },
-    );
+    await linkLibrariesToDeploy(KyberNetworkWrapper, [ERC20Wrapper], this._contractOwnerAddress);
 
-    await KyberNetworkWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const kyberNetworkWrapperInstance = await KyberNetworkWrapper.new(
       core,
       kyberNetworkProxy,
@@ -79,11 +76,8 @@ export class ExchangeHelper {
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<ZeroExExchangeWrapperContract> {
-    const truffleERC20Wrapper = await ERC20Wrapper.new(
-      { from },
-    );
+    await linkLibrariesToDeploy(ZeroExExchangeWrapper, [ERC20Wrapper], this._contractOwnerAddress);
 
-    await ZeroExExchangeWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const zeroExExchangeWrapperInstance = await ZeroExExchangeWrapper.new(
       core,
       zeroExExchange,

@@ -1,6 +1,7 @@
 const Web3 = require('web3'); // import web3 v1.0 constructor
 const BigNumber = require('bignumber.js');
 import { DEFAULT_GAS, NULL_ADDRESS } from './constants';
+import { Address } from 'set-protocol-utils';
 
 const contract = require('@truffle/contract');
 
@@ -37,6 +38,18 @@ export const blankTxn = async (from: string) => {
     to: NULL_ADDRESS,
     value: '1',
   });
+};
+
+export const linkLibrariesToDeploy = async (contract: any, libraries: any[], from: Address) => {
+  contract.setNetwork(50);
+
+  await Promise.all(libraries.map(async library => {
+    const truffleLibrary = await library.new(
+      { from },
+    );
+
+    await contract.link(library.contractName, truffleLibrary.address);
+  }));
 };
 
 export const importArtifactsFromSource = (contractName: string) => {

@@ -3,7 +3,7 @@ import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 
-import { getContractInstance, getWeb3 } from '../web3Helper';
+import { getContractInstance, getWeb3, importArtifactsFromSource } from '../web3Helper';
 import { ether } from '../units';
 
 import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY } from '../constants';
@@ -17,7 +17,7 @@ import { CONTRACTS, PERMISSIONED_ACCOUNTS, BYTECODE } from '../compoundSnapshotA
 import { BadCTokenMockContract } from '../contracts';
 
 const web3 = getWeb3();
-const BadCTokenMock = artifacts.require('BadCTokenMock');
+const BadCTokenMock = importArtifactsFromSource('BadCTokenMock');
 
 export class CompoundHelper {
   private _senderAccountAddress: Address;

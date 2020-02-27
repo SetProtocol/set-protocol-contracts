@@ -5,7 +5,7 @@ import {
   RebalancingSetEthBidderContract,
   RebalancingSetCTokenBidderContract,
 } from '../contracts';
-import { getContractInstance, txnFrom } from '../web3Helper';
+import { getContractInstance, linkLibrariesToDeploy, txnFrom } from '../web3Helper';
 
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const RebalancingSetEthBidder = artifacts.require('RebalancingSetEthBidder');
@@ -27,9 +27,7 @@ export class RebalancingSetBidderHelper {
     wethAddress: Address,
     from: Address = this._contractOwnerAddress
   ): Promise<RebalancingSetEthBidderContract> {
-    const erc20WrapperLibrary = await ERC20Wrapper.new(txnFrom(from));
-
-    await RebalancingSetEthBidder.link('ERC20Wrapper', erc20WrapperLibrary.address);
+    await linkLibrariesToDeploy(RebalancingSetEthBidder, [ERC20Wrapper], this._contractOwnerAddress);
 
     const rebalancingSetEthBidderContract = await RebalancingSetEthBidder.new(
       rebalanceAuctionModuleAddress,
@@ -52,9 +50,7 @@ export class RebalancingSetBidderHelper {
     dataDescription: string,
     from: Address = this._contractOwnerAddress
   ): Promise<RebalancingSetCTokenBidderContract> {
-    const erc20WrapperLibrary = await ERC20Wrapper.new(txnFrom(from));
-
-    await RebalancingSetCTokenBidder.link('ERC20Wrapper', erc20WrapperLibrary.address);
+    await linkLibrariesToDeploy(RebalancingSetCTokenBidder, [ERC20Wrapper], this._contractOwnerAddress);
 
     const rebalancingSetCTokenBidderContract = await RebalancingSetCTokenBidder.new(
       rebalanceAuctionModuleAddress,

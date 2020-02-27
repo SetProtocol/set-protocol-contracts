@@ -36,7 +36,7 @@ import {
   ONE_DAY_IN_SECONDS,
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
-import { getWeb3, getContractInstance, importArtifactsFromSource } from '../web3Helper';
+import { getWeb3, getContractInstance, importArtifactsFromSource, linkLibrariesToDeploy } from '../web3Helper';
 
 const web3 = getWeb3();
 
@@ -94,11 +94,8 @@ export class CoreHelper {
   public async deployTransferProxyAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<TransferProxyContract> {
-    const truffleERC20Wrapper = await ERC20Wrapper.new(
-      { from: this._tokenOwnerAddress },
-    );
+    await linkLibrariesToDeploy(TransferProxy, [ERC20Wrapper], this._tokenOwnerAddress);
 
-    await TransferProxy.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const truffleTransferProxy = await TransferProxy.new(
       { from, gas: DEFAULT_GAS },
     );
@@ -112,11 +109,8 @@ export class CoreHelper {
   public async deployVaultAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<VaultContract> {
-    const truffleERC20Wrapper = await ERC20Wrapper.new(
-      { from: this._tokenOwnerAddress },
-    );
+    await linkLibrariesToDeploy(TransferProxy, [ERC20Wrapper], this._tokenOwnerAddress);
 
-    await Vault.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const truffleVault = await Vault.new(
       { from },
     );
@@ -144,7 +138,7 @@ export class CoreHelper {
     coreAddress: Address,
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenFactoryContract> {
-    await this.linkCommonValidationsLibraryAsync(SetTokenFactory);
+     await linkLibrariesToDeploy(SetTokenFactory, [CommonValidationsLibrary], this._tokenOwnerAddress);
 
     const truffleSetTokenFactory = await SetTokenFactory.new(
       coreAddress,
@@ -168,7 +162,8 @@ export class CoreHelper {
     maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenFactoryContract> {
-    await this.linkRebalancingLibrariesAsync(RebalancingSetTokenFactory);
+    this.linkRebalancingLibrariesAsync(RebalancingSetTokenFactory);
+
     const truffleTokenFactory = await RebalancingSetTokenFactory.new(
       coreAddress,
       componentWhitelistAddress,
@@ -199,7 +194,8 @@ export class CoreHelper {
     maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenV2FactoryContract> {
-    await this.linkRebalancingLibrariesAsync(RebalancingSetTokenV2Factory);
+    this.linkRebalancingLibrariesAsync(RebalancingSetTokenV2Factory);
+
     const truffleTokenFactory = await RebalancingSetTokenV2Factory.new(
       coreAddress,
       componentWhitelistAddress,
@@ -231,11 +227,7 @@ export class CoreHelper {
     maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenV3FactoryContract> {
-    const factoryUtilsLibrary = await FactoryUtilsLibrary.new(
-      { from: this._contractOwnerAddress },
-    );
-
-    await RebalancingSetTokenV3Factory.link('FactoryUtilsLibrary', factoryUtilsLibrary.address);
+    await linkLibrariesToDeploy(RebalancingSetTokenV3Factory, [FactoryUtilsLibrary], this._tokenOwnerAddress);
 
     const truffleTokenFactory = await RebalancingSetTokenV3Factory.new(
       coreAddress,
@@ -256,52 +248,6 @@ export class CoreHelper {
     );
   }
 
-  public async linkSetTokenLibraryAsync(
-    contract: any,
-  ): Promise<void> {
-    const truffleSetTokenLibrary = await SetTokenLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-
-    await contract.link('SetTokenLibrary', truffleSetTokenLibrary.address);
-  }
-
-  public async linkRebalancingLibrariesAsync(
-    contract: any,
-  ): Promise<void> {
-    const truffleProposeLibrary = await ProposeLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-    const truffleStartRebalanceLibrary = await StartRebalanceLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-    const trufflePlaceBidLibrary = await PlaceBidLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-    const truffleSettleRebalanceLibrary = await SettleRebalanceLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-    const truffleFailAuctionLibrary = await FailAuctionLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-
-    await contract.link('ProposeLibrary', truffleProposeLibrary.address);
-    await contract.link('StartRebalanceLibrary', truffleStartRebalanceLibrary.address);
-    await contract.link('PlaceBidLibrary', trufflePlaceBidLibrary.address);
-    await contract.link('SettleRebalanceLibrary', truffleSettleRebalanceLibrary.address);
-    await contract.link('FailAuctionLibrary', truffleFailAuctionLibrary.address);
-  }
-
-  public async linkCommonValidationsLibraryAsync(
-    contract: any,
-  ): Promise<void> {
-    const truffleCommonValidationsLibrary = await CommonValidationsLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-
-    await contract.link('CommonValidationsLibrary', truffleCommonValidationsLibrary.address);
-  }
-
   public async deploySetTokenAsync(
     factory: Address,
     componentAddresses: Address[],
@@ -311,7 +257,7 @@ export class CoreHelper {
     symbol: string = 'SET',
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenContract> {
-    await this.linkCommonValidationsLibraryAsync(SetToken);
+    await linkLibrariesToDeploy(SetToken, [CommonValidationsLibrary], this._tokenOwnerAddress);
 
     // Creates but does not register the Set with Core as enabled
     const truffleSetToken = await SetToken.new(
@@ -338,24 +284,7 @@ export class CoreHelper {
     const transferProxy = await this.deployTransferProxyAsync();
     const vault = await this.deployVaultAsync();
 
-    const truffleCoreIssuanceLibrary = await CoreIssuanceLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-    await Core.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
-
-    await this.linkCommonValidationsLibraryAsync(Core);
-    await this.linkSetTokenLibraryAsync(Core);
-
-    const truffleCore = await Core.new(
-      transferProxy.address,
-      vault.address,
-      { from },
-    );
-
-    return new CoreContract(
-      getContractInstance(truffleCore),
-      { from, gas: DEFAULT_GAS },
-    );
+    return this.deployCoreAsync(transferProxy, vault, from);
   }
 
   public async deployCoreAsync(
@@ -363,13 +292,8 @@ export class CoreHelper {
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
-    const truffleCoreIssuanceLibrary = await CoreIssuanceLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-    await Core.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
-
-    await this.linkCommonValidationsLibraryAsync(Core);
-    await this.linkSetTokenLibraryAsync(Core);
+    const libraries = [CoreIssuanceLibrary, CommonValidationsLibrary, SetTokenLibrary];
+    await linkLibrariesToDeploy(Core, libraries, this._tokenOwnerAddress);
 
     const truffleCore = await Core.new(
       transferProxy.address,
@@ -388,13 +312,8 @@ export class CoreHelper {
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreMockContract> {
-    const truffleCoreIssuanceLibrary = await CoreIssuanceLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-    await CoreMock.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
-
-    await this.linkCommonValidationsLibraryAsync(CoreMock);
-    await this.linkSetTokenLibraryAsync(CoreMock);
+    const libraries = [CoreIssuanceLibrary, CommonValidationsLibrary, SetTokenLibrary];
+    await linkLibrariesToDeploy(CoreMock, libraries, this._tokenOwnerAddress);
 
     const truffleCore = await CoreMock.new(
       transferProxy.address,
@@ -507,7 +426,7 @@ export class CoreHelper {
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<ExchangeIssuanceModuleContract> {
-    await this.linkSetTokenLibraryAsync(ExchangeIssuanceModule);
+    await linkLibrariesToDeploy(ExchangeIssuanceModule, [SetTokenLibrary], this._tokenOwnerAddress);
 
     const truffleExchangeIssuanceModule = await ExchangeIssuanceModule.new(
       core.address,
@@ -528,12 +447,7 @@ export class CoreHelper {
     cTokenWhiteList: Address,
     from: Address = this._tokenOwnerAddress
   ): Promise<CTokenExchangeIssuanceModuleContract> {
-    await this.linkSetTokenLibraryAsync(CTokenExchangeIssuanceModule);
-
-    const erc20WrapperLibrary = await ERC20Wrapper.new(
-      { from: this._contractOwnerAddress },
-    );
-    await CTokenExchangeIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+    await linkLibrariesToDeploy(CTokenExchangeIssuanceModule, [ERC20Wrapper, SetTokenLibrary], this._tokenOwnerAddress);
 
     const truffleCTokenExchangeIssuanceModule = await CTokenExchangeIssuanceModule.new(
       core,
@@ -558,11 +472,7 @@ export class CoreHelper {
     cTokenWhiteList: Address,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetCTokenExchangeIssuanceModuleContract> {
-    const erc20WrapperLibrary = await ERC20Wrapper.new(
-      { from: this._contractOwnerAddress },
-    );
-
-    await RebalancingSetCTokenExchangeIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+    await linkLibrariesToDeploy(RebalancingSetCTokenExchangeIssuanceModule, [ERC20Wrapper], this._tokenOwnerAddress);
 
     const truffleModule = await RebalancingSetCTokenExchangeIssuanceModule.new(
       core,
@@ -588,11 +498,7 @@ export class CoreHelper {
     cTokenWhiteList: Address,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetCTokenIssuanceModuleContract> {
-    const erc20WrapperLibrary = await ERC20Wrapper.new(
-      { from: this._contractOwnerAddress },
-    );
-
-    await RebalancingSetCTokenIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+    await linkLibrariesToDeploy(RebalancingSetCTokenIssuanceModule, [ERC20Wrapper], this._tokenOwnerAddress);
 
     const truffleModule = await RebalancingSetCTokenIssuanceModule.new(
       core,
@@ -617,11 +523,7 @@ export class CoreHelper {
     vault: Address,
     from: Address = this._contractOwnerAddress
   ): Promise<RebalancingSetExchangeIssuanceModuleContract> {
-    const erc20WrapperLibrary = await ERC20Wrapper.new(
-      { from: this._contractOwnerAddress },
-    );
-
-    await RebalancingSetExchangeIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+    await linkLibrariesToDeploy(RebalancingSetExchangeIssuanceModule, [ERC20Wrapper], this._tokenOwnerAddress);
 
     const payableExchangeIssuanceContract = await RebalancingSetExchangeIssuanceModule.new(
       core,
@@ -645,11 +547,7 @@ export class CoreHelper {
     weth: WethMockContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetIssuanceModuleContract> {
-    const erc20WrapperLibrary = await ERC20Wrapper.new(
-      { from: this._contractOwnerAddress },
-    );
-
-    await RebalancingSetIssuanceModule.link('ERC20Wrapper', erc20WrapperLibrary.address);
+    await linkLibrariesToDeploy(RebalancingSetIssuanceModule, [ERC20Wrapper], this._tokenOwnerAddress);
 
     const truffleModule = await RebalancingSetIssuanceModule.new(
       core.address,
@@ -664,6 +562,20 @@ export class CoreHelper {
       { from, gas: DEFAULT_GAS },
     );
   }
+
+  public async linkRebalancingLibrariesAsync(
+    contract: any,
+  ): Promise<void> {
+    const libraries = [
+      ProposeLibrary,
+      StartRebalanceLibrary,
+      PlaceBidLibrary,
+      SettleRebalanceLibrary,
+      FailAuctionLibrary,
+    ];
+    await linkLibrariesToDeploy(contract, libraries, this._tokenOwnerAddress);
+  }
+
 
   /* ============ CoreAdmin Extension ============ */
 

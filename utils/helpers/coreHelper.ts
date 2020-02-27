@@ -162,7 +162,7 @@ export class CoreHelper {
     maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenFactoryContract> {
-    this.linkRebalancingLibrariesAsync(RebalancingSetTokenFactory);
+    await this.linkRebalancingLibrariesAsync(RebalancingSetTokenFactory);
 
     const truffleTokenFactory = await RebalancingSetTokenFactory.new(
       coreAddress,
@@ -194,7 +194,7 @@ export class CoreHelper {
     maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenV2FactoryContract> {
-    this.linkRebalancingLibrariesAsync(RebalancingSetTokenV2Factory);
+    await this.linkRebalancingLibrariesAsync(RebalancingSetTokenV2Factory);
 
     const truffleTokenFactory = await RebalancingSetTokenV2Factory.new(
       coreAddress,

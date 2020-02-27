@@ -44,7 +44,6 @@ export const linkLibrariesToDeploy = async (contract: any, libraries: any[], fro
   contract.setNetwork(50);
 
   await Promise.all(libraries.map(async library => {
-    console.log(library.contractName);
     const truffleLibrary = await library.new(
       { from },
     );

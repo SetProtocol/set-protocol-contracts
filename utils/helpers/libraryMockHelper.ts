@@ -22,29 +22,34 @@ import {
   ZeroExOrderLibraryMockContract
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
-import { getContractInstance, linkLibrariesToDeploy, txnFrom } from '../web3Helper';
+import {
+  getContractInstance,
+  linkLibrariesToDeploy,
+  importArtifactsFromSource,
+  txnFrom
+} from '../web3Helper';
 import { ZERO } from '../constants';
 
-const Bytes32LibraryMock = artifacts.require('Bytes32LibraryMock');
-const CommonMathMock = artifacts.require('CommonMathMock');
-const CommonValidationsLibrary = artifacts.require('CommonValidationsLibrary');
-const CommonValidationsLibraryMock = artifacts.require('CommonValidationsLibraryMock');
-const CompoundUtilsMock = artifacts.require('CompoundUtilsMock');
-const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
-const CoreIssuanceLibraryMock = artifacts.require('CoreIssuanceLibraryMock');
-const ERC20Wrapper = artifacts.require('ERC20Wrapper');
-const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
-const ExchangeIssuanceLibraryMock = artifacts.require('ExchangeIssuanceLibraryMock');
-const PlaceBidMock = artifacts.require('PlaceBidMock');
-const RebalanceMock = artifacts.require('RebalanceMock');
-const RebalancingSetIssuanceMock = artifacts.require('RebalancingSetIssuanceMock');
-const SetMathMock = artifacts.require('SetMathMock');
-const SetTokenLibrary = artifacts.require('SetTokenLibrary');
-const SetTokenLibraryMock = artifacts.require('SetTokenLibraryMock');
-const RebalanceStateSetTokenMock = artifacts.require('RebalanceStateSetTokenMock');
-const SetUSDValuationMock = artifacts.require('SetUSDValuationMock');
-const TokenFlushMock = artifacts.require('TokenFlushMock');
-const ZeroExOrderLibraryMock = artifacts.require('ZeroExOrderLibraryMock');
+const Bytes32LibraryMock = importArtifactsFromSource('Bytes32LibraryMock');
+const CommonMathMock = importArtifactsFromSource('CommonMathMock');
+const CommonValidationsLibrary = importArtifactsFromSource('CommonValidationsLibrary');
+const CommonValidationsLibraryMock = importArtifactsFromSource('CommonValidationsLibraryMock');
+const CompoundUtilsMock = importArtifactsFromSource('CompoundUtilsMock');
+const CoreIssuanceLibrary = importArtifactsFromSource('CoreIssuanceLibrary');
+const CoreIssuanceLibraryMock = importArtifactsFromSource('CoreIssuanceLibraryMock');
+const ERC20Wrapper = importArtifactsFromSource('ERC20Wrapper');
+const ERC20WrapperMock = importArtifactsFromSource('ERC20WrapperMock');
+const ExchangeIssuanceLibraryMock = importArtifactsFromSource('ExchangeIssuanceLibraryMock');
+const PlaceBidMock = importArtifactsFromSource('PlaceBidMock');
+const RebalanceMock = importArtifactsFromSource('RebalanceMock');
+const RebalancingSetIssuanceMock = importArtifactsFromSource('RebalancingSetIssuanceMock');
+const SetMathMock = importArtifactsFromSource('SetMathMock');
+const SetTokenLibrary = importArtifactsFromSource('SetTokenLibrary');
+const SetTokenLibraryMock = importArtifactsFromSource('SetTokenLibraryMock');
+const RebalanceStateSetTokenMock = importArtifactsFromSource('RebalanceStateSetTokenMock');
+const SetUSDValuationMock = importArtifactsFromSource('SetUSDValuationMock');
+const TokenFlushMock = importArtifactsFromSource('TokenFlushMock');
+const ZeroExOrderLibraryMock = importArtifactsFromSource('ZeroExOrderLibraryMock');
 
 
 export class LibraryMockHelper {

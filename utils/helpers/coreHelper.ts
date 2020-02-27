@@ -109,7 +109,7 @@ export class CoreHelper {
   public async deployVaultAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<VaultContract> {
-    await linkLibrariesToDeploy(TransferProxy, [ERC20Wrapper], this._tokenOwnerAddress);
+    await linkLibrariesToDeploy(Vault, [ERC20Wrapper], this._tokenOwnerAddress);
 
     const truffleVault = await Vault.new(
       { from },

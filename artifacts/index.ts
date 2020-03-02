@@ -2,6 +2,7 @@ export { AddressToAddressWhiteList } from "./ts/AddressToAddressWhiteList";
 export { AuctionMock } from "./ts/AuctionMock";
 export { BadCTokenMock } from "./ts/BadCTokenMock";
 export { BadTokenMock } from "./ts/BadTokenMock";
+export { Bytes32Library } from "./ts/Bytes32Library";
 export { Bytes32LibraryMock } from "./ts/Bytes32LibraryMock";
 export { CommonMathMock } from "./ts/CommonMathMock";
 export { CommonValidationsLibrary } from "./ts/CommonValidationsLibrary";
@@ -90,6 +91,7 @@ export {
   BadCTokenMockContract,
   BadTokenMockContract,
   BaseContract,
+  Bytes32LibraryContract,
   Bytes32LibraryMockContract,
   CommonMathMockContract,
   CommonValidationsLibraryContract,

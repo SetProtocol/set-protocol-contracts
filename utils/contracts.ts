@@ -4,6 +4,7 @@ export { AuthorizableContract } from '../types/generated/authorizable';
 export { BadTokenMockContract } from '../types/generated/bad_token_mock';
 export { BadCTokenMockContract } from '../types/generated/bad_c_token_mock';
 export { BaseContract } from '../types/base_contract';
+export { Bytes32LibraryContract } from '../types/generated/bytes32_library';
 export { Bytes32LibraryMockContract } from '../types/generated/bytes32_library_mock';
 export { CommonMathMockContract } from '../types/generated/common_math_mock';
 export { CommonValidationsLibraryContract } from '../types/generated/common_validations_library';

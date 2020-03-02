@@ -27,6 +27,7 @@ import { IWhiteList } from "../interfaces/IWhiteList.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { RebalancingSetTokenV2Factory } from "./RebalancingSetTokenV2Factory.sol";
 import { RebalancingSetTokenV3 } from "./RebalancingSetTokenV3.sol";
+import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
 
 
 /**
@@ -78,11 +79,11 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
 
     /**
      * Overrides the RebalancingSetTokenV2Factory createSet function.
-     * 
+     *
      * Deploys a new RebalancingSetTokenV3 contract, conforming to IFactory
      * Can only be called by core contracts.
      *
-     * 
+     *
      * | CallData                   | Location                      |
      * |----------------------------|-------------------------------|
      * | manager                    | 32                            |
@@ -100,7 +101,7 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
      * @param  _name           The bytes32 encoded name of the new RebalancingSetTokenV3
      * @param  _symbol         The bytes32 encoded symbol of the new RebalancingSetTokenV3
      * @param  _callData       Byte string containing additional call parameters
-     * 
+     *
      * @return setToken        The address of the newly created SetToken
      */
     function createSet(
@@ -114,14 +115,18 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
         external
         returns (address)
     {
-        // The starting currentSet is the first component
-        address startingSet = _components[0];
+        SetTokenLibrary.SetDetails memory rebalancingSetDetails = SetTokenLibrary.SetDetails({
+            naturalUnit: _naturalUnit,
+            components: _components,
+            units: _units
+        });
 
-        validateRebalancingSet(
-            _components,
-            _units,
-            startingSet,
-            _naturalUnit
+        FactoryUtilsLibrary.validateRebalancingSet(
+            rebalancingSetDetails,
+            address(core),
+            msg.sender,
+            minimumNaturalUnit,
+            maximumNaturalUnit
         );
 
         // Parse the calldata
@@ -144,7 +149,7 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
                     address(this),                          // factory
                     parameters.manager,                     // manager
                     parameters.liquidator,                  // liquidator
-                    startingSet,                            // initialSet
+                    _components[0],                            // initialSet
                     address(rebalanceComponentWhitelist),   // componentWhiteList
                     address(liquidatorWhitelist),           // liquidatorWhiteList
                     parameters.feeRecipient,                // feeRecipient
@@ -167,46 +172,5 @@ contract RebalancingSetTokenV3Factory is RebalancingSetTokenV2Factory {
         IRebalancingSetTokenV2(rebalancingSet).initialize(parameters.rebalanceFeeCalculatorData);
 
         return rebalancingSet;
-    }
-
-    /* ============ Internal Functions ============ */
-
-    function validateRebalancingSet(
-        address[] memory _components,
-        uint256[] memory _units,
-        address _startingSet,
-        uint256 _naturalUnit
-    )
-        internal
-        view
-    {
-        require(
-            msg.sender == address(core),
-            "Must be core"
-        );
-
-        // Ensure component array only includes one address which will be the currentSet
-        require(
-            _components.length == 1 && 
-            _units.length == 1,
-            "Components or units len != 1"
-        );
-
-        require(
-            _units[0] > 0,
-            "UnitShares not > 0"
-        );
-
-        // Expect Set to rebalance to be valid and enabled Set
-        require(
-            core.validSets(_startingSet),
-            "Bad Set"
-        );
-
-        // Natural unit must be within minimum and maximum bounds
-        require(
-            _naturalUnit >= minimumNaturalUnit && _naturalUnit <= maximumNaturalUnit,
-            "Bad natural unit"
-        );
     }
 }

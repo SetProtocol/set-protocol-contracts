@@ -239,6 +239,7 @@ contract('RebalancingSetTokenV3Factory', accounts => {
         liquidatorWhiteList.address,
         feeCalculatorWhitelist.address
       );
+
       await coreHelper.addFactoryAsync(core, rebalancingSetTokenFactory);
       await coreHelper.addAddressToWhiteList(liquidatorAccount, liquidatorWhiteList);
       await coreHelper.addAddressToWhiteList(fixedFeeCalculator.address, feeCalculatorWhitelist);

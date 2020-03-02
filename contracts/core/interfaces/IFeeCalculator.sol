@@ -38,4 +38,9 @@ interface IFeeCalculator {
     function updateAndGetFee()
         external
         returns(uint256);
+
+    function adjustFee(
+        bytes calldata _newFeePercentage
+    )
+        external;
 }

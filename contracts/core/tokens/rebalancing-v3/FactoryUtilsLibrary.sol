@@ -22,6 +22,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
 import { LibBytes } from "../../../external/0x/LibBytes.sol";
+import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
 
 
 /*
@@ -70,7 +71,7 @@ library FactoryUtilsLibrary {
 
         // Require liquidator address is non-zero and is whitelisted by the liquidatorWhitelist
         require(
-            _parameters.liquidator != address(0) && 
+            _parameters.liquidator != address(0) &&
             IWhiteList(_liquidatorWhitelist).whiteList(_parameters.liquidator),
             "Bad liquidator"
         );
@@ -84,7 +85,7 @@ library FactoryUtilsLibrary {
         require(
             _parameters.rebalanceInterval >= _minimumRebalanceInterval,
             "Bad Rebalance interval"
-        ); 
+        );
 
         require(
             _parameters.rebalanceFailPeriod >= _minimumFailRebalancePeriod &&
@@ -96,7 +97,7 @@ library FactoryUtilsLibrary {
     /**
      * Parses the calldata, which is configured as follows:
      *
-     * 
+     *
      * | CallData                   | Location                      |
      * |----------------------------|-------------------------------|
      * | manager                    | 32                            |
@@ -132,6 +133,49 @@ library FactoryUtilsLibrary {
         parameters.rebalanceFeeCalculatorData = _callData.slice(256, _callData.length);
 
         return parameters;
+    }
+
+    function validateRebalancingSet(
+        SetTokenLibrary.SetDetails memory _setDetails,
+        address _core,
+        address _sender,
+        uint256 _minimumNaturalUnit,
+        uint256 _maximumNaturalUnit
+    )
+        public
+        view
+    {
+        ICore coreInstance = ICore(_core);
+
+        require(
+            _sender == address(coreInstance),
+            "Must be core"
+        );
+
+        // Ensure component array only includes one address which will be the currentSet
+        require(
+            _setDetails.components.length == 1 &&
+            _setDetails.units.length == 1,
+            "Components or units len != 1"
+        );
+
+        require(
+            _setDetails.units[0] > 0,
+            "UnitShares not > 0"
+        );
+
+        // Expect Set to rebalance to be valid and enabled Set
+        require(
+            coreInstance.validSets(_setDetails.components[0]),
+            "Bad Set"
+        );
+
+        // Natural unit must be within minimum and maximum bounds
+        require(
+            _setDetails.naturalUnit >= _minimumNaturalUnit &&
+            _setDetails.naturalUnit <= _maximumNaturalUnit,
+            "Bad natural unit"
+        );
     }
 }
 

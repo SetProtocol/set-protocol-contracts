@@ -336,8 +336,6 @@ contract('PerformanceFeeCalculator', accounts => {
     });
 
     it('emits the correct FeeInitialization log', async () => {
-      const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
-
       const txHash = await subject();
 
       const lastBlock = await web3.eth.getBlock('latest');
@@ -448,6 +446,174 @@ contract('PerformanceFeeCalculator', accounts => {
 
       after(async () => {
         highWatermarkResetPeriod = ONE_DAY_IN_SECONDS.mul(365);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#adjustFee', async () => {
+    let subjectNewFeeData: string;
+
+    let rebalancingSetToken: RebalancingSetFeeMockContract;
+    let addValidSet: boolean;
+
+    let feeType: BigNumber;
+    let newFeePercentage: BigNumber;
+
+    before(async () => {
+      addValidSet = true;
+
+      feeType = ZERO;
+      newFeePercentage = ether(.03);
+    });
+
+    beforeEach(async () => {
+      const maxProfitFeePercentage = ether(.5);
+      const maxStreamingFeePercentage = ether(.1);
+      const oracleWhiteList = usdOracleWhiteList.address;
+      feeCalculator = await feeCalculatorHelper.deployPerformanceFeeCalculatorAsync(
+        coreMock.address,
+        oracleWhiteList,
+        maxProfitFeePercentage,
+        maxStreamingFeePercentage
+      );
+
+      const set1Components = [wrappedETH.address, wrappedBTC.address];
+      const set1Units = [wrappedBTCPrice.div(wrappedETHPrice).mul(10 ** 12), new BigNumber(100)];
+      const set1NaturalUnit = new BigNumber(10 ** 12);
+      const set1 = await coreHelper.createSetTokenAsync(
+        coreMock,
+        setTokenFactory.address,
+        set1Components,
+        set1Units,
+        set1NaturalUnit,
+      );
+
+      rebalancingSetToken = await feeCalculatorHelper.deployRebalancingSetFeeMockAsync(
+        new BigNumber(1e6),
+        new BigNumber(1e6),
+        set1.address,
+        feeCalculator.address
+      );
+
+      if (addValidSet) {
+        await coreMock.addSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(ownerAccount));
+      }
+
+      const profitFeePeriod = ONE_DAY_IN_SECONDS.mul(30);
+      const highWatermarkResetPeriod = ONE_DAY_IN_SECONDS.mul(365);
+      const profitFeePercentage = ether(.2);
+      const streamingFeePercentage = ether(.02);
+
+      const feeCalculatorData = feeCalculatorHelper.generatePerformanceFeeCallData(
+        profitFeePeriod,
+        highWatermarkResetPeriod,
+        profitFeePercentage,
+        streamingFeePercentage
+      );
+
+      await rebalancingSetToken.initialize.sendTransactionAsync(feeCalculatorData);
+
+      subjectNewFeeData = feeCalculatorHelper.generateAdjustFeeCallData(
+        feeType,
+        newFeePercentage
+      );
+    });
+
+    async function subject(): Promise<any> {
+      await rebalancingSetToken.adjustFee.sendTransactionAsync(subjectNewFeeData);
+    }
+
+    it('sets the streaming fee percentage correctly', async () => {
+      await subject();
+
+      const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+      expect(feeState.streamingFeePercentage).to.be.bignumber.equal(newFeePercentage);
+    });
+
+    describe('when the change is to the profitFee', async () => {
+      before(async () => {
+        feeType = new BigNumber(1);
+      });
+
+      after(async () => {
+        feeType = ZERO;
+      });
+
+      it('sets the profit fee percentage correctly', async () => {
+        await subject();
+
+        const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+        expect(feeState.profitFeePercentage).to.be.bignumber.equal(newFeePercentage);
+      });
+
+      describe('when the profit fee is greater than maximumProfitFeePercentage', async () => {
+        before(async () => {
+          newFeePercentage = ether(.6);
+        });
+
+        after(async () => {
+          newFeePercentage = ether(.2);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when the profit fee is not a multiple of a basis point', async () => {
+        before(async () => {
+          newFeePercentage = ether(.20001);
+        });
+
+        after(async () => {
+          newFeePercentage = ether(.2);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+    });
+
+    describe('when the streaming fee is greater than maximumStreamingFeePercentage', async () => {
+      before(async () => {
+        newFeePercentage = ether(.2);
+      });
+
+      after(async () => {
+        newFeePercentage = ether(.02);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the streaming fee is not a multiple of a basis point', async () => {
+      before(async () => {
+        newFeePercentage = ether(.02001);
+      });
+
+      after(async () => {
+        newFeePercentage = ether(.02);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the passed feeType is not valid', async () => {
+      before(async () => {
+        feeType = new BigNumber(3);
+      });
+
+      after(async () => {
+        feeType = ZERO;
       });
 
       it('should revert', async () => {

@@ -15,5 +15,4 @@ contract FixedFeeCalculatorMock is FixedFeeCalculator {
 
         return fees[msg.sender];
     }
-
 }

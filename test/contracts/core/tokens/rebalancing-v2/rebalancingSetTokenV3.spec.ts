@@ -57,6 +57,7 @@ contract('RebalancingSetTokenV3: adjustFee', accounts => {
     deployerAccount,
     managerAccount,
     feeRecipient,
+    attackerAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV3Contract;
@@ -283,9 +284,9 @@ contract('RebalancingSetTokenV3: adjustFee', accounts => {
       expect(isCalled).to.equal(true);
     });
 
-    describe('when actualizeFee is called but unitShares is 0', async () => {
+    describe('when manager is not caller', async () => {
       beforeEach(async () => {
-       await coreMock.redeem.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+       subjectCaller = attackerAccount;
       });
 
       it('should revert', async () => {
@@ -293,7 +294,7 @@ contract('RebalancingSetTokenV3: adjustFee', accounts => {
       });
     });
 
-    describe('when actualizeFee is called from Rebalance State', async () => {
+    describe('when adjustFee is called from Rebalance State', async () => {
       beforeEach(async () => {
         await rebalancingHelper.transitionToRebalanceV2Async(
           coreMock,
@@ -309,7 +310,7 @@ contract('RebalancingSetTokenV3: adjustFee', accounts => {
       });
     });
 
-    describe('when actualizeFee is called from Drawdown State', async () => {
+    describe('when adjustFee is called from Drawdown State', async () => {
       beforeEach(async () => {
         await rebalancingHelper.transitionToDrawdownV2Async(
           coreMock,

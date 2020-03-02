@@ -577,6 +577,7 @@ export class CoreHelper {
       PlaceBidLibrary,
       SettleRebalanceLibrary,
       FailAuctionLibrary,
+      Bytes32Library,
     ];
     await linkLibrariesToDeploy(contract, libraries, this._tokenOwnerAddress);
   }

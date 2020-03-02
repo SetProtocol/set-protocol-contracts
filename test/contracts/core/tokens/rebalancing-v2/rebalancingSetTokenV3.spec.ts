@@ -132,7 +132,7 @@ contract('RebalancingSetTokenV3: adjustFee', accounts => {
     blockchain.revertAsync();
   });
 
-  describe.only('#adjustFee', async () => {
+  describe('#adjustFee', async () => {
     let subjectNewFee: string;
     let subjectCaller: Address;
 

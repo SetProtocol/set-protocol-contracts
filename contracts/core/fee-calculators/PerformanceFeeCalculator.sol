@@ -228,11 +228,13 @@ contract PerformanceFeeCalculator is IFeeCalculator {
             uint256 feePercentage
         ) = parseNewFeeCallData(_newFeePercentage);
 
+        // Since only two fee options and anything feeType integer passed that is not 0 or 1 will revert can
+        // make this a simple if...else... statement
         if (feeIdentifier == FeeType.StreamingFee) {
             validateStreamingFeePercentage(feePercentage);
 
             feeState[msg.sender].streamingFeePercentage = feePercentage;
-        } else if (feeIdentifier == FeeType.ProfitFee) {
+        } else {
             validateProfitFeePercentage(feePercentage);
 
             feeState[msg.sender].profitFeePercentage = feePercentage;

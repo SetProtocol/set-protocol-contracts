@@ -79,6 +79,7 @@ export { TimeLockUpgradeContract } from '../types/generated/time_lock_upgrade';
 export { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrade_mock';
 export { TimeLockUpgradeV2Contract } from '../types/generated/time_lock_upgrade_v2';
 export { TimeLockUpgradeV2MockContract } from '../types/generated/time_lock_upgrade_v2_mock';
+export { TimeLockUpgradeV3MockContract } from '../types/generated/time_lock_upgrade_v3_mock';
 export { TransferProxyContract } from '../types/generated/transfer_proxy';
 export {
   TwoAssetPriceBoundedLinearAuctionMockContract

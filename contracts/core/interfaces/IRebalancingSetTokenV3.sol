@@ -247,7 +247,7 @@ interface IRebalancingSetTokenV2 {
      * Anyone can call this function.
      */
     function actualizeFee()
-        public;
+        external;
 
     /*
      * Validate then set new streaming fee.

@@ -40,7 +40,7 @@ interface IFeeCalculator {
         returns(uint256);
 
     function adjustFee(
-        bytes calldata _newFeePercentage
+        bytes calldata _newFeeData
     )
         external;
 }

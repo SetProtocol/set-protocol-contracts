@@ -149,17 +149,17 @@ contract RebalancingSetTokenV3 is
     /*
      * Accrue any fees then adjust fee parameters on feeCalculator. Only callable by manager.
      *
-     * @param  _newFeePercentage       Fee type and new streaming fee encoded in bytes
+     * @param  _newFeeData       Fee type and new streaming fee encoded in bytes
      */
     function adjustFee(
-        bytes calldata _newFeePercentage
+        bytes calldata _newFeeData
     )
         external
         onlyManager
     {
         actualizeFee();
 
-        rebalanceFeeCalculator.adjustFee(_newFeePercentage);
+        rebalanceFeeCalculator.adjustFee(_newFeeData);
     }
 
     /* ============ V3 Internal Functions ============ */

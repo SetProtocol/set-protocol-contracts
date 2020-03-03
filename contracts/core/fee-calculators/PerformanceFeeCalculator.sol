@@ -209,17 +209,17 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     /*
      * Validate then set new streaming fee.
      *
-     * @param  _newFeePercentage       Fee type and new streaming fee encoded in bytes
+     * @param  _newFeeData       Fee type and new streaming fee encoded in bytes
      */
     function adjustFee(
-        bytes calldata _newFeePercentage
+        bytes calldata _newFeeData
     )
         external
     {
         (
             FeeType feeIdentifier,
             uint256 feePercentage
-        ) = parseNewFeeCallData(_newFeePercentage);
+        ) = parseNewFeeCallData(_newFeeData);
 
         // Since only two fee options and anything feeType integer passed that is not 0 or 1 will revert can
         // make this a simple if...else... statement

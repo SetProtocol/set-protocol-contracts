@@ -252,10 +252,10 @@ interface IRebalancingSetTokenV3 {
     /*
      * Validate then set new streaming fee.
      *
-     * @param  _newFeePercentage       Fee type and new streaming fee encoded in bytes
+     * @param  _newFeeData       Fee type and new streaming fee encoded in bytes
      */
     function adjustFee(
-        bytes calldata _newFeePercentage
+        bytes calldata _newFeeData
     )
         external;
 

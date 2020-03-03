@@ -173,7 +173,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         (
             uint256 streamingFee,
             uint256 profitFee
-        ) = calculateFees();
+        ) = calculateFees(msg.sender);
 
         return streamingFee.add(profitFee);
     }
@@ -184,7 +184,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
      * Additionally, fee state is set timestamps are updated for each fee type and the high watermark is
      * reset if time since last profit fee exceeds the highWatermarkResetPeriod.
      *
-     * @preturn  uint256       Percent inflation of supply
+     * @return  uint256       Percent inflation of supply
      */
     function updateAndGetFee()
         external
@@ -193,10 +193,10 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         (
             uint256 streamingFee,
             uint256 profitFee
-        ) = calculateFees();
+        ) = calculateFees(msg.sender);
 
         // Update fee state based off fees collected
-        updateFeeState(streamingFee, profitFee);
+        updateFeeState(msg.sender, streamingFee, profitFee);
 
         emit FeeActualization(
             msg.sender,
@@ -214,28 +214,33 @@ contract PerformanceFeeCalculator is IFeeCalculator {
      * Updates fee state after a fee has been accrued. Streaming timestamp is always updated. Profit timestamp
      * is only updated if profit fee is collected. High watermark timestamp is updated if profit fee collected
      * or if a highWatermarkResetPeriod amount of time has passed since last profit fee collection.
+     *
+     * @param  _setAddress          Address of Set to have feeState updated
+     * @param  _streamingFee        Calculated streaming fee percentage
+     * @param  _profitFee           Calculated profit fee percentage
      */
     function updateFeeState(
+        address _setAddress,
         uint256 _streamingFee,
         uint256 _profitFee
     )
         internal
     {
         // Set streaming fee timestamp
-        feeState[msg.sender].lastStreamingFeeTimestamp = block.timestamp;
+        feeState[_setAddress].lastStreamingFeeTimestamp = block.timestamp;
 
-        uint256 rebalancingSetValue = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
+        uint256 rebalancingSetValue = SetUSDValuation.calculateRebalancingSetValue(_setAddress, oracleWhiteList);
         uint256 postStreamingValue = calculatePostStreamingValue(rebalancingSetValue, _streamingFee);
 
         // If profit fee then set new high watermark and profit fee timestamp
         if (_profitFee > 0) {
-            feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
-            feeState[msg.sender].highWatermark = postStreamingValue;
-        } else if (timeSinceLastProfitFee(msg.sender) >= highWatermarkResetPeriod(msg.sender)) {
+            feeState[_setAddress].lastProfitFeeTimestamp = block.timestamp;
+            feeState[_setAddress].highWatermark = postStreamingValue;
+        } else if (timeSinceLastProfitFee(_setAddress) >= highWatermarkResetPeriod(_setAddress)) {
             // If no profit fee and last profit fee was more than highWatermarkResetPeriod seconds ago then reset
             // high watermark
-            feeState[msg.sender].highWatermark = postStreamingValue;
-            feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
+            feeState[_setAddress].highWatermark = postStreamingValue;
+            feeState[_setAddress].lastProfitFeeTimestamp = block.timestamp;
         }
     }
 
@@ -271,22 +276,25 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     /**
      * Verifies caller is valid Set. Calculates and returns streaming and profit fee.
      *
-     * @return  uint256     Streaming Fee
-     * @return  uint256     Profit Fee
+     * @param  _setAddress          Address of Set to have feeState updated
+     * @return  uint256             Streaming Fee
+     * @return  uint256             Profit Fee
      */
-    function calculateFees()
+    function calculateFees(
+        address _setAddress
+    )
         internal
         view
         returns (uint256, uint256)
     {
         require(
-            core.validSets(msg.sender),
-            "PerformanceFeeCalculator.updateAndGetFee: Caller must be valid RebalancingSetToken."
+            core.validSets(_setAddress),
+            "PerformanceFeeCalculator.calculateFees: Caller must be valid RebalancingSetToken."
         );
 
-        uint256 streamingFee = calculateStreamingFee();
+        uint256 streamingFee = calculateStreamingFee(_setAddress);
 
-        uint256 profitFee = calculateProfitFee(streamingFee);
+        uint256 profitFee = calculateProfitFee(_setAddress, streamingFee);
 
         return (streamingFee, profitFee);
     }
@@ -295,17 +303,20 @@ contract PerformanceFeeCalculator is IFeeCalculator {
      * Calculates streaming fee by multiplying streamingFeePercentage by the elapsed amount of time since the last fee
      * was collected divided by one year in seconds, since the fee is a yearly fee.
      *
-     * @return uint256        Streaming fee
+     * @param  _setAddress          Address of Set to have feeState updated
+     * @return uint256              Streaming fee
      */
-    function calculateStreamingFee()
+    function calculateStreamingFee(
+        address _setAddress
+    )
         internal
         view
         returns(uint256)
     {
-        uint256 timeSinceLastFee = block.timestamp.sub(lastStreamingFeeTimestamp(msg.sender));
+        uint256 timeSinceLastFee = block.timestamp.sub(lastStreamingFeeTimestamp(_setAddress));
 
         // Streaming fee is streaming fee times years since last fee
-        return timeSinceLastFee.mul(streamingFeePercentage(msg.sender)).div(ONE_YEAR_IN_SECONDS);
+        return timeSinceLastFee.mul(streamingFeePercentage(_setAddress)).div(ONE_YEAR_IN_SECONDS);
     }
 
     /**
@@ -314,25 +325,30 @@ contract PerformanceFeeCalculator is IFeeCalculator {
      * profitFeePercentage and divide by rebalancingSetValue to get inflation from profit fees. If postStreamingValue does
      * not exceed highWatermark then return 0.
      *
-     * @return uint256        Streaming fee
+     * @param  _setAddress          Address of Set to have feeState updated
+     * @param  _streamingFee        Calculated streaming fee percentage
+     * @return uint256              Streaming fee
      */
-    function calculateProfitFee(uint256 _streamingFee)
+    function calculateProfitFee(
+        address _setAddress,
+        uint256 _streamingFee
+    )
         internal
         view
         returns(uint256)
     {
         // If time since last profit fee exceeds profitFeePeriod then calculate profit fee else 0.
-        if (exceedsProfitFeePeriod(msg.sender)) {
+        if (exceedsProfitFeePeriod(_setAddress)) {
             // Calculate post streaming value and get high watermark
-            uint256 rebalancingSetValue = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
+            uint256 rebalancingSetValue = SetUSDValuation.calculateRebalancingSetValue(_setAddress, oracleWhiteList);
             uint256 postStreamingValue = calculatePostStreamingValue(rebalancingSetValue, _streamingFee);
-            uint256 highWatermark = highWatermark(msg.sender);
+            uint256 highWatermark = highWatermark(_setAddress);
 
             // Subtract high watermark from post streaming fee value, unless less than 0 set to 0
             uint256 gainedValue = postStreamingValue > highWatermark ? postStreamingValue.sub(highWatermark) : 0;
 
             // Determine percent fee in terms of current rebalancing Set value
-            return gainedValue.mul(profitFeePercentage(msg.sender)).div(rebalancingSetValue);
+            return gainedValue.mul(profitFeePercentage(_setAddress)).div(rebalancingSetValue);
         } else {
             return 0;
         }
@@ -341,7 +357,9 @@ contract PerformanceFeeCalculator is IFeeCalculator {
    /**
      * Calculates Rebalancing Set Token value after streaming fees accounted for.
      *
-     * @return  uint256     Post streaming fee value
+     * @param  _rebalancingSetValue         Pre-fee value of Set
+     * @param  _streamingFee                Calculated streaming fee percentage
+     * @return  uint256                     Post streaming fee value
      */
     function calculatePostStreamingValue(
         uint256 _rebalancingSetValue,
@@ -407,8 +425,8 @@ contract PerformanceFeeCalculator is IFeeCalculator {
      *
      * | CallData                     | Location                      |
      * |------------------------------|-------------------------------|
-     * | profitFeePeriod           | 32                            |
-     * | highWatermarkResetPeriod  | 64                            |
+     * | profitFeePeriod              | 32                            |
+     * | highWatermarkResetPeriod     | 64                            |
      * | profitFeePercentage          | 96                            |
      * | streamingFeePercentage       | 128                           |
      *

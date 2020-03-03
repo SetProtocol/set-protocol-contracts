@@ -15,6 +15,7 @@
 */
 
 pragma solidity 0.5.7;
+pragma experimental ABIEncoderV2;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -24,6 +25,7 @@ import { IFeeCalculator } from "../interfaces/IFeeCalculator.sol";
 import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
 import { IRebalancingSetTokenV2 } from "../interfaces/IRebalancingSetTokenV2.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
+import { PerformanceFeeLibrary } from "./lib/PerformanceFeeLibrary.sol";
 import { ScaleValidations } from "../../lib/ScaleValidations.sol";
 import { SetUSDValuation } from "../liquidators/impl/SetUSDValuation.sol";
 
@@ -66,15 +68,6 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     );
 
     /* ============ Structs ============ */
-    struct FeeState {
-        uint256 profitFeePeriod;                // Time required between accruing profit fees
-        uint256 highWatermarkResetPeriod;       // Time required after last profit fee to reset high watermark
-        uint256 profitFeePercentage;            // Percent of profits that accrue to manager
-        uint256 streamingFeePercentage;         // Percent of Set that accrues to manager each year
-        uint256 highWatermark;                  // Value of Set at last profit fee accrual
-        uint256 lastProfitFeeTimestamp;         // Timestamp last profit fee was accrued
-        uint256 lastStreamingFeeTimestamp;      // Timestamp last streaming fee was accrued
-    }
 
     struct InitFeeParameters {
         uint256 profitFeePeriod;
@@ -94,7 +87,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     IOracleWhiteList public oracleWhiteList;
     uint256 public maximumProfitFeePercentage;
     uint256 public maximumStreamingFeePercentage;
-    mapping(address => FeeState) public feeState;
+    mapping(address => PerformanceFeeLibrary.FeeState) public feeState;
 
     /* ============ Constructor ============ */
 
@@ -142,7 +135,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         uint256 highWatermark = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
 
         // Set fee state for new caller
-        FeeState storage feeInfo = feeState[msg.sender];
+        PerformanceFeeLibrary.FeeState storage feeInfo = feeState[msg.sender];
 
         feeInfo.profitFeePeriod = parameters.profitFeePeriod;
         feeInfo.highWatermarkResetPeriod = parameters.highWatermarkResetPeriod;

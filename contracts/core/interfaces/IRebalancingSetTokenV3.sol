@@ -26,11 +26,11 @@ import { ISetToken } from "./ISetToken.sol";
  * @title IRebalancingSetTokenV2
  * @author Set Protocol
  *
- * The IRebalancingSetTokenV2 interface provides a light-weight, structured way to interact with the
- * RebalancingSetTokenV2 contract from another contract.
+ * The IRebalancingSetTokenV3 interface provides a light-weight, structured way to interact with the
+ * RebalancingSetTokenV3 contract from another contract.
  */
 
-interface IRebalancingSetTokenV2 {
+interface IRebalancingSetTokenV3 {
 
     /*
      * Get totalSupply of Rebalancing Set
@@ -109,7 +109,7 @@ interface IRebalancingSetTokenV2 {
     /*
      * Get rebalanceState of Rebalancing Set
      *
-     * @return RebalancingLibrary.State    Current rebalance state of the RebalancingSetTokenV2
+     * @return RebalancingLibrary.State    Current rebalance state of the RebalancingSetTokenV3
      */
     function rebalanceState()
         external

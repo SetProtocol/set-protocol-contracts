@@ -147,7 +147,7 @@ contract RebalancingSetTokenV3 is
     }
 
     /*
-     * Validate then set new streaming fee.
+     * Accrue any fees then adjust fee parameters on feeCalculator. Only callable by manager.
      *
      * @param  _newFeePercentage       Fee type and new streaming fee encoded in bytes
      */

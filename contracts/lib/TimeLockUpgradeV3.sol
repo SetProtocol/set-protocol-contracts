@@ -16,8 +16,9 @@
 
 pragma solidity 0.5.7;
 
-import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
+import { TimeLockUpgradeV2 } from "./TimeLockUpgradeV2.sol";
 
 
 /**
@@ -32,29 +33,9 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
  * - Added upgradeData to UpgradeRegistered event
  */
 contract TimeLockUpgradeV3 is
-    Ownable
+    TimeLockUpgradeV2
 {
     using SafeMath for uint256;
-
-    /* ============ State Variables ============ */
-
-    // Timelock Upgrade Period in seconds
-    uint256 public timeLockPeriod;
-
-    // Mapping of maps hash of registered upgrade to its registration timestam
-    mapping(bytes32 => uint256) public timeLockedUpgrades;
-
-    /* ============ Events ============ */
-
-    event UpgradeRegistered(
-        bytes32 indexed _upgradeHash,
-        uint256 _timestamp,
-        bytes _upgradeData
-    );
-
-    event RemoveRegisteredUpgrade(
-        bytes32 indexed _upgradeHash
-    );
 
     /* ============ Modifiers ============ */
 
@@ -105,51 +86,5 @@ contract TimeLockUpgradeV3 is
 
         // Run the rest of the upgrades
         _;
-    }
-
-    /* ============ Function ============ */
-
-    /**
-     * Removes an existing upgrade.
-     *
-     * @param  _upgradeHash    Keccack256 hash that uniquely identifies function called and arguments
-     */
-    function removeRegisteredUpgrade(
-        bytes32 _upgradeHash
-    )
-        external
-        onlyOwner
-    {
-        require(
-            timeLockedUpgrades[_upgradeHash] != 0,
-            "TimeLockUpgradeV3.removeRegisteredUpgrade: Upgrade hash must be registered"
-        );
-
-        // Reset the timestamp to 0
-        timeLockedUpgrades[_upgradeHash] = 0;
-
-        emit RemoveRegisteredUpgrade(
-            _upgradeHash
-        );
-    }
-
-    /**
-     * Change timeLockPeriod period. Generally called after initially settings have been set up.
-     *
-     * @param  _timeLockPeriod   Time in seconds that upgrades need to be evaluated before execution
-     */
-    function setTimeLockPeriod(
-        uint256 _timeLockPeriod
-    )
-        external
-        onlyOwner
-    {
-        // Only allow setting of the timeLockPeriod if the period is greater than the existing
-        require(
-            _timeLockPeriod > timeLockPeriod,
-            "TimeLockUpgradeV3: New period must be greater than existing"
-        );
-
-        timeLockPeriod = _timeLockPeriod;
     }
 }

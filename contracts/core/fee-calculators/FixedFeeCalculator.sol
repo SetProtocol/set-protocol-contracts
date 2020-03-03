@@ -89,6 +89,19 @@ contract FixedFeeCalculator is IFeeCalculator {
         return fees[msg.sender];
     }
 
+    /*
+     * Validate then set new streaming fee.
+     *
+     * @param  _newFeePercentage       Fee type and new streaming fee encoded in bytes
+     */
+    function adjustFee(
+        bytes calldata _newFeePercentage
+    )
+        external
+    {
+        fees[msg.sender] = parseFeeCalculatorData(_newFeePercentage);
+    }
+
     /* ============ Private Functions ============ */
 
     /**

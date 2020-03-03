@@ -52,11 +52,12 @@ const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
-contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
+contract('RebalancingSetTokenV3: adjustFee', accounts => {
   const [
     deployerAccount,
     managerAccount,
     feeRecipient,
+    attackerAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenV3Contract;
@@ -132,7 +133,8 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
     blockchain.revertAsync();
   });
 
-  describe('#actualizeFee', async () => {
+  describe('#adjustFee', async () => {
+    let subjectNewFee: string;
     let subjectCaller: Address;
 
     let nextSetToken: SetTokenContract;
@@ -142,6 +144,7 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
     let currentSetIssueQuantity: BigNumber;
 
     let rebalanceFee: BigNumber;
+    let newFee: BigNumber;
 
     beforeEach(async () => {
       const setTokensToDeploy = 2;
@@ -156,7 +159,8 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
       currentSetToken = setTokens[0];
       nextSetToken = setTokens[1];
 
-      rebalanceFee = new BigNumber(10 ** 17);
+      rebalanceFee = ether(.1);
+      newFee = ether(.05);
 
       const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
       await coreHelper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
@@ -189,14 +193,23 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
       rebalancingSetQuantityToIssue = ether(7);
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
+      subjectNewFee = feeCalculatorHelper.generateFixedRebalanceFeeCallData(newFee);
       subjectCaller = managerAccount;
     });
 
     async function subject(): Promise<string> {
-      return rebalancingSetToken.actualizeFee.sendTransactionAsync(
+      return rebalancingSetToken.adjustFee.sendTransactionAsync(
+        subjectNewFee,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
+
+    it('updates the fee on the calculator', async () => {
+      await subject();
+
+      const receivedFee = await fixedFeeCalculator.fees.callAsync(rebalancingSetToken.address);
+      expect(receivedFee).to.bignumber.equal(newFee);
+    });
 
     it('mints the correct Rebalancing Set to the feeRecipient', async () => {
       const previousSupply = await rebalancingSetToken.totalSupply.callAsync();
@@ -271,9 +284,9 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
       expect(isCalled).to.equal(true);
     });
 
-    describe('when actualizeFee is called but unitShares is 0', async () => {
+    describe('when manager is not caller', async () => {
       beforeEach(async () => {
-       await coreMock.redeem.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+       subjectCaller = attackerAccount;
       });
 
       it('should revert', async () => {
@@ -281,7 +294,7 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
       });
     });
 
-    describe('when actualizeFee is called from Rebalance State', async () => {
+    describe('when adjustFee is called from Rebalance State', async () => {
       beforeEach(async () => {
         await rebalancingHelper.transitionToRebalanceV2Async(
           coreMock,
@@ -297,7 +310,7 @@ contract('RebalancingSetTokenV3: Actualize Fee', accounts => {
       });
     });
 
-    describe('when actualizeFee is called from Drawdown State', async () => {
+    describe('when adjustFee is called from Drawdown State', async () => {
       beforeEach(async () => {
         await rebalancingHelper.transitionToDrawdownV2Async(
           coreMock,

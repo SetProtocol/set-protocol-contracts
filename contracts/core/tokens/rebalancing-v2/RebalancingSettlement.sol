@@ -34,7 +34,7 @@ import { SetTokenLibrary } from "../../lib/SetTokenLibrary.sol";
  * @author Set Protocol
  *
  */
-contract RebalancingSettlement is 
+contract RebalancingSettlement is
     ERC20,
     RebalancingSetState
 {
@@ -46,7 +46,7 @@ contract RebalancingSettlement is
 
     /*
      * Validates that the settle function can be called.
-     */    
+     */
     function validateRebalancingSettlement()
         internal
         view
@@ -58,7 +58,7 @@ contract RebalancingSettlement is
      * Issue nextSet to RebalancingSetToken; The issued Set is held in the Vault
      *
      * @param  _issueQuantity   Quantity of next Set to issue
-     */ 
+     */
     function issueNextSet(
         uint256 _issueQuantity
     )
@@ -74,7 +74,7 @@ contract RebalancingSettlement is
      * Updates state post-settlement.
      *
      * @param  _nextUnitShares   The new implied unit shares
-     */        
+     */
     function transitionToDefault(
         uint256 _newUnitShares
     )
@@ -85,7 +85,7 @@ contract RebalancingSettlement is
         currentSet = nextSet;
         unitShares = _newUnitShares;
         rebalanceIndex = rebalanceIndex.add(1);
-        
+
         nextSet = ISetToken(address(0));
         hasBidded = false;
     }
@@ -113,7 +113,7 @@ contract RebalancingSettlement is
 
     /**
      * Calculates the fee and mints the rebalancing SetToken quantity to the recipient.
-     * The minting is done without an increase to the total collateral controlled by the 
+     * The minting is done without an increase to the total collateral controlled by the
      * rebalancing SetToken. In effect, the existing holders are paying the fee via inflation.
      *
      * @return feePercentage
@@ -137,8 +137,8 @@ contract RebalancingSettlement is
     /**
      * Returns the new rebalance fee. The calculation for the fee involves implying
      * mint quantity so that the feeRecipient owns the fee percentage of the entire
-     * supply of the Set. 
-     * 
+     * supply of the Set.
+     *
      * The formula to solve for fee is:
      * feeQuantity / feeQuantity + totalSupply = fee / scaleFactor
      *
@@ -160,7 +160,7 @@ contract RebalancingSettlement is
 
         // ScaleFactor (10e18) - fee
         uint256 b = SCALE_FACTOR.sub(_rebalanceFeePercent);
-        
+
         return a.div(b);
     }
 

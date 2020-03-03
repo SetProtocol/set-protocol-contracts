@@ -38,7 +38,7 @@ contract RebalancingSetTokenV3 is
     /**
      * Constructor function for Rebalancing Set Token
      *
-     * addressConfig [factory, manager, liquidator, initialSet, componentWhiteList, 
+     * addressConfig [factory, manager, liquidator, initialSet, componentWhiteList,
      *                liquidatorWhiteList, feeRecipient, rebalanceFeeCalculator]
      * [0]factory                   Factory used to create the Rebalancing Set
      * [1]manager                   Address that is able to propose the next Set
@@ -49,7 +49,7 @@ contract RebalancingSetTokenV3 is
      * [6]feeRecipient              Address that receives any incentive fees
      * [7]rebalanceFeeCalculator    Address to retrieve rebalance fee during settlement
      *
-     * uintConfig [initialUnitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod, 
+     * uintConfig [initialUnitShares, naturalUnit, rebalanceInterval, rebalanceFailPeriod,
      *             lastRebalanceTimestamp, entryFee]
      * [0]initialUnitShares         Units of currentSet that equals one share
      * [1]naturalUnit               The minimum multiple of Sets that can be issued or redeemed
@@ -81,7 +81,7 @@ contract RebalancingSetTokenV3 is
     /*
      * Overrides the RebalancingSetTokenV2 settleRebalance function.
      *
-     * After a successful rebalance, the new Set is issued. 
+     * After a successful rebalance, the new Set is issued.
      * Full issuance functionality is now returned to set owners. No fees are captured.
      *
      * Anyone can call this function.
@@ -122,7 +122,7 @@ contract RebalancingSetTokenV3 is
      * Anyone can call this function.
      */
     function actualizeFee()
-        external
+        public
     {
         IncentiveFee.validateFeeActualization();
 
@@ -146,8 +146,24 @@ contract RebalancingSetTokenV3 is
         );
     }
 
+    /*
+     * Accrue any fees then adjust fee parameters on feeCalculator. Only callable by manager.
+     *
+     * @param  _newFeeData       Fee type and new streaming fee encoded in bytes
+     */
+    function adjustFee(
+        bytes calldata _newFeeData
+    )
+        external
+        onlyManager
+    {
+        actualizeFee();
+
+        rebalanceFeeCalculator.adjustFee(_newFeeData);
+    }
+
     /* ============ V3 Internal Functions ============ */
-    
+
     /*
      * The unit shares must result in a quantity greater than the number of natural units outstanding.
      * In other words, it must be greater than 0
@@ -156,6 +172,6 @@ contract RebalancingSetTokenV3 is
         require(
             _newUnitShares > 0,
             "Unitshares is 0"
-        );        
+        );
     }
 }

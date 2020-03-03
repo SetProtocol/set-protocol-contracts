@@ -90,7 +90,7 @@ library SetTokenLibrary {
         require(
             _core.validSets(_set),
             "SetTokenLibrary: Must be an approved SetToken address"
-        );       
+        );
     }
 
     /**

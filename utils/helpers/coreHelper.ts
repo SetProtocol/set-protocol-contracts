@@ -41,6 +41,7 @@ import { getWeb3, getContractInstance, importArtifactsFromSource, linkLibrariesT
 const web3 = getWeb3();
 
 const Authorizable = importArtifactsFromSource('Authorizable');
+const Bytes32Library = importArtifactsFromSource('Bytes32Library');
 const CommonValidationsLibrary = importArtifactsFromSource('CommonValidationsLibrary');
 const Core = importArtifactsFromSource('Core');
 const CoreIssuanceLibrary = importArtifactsFromSource('CoreIssuanceLibrary');
@@ -138,7 +139,7 @@ export class CoreHelper {
     coreAddress: Address,
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenFactoryContract> {
-     await linkLibrariesToDeploy(SetTokenFactory, [CommonValidationsLibrary], this._tokenOwnerAddress);
+     await linkLibrariesToDeploy(SetTokenFactory, [CommonValidationsLibrary, Bytes32Library], this._tokenOwnerAddress);
 
     const truffleSetTokenFactory = await SetTokenFactory.new(
       coreAddress,
@@ -227,7 +228,11 @@ export class CoreHelper {
     maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenV3FactoryContract> {
-    await linkLibrariesToDeploy(RebalancingSetTokenV3Factory, [FactoryUtilsLibrary], this._tokenOwnerAddress);
+    await linkLibrariesToDeploy(
+      RebalancingSetTokenV3Factory,
+      [FactoryUtilsLibrary, Bytes32Library],
+      this._tokenOwnerAddress
+    );
 
     const truffleTokenFactory = await RebalancingSetTokenV3Factory.new(
       coreAddress,
@@ -572,6 +577,7 @@ export class CoreHelper {
       PlaceBidLibrary,
       SettleRebalanceLibrary,
       FailAuctionLibrary,
+      Bytes32Library,
     ];
     await linkLibrariesToDeploy(contract, libraries, this._tokenOwnerAddress);
   }

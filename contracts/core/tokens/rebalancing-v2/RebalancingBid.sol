@@ -31,7 +31,7 @@ import { RebalancingSetState } from "./RebalancingSetState.sol";
  *
  * Implementation of Rebalancing Set Token V2 bidding-related functionality.
  */
-contract RebalancingBid is 
+contract RebalancingBid is
     RebalancingSetState
 {
     using SafeMath for uint256;
@@ -78,7 +78,7 @@ contract RebalancingBid is
     }
 
     /*
-     * If a successful bid has been made, flip the hasBidded boolean. 
+     * If a successful bid has been made, flip the hasBidded boolean.
      */
     function updateHasBiddedIfNecessary()
         internal

@@ -22,7 +22,7 @@ library Bytes32Library {
      * Converts a bytes32 data structure into a bytes array.
      *
      * @param  data       Piece of data encoded as bytes32
-     * @return bytes          
+     * @return bytes
      */
     function bytes32ToBytes(bytes32 data)
         internal
@@ -46,10 +46,10 @@ library Bytes32Library {
      * Converts a piece of data encoded as bytes32 into a string.
      *
      * @param  data       Piece of data encoded as bytes32
-     * @return string          
+     * @return string
      */
     function bytes32ToString(bytes32 data)
-        internal
+        external
         pure
         returns (string memory)
     {

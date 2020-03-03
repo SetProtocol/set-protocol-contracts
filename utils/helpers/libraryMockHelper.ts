@@ -30,6 +30,7 @@ import {
 } from '../web3Helper';
 import { ZERO } from '../constants';
 
+const Bytes32Library = importArtifactsFromSource('Bytes32Library');
 const Bytes32LibraryMock = importArtifactsFromSource('Bytes32LibraryMock');
 const CommonMathMock = importArtifactsFromSource('CommonMathMock');
 const CommonValidationsLibrary = importArtifactsFromSource('CommonValidationsLibrary');
@@ -77,6 +78,7 @@ export class LibraryMockHelper {
   public async deployBytes32LibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<Bytes32LibraryMockContract> {
+    await linkLibrariesToDeploy(Bytes32LibraryMock, [Bytes32Library], this._contractOwnerAddress);
     const bytes32MockContract = await Bytes32LibraryMock.new(txnFrom(from));
 
     return new Bytes32LibraryMockContract(getContractInstance(bytes32MockContract), txnFrom(from));

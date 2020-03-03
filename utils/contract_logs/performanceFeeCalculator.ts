@@ -42,7 +42,7 @@ export function getExpectedFeeInitializationLog(
       streamingFeePercentage,
       highWatermark,
       lastProfitFeeTimestamp,
-      lastStreamingFeeTimestamp
+      lastStreamingFeeTimestamp,
     },
   }];
 }

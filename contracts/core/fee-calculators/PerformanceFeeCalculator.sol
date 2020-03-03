@@ -15,6 +15,7 @@
 */
 
 pragma solidity 0.5.7;
+pragma experimental ABIEncoderV2;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -24,6 +25,7 @@ import { IFeeCalculator } from "../interfaces/IFeeCalculator.sol";
 import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
 import { IRebalancingSetTokenV2 } from "../interfaces/IRebalancingSetTokenV2.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
+import { PerformanceFeeLibrary } from "./lib/PerformanceFeeLibrary.sol";
 import { ScaleValidations } from "../../lib/ScaleValidations.sol";
 import { SetUSDValuation } from "../liquidators/impl/SetUSDValuation.sol";
 
@@ -40,6 +42,10 @@ contract PerformanceFeeCalculator is IFeeCalculator {
 
     using SafeMath for uint256;
     using CommonMath for uint256;
+
+    /* ============ Enums ============ */
+
+    enum FeeType { StreamingFee, ProfitFee }
 
     /* ============ Events ============ */
 
@@ -62,15 +68,6 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     );
 
     /* ============ Structs ============ */
-    struct FeeState {
-        uint256 profitFeePeriod;                // Time required between accruing profit fees
-        uint256 highWatermarkResetPeriod;       // Time required after last profit fee to reset high watermark
-        uint256 profitFeePercentage;            // Percent of profits that accrue to manager
-        uint256 streamingFeePercentage;         // Percent of Set that accrues to manager each year
-        uint256 highWatermark;                  // Value of Set at last profit fee accrual
-        uint256 lastProfitFeeTimestamp;         // Timestamp last profit fee was accrued
-        uint256 lastStreamingFeeTimestamp;      // Timestamp last streaming fee was accrued
-    }
 
     struct InitFeeParameters {
         uint256 profitFeePeriod;
@@ -83,13 +80,14 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     // 365.25 days used to represent the year
     uint256 private constant ONE_YEAR_IN_SECONDS = 365.25 days;
     uint256 private constant ONE_HUNDRED_PERCENT = 1e18;
+    uint256 private constant ZERO = 0;
 
     /* ============ State Variables ============ */
     ICore public core;
     IOracleWhiteList public oracleWhiteList;
     uint256 public maximumProfitFeePercentage;
     uint256 public maximumStreamingFeePercentage;
-    mapping(address => FeeState) public feeState;
+    mapping(address => PerformanceFeeLibrary.FeeState) public feeState;
 
     /* ============ Constructor ============ */
 
@@ -137,7 +135,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         uint256 highWatermark = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
 
         // Set fee state for new caller
-        FeeState storage feeInfo = feeState[msg.sender];
+        PerformanceFeeLibrary.FeeState storage feeInfo = feeState[msg.sender];
 
         feeInfo.profitFeePeriod = parameters.profitFeePeriod;
         feeInfo.highWatermarkResetPeriod = parameters.highWatermarkResetPeriod;
@@ -208,6 +206,34 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         return streamingFee.add(profitFee);
     }
 
+    /*
+     * Validate then set new streaming fee.
+     *
+     * @param  _newFeeData       Fee type and new streaming fee encoded in bytes
+     */
+    function adjustFee(
+        bytes calldata _newFeeData
+    )
+        external
+    {
+        (
+            FeeType feeIdentifier,
+            uint256 feePercentage
+        ) = parseNewFeeCallData(_newFeeData);
+
+        // Since only two fee options and anything feeType integer passed that is not 0 or 1 will revert can
+        // make this a simple if...else... statement
+        if (feeIdentifier == FeeType.StreamingFee) {
+            validateStreamingFeePercentage(feePercentage);
+
+            feeState[msg.sender].streamingFeePercentage = feePercentage;
+        } else {
+            validateProfitFeePercentage(feePercentage);
+
+            feeState[msg.sender].profitFeePercentage = feePercentage;
+        }
+    }
+
     /* ============ Internal Functions ============ */
 
     /**
@@ -254,23 +280,48 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         internal
         view
     {
-        require(
-            parameters.profitFeePercentage <= maximumProfitFeePercentage,
-            "PerformanceFeeCalculator.validateFeeParameters: Profit fee exceeds maximum."
-        );
-
-        require(
-            parameters.streamingFeePercentage <= maximumStreamingFeePercentage,
-            "PerformanceFeeCalculator.validateFeeParameters: Streaming fee exceeds maximum."
-        );
-
-        ScaleValidations.validateMultipleOfBasisPoint(parameters.profitFeePercentage);
-        ScaleValidations.validateMultipleOfBasisPoint(parameters.streamingFeePercentage);
+        // Validate fee amounts
+        validateStreamingFeePercentage(parameters.streamingFeePercentage);
+        validateProfitFeePercentage(parameters.profitFeePercentage);
 
         require(
             parameters.highWatermarkResetPeriod >= parameters.profitFeePeriod,
             "PerformanceFeeCalculator.validateFeeParameters: Fee collection frequency must exceed highWatermark reset."
         );
+    }
+
+    /*
+     * Validates streaming fee is less than maximum allowed and multiple of basis point.
+     */
+    function validateStreamingFeePercentage(
+        uint256 _streamingFee
+    )
+        internal
+        view
+    {
+        require(
+            _streamingFee <= maximumStreamingFeePercentage,
+            "PerformanceFeeCalculator.validateStreamingFeePercentage: Streaming fee exceeds maximum."
+        );
+
+        ScaleValidations.validateMultipleOfBasisPoint(_streamingFee);
+    }
+
+    /*
+     * Validates profit fee is less than maximum allowed and multiple of basis point.
+     */
+    function validateProfitFeePercentage(
+        uint256 _profitFee
+    )
+        internal
+        view
+    {
+        require(
+            _profitFee <= maximumProfitFeePercentage,
+            "PerformanceFeeCalculator.validateProfitFeePercentage: Profit fee exceeds maximum."
+        );
+
+        ScaleValidations.validateMultipleOfBasisPoint(_profitFee);
     }
 
     /**
@@ -418,8 +469,8 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         return feeState[_set].highWatermarkResetPeriod;
     }
 
-    /* ============ Internal Functions ============ */
-    
+    /* ============ Private Functions ============ */
+
     /**
      * Parses passed in fee parameters from bytestring.
      *
@@ -450,5 +501,35 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         }
 
         return parameters;
+    }
+
+    /**
+     * Parses passed in fee parameters from bytestring. If passed feeType number exceeds number of
+     *  enum items function will revert.
+     *
+     * | CallData                     | Location                      |
+     * |------------------------------|-------------------------------|
+     * | feeType                      | 32                            |
+     * | feePercentage                | 64                            |
+     *
+     * @param  _callData            Byte string containing fee parameter data
+     * @return feeParameters        Fee parameters
+     */
+    function parseNewFeeCallData(
+        bytes memory _callData
+    )
+        private
+        pure
+        returns (FeeType, uint256)
+    {
+        FeeType feeType;
+        uint256 feePercentage;
+
+        assembly {
+            feeType := mload(add(_callData, 32))         // feeType
+            feePercentage := mload(add(_callData, 64))   // feePercentage
+        }
+
+        return (feeType, feePercentage);
     }
 }

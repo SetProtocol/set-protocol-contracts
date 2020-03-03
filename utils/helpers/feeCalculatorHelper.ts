@@ -7,7 +7,6 @@ import {
   FeeCalculatorMockContract,
   FixedFeeCalculatorContract,
   FixedFeeCalculatorMockContract,
-  OracleWhiteListContract,
   PerformanceFeeCalculatorContract,
   RebalancingSetFeeMockContract,
 } from '../contracts';
@@ -101,6 +100,16 @@ export class FeeCalculatorHelper {
     feeQuantity: BigNumber
   ): string {
     return web3.utils.padLeft(web3.utils.numberToHex(feeQuantity.toString()), 64);
+  }
+
+  public generateAdjustFeeCallData(
+    feeType: BigNumber,
+    newFeePercentage: BigNumber,
+  ): string {
+    return SetTestUtils.bufferArrayToHex([
+      SetUtils.paddedBufferForBigNumber(feeType),
+      SetUtils.paddedBufferForBigNumber(newFeePercentage),
+    ]);
   }
 
   public generatePerformanceFeeCallData(

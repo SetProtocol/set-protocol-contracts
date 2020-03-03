@@ -29,7 +29,7 @@ import { RebalancingSetState } from "../rebalancing-v2/RebalancingSetState.sol";
  * @title IncentiveFee
  * @author Set Protocol
  */
-contract IncentiveFee is 
+contract IncentiveFee is
     ERC20,
     RebalancingSetState
 {
@@ -49,7 +49,7 @@ contract IncentiveFee is
 
     /**
      * Calculates the fee and mints the rebalancing SetToken quantity to the recipient.
-     * The minting is done without an increase to the total collateral controlled by the 
+     * The minting is done without an increase to the total collateral controlled by the
      * rebalancing SetToken. In effect, the existing holders are paying the fee via inflation.
      *
      * @return feePercentage
@@ -73,8 +73,8 @@ contract IncentiveFee is
     /**
      * Returns the new incentive fee. The calculation for the fee involves implying
      * mint quantity so that the feeRecipient owns the fee percentage of the entire
-     * supply of the Set. 
-     * 
+     * supply of the Set.
+     *
      * The formula to solve for fee is:
      * feeQuantity / feeQuantity + totalSupply = fee / scaleFactor
      *
@@ -96,7 +96,7 @@ contract IncentiveFee is
 
         // ScaleFactor (10e18) - fee
         uint256 b = CommonMath.scaleFactor().sub(_feePercentage);
-        
+
         return a.div(b);
     }
 

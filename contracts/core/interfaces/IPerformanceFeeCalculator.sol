@@ -15,32 +15,23 @@
 */
 
 pragma solidity 0.5.7;
+pragma experimental ABIEncoderV2;
+
+import { PerformanceFeeLibrary } from "../fee-calculators/lib/PerformanceFeeLibrary.sol";
 
 /**
- * @title IFeeCalculator
+ * @title IPerformanceFeeCalculator
  * @author Set Protocol
  *
+ * Interface for accessing state on PerformanceFeeCalculator (function calls defined in IFeeCalculator)
  */
-interface IFeeCalculator {
+interface IPerformanceFeeCalculator {
 
     /* ============ External Functions ============ */
 
-    function initialize(
-        bytes calldata _feeCalculatorData
+    function feeState(
+        address _rebalancingSetToken
     )
-        external;
-
-    function getFee()
         external
-        view
-        returns(uint256);
-
-    function updateAndGetFee()
-        external
-        returns(uint256);
-
-    function adjustFee(
-        bytes calldata _newFeeData
-    )
-        external;
+        returns (PerformanceFeeLibrary.FeeState memory);
 }

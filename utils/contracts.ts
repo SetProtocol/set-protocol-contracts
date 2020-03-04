@@ -84,6 +84,8 @@ export { TransferProxyContract } from '../types/generated/transfer_proxy';
 export {
   TwoAssetPriceBoundedLinearAuctionMockContract
 } from '../types/generated/two_asset_price_bounded_linear_auction_mock';
+export { UnrestrictedTimeLockUpgradeContract } from '../types/generated/unrestricted_time_lock_upgrade';
+export { UnrestrictedTimeLockUpgradeMockContract } from '../types/generated/unrestricted_time_lock_upgrade_mock';
 export { UpdatableConstantAuctionPriceCurveContract } from '../types/generated/updatable_constant_auction_price_curve';
 export { VaultContract } from '../types/generated/vault';
 export { WethMockContract } from '../types/generated/weth_mock';

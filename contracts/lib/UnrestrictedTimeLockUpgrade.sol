@@ -40,18 +40,6 @@ contract UnrestrictedTimeLockUpgrade is
         bytes32 indexed _upgradeHash
     );
 
-    /* ============ External Function ============ */
-
-    /**
-     * External function to remove upgrade. Modifiers should be added to restrict usage.
-     *
-     * @param  _upgradeHash    Keccack256 hash that uniquely identifies function called and arguments
-     */
-    function removeRegisteredUpgrade(
-        bytes32 _upgradeHash
-    )
-        external;
-
     /* ============ Internal Function ============ */
 
     /**
@@ -76,5 +64,4 @@ contract UnrestrictedTimeLockUpgrade is
             _upgradeHash
         );
     }
-
 }

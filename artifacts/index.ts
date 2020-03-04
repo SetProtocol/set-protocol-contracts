@@ -172,6 +172,7 @@ export {
   LiquidatorHelper,
   RebalancingHelper,
   RebalancingSetV2Helper,
+  RebalancingSetV3Helper,
   ValuationHelper
 } from '../utils/helpers';
 

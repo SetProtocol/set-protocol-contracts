@@ -290,7 +290,8 @@ contract CTokenExchangeIssuanceModule is
         uint256[] memory baseSetUnits = baseSet.getUnits();
         uint256 baseSetNaturalUnit = baseSet.naturalUnit();
 
-        // Calculate the number of natural units required and round down to nearest natural unit
+        // Calculate the number of natural units required. Note: validateExchangeIssuanceParams ensures quantity is a
+        // multiple of natural unit
         uint256 quantityOfNaturalUnits = _quantity.div(baseSetNaturalUnit);
 
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
@@ -455,10 +456,10 @@ contract CTokenExchangeIssuanceModule is
     {
         // Withdraw cToken send tokens from vault (owned by this contract) to the module
         coreInstance.withdrawModule(
-            address(this),
-            address(this),
-            address(_cToken),
-            _cTokenQuantity
+            address(this), // From address in vault
+            address(this), // To address
+            address(_cToken), // Token address
+            _cTokenQuantity // Token quantity
         );
 
         // Redeem cToken to underlying

@@ -129,7 +129,7 @@ contract RebalancingSetCTokenIssuanceModule is
      * @param  _rebalancingSetAddress    Address of the rebalancing SetToken to issue
      * @param  _rebalancingSetQuantity   The issuance quantity of rebalancing SetToken
      * @param  _keepChangeInVault        Boolean signifying whether excess base SetToken is transferred to the user
-     *                                     or left in the vault
+     *                                   or left in the vault
      */
     function issueRebalancingSetWrappingEther(
         address _rebalancingSetAddress,
@@ -332,6 +332,7 @@ contract RebalancingSetCTokenIssuanceModule is
         );
 
         // Withdraw components and redeem cTokens. Transfer tokens to sender.
+        // If unwrapEth is true, the required ether is unwrapped
         withdrawComponentsHandleCTokensAndEth(_baseSetAddress, _unwrapEth);
 
         // Transfer any change of the base SetToken to the end user
@@ -420,24 +421,24 @@ contract RebalancingSetCTokenIssuanceModule is
     /**
      * This function deposits the underlying components into the module and mints cToken
      *
-     * @param  _cTokenComponent             Instance of the cToken to mint
+     * @param  _cToken                      Instance of the cToken to mint
      * @param  _cTokenQuantity              Quantity of the cToken required
-     * @param  _underlyingComponent         Address of the underlying component
+     * @param  _underlyingAddress           Address of the underlying component
      */
     function depositAndMintCToken(
-        ICToken _cTokenComponent,
+        ICToken _cToken,
         uint256 _cTokenQuantity,
-        address _underlyingComponent
+        address _underlyingAddress
     )
         private
     {
         // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
-        uint256 exchangeRate = _cTokenComponent.exchangeRateCurrent();
+        uint256 exchangeRate = _cToken.exchangeRateCurrent();
         uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(_cTokenQuantity, exchangeRate);
 
         // Transfer components to this module
         coreInstance.transferModule(
-            _underlyingComponent,
+            _underlyingAddress,
             underlyingQuantity,
             msg.sender,
             address(this)
@@ -445,14 +446,14 @@ contract RebalancingSetCTokenIssuanceModule is
 
         // Ensure allowance for underlying token to cToken contract. This is for cases if we add a new cToken to the whitelist
         ERC20Wrapper.ensureAllowance(
-            _underlyingComponent,
+            _underlyingAddress,
             address(this),
-            address(_cTokenComponent),
+            address(_cToken),
             CommonMath.maxUInt256()
         );
 
         // Mint cToken using underlying
-        uint256 mintResponse = _cTokenComponent.mint(underlyingQuantity);
+        uint256 mintResponse = _cToken.mint(underlyingQuantity);
         require(
             mintResponse == 0,
             "CTokenExchangeIssuanceModule.exchangeIssue: Error minting cToken"
@@ -460,13 +461,13 @@ contract RebalancingSetCTokenIssuanceModule is
 
         // Get balance of cTokens minted in the contract
         uint256 cTokenQuantity = ERC20Wrapper.balanceOf(
-            address(_cTokenComponent),
+            address(_cToken),
             address(this)
         );
 
         // Ensure allowance for cToken to transferProxy. This is for cases if we add a new cToken to the whitelist
         ERC20Wrapper.ensureAllowance(
-            address(_cTokenComponent),
+            address(_cToken),
             address(this),
             transferProxy,
             CommonMath.maxUInt256()
@@ -476,7 +477,7 @@ contract RebalancingSetCTokenIssuanceModule is
         coreInstance.depositModule(
             address(this),
             address(this),
-            address(_cTokenComponent),
+            address(_cToken),
             cTokenQuantity
         );
     }
@@ -544,31 +545,31 @@ contract RebalancingSetCTokenIssuanceModule is
     /**
      * This function redeems the cToken in the module and withdraws the underlying component to the user
      *
-     * @param  _cTokenComponent             Instance of the cToken to redeem
+     * @param  _cToken                      Instance of the cToken to redeem
      * @param  _cTokenQuantity              Quantity of the cToken to redeem
-     * @param  _underlyingComponent         Address of the underlying component
+     * @param  _underlyingAddress           Address of the underlying component
      */
     function redeemCTokenAndWithdraw(
-        ICToken _cTokenComponent,
+        ICToken _cToken,
         uint256 _cTokenQuantity,
-        address _underlyingComponent
+        address _underlyingAddress
     )
         private
     {
         // Calculate required amount of underlying. Calculated as cToken quantity * exchangeRate / 10 ** 18.
-        uint256 exchangeRate = _cTokenComponent.exchangeRateCurrent();
+        uint256 exchangeRate = _cToken.exchangeRateCurrent();
         uint256 underlyingQuantity = CompoundUtils.convertCTokenToUnderlying(_cTokenQuantity, exchangeRate);
 
         // Transfer the cToken to this address from the Vault
         coreInstance.withdrawModule(
             address(this),
             address(this),
-            address(_cTokenComponent),
+            address(_cToken),
             _cTokenQuantity
         );
 
         // Redeem cToken to underlying
-        uint256 redeemResponse = _cTokenComponent.redeem(_cTokenQuantity);
+        uint256 redeemResponse = _cToken.redeem(_cTokenQuantity);
         require(
             redeemResponse == 0,
             "CTokenExchangeIssuanceModule.exchangeRedeem: Error redeeming cToken"
@@ -576,13 +577,13 @@ contract RebalancingSetCTokenIssuanceModule is
 
          // Get balance of underlying after cToken redemption and override
         underlyingQuantity = ERC20Wrapper.balanceOf(
-            _underlyingComponent,
+            _underlyingAddress,
             address(this)
         );
 
         // Transfer underlying component from the module to the user
         coreInstance.transferModule(
-            _underlyingComponent,
+            _underlyingAddress,
             underlyingQuantity,
             address(this),
             msg.sender

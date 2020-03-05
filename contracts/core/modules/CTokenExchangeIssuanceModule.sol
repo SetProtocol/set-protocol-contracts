@@ -295,7 +295,7 @@ contract CTokenExchangeIssuanceModule is
 
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
             address currentComponentAddress = baseSetComponents[i];
-            // Get existin component quantity in the vault
+            // Get existing component quantity in the vault
             uint256 currentComponentQuantity = vaultInstance.getOwnerBalance(currentComponentAddress, msg.sender);
 
             // Calculate required quantity for component

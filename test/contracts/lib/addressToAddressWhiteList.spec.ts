@@ -120,7 +120,6 @@ contract('AddressToAddressWhiteList', accounts => {
           firstKeyTypeAddress,
           firstKeyTypeAddress,
           thirdKeyTypeAddress,
-          fourthKeyTypeAddress,
         ];
       });
 
@@ -135,7 +134,6 @@ contract('AddressToAddressWhiteList', accounts => {
           firstKeyTypeAddress,
           NULL_ADDRESS,
           thirdKeyTypeAddress,
-          fourthKeyTypeAddress,
         ];
       });
 

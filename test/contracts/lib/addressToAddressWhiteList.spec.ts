@@ -113,6 +113,36 @@ contract('AddressToAddressWhiteList', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the keys are not unique', async () => {
+      beforeEach(async () => {
+        subjectInitialValueTypeAddresses = [
+          firstKeyTypeAddress,
+          firstKeyTypeAddress,
+          thirdKeyTypeAddress,
+          fourthKeyTypeAddress,
+        ];
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when a value is zero', async () => {
+      beforeEach(async () => {
+        subjectInitialValueTypeAddresses = [
+          firstKeyTypeAddress,
+          NULL_ADDRESS,
+          thirdKeyTypeAddress,
+          fourthKeyTypeAddress,
+        ];
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#addPair', async () => {
@@ -188,6 +218,16 @@ contract('AddressToAddressWhiteList', accounts => {
       });
 
       it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when a value is zero', async () => {
+      beforeEach(async () => {
+        subjectValueTypeToAdd = NULL_ADDRESS;
+      });
+
+      it('reverts', async () => {
         await expectRevertError(subject());
       });
     });
@@ -309,6 +349,18 @@ contract('AddressToAddressWhiteList', accounts => {
       expect(valueTypeAddress).to.equal(subjectValueTypeToAdd);
     });
 
+    it('emits a PairRemoved event', async () => {
+      const previousValueType = await addressToAddressWhiteList.whitelist.callAsync(subjectKeyTypeToAdd);
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = PairRemoved(
+        addressToAddressWhiteList.address,
+        subjectKeyTypeToAdd,
+        previousValueType
+      );
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
     it('emits a PairAdded event', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
@@ -337,6 +389,16 @@ contract('AddressToAddressWhiteList', accounts => {
       });
 
       it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when a value is zero', async () => {
+      beforeEach(async () => {
+        subjectValueTypeToAdd = NULL_ADDRESS;
+      });
+
+      it('reverts', async () => {
         await expectRevertError(subject());
       });
     });
@@ -378,16 +440,6 @@ contract('AddressToAddressWhiteList', accounts => {
         const validity = await subject();
 
         expect(validity).to.be.false;
-      });
-    });
-
-    describe('when passed array has no addresses', async () => {
-      beforeEach(async () => {
-        subjectAddressesToVerify = [];
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
       });
     });
   });
@@ -455,16 +507,6 @@ contract('AddressToAddressWhiteList', accounts => {
           thirdKeyTypeAddress,
           fourthKeyTypeAddress,
         ];
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when passed array has no addresses', async () => {
-      beforeEach(async () => {
-        subjectKeyTypeAddresses = [];
       });
 
       it('should revert', async () => {

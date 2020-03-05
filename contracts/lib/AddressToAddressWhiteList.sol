@@ -43,13 +43,13 @@ contract AddressToAddressWhiteList is
     /* ============ Events ============ */
 
     event PairAdded(
-        address _key,
-        address _value
+        address indexed key,
+        address value
     );
 
     event PairRemoved(
-        address _key,
-        address _value
+        address indexed key,
+        address value
     );
 
     /* ============ Constructor ============ */
@@ -79,6 +79,18 @@ contract AddressToAddressWhiteList is
         for (uint256 i = 0; i < _initialKeys.length; i++) {
             address keyTypeAddressToAdd = _initialKeys[i];
 
+            // Require keys are unique
+            require(
+                whitelist[keyTypeAddressToAdd] == address(0),
+                "AddressToAddressWhiteList.constructor: Key must be unique."
+            );
+
+            // Require values are non zero addresses
+            require(
+                _initialValues[i] != address(0),
+                "AddressToAddressWhiteList.constructor: Value must be non zero."
+            );
+
             keys.push(keyTypeAddressToAdd);
             whitelist[keyTypeAddressToAdd] = _initialValues[i];
         }
@@ -105,6 +117,11 @@ contract AddressToAddressWhiteList is
             "AddressToAddressWhiteList.addPair: Address pair already exists."
         );
 
+        require(
+            _value != address(0),
+            "AddressToAddressWhiteList.addPair: Value must be non zero."
+        );
+
         keys.push(_key);
         whitelist[_key] = _value;
 
@@ -122,17 +139,17 @@ contract AddressToAddressWhiteList is
         external
         onlyOwner
     {
-        address valueTypeAddress = whitelist[_key];
+        address valueToRemove = whitelist[_key];
 
         require(
-            valueTypeAddress != address(0),
+            valueToRemove != address(0),
             "AddressToAddressWhiteList.removePair: key type address is not current whitelisted."
         );
 
         keys = keys.remove(_key);
         whitelist[_key] = address(0);
 
-        emit PairRemoved(_key, valueTypeAddress);
+        emit PairRemoved(_key, valueToRemove);
     }
 
     /**
@@ -154,12 +171,22 @@ contract AddressToAddressWhiteList is
             "AddressToAddressWhiteList.editPair: Address pair must exist."
         );
 
+        require(
+            _value != address(0),
+            "AddressToAddressWhiteList.editPair: New value must be non zero."
+        );
+
+        emit PairRemoved(
+            _key,
+            whitelist[_key]
+        );
+
         // Set new value type address for passed key type address
         whitelist[_key] = _value;
 
         emit PairAdded(
             _key,
-            _value
+            whitelist[_key]
         );
     }
 
@@ -192,23 +219,17 @@ contract AddressToAddressWhiteList is
         // Get length of passed array
         uint256 arrayLength = _key.length;
 
-        // Check that passed array length is greater than 0
-        require(
-            arrayLength > 0,
-            "AddressToAddressWhiteList.getValues: Array length must be greater than 0."
-        );
-
         // Instantiate value type addresses array
-        address[] memory valueTypeAddresses = new address[](arrayLength);
+        address[] memory values = new address[](arrayLength);
 
         for (uint256 i = 0; i < arrayLength; i++) {
             // Get value type address for key type address at index i
-            valueTypeAddresses[i] = getValue(
+            values[i] = getValue(
                 _key[i]
             );
         }
 
-        return valueTypeAddresses;       
+        return values;       
     }
 
     /**
@@ -249,12 +270,6 @@ contract AddressToAddressWhiteList is
     {
         // Get length of passed array
         uint256 arrayLength = _keys.length;
-
-        // Check that passed array length is greater than 0
-        require(
-            arrayLength > 0,
-            "AddressToAddressWhiteList.areValidAddresses: Array length must be greater than 0."
-        );
 
         for (uint256 i = 0; i < arrayLength; i++) {
             // Return false if key type address doesn't have matching value type address

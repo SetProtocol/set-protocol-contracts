@@ -33,5 +33,6 @@ interface IPerformanceFeeCalculator {
         address _rebalancingSetToken
     )
         external
+        view
         returns (PerformanceFeeLibrary.FeeState memory);
 }

@@ -116,7 +116,7 @@ contract('AddressToAddressWhiteList', accounts => {
 
     describe('when the keys are not unique', async () => {
       beforeEach(async () => {
-        subjectInitialValueTypeAddresses = [
+        subjectInitialKeyTypeAddresses = [
           firstKeyTypeAddress,
           firstKeyTypeAddress,
           thirdKeyTypeAddress,

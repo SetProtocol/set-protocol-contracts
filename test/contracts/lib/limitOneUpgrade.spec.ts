@@ -49,7 +49,7 @@ contract('UnrestrictedTimeLockUpgrade', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe.only('#testLimitOneUpgrade', async () => {
+  describe('#testLimitOneUpgrade', async () => {
     let subjectTestUint: BigNumber = ONE;
     let subjectCaller: Address = ownerAccount;
 

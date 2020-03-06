@@ -404,7 +404,7 @@ contract RebalancingSetCTokenIssuanceModule is
                     address(weth),
                     address(this),
                     transferProxy,
-                    CommonMath.maxUInt256()
+                    currentComponentQuantity
                 );
             } else {
                 // Deposit components to the vault in the name of the contract
@@ -449,7 +449,7 @@ contract RebalancingSetCTokenIssuanceModule is
             _underlyingAddress,
             address(this),
             address(_cToken),
-            CommonMath.maxUInt256()
+            underlyingQuantity
         );
 
         // Mint cToken using underlying
@@ -470,7 +470,7 @@ contract RebalancingSetCTokenIssuanceModule is
             address(_cToken),
             address(this),
             transferProxy,
-            CommonMath.maxUInt256()
+            cTokenQuantity
         );
 
         // Deposit transformed cTokens to vault (owned by this contract)

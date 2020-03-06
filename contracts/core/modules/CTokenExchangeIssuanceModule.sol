@@ -365,26 +365,26 @@ contract CTokenExchangeIssuanceModule is
 
                 // Ensure unlimited allowance for underlying component to transferProxy.
                 ERC20Wrapper.ensureAllowance(
-                    underlyingAddress, // Token
-                    address(this), // Owner
-                    transferProxy, // Spender
-                    CommonMath.maxUInt256() // Set unlimited allowance
+                    underlyingAddress,  // Token
+                    address(this),      // Owner
+                    transferProxy,      // Spender
+                    underlyingQuantity  // Set unlimited if allowance less than quantity
                 );
 
                 // Transfer send tokens to the appropriate exchange wrapper
                 coreInstance.transferModule(
-                    underlyingAddress, // Token
+                    underlyingAddress,  // Token
                     underlyingQuantity, // Quantity
-                    address(this), // From address
-                    exchangeWrapper // To address
+                    address(this),      // From address
+                    exchangeWrapper     // To address
                 );
             } else {
                 // Withdraw non cToken send tokens from vault (owned by this contract) to the appropriate exchange wrapper
                 coreInstance.withdrawModule(
-                    address(this), // From address in vault
-                    exchangeWrapper, // To address
-                    currentComponentAddress, // Token address
-                    currentComponentQuantity // Token quantity
+                    address(this),              // From address in vault
+                    exchangeWrapper,            // To address
+                    currentComponentAddress,    // Token address
+                    currentComponentQuantity    // Token quantity
                 );
             }
         }
@@ -409,7 +409,7 @@ contract CTokenExchangeIssuanceModule is
             _underlyingAddress,
             address(this),
             address(_cToken),
-            CommonMath.maxUInt256()
+            _underlyingQuantity
         );
 
         // Mint cToken using underlying
@@ -430,7 +430,7 @@ contract CTokenExchangeIssuanceModule is
             address(_cToken),
             address(this),
             transferProxy,
-            CommonMath.maxUInt256()
+            cTokenQuantity
         );
 
         // Deposit transformed cTokens to vault (owned by order sender)
@@ -536,7 +536,7 @@ contract CTokenExchangeIssuanceModule is
                         underlyingAddress,
                         address(this),
                         transferProxy,
-                        CommonMath.maxUInt256()
+                        underlyingQuantity
                     );
 
                     // Transfer underlying components to caller

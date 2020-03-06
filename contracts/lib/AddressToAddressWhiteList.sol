@@ -17,8 +17,6 @@
 pragma solidity 0.5.7;
 
 
-import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-
 import { TimeLockUpgradeV2 } from "./TimeLockUpgradeV2.sol";
 import { AddressArrayUtils } from "./AddressArrayUtils.sol";
 
@@ -30,7 +28,6 @@ import { AddressArrayUtils } from "./AddressArrayUtils.sol";
  * WhiteList that matches addresses to other addresses
  */
 contract AddressToAddressWhiteList is
-    Ownable,
     TimeLockUpgradeV2
 {
     using AddressArrayUtils for address[];
@@ -109,7 +106,6 @@ contract AddressToAddressWhiteList is
         address _value
     )
         external
-        onlyOwner
         timeLockUpgrade
     {
         require(
@@ -137,7 +133,7 @@ contract AddressToAddressWhiteList is
         address _key
     )
         external
-        onlyOwner
+        timeLockUpgrade
     {
         address valueToRemove = whitelist[_key];
 
@@ -163,7 +159,6 @@ contract AddressToAddressWhiteList is
         address _value
     )
         external
-        onlyOwner
         timeLockUpgrade
     {
         require(
@@ -186,7 +181,7 @@ contract AddressToAddressWhiteList is
 
         emit PairAdded(
             _key,
-            whitelist[_key]
+            _value
         );
     }
 

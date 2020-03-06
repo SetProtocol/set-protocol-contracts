@@ -30,6 +30,8 @@ export { FixedFeeCalculatorContract } from '../types/generated/fixed_fee_calcula
 export { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
 export { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
 export { KyberNetworkWrapperContract } from '../types/generated/kyber_network_wrapper';
+export { LimitOneUpgradeContract } from '../types/generated/limit_one_upgrade';
+export { LimitOneUpgradeMockContract } from '../types/generated/limit_one_upgrade_mock';
 export { LinearAuctionLiquidatorContract } from '../types/generated/linear_auction_liquidator';
 export { LinearAuctionMockContract } from '../types/generated/linear_auction_mock';
 export { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';

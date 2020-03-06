@@ -8,6 +8,7 @@ import {
   CoreMockContract,
   CTokenExchangeIssuanceModuleContract,
   ExchangeIssuanceModuleContract,
+  LimitOneUpgradeMockContract,
   OracleWhiteListContract,
   RebalancingSetCTokenExchangeIssuanceModuleContract,
   RebalancingSetCTokenIssuanceModuleContract,
@@ -51,6 +52,7 @@ const CTokenExchangeIssuanceModule = importArtifactsFromSource('CTokenExchangeIs
 const ERC20Wrapper = importArtifactsFromSource('ERC20Wrapper');
 const ExchangeIssuanceModule = importArtifactsFromSource('ExchangeIssuanceModule');
 const FactoryUtilsLibrary = importArtifactsFromSource('FactoryUtilsLibrary');
+const LimitOneUpgradeMock = importArtifactsFromSource('LimitOneUpgradeMock');
 const OracleWhiteList = importArtifactsFromSource('OracleWhiteList');
 const RebalancingSetCTokenExchangeIssuanceModule = importArtifactsFromSource(
   'RebalancingSetCTokenExchangeIssuanceModule'
@@ -369,6 +371,19 @@ export class CoreHelper {
 
     return new UnrestrictedTimeLockUpgradeMockContract(
       getContractInstance(truffleUnrestrictedTimeLockUpgradeMock),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployLimitOneUpgradeMockAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<LimitOneUpgradeMockContract> {
+    const truffleLimitOneUpgradeMock = await LimitOneUpgradeMock.new(
+      { from },
+    );
+
+    return new LimitOneUpgradeMockContract(
+      getContractInstance(truffleLimitOneUpgradeMock),
       { from, gas: DEFAULT_GAS },
     );
   }

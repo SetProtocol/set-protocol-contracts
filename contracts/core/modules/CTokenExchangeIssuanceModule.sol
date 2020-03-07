@@ -36,7 +36,8 @@ import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
  * @author Set Protocol
  *
  * The CTokenExchangeIssuanceModule facilitates the exchangeIssue and exchangeRedeem functions which allows
- * the issuance and redemption of Sets containing cTokens using exchange orders and Compound functions
+ * the issuance and redemption of Sets containing cTokens using exchange orders and Compound functions. 
+ * Note: This module is not compatible with Compound Ether (cETH).
  */
 contract CTokenExchangeIssuanceModule is
     ExchangeIssuanceModule,
@@ -93,7 +94,7 @@ contract CTokenExchangeIssuanceModule is
         public
         nonReentrant
     {
-        // Ensures validity of exchangeIssuanceParams
+        // Validate the issuance quantity, send token and receive token data
         validateExchangeIssuanceParams(_exchangeIssuanceParams);
 
         // Validate that all receiveTokens are components of the Set
@@ -123,7 +124,7 @@ contract CTokenExchangeIssuanceModule is
             _exchangeIssuanceParams.receiveTokenAmounts
         );
 
-        // Check that sender's receive tokens in Vault have been incremented correctly
+        // Check that sender's receive token balances in Vault are correct
         ExchangeIssuanceLibrary.validatePostExchangeReceiveTokenBalances(
             vault,
             _exchangeIssuanceParams.receiveTokens,
@@ -200,7 +201,7 @@ contract CTokenExchangeIssuanceModule is
         // Execute the exchange orders using the encoded order data and deposits tokens in vault
         executeExchangeOrders(_orderData);
 
-        // Check that sender's receive tokens in Vault have been incremented correctly
+        // Check that sender's receive token balances in Vault are correct
         ExchangeIssuanceLibrary.validatePostExchangeReceiveTokenBalances(
             vault,
             _exchangeIssuanceParams.receiveTokens,
@@ -289,13 +290,17 @@ contract CTokenExchangeIssuanceModule is
         uint256[] memory baseSetUnits = baseSet.getUnits();
         uint256 baseSetNaturalUnit = baseSet.naturalUnit();
 
+        // Calculate the number of natural units required. Note: validateExchangeIssuanceParams ensures quantity is a
+        // multiple of natural unit
+        uint256 quantityOfNaturalUnits = _quantity.div(baseSetNaturalUnit);
+
         for (uint256 i = 0; i < baseSetComponents.length; i++) {
             address currentComponentAddress = baseSetComponents[i];
-            // Get component quantity in vault
+            // Get existing component quantity in the vault
             uint256 currentComponentQuantity = vaultInstance.getOwnerBalance(currentComponentAddress, msg.sender);
 
-            // Calculate required component quantity
-            uint256 requiredQuantity = _quantity.div(baseSetNaturalUnit).mul(baseSetUnits[i]);
+            // Calculate required quantity for component
+            uint256 requiredQuantity = quantityOfNaturalUnits.mul(baseSetUnits[i]);
 
             // If cToken and balance of cToken in vault is less than required for issuing the Set
             // transfer difference from user and mint cToken
@@ -347,36 +352,39 @@ contract CTokenExchangeIssuanceModule is
             address underlyingAddress = cTokenWhiteList.whitelist(currentComponentAddress);
             if (underlyingAddress != address(0)) {
                 // Withdraw cToken send tokens from vault (owned by this contract) to the module and redeem cToken
-                redeemCToken(currentComponentAddress, currentComponentQuantity);
+                redeemCToken(
+                    ICToken(currentComponentAddress),
+                    currentComponentQuantity
+                );
 
-                // Get balance of underlying after cToken redemption.
+                // Get balance of underlying in the contract after cToken redemption to ensure tokens are flushed
                 uint256 underlyingQuantity = ERC20Wrapper.balanceOf(
                     underlyingAddress,
                     address(this)
                 );
 
-                // Ensure allowance for underlying component to transferProxy.
+                // Ensure unlimited allowance for underlying component to transferProxy.
                 ERC20Wrapper.ensureAllowance(
-                    underlyingAddress,
-                    address(this),
-                    transferProxy,
-                    underlyingQuantity
+                    underlyingAddress,  // Token
+                    address(this),      // Owner
+                    transferProxy,      // Spender
+                    underlyingQuantity  // Set unlimited if allowance less than quantity
                 );
 
                 // Transfer send tokens to the appropriate exchange wrapper
                 coreInstance.transferModule(
-                    underlyingAddress,
-                    underlyingQuantity,
-                    address(this),
-                    exchangeWrapper
+                    underlyingAddress,  // Token
+                    underlyingQuantity, // Quantity
+                    address(this),      // From address
+                    exchangeWrapper     // To address
                 );
             } else {
                 // Withdraw non cToken send tokens from vault (owned by this contract) to the appropriate exchange wrapper
                 coreInstance.withdrawModule(
-                    address(this),
-                    exchangeWrapper,
-                    currentComponentAddress,
-                    currentComponentQuantity
+                    address(this),              // From address in vault
+                    exchangeWrapper,            // To address
+                    currentComponentAddress,    // Token address
+                    currentComponentQuantity    // Token quantity
                 );
             }
         }
@@ -396,7 +404,7 @@ contract CTokenExchangeIssuanceModule is
     )
         private
     {
-        // Ensure allowance for underlying token to cToken contract.
+        // Ensure unlimited allowance for underlying token to cToken contract.
         ERC20Wrapper.ensureAllowance(
             _underlyingAddress,
             address(this),
@@ -411,13 +419,13 @@ contract CTokenExchangeIssuanceModule is
             "CTokenExchangeIssuanceModule.mintCToken: Error minting cToken"
         );
 
-        // Get balance of cTokens minted in the contract
+        // Get balance of cTokens minted in the contract to ensure tokens are flushed at the end
         uint256 cTokenQuantity = ERC20Wrapper.balanceOf(
             address(_cToken),
             address(this)
         );
 
-        // Ensure allowance for cToken to transferProxy. This is for the case if we add a new cToken to the whitelist
+        // Ensure unlimited allowance for cToken to transferProxy. This is for the case if we add a new cToken to the whitelist
         ERC20Wrapper.ensureAllowance(
             address(_cToken),
             address(this),
@@ -437,27 +445,25 @@ contract CTokenExchangeIssuanceModule is
     /**
      * Withdraw cToken from vault, and redeem cToken in module
      *
-     * @param _cToken                cToken component to redeem
+     * @param _cToken                Instance of cToken component to redeem
      * @param _cTokenQuantity        Quantity of cToken to redeem
      */
     function redeemCToken(
-        address _cToken,
+        ICToken _cToken,
         uint256 _cTokenQuantity
     )
         private
     {
         // Withdraw cToken send tokens from vault (owned by this contract) to the module
         coreInstance.withdrawModule(
-            address(this),
-            address(this),
-            _cToken,
-            _cTokenQuantity
+            address(this), // From address in vault
+            address(this), // To address
+            address(_cToken), // Token address
+            _cTokenQuantity // Token quantity
         );
 
-        ICToken cTokenInstance = ICToken(_cToken);
-
         // Redeem cToken to underlying
-        uint256 redeemResponse = cTokenInstance.redeem(_cTokenQuantity);
+        uint256 redeemResponse = _cToken.redeem(_cTokenQuantity);
         require(
             redeemResponse == 0,
             "CTokenExchangeIssuanceModule.redeemCToken: Error redeeming cToken"
@@ -514,7 +520,10 @@ contract CTokenExchangeIssuanceModule is
                 address underlyingAddress = cTokenWhiteList.whitelist(currentComponentAddress);
                 if (underlyingAddress != address(0)) {
                     // Withdraw cToken send tokens from vault (owned by this contract) to the module and redeem
-                    redeemCToken(currentComponentAddress, currentComponentQuantity);
+                    redeemCToken(
+                        ICToken(currentComponentAddress),
+                        currentComponentQuantity
+                    );
 
                     // Get balance of underlying after cToken redemption.
                     uint256 underlyingQuantity = ERC20Wrapper.balanceOf(

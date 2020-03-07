@@ -25,7 +25,8 @@ import { IAddressToAddressWhiteList } from "../../interfaces/IAddressToAddressWh
  * @title CTokenWhiteListed
  * @author Set Protocol
  *
- * The CTokenWhiteListed library maintains cToken related state for modules that interact with cTokens.
+ * The CTokenWhiteListed contract maintains cToken related state for modules that interact with cTokens. 
+ * Note: cETH is not supported.
  *
  */
 contract CTokenWhiteListed {

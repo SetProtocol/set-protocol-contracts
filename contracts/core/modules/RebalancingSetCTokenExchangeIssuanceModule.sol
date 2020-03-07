@@ -42,6 +42,7 @@ import { RebalancingSetExchangeIssuanceModule } from "./RebalancingSetExchangeIs
  * The RebalancingSetCTokenExchangeIssuanceModule supplementary smart contract allows a user to issue and redeem a Rebalancing Set
  * using a payment token or receiving a receive token atomically in a single transaction using liquidity from
  * decentralized exchanges. If cToken, the module handles redeeming cToken during redemption process
+ * Note: This module is not compatible with Compound Ether (cETH).
  */
 contract RebalancingSetCTokenExchangeIssuanceModule is
     RebalancingSetExchangeIssuanceModule,
@@ -86,7 +87,7 @@ contract RebalancingSetCTokenExchangeIssuanceModule is
 
     /**
      * Withdraw any base Set components to the user from the contract. If component is a supported cToken,
-     * the cToken is redeemed for underlying and returned to the caller
+     * calculate underlying quantity and return to the caller
      *
      * @param _baseSetToken               Instance of the Base SetToken
      * @param _returnAddress              The address to send excess tokens to

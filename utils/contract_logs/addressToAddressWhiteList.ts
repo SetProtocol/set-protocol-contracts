@@ -10,8 +10,8 @@ export function PairAdded(
     event: 'PairAdded',
     address: _contractAddress,
     args: {
-      _key,
-      _value,
+      key: _key,
+      value: _value,
     },
   }];
 }
@@ -24,8 +24,8 @@ export function PairRemoved(
     event: 'PairRemoved',
     address: _contractAddress,
     args: {
-      _key,
-      _value,
+      key: _key,
+      value: _value,
     },
   }];
 }

@@ -19,12 +19,12 @@ import {
   ZERO,
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
-import { getWeb3, getContractInstance } from '../web3Helper';
+import { getWeb3, getContractInstance, importArtifactsFromSource } from '../web3Helper';
 
 import { RebalancingSetV2Helper } from './rebalancingSetV2Helper';
 
 const web3 = getWeb3();
-const RebalancingSetTokenV3 = artifacts.require('RebalancingSetTokenV3');
+const RebalancingSetTokenV3 = importArtifactsFromSource('RebalancingSetTokenV3');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;

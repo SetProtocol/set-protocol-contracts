@@ -58,6 +58,7 @@ export const linkLibrariesToDeploy = async (contract: any, libraries: any[], fro
 };
 
 export const importArtifactsFromSource = (contractName: string) => {
+  const web3 = getWeb3();
   let instance;
   try {
     instance = artifacts.require(contractName);

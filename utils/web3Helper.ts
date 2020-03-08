@@ -7,7 +7,12 @@ const contract = require('@truffle/contract');
 
 // use globally injected web3 to find the currentProvider and wrap with web3 v1.0
 export const getWeb3 = () => {
-  const myWeb3 = new Web3(web3.currentProvider);
+  let myWeb3;
+  if (typeof web3 !== 'undefined') {
+    myWeb3 = new Web3(web3.currentProvider);
+  } else {
+    myWeb3 = new Web3( new Web3.providers.HttpProvider('http://localhost:8545'));
+  }
   return myWeb3;
 };
 

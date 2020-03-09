@@ -10,7 +10,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { LimitOneUpgradeMockContract } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { ZERO, ONE } from '@utils/constants';
+import { ONE, ZERO, ZERO_BYTES  } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
@@ -22,9 +22,11 @@ const UnrestrictedTimeLockUpgrade = artifacts.require('UnrestrictedTimeLockUpgra
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
-contract('UnrestrictedTimeLockUpgrade', accounts => {
+contract('LimitOneUpgrade', accounts => {
   const [
     ownerAccount,
+    upgradeAccount,
+    otherAccount,
   ] = accounts;
 
   let limitOneUpgradeMock: LimitOneUpgradeMockContract;
@@ -51,10 +53,12 @@ contract('UnrestrictedTimeLockUpgrade', accounts => {
 
   describe('#testLimitOneUpgrade', async () => {
     let subjectTestUint: BigNumber = ONE;
+    const subjectUpgradeAddress: Address = upgradeAccount;
     let subjectCaller: Address = ownerAccount;
 
     async function subject(): Promise<string> {
       return limitOneUpgradeMock.testLimitOneUpgrade.sendTransactionAsync(
+        subjectUpgradeAddress,
         subjectTestUint,
         { from: subjectCaller },
       );
@@ -77,11 +81,14 @@ contract('UnrestrictedTimeLockUpgrade', accounts => {
         );
       });
 
-      it('should set upgradeInProgress to true', async () => {
-        await subject();
+      it('upgradeIdentifier should return the upgrade hash', async () => {
+        const txHash = await subject();
+        const { input } = await web3.eth.getTransaction(txHash);
 
-        const isBeingUpgraded = await limitOneUpgradeMock.upgradeInProgress.callAsync(subjectCaller);
-        expect(isBeingUpgraded).to.be.true;
+        const expectedUpgradeHash = web3.utils.soliditySha3(input);
+
+        const actualUpgradeHash = await limitOneUpgradeMock.upgradeIdentifier.callAsync(subjectUpgradeAddress);
+        expect(actualUpgradeHash).to.equal(expectedUpgradeHash);
       });
 
       it('should not update the testUint', async () => {
@@ -105,6 +112,7 @@ contract('UnrestrictedTimeLockUpgrade', accounts => {
         );
 
         await limitOneUpgradeMock.testLimitOneUpgrade.sendTransactionAsync(
+          subjectUpgradeAddress,
           subjectTestUint,
           { from: subjectCaller },
         );
@@ -119,11 +127,11 @@ contract('UnrestrictedTimeLockUpgrade', accounts => {
         expect(currentTestUint).to.bignumber.equal(subjectTestUint);
       });
 
-      it('should set upgradeInProgress to false', async () => {
+      it('should set upgradeIdentifier to 0', async () => {
         await subject();
 
-        const isBeingUpgraded = await limitOneUpgradeMock.upgradeInProgress.callAsync(subjectCaller);
-        expect(isBeingUpgraded).to.be.false;
+        const actualUpgradeHash = await limitOneUpgradeMock.upgradeIdentifier.callAsync(subjectUpgradeAddress);
+        expect(actualUpgradeHash).to.equal(ZERO_BYTES);
       });
 
       describe('when the passed parameters are different', async () => {
@@ -134,6 +142,81 @@ contract('UnrestrictedTimeLockUpgrade', accounts => {
         it('should revert', async () => {
           await expectRevertError(subject());
         });
+      });
+    });
+  });
+
+  describe('#removeRegisteredUpgrade', async () => {
+    let subjectUpgradeAddress: Address;
+    let subjectHash: string;
+    let subjectCaller: Address;
+
+    const subjectTestUint: BigNumber = new BigNumber(1);
+
+    beforeEach(async () => {
+      subjectUpgradeAddress = upgradeAccount;
+      subjectCaller = ownerAccount;
+
+      await limitOneUpgradeMock.setTimeLockPeriod.sendTransactionAsync(
+        ONE,
+        { from: subjectCaller },
+      );
+
+      const txHash = await limitOneUpgradeMock.testLimitOneUpgrade.sendTransactionAsync(
+        subjectUpgradeAddress,
+        subjectTestUint,
+        { from: subjectCaller },
+      );
+
+      const { input } = await web3.eth.getTransaction(txHash);
+      subjectHash = web3.utils.soliditySha3(input);
+    });
+
+    async function subject(): Promise<string> {
+      return limitOneUpgradeMock.removeRegisteredUpgrade.sendTransactionAsync(
+        subjectUpgradeAddress,
+        subjectHash,
+        { from: subjectCaller },
+      );
+    }
+
+    it('sets the upgradeHash to 0', async () => {
+      await subject();
+
+      const actualTimestamp = await limitOneUpgradeMock.timeLockedUpgrades.callAsync(subjectHash);
+      expect(actualTimestamp).to.bignumber.equal(ZERO);
+    });
+
+    it('sets the upgradeIdentifier to 0', async () => {
+      await subject();
+
+      const actualUpgradeHash = await limitOneUpgradeMock.upgradeIdentifier.callAsync(subjectUpgradeAddress);
+      expect(actualUpgradeHash).to.bignumber.equal(ZERO_BYTES);
+    });
+
+    describe('when the hash specified is not registered', async () => {
+      beforeEach(async () => {
+        subjectHash = web3.utils.soliditySha3(5);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the hash does not match the expected one for the upgrade address', async () => {
+      beforeEach(async () => {
+        await limitOneUpgradeMock.testLimitOneUpgrade.sendTransactionAsync(
+          otherAccount,
+          subjectTestUint,
+          { from: subjectCaller },
+        );
+
+        subjectUpgradeAddress = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

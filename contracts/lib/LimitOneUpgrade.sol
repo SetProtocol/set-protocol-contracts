@@ -32,31 +32,56 @@ contract LimitOneUpgrade is
 {
     /* ============ State Variables ============ */
 
-    mapping(address => bool) public upgradeInProgress;
+    mapping(address => bytes32) public upgradeIdentifier;
 
     /* ============ Modifier ============ */
 
     modifier limitOneUpgrade(address _upgradeAddress) {
         if (timeLockPeriod > 0) {
-            if (upgradeInProgress[_upgradeAddress]) {
-                // Get upgradeHash
-                bytes32 upgradeHash = keccak256(
-                    abi.encodePacked(
-                        msg.data
-                    )
-                );
-
+            // Get upgradeHash
+            bytes32 upgradeHash = keccak256(
+                abi.encodePacked(
+                    msg.data
+                )
+            );
+            
+            if (upgradeIdentifier[_upgradeAddress] != 0) {
                 // If upgrade hash has no record then revert since must be second upgrade
                 require(
                     timeLockedUpgrades[upgradeHash] != 0,
-                    "Another fee update already in progress."
+                    "Another update already in progress."
                 );
 
-                upgradeInProgress[_upgradeAddress] = false;
+                upgradeIdentifier[_upgradeAddress] = 0;
+
             } else {
-                upgradeInProgress[_upgradeAddress] = true;
+                upgradeIdentifier[_upgradeAddress] = upgradeHash;
             }
         }
         _;
+    }
+
+    /**
+     * Verifies that upgrade address matches with hash of upgrade. Removes upgrade from timelockUpgrades
+     * and sets upgradeIdentifier to 0 for passed upgradeAddress, allowing for another upgrade.
+     *
+     * @param _upgradeAddress       The address of the trading pool being updated
+     * @param _upgradeHash          Keccack256 hash that uniquely identifies function called and arguments
+     */
+    /* ============ Internal ============ */
+    function removeRegisteredUpgradeInternal(
+        address _upgradeAddress,
+        bytes32 _upgradeHash
+    )
+        internal
+    {
+        require(
+            upgradeIdentifier[_upgradeAddress] == _upgradeHash,
+            "Passed upgrade hash does not match upgrade address."
+        );
+
+        UnrestrictedTimeLockUpgrade.removeRegisteredUpgradeInternal(_upgradeHash);
+
+        upgradeIdentifier[_upgradeAddress] = 0;
     }
 }

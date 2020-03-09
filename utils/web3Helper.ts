@@ -63,12 +63,15 @@ export const importArtifactsFromSource = (contractName: string) => {
   let instance;
   try {
     instance = artifacts.require(contractName);
+    return instance;
   } catch (e) {}
 
   try {
     const data = require('set-protocol-contracts/build/contracts/' + contractName + '.json');
     instance = contract(data);
     instance.setProvider(web3.currentProvider);
+
+    return instance;
   } catch (e) {}
 
   try {
@@ -76,7 +79,7 @@ export const importArtifactsFromSource = (contractName: string) => {
     const data = require(filePath);
     instance = contract(data);
     instance.setProvider(web3.currentProvider);
-  } catch (e) {}
 
-  return instance;
+    return instance;
+  } catch (e) {}
 };

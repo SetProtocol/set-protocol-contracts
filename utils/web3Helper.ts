@@ -1,5 +1,6 @@
 const Web3 = require('web3'); // import web3 v1.0 constructor
 const BigNumber = require('bignumber.js');
+import { version } from '../package.json';
 import { DEFAULT_GAS, NULL_ADDRESS } from './constants';
 import { Address } from 'set-protocol-utils';
 
@@ -62,11 +63,20 @@ export const importArtifactsFromSource = (contractName: string) => {
   let instance;
   try {
     instance = artifacts.require(contractName);
-  } catch (e) {
+  } catch (e) {}
+
+  try {
     const data = require('set-protocol-contracts/build/contracts/' + contractName + '.json');
     instance = contract(data);
     instance.setProvider(web3.currentProvider);
-  }
+  } catch (e) {}
+
+  try {
+    const filePath = 'set-protocol-contracts-' + version + '/build/contracts/' + contractName + '.json';
+    const data = require(filePath);
+    instance = contract(data);
+    instance.setProvider(web3.currentProvider);
+  } catch (e) {}
 
   return instance;
 };

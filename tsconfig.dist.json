@@ -28,7 +28,7 @@
     "declaration": true,
     "declarationDir": "./dist/typings",
     "esModuleInterop": true,
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
   "include": [
     "artifacts/*.ts",

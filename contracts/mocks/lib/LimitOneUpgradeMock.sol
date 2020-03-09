@@ -10,12 +10,22 @@ contract LimitOneUpgradeMock is
     uint256 public testUint;
 
     function testLimitOneUpgrade(
+        address _upgradeAddress,
         uint256 _testUint
     )
         external
-        limitOneUpgrade(msg.sender)
+        limitOneUpgrade(_upgradeAddress)
         timeLockUpgrade
     {
         testUint = _testUint;
+    }
+
+    function removeRegisteredUpgrade(
+        address _upgradeAddress,
+        bytes32 _upgradeHash
+    )
+        external
+    {
+        removeRegisteredUpgradeInternal(_upgradeAddress, _upgradeHash);
     }
 }

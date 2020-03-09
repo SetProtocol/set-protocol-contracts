@@ -28,3 +28,4 @@ export const STANDARD_NATURAL_UNIT = ether(1);
 export const STANDARD_QUANTITY_ISSUED: BigNumber = ether(10);
 export const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
 export const ZERO: BigNumber = new BigNumber(0);
+export const ZERO_BYTES: string = '0x0000000000000000000000000000000000000000000000000000000000000000';

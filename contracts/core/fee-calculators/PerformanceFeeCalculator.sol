@@ -176,6 +176,28 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         return streamingFee.add(profitFee);
     }
 
+    /**
+     * Returns calculated streaming and profit fee.
+     *
+     * @param  _setAddress          Address of Set to have feeState updated
+     * @return  uint256             Streaming Fee
+     * @return  uint256             Profit Fee
+     */
+    function getCalculatedFees(
+        address _setAddress
+    )
+        external
+        view
+        returns (uint256, uint256)
+    {
+        (
+            uint256 streamingFee,
+            uint256 profitFee
+        ) = calculateFees(_setAddress);
+
+        return (streamingFee, profitFee);
+    }
+
     /*
      * Calculates total inflation percentage in order to accrue fees to manager. Profit fee calculations
      * are net of streaming fees, so streaming fees are applied first then profit fees are calculated.

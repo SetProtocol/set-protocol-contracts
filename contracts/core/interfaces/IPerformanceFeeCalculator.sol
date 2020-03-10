@@ -35,4 +35,11 @@ interface IPerformanceFeeCalculator {
         external
         view
         returns (PerformanceFeeLibrary.FeeState memory);
+
+    function getCalculatedFees(
+        address _setAddress
+    )
+        external
+        view
+        returns (uint256, uint256);
 }

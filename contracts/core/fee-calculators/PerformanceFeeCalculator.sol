@@ -179,7 +179,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
     /**
      * Returns calculated streaming and profit fee.
      *
-     * @param  _setAddress          Address of Set to have feeState updated
+     * @param  _setAddress          Address of Set to get fees
      * @return  uint256             Streaming Fee
      * @return  uint256             Profit Fee
      */

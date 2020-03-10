@@ -824,6 +824,232 @@ contract('PerformanceFeeCalculator', accounts => {
     });
   });
 
+  describe('#getCalculatedFees', async () => {
+    let subjectIncreaseChainTime: BigNumber;
+
+    let rebalancingSetToken: RebalancingSetFeeMockContract;
+    let usdDenominated: boolean;
+    let updatedBTCPrice: BigNumber;
+    let updatedETHPrice: BigNumber;
+
+    let profitFeePeriod: BigNumber;
+    let highWatermarkResetPeriod: BigNumber;
+    let profitFeePercentage: BigNumber;
+    let streamingFeePercentage: BigNumber;
+
+    before(async () => {
+      usdDenominated = true;
+      updatedBTCPrice = ether(8000);
+      updatedETHPrice = ether(140);
+
+      profitFeePeriod = ONE_DAY_IN_SECONDS.mul(30);
+      highWatermarkResetPeriod = ONE_YEAR_IN_SECONDS;
+      profitFeePercentage = ether(.2);
+      streamingFeePercentage = ether(.02);
+    });
+
+    beforeEach(async () => {
+      const maxProfitFeePercentage = ether(.5);
+      const maxStreamingFeePercentage = ether(.1);
+      const oracleWhiteList = usdDenominated ? usdOracleWhiteList.address : ethOracleWhiteList.address;
+      feeCalculator = await feeCalculatorHelper.deployPerformanceFeeCalculatorAsync(
+        coreMock.address,
+        oracleWhiteList,
+        maxProfitFeePercentage,
+        maxStreamingFeePercentage
+      );
+
+      const set1Components = [wrappedETH.address, wrappedBTC.address];
+      const set1Units = [wrappedBTCPrice.div(wrappedETHPrice).mul(10 ** 12), new BigNumber(100)];
+      const set1NaturalUnit = new BigNumber(10 ** 12);
+      const set1 = await coreHelper.createSetTokenAsync(
+        coreMock,
+        setTokenFactory.address,
+        set1Components,
+        set1Units,
+        set1NaturalUnit,
+      );
+
+      rebalancingSetToken = await feeCalculatorHelper.deployRebalancingSetFeeMockAsync(
+        new BigNumber(1e6),
+        new BigNumber(1e6),
+        set1.address,
+        feeCalculator.address
+      );
+
+      await coreMock.addSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(ownerAccount));
+
+      const calculatorData = feeCalculatorHelper.generatePerformanceFeeCallData(
+        profitFeePeriod,
+        highWatermarkResetPeriod,
+        profitFeePercentage,
+        streamingFeePercentage
+      );
+
+      await rebalancingSetToken.initialize.sendTransactionAsync(calculatorData);
+
+      await usdWrappedBTCOracle.updatePrice.sendTransactionAsync(updatedBTCPrice);
+      await ethWrappedBTCOracle.updatePrice.sendTransactionAsync(
+        updatedBTCPrice.mul(ether(1)).div(updatedETHPrice).round(0, 3)
+      );
+
+      await usdWrappedETHOracle.updatePrice.sendTransactionAsync(updatedETHPrice);
+      await ethWrappedETHOracle.updatePrice.sendTransactionAsync(
+        updatedETHPrice.mul(ether(1)).div(updatedETHPrice).round(0, 3)
+      );
+
+      subjectIncreaseChainTime = ONE_YEAR_IN_SECONDS;
+    });
+
+    async function subject(): Promise<BigNumber[]> {
+      await blockchain.increaseTimeAsync(subjectIncreaseChainTime);
+      await blockchain.mineBlockAsync();
+      return feeCalculator.getCalculatedFees.callAsync(rebalancingSetToken.address);
+    }
+
+    it('returns the correct fees', async () => {
+      const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+      const [
+        actualStreamingFee,
+        actualProfitFee,
+      ] = await subject();
+
+      const lastBlock = await web3.eth.getBlock('latest');
+
+      const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+        rebalancingSetToken,
+        usdOracleWhiteList,
+      );
+      const expectedStreamingFee = feeCalculatorHelper.calculateAccruedStreamingFee(
+        feeState.streamingFeePercentage,
+        new BigNumber(lastBlock.timestamp).sub(feeState.lastStreamingFeeTimestamp)
+      );
+      const expectedProfitFee = feeCalculatorHelper.calculateAccruedProfitFeeAsync(
+        feeState,
+        rebalancingSetValue,
+        expectedStreamingFee
+      );
+
+      expect(actualStreamingFee).to.bignumber.equal(expectedStreamingFee);
+      expect(actualProfitFee).to.bignumber.equal(expectedProfitFee);
+    });
+
+    describe('when time since last profit fee does not exceed fee period', async () => {
+      beforeEach(async () => {
+        subjectIncreaseChainTime = ONE_DAY_IN_SECONDS.mul(15);
+      });
+
+      it('should return the correct fee', async () => {
+        const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+        const [
+          actualStreamingFee,
+          actualProfitFee,
+        ] = await subject();
+
+        const lastBlock = await web3.eth.getBlock('latest');
+
+        const expectedStreamingFee = feeCalculatorHelper.calculateAccruedStreamingFee(
+          feeState.streamingFeePercentage,
+          new BigNumber(lastBlock.timestamp).sub(feeState.lastStreamingFeeTimestamp)
+        );
+        const expectedProfitFee = ZERO;
+
+        expect(actualStreamingFee).to.bignumber.equal(expectedStreamingFee);
+        expect(actualProfitFee).to.bignumber.equal(expectedProfitFee);
+      });
+    });
+
+    describe('when current value does not exceed highWatermark', async () => {
+      before(async () => {
+        updatedBTCPrice = ether(6000);
+        updatedETHPrice = ether(128);
+      });
+
+      after(async () => {
+        updatedBTCPrice = ether(8000);
+        updatedETHPrice = ether(128);
+      });
+
+      it('should return the correct fee', async () => {
+        const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+        const [
+          actualStreamingFee,
+          actualProfitFee,
+        ] = await subject();
+
+        const lastBlock = await web3.eth.getBlock('latest');
+
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          usdOracleWhiteList,
+        );
+        const expectedStreamingFee = feeCalculatorHelper.calculateAccruedStreamingFee(
+          feeState.streamingFeePercentage,
+          new BigNumber(lastBlock.timestamp).sub(feeState.lastStreamingFeeTimestamp)
+        );
+        const expectedProfitFee = feeCalculatorHelper.calculateAccruedProfitFeeAsync(
+          feeState,
+          rebalancingSetValue,
+          expectedStreamingFee
+        );
+
+        expect(actualStreamingFee).to.bignumber.equal(expectedStreamingFee);
+        expect(actualProfitFee).to.bignumber.equal(expectedProfitFee);
+      });
+    });
+
+    describe('when value denominated in ETH', async () => {
+      before(async () => {
+        usdDenominated = false;
+      });
+
+      after(async () => {
+        usdDenominated = true;
+      });
+
+      it('should return the correct fee', async () => {
+        const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+        const [
+          actualStreamingFee,
+          actualProfitFee,
+        ] = await subject();
+
+        const lastBlock = await web3.eth.getBlock('latest');
+
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          ethOracleWhiteList,
+        );
+        const expectedStreamingFee = feeCalculatorHelper.calculateAccruedStreamingFee(
+          feeState.streamingFeePercentage,
+          new BigNumber(lastBlock.timestamp).sub(feeState.lastStreamingFeeTimestamp)
+        );
+        const expectedProfitFee = feeCalculatorHelper.calculateAccruedProfitFeeAsync(
+          feeState,
+          rebalancingSetValue,
+          expectedStreamingFee
+        );
+
+        expect(actualStreamingFee).to.bignumber.equal(expectedStreamingFee);
+        expect(actualProfitFee).to.bignumber.equal(expectedProfitFee);
+      });
+    });
+
+    describe('when caller is not enabled Set', async () => {
+      beforeEach(async () => {
+        coreMock.disableSet.sendTransactionAsync(rebalancingSetToken.address, txnFrom(ownerAccount));
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
   describe('#updateAndGetFee', async () => {
     let subjectIncreaseChainTime: BigNumber;
 

@@ -55,7 +55,7 @@ library Bytes32Library {
      * @param  data       Piece of data encoded as bytes32
      * @return string
      */
-    function c(bytes32 data)
+    function bytes32ToString(bytes32 data)
         external
         pure
         returns (string memory)

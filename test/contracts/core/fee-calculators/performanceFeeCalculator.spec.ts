@@ -33,6 +33,7 @@ import {
 } from '@utils/constants';
 import {
   getExpectedFeeActualizationLog,
+  getExpectedFeeAdjustmentLog,
   getExpectedFeeInitializationLog
 } from '@utils/contract_logs/performanceFeeCalculator';
 
@@ -523,8 +524,8 @@ contract('PerformanceFeeCalculator', accounts => {
       );
     });
 
-    async function subject(): Promise<any> {
-      await rebalancingSetToken.adjustFee.sendTransactionAsync(subjectNewFeeData);
+    async function subject(): Promise<string> {
+      return rebalancingSetToken.adjustFee.sendTransactionAsync(subjectNewFeeData);
     }
 
     it('sets the streaming fee percentage correctly', async () => {
@@ -532,6 +533,21 @@ contract('PerformanceFeeCalculator', accounts => {
 
       const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
       expect(feeState.streamingFeePercentage).to.be.bignumber.equal(newFeePercentage);
+    });
+
+    it('emits the correct FeeAdjustment log', async () => {
+      const txHash = await subject();
+
+      const expectedLogs = getExpectedFeeAdjustmentLog(
+        rebalancingSetToken.address,
+        feeType,
+        newFeePercentage,
+        feeCalculator.address
+      );
+
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the change is to the profitFee', async () => {

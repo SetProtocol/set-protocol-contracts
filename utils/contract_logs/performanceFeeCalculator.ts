@@ -46,3 +46,20 @@ export function getExpectedFeeInitializationLog(
     },
   }];
 }
+
+export function getExpectedFeeAdjustmentLog(
+  rebalancingSetToken: Address,
+  feeType: BigNumber,
+  newFeePercentage: BigNumber,
+  contractAddress: Address,
+): Log[] {
+  return [{
+    event: 'FeeAdjustment',
+    address: contractAddress,
+    args: {
+      rebalancingSetToken,
+      feeType,
+      newFeePercentage,
+    },
+  }];
+}

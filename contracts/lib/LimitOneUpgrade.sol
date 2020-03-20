@@ -36,19 +36,19 @@ contract LimitOneUpgrade is
 
     /* ============ Modifier ============ */
 
+    /**
+     * This modifier must be used in conjunction with timeLockUpgrade AND must be called before
+     * timeLockUpgrade is called. UpgradeAddress must also be part of the msg.data.
+     */
     modifier limitOneUpgrade(address _upgradeAddress) {
         if (timeLockPeriod > 0) {
             // Get upgradeHash
-            bytes32 upgradeHash = keccak256(
-                abi.encodePacked(
-                    msg.data
-                )
-            );
+            bytes32 upgradeHash = keccak256(msg.data);
             
             if (upgradeIdentifier[_upgradeAddress] != 0) {
                 // If upgrade hash has no record then revert since must be second upgrade
                 require(
-                    timeLockedUpgrades[upgradeHash] != 0,
+                    upgradeIdentifier[_upgradeAddress] == upgradeHash,
                     "Another update already in progress."
                 );
 
@@ -68,7 +68,6 @@ contract LimitOneUpgrade is
      * @param _upgradeAddress       The address of the trading pool being updated
      * @param _upgradeHash          Keccack256 hash that uniquely identifies function called and arguments
      */
-    /* ============ Internal ============ */
     function removeRegisteredUpgradeInternal(
         address _upgradeAddress,
         bytes32 _upgradeHash

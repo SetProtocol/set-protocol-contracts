@@ -67,6 +67,12 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         uint256 lastStreamingFeeTimestamp
     );
 
+    event FeeAdjustment(
+        address indexed rebalancingSetToken,
+        FeeType feeType,
+        uint256 newFeePercentage
+    );
+
     /* ============ Structs ============ */
 
     struct InitFeeParameters {
@@ -243,8 +249,8 @@ contract PerformanceFeeCalculator is IFeeCalculator {
             uint256 feePercentage
         ) = parseNewFeeCallData(_newFeeData);
 
-        // Since only two fee options and anything feeType integer passed that is not 0 or 1 will revert can
-        // make this a simple if...else... statement
+        // Since only two fee options and anything feeType integer passed that is not 0 or 1 will revert in
+        // parsing can make this a simple if...else... statement
         if (feeIdentifier == FeeType.StreamingFee) {
             validateStreamingFeePercentage(feePercentage);
 
@@ -254,6 +260,8 @@ contract PerformanceFeeCalculator is IFeeCalculator {
 
             feeState[msg.sender].profitFeePercentage = feePercentage;
         }
+
+        emit FeeAdjustment(msg.sender, feeIdentifier, feePercentage);
     }
 
     /* ============ Internal Functions ============ */
@@ -513,16 +521,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         pure
         returns (InitFeeParameters memory)
     {
-        InitFeeParameters memory parameters;
-
-        assembly {
-            mstore(parameters,           mload(add(_callData, 32)))   // profitFeePeriod
-            mstore(add(parameters, 32),  mload(add(_callData, 64)))   // highWatermarkResetPeriod
-            mstore(add(parameters, 64),  mload(add(_callData, 96)))   // profitFeePercentage
-            mstore(add(parameters, 96),  mload(add(_callData, 128)))  // streamingFeePercentage
-        }
-
-        return parameters;
+        return abi.decode (_callData, (InitFeeParameters));
     }
 
     /**
@@ -544,14 +543,16 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         pure
         returns (FeeType, uint256)
     {
-        FeeType feeType;
-        uint256 feePercentage;
+        (
+            uint8 feeType,
+            uint256 feePercentage
+        ) = abi.decode (_callData, (uint8, uint256));
 
-        assembly {
-            feeType := mload(add(_callData, 32))         // feeType
-            feePercentage := mload(add(_callData, 64))   // feePercentage
-        }
+        require(
+            feeType < 2,
+            "PerformanceFeeCalculator.parseNewFeeCallData: Fee type invalid"
+        );
 
-        return (feeType, feePercentage);
+        return (FeeType(feeType), feePercentage);
     }
 }

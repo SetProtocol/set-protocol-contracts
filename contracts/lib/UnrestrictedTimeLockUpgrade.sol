@@ -25,7 +25,7 @@ import { TimeLockUpgrade } from "./TimeLockUpgrade.sol";
  * @title UnrestrictedTimeLockUpgrade
  * @author Set Protocol
  *
- * The UnrestrictedTimeLockUpgrade contract contains a modifier for handling minimum time period updates not
+ * The UnrestrictedTimeLockUpgrade contract inherits a modifier for handling minimum time period updates not
  * limited to the owner of the contract. Also implements a removeTimeLockUpgrade internal function that can
  * be exposed by writing an external version into the contract it used in with the required modifiers to
  * restrict access.

@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 Set Labs Inc.
+    Copyright 2020 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,6 +17,13 @@
 pragma solidity 0.5.7;
 
 
+/**
+ * @title Bytes32Library
+ * @author Set Protocol
+ *
+ * As of version contracts 1.3.36-beta Bytes32Library is made external in order for library
+ * to be linked.
+ */
 library Bytes32Library {
     /**
      * Converts a bytes32 data structure into a bytes array.

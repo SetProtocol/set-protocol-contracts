@@ -17,8 +17,8 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { SocialTradingLibrary } from "set-protocol-strategies/contracts/managers/lib/SocialTradingLibrary.sol";
-import { ISocialAllocator } from "set-protocol-strategies/contracts/managers/allocators/ISocialAllocator.sol";
+import { SocialTradingLibrary } from "./SocialTradingLibrary.sol";
+import { ISocialAllocator } from "./ISocialAllocator.sol";
 
 import { IRebalancingSetTokenV2 } from "../../core/interfaces/IRebalancingSetTokenV2.sol";
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";

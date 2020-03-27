@@ -5,6 +5,7 @@
   "main": "dist/artifacts/index.js",
   "typings": "dist/typings/artifacts/index.d.ts",
   "files": [
+    "build",
     "dist",
     "contracts",
     "migrations",
@@ -97,7 +98,7 @@
     "lint-staged": "^7.2.0",
     "module-alias": "^2.1.0",
     "openzeppelin-solidity": "^2.2",
-    "set-protocol-oracles": "^1.0.12",
+    "set-protocol-oracles": "^1.0.13",
     "set-protocol-utils": "^1.1.2",
     "tiny-promisify": "^1.0.0",
     "truffle-flattener": "^1.4.0",

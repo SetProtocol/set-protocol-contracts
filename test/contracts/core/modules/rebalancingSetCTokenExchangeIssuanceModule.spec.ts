@@ -270,6 +270,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let baseSetComponent: StandardTokenMockContract;
     let baseSetComponent2: StandardTokenMockContract;
     let baseSetComponent3: StandardTokenMockContract;
+    let baseSetUnderlyingComponent: StandardTokenMockContract;
+    let baseSetUnderlyingComponent2: StandardTokenMockContract;
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
     let rebalancingSetToken: RebalancingSetTokenContract;
@@ -343,9 +345,9 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
       // Create non-wrapped Ether component tokens
       baseSetComponent = customBaseSetComponent || cUSDCInstance;
-      const baseSetUnderlyingComponent = customBaseSetUnderlying || usdcInstance;
+      baseSetUnderlyingComponent = customBaseSetUnderlying || usdcInstance;
       baseSetComponent2 = customBaseSetComponent2 || cDAIInstance;
-      const baseSetUnderlyingComponent2 = customBaseSetUnderlying2 || daiInstance;
+      baseSetUnderlyingComponent2 = customBaseSetUnderlying2 || daiInstance;
       baseSetComponent3 = customBaseSetComponent3 || await erc20Helper.deployTokenAsync(ownerAccount);
 
       // Create the Set (default is 4 components)
@@ -761,14 +763,17 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       });
 
       it('returns the user the leftover receive token amount', async () => {
-        const previousBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
-
+        const previousBalance = await baseSetUnderlyingComponent.balanceOf.callAsync(subjectCaller);
         await subject();
 
+        const underlyingMakerAssetAmount = await compoundHelper.cTokenToUnderlying(
+          baseSetComponent.address,
+          customZeroExReceiveTokenAmount
+        );
         const expectedOwnerBalance = previousBalance
                                        .add(customZeroExReceiveTokenAmount)
-                                       .sub(zeroExMakerAssetAmount);
-        const ownerBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
+                                       .sub(underlyingMakerAssetAmount);
+        const ownerBalance = await baseSetUnderlyingComponent.balanceOf.callAsync(subjectCaller);
 
         expect(ownerBalance).to.bignumber.equal(expectedOwnerBalance);
       });
@@ -943,6 +948,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let baseSetComponent: StandardTokenMockContract;
     let baseSetComponent2: StandardTokenMockContract;
     let baseSetComponent3: StandardTokenMockContract;
+    let baseSetUnderlyingComponent: StandardTokenMockContract;
+    let baseSetUnderlyingComponent2: StandardTokenMockContract;
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
     let rebalancingSetToken: RebalancingSetTokenContract;
@@ -1019,9 +1026,9 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
       // Create non-wrapped Ether component tokens
       baseSetComponent = customBaseSetComponent || cUSDCInstance;
-      const baseSetUnderlyingComponent = customBaseSetUnderlying || usdcInstance;
+      baseSetUnderlyingComponent = customBaseSetUnderlying || usdcInstance;
       baseSetComponent2 = customBaseSetComponent2 || cDAIInstance;
-      const baseSetUnderlyingComponent2 = customBaseSetUnderlying2 || daiInstance;
+      baseSetUnderlyingComponent2 = customBaseSetUnderlying2 || daiInstance;
       baseSetComponent3 = customBaseSetComponent3 || await erc20Helper.deployTokenAsync(ownerAccount);
 
       // Create cToken underlying send token
@@ -1454,14 +1461,17 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       });
 
       it('returns the user the leftover receive token amount', async () => {
-        const previousBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
-
+        const previousBalance = await baseSetUnderlyingComponent.balanceOf.callAsync(subjectCaller);
         await subject();
 
+        const underlyingMakerAssetAmount = await compoundHelper.cTokenToUnderlying(
+          baseSetComponent.address,
+          customZeroExReceiveTokenAmount
+        );
         const expectedOwnerBalance = previousBalance
                                        .add(customZeroExReceiveTokenAmount)
-                                       .sub(zeroExMakerAssetAmount);
-        const ownerBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
+                                       .sub(underlyingMakerAssetAmount);
+        const ownerBalance = await baseSetUnderlyingComponent.balanceOf.callAsync(subjectCaller);
 
         expect(ownerBalance).to.bignumber.equal(expectedOwnerBalance);
       });

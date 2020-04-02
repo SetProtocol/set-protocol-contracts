@@ -328,7 +328,6 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let zeroExOrder: ZeroExSignedFillOrder;
     let zeroExMakerAssetAmount: BigNumber;
     let zeroExTakerAssetAmount: BigNumber;
-    let nonCTokenZeroExMakerAssetAmount: BigNumber;
 
     let customZeroExReceiveTokenAmount: BigNumber;
 
@@ -538,7 +537,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       const nonCTokenMakerAsset = exchangeIssueReceiveTokens[2];
       const nonCTokenTakerAsset = exchangeIssueSendTokens[2];
 
-      nonCTokenZeroExMakerAssetAmount = customZeroExReceiveTokenAmount || exchangeIssueReceiveTokenAmounts[2];
+      const nonCTokenZeroExMakerAssetAmount = customZeroExReceiveTokenAmount || exchangeIssueReceiveTokenAmounts[2];
       const nonCTokenZeroExTakerAssetAmount = exchangeIssueSendTokenAmounts[2];
 
       const nonCTokenZeroExOrder = await setUtils.generateZeroExSignedFillOrder(
@@ -760,16 +759,16 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     describe('when the amount of receive token from trade exceeds receive token amount', async () => {
       before(async () => {
         // Amount exceeds any calculable quantity of component token
-        customZeroExReceiveTokenAmount = ether(10);
+        customZeroExReceiveTokenAmount = ether(11);
       });
 
-      it('returns the user the leftover receive token amount', async () => {
+      it('returns the user the leftover underlying token amount', async () => {
         const previousBalance = await baseSetUnderlyingComponent.balanceOf.callAsync(subjectCaller);
         await subject();
 
         const underlyingMakerAssetAmount = await compoundHelper.cTokenToUnderlying(
           baseSetComponent.address,
-          customZeroExReceiveTokenAmount
+          exchangeIssueReceiveTokenAmounts[0]
         );
         const expectedOwnerBalance = previousBalance
                                        .add(customZeroExReceiveTokenAmount)
@@ -785,7 +784,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
         const expectedOwnerBalance = previousBalance
                                        .add(customZeroExReceiveTokenAmount)
-                                       .sub(nonCTokenZeroExMakerAssetAmount);
+                                       .sub(exchangeIssueReceiveTokenAmounts[2]);
         const ownerBalance = await baseSetComponent3.balanceOf.callAsync(subjectCaller);
 
         expect(ownerBalance).to.bignumber.equal(expectedOwnerBalance);
@@ -1023,8 +1022,6 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let zeroExMakerAssetAmount: BigNumber;
     let zeroExTakerAssetAmount: BigNumber;
 
-    let nonCTokenZeroExMakerAssetAmount: BigNumber;
-
     let customZeroExReceiveTokenAmount: BigNumber;
 
     // ----------------------------------------------------------------------
@@ -1253,7 +1250,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       const nonCTokenMakerAsset = exchangeIssueReceiveTokens[2];
       const nonCTokenTakerAsset = exchangeIssueSendTokens[2];
 
-      nonCTokenZeroExMakerAssetAmount = customZeroExReceiveTokenAmount || exchangeIssueReceiveTokenAmounts[2];
+      const nonCTokenZeroExMakerAssetAmount = customZeroExReceiveTokenAmount || exchangeIssueReceiveTokenAmounts[2];
       const nonCTokenZeroExTakerAssetAmount = exchangeIssueSendTokenAmounts[2];
 
       const nonCTokenZeroExOrder = await setUtils.generateZeroExSignedFillOrder(
@@ -1472,7 +1469,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     describe('when the amount of receive token from trade exceeds receive token amount', async () => {
       before(async () => {
         // Amount exceeds any calculable quantity of component token
-        customZeroExReceiveTokenAmount = ether(10);
+        customZeroExReceiveTokenAmount = ether(11);
       });
 
       it('returns the user the leftover underlying token amount', async () => {
@@ -1481,7 +1478,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
         const underlyingMakerAssetAmount = await compoundHelper.cTokenToUnderlying(
           baseSetComponent.address,
-          customZeroExReceiveTokenAmount
+          exchangeIssueReceiveTokenAmounts[0]
         );
         const expectedOwnerBalance = previousBalance
                                        .add(customZeroExReceiveTokenAmount)
@@ -1497,7 +1494,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
         const expectedOwnerBalance = previousBalance
                                        .add(customZeroExReceiveTokenAmount)
-                                       .sub(nonCTokenZeroExMakerAssetAmount);
+                                       .sub(exchangeIssueReceiveTokenAmounts[2]);
         const ownerBalance = await baseSetComponent3.balanceOf.callAsync(subjectCaller);
 
         expect(ownerBalance).to.bignumber.equal(expectedOwnerBalance);

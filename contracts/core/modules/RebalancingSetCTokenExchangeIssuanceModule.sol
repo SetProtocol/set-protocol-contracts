@@ -86,6 +86,62 @@ contract RebalancingSetCTokenExchangeIssuanceModule is
     /* ============ Private Functions ============ */
 
     /**
+     * Withdraw any base Set components to the user in the vault owned by the contract. If component is a 
+     * supported cToken, calculate underlying quantity in vault and return to the caller. Note: there may be 
+     * excess cTokens so we flush underlying in addition to the cToken component. 
+    `*
+     * This function overrides returnExcessComponentsFromVault from TokenFlush
+     *
+     * @param _baseSetToken               Instance of the Base SetToken
+     * @param _returnAddress              The address to send excess tokens to
+     */
+    function returnExcessComponentsFromVault(
+        ISetToken _baseSetToken,
+        address _returnAddress
+    )
+        internal
+    {
+        // Return base Set components
+        address[] memory baseSetComponents = _baseSetToken.getComponents();
+        for (uint256 i = 0; i < baseSetComponents.length; i++) {
+            address currentComponentAddress = baseSetComponents[i];
+
+            address underlyingAddress = cTokenWhiteList.whitelist(currentComponentAddress);
+            uint256 vaultQuantity = vaultInstance.getOwnerBalance(currentComponentAddress, address(this));
+
+            // Check if component is a cToken and quantity is greater than 0
+            if (underlyingAddress != address(0)) {
+                // Get balance of underlying in vault
+                uint256 underlyingVaultQuantity = vaultInstance.getOwnerBalance(
+                    underlyingAddress,
+                    address(this)
+                );
+
+                // Check if underlying token quantity greater than 0, and return underlying from vault
+                if (underlyingVaultQuantity > 0) {
+                    coreInstance.withdrawModule(
+                        address(this),
+                        _returnAddress,
+                        underlyingAddress,
+                        underlyingVaultQuantity
+                    );
+                }
+            }
+
+            // Check if base Set components in vault is greater than 0.
+            if (vaultQuantity > 0) {
+                // Return the unexchanged components (including cToken components) from vault to the caller
+                coreInstance.withdrawModule(
+                    address(this),
+                    _returnAddress,
+                    currentComponentAddress,
+                    vaultQuantity
+                );
+            }
+        }         
+    }
+
+    /**
      * Withdraw any base Set components to the user from the contract. If component is a supported cToken,
      * calculate underlying quantity and return to the caller
      *

@@ -328,6 +328,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let zeroExOrder: ZeroExSignedFillOrder;
     let zeroExMakerAssetAmount: BigNumber;
     let zeroExTakerAssetAmount: BigNumber;
+    let nonCTokenZeroExMakerAssetAmount: BigNumber;
 
     let customZeroExReceiveTokenAmount: BigNumber;
 
@@ -537,7 +538,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       const nonCTokenMakerAsset = exchangeIssueReceiveTokens[2];
       const nonCTokenTakerAsset = exchangeIssueSendTokens[2];
 
-      const nonCTokenZeroExMakerAssetAmount = exchangeIssueReceiveTokenAmounts[2];
+      nonCTokenZeroExMakerAssetAmount = customZeroExReceiveTokenAmount || exchangeIssueReceiveTokenAmounts[2];
       const nonCTokenZeroExTakerAssetAmount = exchangeIssueSendTokenAmounts[2];
 
       const nonCTokenZeroExOrder = await setUtils.generateZeroExSignedFillOrder(
@@ -784,7 +785,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
         const expectedOwnerBalance = previousBalance
                                        .add(customZeroExReceiveTokenAmount)
-                                       .sub(zeroExMakerAssetAmount);
+                                       .sub(nonCTokenZeroExMakerAssetAmount);
         const ownerBalance = await baseSetComponent3.balanceOf.callAsync(subjectCaller);
 
         expect(ownerBalance).to.bignumber.equal(expectedOwnerBalance);
@@ -1022,6 +1023,8 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
     let zeroExMakerAssetAmount: BigNumber;
     let zeroExTakerAssetAmount: BigNumber;
 
+    let nonCTokenZeroExMakerAssetAmount: BigNumber;
+
     let customZeroExReceiveTokenAmount: BigNumber;
 
     // ----------------------------------------------------------------------
@@ -1250,7 +1253,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       const nonCTokenMakerAsset = exchangeIssueReceiveTokens[2];
       const nonCTokenTakerAsset = exchangeIssueSendTokens[2];
 
-      const nonCTokenZeroExMakerAssetAmount = exchangeIssueReceiveTokenAmounts[2];
+      nonCTokenZeroExMakerAssetAmount = customZeroExReceiveTokenAmount || exchangeIssueReceiveTokenAmounts[2];
       const nonCTokenZeroExTakerAssetAmount = exchangeIssueSendTokenAmounts[2];
 
       const nonCTokenZeroExOrder = await setUtils.generateZeroExSignedFillOrder(
@@ -1494,7 +1497,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
         const expectedOwnerBalance = previousBalance
                                        .add(customZeroExReceiveTokenAmount)
-                                       .sub(zeroExMakerAssetAmount);
+                                       .sub(nonCTokenZeroExMakerAssetAmount);
         const ownerBalance = await baseSetComponent3.balanceOf.callAsync(subjectCaller);
 
         expect(ownerBalance).to.bignumber.equal(expectedOwnerBalance);

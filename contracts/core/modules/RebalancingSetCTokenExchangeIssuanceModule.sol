@@ -88,7 +88,9 @@ contract RebalancingSetCTokenExchangeIssuanceModule is
     /**
      * Withdraw any base Set components to the user in the vault owned by the contract. If component is a 
      * supported cToken, calculate underlying quantity in vault and return to the caller. Note: there may be 
-     * excess cTokens so we flush underlying in addition to the cToken component.
+     * excess cTokens so we flush underlying in addition to the cToken component. 
+    `*
+     * This function overrides returnExcessComponentsFromVault from TokenFlush
      *
      * @param _baseSetToken               Instance of the Base SetToken
      * @param _returnAddress              The address to send excess tokens to
@@ -128,7 +130,7 @@ contract RebalancingSetCTokenExchangeIssuanceModule is
 
             // Check if base Set components in vault is greater than 0.
             if (vaultQuantity > 0) {
-                // Return the unexchanged non cToken components from vault to the caller
+                // Return the unexchanged components (including cToken components) from vault to the caller
                 coreInstance.withdrawModule(
                     address(this),
                     _returnAddress,

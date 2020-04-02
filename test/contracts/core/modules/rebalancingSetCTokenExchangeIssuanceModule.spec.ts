@@ -777,6 +777,18 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
         expect(ownerBalance).to.bignumber.equal(expectedOwnerBalance);
       });
+
+      it('returns the user the leftover base component token amount', async () => {
+        const previousBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
+        await subject();
+
+        const expectedOwnerBalance = previousBalance
+                                       .add(customZeroExReceiveTokenAmount)
+                                       .sub(zeroExMakerAssetAmount);
+        const ownerBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
+
+        expect(ownerBalance).to.bignumber.equal(expectedOwnerBalance);
+      });
     });
 
     describe('when the wrapper does not have enough allowance to transfer weth', async () => {
@@ -1460,7 +1472,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
         customZeroExReceiveTokenAmount = ether(10);
       });
 
-      it('returns the user the leftover receive token amount', async () => {
+      it('returns the user the leftover underlying token amount', async () => {
         const previousBalance = await baseSetUnderlyingComponent.balanceOf.callAsync(subjectCaller);
         await subject();
 
@@ -1472,6 +1484,18 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
                                        .add(customZeroExReceiveTokenAmount)
                                        .sub(underlyingMakerAssetAmount);
         const ownerBalance = await baseSetUnderlyingComponent.balanceOf.callAsync(subjectCaller);
+
+        expect(ownerBalance).to.bignumber.equal(expectedOwnerBalance);
+      });
+
+      it('returns the user the leftover base component token amount', async () => {
+        const previousBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
+        await subject();
+
+        const expectedOwnerBalance = previousBalance
+                                       .add(customZeroExReceiveTokenAmount)
+                                       .sub(zeroExMakerAssetAmount);
+        const ownerBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
 
         expect(ownerBalance).to.bignumber.equal(expectedOwnerBalance);
       });

@@ -87,7 +87,8 @@ contract RebalancingSetCTokenExchangeIssuanceModule is
 
     /**
      * Withdraw any base Set components to the user in the vault owned by the contract. If component is a 
-     * supported cToken, calculate underlying quantity and return to the caller
+     * supported cToken, calculate underlying quantity in vault and return to the caller. Note: there may be 
+     * excess cTokens so we flush underlying in addition to the cToken component.
      *
      * @param _baseSetToken               Instance of the Base SetToken
      * @param _returnAddress              The address to send excess tokens to
@@ -106,6 +107,7 @@ contract RebalancingSetCTokenExchangeIssuanceModule is
             address underlyingAddress = cTokenWhiteList.whitelist(currentComponentAddress);
             uint256 vaultQuantity = vaultInstance.getOwnerBalance(currentComponentAddress, address(this));
 
+            // Check if component is a cToken and quantity is greater than 0
             if (underlyingAddress != address(0)) {
                 // Get balance of underlying in vault
                 uint256 underlyingVaultQuantity = vaultInstance.getOwnerBalance(
@@ -122,17 +124,17 @@ contract RebalancingSetCTokenExchangeIssuanceModule is
                         underlyingVaultQuantity
                     );
                 }
-            } else {
-                // Check if non cToken component quantity in vault is greater than 0
-                if (vaultQuantity > 0) {
-                    // Return the unexchanged non cToken components from vault to the caller
-                    coreInstance.withdrawModule(
-                        address(this),
-                        _returnAddress,
-                        currentComponentAddress,
-                        vaultQuantity
-                    );
-                }
+            }
+
+            // Check if base Set components in vault is greater than 0.
+            if (vaultQuantity > 0) {
+                // Return the unexchanged non cToken components from vault to the caller
+                coreInstance.withdrawModule(
+                    address(this),
+                    _returnAddress,
+                    currentComponentAddress,
+                    vaultQuantity
+                );
             }
         }         
     }

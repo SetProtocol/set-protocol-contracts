@@ -756,7 +756,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
       });
     });
 
-    describe.only('when the amount of receive token from trade exceeds receive token amount', async () => {
+    describe('when the amount of receive token from trade exceeds receive token amount', async () => {
       before(async () => {
         // Amount exceeds any calculable quantity of component token
         customZeroExReceiveTokenAmount = ether(10);

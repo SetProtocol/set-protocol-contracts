@@ -16,6 +16,9 @@ const getFiles = async (dir) => {
 const generatedTypePath = join(__dirname, "../types/generated");
 const contractPath = join(__dirname, "../contracts");
 
+console.log("Fixing paths in types/generated: fix-generated-type-paths");
+
+let finished = false;
 getFiles(contractPath).then((contractFiles) => {
   const contractMapping = {};
   contractFiles.forEach(file => {
@@ -49,7 +52,14 @@ getFiles(contractPath).then((contractFiles) => {
         }
       }
     });
-
+    finished = true;
   });
 });
-// console.log(await getFiles(contractPath));
+
+(function wait() {
+   if (!finished) {
+     setTimeout(wait, 1000);
+   } else {
+     console.log("Finished fixing generated type paths");
+   }
+})();

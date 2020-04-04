@@ -47,17 +47,16 @@ fi
 # interacting with the artifacts significantly easier when exporting
 # them as modules.
 for filename in build/contracts/*.json; do
-    filename_base=$(basename $filename .json)
+  filename_base=$(basename $filename .json)
 
-    # Extract out the folder name to keep the folder structure of own contracts folder
-    regex="\"sourcePath\":[[:space:]]\".+contracts\/([a-zA-Z_0-9\/\-]+)\/.+\.sol\""
-    json=$(<build/contracts/$filename_base.json)
-    if [[ $json =~ $regex ]]
-    then
-      folder="${BASH_REMATCH[1]}"
-      # echo $folder
-      mkdir -p "artifacts/ts/$folder"
-    fi
+  # Extract out the folder name to keep the folder structure of own contracts folder
+  regex="\"sourcePath\": \"[a-zA-Z_0-9\/\-]+\/set-protocol-contracts\/contracts\/([a-zA-Z_0-9\/\-]+)\/.+\.sol\""
+  json=$(<build/contracts/$filename_base.json)
+  if [[ $json =~ $regex ]]
+  then
+    folder="${BASH_REMATCH[1]}"
+    # echo $folder
+    mkdir -p "artifacts/ts/$folder"
 
     filename_base=$(basename $filename .json)
     new_file="artifacts/ts/$folder/$filename_base.ts"
@@ -69,6 +68,13 @@ for filename in build/contracts/*.json; do
     echo -e "export { $filename_base } from \"./ts/$folder/$filename_base\"; // THIS LINE IS AUTO-GENERATED" | cat - artifacts/index.ts > temp && mv temp artifacts/index.ts
 
     echo -e "Transpiled $filename_base.json into $new_file"
+  else
+    filename_base=$(basename $filename .json)
+    new_file="artifacts/ts/$filename_base.ts"
+
+    echo -e "export const $filename_base = " > $new_file
+    cat "build/contracts/$filename_base.json" >> $new_file
+  fi
 done
 
 echo -e "Successfully deployed contracts onto Development Testnet!"

@@ -50,6 +50,8 @@ for filename in build/contracts/*.json; do
   filename_base=$(basename $filename .json)
 
   # Extract out the folder name to keep the folder structure of own contracts folder
+
+  # IMPORTANT: CHANGE THE REPO NAME IN REGEX IF CHANGING TO ANOTHER REPO: set-protocol-contracts
   regex="\"sourcePath\": \"[a-zA-Z_0-9\/\-]+\/set-protocol-contracts\/contracts\/([a-zA-Z_0-9\/\-]+)\/.+\.sol\""
   json=$(<build/contracts/$filename_base.json)
   if [[ $json =~ $regex ]]

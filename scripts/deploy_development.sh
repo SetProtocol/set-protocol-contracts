@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # NOTE: This script is intended for use by external repos that depend
 #   on the Set Protocol smart contracts in any capacity. To deploy the Set Protocol
 #   smart contracts on your local blockchain environment,
@@ -31,19 +33,42 @@ mkdir artifacts/json
 cp build/contracts/* artifacts/json/
 
 # Remove old transpiled artifacts from the artifacts/ directory
-rm artifacts/ts/*
+rm -rf artifacts/ts/*
 
-
+# Replace the auto-generated lines in the index.ts file
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # Mac OSX
+  [ -f "artifacts/index.ts" ] && sed -i '' '/AUTO-GENERATED$/d' artifacts/index.ts
+else
+  [ -f "artifacts/index.ts" ] && sed -i '/AUTO-GENERATED$/d' artifacts/index.ts
+fi
 
 # Transform raw JSON artifacts into Typescript modules.  This makes
 # interacting with the artifacts significantly easier when exporting
 # them as modules.
 for filename in build/contracts/*.json; do
     filename_base=$(basename $filename .json)
-    echo -e "export const $filename_base = " > "artifacts/ts/$filename_base.ts"
-    cat "build/contracts/$filename_base.json" >> "artifacts/ts/$filename_base.ts"
 
-    echo -e "Transpiled $filename_base.json into $filename_base.ts"
+    # Extract out the folder name to keep the folder structure of own contracts folder
+    regex="\"sourcePath\":[[:space:]]\".+contracts\/([a-zA-Z_0-9\/\-]+)\/.+\.sol\""
+    json=$(<build/contracts/$filename_base.json)
+    if [[ $json =~ $regex ]]
+    then
+      folder="${BASH_REMATCH[1]}"
+      # echo $folder
+      mkdir -p "artifacts/ts/$folder"
+    fi
+
+    filename_base=$(basename $filename .json)
+    new_file="artifacts/ts/$folder/$filename_base.ts"
+
+    echo -e "export const $filename_base = " > $new_file
+    cat "build/contracts/$filename_base.json" >> $new_file
+
+    # Add export lines to artifacts/index.ts
+    echo -e "export { $filename_base } from \"./ts/$folder/$filename_base\"; // THIS LINE IS AUTO-GENERATED" | cat - artifacts/index.ts > temp && mv temp artifacts/index.ts
+
+    echo -e "Transpiled $filename_base.json into $new_file"
 done
 
 echo -e "Successfully deployed contracts onto Development Testnet!"

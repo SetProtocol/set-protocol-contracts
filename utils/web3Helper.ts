@@ -67,7 +67,7 @@ export const importArtifactsFromSource = (contractName: string) => {
   } catch (e) {}
 
   try {
-    const data = require('set-protocol-contracts/dist/artifacts/ts/' + contractName + '.js')[contractName];
+    const data = require('set-protocol-contracts')[contractName];
     instance = contract(data);
     instance.setProvider(web3.currentProvider);
 
@@ -75,7 +75,7 @@ export const importArtifactsFromSource = (contractName: string) => {
   } catch (e) {}
 
   try {
-    const filePath = 'set-protocol-contracts-' + version + '/dist/artifacts/ts/' + contractName + '.js';
+    const filePath = 'set-protocol-contracts-' + version;
     const data = require(filePath)[contractName];
     instance = contract(data);
     instance.setProvider(web3.currentProvider);

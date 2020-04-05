@@ -27,7 +27,7 @@
     "delete-dev-addresses": "jq 'del(.development)' ./deployments/outputs.json > outputs.tmp && mv outputs.tmp ./deployments/outputs.json && bash scripts/generate_outputs.sh && git add .",
     "deploy-development": "bash scripts/deploy_development.sh",
     "dist": "yarn setup && bash scripts/prepare_dist.sh",
-    "generate-typings": "set-abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache'",
+    "generate-typings": "set-abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache' && node scripts/fix-generated-type-paths.js",
     "lint": "yarn run lint-sol && yarn run lint-ts",
     "lint-sol": "solium -d contracts/",
     "lint-ts": "tslint -c tslint.json -p tsconfig.json --fix test/**/*.ts utils/**/*.ts",

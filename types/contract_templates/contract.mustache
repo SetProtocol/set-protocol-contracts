@@ -55,7 +55,7 @@ export class {{contractName}}Contract extends BaseContract {
   static async deployed(web3: Web3, defaults: Tx): Promise<{{contractName}}Contract> {
     const web3Utils = new Web3Utils(web3);
     const currentNetwork = await web3Utils.getNetworkIdAsync();
-    const { abi, networks }: { abi: any[]; networks: any } = require('../../artifacts/ts/{{contractName}}.js').{{contractName}};
+    const { abi, networks }: { abi: any[]; networks: any } = require('../../artifacts/ts/{{contractName}}').{{contractName}};
     const web3ContractInstance = new web3.eth.Contract(abi, networks[currentNetwork].address);
 
     return new {{contractName}}Contract(web3ContractInstance, defaults);
@@ -65,7 +65,7 @@ export class {{contractName}}Contract extends BaseContract {
     web3: Web3,
     defaults: Tx,
   ): Promise<{{contractName}}Contract> {
-    const { abi }: { abi: any[] } = require('../../artifacts/ts/{{contractName}}.js').{{contractName}};
+    const { abi }: { abi: any[] } = require('../../artifacts/ts/{{contractName}}').{{contractName}};
     const web3Utils = new Web3Utils(web3);
     const contractExists = await web3Utils.doesContractExistAtAddressAsync(address);
     const currentNetwork = await web3Utils.getNetworkIdAsync();

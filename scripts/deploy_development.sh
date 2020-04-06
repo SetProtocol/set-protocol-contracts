@@ -35,48 +35,20 @@ cp build/contracts/* artifacts/json/
 # Remove old transpiled artifacts from the artifacts/ directory
 rm -rf artifacts/ts/*
 
-# Replace the auto-generated lines in the index.ts file
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  # Mac OSX
-  [ -f "artifacts/index.ts" ] && sed -i '' '/AUTO-GENERATED$/d' artifacts/index.ts
-else
-  [ -f "artifacts/index.ts" ] && sed -i '/AUTO-GENERATED$/d' artifacts/index.ts
-fi
-
 # Transform raw JSON artifacts into Typescript modules.  This makes
 # interacting with the artifacts significantly easier when exporting
 # them as modules.
 for filename in build/contracts/*.json; do
   filename_base=$(basename $filename .json)
 
-  # Extract out the folder name to keep the folder structure of own contracts folder
+  filename_base=$(basename $filename .json)
+  new_file="artifacts/ts/$filename_base.ts"
 
-  # IMPORTANT: CHANGE THE REPO NAME IN REGEX IF CHANGING TO ANOTHER REPO: set-protocol-contracts
-  regex="\"sourcePath\": \"[a-zA-Z_0-9\/\-]+\/set-protocol-contracts\/contracts\/([a-zA-Z_0-9\/\-]+)\/.+\.sol\""
-  json=$(<build/contracts/$filename_base.json)
-  if [[ $json =~ $regex ]]
-  then
-    folder="${BASH_REMATCH[1]}"
-    # echo $folder
-    mkdir -p "artifacts/ts/$folder"
+  echo -e "export const $filename_base = " > $new_file
+  cat "build/contracts/$filename_base.json" >> $new_file
 
-    filename_base=$(basename $filename .json)
-    new_file="artifacts/ts/$folder/$filename_base.ts"
-
-    echo -e "export const $filename_base = " > $new_file
-    cat "build/contracts/$filename_base.json" >> $new_file
-
-    # Add export lines to artifacts/index.ts
-    echo -e "export { $filename_base } from \"./ts/$folder/$filename_base\"; // THIS LINE IS AUTO-GENERATED" | cat - artifacts/index.ts > temp && mv temp artifacts/index.ts
-
-    echo -e "Transpiled $filename_base.json into $new_file"
-  else
-    filename_base=$(basename $filename .json)
-    new_file="artifacts/ts/$filename_base.ts"
-
-    echo -e "export const $filename_base = " > $new_file
-    cat "build/contracts/$filename_base.json" >> $new_file
-  fi
+  # Add export lines to artifacts/ts/index.ts so types will works
+  echo -e "export { $filename_base } from \"./$filename_base\";" >> artifacts/ts/index.ts
 done
 
 echo -e "Successfully deployed contracts onto Development Testnet!"

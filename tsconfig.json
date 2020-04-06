@@ -22,6 +22,8 @@
     "esModuleInterop": true
   },
   "include": [
+    "artifacts/*.ts",
+    "artifacts/ts/*.ts",
     "types/*.ts",
     "utils/**/*.ts",
     "test/**/*.ts"

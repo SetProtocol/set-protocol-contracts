@@ -46,6 +46,9 @@ for filename in build/contracts/*.json; do
 
   echo -e "export const $filename_base = " > $new_file
   cat "build/contracts/$filename_base.json" >> $new_file
+
+  # Add export lines to artifacts/ts/index.ts so types will works
+  echo -e "export { $filename_base } from \"./$filename_base\";" >> artifacts/ts/index.ts
 done
 
 echo -e "Successfully deployed contracts onto Development Testnet!"

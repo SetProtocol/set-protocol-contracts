@@ -1,11 +1,7 @@
 import { Address } from 'set-protocol-utils';
 import * as _ from 'lodash';
 import {
-  CommonValidationsLibraryMockContract,
   CoreContract,
-  Bytes32LibraryMockContract,
-  CommonMathMockContract,
-  CompoundUtilsMockContract,
   CoreIssuanceLibraryMockContract,
   ERC20WrapperMockContract,
   ExchangeIssuanceLibraryMockContract,
@@ -30,12 +26,6 @@ import {
 } from '../web3Helper';
 import { ZERO } from '../constants';
 
-const Bytes32Library = importArtifactsFromSource('Bytes32Library');
-const Bytes32LibraryMock = importArtifactsFromSource('Bytes32LibraryMock');
-const CommonMathMock = importArtifactsFromSource('CommonMathMock');
-const CommonValidationsLibrary = importArtifactsFromSource('CommonValidationsLibrary');
-const CommonValidationsLibraryMock = importArtifactsFromSource('CommonValidationsLibraryMock');
-const CompoundUtilsMock = importArtifactsFromSource('CompoundUtilsMock');
 const CoreIssuanceLibrary = importArtifactsFromSource('CoreIssuanceLibrary');
 const CoreIssuanceLibraryMock = importArtifactsFromSource('CoreIssuanceLibraryMock');
 const ERC20Wrapper = importArtifactsFromSource('ERC20Wrapper');
@@ -61,47 +51,6 @@ export class LibraryMockHelper {
   }
 
   /* ============ Deployment ============ */
-
-  public async deployCommonValidationsLibraryAsync(
-    from: Address = this._contractOwnerAddress
-  ): Promise<CommonValidationsLibraryMockContract> {
-    await linkLibrariesToDeploy(CommonValidationsLibraryMock, [CommonValidationsLibrary], this._contractOwnerAddress);
-
-    const commonValidationsMockContract = await CommonValidationsLibraryMock.new(txnFrom(from));
-
-    return new CommonValidationsLibraryMockContract(
-      getContractInstance(commonValidationsMockContract),
-      txnFrom(from),
-    );
-  }
-
-  public async deployBytes32LibraryAsync(
-    from: Address = this._contractOwnerAddress
-  ): Promise<Bytes32LibraryMockContract> {
-    await linkLibrariesToDeploy(Bytes32LibraryMock, [Bytes32Library], this._contractOwnerAddress);
-    const bytes32MockContract = await Bytes32LibraryMock.new(txnFrom(from));
-
-    return new Bytes32LibraryMockContract(getContractInstance(bytes32MockContract), txnFrom(from));
-  }
-
-  public async deployCommonMathLibraryAsync(
-    from: Address = this._contractOwnerAddress
-  ): Promise<CommonMathMockContract> {
-    const truffleCommonMathLibrary = await CommonMathMock.new(txnFrom(from));
-
-    return new CommonMathMockContract(
-      getContractInstance(truffleCommonMathLibrary),
-      txnFrom(from),
-    );
-  }
-
-  public async deployCompoundUtilsLibraryMockAsync(
-    from: Address = this._contractOwnerAddress
-  ): Promise<CompoundUtilsMockContract> {
-    const compoundUtilsMockContract = await CompoundUtilsMock.new(txnFrom(from));
-
-    return new CompoundUtilsMockContract(getContractInstance(compoundUtilsMockContract), txnFrom(from));
-  }
 
   public async deployCoreIssuanceLibraryAsync(
     from: Address = this._contractOwnerAddress
@@ -207,6 +156,7 @@ export class LibraryMockHelper {
       txnFrom(from),
     );
   }
+
 
   public async deploySetMathAsync(
     from: Address = this._contractOwnerAddress

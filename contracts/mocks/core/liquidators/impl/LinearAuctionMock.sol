@@ -2,9 +2,9 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
+import { CommonMath } from "set-protocol-contract-utils/contracts/lib/CommonMath.sol";
 
 import { Auction } from "../../../../core/liquidators/impl/Auction.sol";
-import { CommonMath } from "../../../../lib/CommonMath.sol";
 import { LinearAuction } from "../../../../core/liquidators/impl/LinearAuction.sol";
 import { IOracleWhiteList } from "../../../../core/interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../../../core/interfaces/ISetToken.sol";

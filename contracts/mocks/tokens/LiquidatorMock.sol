@@ -19,12 +19,12 @@ pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { AddressArrayUtils } from "set-protocol-contract-utils/contracts/lib/AddressArrayUtils.sol";
 
 import { ISetToken } from "../../core/interfaces/ISetToken.sol";
 import { ILiquidator } from "../../core/interfaces/ILiquidator.sol";
 import { Rebalance } from "../../core/lib/Rebalance.sol";
 import { RebalancingLibrary } from "../../core/lib/RebalancingLibrary.sol";
-import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
 
 /**
  * @title LiquidatorMock

@@ -17,8 +17,8 @@
 pragma solidity 0.5.7;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { AddressArrayUtils } from "set-protocol-contract-utils/contracts/lib/AddressArrayUtils.sol";
 
-import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
 import { ERC20Wrapper } from "../../../lib/ERC20Wrapper.sol";
 import { IRebalancingSetToken } from "../../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";

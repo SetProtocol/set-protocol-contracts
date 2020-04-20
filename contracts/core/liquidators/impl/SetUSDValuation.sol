@@ -20,9 +20,9 @@ pragma experimental "ABIEncoderV2";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { AddressArrayUtils } from "set-protocol-contract-utils/contracts/lib/AddressArrayUtils.sol";
 import { IOracle } from "set-protocol-oracles/contracts/meta-oracles/interfaces/IOracle.sol";
 
-import { AddressArrayUtils } from "../../../lib/AddressArrayUtils.sol";
 import { ICore } from "../../interfaces/ICore.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { IRebalancingSetTokenV2 } from "../../interfaces/IRebalancingSetTokenV2.sol";

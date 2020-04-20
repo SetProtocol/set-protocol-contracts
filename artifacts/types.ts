@@ -7,15 +7,11 @@ export { BackwardCompatibility } from "./ts/BackwardCompatibility";
 export { BadCTokenMock } from "./ts/BadCTokenMock";
 export { BadTokenMock } from "./ts/BadTokenMock";
 export { Bytes32Library } from "./ts/Bytes32Library";
-export { Bytes32LibraryMock } from "./ts/Bytes32LibraryMock";
 export { CTokenExchangeIssuanceModule } from "./ts/CTokenExchangeIssuanceModule";
 export { CTokenWhiteListed } from "./ts/CTokenWhiteListed";
 export { CommonMath } from "./ts/CommonMath";
-export { CommonMathMock } from "./ts/CommonMathMock";
 export { CommonValidationsLibrary } from "./ts/CommonValidationsLibrary";
-export { CommonValidationsLibraryMock } from "./ts/CommonValidationsLibraryMock";
 export { CompoundUtils } from "./ts/CompoundUtils";
-export { CompoundUtilsMock } from "./ts/CompoundUtilsMock";
 export { ConstantAuctionPriceCurve } from "./ts/ConstantAuctionPriceCurve";
 export { Core } from "./ts/Core";
 export { CoreAccounting } from "./ts/CoreAccounting";
@@ -97,8 +93,6 @@ export { LibEIP712 } from "./ts/LibEIP712";
 export { LibExchangeErrors } from "./ts/LibExchangeErrors";
 export { LibFillResults } from "./ts/LibFillResults";
 export { LibOrder } from "./ts/LibOrder";
-export { LimitOneUpgrade } from "./ts/LimitOneUpgrade";
-export { LimitOneUpgradeMock } from "./ts/LimitOneUpgradeMock";
 export { LinearAuction } from "./ts/LinearAuction";
 export { LinearAuctionLiquidator } from "./ts/LinearAuctionLiquidator";
 export { LinearAuctionMock } from "./ts/LinearAuctionMock";
@@ -162,16 +156,12 @@ export { StandardTokenMock } from "./ts/StandardTokenMock";
 export { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
 export { StartRebalanceLibrary } from "./ts/StartRebalanceLibrary";
 export { TimeLockUpgrade } from "./ts/TimeLockUpgrade";
-export { TimeLockUpgradeMock } from "./ts/TimeLockUpgradeMock";
 export { TimeLockUpgradeV2 } from "./ts/TimeLockUpgradeV2";
-export { TimeLockUpgradeV2Mock } from "./ts/TimeLockUpgradeV2Mock";
 export { TokenFlush } from "./ts/TokenFlush";
 export { TokenFlushMock } from "./ts/TokenFlushMock";
 export { TransferProxy } from "./ts/TransferProxy";
 export { TwoAssetPriceBoundedLinearAuction } from "./ts/TwoAssetPriceBoundedLinearAuction";
 export { TwoAssetPriceBoundedLinearAuctionMock } from "./ts/TwoAssetPriceBoundedLinearAuctionMock";
-export { UnrestrictedTimeLockUpgrade } from "./ts/UnrestrictedTimeLockUpgrade";
-export { UnrestrictedTimeLockUpgradeMock } from "./ts/UnrestrictedTimeLockUpgradeMock";
 export { UpdatableConstantAuctionPriceCurve } from "./ts/UpdatableConstantAuctionPriceCurve";
 export { Vault } from "./ts/Vault";
 export { WETH9 } from "./ts/WETH9";
@@ -189,11 +179,7 @@ export {
   BadTokenMockContract,
   BaseContract,
   Bytes32LibraryContract,
-  Bytes32LibraryMockContract,
-  CommonMathMockContract,
   CommonValidationsLibraryContract,
-  CommonValidationsLibraryMockContract,
-  CompoundUtilsMockContract,
   ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreIssuanceLibraryContract,
@@ -250,7 +236,6 @@ export {
   StartRebalanceLibraryContract,
   TimeLockUpgradeContract,
   TimeLockUpgradeV2Contract,
-  TimeLockUpgradeMockContract,
   TokenFlushMockContract,
   TransferProxyContract,
   VaultContract,

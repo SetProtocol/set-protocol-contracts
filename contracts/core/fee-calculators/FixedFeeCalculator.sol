@@ -17,12 +17,12 @@
 pragma solidity 0.5.7;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { CommonMath } from "set-protocol-contract-utils/contracts/lib/CommonMath.sol";
+import { ScaleValidations } from "set-protocol-contract-utils/contracts/lib/ScaleValidations.sol";
 
-import { CommonMath } from "../../lib/CommonMath.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IFeeCalculator } from "../interfaces/IFeeCalculator.sol";
 import { SetTokenLibrary } from "../lib/SetTokenLibrary.sol";
-import { ScaleValidations } from "../../lib/ScaleValidations.sol";
 
 
 /**

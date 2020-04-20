@@ -18,15 +18,15 @@ pragma solidity 0.5.7;
 pragma experimental ABIEncoderV2;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { CommonMath } from "set-protocol-contract-utils/contracts/lib/CommonMath.sol";
+import { ScaleValidations } from "set-protocol-contract-utils/contracts/lib/ScaleValidations.sol";
 
-import { CommonMath } from "../../lib/CommonMath.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IFeeCalculator } from "../interfaces/IFeeCalculator.sol";
 import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
 import { IRebalancingSetTokenV2 } from "../interfaces/IRebalancingSetTokenV2.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { PerformanceFeeLibrary } from "./lib/PerformanceFeeLibrary.sol";
-import { ScaleValidations } from "../../lib/ScaleValidations.sol";
 import { SetUSDValuation } from "../liquidators/impl/SetUSDValuation.sol";
 
 

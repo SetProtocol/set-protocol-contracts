@@ -7,6 +7,7 @@ import {
   CoreMockContract,
   CTokenExchangeIssuanceModuleContract,
   ExchangeIssuanceModuleContract,
+  OracleWhiteListContract,
   RebalancingSetCTokenExchangeIssuanceModuleContract,
   RebalancingSetCTokenIssuanceModuleContract,
   RebalancingSetExchangeIssuanceModuleContract,
@@ -45,6 +46,7 @@ const CTokenExchangeIssuanceModule = importArtifactsFromSource('CTokenExchangeIs
 const ERC20Wrapper = importArtifactsFromSource('ERC20Wrapper');
 const ExchangeIssuanceModule = importArtifactsFromSource('ExchangeIssuanceModule');
 const FactoryUtilsLibrary = importArtifactsFromSource('FactoryUtilsLibrary');
+const OracleWhiteList = importArtifactsFromSource('OracleWhiteList');
 const RebalancingSetCTokenExchangeIssuanceModule = importArtifactsFromSource(
   'RebalancingSetCTokenExchangeIssuanceModule'
 );
@@ -66,6 +68,7 @@ const SettleRebalanceLibrary = importArtifactsFromSource('SettleRebalanceLibrary
 const StartRebalanceLibrary = importArtifactsFromSource('StartRebalanceLibrary');
 const TransferProxy = importArtifactsFromSource('TransferProxy');
 const Vault = importArtifactsFromSource('Vault');
+const WhiteList = importArtifactsFromSource('WhiteList');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
@@ -310,6 +313,40 @@ export class CoreHelper {
     );
   }
 
+  public async deployWhiteListAsync(
+    initialAddresses: Address[] = [],
+    from: Address = this._tokenOwnerAddress
+  ): Promise<WhiteListContract> {
+    const truffleWhiteList = await WhiteList.new(
+      initialAddresses,
+      { from },
+    );
+
+    return new WhiteListContract(
+      getContractInstance(truffleWhiteList),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployOracleWhiteListAsync(
+    initialTokenAddresses: Address[] = [],
+    initialOracleAddresses: Address[] = [],
+    from: Address = this._tokenOwnerAddress
+  ): Promise<OracleWhiteListContract> {
+    const truffleWhiteList = await OracleWhiteList.new(
+      initialTokenAddresses,
+      initialOracleAddresses,
+      { from },
+    );
+
+    return new OracleWhiteListContract(
+      getContractInstance(truffleWhiteList),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+
+
   public async deployRebalanceAuctionModuleAsync(
     core: CoreLikeContract,
     vault: VaultContract,
@@ -544,6 +581,19 @@ export class CoreHelper {
       { from },
     );
   }
+
+  public async addAuthorizationAsync(
+    contract: any,
+    toAuthorize: Address,
+    from: Address = this._contractOwnerAddress
+  ) {
+    await contract.addAuthorizedAddress.sendTransactionAsync(
+      toAuthorize,
+      { from },
+    );
+  }
+
+
 
   /* ============ Vault ============ */
 

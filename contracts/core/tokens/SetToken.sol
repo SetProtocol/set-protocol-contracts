@@ -20,9 +20,9 @@ pragma solidity 0.5.7;
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import { CommonValidationsLibrary } from "set-protocol-contract-utils/contracts/lib/CommonValidationsLibrary.sol";
+import { CommonMath } from "set-protocol-contract-utils/contracts/lib/CommonMath.sol";
 
-import { CommonValidationsLibrary } from "../../lib/CommonValidationsLibrary.sol";
-import { CommonMath } from "../../lib/CommonMath.sol";
 import { ISetFactory } from "../interfaces/ISetFactory.sol";
 
 

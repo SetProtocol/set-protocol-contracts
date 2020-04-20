@@ -16,7 +16,8 @@
 
 pragma solidity 0.5.7;
 
-import { CommonMath } from "../../../lib/CommonMath.sol";
+import { CommonMath } from "set-protocol-contract-utils/contracts/lib/CommonMath.sol";
+
 import { ERC20Wrapper } from "../../../lib/ERC20Wrapper.sol";
 import { IAddressToAddressWhiteList } from "../../interfaces/IAddressToAddressWhiteList.sol";
 

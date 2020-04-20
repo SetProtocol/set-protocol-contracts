@@ -19,8 +19,8 @@ pragma experimental "ABIEncoderV2";
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { CommonMath } from "set-protocol-contract-utils/contracts/lib/CommonMath.sol";
 
-import { CommonMath } from "../../lib/CommonMath.sol";
 import { ExchangeIssuanceLibrary } from "./lib/ExchangeIssuanceLibrary.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ICore } from "../interfaces/ICore.sol";

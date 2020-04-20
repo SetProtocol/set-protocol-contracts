@@ -17,6 +17,8 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
+import { ScaleValidations } from "set-protocol-contract-utils/contracts/lib/ScaleValidations.sol";
+
 import { ICore } from "../../interfaces/ICore.sol";
 import { IFeeCalculator } from "../../interfaces/IFeeCalculator.sol";
 import { ILiquidator } from "../../interfaces/ILiquidator.sol";
@@ -25,7 +27,6 @@ import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
 import { RebalancingLibrary } from "../../lib/RebalancingLibrary.sol";
-import { ScaleValidations } from "../../../lib/ScaleValidations.sol";
 
 
 /**

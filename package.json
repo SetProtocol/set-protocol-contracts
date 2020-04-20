@@ -100,6 +100,7 @@
     "minify-all": "^1.2.2",
     "module-alias": "^2.1.0",
     "openzeppelin-solidity": "^2.2",
+    "set-protocol-contract-utils": "^1.0.2",
     "set-protocol-oracles": "^1.0.15",
     "set-protocol-utils": "^1.1.2",
     "tiny-promisify": "^1.0.0",

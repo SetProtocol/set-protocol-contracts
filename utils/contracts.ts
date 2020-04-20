@@ -1,4 +1,5 @@
 export { AddressToAddressWhiteListContract } from '../types/generated/address_to_address_white_list';
+export { AuctionGettersMockContract } from '../types/generated/auction_getters_mock';
 export { AuctionMockContract } from '../types/generated/auction_mock';
 export { AuthorizableContract } from '../types/generated/authorizable';
 export { BadTokenMockContract } from '../types/generated/bad_token_mock';
@@ -75,6 +76,7 @@ export { TokenFlushMockContract } from '../types/generated/token_flush_mock';
 export { TimeLockUpgradeContract } from '../types/generated/time_lock_upgrade';
 export { TimeLockUpgradeV2Contract } from '../types/generated/time_lock_upgrade_v2';
 export { TransferProxyContract } from '../types/generated/transfer_proxy';
+export { TWAPAuctionGettersMockContract } from '../types/generated/t_w_a_p_auction_getters_mock';
 export {
   TwoAssetPriceBoundedLinearAuctionMockContract
 } from '../types/generated/two_asset_price_bounded_linear_auction_mock';

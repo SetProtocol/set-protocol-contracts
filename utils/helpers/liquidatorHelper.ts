@@ -4,12 +4,14 @@ import { BigNumber } from 'bignumber.js';
 
 import {
   AuctionMockContract,
+  AuctionGettersMockContract,
   LinearAuctionLiquidatorContract,
   LinearAuctionMockContract,
   LiquidatorMockContract,
   LiquidatorProxyContract,
   OracleWhiteListContract,
   SetTokenContract,
+  TWAPAuctionGettersMockContract,
   TwoAssetPriceBoundedLinearAuctionMockContract,
 } from '../contracts';
 import { getContractInstance, importArtifactsFromSource, txnFrom } from '../web3Helper';
@@ -26,14 +28,36 @@ import {
 import { ether } from '../units';
 
 const AuctionMock = importArtifactsFromSource('AuctionMock');
+const AuctionGettersMock = importArtifactsFromSource('AuctionGettersMock');
 const LinearAuctionLiquidator = importArtifactsFromSource('LinearAuctionLiquidator');
 const LinearAuctionMock = importArtifactsFromSource('LinearAuctionMock');
 const LiquidatorMock = importArtifactsFromSource('LiquidatorMock');
 const LiquidatorProxy = importArtifactsFromSource('LiquidatorProxy');
+const TWAPAuctionGettersMock = importArtifactsFromSource('TWAPAuctionGettersMock');
 const TwoAssetPriceBoundedLinearAuctionMock = importArtifactsFromSource('TwoAssetPriceBoundedLinearAuctionMock');
 
 import { ERC20Helper } from './erc20Helper';
 import { ValuationHelper } from './valuationHelper';
+
+export interface AuctionData {
+  maxNaturalUnit: BigNumber;
+  minimumBid: BigNumber;
+  startTime: BigNumber;
+  startingCurrentSets: BigNumber;
+  remainingCurrentSets: BigNumber;
+  combinedTokenArray: Address[];
+  combinedCurrentSetUnits: BigNumber[];
+  combinedNextSetUnits: BigNumber[];
+}
+
+export interface TestTWAPAuctionData {
+  orderSize: BigNumber;
+  orderRemaining: BigNumber;
+  lastChunkAuctionEnd: BigNumber;
+  chunkAuctionPeriod: BigNumber;
+  chunkSize: BigNumber;
+  remainingCurrentSets: BigNumber;
+}
 
 export class LiquidatorHelper {
   private _contractOwnerAddress: Address;
@@ -58,6 +82,22 @@ export class LiquidatorHelper {
     const auctionMock = await AuctionMock.new(txnFrom(from));
 
     return new AuctionMockContract(getContractInstance(auctionMock), txnFrom(from));
+  }
+
+  public async deployAuctionGettersMockAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<AuctionGettersMockContract> {
+    const auctionGettersMock = await AuctionGettersMock.new(txnFrom(from));
+
+    return new AuctionGettersMockContract(getContractInstance(auctionGettersMock), txnFrom(from));
+  }
+
+  public async deployTWAPAuctionGettersMockAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<TWAPAuctionGettersMockContract> {
+    const twapAuctionGettersMock = await TWAPAuctionGettersMock.new(txnFrom(from));
+
+    return new TWAPAuctionGettersMockContract(getContractInstance(twapAuctionGettersMock), txnFrom(from));
   }
 
   public async deployLiquidatorProxyAsync(
@@ -428,5 +468,4 @@ export class LiquidatorHelper {
       outflow,
     };
   }
-
 }

@@ -404,4 +404,5 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         return _assetOne < _assetTwo ? keccak256(abi.encodePacked(_assetOne, _assetTwo)) :
             keccak256(abi.encodePacked(_assetTwo, _assetOne));
     }
+    
 }

@@ -20,10 +20,10 @@ pragma experimental "ABIEncoderV2";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { CommonMath } from "set-protocol-contract-utils/contracts/lib/CommonMath.sol";
 import { IOracle } from "set-protocol-oracles/contracts/meta-oracles/interfaces/IOracle.sol";
 
 import { Auction } from "./Auction.sol";
-import { CommonMath } from "../../../lib/CommonMath.sol";
 import { IOracleWhiteList } from "../../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { LinearAuction } from "./LinearAuction.sol";

@@ -17,7 +17,8 @@
 pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
-import { Bytes32Library } from "../../lib/Bytes32Library.sol";
+import { Bytes32Library } from "set-protocol-contract-utils/contracts/lib/Bytes32Library.sol";
+
 import { FactoryUtilsLibrary } from "./rebalancing-v3/FactoryUtilsLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { ILiquidator } from "../interfaces/ILiquidator.sol";

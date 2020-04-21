@@ -18,8 +18,8 @@ pragma solidity 0.5.7;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { CommonValidationsLibrary } from "set-protocol-contract-utils/contracts/lib/CommonValidationsLibrary.sol";
 
-import { CommonValidationsLibrary } from "../../lib/CommonValidationsLibrary.sol";
 import { CoreOperationState } from "./CoreOperationState.sol";
 import { CoreState } from "../lib/CoreState.sol";
 

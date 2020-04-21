@@ -18,9 +18,9 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { CommonMath } from "set-protocol-contract-utils/contracts/lib/CommonMath.sol";
+import { CompoundUtils } from "set-protocol-contract-utils/contracts/lib/CompoundUtils.sol";
 
-import { CommonMath } from "../../lib/CommonMath.sol";
-import { CompoundUtils } from "../../lib/CompoundUtils.sol";
 import { CTokenWhiteListed } from "./lib/CTokenWhiteListed.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ExchangeIssuanceLibrary } from "./lib/ExchangeIssuanceLibrary.sol";

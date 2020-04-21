@@ -5,11 +5,7 @@ export { BadTokenMockContract } from '../types/generated/bad_token_mock';
 export { BadCTokenMockContract } from '../types/generated/bad_c_token_mock';
 export { BaseContract } from '../types/base_contract';
 export { Bytes32LibraryContract } from '../types/generated/bytes32_library';
-export { Bytes32LibraryMockContract } from '../types/generated/bytes32_library_mock';
-export { CommonMathMockContract } from '../types/generated/common_math_mock';
 export { CommonValidationsLibraryContract } from '../types/generated/common_validations_library';
-export { CommonValidationsLibraryMockContract } from '../types/generated/common_validations_library_mock';
-export { CompoundUtilsMockContract } from '../types/generated/compound_utils_mock';
 export { ConstantAuctionPriceCurveContract } from '../types/generated/constant_auction_price_curve';
 export { CoreContract } from '../types/generated/core';
 export { CoreIssuanceLibraryContract } from '../types/generated/core_issuance_library';
@@ -30,8 +26,6 @@ export { FixedFeeCalculatorContract } from '../types/generated/fixed_fee_calcula
 export { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
 export { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
 export { KyberNetworkWrapperContract } from '../types/generated/kyber_network_wrapper';
-export { LimitOneUpgradeContract } from '../types/generated/limit_one_upgrade';
-export { LimitOneUpgradeMockContract } from '../types/generated/limit_one_upgrade_mock';
 export { LinearAuctionLiquidatorContract } from '../types/generated/linear_auction_liquidator';
 export { LinearAuctionMockContract } from '../types/generated/linear_auction_mock';
 export { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
@@ -79,15 +73,11 @@ export { StandardTokenWithFeeMockContract } from '../types/generated/standard_to
 export { StartRebalanceLibraryContract } from '../types/generated/start_rebalance_library';
 export { TokenFlushMockContract } from '../types/generated/token_flush_mock';
 export { TimeLockUpgradeContract } from '../types/generated/time_lock_upgrade';
-export { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrade_mock';
 export { TimeLockUpgradeV2Contract } from '../types/generated/time_lock_upgrade_v2';
-export { TimeLockUpgradeV2MockContract } from '../types/generated/time_lock_upgrade_v2_mock';
 export { TransferProxyContract } from '../types/generated/transfer_proxy';
 export {
   TwoAssetPriceBoundedLinearAuctionMockContract
 } from '../types/generated/two_asset_price_bounded_linear_auction_mock';
-export { UnrestrictedTimeLockUpgradeContract } from '../types/generated/unrestricted_time_lock_upgrade';
-export { UnrestrictedTimeLockUpgradeMockContract } from '../types/generated/unrestricted_time_lock_upgrade_mock';
 export { UpdatableConstantAuctionPriceCurveContract } from '../types/generated/updatable_constant_auction_price_curve';
 export { VaultContract } from '../types/generated/vault';
 export { WethMockContract } from '../types/generated/weth_mock';

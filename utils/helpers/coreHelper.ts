@@ -3,12 +3,10 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 
 import {
-  AuthorizableContract,
   CoreContract,
   CoreMockContract,
   CTokenExchangeIssuanceModuleContract,
   ExchangeIssuanceModuleContract,
-  LimitOneUpgradeMockContract,
   OracleWhiteListContract,
   RebalancingSetCTokenExchangeIssuanceModuleContract,
   RebalancingSetCTokenIssuanceModuleContract,
@@ -22,10 +20,7 @@ import {
   RebalancingSetTokenV3FactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
-  TimeLockUpgradeMockContract,
-  TimeLockUpgradeV2MockContract,
   TransferProxyContract,
-  UnrestrictedTimeLockUpgradeMockContract,
   VaultContract,
   WethMockContract,
   WhiteListContract,
@@ -42,7 +37,6 @@ import { getWeb3, getContractInstance, importArtifactsFromSource, linkLibrariesT
 
 const web3 = getWeb3();
 
-const Authorizable = importArtifactsFromSource('Authorizable');
 const Bytes32Library = importArtifactsFromSource('Bytes32Library');
 const CommonValidationsLibrary = importArtifactsFromSource('CommonValidationsLibrary');
 const Core = importArtifactsFromSource('Core');
@@ -52,7 +46,6 @@ const CTokenExchangeIssuanceModule = importArtifactsFromSource('CTokenExchangeIs
 const ERC20Wrapper = importArtifactsFromSource('ERC20Wrapper');
 const ExchangeIssuanceModule = importArtifactsFromSource('ExchangeIssuanceModule');
 const FactoryUtilsLibrary = importArtifactsFromSource('FactoryUtilsLibrary');
-const LimitOneUpgradeMock = importArtifactsFromSource('LimitOneUpgradeMock');
 const OracleWhiteList = importArtifactsFromSource('OracleWhiteList');
 const RebalancingSetCTokenExchangeIssuanceModule = importArtifactsFromSource(
   'RebalancingSetCTokenExchangeIssuanceModule'
@@ -73,10 +66,7 @@ const PlaceBidLibrary = importArtifactsFromSource('PlaceBidLibrary');
 const ProposeLibrary = importArtifactsFromSource('ProposeLibrary');
 const SettleRebalanceLibrary = importArtifactsFromSource('SettleRebalanceLibrary');
 const StartRebalanceLibrary = importArtifactsFromSource('StartRebalanceLibrary');
-const TimeLockUpgradeMock = importArtifactsFromSource('TimeLockUpgradeMock');
-const TimeLockUpgradeV2Mock = importArtifactsFromSource('TimeLockUpgradeV2Mock');
 const TransferProxy = importArtifactsFromSource('TransferProxy');
-const UnrestrictedTimeLockUpgradeMock = importArtifactsFromSource('UnrestrictedTimeLockUpgradeMock');
 const Vault = importArtifactsFromSource('Vault');
 const WhiteList = importArtifactsFromSource('WhiteList');
 
@@ -122,19 +112,6 @@ export class CoreHelper {
 
     return new VaultContract(
       getContractInstance(truffleVault),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
-  public async deployAuthorizableAsync(
-    from: Address = this._tokenOwnerAddress
-  ): Promise<AuthorizableContract> {
-    const truffleAuthorizable = await Authorizable.new(
-      { from, gas: DEFAULT_GAS },
-    );
-
-    return new AuthorizableContract(
-      getContractInstance(truffleAuthorizable),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -336,58 +313,6 @@ export class CoreHelper {
     );
   }
 
-  public async deployTimeLockUpgradeMockAsync(
-    from: Address = this._tokenOwnerAddress
-  ): Promise<TimeLockUpgradeMockContract> {
-    const truffleTimeLockUpgradeMock = await TimeLockUpgradeMock.new(
-      { from },
-    );
-
-    return new TimeLockUpgradeMockContract(
-      getContractInstance(truffleTimeLockUpgradeMock),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
-  public async deployTimeLockUpgradeV2MockAsync(
-    from: Address = this._tokenOwnerAddress
-  ): Promise<TimeLockUpgradeV2MockContract> {
-    const truffleTimeLockUpgradeV2Mock = await TimeLockUpgradeV2Mock.new(
-      { from },
-    );
-
-    return new TimeLockUpgradeV2MockContract(
-      getContractInstance(truffleTimeLockUpgradeV2Mock),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
-  public async deployUnrestrictedTimeLockUpgradeMockAsync(
-    from: Address = this._tokenOwnerAddress
-  ): Promise<UnrestrictedTimeLockUpgradeMockContract> {
-    const truffleUnrestrictedTimeLockUpgradeMock = await UnrestrictedTimeLockUpgradeMock.new(
-      { from },
-    );
-
-    return new UnrestrictedTimeLockUpgradeMockContract(
-      getContractInstance(truffleUnrestrictedTimeLockUpgradeMock),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
-  public async deployLimitOneUpgradeMockAsync(
-    from: Address = this._tokenOwnerAddress
-  ): Promise<LimitOneUpgradeMockContract> {
-    const truffleLimitOneUpgradeMock = await LimitOneUpgradeMock.new(
-      { from },
-    );
-
-    return new LimitOneUpgradeMockContract(
-      getContractInstance(truffleLimitOneUpgradeMock),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
   public async deployWhiteListAsync(
     initialAddresses: Address[] = [],
     from: Address = this._tokenOwnerAddress
@@ -419,6 +344,8 @@ export class CoreHelper {
       { from, gas: DEFAULT_GAS },
     );
   }
+
+
 
   public async deployRebalanceAuctionModuleAsync(
     core: CoreLikeContract,
@@ -656,7 +583,7 @@ export class CoreHelper {
   }
 
   public async addAuthorizationAsync(
-    contract: AuthorizableContract,
+    contract: any,
     toAuthorize: Address,
     from: Address = this._contractOwnerAddress
   ) {
@@ -665,6 +592,8 @@ export class CoreHelper {
       { from },
     );
   }
+
+
 
   /* ============ Vault ============ */
 

@@ -18,9 +18,9 @@ pragma solidity 0.5.7;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { CommonMath } from "set-protocol-contract-utils/contracts/lib/CommonMath.sol";
 
 import { IVault } from "../interfaces/IVault.sol";
-import { CommonMath } from "../../lib/CommonMath.sol";
 
 
 /**

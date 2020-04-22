@@ -25,7 +25,8 @@ import {
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
-import {
+import { AssetChunkSizeBounds } from '@utils/auction';
+import { 
   DEFAULT_GAS,
   EMPTY_BYTESTRING,
   ZERO,
@@ -83,6 +84,8 @@ contract('TWAPLiquidator', accounts => {
   let rangeStart: BigNumber;
   let rangeEnd: BigNumber;
   let oracleWhiteList: OracleWhiteListContract;
+  let assetPairHashes: string[];
+  let assetPairBounds: AssetChunkSizeBounds[];
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -95,6 +98,14 @@ contract('TWAPLiquidator', accounts => {
     rangeEnd = new BigNumber(10); // 10% above fair value
     name = 'liquidator';
     oracleWhiteList = scenario.oracleWhiteList;
+    assetPairHashes = [
+      liquidatorHelper.generateAssetPairHashes(scenario.component1.address, scenario.component2.address),
+      liquidatorHelper.generateAssetPairHashes(scenario.component2.address, scenario.component3.address),
+    ];
+    assetPairBounds = [
+      {min: ZERO, max: ether(10 ** 6)},
+      {min: ether(10 ** 4), max: ether(10 ** 6)},
+    ];
 
     liquidator = await liquidatorHelperFelix.deployTWAPLiquidatorAsync(
       scenario.core.address,
@@ -102,6 +113,8 @@ contract('TWAPLiquidator', accounts => {
       auctionPeriod,
       rangeStart,
       rangeEnd,
+      assetPairHashes,
+      assetPairBounds,
       name,
     );
 

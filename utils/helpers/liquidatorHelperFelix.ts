@@ -5,7 +5,15 @@ import { BigNumber } from 'bignumber.js';
 import {
   TWAPLiquidatorContract,
 } from '../contracts';
-import { getContractInstance, importArtifactsFromSource, txnFrom } from '../web3Helper';
+import {
+  coerceStructBNValuesToString,
+  getContractInstance,
+  importArtifactsFromSource,
+  txnFrom,
+} from '../web3Helper';
+import {
+  AssetChunkSizeBounds,
+} from '../auction';
 
 const TWAPLiquidator = importArtifactsFromSource('TWAPLiquidator');
 
@@ -35,16 +43,24 @@ export class LiquidatorHelperFelix {
     auctionPeriod: BigNumber,
     rangeStart: BigNumber,
     rangeEnd: BigNumber,
-    // TODO: Add more
+    assetPairHashes: string[],
+    assetPairBounds: AssetChunkSizeBounds[],
     name: string,
     from: Address = this._contractOwnerAddress
   ): Promise<TWAPLiquidatorContract> {
+    const assetPairBoundsStr = [];
+    for (let i = 0; i < assetPairBounds.length; i++) {
+      assetPairBoundsStr.push(coerceStructBNValuesToString(assetPairBounds[i]));
+    }
+
     const twapLiquidator = await TWAPLiquidator.new(
       core,
       oracleWhiteList,
       auctionPeriod,
       rangeStart,
       rangeEnd,
+      assetPairHashes,
+      assetPairBoundsStr,
       name,
       txnFrom(from)
     );

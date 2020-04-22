@@ -77,14 +77,18 @@ contract TWAPLiquidator is
         uint256 _auctionPeriod,
         uint256 _rangeStart,
         uint256 _rangeEnd,
+        bytes32[] memory _assetPairHashes,
+        BoundsLibrary.Bounds[] memory _assetPairBounds,
         string memory _name
     )
         public
-        TwoAssetPriceBoundedLinearAuction(
+        TWAPAuction(
             _oracleWhiteList,
             _auctionPeriod,
             _rangeStart,
-            _rangeEnd
+            _rangeEnd,
+            _assetPairHashes,
+            _assetPairBounds
         )
     {
         core = _core;

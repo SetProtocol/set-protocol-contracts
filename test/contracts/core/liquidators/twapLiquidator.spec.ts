@@ -50,6 +50,15 @@ const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
 const TWAPLiquidator = artifacts.require('TWAPLiquidator');
 
+export interface TWAPAuction {
+  chunkAuction: LinearAuction;
+  orderSize: BigNumber;
+  orderRemaining: BigNumber;
+  lastChunkAuctionEnd: BigNumber;
+  chunkAuctionPeriod: BigNumber;
+  chunkSize: BigNumber;
+}
+
 contract('TWAPLiquidator', accounts => {
   const [
     ownerAccount,
@@ -66,7 +75,8 @@ contract('TWAPLiquidator', accounts => {
   const valuationHelper = new ValuationHelper(ownerAccount, coreHelper, erc20Helper, oracleHelper);
   const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper, valuationHelper);
   const liquidatorHelperFelix = new LiquidatorHelperFelix(ownerAccount, erc20Helper, valuationHelper);
-  const rebalanceTestSetup = new RebalanceTestSetup(ownerAccount, coreHelper, erc20Helper, oracleHelper);
+  
+  const scenario = new RebalanceTestSetup(ownerAccount, coreHelper, erc20Helper, oracleHelper);
 
   let name: string;
   let auctionPeriod: BigNumber;
@@ -78,16 +88,16 @@ contract('TWAPLiquidator', accounts => {
     ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(TWAPLiquidator.abi);
 
-    await rebalanceTestSetup.initialize();
+    await scenario.initialize();
 
     auctionPeriod = ONE_DAY_IN_SECONDS;
     rangeStart = new BigNumber(10); // 10% below fair value
     rangeEnd = new BigNumber(10); // 10% above fair value
     name = 'liquidator';
-    oracleWhiteList = rebalanceTestSetup.oracleWhiteList;
+    oracleWhiteList = scenario.oracleWhiteList;
 
     liquidator = await liquidatorHelperFelix.deployTWAPLiquidatorAsync(
-      rebalanceTestSetup.core.address,
+      scenario.core.address,
       oracleWhiteList.address,
       auctionPeriod,
       rangeStart,
@@ -95,14 +105,14 @@ contract('TWAPLiquidator', accounts => {
       name,
     );
 
-    await rebalanceTestSetup.core.addSet.sendTransactionAsync(
+    await scenario.core.addSet.sendTransactionAsync(
       functionCaller,
       { from: ownerAccount, gas: DEFAULT_GAS },
     );
 
     liquidatorProxy = await liquidatorHelper.deployLiquidatorProxyAsync(liquidator.address);
 
-    await rebalanceTestSetup.core.addSet.sendTransactionAsync(
+    await scenario.core.addSet.sendTransactionAsync(
       liquidatorProxy.address,
       { from: ownerAccount, gas: DEFAULT_GAS },
     );
@@ -144,12 +154,125 @@ contract('TWAPLiquidator', accounts => {
 
     it('sets the correct core', async () => {
       const result = await liquidator.core.callAsync();
-      expect(result).to.equal(rebalanceTestSetup.core.address);
+      expect(result).to.equal(scenario.core.address);
     });
+
+    // It sets the correct initial bounds
 
     it('sets the correct name', async () => {
       const result = await liquidator.name.callAsync();
       expect(result).to.equal(name);
     });
   });
+
+  describe('#startRebalance', async () => {
+    let twapAuction: TWAPAuction;
+
+    let subjectCaller: Address;
+    let subjectCurrentSet: Address;
+    let subjectNextSet: Address;
+    let subjectStartingCurrentSetQuantity: BigNumber;
+    let subjectLiquidatorData: string;
+
+    beforeEach(async () => {
+      const maxNaturalUnit = BigNumber.max(
+        await scenario.set1.naturalUnit.callAsync(),
+        await scenario.set2.naturalUnit.callAsync()
+      );
+
+      const combinedTokenArray = _.union(scenario.set1Components, scenario.set2Components);
+      const combinedCurrentSetUnits = await liquidatorHelper.constructCombinedUnitArrayAsync(
+        scenario.set1,
+        combinedTokenArray,
+        maxNaturalUnit,
+      );
+      const combinedNextSetUnits = await liquidatorHelper.constructCombinedUnitArrayAsync(
+        scenario.set2,
+        combinedTokenArray,
+        maxNaturalUnit,
+      );
+
+      twapAuction = {
+        chunkAuction: {
+          auction: {
+            maxNaturalUnit,
+            minimumBid: new BigNumber(0),
+            startTime: new BigNumber(0),
+            startingCurrentSets: new BigNumber(0),
+            remainingCurrentSets: new BigNumber(0),
+            combinedTokenArray,
+            combinedCurrentSetUnits,
+            combinedNextSetUnits,
+          },
+          endTime: new BigNumber(0),
+          startPrice: new BigNumber(0),
+          endPrice: new BigNumber(0),
+        },
+        orderSize: new BigNumber(0),
+        orderRemaining: new BigNumber(0),
+        lastChunkAuctionEnd: new BigNumber(0),
+        chunkAuctionPeriod: new BigNumber(0),
+        chunkSize: new BigNumber(0),
+      };
+
+      subjectCaller = functionCaller;
+      subjectCurrentSet = scenario.set1.address;
+      subjectNextSet = scenario.set2.address;
+      subjectStartingCurrentSetQuantity = ether(10);
+
+      // Liquidator data will be different 
+      subjectLiquidatorData = EMPTY_BYTESTRING;
+    });
+
+    async function subject(): Promise<string> {
+      return liquidator.startRebalance.sendTransactionAsync(
+        subjectCurrentSet,
+        subjectNextSet,
+        subjectStartingCurrentSetQuantity,
+        subjectLiquidatorData,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+    }
+
+    it('sets the correct chunkAuction parameters', async () => {});
+    it('sets the correct orderSize', async () => {});
+    it('sets the correct orderRemaining', async () => {});
+    it('sets the correct lastChunkAuctionEnd', async () => {});
+    it('sets the correct chunkAuctionPeriod', async () => {});
+    it('sets the correct chunkSize', async () => {});
+    describe('when the caller is not a valid Set', async () => {
+      beforeEach(async () => {
+        subjectCaller = nonSet;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('[CONTEXT] First two chunk auction', async () => {
+    describe('#placeBid', async () => {});
+    describe('#getBidPrice', async () => {});
+    describe('#iterateChunkAuction', async () => {});
+    describe('#auctionGetters', async () => {});
+    describe('#twapGetters', async () => {});
+    describe('hasRebalanceFailed', async () => {});
+
+    describe('when the auction has failed', async () => {
+      describe('hasRebalanceFailed', async () => {});
+    });
+  });
+
+  describe('[CONTEXT] Second two chunk auction', async () => {
+    describe('#settleRebalance', async () => {});
+  });
+
+
+
+  describe('#setChunkSizeBounds', async () => {
+    // Can only be called by owner
+    // Sets properly
+  });
+
 });

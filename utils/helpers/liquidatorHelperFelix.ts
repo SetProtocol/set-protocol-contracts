@@ -6,17 +6,6 @@ import {
   TWAPLiquidatorContract,
 } from '../contracts';
 import { getContractInstance, importArtifactsFromSource, txnFrom } from '../web3Helper';
-import {
-  AUCTION_CURVE_DENOMINATOR,
-  ONE_HUNDRED,
-  SCALE_FACTOR,
-  ZERO
-} from '../constants';
-import {
-  LinearAuction,
-  TokenFlow
-} from '../auction';
-import { ether } from '../units';
 
 const TWAPLiquidator = importArtifactsFromSource('TWAPLiquidator');
 

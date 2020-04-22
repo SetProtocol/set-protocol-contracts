@@ -19,6 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { BoundsLibrary } from "set-protocol-contract-utils/contracts/lib/BoundsLibrary.sol";
 
 import { ICore } from "../interfaces/ICore.sol";
 import { ILiquidator } from "../interfaces/ILiquidator.sol";
@@ -188,13 +189,16 @@ contract TWAPLiquidator is
 
     function setChunkSizeBounds(
         address _assetOne,
-        address _assetTwo
-        // BoundsLibrary.Bounds calldata _assetPairBounds
+        address _assetTwo,
+        BoundsLibrary.Bounds calldata _assetPairBounds
     )
         external
         onlyOwner
     {
-        // To implement
+        // bytes32 pairHash = TWAPAuction.getAssetPairHash(_assetOne, _assetTwo);
+
+        // chunkSizeWhiteList[pairHash] = _assetPairBounds;
+
     }
 
     /* ============ Getters Functions ============ */

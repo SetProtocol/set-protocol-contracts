@@ -1,4 +1,6 @@
 import * as _ from 'lodash';
+import * as setProtocolUtils from 'set-protocol-utils';
+import * as ethUtil from 'ethereumjs-util';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
@@ -11,10 +13,16 @@ import {
   LiquidatorProxyContract,
   OracleWhiteListContract,
   SetTokenContract,
+  TWAPAuctionMockContract,
   TWAPAuctionGettersMockContract,
   TwoAssetPriceBoundedLinearAuctionMockContract,
 } from '../contracts';
-import { getContractInstance, importArtifactsFromSource, txnFrom } from '../web3Helper';
+import {
+  coerceStructBNValuesToString,
+  getContractInstance,
+  importArtifactsFromSource,
+  txnFrom
+} from '../web3Helper';
 import {
   AUCTION_CURVE_DENOMINATOR,
   ONE_HUNDRED,
@@ -22,6 +30,7 @@ import {
   ZERO
 } from '../constants';
 import {
+  AssetChunkSizeBounds,
   LinearAuction,
   TokenFlow
 } from '../auction';
@@ -33,11 +42,14 @@ const LinearAuctionLiquidator = importArtifactsFromSource('LinearAuctionLiquidat
 const LinearAuctionMock = importArtifactsFromSource('LinearAuctionMock');
 const LiquidatorMock = importArtifactsFromSource('LiquidatorMock');
 const LiquidatorProxy = importArtifactsFromSource('LiquidatorProxy');
+const TWAPAuctionMock = importArtifactsFromSource('TWAPAuctionMock');
 const TWAPAuctionGettersMock = importArtifactsFromSource('TWAPAuctionGettersMock');
 const TwoAssetPriceBoundedLinearAuctionMock = importArtifactsFromSource('TwoAssetPriceBoundedLinearAuctionMock');
 
 import { ERC20Helper } from './erc20Helper';
 import { ValuationHelper } from './valuationHelper';
+
+const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 
 export interface AuctionData {
   maxNaturalUnit: BigNumber;
@@ -173,12 +185,65 @@ export class LiquidatorHelper {
     );
   }
 
+  public async deployTWAPAuctionMock(
+    oracleWhiteList: Address,
+    auctionPeriod: BigNumber,
+    rangeStart: BigNumber,
+    rangeEnd: BigNumber,
+    assetPairHashes: string[],
+    assetPairBounds: AssetChunkSizeBounds[],
+    from: Address = this._contractOwnerAddress
+  ): Promise<TWAPAuctionMockContract> {
+    const assetPairBoundsStr = [];
+    for (let i = 0; i < assetPairBounds.length; i++) {
+      assetPairBoundsStr.push(coerceStructBNValuesToString(assetPairBounds[i]));
+    }
+
+    const mockContract = await TWAPAuctionMock.new(
+      oracleWhiteList,
+      auctionPeriod,
+      rangeStart,
+      rangeEnd,
+      assetPairHashes,
+      assetPairBoundsStr,
+      txnFrom(from)
+    );
+
+    return new TWAPAuctionMockContract(
+      getContractInstance(mockContract),
+      txnFrom(from)
+    );
+  }
+
   public async deployLiquidatorMockAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<LiquidatorMockContract> {
     const liquidatorMock = await LiquidatorMock.new(txnFrom(from));
 
     return new LiquidatorMockContract(getContractInstance(liquidatorMock), txnFrom(from));
+  }
+
+  /* ============ Deploy Helpers ============ */
+  public generateAssetPairHashes(
+    assetOne: Address,
+    assetTwo: Address
+  ): string {
+    let hexString: string;
+    const assetOneNum = new BigNumber(assetOne);
+    const assetTwoNum = new BigNumber(assetTwo);
+    if (assetOneNum.greaterThan(assetTwoNum)) {
+      hexString =  SetTestUtils.bufferArrayToHex([
+        ethUtil.toBuffer(assetTwo),
+        ethUtil.toBuffer(assetOne),
+      ]);
+    } else {
+      hexString =  SetTestUtils.bufferArrayToHex([
+        ethUtil.toBuffer(assetOne),
+        ethUtil.toBuffer(assetTwo),
+      ]);
+    }
+
+    return web3.utils.soliditySha3(hexString);
   }
 
   /* ============ Bid-Related ============ */

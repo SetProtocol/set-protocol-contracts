@@ -170,7 +170,16 @@ contract('TWAPLiquidator', accounts => {
       expect(result).to.equal(scenario.core.address);
     });
 
-    // It sets the correct initial bounds
+    it('sets the correct chunk whitelist values', async () => {
+      const bounds1 = await liquidator.chunkSizeWhiteList.callAsync(assetPairHashes[0]);
+      const bounds2 = await liquidator.chunkSizeWhiteList.callAsync(assetPairHashes[1]);
+      
+      expect(bounds1['min']).to.bignumber.equal(assetPairBounds[0]['min']);
+      expect(bounds1['max']).to.bignumber.equal(assetPairBounds[0]['max']);
+
+      expect(bounds2['min']).to.bignumber.equal(assetPairBounds[1]['min']);
+      expect(bounds2['max']).to.bignumber.equal(assetPairBounds[1]['max']);
+    });
 
     it('sets the correct name', async () => {
       const result = await liquidator.name.callAsync();
@@ -284,8 +293,43 @@ contract('TWAPLiquidator', accounts => {
 
 
   describe('#setChunkSizeBounds', async () => {
+    let subjectCaller: Address;
+    let subjectAsset1: Address;
+    let subjectAsset2: Address;
+    let subjectAssetPairBounds: AssetChunkSizeBounds;
+
+    let pairHash: string;
     // Can only be called by owner
     // Sets properly
+    beforeEach(async () => {
+      subjectCaller = ownerAccount;
+      subjectAsset1 = scenario.component1.address;
+      subjectAsset2 = scenario.component2.address;
+      pairHash = liquidatorHelper.generateAssetPairHashes(
+        scenario.component1.address,
+        scenario.component2.address,
+      );
+      subjectAssetPairBounds = {
+        min: ether(10 ** 8),
+        max: ether(10 ** 9)
+      };
+    });
+
+    async function subject(): Promise<string> {
+      return liquidator.setChunkSizeBounds.sendTransactionAsync(
+        subjectAsset1,
+        subjectAsset2,
+        subjectAssetPairBounds,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+    }
+
+    it('sets the correct chunkAuction parameters', async () => {
+      const bounds = await liquidator.chunkSizeWhiteList.callAsync(pairHash);
+      
+      expect(bounds['min']).to.bignumber.equal(subjectAssetPairBounds['min']);
+      expect(bounds['max']).to.bignumber.equal(subjectAssetPairBounds['max']);
+    });
   });
 
 });

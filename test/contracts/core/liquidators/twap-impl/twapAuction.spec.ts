@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import * as chai from 'chai';
 import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
+import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -27,7 +28,7 @@ import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { OracleHelper } from 'set-protocol-oracles';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
-import { ZERO } from '@utils/constants';
+import { ZERO, ZERO_BYTES } from '@utils/constants';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -134,7 +135,7 @@ contract('TWAPAuction', accounts => {
     ABIDecoder.removeABI(TwoAssetPriceBoundedLinearAuction.abi);
   });
 
-  describe.only('#constructor', async () => {
+  describe('#constructor', async () => {
     it('sets the correct chunkSizeWhiteList', async () => {
       const pairOne: any = await twapAuction.chunkSizeWhiteList.callAsync(assetPairHashes[0]);
       const pairTwo: any = await twapAuction.chunkSizeWhiteList.callAsync(assetPairHashes[1]);
@@ -151,6 +152,33 @@ contract('TWAPAuction', accounts => {
       const expectedAuctionLength = auctionPeriod.mul(rangeStart.add(2)).div(rangeStart.add(rangeEnd));
 
       expect(actualExpectedAuctionLength).to.be.bignumber.equal(expectedAuctionLength);
+    });
+  });
+
+  describe('#initializeTWAPAuction', async () => {
+    let subjectCurrentSet: Address;
+    let subjectNextSet: Address;
+    let subjectStartingCurrentSets: BigNumber;
+    let subjectLiquidatorData: any;
+
+    beforeEach(async () => {
+      subjectCurrentSet = deployerAccount;
+      subjectNextSet = deployerAccount;
+      subjectStartingCurrentSets = ether(1);
+      subjectLiquidatorData = ZERO_BYTES;
+    });
+
+    async function subject(): Promise<BigNumber> {
+      return twapAuction.initializeTWAPAuction.sendTransactionAsync(
+        subjectCurrentSet,
+        subjectNextSet,
+        subjectStartingCurrentSets,
+        subjectLiquidatorData
+      );
+    }
+
+    it('sets the correct chunkSizeWhiteList', async () => {
+      await subject();
     });
   });
 });

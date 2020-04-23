@@ -11,6 +11,7 @@ import {
   LinearAuctionMockContract,
   LiquidatorMockContract,
   LiquidatorProxyContract,
+  LiquidatorUtilsMockContract,
   OracleWhiteListContract,
   SetTokenContract,
   TWAPAuctionMockContract,
@@ -42,6 +43,7 @@ const LinearAuctionLiquidator = importArtifactsFromSource('LinearAuctionLiquidat
 const LinearAuctionMock = importArtifactsFromSource('LinearAuctionMock');
 const LiquidatorMock = importArtifactsFromSource('LiquidatorMock');
 const LiquidatorProxy = importArtifactsFromSource('LiquidatorProxy');
+const LiquidatorUtilsMock = importArtifactsFromSource('LiquidatorUtilsMock');
 const TWAPAuctionMock = importArtifactsFromSource('TWAPAuctionMock');
 const TWAPAuctionGettersMock = importArtifactsFromSource('TWAPAuctionGettersMock');
 const TwoAssetPriceBoundedLinearAuctionMock = importArtifactsFromSource('TwoAssetPriceBoundedLinearAuctionMock');
@@ -119,6 +121,14 @@ export class LiquidatorHelper {
     const liquidatorProxy = await LiquidatorProxy.new(liquidator, txnFrom(from));
 
     return new LiquidatorProxyContract(getContractInstance(liquidatorProxy), txnFrom(from));
+  }
+
+  public async deployLiquidatorUtilsMockAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<LiquidatorUtilsMockContract> {
+    const liquidatorUtilsMock = await LiquidatorUtilsMock.new(txnFrom(from));
+
+    return new LiquidatorUtilsMockContract(getContractInstance(liquidatorUtilsMock), txnFrom(from));
   }
 
   public async deployLinearAuctionMockAsync(
@@ -532,5 +542,39 @@ export class LiquidatorHelper {
       inflow,
       outflow,
     };
+  }
+
+  public async calculateRebalanceVolumeAsync(
+    currentSet: SetTokenContract,
+    nextSet: SetTokenContract,
+    oracleWhiteList: OracleWhiteListContract,
+    currentSetQuantity: BigNumber
+  ): Promise<BigNumber> {
+    const currentSetValue = await this._valuationHelper.calculateSetTokenValueAsync(currentSet, oracleWhiteList);
+    const components = await currentSet.getComponents.callAsync();
+    const allocationAsset = components[0];
+
+    const currentSetAssetAllocation = await this.calculateAssetAllocationAsync(
+      currentSet,
+      oracleWhiteList,
+      allocationAsset
+    );
+    const nextSetAssetAllocation = await this.calculateAssetAllocationAsync(nextSet, oracleWhiteList, allocationAsset);
+
+    const allocationChange = currentSetAssetAllocation.sub(nextSetAssetAllocation).abs();
+    console.log(allocationChange, currentSetValue, currentSetQuantity);
+    return currentSetValue.mul(currentSetQuantity).mul(allocationChange).div(SCALE_FACTOR).div(SCALE_FACTOR);
+  }
+
+  public async calculateAssetAllocationAsync(
+    setToken: SetTokenContract,
+    oracleWhiteList: OracleWhiteListContract,
+    asset: Address
+  ): Promise<BigNumber> {
+    const setValue = await this._valuationHelper.calculateSetTokenValueAsync(setToken, oracleWhiteList);
+
+    const allocationValue = await this._valuationHelper.calculateAllocationValueAsync(setToken, oracleWhiteList, asset);
+
+    return allocationValue.mul(ether(1)).div(setValue).round(0, 3);
   }
 }

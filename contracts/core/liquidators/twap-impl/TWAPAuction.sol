@@ -1,7 +1,8 @@
 /*
     Copyright 2020 Set Labs Inc.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
+    Licensed under the Apache License,
+        Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
 
@@ -21,7 +22,9 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { BoundsLibrary } from "set-protocol-contract-utils/contracts/lib/BoundsLibrary.sol";
 
 import { LinearAuction } from "../impl/LinearAuction.sol";
+import { LiquidatorUtils } from "../utils/LiquidatorUtils.sol";
 import { IOracleWhiteList } from "../../../core/interfaces/IOracleWhiteList.sol";
+import { ISetToken } from "../../../core/interfaces/ISetToken.sol";
 import { TwoAssetPriceBoundedLinearAuction } from "../impl/TwoAssetPriceBoundedLinearAuction.sol";
 
 
@@ -36,6 +39,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     using SafeMath for uint256;
 
     /* ============ Structs ============ */
+
     struct TWAPState {
         LinearAuction.State chunkAuction;
         uint256 orderSize;
@@ -51,12 +55,16 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     }
 
     /* ============ Constants ============ */
+
     // Auction completion buffer assumes completion potentially 2% after fair value when auction started
     uint256 constant AUCTION_COMPLETION_BUFFER = 2;
 
     /* ============ State Variables ============ */
+
     mapping(bytes32 => BoundsLibrary.Bounds) public chunkSizeWhiteList;
     uint256 public expectedChunkAuctionLength;
+
+    /* ============ Constructor ============ */
 
     constructor(
         IOracleWhiteList _oracleWhiteList,
@@ -88,4 +96,58 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
             .div(_rangeStart.add(_rangeEnd));
     }
 
+    /* ============ Internal Functions ============ */
+    function initializeTWAPAuction(
+        TWAPState storage _twapAuction,
+        ISetToken _currentSet,
+        ISetToken _nextSet,
+        uint256 _startingCurrentSetQuantity,
+        TWAPLiquidatorData memory _liquidatorData
+    )
+        internal
+    {
+        uint256 rebalanceVolume = LiquidatorUtils.calculateRebalanceVolume(
+            _currentSet,
+            _nextSet,
+            oracleWhiteList,
+            _startingCurrentSetQuantity
+        );
+
+        uint256 chunkSize = calculateChunkSize(
+            _twapAuction,
+            _startingCurrentSetQuantity,
+            rebalanceVolume,
+            _liquidatorData.usdChunkSize
+        );
+
+        LinearAuction.initializeLinearAuction(
+            _twapAuction.chunkAuction,
+            _currentSet,
+            _nextSet,
+            chunkSize
+        );
+
+        _twapAuction.orderSize = _startingCurrentSetQuantity;
+        _twapAuction.orderRemaining = _startingCurrentSetQuantity.sub(chunkSize);
+        _twapAuction.chunkSize = chunkSize;
+        _twapAuction.lastChunkAuctionEnd = block.timestamp.sub(_liquidatorData.chunkAuctionPeriod);
+        _twapAuction.chunkAuctionPeriod = _liquidatorData.chunkAuctionPeriod;
+    }
+
+    function calculateChunkSize(
+        TWAPState storage _twapState,
+        uint256 _totalSetAmount,
+        uint256 _rebalanceVolume,
+        uint256 _usdChunkSize
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        if (_rebalanceVolume.div(_usdChunkSize) >= 1) {
+            return _totalSetAmount.mul(_usdChunkSize).div(_rebalanceVolume);
+        } else {
+            return _totalSetAmount;
+        }
+    }
 }

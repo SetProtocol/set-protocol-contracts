@@ -31,6 +31,8 @@ import { TWAPAuction } from "../../../../core/liquidators/twap-impl/TWAPAuction.
  */
 contract TWAPAuctionMock is TWAPAuction {
 
+    // TWAPAuction.TWAPState public twapState;
+
     constructor(
         IOracleWhiteList _oracleWhiteList,
         uint256 _auctionPeriod,
@@ -49,4 +51,21 @@ contract TWAPAuctionMock is TWAPAuction {
             _assetPairBounds
         )
     {}
+
+    // function initializeTWAPAuction(
+    //     ISetToken _currentSet,
+    //     ISetToken _nextSet,
+    //     uint256 _startingCurrentSetQuantity,
+    //     TWAPAuction.TWAPLiquidatorData calldata _liquidatorData
+    // )
+    //     external
+    // {
+    //     initializeTWAPAuction(
+    //         twapState,
+    //         _currentSet,
+    //         _nextSet,
+    //         _startingCurrentSetQuantity,
+    //         _liquidatorData
+    //     );
+    // }
 }

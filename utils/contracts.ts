@@ -32,6 +32,7 @@ export { LinearAuctionMockContract } from '../types/generated/linear_auction_moc
 export { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
 export { LiquidatorMockContract } from '../types/generated/liquidator_mock';
 export { LiquidatorProxyContract } from '../types/generated/liquidator_proxy';
+export { LiquidatorUtilsMockContract } from '../types/generated/liquidator_utils_mock';
 export { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 export { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 export { OracleWhiteListContract } from '../types/generated/oracle_white_list';

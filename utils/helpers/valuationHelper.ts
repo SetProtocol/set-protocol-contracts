@@ -87,6 +87,34 @@ export class ValuationHelper {
     return collateralValue.mul(unitShares).div(naturalUnit).round(0, 3);
   }
 
+  public async calculateAllocationValueAsync(
+    setToken: SetTokenContract,
+    oracleWhiteList: OracleWhiteListContract,
+    asset: Address
+  ): Promise<BigNumber> {
+    const components = await setToken.getComponents.callAsync();
+    const componentIndex = components.indexOf(asset);
+
+    const tokenPrices = await this.getComponentPricesAsync(
+      components,
+      oracleWhiteList
+    );
+    const componentUnits = await setToken.getUnits.callAsync();
+    const setNaturalUnit = await setToken.naturalUnit.callAsync();
+
+    const tokenUnitsInFullSet = SET_FULL_TOKEN_UNITS
+      .mul(componentUnits[componentIndex])
+      .div(setNaturalUnit)
+      .round(0, 3);
+
+    const assetDecimals = await this._erc20Helper.getTokensDecimalsAsync([asset]);
+    return this.computeTokenDollarAmount(
+      tokenPrices[componentIndex],
+      tokenUnitsInFullSet,
+      assetDecimals[0],
+    );
+  }
+
   private computeTokenDollarAmount(
     tokenPrice: BigNumber,
     unitsInFullSet: BigNumber,

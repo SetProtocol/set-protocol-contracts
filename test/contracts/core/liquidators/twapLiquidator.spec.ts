@@ -181,6 +181,10 @@ contract('TWAPLiquidator', accounts => {
       expect(bounds2['max']).to.bignumber.equal(assetPairBounds[1]['max']);
     });
 
+    it('sets the expected chunk auction length properly', async () => {
+      // TODO
+    });
+
     it('sets the correct name', async () => {
       const result = await liquidator.name.callAsync();
       expect(result).to.equal(name);
@@ -274,12 +278,183 @@ contract('TWAPLiquidator', accounts => {
   });
 
   describe('[CONTEXT] First two chunk auction', async () => {
+    let subjectCaller: Address;
+
+    let startingCurrentSetQuantity: BigNumber;
+
+    beforeEach(async () => {
+      subjectCaller = functionCaller;
+      startingCurrentSetQuantity = ether(10);
+    });
+
     describe('#placeBid', async () => {});
-    describe('#getBidPrice', async () => {});
+    describe('#getBidPrice', async () => {
+      let subjectSet: Address;
+      let subjectQuantity: BigNumber;
+
+      let tokenFlows: TokenFlow;
+
+      beforeEach(async () => {
+        subjectSet = functionCaller;
+        subjectQuantity = startingCurrentSetQuantity;
+
+        await liquidator.startRebalance.sendTransactionAsync(
+          scenario.set1.address,
+          scenario.set2.address,
+          startingCurrentSetQuantity,
+          EMPTY_BYTESTRING,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+
+        const auction = await liquidator.auctions.callAsync(subjectCaller);
+        const chunkAuction = auction[0];
+        const linearAuction = getLinearAuction(chunkAuction);
+        const { timestamp } = await web3.eth.getBlock('latest');
+
+        const currentPrice = await liquidatorHelper.calculateCurrentPrice(
+          linearAuction,
+          new BigNumber(timestamp),
+          auctionPeriod,
+        );
+
+        tokenFlows = liquidatorHelper.constructTokenFlow(
+          linearAuction,
+          subjectQuantity,
+          currentPrice,
+        );
+      });
+
+      async function subject(): Promise<any> {
+        return liquidatorProxy.getBidPrice.callAsync(subjectSet, subjectQuantity);
+      }
+
+      it('returns the token array', async () => {
+        const { addresses } = await subject();
+        expect(JSON.stringify(addresses)).to.equal(JSON.stringify(tokenFlows.addresses));
+      });
+
+      it('returns the correct inflow', async () => {
+        const { inflow } = await subject();
+        expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
+      });
+
+      it('returns the correct outflow', async () => {
+        const { outflow } = await subject();
+        expect(JSON.stringify(outflow)).to.equal(JSON.stringify(tokenFlows.outflow));
+      });
+    });
+
     describe('#iterateChunkAuction', async () => {});
-    describe('#auctionGetters', async () => {});
-    describe('#twapGetters', async () => {});
-    describe('hasRebalanceFailed', async () => {});
+
+    describe('#auctionGetters', async () => {
+      it('gets the correct minimumBid', async () => {});
+      it('gets the correct remainingCurrentSets', async () => {});
+      it('gets the correct startingCurrentSets', async () => {});
+      it('gets the correct getCombinedTokenArray', async () => {});
+      it('gets the correct getCombinedCurrentSetUnits', async () => {});
+      it('gets the correct getCombinedNextSetUnits', async () => {});
+    });
+
+    describe('#twapGetters', async () => {
+      it('gets the correct chunkAuction parameters', async () => {});
+      it('gets the correct orderSize', async () => {});
+      it('gets the correct orderRemaining', async () => {});
+      it('gets the correct lastChunkAuctionEnd', async () => {});
+      it('gets the correct chunkAuctionPeriod', async () => {});
+      it('gets the correct chunkSize', async () => {});
+    });
+    
+    describe('#hasRebalanceFailed', async () => {
+      let subjectSet: Address;
+
+      beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+      });
+
+      async function subject(): Promise<boolean> {
+        return liquidator.hasRebalanceFailed.callAsync(subjectSet);
+      }
+
+      it('should return the correct value', async () => {
+        const result = await subject();
+        expect(result).to.equal(false);
+      });
+    });
+
+    describe('#endFailedRebalance', async () => {
+      async function subject(): Promise<string> {
+        return liquidatorProxy.endFailedRebalance.sendTransactionAsync(
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      async function directCallSubject(): Promise<string> {
+        return liquidator.endFailedRebalance.sendTransactionAsync(
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      it('clears the auction state', async () => {
+        await subject();
+
+        const auction: any = await liquidator.auctions.callAsync(subjectCaller);
+        expect(auction.orderSize).to.bignumber.equal(ZERO);
+        expect(auction.orderRemaining).to.bignumber.equal(ZERO);
+        expect(auction.lastChunkAuctionEnd).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuctionPeriod).to.bignumber.equal(ZERO);
+        expect(auction.chunkSize).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.auction.minimumBid).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.auction.startTime).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.auction.startingCurrentSets).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.auction.remainingCurrentSets).to.bignumber.equal(ZERO);
+        expect(JSON.stringify(auction.chunkAuction.auction.combinedTokenArray)).to.equal(JSON.stringify([]));
+        expect(JSON.stringify(auction.chunkAuction.auction.combinedCurrentSetUnits)).to.equal(JSON.stringify([]));
+        expect(JSON.stringify(auction.chunkAuction.auction.combinedNextSetUnits)).to.equal(JSON.stringify([]));
+        expect(auction.chunkAuction.endTime).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.startPrice).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.endPrice).to.bignumber.equal(ZERO);
+      });
+
+      describe('when the caller is not a valid Set', async () => {
+        beforeEach(async () => {
+          subjectCaller = nonSet;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(directCallSubject());
+        });
+      });
+    });
+
+    describe('#auctionPriceParameters', async () => {
+      let subjectSet: Address;
+
+      beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+      });
+
+      async function subject(): Promise<any> {
+        return liquidator.auctionPriceParameters.callAsync(subjectSet);
+      }
+
+      it('should return the correct values', async () => {
+        const {
+          auctionStartTime,
+          auctionTimeToPivot,
+          auctionStartPrice,
+          auctionPivotPrice,
+        } = await subject();
+
+        const auction = await liquidator.auctions.callAsync(subjectSet);
+        const chunkAuction = auction[0];
+
+        const linearAuction = getLinearAuction(chunkAuction);
+        expect(auctionStartTime).to.bignumber.equal(linearAuction.auction.startTime);
+        expect(auctionTimeToPivot).to.bignumber.equal(auctionPeriod);
+        expect(auctionStartPrice).to.bignumber.equal(linearAuction.startPrice);
+        expect(auctionPivotPrice).to.bignumber.equal(linearAuction.endPrice);
+      });
+    });
 
     describe('when the auction has failed', async () => {
       describe('hasRebalanceFailed', async () => {});

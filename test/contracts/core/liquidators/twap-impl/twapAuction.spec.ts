@@ -19,16 +19,19 @@ import {
   TWAPAuctionMockContract,
   TransferProxyContract,
   VaultContract,
+  SetTokenContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
 import { AssetChunkSizeBounds } from '@utils/auction';
+import { coerceStructBNValuesToString } from '@utils/web3Helper';
+import { getSubjectTimestamp, expectNoRevertError, expectRevertError } from '@utils/tokenAssertions';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { OracleHelper } from 'set-protocol-oracles';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
-import { ZERO, ZERO_BYTES } from '@utils/constants';
+import { ZERO, ONE_HOUR_IN_SECONDS } from '@utils/constants';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -71,6 +74,10 @@ contract('TWAPAuction', accounts => {
   let usdcOracle: UpdatableOracleMockContract;
   let daiOracle: UpdatableOracleMockContract;
 
+  let set1: SetTokenContract;
+  let set2: SetTokenContract;
+  let set3: SetTokenContract;
+
   let auctionPeriod: BigNumber;
   let rangeStart: BigNumber;
   let rangeEnd: BigNumber;
@@ -102,6 +109,39 @@ contract('TWAPAuction', accounts => {
     wrappedBTCOracle = await oracleHelper.deployUpdatableOracleMockAsync(wrappedBTCPrice);
     usdcOracle = await oracleHelper.deployUpdatableOracleMockAsync(usdcPrice);
     daiOracle = await oracleHelper.deployUpdatableOracleMockAsync(daiPrice);
+
+    const set1Components = [wrappedETH.address, usdc.address];
+    const set1Units = [new BigNumber(10 ** 13), new BigNumber(1280)];
+    const set1NaturalUnit = new BigNumber(10 ** 13);
+    set1 = await coreHelper.createSetTokenAsync(
+      coreMock,
+      setTokenFactory.address,
+      set1Components,
+      set1Units,
+      set1NaturalUnit,
+    );
+
+    const set2Components = [wrappedETH.address, usdc.address];
+    const set2Units = [new BigNumber(10 ** 13), new BigNumber(5120)];
+    const set2NaturalUnit = new BigNumber(10 ** 13);
+    set2 = await coreHelper.createSetTokenAsync(
+      coreMock,
+      setTokenFactory.address,
+      set2Components,
+      set2Units,
+      set2NaturalUnit,
+    );
+
+    const set3Components = [usdc.address];
+    const set3Units = [new BigNumber(5120)];
+    const set3NaturalUnit = new BigNumber(10 ** 13);
+    set3 = await coreHelper.createSetTokenAsync(
+      coreMock,
+      setTokenFactory.address,
+      set3Components,
+      set3Units,
+      set3NaturalUnit,
+    );
 
     oracleWhiteList = await coreHelper.deployOracleWhiteListAsync(
       [wrappedETH.address, wrappedBTC.address, usdc.address, dai.address],
@@ -162,14 +202,19 @@ contract('TWAPAuction', accounts => {
     let subjectLiquidatorData: any;
 
     beforeEach(async () => {
-      subjectCurrentSet = deployerAccount;
-      subjectNextSet = deployerAccount;
-      subjectStartingCurrentSets = ether(1);
-      subjectLiquidatorData = ZERO_BYTES;
+      subjectCurrentSet = set1.address;
+      subjectNextSet = set2.address;
+      subjectStartingCurrentSets = ether(2000);
+      subjectLiquidatorData = coerceStructBNValuesToString(
+        {
+          usdChunkSize: ether(10 ** 5),
+          chunkAuctionPeriod: ONE_HOUR_IN_SECONDS,
+        }
+      );
     });
 
-    async function subject(): Promise<BigNumber> {
-      return twapAuction.initializeTWAPAuction.sendTransactionAsync(
+    async function subject(): Promise<string> {
+      return twapAuction.testInitializeTWAPAuction.sendTransactionAsync(
         subjectCurrentSet,
         subjectNextSet,
         subjectStartingCurrentSets,
@@ -177,8 +222,464 @@ contract('TWAPAuction', accounts => {
       );
     }
 
-    it('sets the correct chunkSizeWhiteList', async () => {
+    it('sets the correct orderSize', async () => {
       await subject();
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+
+      expect(twapState.orderSize).to.be.bignumber.equal(subjectStartingCurrentSets);
+    });
+
+    it('sets the correct orderRemaining', async () => {
+      await subject();
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+      const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+        set1,
+        set2,
+        oracleWhiteList,
+        subjectStartingCurrentSets,
+        subjectLiquidatorData.usdChunkSize,
+      );
+
+      expect(twapState.orderRemaining).to.be.bignumber.equal(subjectStartingCurrentSets.sub(expectedChunkSize));
+    });
+
+    it('sets the correct lastChunkAuctionEnd', async () => {
+      const subjectTimestamp = await getSubjectTimestamp(subject());
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+      const expectedLastChunkAuctionEnd = subjectTimestamp.sub(subjectLiquidatorData.chunkAuctionPeriod);
+      expect(twapState.lastChunkAuctionEnd).to.be.bignumber.equal(expectedLastChunkAuctionEnd);
+    });
+
+    it('sets the correct chunkAuctionPeriod', async () => {
+      await subject();
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+
+      expect(twapState.chunkAuctionPeriod).to.be.bignumber.equal(subjectLiquidatorData.chunkAuctionPeriod);
+    });
+
+    it('sets the correct chunkSize', async () => {
+      await subject();
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+      const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+        set1,
+        set2,
+        oracleWhiteList,
+        subjectStartingCurrentSets,
+        subjectLiquidatorData.usdChunkSize,
+      );
+
+      expect(twapState.chunkSize).to.be.bignumber.equal(expectedChunkSize);
+    });
+
+    describe('for an auction that does not need to be chunked', async () => {
+      beforeEach(async () => {
+        subjectStartingCurrentSets = ether(1000);
+      });
+
+      it('sets the correct chunkSize', async () => {
+        await subject();
+
+        const twapState: any = await twapAuction.twapState.callAsync();
+        const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+          set1,
+          set2,
+          oracleWhiteList,
+          subjectStartingCurrentSets,
+          subjectLiquidatorData.usdChunkSize,
+        );
+
+        expect(twapState.chunkSize).to.be.bignumber.equal(expectedChunkSize);
+      });
+
+      it('sets the correct orderRemaining', async () => {
+        await subject();
+
+        const twapState: any = await twapAuction.twapState.callAsync();
+
+        expect(twapState.orderRemaining).to.be.bignumber.equal(ZERO);
+      });
+    });
+
+    describe('when a collateral has one asset', async () => {
+      beforeEach(async () => {
+        subjectNextSet = set3.address;
+      });
+
+      it('sets the correct chunkSize', async () => {
+        await subject();
+
+        const twapState: any = await twapAuction.twapState.callAsync();
+        const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+          set1,
+          set3,
+          oracleWhiteList,
+          subjectStartingCurrentSets,
+          subjectLiquidatorData.usdChunkSize,
+        );
+
+        expect(twapState.chunkSize).to.be.bignumber.equal(expectedChunkSize);
+      });
+
+      it('sets the correct orderRemaining', async () => {
+        await subject();
+
+        const twapState: any = await twapAuction.twapState.callAsync();
+        const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+          set1,
+          set3,
+          oracleWhiteList,
+          subjectStartingCurrentSets,
+          subjectLiquidatorData.usdChunkSize,
+        );
+
+        expect(twapState.orderRemaining).to.be.bignumber.equal(subjectStartingCurrentSets.sub(expectedChunkSize));
+      });
+    });
+  });
+
+  describe('#auctionNextChunk', async () => {
+    let currentSet: Address;
+    let nextSet: Address;
+    let startingCurrentSets: BigNumber;
+    let liquidatorData: any;
+
+    before(async () => {
+      startingCurrentSets = ether(3000);
+    });
+
+    beforeEach(async () => {
+      currentSet = set1.address;
+      nextSet = set2.address;
+      liquidatorData = coerceStructBNValuesToString(
+        {
+          usdChunkSize: ether(10 ** 5),
+          chunkAuctionPeriod: ONE_HOUR_IN_SECONDS,
+        }
+      );
+
+      await twapAuction.testInitializeTWAPAuction.sendTransactionAsync(
+        currentSet,
+        nextSet,
+        startingCurrentSets,
+        liquidatorData
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return twapAuction.testAuctionNextChunk.sendTransactionAsync();
+    }
+
+    it('sets the correct orderRemaining', async () => {
+      const preTWAPState: any = await twapAuction.twapState.callAsync();
+
+      await subject();
+
+      const newChunkSize = BigNumber.min(preTWAPState.chunkSize, preTWAPState.orderRemaining);
+      const expectedOrderRemaining = new BigNumber(preTWAPState.orderRemaining).sub(newChunkSize);
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+
+      expect(twapState.orderRemaining).to.be.bignumber.equal(expectedOrderRemaining);
+    });
+
+    it('sets the correct startingCurrentSets', async () => {
+      const preTWAPState: any = await twapAuction.twapState.callAsync();
+
+      await subject();
+
+      const newChunkSize = BigNumber.min(preTWAPState.chunkSize, preTWAPState.orderRemaining);
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+
+      expect(twapState.chunkAuction.auction.startingCurrentSets).to.be.bignumber.equal(newChunkSize);
+    });
+
+    it('sets the correct remainingCurrentSets', async () => {
+      const preTWAPState: any = await twapAuction.twapState.callAsync();
+
+      await subject();
+
+      const newChunkSize = BigNumber.min(preTWAPState.chunkSize, preTWAPState.orderRemaining);
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+
+      expect(twapState.chunkAuction.auction.remainingCurrentSets).to.be.bignumber.equal(newChunkSize);
+    });
+
+    it('sets the correct startTime', async () => {
+      const subjectTimestamp = await getSubjectTimestamp(subject());
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+
+      expect(twapState.chunkAuction.auction.startTime).to.be.bignumber.equal(subjectTimestamp);
+    });
+
+    it('sets the correct startTime', async () => {
+      const subjectTimestamp = await getSubjectTimestamp(subject());
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+
+      expect(twapState.chunkAuction.endTime).to.be.bignumber.equal(subjectTimestamp.add(auctionPeriod));
+    });
+
+    describe('when orderRemaining should be zeroed out', async () => {
+      before(async () => {
+        startingCurrentSets = ether(2000);
+      });
+
+      after(async () => {
+        startingCurrentSets = ether(3000);
+      });
+
+      it('sets the correct orderRemaining', async () => {
+        await subject();
+
+        const twapState: any = await twapAuction.twapState.callAsync();
+
+        expect(twapState.orderRemaining).to.be.bignumber.equal(ZERO);
+      });
+
+      it('sets the correct startingCurrentSets', async () => {
+        const preTWAPState: any = await twapAuction.twapState.callAsync();
+
+        await subject();
+
+        const newChunkSize = BigNumber.min(preTWAPState.chunkSize, preTWAPState.orderRemaining);
+
+        const twapState: any = await twapAuction.twapState.callAsync();
+
+        expect(twapState.chunkAuction.auction.startingCurrentSets).to.be.bignumber.equal(newChunkSize);
+      });
+    });
+  });
+
+  describe.only('#validateLiquidatorData', async () => {
+    let subjectCurrentSet: Address;
+    let subjectNextSet: Address;
+    let subjectStartingCurrentSets: BigNumber;
+    let subjectLiquidatorData: any;
+
+    let usdChunkSize: BigNumber;
+    let chunkAuctionPeriod: BigNumber;
+
+    before(async () => {
+      usdChunkSize = ether(10 ** 5);
+      chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
+    });
+
+    beforeEach(async () => {
+      subjectCurrentSet = set1.address;
+      subjectNextSet = set2.address;
+      subjectStartingCurrentSets = ether(2000);
+      subjectLiquidatorData = coerceStructBNValuesToString(
+        {
+          usdChunkSize,
+          chunkAuctionPeriod,
+        }
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return twapAuction.testValidateLiquidatorData.sendTransactionAsync(
+        subjectCurrentSet,
+        subjectNextSet,
+        subjectStartingCurrentSets,
+        subjectLiquidatorData
+      );
+    }
+
+    it('does not revert', async () => {
+      await expectNoRevertError(subject());
+    });
+
+    describe('when passed chunk size is too large', async () => {
+      before(async () => {
+        usdChunkSize = ether(10 ** 7);
+      });
+
+      after(async () => {
+        usdChunkSize = ether(10 ** 5);
+      });
+
+      it('it reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#validateNextChunkAuction', async () => {
+    let startingCurrentSets: BigNumber;
+    let liquidatorData: any;
+    let isChunksAuctionFinished: boolean;
+
+    before(async () => {
+      isChunksAuctionFinished = true;
+      startingCurrentSets = ether(2000);
+    });
+
+    beforeEach(async () => {
+      const currentSet = set1.address;
+      const nextSet = set2.address;
+      liquidatorData = coerceStructBNValuesToString(
+        {
+          usdChunkSize: ether(10 ** 5),
+          chunkAuctionPeriod: ONE_HOUR_IN_SECONDS,
+        }
+      );
+
+      await twapAuction.testInitializeTWAPAuction.sendTransactionAsync(
+        currentSet,
+        nextSet,
+        startingCurrentSets,
+        liquidatorData
+      );
+
+      if (isChunksAuctionFinished) {
+        await twapAuction.setRemainingCurrentSets.sendTransactionAsync(ZERO);
+      }
+    });
+
+    async function subject(): Promise<string> {
+      return twapAuction.testValidateNextChunkAuction.sendTransactionAsync();
+    }
+
+    it('does not revert', async () => {
+      await expectNoRevertError(subject());
+    });
+
+    describe('when current chunk auction is not finished', async () => {
+      before(async () => {
+        isChunksAuctionFinished = false;
+      });
+
+      after(async () => {
+        isChunksAuctionFinished = true;
+      });
+
+      it('it reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when orderRemaining is 0', async () => {
+      before(async () => {
+        startingCurrentSets = ether(1000);
+      });
+
+      after(async () => {
+        startingCurrentSets = ether(2000);
+      });
+
+      it('it reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when not enough time has passed between chunks', async () => {
+      beforeEach(async () => {
+        const block = await web3.eth.getBlock('latest');
+        await twapAuction.setLastChunkAuctionEnd.sendTransactionAsync(new BigNumber(block.timestamp));
+      });
+
+      it('it reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#getAssetPairHashFromCollateral', async () => {
+    let subjectCurrentSet: Address;
+    let subjectNextSet: Address;
+
+    beforeEach(async () => {
+      subjectCurrentSet = set1.address;
+      subjectNextSet = set2.address;
+    });
+
+    async function subject(): Promise<string> {
+      return twapAuction.testGetAssetPairHashFromCollateral.callAsync(
+        subjectCurrentSet,
+        subjectNextSet
+      );
+    }
+
+    it('sets creates the correct asset pair hash', async () => {
+      const assetPairHash = await subject();
+
+      const expectedAssetPairHash = await liquidatorHelper.generateAssetPairHashes(
+        wrappedETH.address,
+        usdc.address
+      );
+
+      expect(assetPairHash).to.be.bignumber.equal(expectedAssetPairHash);
+    });
+
+    describe('when one Set has one component', async () => {
+      beforeEach(async () => {
+        subjectCurrentSet = set3.address;
+      });
+
+      it('sets creates the correct asset pair hash', async () => {
+        const assetPairHash = await subject();
+
+        const expectedAssetPairHash = await liquidatorHelper.generateAssetPairHashes(
+          wrappedETH.address,
+          usdc.address
+        );
+
+        expect(assetPairHash).to.be.bignumber.equal(expectedAssetPairHash);
+      });
+    });
+  });
+
+  describe('#getAssetPairHash', async () => {
+    let subjectAssetOne: Address;
+    let subjectAssetTwo: Address;
+
+    beforeEach(async () => {
+      subjectAssetOne = wrappedETH.address;
+      subjectAssetTwo = usdc.address;
+    });
+
+    async function subject(): Promise<string> {
+      return twapAuction.testGetAssetPairHash.callAsync(
+        subjectAssetOne,
+        subjectAssetTwo
+      );
+    }
+
+    it('sets creates the correct asset pair hash', async () => {
+      const assetPairHash = await subject();
+
+      const expectedAssetPairHash = await liquidatorHelper.generateAssetPairHashes(
+        wrappedETH.address,
+        usdc.address
+      );
+
+      expect(assetPairHash).to.be.bignumber.equal(expectedAssetPairHash);
+    });
+
+    describe('when asset order is flipped', async () => {
+      beforeEach(async () => {
+        subjectAssetOne = usdc.address;
+        subjectAssetTwo = wrappedETH.address;
+      });
+
+      it('sets creates the correct asset pair hash', async () => {
+        const assetPairHash = await subject();
+
+        const expectedAssetPairHash = await liquidatorHelper.generateAssetPairHashes(
+          wrappedETH.address,
+          usdc.address
+        );
+
+        expect(assetPairHash).to.be.bignumber.equal(expectedAssetPairHash);
+      });
     });
   });
 });

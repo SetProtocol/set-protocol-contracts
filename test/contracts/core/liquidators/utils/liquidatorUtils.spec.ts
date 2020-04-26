@@ -156,7 +156,7 @@ contract('LiquidatorUtils', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe.only('#calculateRebalanceVolume', async () => {
+  describe('#calculateRebalanceVolume', async () => {
     let subjectCurrentSet: Address;
     let subjectNextSet: Address;
     let subjectOracleWhiteList: Address;

@@ -95,24 +95,28 @@ export class ValuationHelper {
     const components = await setToken.getComponents.callAsync();
     const componentIndex = components.indexOf(asset);
 
-    const tokenPrices = await this.getComponentPricesAsync(
-      components,
-      oracleWhiteList
-    );
-    const componentUnits = await setToken.getUnits.callAsync();
-    const setNaturalUnit = await setToken.naturalUnit.callAsync();
+    if (componentIndex != -1) {
+      const tokenPrices = await this.getComponentPricesAsync(
+        components,
+        oracleWhiteList
+      );
+      const componentUnits = await setToken.getUnits.callAsync();
+      const setNaturalUnit = await setToken.naturalUnit.callAsync();
 
-    const tokenUnitsInFullSet = SET_FULL_TOKEN_UNITS
-      .mul(componentUnits[componentIndex])
-      .div(setNaturalUnit)
-      .round(0, 3);
+      const tokenUnitsInFullSet = SET_FULL_TOKEN_UNITS
+        .mul(componentUnits[componentIndex])
+        .div(setNaturalUnit)
+        .round(0, 3);
 
-    const assetDecimals = await this._erc20Helper.getTokensDecimalsAsync([asset]);
-    return this.computeTokenDollarAmount(
-      tokenPrices[componentIndex],
-      tokenUnitsInFullSet,
-      assetDecimals[0],
-    );
+      const assetDecimals = await this._erc20Helper.getTokensDecimalsAsync([asset]);
+      return this.computeTokenDollarAmount(
+        tokenPrices[componentIndex],
+        tokenUnitsInFullSet,
+        assetDecimals[0],
+      );
+    } else {
+      return ZERO;
+    }
   }
 
   private computeTokenDollarAmount(

@@ -31,7 +31,7 @@ import { TWAPAuction } from "../../../../core/liquidators/twap-impl/TWAPAuction.
  */
 contract TWAPAuctionMock is TWAPAuction {
 
-    // TWAPAuction.TWAPState public twapState;
+    TWAPAuction.TWAPState public twapState;
 
     constructor(
         IOracleWhiteList _oracleWhiteList,
@@ -52,20 +52,87 @@ contract TWAPAuctionMock is TWAPAuction {
         )
     {}
 
-    // function initializeTWAPAuction(
-    //     ISetToken _currentSet,
-    //     ISetToken _nextSet,
-    //     uint256 _startingCurrentSetQuantity,
-    //     TWAPAuction.TWAPLiquidatorData calldata _liquidatorData
-    // )
-    //     external
-    // {
-    //     initializeTWAPAuction(
-    //         twapState,
-    //         _currentSet,
-    //         _nextSet,
-    //         _startingCurrentSetQuantity,
-    //         _liquidatorData
-    //     );
-    // }
+    function testInitializeTWAPAuction(
+        ISetToken _currentSet,
+        ISetToken _nextSet,
+        uint256 _startingCurrentSetQuantity,
+        TWAPAuction.TWAPLiquidatorData calldata _liquidatorData
+    )
+        external
+    {
+        initializeTWAPAuction(
+            twapState,
+            _currentSet,
+            _nextSet,
+            _startingCurrentSetQuantity,
+            _liquidatorData
+        );
+    }
+
+    function testAuctionNextChunk()
+        external
+    {
+        auctionNextChunk(twapState);
+    }
+
+    function testValidateLiquidatorData(
+        ISetToken _currentSet,
+        ISetToken _nextSet,
+        uint256 _startingCurrentSetQuantity,
+        TWAPLiquidatorData calldata _liquidatorData
+    )
+        external
+    {
+        TWAPAuction.validateLiquidatorData(
+            _currentSet,
+            _nextSet,
+            _startingCurrentSetQuantity,
+            _liquidatorData
+        );
+    }
+
+    function testValidateNextChunkAuction()
+        external
+    {
+        TWAPAuction.validateNextChunkAuction(twapState);
+    }
+
+    function testGetAssetPairHashFromCollateral(
+        ISetToken _currentSet,
+        ISetToken _nextSet
+    )
+        external
+        view
+        returns (bytes32)
+    {
+        return TWAPAuction.getAssetPairHashFromCollateral(_currentSet, _nextSet);
+    }
+
+    function testGetAssetPairHash(
+        address _assetOne,
+        address _assetTwo
+    )
+        external
+        view
+        returns (bytes32)
+    {
+        return TWAPAuction.getAssetPairHash(_assetOne, _assetTwo);
+    }
+
+    /* ============ Setters ============ */
+    function setRemainingCurrentSets(
+        uint256 _value
+    )
+        external
+    {
+        twapState.chunkAuction.auction.remainingCurrentSets = _value;
+    }
+
+    function setLastChunkAuctionEnd(
+        uint256 _value
+    )
+        external
+    {
+        twapState.lastChunkAuctionEnd = _value;
+    }
 }

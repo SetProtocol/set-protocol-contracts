@@ -33,6 +33,13 @@ export async function getTokenBalancesAsync(tokens: ERC20DetailedContract[], tes
   return result;
 }
 
+export async function getSubjectTimestamp(asyncTxn: any): Promise<BigNumber> {
+  await asyncTxn;
+
+  const block = await web3.eth.getBlock('latest');
+  return new BigNumber(block.timestamp);
+}
+
 // For solidity function calls that violate require()
 export async function expectRevertError(asyncTxn: any) {
   try {

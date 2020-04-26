@@ -28,7 +28,8 @@ import {
   AUCTION_CURVE_DENOMINATOR,
   ONE_HUNDRED,
   SCALE_FACTOR,
-  ZERO
+  ZERO,
+  ONE_DAY_IN_SECONDS
 } from '../constants';
 import {
   AssetChunkSizeBounds,
@@ -116,9 +117,10 @@ export class LiquidatorHelper {
 
   public async deployLiquidatorProxyAsync(
     liquidator: Address,
+    failAuctionPeriod: BigNumber = ONE_DAY_IN_SECONDS,
     from: Address = this._contractOwnerAddress
   ): Promise<LiquidatorProxyContract> {
-    const liquidatorProxy = await LiquidatorProxy.new(liquidator, txnFrom(from));
+    const liquidatorProxy = await LiquidatorProxy.new(liquidator, failAuctionPeriod, txnFrom(from));
 
     return new LiquidatorProxyContract(getContractInstance(liquidatorProxy), txnFrom(from));
   }
@@ -544,6 +546,27 @@ export class LiquidatorHelper {
     };
   }
 
+  public async calculateChunkSize(
+    currentSet: SetTokenContract,
+    nextSet: SetTokenContract,
+    oracleWhiteList: OracleWhiteListContract,
+    currentSetQuantity: BigNumber,
+    usdChunkSize: BigNumber,
+  ): Promise<BigNumber> {
+    const rebalanceVolume = await this.calculateRebalanceVolumeAsync(
+      currentSet,
+      nextSet,
+      oracleWhiteList,
+      currentSetQuantity
+    );
+
+    if (rebalanceVolume.div(usdChunkSize).greaterThanOrEqualTo(1)) {
+      return currentSetQuantity.mul(usdChunkSize).div(rebalanceVolume).round(0, 3);
+    } else {
+      return currentSetQuantity;
+    }
+  }
+
   public async calculateRebalanceVolumeAsync(
     currentSet: SetTokenContract,
     nextSet: SetTokenContract,
@@ -562,7 +585,6 @@ export class LiquidatorHelper {
     const nextSetAssetAllocation = await this.calculateAssetAllocationAsync(nextSet, oracleWhiteList, allocationAsset);
 
     const allocationChange = currentSetAssetAllocation.sub(nextSetAssetAllocation).abs();
-    console.log(allocationChange, currentSetValue, currentSetQuantity);
     return currentSetValue.mul(currentSetQuantity).mul(allocationChange).div(SCALE_FACTOR).div(SCALE_FACTOR);
   }
 

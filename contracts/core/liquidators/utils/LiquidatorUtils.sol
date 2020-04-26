@@ -41,6 +41,15 @@ library LiquidatorUtils {
 
     /* ============ Internal Functions ============ */
 
+    /**
+     * Calculate the rebalance volume as the difference in allocation percentages times market
+     * cap.
+     *
+     * @param _currentSet                       The Set to rebalance from
+     * @param _nextSet                          The Set to rebalance to
+     * @param _oracleWhiteList                  OracleWhiteList used for valuation
+     * @param _currentSetQuantity               Quantity of currentSet to rebalance
+     */
     function calculateRebalanceVolume(
         ISetToken _currentSet,
         ISetToken _nextSet,
@@ -51,11 +60,13 @@ library LiquidatorUtils {
         view
         returns (uint256)
     {
+        // Calculate current set value
         uint256 currentSetValue = SetUSDValuation.calculateSetTokenDollarValue(
             _currentSet,
             _oracleWhiteList
         );
 
+        // Calculate allocationAsset's current set allocation
         address allocationAsset = _currentSet.getComponents()[0];
         uint256 currentSetAllocation = calculateAssetAllocation(
             _currentSet,
@@ -63,19 +74,29 @@ library LiquidatorUtils {
             allocationAsset
         );
 
+        // Calculate allocationAsset's next set allocation
         uint256 nextSetAllocation = calculateAssetAllocation(
             _nextSet,
             _oracleWhiteList,
             allocationAsset
         );
 
+        // Get allocation change
         uint256 allocationChange = currentSetAllocation > nextSetAllocation ?
             currentSetAllocation.sub(nextSetAllocation) :
             nextSetAllocation.sub(currentSetAllocation);
 
+        // Return rebalance volume by multiplying allocationChange by Set market cap
         return currentSetValue.mul(_currentSetQuantity).mul(allocationChange).deScale().deScale();
     }
 
+    /**
+     * Calculate the allocation percentage of passed asset in Set
+     *
+     * @param _setToken             Set being evaluated
+     * @param _oracleWhiteList      OracleWhiteList used for valuation
+     * @param _asset                Asset that's allocation being calculated
+     */
     function calculateAssetAllocation(
         ISetToken _setToken,
         IOracleWhiteList _oracleWhiteList,
@@ -87,11 +108,13 @@ library LiquidatorUtils {
     {
         address[] memory components = _setToken.getComponents();
 
+        // Get index of asset and return if asset in Set
         (
             uint256 assetIndex,
             bool isInSet
         ) = AddressArrayUtils.indexOf(components, _asset);
 
+        // Calculate allocation of asset or return 0 if not in Set
         if (isInSet) {
             uint256 setNaturalUnit = _setToken.naturalUnit();
             uint256[] memory setUnits = _setToken.getUnits();

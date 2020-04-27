@@ -343,7 +343,7 @@ contract('TWAPAuction', accounts => {
     });
   });
 
-  describe.only('#auctionNextChunk', async () => {
+  describe('#auctionNextChunk', async () => {
     let currentSet: Address;
     let nextSet: Address;
     let startingCurrentSets: BigNumber;

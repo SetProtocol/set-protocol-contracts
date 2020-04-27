@@ -74,6 +74,7 @@ export { StandardTokenMockContract } from '../types/generated/standard_token_moc
 export { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
 export { StartRebalanceLibraryContract } from '../types/generated/start_rebalance_library';
 export { TWAPAuctionMockContract } from '../types/generated/t_w_a_p_auction_mock';
+export { TWAPAuctionCallerContract } from '../types/generated/t_w_a_p_auction_caller';
 export { TokenFlushMockContract } from '../types/generated/token_flush_mock';
 export { TimeLockUpgradeContract } from '../types/generated/time_lock_upgrade';
 export { TimeLockUpgradeV2Contract } from '../types/generated/time_lock_upgrade_v2';

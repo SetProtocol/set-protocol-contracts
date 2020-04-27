@@ -4,26 +4,23 @@ pragma experimental "ABIEncoderV2";
 import { ILiquidator } from "../../../core/interfaces/ILiquidator.sol";
 import { ISetToken } from "../../../core/interfaces/ISetToken.sol";
 import { Rebalance } from "../../../core/lib/Rebalance.sol";
+import { TWAPAuction } from "../../../core/liquidators/twap-impl/TWAPAuction.sol";
 
 
 // Mock contract implementation of Auction with extra functions for testing
 contract LiquidatorProxy {
     ILiquidator public liquidator;
 
-    uint256 public failRebalancePeriod;
-
     uint256[] private inflow;
     uint256[] private outflow;
     address[] private combinedTokenArray;
 
     constructor(
-        ILiquidator _liquidator,
-        uint256 _failRebalancePeriod
+        ILiquidator _liquidator
     )
         public
     {
         liquidator = _liquidator;
-        failRebalancePeriod = _failRebalancePeriod;
     }
 
     function startRebalance(
@@ -76,7 +73,7 @@ contract LiquidatorProxy {
     function getOutflow() external view returns(uint256[] memory) {
         return outflow;
     }
-    
+
     function getCombinedTokenArray() external view returns(address[] memory) {
         return combinedTokenArray;
     }

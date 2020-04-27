@@ -14,6 +14,7 @@ import {
   LiquidatorUtilsMockContract,
   OracleWhiteListContract,
   SetTokenContract,
+  TWAPAuctionCallerContract,
   TWAPAuctionMockContract,
   TWAPAuctionGettersMockContract,
   TwoAssetPriceBoundedLinearAuctionMockContract,
@@ -29,7 +30,7 @@ import {
   ONE_HUNDRED,
   SCALE_FACTOR,
   ZERO,
-  ONE_DAY_IN_SECONDS
+  ONE_DAY_IN_SECONDS,
 } from '../constants';
 import {
   AssetChunkSizeBounds,
@@ -45,6 +46,7 @@ const LinearAuctionMock = importArtifactsFromSource('LinearAuctionMock');
 const LiquidatorMock = importArtifactsFromSource('LiquidatorMock');
 const LiquidatorProxy = importArtifactsFromSource('LiquidatorProxy');
 const LiquidatorUtilsMock = importArtifactsFromSource('LiquidatorUtilsMock');
+const TWAPAuctionCaller = importArtifactsFromSource('TWAPAuctionCaller');
 const TWAPAuctionMock = importArtifactsFromSource('TWAPAuctionMock');
 const TWAPAuctionGettersMock = importArtifactsFromSource('TWAPAuctionGettersMock');
 const TwoAssetPriceBoundedLinearAuctionMock = importArtifactsFromSource('TwoAssetPriceBoundedLinearAuctionMock');
@@ -115,12 +117,21 @@ export class LiquidatorHelper {
     return new TWAPAuctionGettersMockContract(getContractInstance(twapAuctionGettersMock), txnFrom(from));
   }
 
-  public async deployLiquidatorProxyAsync(
+  public async deployTWAPAuctionCallerAsync(
     liquidator: Address,
     failAuctionPeriod: BigNumber = ONE_DAY_IN_SECONDS,
     from: Address = this._contractOwnerAddress
+  ): Promise<TWAPAuctionCallerContract> {
+    const auctionCaller = await TWAPAuctionCaller.new(liquidator, failAuctionPeriod, txnFrom(from));
+
+    return new TWAPAuctionCallerContract(getContractInstance(auctionCaller), txnFrom(from));
+  }
+
+  public async deployLiquidatorProxyAsync(
+    liquidator: Address,
+    from: Address = this._contractOwnerAddress
   ): Promise<LiquidatorProxyContract> {
-    const liquidatorProxy = await LiquidatorProxy.new(liquidator, failAuctionPeriod, txnFrom(from));
+    const liquidatorProxy = await LiquidatorProxy.new(liquidator, txnFrom(from));
 
     return new LiquidatorProxyContract(getContractInstance(liquidatorProxy), txnFrom(from));
   }

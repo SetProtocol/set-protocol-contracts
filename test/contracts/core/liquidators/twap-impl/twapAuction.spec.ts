@@ -20,6 +20,7 @@ import {
   TransferProxyContract,
   VaultContract,
   SetTokenContract,
+  TWAPAuctionCallerContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
 import { AssetChunkSizeBounds } from '@utils/auction';
@@ -31,7 +32,7 @@ import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { OracleHelper } from 'set-protocol-oracles';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
-import { ZERO, ONE_HOUR_IN_SECONDS } from '@utils/constants';
+import { ZERO, ONE_HOUR_IN_SECONDS, ONE_DAY_IN_SECONDS } from '@utils/constants';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -458,11 +459,13 @@ contract('TWAPAuction', accounts => {
     });
   });
 
-  describe.only('#validateLiquidatorData', async () => {
+  describe('#validateLiquidatorData', async () => {
     let subjectCurrentSet: Address;
     let subjectNextSet: Address;
     let subjectStartingCurrentSets: BigNumber;
     let subjectLiquidatorData: any;
+
+    let auctionCaller: TWAPAuctionCallerContract;
 
     let usdChunkSize: BigNumber;
     let chunkAuctionPeriod: BigNumber;
@@ -482,10 +485,14 @@ contract('TWAPAuction', accounts => {
           chunkAuctionPeriod,
         }
       );
+
+      auctionCaller = await liquidatorHelper.deployTWAPAuctionCallerAsync(
+        twapAuction.address
+      );
     });
 
     async function subject(): Promise<string> {
-      return twapAuction.testValidateLiquidatorData.sendTransactionAsync(
+      return auctionCaller.validateLiquidatorData.sendTransactionAsync(
         subjectCurrentSet,
         subjectNextSet,
         subjectStartingCurrentSets,
@@ -497,13 +504,27 @@ contract('TWAPAuction', accounts => {
       await expectNoRevertError(subject());
     });
 
-    describe('when passed chunk size is too large', async () => {
+    describe('when passed chunk size is not within the bounds', async () => {
       before(async () => {
         usdChunkSize = ether(10 ** 7);
       });
 
       after(async () => {
         usdChunkSize = ether(10 ** 5);
+      });
+
+      it('it reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when expected auction time would exceed failAuctionPeriod', async () => {
+      before(async () => {
+        chunkAuctionPeriod = ONE_DAY_IN_SECONDS;
+      });
+
+      after(async () => {
+        chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
       });
 
       it('it reverts', async () => {

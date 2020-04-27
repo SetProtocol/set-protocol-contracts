@@ -343,14 +343,17 @@ contract('TWAPAuction', accounts => {
     });
   });
 
-  describe('#auctionNextChunk', async () => {
+  describe.only('#auctionNextChunk', async () => {
     let currentSet: Address;
     let nextSet: Address;
     let startingCurrentSets: BigNumber;
     let liquidatorData: any;
 
+    let postChunkSetsRemaining: BigNumber;
+
     before(async () => {
       startingCurrentSets = ether(3000);
+      postChunkSetsRemaining = new BigNumber(10 ** 13);
     });
 
     beforeEach(async () => {
@@ -369,6 +372,8 @@ contract('TWAPAuction', accounts => {
         startingCurrentSets,
         liquidatorData
       );
+
+      await twapAuction.setRemainingCurrentSets.sendTransactionAsync(postChunkSetsRemaining);
     });
 
     async function subject(): Promise<string> {
@@ -381,7 +386,8 @@ contract('TWAPAuction', accounts => {
       await subject();
 
       const newChunkSize = BigNumber.min(preTWAPState.chunkSize, preTWAPState.orderRemaining);
-      const expectedOrderRemaining = new BigNumber(preTWAPState.orderRemaining).sub(newChunkSize);
+      const expectedOrderRemaining = new BigNumber(preTWAPState.orderRemaining).sub(newChunkSize)
+                                        .add(postChunkSetsRemaining);
 
       const twapState: any = await twapAuction.twapState.callAsync();
 
@@ -420,7 +426,7 @@ contract('TWAPAuction', accounts => {
       expect(twapState.chunkAuction.auction.startTime).to.be.bignumber.equal(subjectTimestamp);
     });
 
-    it('sets the correct startTime', async () => {
+    it('sets the correct endTime', async () => {
       const subjectTimestamp = await getSubjectTimestamp(subject());
 
       const twapState: any = await twapAuction.twapState.callAsync();
@@ -450,7 +456,10 @@ contract('TWAPAuction', accounts => {
 
         await subject();
 
-        const newChunkSize = BigNumber.min(preTWAPState.chunkSize, preTWAPState.orderRemaining);
+        const newChunkSize = BigNumber.min(
+          preTWAPState.chunkSize,
+          new BigNumber(preTWAPState.orderRemaining).add(postChunkSetsRemaining)
+        );
 
         const twapState: any = await twapAuction.twapState.callAsync();
 

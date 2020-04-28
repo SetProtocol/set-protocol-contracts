@@ -114,19 +114,29 @@ contract TWAPLiquidator is
         external
         isValidSet
     {
-        // _liquidatorData; // Pass linting
+        // Parse Liquidator data
+        TWAPAuction.TWAPLiquidatorData memory twapLiquidatorData = TWAPAuction.parseLiquidatorData(_liquidatorData);
 
-        // TwoAssetPriceBoundedLinearAuction.validateTwoAssetPriceBoundedAuction(
-        //     _currentSet,
-        //     _nextSet
-        // );
+        // Validate liquidator data
+        TWAPAuction.validateLiquidatorData(
+            _currentSet,
+            _nextSet,
+            _startingCurrentSetQuantity,
+            twapLiquidatorData
+        );
 
-        // LinearAuction.initializeLinearAuction(
-        //     chunkAuction(msg.sender),
-        //     _currentSet,
-        //     _nextSet,
-        //     _startingCurrentSetQuantity
-        // );
+        TwoAssetPriceBoundedLinearAuction.validateTwoAssetPriceBoundedAuction(
+            _currentSet,
+            _nextSet
+        );
+
+        TWAPAuction.initializeTWAPAuction(
+            auctions[msg.sender],
+            _currentSet,
+            _nextSet,
+            _startingCurrentSetQuantity,
+            twapLiquidatorData
+        );
     }
 
     /**
@@ -147,6 +157,11 @@ contract TWAPLiquidator is
         Auction.validateBidQuantity(auction(msg.sender), _quantity);
 
         Auction.reduceRemainingCurrentSets(auction(msg.sender), _quantity);
+
+        // If the auction is complete, update the chunk auction end time to now.
+        if (!hasBiddableQuantity(auction(msg.sender))) {
+            twapAuction(msg.sender).lastChunkAuctionEnd = block.timestamp;    
+        }
 
         return getBidPrice(msg.sender, _quantity);
     }
@@ -169,16 +184,25 @@ contract TWAPLiquidator is
         return LinearAuction.getTokenFlow(chunkAuction(_set), _quantity);
     }
 
-    function iterateChunkAuction(address _set) external isValidSet {
-        // To implement
+    /**
+     * 
+     */    
+    function iterateChunkAuction(address _set) external {
+        validateNextChunkAuction(twapAuction(_set));
+
+        auctionNextChunk(twapAuction(_set));
     }
 
     /**
      * Validates auction completion and clears auction state.
      */
     function settleRebalance() external isValidSet {
-
         Auction.validateAuctionCompletion(auction(msg.sender));
+
+        require(
+            !(isRebalanceActive(twapAuction(msg.sender))),
+            "TWAPLiquidator: Auction must be complete"
+        );
 
         clearAuctionState(msg.sender);
     }
@@ -187,22 +211,20 @@ contract TWAPLiquidator is
      * Clears auction state.
      */
     function endFailedRebalance() external isValidSet {
-
         clearAuctionState(msg.sender);
     }
 
     function setChunkSizeBounds(
         address _assetOne,
         address _assetTwo,
-        BoundsLibrary.Bounds calldata _assetPairBounds
+        BoundsLibrary.Bounds memory _assetPairBounds
     )
-        external
+        public
         onlyOwner
     {
-        // bytes32 pairHash = TWAPAuction.getAssetPairHash(_assetOne, _assetTwo);
+        bytes32 pairHash = TWAPAuction.getAssetPairHash(_assetOne, _assetTwo);
 
-        // chunkSizeWhiteList[pairHash] = _assetPairBounds;
-
+        chunkSizeWhiteList[pairHash] = _assetPairBounds;
     }
 
     /* ============ Getters Functions ============ */

@@ -86,8 +86,9 @@ library LiquidatorUtils {
             currentSetAllocation.sub(nextSetAllocation) :
             nextSetAllocation.sub(currentSetAllocation);
 
-        // Return rebalance volume by multiplying allocationChange by Set market cap
-        return currentSetValue.mul(_currentSetQuantity).mul(allocationChange).deScale().deScale();
+        // Return rebalance volume by multiplying allocationChange by Set market cap, deScaling to avoid
+        // overflow potential, still have 18 decimals of precision
+        return currentSetValue.mul(_currentSetQuantity).deScale().mul(allocationChange).deScale();
     }
 
     /**

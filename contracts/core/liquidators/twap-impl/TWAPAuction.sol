@@ -106,6 +106,11 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         );
 
         for (uint8 i = 0; i < _assetPairHashes.length; i++) {
+            require(
+                _assetPairBounds[i].isValid(),
+                "TWAPAuction.constructor: Passed asset pair bounds are invalid."
+            );
+
             chunkSizeWhiteList[_assetPairHashes[i]] = _assetPairBounds[i];
         }
 

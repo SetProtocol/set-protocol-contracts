@@ -160,15 +160,6 @@ contract('TWAPAuction', accounts => {
       {min: ZERO, max: ether(10 ** 6)},
       {min: ether(10 ** 4), max: ether(10 ** 6)},
     ];
-
-    twapAuction = await liquidatorHelper.deployTWAPAuctionMock(
-      oracleWhiteList.address,
-      auctionPeriod,
-      rangeStart,
-      rangeEnd,
-      assetPairHashes,
-      assetPairBounds
-    );
   });
 
   after(async () => {
@@ -177,22 +168,68 @@ contract('TWAPAuction', accounts => {
   });
 
   describe('#constructor', async () => {
-    it('sets the correct chunkSizeWhiteList', async () => {
-      const pairOne: any = await twapAuction.chunkSizeWhiteList.callAsync(assetPairHashes[0]);
-      const pairTwo: any = await twapAuction.chunkSizeWhiteList.callAsync(assetPairHashes[1]);
+    let subjectOracleWhiteList: Address;
+    let subjectAuctionPeriod: BigNumber;
+    let subjectRangeStart: BigNumber;
+    let subjectRangeEnd: BigNumber;
+    let subjectAssetPairHashes: string[];
+    let subjectAssetPairBounds: any[];
 
-      expect(pairOne.min).to.equal(assetPairBounds[0].min.toString());
-      expect(pairOne.max).to.equal(assetPairBounds[0].max.toString());
-      expect(pairTwo.min).to.equal(assetPairBounds[1].min.toString());
-      expect(pairTwo.max).to.equal(assetPairBounds[1].max.toString());
+    beforeEach(async () => {
+      subjectOracleWhiteList = oracleWhiteList.address;
+      subjectAuctionPeriod = auctionPeriod;
+      subjectRangeStart = rangeStart;
+      subjectRangeEnd = rangeEnd;
+      subjectAssetPairHashes = assetPairHashes;
+      subjectAssetPairBounds = assetPairBounds;
+    });
+
+    async function subject(): Promise<TWAPAuctionMockContract> {
+      return liquidatorHelper.deployTWAPAuctionMock(
+        subjectOracleWhiteList,
+        subjectAuctionPeriod,
+        subjectRangeStart,
+        subjectRangeEnd,
+        subjectAssetPairHashes,
+        subjectAssetPairBounds
+      );
+    }
+
+    it('sets the correct chunkSizeWhiteList', async () => {
+      twapAuction = await subject();
+
+      const pairOne: any = await twapAuction.chunkSizeWhiteList.callAsync(subjectAssetPairHashes[0]);
+      const pairTwo: any = await twapAuction.chunkSizeWhiteList.callAsync(subjectAssetPairHashes[1]);
+
+      expect(pairOne.min).to.equal(subjectAssetPairBounds[0].min.toString());
+      expect(pairOne.max).to.equal(subjectAssetPairBounds[0].max.toString());
+      expect(pairTwo.min).to.equal(subjectAssetPairBounds[1].min.toString());
+      expect(pairTwo.max).to.equal(subjectAssetPairBounds[1].max.toString());
     });
 
     it('sets the correct expected chunk auction length', async () => {
+      twapAuction = await subject();
+
       const actualExpectedAuctionLength = await twapAuction.expectedChunkAuctionLength.callAsync();
 
-      const expectedAuctionLength = auctionPeriod.mul(rangeStart.add(2)).div(rangeStart.add(rangeEnd));
+      const expectedAuctionLength = subjectAuctionPeriod
+        .mul(subjectRangeStart.add(2))
+        .div(subjectRangeStart.add(subjectRangeEnd));
 
       expect(actualExpectedAuctionLength).to.be.bignumber.equal(expectedAuctionLength);
+    });
+
+    describe('when invalid bounds are passed', async () => {
+      beforeEach(async () => {
+        subjectAssetPairBounds = [
+          {min: ether(10 ** 7), max: ether(10 ** 6)},
+          {min: ether(10 ** 4), max: ether(10 ** 6)},
+        ];
+      });
+
+      it('sets the correct chunkSize', async () => {
+        await expectRevertError(subject());
+      });
     });
   });
 
@@ -203,6 +240,15 @@ contract('TWAPAuction', accounts => {
     let subjectLiquidatorData: any;
 
     beforeEach(async () => {
+      twapAuction = await liquidatorHelper.deployTWAPAuctionMock(
+        oracleWhiteList.address,
+        auctionPeriod,
+        rangeStart,
+        rangeEnd,
+        assetPairHashes,
+        assetPairBounds
+      );
+
       subjectCurrentSet = set1.address;
       subjectNextSet = set2.address;
       subjectStartingCurrentSets = ether(2000);
@@ -244,6 +290,23 @@ contract('TWAPAuction', accounts => {
       );
 
       expect(twapState.orderRemaining).to.be.bignumber.equal(subjectStartingCurrentSets.sub(expectedChunkSize));
+    });
+
+    it('sets the correct startingCurrentSets', async () => {
+      await subject();
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+      const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+        set1,
+        set2,
+        oracleWhiteList,
+        subjectStartingCurrentSets,
+        subjectLiquidatorData.usdChunkSize,
+      );
+
+      expect(twapState.chunkAuction.auction.startingCurrentSets).to.be.bignumber.equal(
+        expectedChunkSize
+      );
     });
 
     it('sets the correct lastChunkAuctionEnd', async () => {
@@ -357,6 +420,15 @@ contract('TWAPAuction', accounts => {
     });
 
     beforeEach(async () => {
+      twapAuction = await liquidatorHelper.deployTWAPAuctionMock(
+        oracleWhiteList.address,
+        auctionPeriod,
+        rangeStart,
+        rangeEnd,
+        assetPairHashes,
+        assetPairBounds
+      );
+
       currentSet = set1.address;
       nextSet = set2.address;
       liquidatorData = coerceStructBNValuesToString(
@@ -485,6 +557,15 @@ contract('TWAPAuction', accounts => {
     });
 
     beforeEach(async () => {
+      twapAuction = await liquidatorHelper.deployTWAPAuctionMock(
+        oracleWhiteList.address,
+        auctionPeriod,
+        rangeStart,
+        rangeEnd,
+        assetPairHashes,
+        assetPairBounds
+      );
+
       subjectCurrentSet = set1.address;
       subjectNextSet = set2.address;
       subjectStartingCurrentSets = ether(2000);
@@ -553,6 +634,15 @@ contract('TWAPAuction', accounts => {
     });
 
     beforeEach(async () => {
+      twapAuction = await liquidatorHelper.deployTWAPAuctionMock(
+        oracleWhiteList.address,
+        auctionPeriod,
+        rangeStart,
+        rangeEnd,
+        assetPairHashes,
+        assetPairBounds
+      );
+
       const currentSet = set1.address;
       const nextSet = set2.address;
       liquidatorData = coerceStructBNValuesToString(
@@ -627,6 +717,15 @@ contract('TWAPAuction', accounts => {
     let subjectNextSet: Address;
 
     beforeEach(async () => {
+      twapAuction = await liquidatorHelper.deployTWAPAuctionMock(
+        oracleWhiteList.address,
+        auctionPeriod,
+        rangeStart,
+        rangeEnd,
+        assetPairHashes,
+        assetPairBounds
+      );
+
       subjectCurrentSet = set1.address;
       subjectNextSet = set2.address;
     });
@@ -672,6 +771,15 @@ contract('TWAPAuction', accounts => {
     let subjectAssetTwo: Address;
 
     beforeEach(async () => {
+      twapAuction = await liquidatorHelper.deployTWAPAuctionMock(
+        oracleWhiteList.address,
+        auctionPeriod,
+        rangeStart,
+        rangeEnd,
+        assetPairHashes,
+        assetPairBounds
+      );
+
       subjectAssetOne = wrappedETH.address;
       subjectAssetTwo = usdc.address;
     });
@@ -696,6 +804,15 @@ contract('TWAPAuction', accounts => {
 
     describe('when asset order is flipped', async () => {
       beforeEach(async () => {
+        twapAuction = await liquidatorHelper.deployTWAPAuctionMock(
+          oracleWhiteList.address,
+          auctionPeriod,
+          rangeStart,
+          rangeEnd,
+          assetPairHashes,
+          assetPairBounds
+        );
+
         subjectAssetOne = usdc.address;
         subjectAssetTwo = wrappedETH.address;
       });

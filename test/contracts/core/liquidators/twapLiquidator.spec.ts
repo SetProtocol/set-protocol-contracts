@@ -189,7 +189,7 @@ contract('TWAPLiquidator', accounts => {
     });
   });
 
-  describe.only('#startRebalance', async () => {
+  describe('#startRebalance', async () => {
     let usdChunkSize: BigNumber;
     let chunkAuctionPeriod: BigNumber;
 
@@ -463,19 +463,44 @@ contract('TWAPLiquidator', accounts => {
     });
   });
 
-  describe('[CONTEXT] First two chunk auction', async () => {
-    let subjectCaller: Address;
+  describe.only('[CONTEXT] First two chunk auction', async () => {
+    let usdChunkSize: BigNumber;
+    let chunkAuctionPeriod: BigNumber;
 
-    let startingCurrentSetQuantity: BigNumber;
+    let subjectCaller: Address;
+    let subjectCurrentSet: Address;
+    let subjectNextSet: Address;
+    let subjectStartingCurrentSets: BigNumber;
+    let subjectLiquidatorData: string;
 
     beforeEach(async () => {
       subjectCaller = functionCaller;
-      startingCurrentSetQuantity = ether(10);
 
-      // Start the Rebalance
+      subjectCaller = functionCaller;
+      subjectCurrentSet = scenario.set1.address;
+      subjectNextSet = scenario.set2.address;
+      subjectStartingCurrentSets = ether(2000);
+
+      usdChunkSize = ether(10 ** 5);
+      chunkAuctionPeriod =  ONE_HOUR_IN_SECONDS;
+
+      subjectLiquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(
+        usdChunkSize,
+        chunkAuctionPeriod,
+      );
+
+      await liquidatorProxy.startRebalance.sendTransactionAsync(
+        subjectCurrentSet,
+        subjectNextSet,
+        subjectStartingCurrentSets,
+        subjectLiquidatorData,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+
     });
 
-    describe('#placeBid', async () => {});
+    describe.only('#placeBid', async () => {});
+
     describe('#getBidPrice', async () => {
       let subjectSet: Address;
       let subjectQuantity: BigNumber;
@@ -483,18 +508,10 @@ contract('TWAPLiquidator', accounts => {
       let tokenFlows: TokenFlow;
 
       beforeEach(async () => {
-        subjectSet = functionCaller;
-        subjectQuantity = startingCurrentSetQuantity;
+        subjectSet = liquidatorProxy.address;
+        subjectQuantity = subjectStartingCurrentSets;
 
-        await liquidator.startRebalance.sendTransactionAsync(
-          scenario.set1.address,
-          scenario.set2.address,
-          startingCurrentSetQuantity,
-          EMPTY_BYTESTRING,
-          { from: subjectCaller, gas: DEFAULT_GAS },
-        );
-
-        const auction = await liquidator.auctions.callAsync(subjectCaller);
+        const auction = await liquidator.auctions.callAsync(subjectSet);
         const chunkAuction = auction[0];
         const linearAuction = getLinearAuction(chunkAuction);
         const { timestamp } = await web3.eth.getBlock('latest');

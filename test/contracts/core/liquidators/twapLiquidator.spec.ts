@@ -507,7 +507,7 @@ contract('TWAPLiquidator', accounts => {
       );
     });
 
-    describe.only('#placeBid', async () => {
+    describe('#placeBid', async () => {
       let subjectSet: Address;
       let subjectQuantity: BigNumber;
 
@@ -531,6 +531,33 @@ contract('TWAPLiquidator', accounts => {
           { from: subjectCaller, gas: DEFAULT_GAS },
         );
       }
+
+      it('returns the correct array and inflows', async () => {
+        await subject();
+        
+        const auction = await liquidator.auctions.callAsync(subjectSet);
+        const chunkAuction = auction[0];
+        const linearAuction = getLinearAuction(chunkAuction);
+        const { timestamp } = await web3.eth.getBlock('latest');
+
+        const currentPrice = await liquidatorHelper.calculateCurrentPrice(
+          linearAuction,
+          new BigNumber(timestamp),
+          auctionPeriod,
+        );
+
+        const tokenFlows = liquidatorHelper.constructTokenFlow(
+          linearAuction,
+          subjectQuantity,
+          currentPrice,
+        );
+
+        const addresses = await liquidatorProxy.getCombinedTokenArray.callAsync();
+        expect(JSON.stringify(addresses)).to.equal(JSON.stringify(tokenFlows.addresses));
+
+        const inflow = await liquidatorProxy.getInflow.callAsync();
+        expect(JSON.stringify(inflow)).to.equal(JSON.stringify(tokenFlows.inflow));
+      });
 
       it('reduces the remainingCurrentSets', async () => {
         await subject();
@@ -614,7 +641,34 @@ contract('TWAPLiquidator', accounts => {
       });
     });
 
-    describe('#iterateChunkAuction', async () => {});
+    describe.only('#iterateChunkAuction', async () => {
+      beforeEach(async () => {
+        const minimumBid =  await liquidator.minimumBid.callAsync(liquidatorProxy.address);
+        const maxBid = liquidatorHelper.calculateChunkAuctionMaximumBid(
+          chunkAuctionChunkSize,
+          minimumBid,
+        );
+        await liquidatorProxy.placeBid.sendTransactionAsync(
+          maxBid,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+
+        await blockchain.increaseTimeAsync(chunkAuctionPeriod);
+      });
+
+      async function subject(): Promise<any> {
+        return liquidator.iterateChunkAuction.sendTransactionAsync(
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      it('should update the orderRemaining', async () => {
+
+      });
+
+      // Revert when the auction is not complete
+      // Revert if not enough time has elapsed since auction end
+    });
 
     describe('#hasRebalanceFailed', async () => {
       let subjectSet: Address;

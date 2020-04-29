@@ -29,7 +29,7 @@ import { getLinearAuction, LinearAuction, TokenFlow } from '@utils/auction';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
-import { RebalanceTestSetup } from '@utils/helpers/RebalanceTestSetup';
+import { RebalanceTestSetup } from '@utils/helpers/rebalanceTestSetup';
 import { OracleHelper } from 'set-protocol-oracles';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
 
@@ -243,7 +243,7 @@ contract('TWAPLiquidator', accounts => {
         await scenario.set2.naturalUnit.callAsync()
       );
 
-      const combinedTokenArray = _.union(scenario.set1Components, scenario.set2Components);
+      const combinedTokenArray: Address[] = _.union(scenario.set1Components, scenario.set2Components);
       const combinedCurrentSetUnits = await liquidatorHelper.constructCombinedUnitArrayAsync(
         scenario.set1,
         combinedTokenArray,

@@ -19,7 +19,6 @@ import { getWeb3 } from '@utils/web3Helper';
 import { AssetChunkSizeBounds } from '@utils/auction';
 import {
   DEFAULT_GAS,
-  EMPTY_BYTESTRING,
   ZERO,
   ONE_DAY_IN_SECONDS,
   ONE_HOUR_IN_SECONDS,
@@ -304,10 +303,10 @@ contract('TWAPLiquidator', accounts => {
 
       const combinedCurrentUnits =  await liquidator.getCombinedCurrentSetUnits.callAsync(liquidatorProxy.address);
       expect(JSON.stringify(combinedCurrentUnits)).to.equal(JSON.stringify(combinedCurrentSetUnits));
-      
-      const combinedNextUnits =  await liquidator.getCombinedNextSetUnits.callAsync(liquidatorProxy.address);      
+
+      const combinedNextUnits =  await liquidator.getCombinedNextSetUnits.callAsync(liquidatorProxy.address);
       expect(JSON.stringify(combinedNextUnits)).to.equal(JSON.stringify(combinedNextSetUnits));
-      
+
       const remainingCurrentSets =  await liquidator.remainingCurrentSets.callAsync(liquidatorProxy.address);
       expect(remainingCurrentSets).to.be.bignumber.equal(expectedChunkSize);
 
@@ -383,7 +382,7 @@ contract('TWAPLiquidator', accounts => {
       );
       const expectedOrderRemaining = subjectStartingCurrentSets.sub(expectedChunkSize);
       expect(orderRemaining).to.bignumber.equal(expectedOrderRemaining);
-    });    
+    });
 
     it('gets the correct getTotalSetsRemaining', async () => {
       await subject();
@@ -397,7 +396,7 @@ contract('TWAPLiquidator', accounts => {
 
       const lastChunkAuctionEnd = await liquidator.getLastChunkAuctionEnd.callAsync(liquidatorProxy.address);
       const expectedLastChunkAuctionEnd = subjectTimestamp.sub(chunkAuctionPeriod);
-      expect(lastChunkAuctionEnd).to.be.bignumber.equal(expectedLastChunkAuctionEnd);      
+      expect(lastChunkAuctionEnd).to.be.bignumber.equal(expectedLastChunkAuctionEnd);
     });
 
     describe('when the caller is not a valid Set', async () => {
@@ -473,6 +472,8 @@ contract('TWAPLiquidator', accounts => {
     let subjectStartingCurrentSets: BigNumber;
     let subjectLiquidatorData: string;
 
+    let chunkAuctionChunkSize: BigNumber;
+
     beforeEach(async () => {
       subjectCaller = functionCaller;
 
@@ -497,9 +498,73 @@ contract('TWAPLiquidator', accounts => {
         { from: subjectCaller, gas: DEFAULT_GAS },
       );
 
+      chunkAuctionChunkSize = await liquidatorHelper.calculateChunkSize(
+        scenario.set1,
+        scenario.set2,
+        oracleWhiteList,
+        subjectStartingCurrentSets,
+        usdChunkSize,
+      );
     });
 
-    describe.only('#placeBid', async () => {});
+    describe.only('#placeBid', async () => {
+      let subjectSet: Address;
+      let subjectQuantity: BigNumber;
+
+      let maxBid: BigNumber;
+
+      beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+
+        const minimumBid =  await liquidator.minimumBid.callAsync(liquidatorProxy.address);
+        maxBid = liquidatorHelper.calculateChunkAuctionMaximumBid(
+          chunkAuctionChunkSize,
+          minimumBid,
+        );
+
+        subjectQuantity = maxBid.div(2);
+      });
+
+      async function subject(): Promise<any> {
+        return liquidatorProxy.placeBid.sendTransactionAsync(
+          subjectQuantity,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      it('reduces the remainingCurrentSets', async () => {
+        await subject();
+
+        const remainingQuantity = await liquidator.remainingCurrentSets.callAsync(subjectSet);
+        const startQuantity = await liquidator.startingCurrentSets.callAsync(subjectSet);
+        const expectedRemainingSets = startQuantity.sub(subjectQuantity);
+        expect(expectedRemainingSets).to.bignumber.equal(remainingQuantity);
+      });
+
+      describe('when the entire auction is bidded on', async () => {
+        beforeEach(async () => {
+          subjectQuantity = maxBid;
+        });
+
+        it('should update lastChunkAuctionEnd to the present timestamp', async () => {
+          const subjectTimestamp = await getSubjectTimestamp(subject());
+
+          const lastAuctionEnded = await liquidator.getLastChunkAuctionEnd.callAsync(subjectSet);
+
+          expect(lastAuctionEnded).to.bignumber.equal(subjectTimestamp);
+        });
+      });
+
+      describe('when the bid quantity is not a multiple of the minimumBid', async () => {
+        beforeEach(async () => {
+          subjectQuantity = chunkAuctionChunkSize;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+    });
 
     describe('#getBidPrice', async () => {
       let subjectSet: Address;
@@ -650,7 +715,7 @@ contract('TWAPLiquidator', accounts => {
 
   describe('[CONTEXT] Second two chunk auction', async () => {
     describe('#settleRebalance', async () => {});
-  });  
+  });
 
   describe('#setChunkSizeBounds', async () => {
     let subjectCaller: Address;

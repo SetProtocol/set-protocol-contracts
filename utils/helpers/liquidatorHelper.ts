@@ -588,6 +588,13 @@ export class LiquidatorHelper {
     }
   }
 
+  public calculateChunkAuctionMaximumBid(
+    chunkAuctionSize: BigNumber,
+    minimumBid: BigNumber,
+  ): BigNumber {
+    return chunkAuctionSize.div(minimumBid).round(0, 3).mul(minimumBid);
+  }
+
   public async calculateRebalanceVolumeAsync(
     currentSet: SetTokenContract,
     nextSet: SetTokenContract,

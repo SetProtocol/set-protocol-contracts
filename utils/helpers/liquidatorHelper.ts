@@ -54,7 +54,7 @@ const TwoAssetPriceBoundedLinearAuctionMock = importArtifactsFromSource('TwoAsse
 import { ERC20Helper } from './erc20Helper';
 import { ValuationHelper } from './valuationHelper';
 
-const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
+const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 
 export interface AuctionData {
   maxNaturalUnit: BigNumber;
@@ -247,6 +247,16 @@ export class LiquidatorHelper {
   }
 
   /* ============ Deploy Helpers ============ */
+  public generateTWAPLiquidatorCalldata(
+    usdChunkSize: BigNumber,
+    chunkAuctionPeriod: BigNumber,
+  ): string {
+    return SetTestUtils.bufferArrayToHex([
+      SetUtils.paddedBufferForBigNumber(usdChunkSize),
+      SetUtils.paddedBufferForBigNumber(chunkAuctionPeriod),
+    ]);
+  }
+
   public generateAssetPairHashes(
     assetOne: Address,
     assetTwo: Address

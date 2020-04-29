@@ -506,6 +506,54 @@ contract('TWAPAuction', accounts => {
       expect(twapState.chunkAuction.endTime).to.be.bignumber.equal(subjectTimestamp.add(auctionPeriod));
     });
 
+    it('does not change the minimumBid', async () => {
+      const preTWAPState: any = await twapAuction.twapState.callAsync();
+
+      await subject();
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+
+      expect(twapState.chunkAuction.auction.minimumBid).to.be.bignumber.equal(
+        preTWAPState.chunkAuction.auction.minimumBid
+      );
+    });
+
+    it('does not change the combinedTokenArray', async () => {
+      const preTWAPState: any = await twapAuction.twapState.callAsync();
+
+      await subject();
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+
+      expect(JSON.stringify(twapState.chunkAuction.auction.combinedTokenArray)).to.equal(
+        JSON.stringify(preTWAPState.chunkAuction.auction.combinedTokenArray)
+      );
+    });
+
+    it('does not change the combinedCurrentSetUnits', async () => {
+      const preTWAPState: any = await twapAuction.twapState.callAsync();
+
+      await subject();
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+
+      expect(JSON.stringify(twapState.chunkAuction.auction.combinedCurrentSetUnits)).to.equal(
+        JSON.stringify(preTWAPState.chunkAuction.auction.combinedCurrentSetUnits)
+      );
+    });
+
+    it('does not change the combinedNextSetUnits', async () => {
+      const preTWAPState: any = await twapAuction.twapState.callAsync();
+
+      await subject();
+
+      const twapState: any = await twapAuction.twapState.callAsync();
+
+      expect(JSON.stringify(twapState.chunkAuction.auction.combinedNextSetUnits)).to.equal(
+        JSON.stringify(preTWAPState.chunkAuction.auction.combinedNextSetUnits)
+      );
+    });
+
     describe('when orderRemaining should be zeroed out', async () => {
       before(async () => {
         startingCurrentSets = ether(2000);
@@ -827,6 +875,44 @@ contract('TWAPAuction', accounts => {
 
         expect(assetPairHash).to.be.bignumber.equal(expectedAssetPairHash);
       });
+    });
+  });
+
+  describe('#parseLiquidatorData', async () => {
+    let usdChunkSize: BigNumber;
+    let chunkAuctionPeriod: BigNumber;
+
+    let subjectLiquidatorData: string;
+
+    beforeEach(async () => {
+      twapAuction = await liquidatorHelper.deployTWAPAuctionMock(
+        oracleWhiteList.address,
+        auctionPeriod,
+        rangeStart,
+        rangeEnd,
+        assetPairHashes,
+        assetPairBounds
+      );
+
+      usdChunkSize = ether(10 ** 5);
+      chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
+      subjectLiquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(
+        usdChunkSize,
+        chunkAuctionPeriod
+      );
+    });
+
+    async function subject(): Promise<any> {
+      return twapAuction.testParseLiquidatorData.callAsync(
+        subjectLiquidatorData
+      );
+    }
+
+    it('sets returns the correct struct', async () => {
+      const liquidatorDataStruct: any = await subject();
+
+      expect(liquidatorDataStruct.usdChunkSize).to.be.bignumber.equal(usdChunkSize);
+      expect(liquidatorDataStruct.chunkAuctionPeriod).to.be.bignumber.equal(chunkAuctionPeriod);
     });
   });
 });

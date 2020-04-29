@@ -75,6 +75,16 @@ contract TWAPAuctionMock is TWAPAuction {
         auctionNextChunk(twapState);
     }
 
+    function testParseLiquidatorData(
+        bytes calldata _liquidatorData
+    )
+        external
+        pure
+        returns (TWAPAuction.TWAPLiquidatorData memory)
+    {
+        return TWAPAuction.parseLiquidatorData(_liquidatorData);
+    }
+
     function testValidateLiquidatorData(
         ISetToken _currentSet,
         ISetToken _nextSet,

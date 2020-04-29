@@ -182,16 +182,16 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         internal
     {
         // Add leftover current Sets from previous chunk auction to orderRemaining
-        _twapAuction.orderRemaining = _twapAuction.orderRemaining.add(
+        uint256 netRemainingSets = _twapAuction.orderRemaining.add(
             _twapAuction.chunkAuction.auction.remainingCurrentSets
         );
 
         // Calculate next chunk auction sise as min of chunkSize or orderRemaining
-        uint256 nextChunkAuctionSize = Math.min(_twapAuction.chunkSize, _twapAuction.orderRemaining);
+        uint256 nextChunkAuctionSize = Math.min(_twapAuction.chunkSize, netRemainingSets);
 
         // Start new chunk auction by over writing previous auction state and decrementing orderRemaining
         overwriteChunkAuctionState(_twapAuction, nextChunkAuctionSize);
-        _twapAuction.orderRemaining = _twapAuction.orderRemaining.sub(nextChunkAuctionSize);
+        _twapAuction.orderRemaining = netRemainingSets.sub(nextChunkAuctionSize);
     }
 
     /* ============ Internal Helper Functions ============ */

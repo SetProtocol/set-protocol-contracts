@@ -41,15 +41,19 @@ export class RebalanceTestSetup {
 
   public set1: SetTokenContract;
   public set2: SetTokenContract;
+  public set3: SetTokenContract;
 
   public set1Components: Address[];
   public set2Components: Address[];
+  public set3Components: Address[];
 
   public set1Units: BigNumber[];
   public set2Units: BigNumber[];
+  public set3Units: BigNumber[];
 
   public set1NaturalUnit: BigNumber;
   public set2NaturalUnit: BigNumber;
+  public set3NaturalUnit: BigNumber;
 
   public component1Oracle: UpdatableOracleMockContract;
   public component2Oracle: UpdatableOracleMockContract;
@@ -110,6 +114,17 @@ export class RebalanceTestSetup {
       this.set2Components,
       this.set2Units,
       this.set2NaturalUnit,
+    );
+
+    this.set3Components = [this.component1.address, this.component3.address];
+    this.set3Units = [new BigNumber(10 ** 13), new BigNumber(5120)];
+    this.set3NaturalUnit = new BigNumber(10 ** 13);
+    this.set3 = await this._coreHelper.createSetTokenAsync(
+      this.core,
+      this.setTokenFactory.address,
+      this.set3Components,
+      this.set3Units,
+      this.set3NaturalUnit,
     );
 
     this.component1Price = ether(128);

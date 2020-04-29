@@ -69,6 +69,8 @@ contract TWAPLiquidator is
      * @param _auctionPeriod          Length of auction
      * @param _rangeStart             Percentage above FairValue to begin auction at
      * @param _rangeEnd               Percentage below FairValue to end auction at     
+     * @param _assetPairHashes        List of asset pair unique identifiers
+     * @param _assetPairBounds        List of asset pair USD-denominated chunk auction size bounds
      * @param _name                   Descriptive name of Liquidator
      */
     constructor(
@@ -98,12 +100,12 @@ contract TWAPLiquidator is
     /* ============ External Functions ============ */
 
     /**
-     * Initiates a linear auction. Can only be called by a SetToken.
+     * Initiates a TWAP auction. Can only be called by a SetToken.
      *
      * @param _currentSet                   The Set to rebalance from
      * @param _nextSet                      The Set to rebalance to
      * @param _startingCurrentSetQuantity   The currentSet quantity to rebalance
-     * @param _liquidatorData                  Bytecode formatted data with liquidator-specific arguments
+     * @param _liquidatorData               Bytecode formatted data with TWAPLiquidator-specific arguments
      */
     function startRebalance(
         ISetToken _currentSet,
@@ -114,10 +116,10 @@ contract TWAPLiquidator is
         external
         isValidSet
     {
-        // Parse Liquidator data
+        // Retrieve the chunk auction size and auction period from liquidator data.
         TWAPAuction.TWAPLiquidatorData memory twapLiquidatorData = TWAPAuction.parseLiquidatorData(_liquidatorData);
 
-        // Validate liquidator data
+        // Validates chunk auction size and chunkAuctionPeriod validity
         TWAPAuction.validateLiquidatorData(
             _currentSet,
             _nextSet,
@@ -125,11 +127,13 @@ contract TWAPLiquidator is
             twapLiquidatorData
         );
 
+        // Validates a valid linear auction can be initiated
         TwoAssetPriceBoundedLinearAuction.validateTwoAssetPriceBoundedAuction(
             _currentSet,
             _nextSet
         );
 
+        // Initiates the TWAP auction
         TWAPAuction.initializeTWAPAuction(
             auctions[msg.sender],
             _currentSet,
@@ -141,7 +145,8 @@ contract TWAPLiquidator is
 
     /**
      * Reduces the remainingCurrentSet quantity and retrieves the current
-     * bid price.
+     * bid price for the chunk auction. If this auction completes the chunkAuction,
+     * the lastChunkAuction parameter is updated.
      * Can only be called by a SetToken during an active auction
      *
      * @param _quantity               The currentSetQuantity to rebalance
@@ -158,7 +163,7 @@ contract TWAPLiquidator is
 
         Auction.reduceRemainingCurrentSets(auction(msg.sender), _quantity);
 
-        // If the auction is complete, update the chunk auction end time to now.
+        // If the auction is complete, update the chunk auction end time to the present timestamp
         if (!hasBiddableQuantity(auction(msg.sender))) {
             twapAuction(msg.sender).lastChunkAuctionEnd = block.timestamp;    
         }
@@ -185,8 +190,9 @@ contract TWAPLiquidator is
     }
 
     /**
-     * 
-     */    
+     * Initiates the next chunk auction. Callable by anybody.
+     * @param _set                    Address of the RebalancingSetToken
+     */
     function iterateChunkAuction(address _set) external {
         validateNextChunkAuction(twapAuction(_set));
 
@@ -194,14 +200,14 @@ contract TWAPLiquidator is
     }
 
     /**
-     * Validates auction completion and clears auction state.
+     * Validates auction completion and clears auction state. Callable only by a SetToken.
      */
     function settleRebalance() external isValidSet {
         Auction.validateAuctionCompletion(auction(msg.sender));
 
         require(
             !(isRebalanceActive(twapAuction(msg.sender))),
-            "TWAPLiquidator: Auction must be complete"
+            "TWAPLiquidator: Rebalance must be complete"
         );
 
         clearAuctionState(msg.sender);
@@ -214,6 +220,13 @@ contract TWAPLiquidator is
         clearAuctionState(msg.sender);
     }
 
+    /**
+     * Admin function to modify chunk sizes for an asset pair. 
+     *
+     * @param _assetOne             Address of the first asset
+     * @param _assetTwo             Address of the second asset
+     * @param _assetPairBounds      Asset pair USD-denominated chunk auction size bounds
+     */
     function setChunkSizeBounds(
         address _assetOne,
         address _assetTwo,
@@ -223,6 +236,8 @@ contract TWAPLiquidator is
         onlyOwner
     {
         bytes32 pairHash = TWAPAuction.getAssetPairHash(_assetOne, _assetTwo);
+
+        // Require that min <= max
 
         chunkSizeWhiteList[pairHash] = _assetPairBounds;
     }

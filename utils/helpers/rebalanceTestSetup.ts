@@ -14,19 +14,11 @@ import {
   TransferProxyContract,
   VaultContract,
 } from '../contracts';
-import { getContractInstance, importArtifactsFromSource, txnFrom } from '../web3Helper';
-import {
-  AUCTION_CURVE_DENOMINATOR,
-  ONE_HUNDRED,
-  SCALE_FACTOR,
-  ZERO
-} from '../constants';
-import { ether, gWei } from '@utils/units';
+import { ether } from '@utils/units';
 
 import { CoreHelper } from './coreHelper';
 import { ERC20Helper } from './erc20Helper';
 import { OracleHelper } from 'set-protocol-oracles';
-import { ValuationHelper } from './valuationHelper';
 
 export class RebalanceTestSetup {
   private _contractOwnerAddress: Address;
@@ -94,13 +86,13 @@ export class RebalanceTestSetup {
       this.setTokenFactory,
     );
 
-    this.component1 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress);
-    this.component2 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress);
-    this.component3 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress);
+    this.component1 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 18);
+    this.component2 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 6);
+    this.component3 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 8);
 
     this.set1Components = [this.component1.address, this.component2.address];
-    this.set1Units = [gWei(1), gWei(1)];
-    this.set1NaturalUnit = gWei(1);
+    this.set1Units = [new BigNumber(10 ** 13), new BigNumber(1280)];
+    this.set1NaturalUnit = new BigNumber(10 ** 13);
     this.set1 = await this._coreHelper.createSetTokenAsync(
       this.core,
       this.setTokenFactory.address,
@@ -110,8 +102,8 @@ export class RebalanceTestSetup {
     );
 
     this.set2Components = [this.component1.address, this.component2.address];
-    this.set2Units = [gWei(1), gWei(0.5)];
-    this.set2NaturalUnit = gWei(2);
+    this.set2Units = [new BigNumber(10 ** 13), new BigNumber(5120)];
+    this.set2NaturalUnit = new BigNumber(10 ** 13);
     this.set2 = await this._coreHelper.createSetTokenAsync(
       this.core,
       this.setTokenFactory.address,
@@ -120,9 +112,9 @@ export class RebalanceTestSetup {
       this.set2NaturalUnit,
     );
 
-    this.component1Price = ether(1);
-    this.component2Price = ether(2);
-    this.component3Price = ether(1);
+    this.component1Price = ether(128);
+    this.component2Price = ether(1);
+    this.component3Price = ether(7500);
 
     this.component1Oracle = await this._oracleHelper.deployUpdatableOracleMockAsync(this.component1Price);
     this.component2Oracle = await this._oracleHelper.deployUpdatableOracleMockAsync(this.component2Price);

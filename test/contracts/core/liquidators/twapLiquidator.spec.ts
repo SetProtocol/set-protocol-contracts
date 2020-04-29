@@ -29,7 +29,6 @@ import { getLinearAuction, LinearAuction, TokenFlow } from '@utils/auction';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
-import { LiquidatorHelperFelix } from '@utils/helpers/LiquidatorHelperFelix';
 import { RebalanceTestSetup } from '@utils/helpers/RebalanceTestSetup';
 import { OracleHelper } from 'set-protocol-oracles';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
@@ -66,7 +65,6 @@ contract('TWAPLiquidator', accounts => {
   const oracleHelper = new OracleHelper(ownerAccount);
   const valuationHelper = new ValuationHelper(ownerAccount, coreHelper, erc20Helper, oracleHelper);
   const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper, valuationHelper);
-  const liquidatorHelperFelix = new LiquidatorHelperFelix(ownerAccount, erc20Helper, valuationHelper);
 
   const scenario = new RebalanceTestSetup(ownerAccount, coreHelper, erc20Helper, oracleHelper);
 
@@ -98,7 +96,7 @@ contract('TWAPLiquidator', accounts => {
       {min: ZERO, max: ether(10 ** 6)},
     ];
 
-    liquidator = await liquidatorHelperFelix.deployTWAPLiquidatorAsync(
+    liquidator = await liquidatorHelper.deployTWAPLiquidatorAsync(
       scenario.core.address,
       oracleWhiteList.address,
       auctionPeriod,
@@ -462,7 +460,7 @@ contract('TWAPLiquidator', accounts => {
     });
   });
 
-  describe.only('[CONTEXT] First two chunk auction', async () => {
+  describe('[CONTEXT] Two chunk auction rebalance', async () => {
     let usdChunkSize: BigNumber;
     let chunkAuctionPeriod: BigNumber;
 
@@ -534,7 +532,7 @@ contract('TWAPLiquidator', accounts => {
 
       it('returns the correct array and inflows', async () => {
         await subject();
-        
+
         const auction = await liquidator.auctions.callAsync(subjectSet);
         const chunkAuction = auction[0];
         const linearAuction = getLinearAuction(chunkAuction);
@@ -641,33 +639,180 @@ contract('TWAPLiquidator', accounts => {
       });
     });
 
-    describe.only('#iterateChunkAuction', async () => {
+    describe('#iterateChunkAuction', async () => {
+      let subjectSet: Address;
+
+      let customBidQuantity: BigNumber;
+      let customPostAuctionElapsed: BigNumber;
+
       beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+
         const minimumBid =  await liquidator.minimumBid.callAsync(liquidatorProxy.address);
         const maxBid = liquidatorHelper.calculateChunkAuctionMaximumBid(
           chunkAuctionChunkSize,
           minimumBid,
         );
+
+        const bidQuantity = customBidQuantity || maxBid;
         await liquidatorProxy.placeBid.sendTransactionAsync(
-          maxBid,
+          bidQuantity,
           { from: subjectCaller, gas: DEFAULT_GAS },
         );
 
-        await blockchain.increaseTimeAsync(chunkAuctionPeriod);
+        const postAuctionTimePeriod = customPostAuctionElapsed || chunkAuctionPeriod;
+        await blockchain.increaseTimeAsync(postAuctionTimePeriod);
       });
 
       async function subject(): Promise<any> {
         return liquidator.iterateChunkAuction.sendTransactionAsync(
+          subjectSet,
           { from: subjectCaller, gas: DEFAULT_GAS },
         );
       }
 
       it('should update the orderRemaining', async () => {
+        const previousOrderRemaining = await liquidator.getOrderRemaining.callAsync(subjectSet);
+        const postChunkSetsRemaining = await liquidator.remainingCurrentSets.callAsync(subjectSet);
+        const updatedOrderRemaining = previousOrderRemaining.plus(postChunkSetsRemaining);
 
+        await subject();
+
+        const newChunkSize = BigNumber.min(chunkAuctionChunkSize, updatedOrderRemaining);
+        const expectedOrderRemaining = new BigNumber(updatedOrderRemaining).sub(newChunkSize);
+
+        const newOrderRemaining = await liquidator.getOrderRemaining.callAsync(subjectSet);
+        expect(newOrderRemaining).to.bignumber.equal(expectedOrderRemaining);
       });
 
-      // Revert when the auction is not complete
-      // Revert if not enough time has elapsed since auction end
+      describe('when the auction has not been complete', async () => {
+        before(async () => {
+          const minimumBid =  await liquidator.minimumBid.callAsync(liquidatorProxy.address);
+          customBidQuantity = minimumBid;
+        });
+
+        after(async () => {
+          customBidQuantity = undefined;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when the chunkAuctionPeriod has not elapsed', async () => {
+        before(async () => {
+          customPostAuctionElapsed = chunkAuctionPeriod.div(2);
+        });
+
+        after(async () => {
+          customPostAuctionElapsed = undefined;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+    });
+
+    describe('#settleRebalance', async () => {
+      let subjectSet: Address;
+
+      let customBidQuantity: BigNumber;
+      let skipSecondAuction: boolean;
+
+      beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+
+        const minimumBid =  await liquidator.minimumBid.callAsync(liquidatorProxy.address);
+        const maxBid = liquidatorHelper.calculateChunkAuctionMaximumBid(
+          chunkAuctionChunkSize,
+          minimumBid,
+        );
+
+        const bidQuantity = maxBid;
+        await liquidatorProxy.placeBid.sendTransactionAsync(
+          bidQuantity,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+
+        await blockchain.increaseTimeAsync(chunkAuctionPeriod);
+
+        if (skipSecondAuction) { return; }
+
+        await liquidator.iterateChunkAuction.sendTransactionAsync(
+          subjectSet,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+
+        const secondAuctionRemaining = await liquidator.remainingCurrentSets.callAsync(liquidatorProxy.address);
+        const secondAuctionMaxBid = liquidatorHelper.calculateChunkAuctionMaximumBid(
+          secondAuctionRemaining,
+          minimumBid,
+        );
+
+        const secondAuctionBidQuantity = customBidQuantity || secondAuctionMaxBid;
+        await liquidatorProxy.placeBid.sendTransactionAsync(
+          secondAuctionBidQuantity,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      });
+
+      async function subject(): Promise<any> {
+        return liquidatorProxy.settleRebalance.sendTransactionAsync(
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
+
+      it('should clear the auction state', async () => {
+        await subject();
+
+        const auction: any = await liquidator.auctions.callAsync(subjectCaller);
+        expect(auction.orderSize).to.bignumber.equal(ZERO);
+        expect(auction.orderRemaining).to.bignumber.equal(ZERO);
+        expect(auction.lastChunkAuctionEnd).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuctionPeriod).to.bignumber.equal(ZERO);
+        expect(auction.chunkSize).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.auction.minimumBid).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.auction.startTime).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.auction.startingCurrentSets).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.auction.remainingCurrentSets).to.bignumber.equal(ZERO);
+        expect(JSON.stringify(auction.chunkAuction.auction.combinedTokenArray)).to.equal(JSON.stringify([]));
+        expect(JSON.stringify(auction.chunkAuction.auction.combinedCurrentSetUnits)).to.equal(JSON.stringify([]));
+        expect(JSON.stringify(auction.chunkAuction.auction.combinedNextSetUnits)).to.equal(JSON.stringify([]));
+        expect(auction.chunkAuction.endTime).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.startPrice).to.bignumber.equal(ZERO);
+        expect(auction.chunkAuction.endPrice).to.bignumber.equal(ZERO);
+      });
+
+      describe('when the auction has not been complete', async () => {
+        before(async () => {
+          const minimumBid =  await liquidator.minimumBid.callAsync(liquidatorProxy.address);
+          customBidQuantity = minimumBid;
+        });
+
+        after(async () => {
+          customBidQuantity = undefined;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when the rebalance is not complete', async () => {
+        before(async () => {
+          skipSecondAuction = true;
+        });
+
+        after(async () => {
+          skipSecondAuction = undefined;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
     });
 
     describe('#hasRebalanceFailed', async () => {
@@ -681,9 +826,27 @@ contract('TWAPLiquidator', accounts => {
         return liquidator.hasRebalanceFailed.callAsync(subjectSet);
       }
 
-      it('should return the correct value', async () => {
+      it('should return false', async () => {
         const result = await subject();
         expect(result).to.equal(false);
+      });
+
+      describe('when the auctionFailPeriod has elapsed', async () => {
+        beforeEach(async () => {
+          await blockchain.increaseTimeAsync(auctionPeriod.mul(2));
+
+          // Enact on-chain timestamp
+          const minimumBid =  await liquidator.minimumBid.callAsync(subjectSet);
+          await liquidatorProxy.placeBid.sendTransactionAsync(
+            minimumBid,
+            { from: subjectCaller, gas: DEFAULT_GAS },
+          );
+        });
+
+      it('should return true', async () => {
+        const result = await subject();
+        expect(result).to.equal(true);
+      });
       });
     });
 
@@ -761,14 +924,6 @@ contract('TWAPLiquidator', accounts => {
         expect(auctionPivotPrice).to.bignumber.equal(linearAuction.endPrice);
       });
     });
-
-    describe('when the auction has failed', async () => {
-      describe('hasRebalanceFailed', async () => {});
-    });
-  });
-
-  describe('[CONTEXT] Second two chunk auction', async () => {
-    describe('#settleRebalance', async () => {});
   });
 
   describe('#setChunkSizeBounds', async () => {

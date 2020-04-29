@@ -206,7 +206,7 @@ contract TWAPLiquidator is
         Auction.validateAuctionCompletion(auction(msg.sender));
 
         require(
-            !(isRebalanceActive(twapAuction(msg.sender))),
+            !(TWAPAuction.isRebalanceActive(twapAuction(msg.sender))),
             "TWAPLiquidator: Rebalance must be complete"
         );
 

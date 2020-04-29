@@ -17,6 +17,7 @@ import {
   TWAPAuctionCallerContract,
   TWAPAuctionMockContract,
   TWAPAuctionGettersMockContract,
+  TWAPLiquidatorContract,
   TwoAssetPriceBoundedLinearAuctionMockContract,
 } from '../contracts';
 import {
@@ -49,6 +50,7 @@ const LiquidatorUtilsMock = importArtifactsFromSource('LiquidatorUtilsMock');
 const TWAPAuctionCaller = importArtifactsFromSource('TWAPAuctionCaller');
 const TWAPAuctionMock = importArtifactsFromSource('TWAPAuctionMock');
 const TWAPAuctionGettersMock = importArtifactsFromSource('TWAPAuctionGettersMock');
+const TWAPLiquidator = importArtifactsFromSource('TWAPLiquidator');
 const TwoAssetPriceBoundedLinearAuctionMock = importArtifactsFromSource('TwoAssetPriceBoundedLinearAuctionMock');
 
 import { ERC20Helper } from './erc20Helper';
@@ -183,6 +185,40 @@ export class LiquidatorHelper {
 
     return new LinearAuctionLiquidatorContract(
       getContractInstance(linearAuctionLiquidator),
+      txnFrom(from)
+    );
+  }
+
+  public async deployTWAPLiquidatorAsync(
+    core: Address,
+    oracleWhiteList: Address,
+    auctionPeriod: BigNumber,
+    rangeStart: BigNumber,
+    rangeEnd: BigNumber,
+    assetPairHashes: string[],
+    assetPairBounds: AssetChunkSizeBounds[],
+    name: string,
+    from: Address = this._contractOwnerAddress
+  ): Promise<TWAPLiquidatorContract> {
+    const assetPairBoundsStr = [];
+    for (let i = 0; i < assetPairBounds.length; i++) {
+      assetPairBoundsStr.push(coerceStructBNValuesToString(assetPairBounds[i]));
+    }
+
+    const twapLiquidator = await TWAPLiquidator.new(
+      core,
+      oracleWhiteList,
+      auctionPeriod,
+      rangeStart,
+      rangeEnd,
+      assetPairHashes,
+      assetPairBoundsStr,
+      name,
+      txnFrom(from)
+    );
+
+    return new TWAPLiquidatorContract(
+      getContractInstance(twapLiquidator),
       txnFrom(from)
     );
   }

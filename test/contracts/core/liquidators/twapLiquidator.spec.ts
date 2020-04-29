@@ -975,5 +975,18 @@ contract('TWAPLiquidator', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the min is greater than the max bound', async () => {
+      beforeEach(async () => {
+        subjectAssetPairBounds = {
+          min: ether(10 ** 9),
+          max: ether(10 ** 8),
+        };
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 });

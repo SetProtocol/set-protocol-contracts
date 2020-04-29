@@ -237,7 +237,10 @@ contract TWAPLiquidator is
     {
         bytes32 pairHash = TWAPAuction.getAssetPairHash(_assetOne, _assetTwo);
 
-        // Require that min <= max
+        require(
+            BoundsLibrary.isValid(_assetPairBounds),
+            "TWAPLiquidator: Bounds invalid"
+        );
 
         chunkSizeWhiteList[pairHash] = _assetPairBounds;
     }

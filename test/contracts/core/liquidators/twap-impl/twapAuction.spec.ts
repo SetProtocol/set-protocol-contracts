@@ -266,7 +266,7 @@ contract('TWAPAuction', accounts => {
       subjectStartingCurrentSets = ether(2000);
       subjectLiquidatorData = coerceStructBNValuesToString(
         {
-          usdChunkSize: ether(10 ** 5),
+          chunkSizeValue: ether(10 ** 5),
           chunkAuctionPeriod: ONE_HOUR_IN_SECONDS,
         }
       );
@@ -298,7 +298,7 @@ contract('TWAPAuction', accounts => {
         set2,
         oracleWhiteList,
         subjectStartingCurrentSets,
-        subjectLiquidatorData.usdChunkSize,
+        subjectLiquidatorData.chunkSizeValue,
       );
 
       expect(twapState.orderRemaining).to.be.bignumber.equal(subjectStartingCurrentSets.sub(expectedChunkSize));
@@ -313,7 +313,7 @@ contract('TWAPAuction', accounts => {
         set2,
         oracleWhiteList,
         subjectStartingCurrentSets,
-        subjectLiquidatorData.usdChunkSize,
+        subjectLiquidatorData.chunkSizeValue,
       );
 
       expect(twapState.chunkAuction.auction.startingCurrentSets).to.be.bignumber.equal(
@@ -346,7 +346,7 @@ contract('TWAPAuction', accounts => {
         set2,
         oracleWhiteList,
         subjectStartingCurrentSets,
-        subjectLiquidatorData.usdChunkSize,
+        subjectLiquidatorData.chunkSizeValue,
       );
 
       expect(twapState.chunkSize).to.be.bignumber.equal(expectedChunkSize);
@@ -366,7 +366,7 @@ contract('TWAPAuction', accounts => {
           set2,
           oracleWhiteList,
           subjectStartingCurrentSets,
-          subjectLiquidatorData.usdChunkSize,
+          subjectLiquidatorData.chunkSizeValue,
         );
 
         expect(twapState.chunkSize).to.be.bignumber.equal(expectedChunkSize);
@@ -395,7 +395,7 @@ contract('TWAPAuction', accounts => {
           set3,
           oracleWhiteList,
           subjectStartingCurrentSets,
-          subjectLiquidatorData.usdChunkSize,
+          subjectLiquidatorData.chunkSizeValue,
         );
 
         expect(twapState.chunkSize).to.be.bignumber.equal(expectedChunkSize);
@@ -410,7 +410,7 @@ contract('TWAPAuction', accounts => {
           set3,
           oracleWhiteList,
           subjectStartingCurrentSets,
-          subjectLiquidatorData.usdChunkSize,
+          subjectLiquidatorData.chunkSizeValue,
         );
 
         expect(twapState.orderRemaining).to.be.bignumber.equal(subjectStartingCurrentSets.sub(expectedChunkSize));
@@ -445,7 +445,7 @@ contract('TWAPAuction', accounts => {
       nextSet = set2.address;
       liquidatorData = coerceStructBNValuesToString(
         {
-          usdChunkSize: ether(10 ** 5),
+          chunkSizeValue: ether(10 ** 5),
           chunkAuctionPeriod: ONE_HOUR_IN_SECONDS,
         }
       );
@@ -608,11 +608,11 @@ contract('TWAPAuction', accounts => {
 
     let auctionCaller: TWAPAuctionCallerContract;
 
-    let usdChunkSize: BigNumber;
+    let chunkSizeValue: BigNumber;
     let chunkAuctionPeriod: BigNumber;
 
     before(async () => {
-      usdChunkSize = ether(10 ** 5);
+      chunkSizeValue = ether(10 ** 5);
       chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
     });
 
@@ -631,7 +631,7 @@ contract('TWAPAuction', accounts => {
       subjectStartingCurrentSets = ether(2000);
       subjectLiquidatorData = coerceStructBNValuesToString(
         {
-          usdChunkSize,
+          chunkSizeValue,
           chunkAuctionPeriod,
         }
       );
@@ -656,11 +656,11 @@ contract('TWAPAuction', accounts => {
 
     describe('when passed chunk size is not within the bounds', async () => {
       before(async () => {
-        usdChunkSize = ether(10 ** 7);
+        chunkSizeValue = ether(10 ** 7);
       });
 
       after(async () => {
-        usdChunkSize = ether(10 ** 5);
+        chunkSizeValue = ether(10 ** 5);
       });
 
       it('it reverts', async () => {
@@ -707,7 +707,7 @@ contract('TWAPAuction', accounts => {
       const nextSet = set2.address;
       liquidatorData = coerceStructBNValuesToString(
         {
-          usdChunkSize: ether(10 ** 5),
+          chunkSizeValue: ether(10 ** 5),
           chunkAuctionPeriod: ONE_HOUR_IN_SECONDS,
         }
       );
@@ -891,7 +891,7 @@ contract('TWAPAuction', accounts => {
   });
 
   describe('#parseLiquidatorData', async () => {
-    let usdChunkSize: BigNumber;
+    let chunkSizeValue: BigNumber;
     let chunkAuctionPeriod: BigNumber;
 
     let subjectLiquidatorData: string;
@@ -906,10 +906,10 @@ contract('TWAPAuction', accounts => {
         assetPairBounds
       );
 
-      usdChunkSize = ether(10 ** 5);
+      chunkSizeValue = ether(10 ** 5);
       chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
       subjectLiquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(
-        usdChunkSize,
+        chunkSizeValue,
         chunkAuctionPeriod
       );
     });
@@ -923,7 +923,7 @@ contract('TWAPAuction', accounts => {
     it('sets returns the correct struct', async () => {
       const liquidatorDataStruct: any = await subject();
 
-      expect(liquidatorDataStruct.usdChunkSize).to.be.bignumber.equal(usdChunkSize);
+      expect(liquidatorDataStruct.chunkSizeValue).to.be.bignumber.equal(chunkSizeValue);
       expect(liquidatorDataStruct.chunkAuctionPeriod).to.be.bignumber.equal(chunkAuctionPeriod);
     });
   });

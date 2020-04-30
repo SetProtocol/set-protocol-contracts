@@ -834,13 +834,7 @@ contract('TWAPLiquidator', accounts => {
       describe('when the auctionFailPeriod has elapsed', async () => {
         beforeEach(async () => {
           await blockchain.increaseTimeAsync(auctionPeriod.mul(2));
-
-          // Enact on-chain timestamp
-          const minimumBid =  await liquidator.minimumBid.callAsync(subjectSet);
-          await liquidatorProxy.placeBid.sendTransactionAsync(
-            minimumBid,
-            { from: subjectCaller, gas: DEFAULT_GAS },
-          );
+          await blockchain.mineBlockAsync();
         });
 
       it('should return true', async () => {

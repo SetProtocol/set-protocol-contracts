@@ -21,17 +21,16 @@ import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { BoundsLibrary } from "set-protocol-contract-utils/contracts/lib/BoundsLibrary.sol";
 
+import { Auction } from "./impl/Auction.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { ILiquidator } from "../interfaces/ILiquidator.sol";
 import { IOracleWhiteList } from "../interfaces/IOracleWhiteList.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
-import { Auction } from "./impl/Auction.sol";
 import { LinearAuction } from "./impl/LinearAuction.sol";
 import { Rebalance } from "../lib/Rebalance.sol";
 import { RebalancingLibrary } from "../lib/RebalancingLibrary.sol";
-import { AuctionGetters } from "./impl/AuctionGetters.sol";
-import { TWAPAuctionGetters } from "./twap-impl/TWAPAuctionGetters.sol";
 import { TWAPAuction } from "./twap-impl/TWAPAuction.sol";
+import { TWAPAuctionGetters } from "./twap-impl/TWAPAuctionGetters.sol";
 import { TwoAssetPriceBoundedLinearAuction } from "./impl/TwoAssetPriceBoundedLinearAuction.sol";
 
 
@@ -45,7 +44,6 @@ import { TwoAssetPriceBoundedLinearAuction } from "./impl/TwoAssetPriceBoundedLi
 contract TWAPLiquidator is
     ILiquidator,
     TWAPAuction,
-    AuctionGetters,
     TWAPAuctionGetters,
     Ownable
 {
@@ -66,7 +64,7 @@ contract TWAPLiquidator is
      *
      * @param _core                   Core instance
      * @param _oracleWhiteList        Oracle WhiteList instance
-     * @param _auctionPeriod          Length of auction
+     * @param _auctionPeriod          Length of auction in seconds
      * @param _rangeStart             Percentage above FairValue to begin auction at
      * @param _rangeEnd               Percentage below FairValue to end auction at     
      * @param _assetPairHashes        List of asset pair unique identifiers
@@ -116,10 +114,16 @@ contract TWAPLiquidator is
         external
         isValidSet
     {
+        // Validates only 2 components are involved and are supported by oracles
+        TwoAssetPriceBoundedLinearAuction.validateTwoAssetPriceBoundedAuction(
+            _currentSet,
+            _nextSet
+        );
+
         // Retrieve the chunk auction size and auction period from liquidator data.
         TWAPAuction.TWAPLiquidatorData memory twapLiquidatorData = TWAPAuction.parseLiquidatorData(_liquidatorData);
 
-        // Validates chunk auction size and chunkAuctionPeriod validity
+        // Chunk size must be within bounds and total rebalance length must be below fail auction time
         TWAPAuction.validateLiquidatorData(
             _currentSet,
             _nextSet,
@@ -127,13 +131,7 @@ contract TWAPLiquidator is
             twapLiquidatorData
         );
 
-        // Validates a valid linear auction can be initiated
-        TwoAssetPriceBoundedLinearAuction.validateTwoAssetPriceBoundedAuction(
-            _currentSet,
-            _nextSet
-        );
-
-        // Initiates the TWAP auction
+        // Initializes TWAP Auction and commits to TWAP state
         TWAPAuction.initializeTWAPAuction(
             auctions[msg.sender],
             _currentSet,
@@ -203,8 +201,6 @@ contract TWAPLiquidator is
      * Validates auction completion and clears auction state. Callable only by a SetToken.
      */
     function settleRebalance() external isValidSet {
-        Auction.validateAuctionCompletion(auction(msg.sender));
-
         require(
             !(TWAPAuction.isRebalanceActive(twapAuction(msg.sender))),
             "TWAPLiquidator: Rebalance must be complete"

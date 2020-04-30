@@ -303,7 +303,8 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     }
 
     /**
-     * Validates next chunk auction can begin.
+     * The next chunk auction can begin when the previous auction has completed, there are still currentSets to
+     * rebalance, and the auction period has elapsed.
      *
      * @param _twapAuction                  TWAPAuction State object
      */
@@ -396,21 +397,6 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     }
 
     /**
-     * Parse passed Liquidator data
-     *
-     * @param _liquidatorData               Bytestring of liquidator data
-     */
-    function parseLiquidatorData(
-        bytes memory _liquidatorData
-    )
-        internal
-        pure
-        returns (TWAPLiquidatorData memory)
-    {
-        return abi.decode(_liquidatorData, (TWAPLiquidatorData));
-    }
-
-    /**
      * Returns hash of token pair where token address with lowest numerical value is hashed first.
      *
      * @param _assetOne                   First asset in pair
@@ -426,5 +412,15 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     {
         return _assetOne < _assetTwo ? keccak256(abi.encodePacked(_assetOne, _assetTwo)) :
             keccak256(abi.encodePacked(_assetTwo, _assetOne));
+    }
+
+    function parseLiquidatorData(
+        bytes memory _liquidatorData
+    )
+        internal
+        pure
+        returns (TWAPLiquidatorData memory)
+    {
+        return abi.decode(_liquidatorData, (TWAPLiquidatorData));
     }
 }

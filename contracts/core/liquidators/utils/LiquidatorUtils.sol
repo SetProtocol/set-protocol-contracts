@@ -126,7 +126,7 @@ library LiquidatorUtils {
 
             uint256 assetValue;
             uint256 setValue = 0;
-            for (uint8 i = 0; i < components.length; i++) {
+            for (uint256 i = 0; i < components.length; i++) {
                 address currentComponent = components[i];
 
                 address oracle = _oracleWhiteList.getOracleAddressByToken(currentComponent);

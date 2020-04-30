@@ -33,6 +33,11 @@ export interface Auction {
   combinedNextSetUnits: BigNumber[];
 }
 
+export interface AssetChunkSizeBounds {
+  min: BigNumber;
+  max: BigNumber;
+}
+
 export function getLinearAuction(input: any): LinearAuction {
   const {
     minimumBid,

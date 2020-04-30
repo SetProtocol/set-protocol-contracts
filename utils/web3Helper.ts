@@ -58,6 +58,18 @@ export const linkLibrariesToDeploy = async (contract: any, libraries: any[], fro
   }));
 };
 
+export const coerceStructBNValuesToString = (struct: any) => {
+  const newObject = {};
+
+  const keys = Object.keys(struct);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    newObject[key] = struct[key] instanceof BigNumber ? struct[key].toString() : struct[key];
+  }
+
+  return newObject;
+};
+
 export const importArtifactsFromSource = (contractName: string) => {
   const web3 = getWeb3();
   let instance;

@@ -93,6 +93,16 @@ interface IRebalancingSetTokenV3 {
         returns (uint256);
 
     /*
+     * Get failAuctionPeriod of Rebalancing Set
+     *
+     * @return  failAuctionPeriod
+     */
+    function failAuctionPeriod()
+        external
+        view
+        returns (uint256);
+
+    /*
      * Get array returning [startTime, timeToPivot, startPrice, endPrice]
      *
      * @return  AuctionPriceParameters

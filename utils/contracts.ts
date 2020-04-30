@@ -32,6 +32,7 @@ export { LinearAuctionMockContract } from '../types/generated/linear_auction_moc
 export { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
 export { LiquidatorMockContract } from '../types/generated/liquidator_mock';
 export { LiquidatorProxyContract } from '../types/generated/liquidator_proxy';
+export { LiquidatorUtilsMockContract } from '../types/generated/liquidator_utils_mock';
 export { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 export { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 export { OracleWhiteListContract } from '../types/generated/oracle_white_list';
@@ -72,11 +73,14 @@ export { SocialTradingManagerMockContract } from '../types/generated/social_trad
 export { StandardTokenMockContract } from '../types/generated/standard_token_mock';
 export { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
 export { StartRebalanceLibraryContract } from '../types/generated/start_rebalance_library';
+export { TWAPAuctionMockContract } from '../types/generated/t_w_a_p_auction_mock';
+export { TWAPAuctionCallerContract } from '../types/generated/t_w_a_p_auction_caller';
 export { TokenFlushMockContract } from '../types/generated/token_flush_mock';
 export { TimeLockUpgradeContract } from '../types/generated/time_lock_upgrade';
 export { TimeLockUpgradeV2Contract } from '../types/generated/time_lock_upgrade_v2';
 export { TransferProxyContract } from '../types/generated/transfer_proxy';
 export { TWAPAuctionGettersMockContract } from '../types/generated/t_w_a_p_auction_getters_mock';
+export { TWAPLiquidatorContract } from '../types/generated/t_w_a_p_liquidator';
 export {
   TwoAssetPriceBoundedLinearAuctionMockContract
 } from '../types/generated/two_asset_price_bounded_linear_auction_mock';

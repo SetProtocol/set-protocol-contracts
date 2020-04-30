@@ -45,10 +45,13 @@ library LiquidatorUtils {
      * Calculate the rebalance volume as the difference in allocation percentages times market
      * cap.
      *
-     * @param _currentSet                       The Set to rebalance from
-     * @param _nextSet                          The Set to rebalance to
-     * @param _oracleWhiteList                  OracleWhiteList used for valuation
-     * @param _currentSetQuantity               Quantity of currentSet to rebalance
+     * rebalanceVolume = currentSetValue * currentSetQty * abs(currentSetAllocation-nextSetAllocation)
+     *
+     * @param _currentSet               The Set to rebalance from
+     * @param _nextSet                  The Set to rebalance to
+     * @param _oracleWhiteList          OracleWhiteList used for valuation
+     * @param _currentSetQuantity       Quantity of currentSet to rebalance
+     * @return                          Rebalance volume
      */
     function calculateRebalanceVolume(
         ISetToken _currentSet,
@@ -66,7 +69,7 @@ library LiquidatorUtils {
             _oracleWhiteList
         );
 
-        // Calculate allocationAsset's current set allocation
+        // Calculate allocationAsset's current set allocation in 18 decimal scaled percentage
         address allocationAsset = _currentSet.getComponents()[0];
         uint256 currentSetAllocation = calculateAssetAllocation(
             _currentSet,
@@ -74,7 +77,7 @@ library LiquidatorUtils {
             allocationAsset
         );
 
-        // Calculate allocationAsset's next set allocation
+        // Calculate allocationAsset's next set allocation in 18 decimal scaled percentage
         uint256 nextSetAllocation = calculateAssetAllocation(
             _nextSet,
             _oracleWhiteList,
@@ -94,9 +97,10 @@ library LiquidatorUtils {
     /**
      * Calculate the allocation percentage of passed asset in Set
      *
-     * @param _setToken             Set being evaluated
-     * @param _oracleWhiteList      OracleWhiteList used for valuation
-     * @param _asset                Asset that's allocation being calculated
+     * @param  _setToken            Set being evaluated
+     * @param  _oracleWhiteList     OracleWhiteList used for valuation
+     * @param  _asset               Asset that's allocation being calculated
+     * @return                      18 decimal scaled allocation percentage
      */
     function calculateAssetAllocation(
         ISetToken _setToken,

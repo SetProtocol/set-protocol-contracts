@@ -219,6 +219,18 @@ contract('TWAPAuction', accounts => {
       expect(actualExpectedAuctionLength).to.be.bignumber.equal(expectedAuctionLength);
     });
 
+    describe('when assetPairHashes and assetPairBounds lengths do not match', async () => {
+      beforeEach(async () => {
+        subjectAssetPairBounds = [
+          {min: ether(10 ** 4), max: ether(10 ** 6)},
+        ];
+      });
+
+      it('sets the correct chunkSize', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe('when invalid bounds are passed', async () => {
       beforeEach(async () => {
         subjectAssetPairBounds = [

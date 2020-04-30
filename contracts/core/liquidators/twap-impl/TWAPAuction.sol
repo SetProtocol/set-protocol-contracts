@@ -57,7 +57,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     }
 
     struct TWAPLiquidatorData {
-        uint256 usdChunkSize;               // Value of rebalance volume in each chunk (18 decimal)
+        uint256 chunkSizeValue;             // Currency value of rebalance volume in each chunk (18 decimal)
         uint256 chunkAuctionPeriod;         // Time between chunk auctions
     }
 
@@ -142,7 +142,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     )
         internal
     {
-        // Calculate value of rebalance volume
+        // Calculate currency value of rebalance volume
         uint256 rebalanceVolume = LiquidatorUtils.calculateRebalanceVolume(
             _currentSet,
             _nextSet,
@@ -154,7 +154,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         uint256 chunkSize = calculateChunkSize(
             _startingCurrentSetQuantity,
             rebalanceVolume,
-            _liquidatorData.usdChunkSize
+            _liquidatorData.chunkSizeValue
         );
 
         // Initialize first chunk auction
@@ -189,7 +189,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
             _twapAuction.chunkAuction.auction.remainingCurrentSets
         );
 
-        // Calculate next chunk auction sise as min of chunkSize or orderRemaining
+        // Calculate next chunk auction size as min of chunkSize or orderRemaining
         uint256 nextChunkAuctionSize = Math.min(_twapAuction.chunkSize, totalRemainingSets);
 
         // Start new chunk auction by over writing previous auction state and decrementing orderRemaining
@@ -248,6 +248,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         internal
         view
     {
+        // Calculate currency value of rebalance volume
         uint256 rebalanceVolume = LiquidatorUtils.calculateRebalanceVolume(
             _currentSet,
             _nextSet,
@@ -279,8 +280,9 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         internal
         view
     {
+        // Bounds and chunkSizeValue denominated in currency value
         require(
-            chunkSizeWhiteList[_assetPairHash].isWithin(_twapLiquidatorData.usdChunkSize),
+            chunkSizeWhiteList[_assetPairHash].isWithin(_twapLiquidatorData.chunkSizeValue),
             "TWAPAuction.validateTWAPParameters: Passed chunk size must be between bounds."
         );
 
@@ -288,7 +290,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         // or else a legitimate auction could be failed. Calculated as such:
         // expectedTWAPTime = numChunkAuctions * expectedChunkAuctionLength + (numChunkAuctions - 1) *
         // chunkAuctionPeriod
-        uint256 numChunkAuctions = _rebalanceVolume.divCeil(_twapLiquidatorData.usdChunkSize);
+        uint256 numChunkAuctions = _rebalanceVolume.divCeil(_twapLiquidatorData.chunkSizeValue);
         uint256 expectedTWAPAuctionTime = numChunkAuctions.mul(expectedChunkAuctionLength)
             .add(numChunkAuctions.sub(1).mul(_twapLiquidatorData.chunkAuctionPeriod));
 
@@ -349,22 +351,22 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
      * Calculates chunkSize of auction in current Set terms
      *
      * @param _totalSetAmount       Total amount of Sets being auctioned
-     * @param _rebalanceVolume      The total value being auctioned
-     * @param _usdChunkSize         Value of chunk size
+     * @param _rebalanceVolume      The total currency value being auctioned
+     * @param _chunkSizeValue       Value of chunk size in currency terms
      */
     function calculateChunkSize(
         uint256 _totalSetAmount,
         uint256 _rebalanceVolume,
-        uint256 _usdChunkSize
+        uint256 _chunkSizeValue
     )
         internal
         view
         returns (uint256)
     {
         // Since solidity rounds down anything equal to 1 will require at least one auction
-        // equal to the usdChunkSize
-        if (_rebalanceVolume.div(_usdChunkSize) >= 1) {
-            return _totalSetAmount.mul(_usdChunkSize).div(_rebalanceVolume);
+        // equal to the chunkSizeValue
+        if (_rebalanceVolume.div(_chunkSizeValue) >= 1) {
+            return _totalSetAmount.mul(_chunkSizeValue).div(_rebalanceVolume);
         } else {
             return _totalSetAmount;
         }

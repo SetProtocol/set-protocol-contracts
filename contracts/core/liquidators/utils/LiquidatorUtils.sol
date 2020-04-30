@@ -63,7 +63,7 @@ library LiquidatorUtils {
         view
         returns (uint256)
     {
-        // Calculate current set value
+        // Calculate currency value of current set
         uint256 currentSetValue = SetUSDValuation.calculateSetTokenDollarValue(
             _currentSet,
             _oracleWhiteList
@@ -133,7 +133,7 @@ library LiquidatorUtils {
                 uint256 price = IOracle(oracle).read();
                 uint256 decimals = ERC20Detailed(currentComponent).decimals();
 
-                // Calculate dollar value of single component in Set
+                // Calculate currency value of single component in Set
                 uint256 componentValue = SetUSDValuation.calculateTokenAllocationAmountUSD(
                     price,
                     setNaturalUnit,
@@ -141,7 +141,7 @@ library LiquidatorUtils {
                     decimals
                 );
 
-                // Add value of single component to running component value tally
+                // Add currency value of single component to running currency value tally
                 setValue = setValue.add(componentValue);
                 if (i == assetIndex) {assetValue = componentValue;}
             }

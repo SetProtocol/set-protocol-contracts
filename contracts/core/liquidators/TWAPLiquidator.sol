@@ -170,10 +170,10 @@ contract TWAPLiquidator is
     }
 
     /**
-     * Retrieves the current auction price for the particular Set
+     * Retrieves the current chunk auction price for the particular Set
      *
      * @param _set                    Address of the SetToken
-     * @param _quantity               The currentSetQuantity to rebalance
+     * @param _quantity               The chunk auction's currentSetQuantity to rebalance
      * @return TokenFlow              Struct with array, inflow, and outflow data
      */
     function getBidPrice(
@@ -189,6 +189,7 @@ contract TWAPLiquidator is
 
     /**
      * Initiates the next chunk auction. Callable by anybody.
+     *
      * @param _set                    Address of the RebalancingSetToken
      */
     function iterateChunkAuction(address _set) external {

@@ -80,6 +80,7 @@ export { TimeLockUpgradeContract } from '../types/generated/time_lock_upgrade';
 export { TimeLockUpgradeV2Contract } from '../types/generated/time_lock_upgrade_v2';
 export { TransferProxyContract } from '../types/generated/transfer_proxy';
 export { TWAPAuctionGettersMockContract } from '../types/generated/t_w_a_p_auction_getters_mock';
+export { TWAPLiquidatorContract } from '../types/generated/t_w_a_p_liquidator';
 export {
   TwoAssetPriceBoundedLinearAuctionMockContract
 } from '../types/generated/two_asset_price_bounded_linear_auction_mock';

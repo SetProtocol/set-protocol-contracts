@@ -65,6 +65,7 @@ export {
   TimeLockUpgradeV2Contract,
   TokenFlushMockContract,
   TransferProxyContract,
+  TWAPLiquidatorContract,
   VaultContract,
   WethMockContract,
   WhiteListContract,

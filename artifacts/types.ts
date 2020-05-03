@@ -74,6 +74,7 @@ export { ISocialAllocator } from "./ts/ISocialAllocator";
 export { ISocialTradingManager } from "./ts/ISocialTradingManager";
 export { ITransactions } from "./ts/ITransactions";
 export { ITransferProxy } from "./ts/ITransferProxy";
+export { ITWAPAuctionGetters } from "./ts/ITWAPAuctionGetters";
 export { IValidator } from "./ts/IValidator";
 export { IVault } from "./ts/IVault";
 export { IWETH } from "./ts/IWETH";

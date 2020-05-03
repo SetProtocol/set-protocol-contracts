@@ -16,19 +16,13 @@ fs.readdir(directoryPath, function (err, files) {
     const baseName = file.replace('.json', '');
     const filePath = path.join(__dirname, '../artifacts/json', file);
     const newPath = path.join(__dirname, '../artifacts/ts', `${baseName}.ts`);
-    fs.readFile(filePath, 'utf8', function(err, contents) {
-      if (err) { return console.log(`Failed to read ${filePath}`); }
-      let json = JSON.parse(contents);
-      delete json["ast"]
-      delete json["legacyAST"]
+    const contents = fs.readFileSync(filePath, 'utf8');
+    let json = JSON.parse(contents);
+    delete json["ast"]
+    delete json["legacyAST"]
 
-      fs.writeFile(newPath, `export const ${baseName} = `, function(err) {
-        if (err) { return console.log(`Failed to write to ${newPath}`); }
-        fs.appendFile(newPath, `${JSON.stringify(json)}`, function(err) {
-          if (err) { return console.log(`Failed to write to ${newPath}`); }
-          console.log(`Finished writing to ${newPath}`);
-        });
-      });
-    });
+    fs.writeFileSync(newPath, `export const ${baseName} = `);
+    fs.appendFileSync(newPath, `${JSON.stringify(json)}`);
+    console.log(`Finished writing to ${newPath}`);
   });
 });

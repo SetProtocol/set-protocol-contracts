@@ -74,6 +74,7 @@ export { ISocialAllocator } from "./ts/ISocialAllocator";
 export { ISocialTradingManager } from "./ts/ISocialTradingManager";
 export { ITransactions } from "./ts/ITransactions";
 export { ITransferProxy } from "./ts/ITransferProxy";
+export { ITWAPAuctionGetters } from "./ts/ITWAPAuctionGetters";
 export { IValidator } from "./ts/IValidator";
 export { IVault } from "./ts/IVault";
 export { IWETH } from "./ts/IWETH";
@@ -160,6 +161,7 @@ export { TimeLockUpgradeV2 } from "./ts/TimeLockUpgradeV2";
 export { TokenFlush } from "./ts/TokenFlush";
 export { TokenFlushMock } from "./ts/TokenFlushMock";
 export { TransferProxy } from "./ts/TransferProxy";
+export { TWAPLiquidator } from "./ts/TWAPLiquidator";
 export { TwoAssetPriceBoundedLinearAuction } from "./ts/TwoAssetPriceBoundedLinearAuction";
 export { TwoAssetPriceBoundedLinearAuctionMock } from "./ts/TwoAssetPriceBoundedLinearAuctionMock";
 export { UpdatableConstantAuctionPriceCurve } from "./ts/UpdatableConstantAuctionPriceCurve";
@@ -238,6 +240,7 @@ export {
   TimeLockUpgradeV2Contract,
   TokenFlushMockContract,
   TransferProxyContract,
+  TWAPLiquidatorContract,
   VaultContract,
   WethMockContract,
   WhiteListContract,

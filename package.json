@@ -3,6 +3,7 @@
   "version": "1.4.4-beta",
   "description": "Smart contracts for {Set} Protocol",
   "main": "dist/artifacts/index.js",
+  "typings": "dist/typings/artifacts/index.d.ts",
   "files": [
     "dist",
     "contracts",

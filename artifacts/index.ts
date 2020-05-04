@@ -94,7 +94,6 @@ export { LibEIP712 } from "./ts/LibEIP712";
 export { LibExchangeErrors } from "./ts/LibExchangeErrors";
 export { LibFillResults } from "./ts/LibFillResults";
 export { LibOrder } from "./ts/LibOrder";
-export { LimitOneUpgradeMock } from "./ts/LimitOneUpgradeMock";
 export { LinearAuction } from "./ts/LinearAuction";
 export { LinearAuctionLiquidator } from "./ts/LinearAuctionLiquidator";
 export { LinearAuctionMock } from "./ts/LinearAuctionMock";

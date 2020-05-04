@@ -24,7 +24,8 @@ import {
   coerceStructBNValuesToString,
   getContractInstance,
   importArtifactsFromSource,
-  txnFrom
+  txnFrom,
+  getWeb3,
 } from '../web3Helper';
 import {
   AUCTION_CURVE_DENOMINATOR,
@@ -39,6 +40,8 @@ import {
   TokenFlow
 } from '../auction';
 import { ether } from '../units';
+
+const web3 = getWeb3();
 
 const AuctionMock = importArtifactsFromSource('AuctionMock');
 const AuctionGettersMock = importArtifactsFromSource('AuctionGettersMock');

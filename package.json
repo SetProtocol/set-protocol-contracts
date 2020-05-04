@@ -1,9 +1,9 @@
 {
   "name": "set-protocol-contracts",
-  "version": "1.4.3-beta",
+  "version": "1.4.4-beta",
   "description": "Smart contracts for {Set} Protocol",
   "main": "dist/artifacts/index.js",
-  "typings": "dist/typings/artifacts/types.d.ts",
+  "typings": "dist/typings/artifacts/index.d.ts",
   "files": [
     "dist",
     "contracts",
@@ -25,7 +25,7 @@
     "coverage-continuous": "./node_modules/.bin/solidity-coverage",
     "coverage-setup": "yarn transpile && cp -r transpiled/artifacts/ts/* artifacts/ts/. && cp -r transpiled/test/contracts/* test/. && cp -r transpiled/types/* types/. && cp -r transpiled/utils/* utils/.",
     "delete-dev-addresses": "jq 'del(.development)' ./deployments/outputs.json > outputs.tmp && mv outputs.tmp ./deployments/outputs.json && bash scripts/generate_outputs.sh && git add .",
-    "deploy-development": "bash scripts/deploy_development.sh",
+    "deploy-development": "bash scripts/deploy_development.sh && yarn transformJson",
     "dist": "yarn setup && bash scripts/prepare_dist.sh",
     "generate-typings": "set-abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache'",
     "lint": "yarn run lint-sol && yarn run lint-ts",
@@ -41,6 +41,7 @@
     "test-continuous": "yarn deploy-development && truffle test",
     "transpile": "tsc",
     "transpile-dist": "tsc --p tsconfig.dist.json",
+    "transformJson": "node scripts/transform_contract_json.js",
     "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name '*.spec.js'`",
     "prepublishOnly": "yarn dist",
     "flatten": "truffle-flattener contracts/core/[XXX]/[XXX].sol",

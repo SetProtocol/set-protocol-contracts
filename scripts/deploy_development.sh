@@ -41,12 +41,6 @@ rm -rf artifacts/ts/*
 for filename in build/contracts/*.json; do
   filename_base=$(basename $filename .json)
 
-  filename_base=$(basename $filename .json)
-  new_file="artifacts/ts/$filename_base.ts"
-
-  echo -e "export const $filename_base = " > $new_file
-  cat "build/contracts/$filename_base.json" >> $new_file
-
   # Add export lines to artifacts/ts/index.ts so types will works
   echo -e "export { $filename_base } from \"./$filename_base\";" >> artifacts/ts/index.ts
 done

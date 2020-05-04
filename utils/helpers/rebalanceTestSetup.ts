@@ -14,7 +14,7 @@ import {
   TransferProxyContract,
   VaultContract,
 } from '../contracts';
-import { ether } from '@utils/units';
+import { ether } from '../units';
 
 import { CoreHelper } from './coreHelper';
 import { ERC20Helper } from './erc20Helper';

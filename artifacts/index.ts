@@ -161,6 +161,7 @@ export { TimeLockUpgradeV2 } from "./ts/TimeLockUpgradeV2";
 export { TokenFlush } from "./ts/TokenFlush";
 export { TokenFlushMock } from "./ts/TokenFlushMock";
 export { TransferProxy } from "./ts/TransferProxy";
+export { TWAPLiquidator } from "./ts/TWAPLiquidator";
 export { TwoAssetPriceBoundedLinearAuction } from "./ts/TwoAssetPriceBoundedLinearAuction";
 export { TwoAssetPriceBoundedLinearAuctionMock } from "./ts/TwoAssetPriceBoundedLinearAuctionMock";
 export { UpdatableConstantAuctionPriceCurve } from "./ts/UpdatableConstantAuctionPriceCurve";

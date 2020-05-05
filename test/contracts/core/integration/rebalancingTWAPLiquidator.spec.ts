@@ -1,0 +1,482 @@
+require('module-alias/register');
+
+import * as _ from 'lodash';
+import * as ABIDecoder from 'abi-decoder';
+import * as chai from 'chai';
+import * as setProtocolUtils from 'set-protocol-utils';
+import { Address } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
+
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
+import {
+  UpdatableOracleMockContract
+} from 'set-protocol-oracles';
+import {
+  CoreMockContract,
+  FixedFeeCalculatorContract,
+  TWAPLiquidatorContract,
+  OracleWhiteListContract,
+  SetTokenContract,
+  RebalanceAuctionModuleContract,
+  RebalancingSetTokenV3Contract,
+  RebalancingSetTokenV3FactoryContract,
+  SetTokenFactoryContract,
+  StandardTokenMockContract,
+  TransferProxyContract,
+  VaultContract,
+  WhiteListContract,
+} from '@utils/contracts';
+import { Blockchain } from '@utils/blockchain';
+import { ether, gWei } from '@utils/units';
+import { AssetChunkSizeBounds } from '@utils/auction';
+import {
+  DEFAULT_GAS,
+  ONE_DAY_IN_SECONDS,
+  ONE_HOUR_IN_SECONDS,
+  ZERO,
+} from '@utils/constants';
+import { expectRevertError } from '@utils/tokenAssertions';
+import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreHelper } from '@utils/helpers/coreHelper';
+import { ERC20Helper } from '@utils/helpers/erc20Helper';
+import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
+import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { OracleHelper } from 'set-protocol-oracles';
+import { RebalancingSetV3Helper } from '@utils/helpers/rebalancingSetV3Helper';
+import { ValuationHelper } from '@utils/helpers/valuationHelper';
+
+BigNumberSetup.configure();
+ChaiSetup.configure();
+const web3 = getWeb3();
+const CoreMock = artifacts.require('CoreMock');
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
+const { expect } = chai;
+const blockchain = new Blockchain(web3);
+
+contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
+  const [
+    deployerAccount,
+    managerAccount,
+    otherAccount,
+    fakeTokenAccount,
+    feeRecipient,
+  ] = accounts;
+
+  let rebalancingSetToken: RebalancingSetTokenV3Contract;
+
+  let coreMock: CoreMockContract;
+  let transferProxy: TransferProxyContract;
+  let vault: VaultContract;
+  let setTokenFactory: SetTokenFactoryContract;
+  let rebalanceAuctionModule: RebalanceAuctionModuleContract;
+  let rebalancingFactory: RebalancingSetTokenV3FactoryContract;
+  let rebalancingComponentWhiteList: WhiteListContract;
+  let liquidatorWhitelist: WhiteListContract;
+  let liquidator: TWAPLiquidatorContract;
+  let fixedFeeCalculator: FixedFeeCalculatorContract;
+  let feeCalculatorWhitelist: WhiteListContract;
+
+  let name: string;
+  let auctionPeriod: BigNumber;
+  let rangeStart: BigNumber;
+  let rangeEnd: BigNumber;
+  let oracleWhiteList: OracleWhiteListContract;
+
+  let component1: StandardTokenMockContract;
+  let component2: StandardTokenMockContract;
+  let component3: StandardTokenMockContract;
+
+  let component1Price: BigNumber;
+  let component2Price: BigNumber;
+  let component3Price: BigNumber;
+
+  let set1: SetTokenContract;
+  let set2: SetTokenContract;
+
+  let set1Components: Address[];
+  let set2Components: Address[];
+
+  let set1Units: BigNumber[];
+  let set2Units: BigNumber[];
+
+  let set1NaturalUnit: BigNumber;
+  let set2NaturalUnit: BigNumber;
+
+  let customSet1NaturalUnit: BigNumber;
+  let customSet2NaturalUnit: BigNumber;
+
+  let component1Oracle: UpdatableOracleMockContract;
+  let component2Oracle: UpdatableOracleMockContract;
+  let component3Oracle: UpdatableOracleMockContract;
+
+  let assetPairHashes: string[];
+  let assetPairBounds: AssetChunkSizeBounds[];
+
+  const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
+  const erc20Helper = new ERC20Helper(deployerAccount);
+  const rebalancingHelper = new RebalancingSetV3Helper(
+    deployerAccount,
+    coreHelper,
+    erc20Helper,
+    blockchain
+  );
+  const oracleHelper = new OracleHelper(deployerAccount);
+  const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, valuationHelper);
+  const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
+
+  before(async () => {
+    ABIDecoder.addABI(CoreMock.abi);
+  });
+
+  after(async () => {
+    ABIDecoder.removeABI(CoreMock.abi);
+  });
+
+  beforeEach(async () => {
+    blockchain.saveSnapshotAsync();
+
+    transferProxy = await coreHelper.deployTransferProxyAsync();
+    vault = await coreHelper.deployVaultAsync();
+    coreMock = await coreHelper.deployCoreMockAsync(transferProxy, vault);
+
+    rebalanceAuctionModule = await coreHelper.deployRebalanceAuctionModuleAsync(coreMock, vault);
+    await coreHelper.addModuleAsync(coreMock, rebalanceAuctionModule.address);
+
+    setTokenFactory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
+    rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
+    liquidatorWhitelist = await coreHelper.deployWhiteListAsync();
+    feeCalculatorWhitelist = await coreHelper.deployWhiteListAsync();
+    rebalancingFactory = await coreHelper.deployRebalancingSetTokenV3FactoryAsync(
+      coreMock.address,
+      rebalancingComponentWhiteList.address,
+      liquidatorWhitelist.address,
+      feeCalculatorWhitelist.address,
+    );
+
+    await coreHelper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, setTokenFactory);
+    await coreHelper.addFactoryAsync(coreMock, rebalancingFactory);
+
+    component1 = await erc20Helper.deployTokenAsync(deployerAccount);
+    component2 = await erc20Helper.deployTokenAsync(deployerAccount);
+    component3 = await erc20Helper.deployTokenAsync(deployerAccount);
+    await coreHelper.addTokensToWhiteList(
+      [component1.address, component2.address, component3.address],
+      rebalancingComponentWhiteList,
+    );
+    await erc20Helper.approveTransfersAsync(
+      [component1, component2, component3],
+      transferProxy.address
+    );
+
+    set1Components = [component1.address, component2.address];
+    set1Units = [gWei(1), gWei(1)];
+    set1NaturalUnit = customSet1NaturalUnit || gWei(1);
+    set1 = await coreHelper.createSetTokenAsync(
+      coreMock,
+      setTokenFactory.address,
+      set1Components,
+      set1Units,
+      set1NaturalUnit,
+    );
+
+    set2Components = [component1.address, component2.address];
+    set2Units = [gWei(1), gWei(2)];
+    set2NaturalUnit = customSet2NaturalUnit || gWei(2);
+    set2 = await coreHelper.createSetTokenAsync(
+      coreMock,
+      setTokenFactory.address,
+      set2Components,
+      set2Units,
+      set2NaturalUnit,
+    );
+
+    component1Price = ether(1);
+    component2Price = ether(2);
+    component3Price = ether(1);
+
+    component1Oracle = await oracleHelper.deployUpdatableOracleMockAsync(component1Price);
+    component2Oracle = await oracleHelper.deployUpdatableOracleMockAsync(component2Price);
+    component3Oracle = await oracleHelper.deployUpdatableOracleMockAsync(component3Price);
+
+    oracleWhiteList = await coreHelper.deployOracleWhiteListAsync(
+      [component1.address, component2.address, component3.address],
+      [component1Oracle.address, component2Oracle.address, component3Oracle.address],
+    );
+
+    auctionPeriod = ONE_DAY_IN_SECONDS;
+    rangeStart = new BigNumber(10); // 10% above fair value
+    rangeEnd = new BigNumber(10); // 10% below fair value
+    name = 'liquidator';
+
+    assetPairHashes = [
+      liquidatorHelper.generateAssetPairHashes(component1.address, component2.address),
+      liquidatorHelper.generateAssetPairHashes(component2.address, component3.address),
+    ];
+    assetPairBounds = [
+      {min: ZERO, max: ether(10 ** 10)},
+      {min: ZERO, max: ether(10 ** 10)},
+    ];
+
+    liquidator = await liquidatorHelper.deployTWAPLiquidatorAsync(
+      coreMock.address,
+      oracleWhiteList.address,
+      auctionPeriod,
+      rangeStart,
+      rangeEnd,
+      assetPairHashes,
+      assetPairBounds,
+      name,
+    );
+    await coreHelper.addAddressToWhiteList(liquidator.address, liquidatorWhitelist);
+
+    fixedFeeCalculator = await feeCalculatorHelper.deployFixedFeeCalculatorAsync();
+    await coreHelper.addAddressToWhiteList(fixedFeeCalculator.address, feeCalculatorWhitelist);
+  });
+
+  afterEach(async () => {
+    blockchain.revertAsync();
+  });
+
+  describe('#startRebalance', async () => {
+    let usdChunkSize: BigNumber;
+    let chunkAuctionPeriod: BigNumber;
+
+    let subjectCaller: Address;
+    let subjectNextSet: Address;
+    let subjectLiquidatorData: string;
+    let subjectTimeFastForward: BigNumber;
+    let failPeriod: BigNumber;
+
+    let currentSetToken: SetTokenContract;
+    let nextSetToken: SetTokenContract;
+    let rebalancingSetQuantityToIssue: BigNumber;
+
+    beforeEach(async () => {
+      currentSetToken = set1;
+      nextSetToken = set2;
+
+      failPeriod = ONE_DAY_IN_SECONDS;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
+        coreMock,
+        rebalancingFactory.address,
+        managerAccount,
+        liquidator.address,
+        feeRecipient,
+        fixedFeeCalculator.address,
+        currentSetToken.address,
+        failPeriod,
+        lastRebalanceTimestamp,
+      );
+
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        ether(8),
+        {from: deployerAccount}
+      );
+      await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      rebalancingSetQuantityToIssue = ether(7);
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+
+      usdChunkSize = ether(10 ** 5);
+      chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
+
+      subjectLiquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(
+        usdChunkSize,
+        chunkAuctionPeriod,
+      );
+
+      subjectCaller = managerAccount;
+      subjectNextSet = nextSetToken.address;
+      subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
+    });
+
+    async function subject(): Promise<string> {
+      await blockchain.increaseTimeAsync(subjectTimeFastForward);
+      return rebalancingSetToken.startRebalance.sendTransactionAsync(
+        subjectNextSet,
+        subjectLiquidatorData,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    describe('when startRebalance is called from Default State', async () => {
+      it.only('updates the rebalanceState to Rebalance', async () => {
+        await subject();
+
+        const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+        expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.REBALANCE);
+      });
+
+      it('updates the rebalanceStartTime to the latest timestamp', async () => {
+        await subject();
+
+        const { timestamp } = await web3.eth.getBlock('latest');
+
+        const rebalanceStartTime = await rebalancingSetToken.rebalanceStartTime.callAsync();
+        expect(rebalanceStartTime).to.be.bignumber.equal(timestamp);
+      });
+
+      it('redeemsInVault the currentSet', async () => {
+        const supply = await vault.getOwnerBalance.callAsync(currentSetToken.address, rebalancingSetToken.address);
+        const currentSetNaturalUnit = await currentSetToken.naturalUnit.callAsync();
+        const currentSetTokenBalance = await vault.balances.callAsync(
+          currentSetToken.address,
+          rebalancingSetToken.address
+        );
+
+        await subject();
+
+        const expectedRedeemableCurrentSets = supply.div(currentSetNaturalUnit).round(0, 3).mul(currentSetNaturalUnit);
+        const expectedCurrentSetTokenBalance = currentSetTokenBalance.sub(expectedRedeemableCurrentSets);
+        const actualCurrentSetTokenBalance = await vault.balances.callAsync(
+          currentSetToken.address,
+          rebalancingSetToken.address
+        );
+        expect(actualCurrentSetTokenBalance).to.be.bignumber.equal(expectedCurrentSetTokenBalance);
+      });
+
+      it('increments the balances of the currentSet components back to the rebalancingSetToken', async () => {
+        const components = await currentSetToken.getComponents.callAsync();
+        const naturalUnit = await currentSetToken.naturalUnit.callAsync();
+        const componentUnits = await currentSetToken.getUnits.callAsync();
+
+        const existingVaultBalancePromises = _.map(components, component =>
+          vault.balances.callAsync(component, rebalancingSetToken.address),
+        );
+        const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
+
+        await subject();
+
+        const actualStartingCurrentSetAmount = await liquidator.startingCurrentSets.callAsync(
+          rebalancingSetToken.address
+        );
+        const expectedVaultBalances = _.map(components, (component, idx) => {
+          const requiredQuantityToRedeem = actualStartingCurrentSetAmount.div(naturalUnit).mul(componentUnits[idx]);
+          return existingVaultBalances[idx].add(requiredQuantityToRedeem);
+        });
+
+        const newVaultBalancesPromises = _.map(components, component =>
+          vault.balances.callAsync(component, rebalancingSetToken.address),
+        );
+        const newVaultBalances = await Promise.all(newVaultBalancesPromises);
+
+        _.map(components, (component, idx) =>
+          expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx]),
+        );
+      });
+
+      describe('when one of the components in the next set is not on the whitelist', async () => {
+        beforeEach(async () => {
+          const nextSetComponents = await nextSetToken.getComponents.callAsync();
+          await rebalancingComponentWhiteList.removeAddress.sendTransactionAsync(
+            nextSetComponents[0],
+            { from: deployerAccount }
+          );
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when the union of currentSet and nextSet is not 2 components', async () => {
+        beforeEach(async () => {
+          const set3Components = [component1.address, component3.address];
+          const set3Units = [gWei(1), gWei(1)];
+          const set3NaturalUnit = customSet1NaturalUnit || gWei(1);
+          const set3 = await coreHelper.createSetTokenAsync(
+            coreMock,
+            setTokenFactory.address,
+            set3Components,
+            set3Units,
+            set3NaturalUnit,
+          );
+
+          subjectNextSet = set3.address;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when the rebalance interval has not elapsed', async () => {
+        beforeEach(async () => {
+          subjectTimeFastForward = ONE_DAY_IN_SECONDS.sub(10);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when not by the token manager', async () => {
+        beforeEach(async () => {
+          subjectCaller = otherAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('when the nextSet is not approved by Core', async () => {
+        beforeEach(async () => {
+          subjectNextSet = fakeTokenAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe("when the new set's natural unit is not a multiple of the current set", async () => {
+        before(async () => {
+          // a setToken with natural unit ether(.003) and setToken with natural unit ether(.002) are being used
+          customSet1NaturalUnit = ether(.002);
+          customSet2NaturalUnit = ether(.003);
+        });
+
+        after(async () => {
+          customSet1NaturalUnit = undefined;
+          customSet2NaturalUnit = undefined;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+    });
+
+    describe('when startRebalance is called from Rebalance state', async () => {
+      beforeEach(async () => {
+        // Issue currentSetToken
+        await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
+        await erc20Helper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+        // Use issued currentSetToken to issue rebalancingSetToken
+        const rebalancingSetQuantityToIssue = ether(7);
+        await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+
+        await rebalancingHelper.transitionToRebalanceV2Async(
+          coreMock,
+          rebalancingComponentWhiteList,
+          rebalancingSetToken,
+          set2,
+          managerAccount
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+});

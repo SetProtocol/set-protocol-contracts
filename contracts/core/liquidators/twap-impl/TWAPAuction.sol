@@ -116,7 +116,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         }
 
         // Expected length of a chunk auction, assuming the auction goes 2% beyond initial fair
-        // value. Used to validate TWAP Auction length won't exceed Set's failAuctionPeriod.
+        // value. Used to validate TWAP Auction length won't exceed Set's rebalanceFailPeriod.
         expectedChunkAuctionLength = _auctionPeriod
             .mul(_rangeStart.add(AUCTION_COMPLETION_BUFFER))
             .div(_rangeStart.add(_rangeEnd));
@@ -232,7 +232,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
 
     /**
      * Validates that chunk size is within asset bounds and passed chunkAuctionLength
-     * is unlikely to push TWAPAuction beyond failAuctionPeriod.
+     * is unlikely to push TWAPAuction beyond rebalanceFailPeriod.
      *
      * @param _currentSet                   The Set to rebalance from
      * @param _nextSet                      The Set to rebalance to
@@ -286,7 +286,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
             "TWAPAuction.validateTWAPParameters: Passed chunk size must be between bounds."
         );
 
-        // Want to make sure that the expected length of the auction is less than the failAuctionPeriod
+        // Want to make sure that the expected length of the auction is less than the rebalanceFailPeriod
         // or else a legitimate auction could be failed. Calculated as such:
         // expectedTWAPTime = numChunkAuctions * expectedChunkAuctionLength + (numChunkAuctions - 1) *
         // chunkAuctionPeriod
@@ -294,10 +294,10 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         uint256 expectedTWAPAuctionTime = numChunkAuctions.mul(expectedChunkAuctionLength)
             .add(numChunkAuctions.sub(1).mul(_twapLiquidatorData.chunkAuctionPeriod));
 
-        uint256 failAuctionPeriod = IRebalancingSetTokenV3(msg.sender).failAuctionPeriod();
+        uint256 rebalanceFailPeriod = IRebalancingSetTokenV3(msg.sender).rebalanceFailPeriod();
 
         require(
-            expectedTWAPAuctionTime < failAuctionPeriod,
+            expectedTWAPAuctionTime < rebalanceFailPeriod,
             "TWAPAuction.validateTWAPParameters: Expected auction duration exceeds allowed length."
         );
     }

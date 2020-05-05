@@ -97,7 +97,7 @@ interface IRebalancingSetTokenV3 {
      *
      * @return  failAuctionPeriod
      */
-    function failAuctionPeriod()
+    function rebalanceFailPeriod()
         external
         view
         returns (uint256);

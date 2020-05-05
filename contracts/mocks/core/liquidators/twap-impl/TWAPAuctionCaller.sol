@@ -8,16 +8,16 @@ import { TWAPAuction } from "../../../../core/liquidators/twap-impl/TWAPAuction.
 // Mock contract implementation of Auction with extra functions for testing
 contract TWAPAuctionCaller {
     ITWAPAuction public twapAuction;
-    uint256 public failAuctionPeriod;
+    uint256 public rebalanceFailPeriod;
 
     constructor(
         ITWAPAuction _twapAuction,
-        uint256 _failAuctionPeriod
+        uint256 _rebalanceFailPeriod
     )
         public
     {
         twapAuction = _twapAuction;
-        failAuctionPeriod = _failAuctionPeriod;
+        rebalanceFailPeriod = _rebalanceFailPeriod;
     }
 
     function validateLiquidatorData(

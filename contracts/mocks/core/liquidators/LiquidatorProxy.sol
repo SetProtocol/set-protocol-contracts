@@ -15,7 +15,7 @@ contract LiquidatorProxy {
     uint256[] private outflow;
     address[] private combinedTokenArray;
 
-    uint256 public failAuctionPeriod;
+    uint256 public rebalanceFailPeriod;
 
     constructor(
         ILiquidator _liquidator
@@ -81,7 +81,7 @@ contract LiquidatorProxy {
     }
 
     function setAuctionFailPeriod(uint256 _newFailPeriod) external {
-        failAuctionPeriod = _newFailPeriod;
+        rebalanceFailPeriod = _newFailPeriod;
     }
 }
 

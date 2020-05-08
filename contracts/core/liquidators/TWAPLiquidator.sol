@@ -131,14 +131,14 @@ contract TWAPLiquidator is
             twapLiquidatorData
         );
 
-        // // Initializes TWAP Auction and commits to TWAP state
-        // TWAPAuction.initializeTWAPAuction(
-        //     auctions[msg.sender],
-        //     _currentSet,
-        //     _nextSet,
-        //     _startingCurrentSetQuantity,
-        //     twapLiquidatorData
-        // );
+        // Initializes TWAP Auction and commits to TWAP state
+        TWAPAuction.initializeTWAPAuction(
+            auctions[msg.sender],
+            _currentSet,
+            _nextSet,
+            _startingCurrentSetQuantity,
+            twapLiquidatorData
+        );
     }
 
     /**

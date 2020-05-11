@@ -8,28 +8,40 @@ import {
 import {
   CoreMockContract,
   OracleWhiteListContract,
+  RebalanceAuctionModuleContract,
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
+  RebalancingSetTokenV3FactoryContract,
+  WhiteListContract,
+  FixedFeeCalculatorContract,
 } from '../contracts';
 import { ether } from '../units';
 
 import { CoreHelper } from './coreHelper';
 import { ERC20Helper } from './erc20Helper';
 import { OracleHelper } from 'set-protocol-oracles';
+import { FeeCalculatorHelper } from './feeCalculatorHelper';
 
 export class RebalanceTestSetup {
   private _contractOwnerAddress: Address;
   private _coreHelper: CoreHelper;
   private _erc20Helper: ERC20Helper;
   private _oracleHelper: OracleHelper;
+  private _feeCalculatorHelper: FeeCalculatorHelper;
 
   public core: CoreMockContract;
   public transferProxy: TransferProxyContract;
   public vault: VaultContract;
   public setTokenFactory: SetTokenFactoryContract;
+  public rebalanceAuctionModule: RebalanceAuctionModuleContract;
+  public rebalancingFactory: RebalancingSetTokenV3FactoryContract;
+  public rebalancingComponentWhiteList: WhiteListContract;
+  public liquidatorWhitelist: WhiteListContract;
+  public fixedFeeCalculator: FixedFeeCalculatorContract;
+  public feeCalculatorWhitelist: WhiteListContract;
 
   public component1: StandardTokenMockContract;
   public component2: StandardTokenMockContract;
@@ -63,14 +75,12 @@ export class RebalanceTestSetup {
 
   constructor(
     contractOwnerAddress: Address,
-    coreHelper: CoreHelper,
-    erc20Helper: ERC20Helper,
-    oracleHelper: OracleHelper
   ) {
     this._contractOwnerAddress = contractOwnerAddress;
-    this._coreHelper = coreHelper;
-    this._erc20Helper = erc20Helper;
-    this._oracleHelper = oracleHelper;
+    this._coreHelper = new CoreHelper(this._contractOwnerAddress, this._contractOwnerAddress);
+    this._erc20Helper = new ERC20Helper(this._contractOwnerAddress);
+    this._oracleHelper = new OracleHelper(this._contractOwnerAddress);
+    this._feeCalculatorHelper = new FeeCalculatorHelper(this._contractOwnerAddress);
   }
 
   /* ============ Deployment ============ */
@@ -78,17 +88,7 @@ export class RebalanceTestSetup {
   public async initialize(
     from: Address = this._contractOwnerAddress
   ): Promise<void> {
-    this.transferProxy = await this._coreHelper.deployTransferProxyAsync();
-    this.vault = await this._coreHelper.deployVaultAsync();
-    this.core = await this._coreHelper.deployCoreMockAsync(this.transferProxy, this.vault);
-
-    this.setTokenFactory = await this._coreHelper.deploySetTokenFactoryAsync(this.core.address);
-    await this._coreHelper.setDefaultStateAndAuthorizationsAsync(
-      this.core,
-      this.vault,
-      this.transferProxy,
-      this.setTokenFactory,
-    );
+    await this.initializeCore();
 
     this.component1 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 18);
     this.component2 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 6);
@@ -139,5 +139,48 @@ export class RebalanceTestSetup {
       [this.component1.address, this.component2.address, this.component3.address],
       [this.component1Oracle.address, this.component2Oracle.address, this.component3Oracle.address],
     );
+
+    await this._coreHelper.addTokensToWhiteList(
+      [this.component1.address, this.component2.address, this.component3.address],
+      this.rebalancingComponentWhiteList,
+    );
+
+    await this._erc20Helper.approveTransfersAsync(
+      [this.component1, this.component2, this.component3],
+      this.transferProxy.address
+    );
+  }
+
+  public async initializeCore(
+    from: Address = this._contractOwnerAddress
+  ): Promise<void> {
+        this.transferProxy = await this._coreHelper.deployTransferProxyAsync();
+    this.vault = await this._coreHelper.deployVaultAsync();
+    this.core = await this._coreHelper.deployCoreMockAsync(this.transferProxy, this.vault);
+
+    this.setTokenFactory = await this._coreHelper.deploySetTokenFactoryAsync(this.core.address);
+    await this._coreHelper.setDefaultStateAndAuthorizationsAsync(
+      this.core,
+      this.vault,
+      this.transferProxy,
+      this.setTokenFactory,
+    );
+
+    this.rebalanceAuctionModule = await this._coreHelper.deployRebalanceAuctionModuleAsync(this.core, this.vault);
+    await this._coreHelper.addModuleAsync(this.core, this.rebalanceAuctionModule.address);
+
+    this.rebalancingComponentWhiteList = await this._coreHelper.deployWhiteListAsync();
+    this.liquidatorWhitelist = await this._coreHelper.deployWhiteListAsync();
+    this.feeCalculatorWhitelist = await this._coreHelper.deployWhiteListAsync();
+    this.rebalancingFactory = await this._coreHelper.deployRebalancingSetTokenV3FactoryAsync(
+      this.core.address,
+      this.rebalancingComponentWhiteList.address,
+      this.liquidatorWhitelist.address,
+      this.feeCalculatorWhitelist.address,
+    );
+    await this._coreHelper.addFactoryAsync(this.core, this.rebalancingFactory);
+
+    this.fixedFeeCalculator = await this._feeCalculatorHelper.deployFixedFeeCalculatorAsync();
+    await this._coreHelper.addAddressToWhiteList(this.fixedFeeCalculator.address, this.feeCalculatorWhitelist);
   }
 }

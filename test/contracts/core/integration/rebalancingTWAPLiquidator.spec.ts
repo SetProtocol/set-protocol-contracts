@@ -66,7 +66,6 @@ contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
   let currentSetToken: SetTokenContract;
   let nextSetToken: SetTokenContract;
   let failPeriod: BigNumber;
-  let currentSetIssueQuantity: BigNumber;
   let rebalancingSetQuantityToIssue: BigNumber;
 
 
@@ -110,18 +109,10 @@ contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
         lastRebalanceTimestamp,
       );
 
-      // Issue currentSetToken
-      currentSetIssueQuantity = ether(2500);
-      await scenario.core.issue.sendTransactionAsync(
-        currentSetToken.address,
-        currentSetIssueQuantity,
-        {from: deployerAccount}
-      );
-      await erc20Helper.approveTransfersAsync([currentSetToken], scenario.transferProxy.address);
+      await scenario.setRebalancingSet(rebalancingSetToken);
 
-      // Use issued currentSetToken to issue rebalancingSetToken
       rebalancingSetQuantityToIssue = ether(2000);
-      await scenario.core.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+      await scenario.mintRebalancingSets(rebalancingSetQuantityToIssue);
   }
 
   async function getMaxBiddableQuantity(rebalancingSetTokenAddress: Address): Promise<BigNumber> {

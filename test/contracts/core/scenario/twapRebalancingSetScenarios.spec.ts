@@ -60,9 +60,9 @@ const scenarios = [
       units: [new BigNumber(307)],
       naturalUnit: new BigNumber(0),
     },
-    components: {
-      price1: ether(188),
-      price2: ether(1),
+    prices: {
+      component1: ether(188),
+      component2: ether(1),
     },
     auction: {
       chunkSize: ether(1000000),
@@ -90,15 +90,6 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   let rangeStart: BigNumber = new BigNumber(1);
   let rangeEnd: BigNumber = new BigNumber(21);
 
-  let assetPairHashes: string[];
-  let assetPairBounds: AssetChunkSizeBounds[];
-
-  let currentSetToken: SetTokenContract;
-  let nextSetToken: SetTokenContract;
-  let failPeriod: BigNumber;
-  let rebalancingSetQuantityToIssue: BigNumber;
-
-
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
   const rebalancingHelper = new RebalancingSetV3Helper(
@@ -111,7 +102,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, valuationHelper);
 
-  const scenario = new RebalanceTestSetup(deployerAccount);
+  const setup = new RebalanceTestSetup(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -123,29 +114,6 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
 
   beforeEach(async () => {
     blockchain.saveSnapshotAsync();
-
-    await scenario.initialize();
-
-    assetPairHashes = [
-      liquidatorHelper.generateAssetPairHashes(scenario.component1.address, scenario.component2.address),
-      liquidatorHelper.generateAssetPairHashes(scenario.component2.address, scenario.component3.address),
-    ];
-    assetPairBounds = [
-      {min: ZERO, max: ether(10 ** 10)},
-      {min: ZERO, max: ether(10 ** 10)},
-    ];
-
-    liquidator = await liquidatorHelper.deployTWAPLiquidatorAsync(
-      scenario.core.address,
-      scenario.oracleWhiteList.address,
-      auctionPeriod,
-      rangeStart,
-      rangeEnd,
-      assetPairHashes,
-      assetPairBounds,
-      name,
-    );
-    await coreHelper.addAddressToWhiteList(liquidator.address, scenario.liquidatorWhitelist);
   });
 
   afterEach(async () => {
@@ -239,8 +207,8 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
     });
   });
 
-  async function runScenario(): Promise<void> {
-    // create Set and mint
+  async function runScenario(scenario: any): Promise<void> {
+    await initializeScenario(scenario);
 
     // StartRebalance
     // Loop through number of auctions
@@ -249,28 +217,58 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
     // If last auction, call settle
   }
 
-  async function createSetAndMint(): Promise<void> {
-    currentSetToken = scenario.set1;
-    nextSetToken = scenario.set2;
+  async function initializeScenario(scenario: any): Promise<void> {
+    await setup.initializeCore();
+    await setup.initializeComponents({
+      component1Price: setup.prices.component1,
+      component2Price: setup.prices.component2
+    });
+    await setup.initializeBaseSets({
+      set1Components: [scenario.component1.address],
+      set2Components: [scenario.component2.address],
+      set1Units: scenario.currentSet.units,
+      set2Units: scenario.nextSet.units,
+      set1NaturalUnit: scenario.currentSet.naturalUnit,
+      set2NaturalUnit: scenario.nextSet.naturalUnit,
+    });
 
-    failPeriod = ONE_DAY_IN_SECONDS;
+    const assetPairHashes: string[] = [
+      liquidatorHelper.generateAssetPairHashes(setup.component1.address, setup.component2.address),
+    ];
+    const assetPairBounds: AssetChunkSizeBounds[] = [
+      {min: ZERO, max: ether(10 ** 10)},
+    ];
+
+    liquidator = await liquidatorHelper.deployTWAPLiquidatorAsync(
+      setup.core.address,
+      setup.oracleWhiteList.address,
+      auctionPeriod,
+      rangeStart,
+      rangeEnd,
+      assetPairHashes,
+      assetPairBounds,
+      name,
+    );
+    await coreHelper.addAddressToWhiteList(liquidator.address, setup.liquidatorWhitelist);
+
+    const failPeriod = ONE_DAY_IN_SECONDS;
     const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
     rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
-      scenario.core,
-      scenario.rebalancingFactory.address,
+      setup.core,
+      setup.rebalancingFactory.address,
       managerAccount,
       liquidator.address,
       feeRecipient,
-      scenario.fixedFeeCalculator.address,
-      currentSetToken.address,
+      setup.fixedFeeCalculator.address,
+      setup.set1.address,
       failPeriod,
       lastRebalanceTimestamp,
+      scenario.rebalancingSet.unitShares
     );
 
-    await scenario.setRebalancingSet(rebalancingSetToken);
+    await setup.setRebalancingSet(rebalancingSetToken);
 
-    rebalancingSetQuantityToIssue = ether(2000);
-    await scenario.mintRebalancingSets(rebalancingSetQuantityToIssue);
+    await setup.mintRebalancingSets(scenario.rebalancingSet.supply);    
   }
 
   async function getMaxBiddableQuantity(rebalancingSetTokenAddress: Address): Promise<BigNumber> {

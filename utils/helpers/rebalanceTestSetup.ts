@@ -90,8 +90,13 @@ export class RebalanceTestSetup {
   ): Promise<void> {
     await this.initializeCore();
 
+    // Ether
     this.component1 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 18);
+
+    // USDC
     this.component2 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 6);
+
+    // BTC
     this.component3 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 8);
 
     this.set1Components = [this.component1.address, this.component2.address];

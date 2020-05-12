@@ -13,7 +13,6 @@ import {
   TWAPLiquidatorContract,
   SetTokenContract,
   RebalancingSetTokenV3Contract,
-  WhiteListContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { ether, gWei } from '@utils/units';
@@ -54,7 +53,6 @@ contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
 
   let rebalancingSetToken: RebalancingSetTokenV3Contract;
 
-  let liquidatorWhitelist: WhiteListContract;
   let liquidator: TWAPLiquidatorContract;
 
   let name: string;
@@ -64,6 +62,13 @@ contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
 
   let assetPairHashes: string[];
   let assetPairBounds: AssetChunkSizeBounds[];
+
+  let currentSetToken: SetTokenContract;
+  let nextSetToken: SetTokenContract;
+  let failPeriod: BigNumber;
+  let currentSetIssueQuantity: BigNumber;
+  let rebalancingSetQuantityToIssue: BigNumber;
+
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -87,14 +92,52 @@ contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
     ABIDecoder.removeABI(CoreMock.abi);
   });
 
+  async function createSetAndMint(): Promise<void> {
+      currentSetToken = scenario.set1;
+      nextSetToken = scenario.set2;
+
+      failPeriod = ONE_DAY_IN_SECONDS;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
+        scenario.core,
+        scenario.rebalancingFactory.address,
+        managerAccount,
+        liquidator.address,
+        feeRecipient,
+        scenario.fixedFeeCalculator.address,
+        currentSetToken.address,
+        failPeriod,
+        lastRebalanceTimestamp,
+      );
+
+      // Issue currentSetToken
+      currentSetIssueQuantity = ether(2500);
+      await scenario.core.issue.sendTransactionAsync(
+        currentSetToken.address,
+        currentSetIssueQuantity,
+        {from: deployerAccount}
+      );
+      await erc20Helper.approveTransfersAsync([currentSetToken], scenario.transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      rebalancingSetQuantityToIssue = ether(2000);
+      await scenario.core.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+  }
+
+  async function getMaxBiddableQuantity(rebalancingSetTokenAddress: Address): Promise<BigNumber> {
+    const remainingBids = await liquidator.remainingCurrentSets.callAsync(rebalancingSetTokenAddress);
+    const minBid = await liquidator.minimumBid.callAsync(rebalancingSetTokenAddress);
+    return liquidatorHelper.calculateChunkAuctionMaximumBid(remainingBids, minBid);
+  }
+
   beforeEach(async () => {
     blockchain.saveSnapshotAsync();
 
     await scenario.initialize();
 
-    auctionPeriod = ONE_DAY_IN_SECONDS;
-    rangeStart = new BigNumber(10); // 10% above fair value
-    rangeEnd = new BigNumber(10); // 10% below fair value
+    auctionPeriod = ONE_HOUR_IN_SECONDS;
+    rangeStart = new BigNumber(3); // 3% above fair value
+    rangeEnd = new BigNumber(21); // 21% below fair value
     name = 'liquidator';
 
     assetPairHashes = [
@@ -131,40 +174,9 @@ contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
     let subjectNextSet: Address;
     let subjectLiquidatorData: string;
     let subjectTimeFastForward: BigNumber;
-    let failPeriod: BigNumber;
-
-    let currentSetToken: SetTokenContract;
-    let nextSetToken: SetTokenContract;
-    let rebalancingSetQuantityToIssue: BigNumber;
 
     beforeEach(async () => {
-      currentSetToken = scenario.set1;
-      nextSetToken = scenario.set2;
-
-      failPeriod = ONE_DAY_IN_SECONDS;
-      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
-        scenario.core,
-        scenario.rebalancingFactory.address,
-        managerAccount,
-        liquidator.address,
-        feeRecipient,
-        scenario.fixedFeeCalculator.address,
-        currentSetToken.address,
-        failPeriod,
-        lastRebalanceTimestamp,
-      );
-
-      await scenario.core.issue.sendTransactionAsync(
-        currentSetToken.address,
-        ether(8),
-        {from: deployerAccount}
-      );
-      await erc20Helper.approveTransfersAsync([currentSetToken], scenario.transferProxy.address);
-
-      // Use issued currentSetToken to issue rebalancingSetToken
-      rebalancingSetQuantityToIssue = ether(7);
-      await scenario.core.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+      await createSetAndMint();
 
       usdChunkSize = ether(10 ** 5);
       chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
@@ -206,7 +218,10 @@ contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
       });
 
       it('redeemsInVault the currentSet', async () => {
-        const supply = await scenario.vault.getOwnerBalance.callAsync(currentSetToken.address, rebalancingSetToken.address);
+        const supply = await scenario.vault.getOwnerBalance.callAsync(
+          currentSetToken.address,
+          rebalancingSetToken.address
+        );
         const currentSetNaturalUnit = await currentSetToken.naturalUnit.callAsync();
         const currentSetTokenBalance = await scenario.vault.balances.callAsync(
           currentSetToken.address,
@@ -222,36 +237,6 @@ contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
           rebalancingSetToken.address
         );
         expect(actualCurrentSetTokenBalance).to.be.bignumber.equal(expectedCurrentSetTokenBalance);
-      });
-
-      it('increments the balances of the currentSet components back to the rebalancingSetToken', async () => {
-        const components = await currentSetToken.getComponents.callAsync();
-        const naturalUnit = await currentSetToken.naturalUnit.callAsync();
-        const componentUnits = await currentSetToken.getUnits.callAsync();
-
-        const existingVaultBalancePromises = _.map(components, component =>
-          scenario.vault.balances.callAsync(component, rebalancingSetToken.address),
-        );
-        const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
-
-        await subject();
-
-        const actualStartingCurrentSetAmount = await liquidator.startingCurrentSets.callAsync(
-          rebalancingSetToken.address
-        );
-        const expectedVaultBalances = _.map(components, (component, idx) => {
-          const requiredQuantityToRedeem = actualStartingCurrentSetAmount.div(naturalUnit).mul(componentUnits[idx]);
-          return existingVaultBalances[idx].add(requiredQuantityToRedeem);
-        });
-
-        const newVaultBalancesPromises = _.map(components, component =>
-          scenario.vault.balances.callAsync(component, rebalancingSetToken.address),
-        );
-        const newVaultBalances = await Promise.all(newVaultBalancesPromises);
-
-        _.map(components, (component, idx) =>
-          expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx]),
-        );
       });
 
       describe('when one of the components in the next set is not on the whitelist', async () => {
@@ -321,46 +306,191 @@ contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
     });
   });
 
-  describe('#settleRebalance', async () => {
+  describe('#placeBid', async () => {
+    let liquidatorData: string;
+    let usdChunkSize: BigNumber;
+    let chunkAuctionPeriod: BigNumber;
+
+    let subjectBidQuantity: BigNumber;
     let subjectCaller: Address;
 
-    let nextSetToken: SetTokenContract;
-    let currentSetToken: SetTokenContract;
-
-    let rebalancingSetQuantityToIssue: BigNumber;
-    let currentSetIssueQuantity: BigNumber;
+    let customChunkSize: BigNumber;
 
     beforeEach(async () => {
-      currentSetToken = scenario.set1;
-      nextSetToken = scenario.set2;
+      await createSetAndMint();
 
-      const failPeriod = ONE_DAY_IN_SECONDS;
-      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
+      usdChunkSize = customChunkSize || ether(10 ** 5); // 2 auctions to be performed
+      chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
+
+      liquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(
+        usdChunkSize,
+        chunkAuctionPeriod,
+      );
+
+      await rebalancingHelper.transitionToRebalanceV2Async(
         scenario.core,
-        scenario.rebalancingFactory.address,
+        scenario.rebalancingComponentWhiteList,
+        rebalancingSetToken,
+        nextSetToken,
         managerAccount,
-        liquidator.address,
-        feeRecipient,
-        scenario.fixedFeeCalculator.address,
-        currentSetToken.address,
-        failPeriod,
-        lastRebalanceTimestamp,
+        liquidatorData,
       );
 
-      // Issue currentSetToken
-      currentSetIssueQuantity = ether(8);
-      await scenario.core.issue.sendTransactionAsync(
-        currentSetToken.address,
-        currentSetIssueQuantity,
-        {from: deployerAccount}
+      subjectBidQuantity = await getMaxBiddableQuantity(rebalancingSetToken.address);
+      subjectCaller = managerAccount;
+    });
+
+    async function subject(): Promise<void> {
+      return rebalancingHelper.placeBidAsync(
+        scenario.rebalanceAuctionModule,
+        rebalancingSetToken.address,
+        subjectBidQuantity,
       );
-      await erc20Helper.approveTransfersAsync([currentSetToken], scenario.transferProxy.address);
+    }
 
-      // Use issued currentSetToken to issue rebalancingSetToken
-      rebalancingSetQuantityToIssue = ether(7);
-      await scenario.core.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+    describe('with 1 chunk auction', async () => {
+      before(async () => {
+        customChunkSize = ether(10 ** 10);
+      });
 
+      after(async () => {
+        customChunkSize = undefined;
+      });
+
+      it('reduces the remainingCurrentSets', async () => {
+        const startingBids = await liquidator.remainingCurrentSets.callAsync(rebalancingSetToken.address);
+
+        await subject();
+
+        const endingBids = await liquidator.remainingCurrentSets.callAsync(rebalancingSetToken.address);
+
+        const expected = startingBids.minus(subjectBidQuantity);
+        expect(endingBids).to.be.bignumber.equal(expected);
+      });
+    });
+
+    describe('after 1 chunk auction is complete and the second has not begun', async () => {
+      beforeEach(async () => {
+        const firstAuctionBid = await getMaxBiddableQuantity(rebalancingSetToken.address);
+
+        await rebalancingHelper.placeBidAsync(
+          scenario.rebalanceAuctionModule,
+          rebalancingSetToken.address,
+          firstAuctionBid,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('after 1 chunk auction is complete and the second has begun', async () => {
+      beforeEach(async () => {
+        const firstAuctionBid = await getMaxBiddableQuantity(rebalancingSetToken.address);
+        await rebalancingHelper.placeBidAsync(
+          scenario.rebalanceAuctionModule,
+          rebalancingSetToken.address,
+          firstAuctionBid,
+        );
+
+        await blockchain.increaseTimeAsync(chunkAuctionPeriod);
+
+        await liquidator.iterateChunkAuction.sendTransactionAsync(
+          rebalancingSetToken.address,
+          { from: subjectCaller, gas: DEFAULT_GAS }
+        );
+
+        const remainingBids = await liquidator.remainingCurrentSets.callAsync(rebalancingSetToken.address);
+        const minBid = await liquidator.minimumBid.callAsync(rebalancingSetToken.address);
+        subjectBidQuantity = liquidatorHelper.calculateChunkAuctionMaximumBid(remainingBids, minBid);
+      });
+
+      it('updates the rebalanceState to Default', async () => {
+        const startingBids = await liquidator.remainingCurrentSets.callAsync(rebalancingSetToken.address);
+
+        await subject();
+
+        const endingBids = await liquidator.remainingCurrentSets.callAsync(rebalancingSetToken.address);
+
+        const expected = startingBids.minus(subjectBidQuantity);
+        expect(endingBids).to.be.bignumber.equal(expected);
+      });
+    });
+  });
+
+  describe('#actualizeFee', async () => {
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      await createSetAndMint();
+
+      // Should only be one chunk auction
+      const usdChunkSize = ether(10 ** 10); // max value
+      const chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
+
+      const liquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(
+        usdChunkSize,
+        chunkAuctionPeriod,
+      );
+
+     await rebalancingHelper.transitionToRebalanceV2Async(
+       scenario.core,
+       scenario.rebalancingComponentWhiteList,
+       rebalancingSetToken,
+       nextSetToken,
+       managerAccount,
+       liquidatorData,
+     );
+
+      subjectCaller = managerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingSetToken.actualizeFee.sendTransactionAsync(
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('should revert when in rebalance phase', async () => {
+      await expectRevertError(subject());
+    });
+  });
+
+  describe('#settleRebalance', async () => {
+    let liquidatorData: string;
+    let usdChunkSize: BigNumber;
+    let chunkAuctionPeriod: BigNumber;
+    let subjectCaller: Address;
+
+    let customChunkSize: BigNumber;
+
+    beforeEach(async () => {
+      await createSetAndMint();
+
+      usdChunkSize = customChunkSize || ether(10 ** 5); // 2 auctions to be performed
+      chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
+
+      liquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(
+        usdChunkSize,
+        chunkAuctionPeriod,
+      );
+
+      await rebalancingHelper.transitionToRebalanceV2Async(
+        scenario.core,
+        scenario.rebalancingComponentWhiteList,
+        rebalancingSetToken,
+        nextSetToken,
+        managerAccount,
+        liquidatorData,
+      );
+
+      const bidQuantity = await getMaxBiddableQuantity(rebalancingSetToken.address);
+      await rebalancingHelper.placeBidAsync(
+        scenario.rebalanceAuctionModule,
+        rebalancingSetToken.address,
+        bidQuantity,
+      );
       subjectCaller = managerAccount;
     });
 
@@ -370,32 +500,53 @@ contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
       );
     }
 
-    describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
-      let liquidatorData: string;
-      let usdChunkSize: BigNumber;
-      let chunkAuctionPeriod: BigNumber;
+    describe('with 1 chunk auction and all currentSets are rebalanced', async () => {
+      before(async () => {
+        customChunkSize = ether(10 ** 10);
+      });
 
+      after(async () => {
+        customChunkSize = undefined;
+      });
+
+      it('updates the rebalanceState to Default', async () => {
+        await subject();
+
+        const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+        expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
+      });
+    });
+
+    describe('with 2 chunk auctions and only 1 is complete', async () => {
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('after 1 chunk auction is complete and the second has begun', async () => {
       beforeEach(async () => {
-        // Should only be one chunk auction
-        usdChunkSize = ether(10 ** 10); // max value
-        chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
+        await blockchain.increaseTimeAsync(chunkAuctionPeriod);
+        await liquidator.iterateChunkAuction.sendTransactionAsync(
+          rebalancingSetToken.address,
+          { from: subjectCaller, gas: DEFAULT_GAS }
+        );
+      });
 
-        liquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(
-          usdChunkSize,
-          chunkAuctionPeriod,
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('after 1 chunk auction is complete and the second has begun', async () => {
+      beforeEach(async () => {
+        await blockchain.increaseTimeAsync(chunkAuctionPeriod);
+
+        await liquidator.iterateChunkAuction.sendTransactionAsync(
+          rebalancingSetToken.address,
+          { from: subjectCaller, gas: DEFAULT_GAS }
         );
 
-       await rebalancingHelper.transitionToRebalanceV2Async(
-         scenario.core,
-         scenario.rebalancingComponentWhiteList,
-         rebalancingSetToken,
-         nextSetToken,
-         managerAccount,
-         liquidatorData,
-       );
-
-        const bidQuantity = rebalancingSetQuantityToIssue;
-
+        const bidQuantity = await getMaxBiddableQuantity(rebalancingSetToken.address);
         await rebalancingHelper.placeBidAsync(
           scenario.rebalanceAuctionModule,
           rebalancingSetToken.address,
@@ -408,6 +559,122 @@ contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
 
         const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
         expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
+      });
+
+      it('clears the auction state', async () => {
+        await subject();
+
+        const orderSize = await liquidator.getOrderSize.callAsync(rebalancingSetToken.address);
+        expect(orderSize).to.bignumber.equal(0);
+      });
+    });
+  });
+
+  describe('#endFailedRebalance', async () => {
+    let liquidatorData: string;
+    let usdChunkSize: BigNumber;
+    let chunkAuctionPeriod: BigNumber;
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      await createSetAndMint();
+
+      usdChunkSize = ether(10 ** 5); // 2 auctions to be performed
+      chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
+
+      liquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(
+        usdChunkSize,
+        chunkAuctionPeriod,
+      );
+
+      await rebalancingHelper.transitionToRebalanceV2Async(
+        scenario.core,
+        scenario.rebalancingComponentWhiteList,
+        rebalancingSetToken,
+        nextSetToken,
+        managerAccount,
+        liquidatorData,
+      );
+      subjectCaller = managerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingSetToken.endFailedRebalance.sendTransactionAsync(
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    describe('when the chunkAuctionFailPeriod has elapsed and no bids are made', async () => {
+      beforeEach(async () => {
+        await blockchain.increaseTimeAsync(auctionPeriod.plus(1));
+      });
+
+      it('updates the rebalanceState to Default', async () => {
+        await subject();
+
+        const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+        expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
+      });
+
+      it('clears the auction state', async () => {
+        await subject();
+
+        const orderSize = await liquidator.getOrderSize.callAsync(rebalancingSetToken.address);
+        expect(orderSize).to.bignumber.equal(0);
+      });
+    });
+
+    describe('when the failPeriod has elapsed and no bids are made', async () => {
+      beforeEach(async () => {
+        await blockchain.increaseTimeAsync(failPeriod.plus(1));
+      });
+
+      it('updates the rebalanceState to Default', async () => {
+        await subject();
+
+        const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+        expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
+      });
+
+      it('clears the auction state', async () => {
+        await subject();
+
+        const orderSize = await liquidator.getOrderSize.callAsync(rebalancingSetToken.address);
+        expect(orderSize).to.bignumber.equal(0);
+      });
+    });
+
+    describe('when the failPeriod has elapsed and bids are made', async () => {
+      beforeEach(async () => {
+        const bidQuantity = await getMaxBiddableQuantity(rebalancingSetToken.address);
+        await rebalancingHelper.placeBidAsync(
+          scenario.rebalanceAuctionModule,
+          rebalancingSetToken.address,
+          bidQuantity,
+        );
+
+        await blockchain.increaseTimeAsync(chunkAuctionPeriod);
+
+        await liquidator.iterateChunkAuction.sendTransactionAsync(
+          rebalancingSetToken.address,
+          { from: subjectCaller, gas: DEFAULT_GAS }
+        );
+
+        await blockchain.increaseTimeAsync(failPeriod.plus(1));
+      });
+
+      it('updates the rebalanceState to Drawdown', async () => {
+        await subject();
+
+        const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+        expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DRAWDOWN);
+      });
+
+      it('clears the auction state', async () => {
+        await subject();
+
+        const orderSize = await liquidator.getOrderSize.callAsync(rebalancingSetToken.address);
+        expect(orderSize).to.bignumber.equal(0);
       });
     });
   });

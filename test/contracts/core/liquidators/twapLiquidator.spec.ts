@@ -66,7 +66,7 @@ contract('TWAPLiquidator', accounts => {
   const valuationHelper = new ValuationHelper(ownerAccount, coreHelper, erc20Helper, oracleHelper);
   const liquidatorHelper = new LiquidatorHelper(ownerAccount, erc20Helper, valuationHelper);
 
-  const scenario = new RebalanceTestSetup(ownerAccount, coreHelper, erc20Helper, oracleHelper);
+  const scenario = new RebalanceTestSetup(ownerAccount);
 
   let name: string;
   let auctionPeriod: BigNumber;

@@ -26,7 +26,7 @@ import { ERC20Helper } from './erc20Helper';
 import { OracleHelper } from 'set-protocol-oracles';
 import { FeeCalculatorHelper } from './feeCalculatorHelper';
 
-export interface ScenarioConfig {
+export interface BaseSetConfig {
   set1Components?: Address[];
   set2Components?: Address[];
   set3Components?: Address[];
@@ -36,6 +36,9 @@ export interface ScenarioConfig {
   set1NaturalUnit?: BigNumber;
   set2NaturalUnit?: BigNumber;
   set3NaturalUnit?: BigNumber;
+}
+
+export interface ComponentConfig {
   component1Price?: BigNumber;
   component2Price?: BigNumber;
   component3Price?: BigNumber;
@@ -104,20 +107,16 @@ export class RebalanceTestSetup {
   /* ============ Deployment ============ */
 
   public async initialize(
-    config: ScenarioConfig = {},
     from: Address = this._contractOwnerAddress
   ): Promise<void> {
     await this.initializeCore();
 
-    // Ether
-    this.component1 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 18);
+    await this.initializeComponents();
 
-    // USDC
-    this.component2 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 6);
+    await this.initializeBaseSets();
+  }
 
-    // BTC
-    this.component3 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 8);
-
+  public async initializeBaseSets(config: BaseSetConfig = {}): Promise<void> {
     this.set1Components = config.set1Components ||  [this.component1.address, this.component2.address];
     this.set1Units = config.set1Units || [new BigNumber(10 ** 13), new BigNumber(1280)];
     this.set1NaturalUnit = config.set1NaturalUnit || new BigNumber(10 ** 13);
@@ -150,6 +149,17 @@ export class RebalanceTestSetup {
       this.set3Units,
       this.set3NaturalUnit,
     );
+  }
+
+  public async initializeComponents(config: ComponentConfig = {}): Promise<void> {
+    // Ether
+    this.component1 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 18);
+
+    // USDC
+    this.component2 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 6);
+
+    // BTC
+    this.component3 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 8);
 
     this.component1Price = config.component1Price || ether(128);
     this.component2Price = config.component2Price || ether(1);

@@ -42,7 +42,7 @@ const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
-contract('RebalancingSetV3 - LinearAuctionLiquidator', accounts => {
+contract('RebalancingSetV3 - TWAPLiquidator', accounts => {
   const [
     deployerAccount,
     managerAccount,

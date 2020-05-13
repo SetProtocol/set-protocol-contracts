@@ -42,6 +42,9 @@ export interface ComponentConfig {
   component1Price?: BigNumber;
   component2Price?: BigNumber;
   component3Price?: BigNumber;
+  component1Decimals?: number;
+  component2Decimals?: number;
+  component3Decimals?: number;
 }
 
 export class RebalanceTestSetup {
@@ -152,14 +155,15 @@ export class RebalanceTestSetup {
   }
 
   public async initializeComponents(config: ComponentConfig = {}): Promise<void> {
-    // Ether
-    this.component1 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 18);
+    const component1Decimals = config.component1Decimals || 18;
+    const component2Decimals = config.component2Decimals || 6;
+    const component3Decimals = config.component3Decimals || 8;
 
-    // USDC
-    this.component2 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 6);
+    this.component1 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, component1Decimals);
 
-    // BTC
-    this.component3 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, 8);
+    this.component2 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, component2Decimals);
+
+    this.component3 = await this._erc20Helper.deployTokenAsync(this._contractOwnerAddress, component3Decimals);
 
     this.component1Price = config.component1Price || ether(128);
     this.component2Price = config.component2Price || ether(1);

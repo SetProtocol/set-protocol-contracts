@@ -44,30 +44,61 @@ const blockchain = new Blockchain(web3);
 
 const scenarios = [
   {
-    name: 'ETH 20 MA Set Rebalances WETH to USD',
+    name: 'ETH 20 MA Set Rebalances 100% WETH to 100% USD',
     rebalancingSet: {
       unitShares: new BigNumber(2076796),
       naturalUnit: new BigNumber(1000000),
       supply: new BigNumber('20556237207015075000000')
     },
     currentSet: {
-      components: ['WETH'],
+      components: ['component1'], // ETH
       units: [new BigNumber(1000000)],
       naturalUnit: new BigNumber(1000000),
     },
     nextSet: {
-      components: ['USDC'],
+      components: ['component2'], // USDC
       units: [new BigNumber(307)],
       naturalUnit: new BigNumber(1000000000000),
     },
     prices: {
-      component1: ether(188),
-      component2: ether(1),
+      component1Price: ether(188),
+      component2Price: ether(1),
+      component1Decimals: 18,
+      component2Decimals: 6,
     },
     auction: {
       chunkSize: ether(1000000),
       chunkAuctionPeriod: new BigNumber(0),
-      expectedAuctions: 4,
+      expectedAuctions: 3,
+    }
+  },
+{
+    name: 'ETHBTC Set Rebalances 100% WETH to 50% WETH/WBTC',
+    rebalancingSet: {
+      unitShares: new BigNumber(799797),
+      naturalUnit: new BigNumber(100000000),
+      supply: new BigNumber('14256596210800000000000')
+    },
+    currentSet: {
+      components: ['component1'], // WETH
+      units: [new BigNumber(1000000)],
+      naturalUnit: new BigNumber(1000000),
+    },
+    nextSet: {
+      components: ['component1', 'component2'], // WETH, WBTC
+      units: [new BigNumber(484880000000000), new BigNumber(1000)],
+      naturalUnit: new BigNumber(10000000000000),
+    },
+    components: {
+      component1Price: ether(188),
+      component2Price: ether(9000),
+      component1Decimals: 18,
+      component2Decimals: 8,
+    },
+    auction: {
+      chunkSize: ether(1000000),
+      chunkAuctionPeriod: new BigNumber(0),
+      expectedAuctions: 2,
     }
   }
 ];
@@ -90,6 +121,8 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   let rangeStart: BigNumber = new BigNumber(1);
   let rangeEnd: BigNumber = new BigNumber(21);
 
+  let setup: RebalanceTestSetup;
+
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
   const rebalancingHelper = new RebalancingSetV3Helper(
@@ -102,8 +135,6 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, valuationHelper);
 
-  const setup = new RebalanceTestSetup(deployerAccount);
-
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
   });
@@ -114,6 +145,8 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
 
   beforeEach(async () => {
     blockchain.saveSnapshotAsync();
+
+    setup = new RebalanceTestSetup(deployerAccount);
   });
 
   afterEach(async () => {
@@ -121,9 +154,18 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   });
 
   describe(`${scenarios[0].name}`, async () => {
-
     it('should successfully complete', async () => {
       await runScenario(scenarios[0]);
+
+      const newRebalanceState = await setup.rebalancingSetToken.rebalanceState.callAsync();
+      expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
+    });
+  });
+
+  describe(`${scenarios[1].name}`, async () => {
+
+    it('should successfully complete', async () => {
+      await runScenario(scenarios[1]);
 
       const newRebalanceState = await setup.rebalancingSetToken.rebalanceState.callAsync();
       expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
@@ -142,7 +184,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
       scenario.rebalancingSet.supply,
     );
 
-    console.log("Rebalance volume", volume.div(10 ** 18).toString());
+    console.log("Rebalance volume", volume.div(10 ** 18).round(0, 3).toString());
 
     const liquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(chunkSize, chunkAuctionPeriod);
     await rebalancingHelper.transitionToRebalanceV2Async(
@@ -169,7 +211,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
         bidQuantity,
       );
 
-      // If not the last auction
+      // If not the last auction, then iterate to next auction
       if (i + 1 < expectedAuctions) {
         await blockchain.increaseTimeAsync(chunkAuctionPeriod);
         await blockchain.mineBlockAsync();
@@ -179,10 +221,6 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
           { from: deployerAccount, gas: DEFAULT_GAS }
         );
       }
-        // Wait until 1% FV then place bids
-        // If not the last auction, run iterate
-      // If last auction, call settle
-
     }
 
     await setup.rebalancingSetToken.settleRebalance.sendTransactionAsync(
@@ -193,13 +231,10 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   // Sets up assets, creates and mints rebalancing set
   async function initializeScenario(scenario: any): Promise<void> {
     await setup.initializeCore();
-    await setup.initializeComponents({
-      component1Price: scenario.prices.component1,
-      component2Price: scenario.prices.component2
-    });
+    await setup.initializeComponents(scenario.components);
     await setup.initializeBaseSets({
-      set1Components: [setup.component1.address],
-      set2Components: [setup.component2.address],
+      set1Components: _.map(scenario.currentSet.components, component => setup[component].address),
+      set2Components: _.map(scenario.nextSet.components, component => setup[component].address),
       set1Units: scenario.currentSet.units,
       set2Units: scenario.nextSet.units,
       set1NaturalUnit: scenario.currentSet.naturalUnit,

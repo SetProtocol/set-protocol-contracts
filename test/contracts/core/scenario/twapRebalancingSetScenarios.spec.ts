@@ -48,17 +48,17 @@ const scenarios = [
     rebalancingSet: {
       unitShares: new BigNumber(2076796),
       naturalUnit: new BigNumber(1000000),
-      supply: new BigNumber('2193805828851612000000')
+      supply: new BigNumber('20556237207015075000000')
     },
     currentSet: {
       components: ['WETH'],
       units: [new BigNumber(1000000)],
-      naturalUnit: new BigNumber(0),
+      naturalUnit: new BigNumber(1000000),
     },
     nextSet: {
       components: ['USDC'],
       units: [new BigNumber(307)],
-      naturalUnit: new BigNumber(0),
+      naturalUnit: new BigNumber(1000000000000),
     },
     prices: {
       component1: ether(188),
@@ -66,7 +66,7 @@ const scenarios = [
     },
     auction: {
       chunkSize: ether(1000000),
-      chunkAuctionPeriod: new Bignumber(0),
+      chunkAuctionPeriod: new BigNumber(0),
       expectedAuctions: 4,
     }
   }
@@ -86,7 +86,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   let liquidator: TWAPLiquidatorContract;
 
   let name: string = 'liquidator';
-  let auctionPeriod: BigNumber = ONE_HOUR_IN_SECONDS;
+  let auctionPeriod: BigNumber = ONE_HOUR_IN_SECONDS.mul(4);
   let rangeStart: BigNumber = new BigNumber(1);
   let rangeEnd: BigNumber = new BigNumber(21);
 
@@ -121,111 +121,85 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   });
 
   describe(`${scenarios[0].name}`, async () => {
-    // Set up scenario
 
-    // Run scenario
-      // StartRebalance
-      // Loop through number of auctions
-        // Wait until 1% FV then place bids
-        // If not the last auction, run iterate
-      // If last auction, call settle
-  });
+    it('should successfully complete', async () => {
+      await runScenario(scenarios[0]);
 
-  describe('#settleRebalance', async () => {
-    let liquidatorData: string;
-    let usdChunkSize: BigNumber;
-    let chunkAuctionPeriod: BigNumber;
-    let subjectCaller: Address;
-
-    let customChunkSize: BigNumber;
-
-    beforeEach(async () => {
-      await createSetAndMint();
-
-      usdChunkSize = customChunkSize || ether(10 ** 5); // 2 auctions to be performed
-      chunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
-
-      liquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(
-        usdChunkSize,
-        chunkAuctionPeriod,
-      );
-
-      await rebalancingHelper.transitionToRebalanceV2Async(
-        scenario.core,
-        scenario.rebalancingComponentWhiteList,
-        rebalancingSetToken,
-        nextSetToken,
-        managerAccount,
-        liquidatorData,
-      );
-
-      const bidQuantity = await getMaxBiddableQuantity(rebalancingSetToken.address);
-      await rebalancingHelper.placeBidAsync(
-        scenario.rebalanceAuctionModule,
-        rebalancingSetToken.address,
-        bidQuantity,
-      );
-      subjectCaller = managerAccount;
-    });
-
-    async function subject(): Promise<string> {
-      return rebalancingSetToken.settleRebalance.sendTransactionAsync(
-        { from: subjectCaller, gas: DEFAULT_GAS}
-      );
-    }
-
-    describe('after 1 chunk auction is complete and the second has begun', async () => {
-      beforeEach(async () => {
-        await blockchain.increaseTimeAsync(chunkAuctionPeriod);
-
-        await liquidator.iterateChunkAuction.sendTransactionAsync(
-          rebalancingSetToken.address,
-          { from: subjectCaller, gas: DEFAULT_GAS }
-        );
-
-        const bidQuantity = await getMaxBiddableQuantity(rebalancingSetToken.address);
-        await rebalancingHelper.placeBidAsync(
-          scenario.rebalanceAuctionModule,
-          rebalancingSetToken.address,
-          bidQuantity,
-        );
-      });
-
-      it('updates the rebalanceState to Default', async () => {
-        await subject();
-
-        const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
-        expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
-      });
-
-      it('clears the auction state', async () => {
-        await subject();
-
-        const orderSize = await liquidator.getOrderSize.callAsync(rebalancingSetToken.address);
-        expect(orderSize).to.bignumber.equal(0);
-      });
+      const newRebalanceState = await setup.rebalancingSetToken.rebalanceState.callAsync();
+      expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
     });
   });
 
   async function runScenario(scenario: any): Promise<void> {
     await initializeScenario(scenario);
 
-    // StartRebalance
+    const { chunkSize, expectedAuctions, chunkAuctionPeriod, rebalancingSet } = scenario.auction;
+
+    const volume = await liquidatorHelper.calculateRebalanceVolumeAsync(
+      setup.set1,
+      setup.set2,
+      setup.oracleWhiteList,
+      scenario.rebalancingSet.supply,
+    );
+
+    console.log("Rebalance volume", volume.div(10 ** 18).toString());
+
+    const liquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(chunkSize, chunkAuctionPeriod);
+    await rebalancingHelper.transitionToRebalanceV2Async(
+      setup.core,
+      setup.rebalancingComponentWhiteList,
+      setup.rebalancingSetToken,
+      setup.set2,
+      managerAccount,
+      liquidatorData,
+    );
+    
     // Loop through number of auctions
-      // Wait until 1% FV then place bids
-      // If not the last auction, run iterate
-    // If last auction, call settle
+    for (let i = 0; i < expectedAuctions; i++) {
+      console.log("Auction ", i);
+
+      const timeToFV = ONE_HOUR_IN_SECONDS.div(6);
+      await blockchain.increaseTimeAsync(timeToFV);
+      await blockchain.mineBlockAsync();
+
+      const bidQuantity = await getMaxBiddableQuantity(setup.rebalancingSetToken.address);
+      await rebalancingHelper.placeBidAsync(
+        setup.rebalanceAuctionModule,
+        setup.rebalancingSetToken.address,
+        bidQuantity,
+      );
+
+      // If not the last auction
+      if (i + 1 < expectedAuctions) {
+        await blockchain.increaseTimeAsync(chunkAuctionPeriod);
+        await blockchain.mineBlockAsync();
+
+        await liquidator.iterateChunkAuction.sendTransactionAsync(
+          setup.rebalancingSetToken.address,
+          { from: deployerAccount, gas: DEFAULT_GAS }
+        );
+      }
+        // Wait until 1% FV then place bids
+        // If not the last auction, run iterate
+      // If last auction, call settle
+
+    }
+
+    await setup.rebalancingSetToken.settleRebalance.sendTransactionAsync(
+      { from: deployerAccount, gas: DEFAULT_GAS}
+    );
   }
 
+  // Sets up assets, creates and mints rebalancing set
   async function initializeScenario(scenario: any): Promise<void> {
     await setup.initializeCore();
     await setup.initializeComponents({
-      component1Price: setup.prices.component1,
-      component2Price: setup.prices.component2
+      component1Price: scenario.prices.component1,
+      component2Price: scenario.prices.component2
     });
     await setup.initializeBaseSets({
-      set1Components: [scenario.component1.address],
-      set2Components: [scenario.component2.address],
+      set1Components: [setup.component1.address],
+      set2Components: [setup.component2.address],
       set1Units: scenario.currentSet.units,
       set2Units: scenario.nextSet.units,
       set1NaturalUnit: scenario.currentSet.naturalUnit,

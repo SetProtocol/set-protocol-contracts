@@ -234,7 +234,13 @@ export class RebalanceTestSetup {
       const rebalancingNaturalUnit = await this.rebalancingSetToken.naturalUnit.callAsync();
       const currentSet = await this.rebalancingSetToken.currentSet.callAsync();
       const [currentSetUnit] = await this.rebalancingSetToken.getUnits.callAsync();
-      const currentSetRequired = rebalancingSetQuantity.mul(currentSetUnit).div(rebalancingNaturalUnit);
+      const curSetNaturalUnit = await this.set1.naturalUnit.callAsync();
+      const currentSetRequired = rebalancingSetQuantity
+                                  .mul(currentSetUnit)
+                                  .div(rebalancingNaturalUnit)
+                                  .div(curSetNaturalUnit).round(0, 3)
+                                  .mul(curSetNaturalUnit)
+                                  .mul(2); // Ensure there is enough minted for safe measure
 
       // Issue currentSetToken
       await this.core.issue.sendTransactionAsync(

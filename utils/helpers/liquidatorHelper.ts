@@ -651,8 +651,6 @@ export class LiquidatorHelper {
     );
     const nextSetAssetAllocation = await this.calculateAssetAllocationAsync(nextSet, oracleWhiteList, allocationAsset);
 
-    console.log("Allocations", currentSetAssetAllocation.toString(), nextSetAssetAllocation.toString());
-
     const allocationChange = currentSetAssetAllocation.sub(nextSetAssetAllocation).abs();
     return currentSetValue.mul(currentSetQuantity).mul(allocationChange).div(SCALE_FACTOR).div(SCALE_FACTOR);
   }

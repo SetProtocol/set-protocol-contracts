@@ -352,7 +352,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         );
         
         // Check that total remaining sets is greater than minimumBid
-        return totalRemainingSets > _twapAuction.chunkAuction.auction.minimumBid;
+        return totalRemainingSets >= _twapAuction.chunkAuction.auction.minimumBid;
     }
 
     /**

@@ -142,18 +142,12 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     )
         internal
     {
-        // Initialize auction ot enable calculation of minimumBid
-        Auction.initializeAuction(
-            _twapAuction.chunkAuction.auction,
+        // Initialize first chunk auction
+        LinearAuction.initializeLinearAuction(
+            _twapAuction.chunkAuction,
             _currentSet,
             _nextSet,
-            0
-        );
-
-        uint256 minimumBid = calculateMinimumBid(
-            _twapAuction.chunkAuction.auction,
-            _currentSet,
-            _nextSet
+            _startingCurrentSetQuantity
         );
 
         // Calculate currency value of rebalance volume
@@ -171,16 +165,12 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
             _liquidatorData.chunkSizeValue
         );
 
-        uint256 normalizedChunkSize = chunkSize.div(minimumBid).mul(minimumBid);
-        uint256 totalOrderSize = _startingCurrentSetQuantity.div(minimumBid).mul(minimumBid);
+        uint256 minBid = _twapAuction.chunkAuction.auction.minimumBid;
+        uint256 normalizedChunkSize = chunkSize.div(minBid).mul(minBid);
+        uint256 totalOrderSize = _startingCurrentSetQuantity.div(minBid).mul(minBid);
 
-        // Initialize first chunk auction
-        LinearAuction.initializeLinearAuction(
-            _twapAuction.chunkAuction,
-            _currentSet,
-            _nextSet,
-            normalizedChunkSize
-        );
+        _twapAuction.chunkAuction.auction.startingCurrentSets = normalizedChunkSize;
+        _twapAuction.chunkAuction.auction.remainingCurrentSets = normalizedChunkSize;
 
         // Set TWAPState
         _twapAuction.orderSize = totalOrderSize;

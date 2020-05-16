@@ -142,6 +142,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     )
         internal
     {
+        // Initialize auction ot enable calculation of minimumBid
         Auction.initializeAuction(
             _twapAuction.chunkAuction.auction,
             _currentSet,
@@ -155,51 +156,36 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
             _nextSet
         );
 
-        // Total currentSetQUantity
-        uint256 totalOrderSize = _startingCurrentSetQuantity.div(minimumBid).mul(minimumBid);
-        // uint256 totalOrderSize = _startingCurrentSetQuantity;
-
         // Calculate currency value of rebalance volume
         uint256 rebalanceVolume = LiquidatorUtils.calculateRebalanceVolume(
             _currentSet,
             _nextSet,
             oracleWhiteList,
-            totalOrderSize
+            _startingCurrentSetQuantity
         );
 
         // Calculate the size of each chunk auction in currentSet terms
         uint256 chunkSize = calculateChunkSize(
-            totalOrderSize,
+            _startingCurrentSetQuantity,
             rebalanceVolume,
             _liquidatorData.chunkSizeValue
         );
 
-        // remainingCurrentSets must be greater than minimumBid or no bidding would be allowed
-        require(
-            chunkSize.div(minimumBid) >= 100,
-            "Auction.initializeAuction: Minimum bid must be less than or equal to 1% of collateral."
-        );
+        uint256 normalizedChunkSize = chunkSize.div(minimumBid).mul(minimumBid);
+        uint256 totalOrderSize = _startingCurrentSetQuantity.div(minimumBid).mul(minimumBid);
 
-        _twapAuction.chunkAuction.auction.startingCurrentSets = chunkSize;
-        _twapAuction.chunkAuction.auction.remainingCurrentSets = chunkSize;
-        _twapAuction.chunkAuction.auction.minimumBid = minimumBid;
-        _twapAuction.chunkAuction.startPrice = calculateStartPrice(
-            _twapAuction.chunkAuction.auction,
+        // Initialize first chunk auction
+        LinearAuction.initializeLinearAuction(
+            _twapAuction.chunkAuction,
             _currentSet,
-            _nextSet
+            _nextSet,
+            normalizedChunkSize
         );
-        _twapAuction.chunkAuction.endPrice = calculateEndPrice(
-            _twapAuction.chunkAuction.auction,
-            _currentSet,
-            _nextSet
-        );
-
-        _twapAuction.chunkAuction.endTime = block.timestamp.add(auctionPeriod);
 
         // Set TWAPState
         _twapAuction.orderSize = totalOrderSize;
-        _twapAuction.orderRemaining = totalOrderSize.sub(chunkSize);
-        _twapAuction.chunkSize = chunkSize;
+        _twapAuction.orderRemaining = totalOrderSize.sub(normalizedChunkSize);
+        _twapAuction.chunkSize = normalizedChunkSize;
         _twapAuction.lastChunkAuctionEnd = block.timestamp.sub(_liquidatorData.chunkAuctionPeriod);
         _twapAuction.chunkAuctionPeriod = _liquidatorData.chunkAuctionPeriod;
     }

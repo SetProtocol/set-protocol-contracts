@@ -87,7 +87,7 @@ contract LinearAuction is Auction {
         // remainingCurrentSets must be greater than minimumBid or no bidding would be allowed
         require(
             _startingCurrentSetQuantity.div(minimumBid) >= 100,
-            "Auction.initializeAuction: Minimum bid must be less than or equal to 1% of collateral."
+            "LinearAuction.initializeAuction: Minimum bid must be less than or equal to 1% of collateral."
         );
 
         _linearAuction.auction.minimumBid = minimumBid;

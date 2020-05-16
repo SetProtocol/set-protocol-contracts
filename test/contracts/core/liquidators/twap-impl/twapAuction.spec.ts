@@ -285,36 +285,43 @@ contract('TWAPAuction', accounts => {
       await subject();
 
       const twapState: any = await twapAuction.twapState.callAsync();
+      const { minimumBid } = twapState.chunkAuction.auction;
+      const expectedOrderSize = subjectStartingCurrentSets.div(minimumBid).round(0, 3).mul(minimumBid);
 
-      expect(twapState.orderSize).to.be.bignumber.equal(subjectStartingCurrentSets);
+      expect(twapState.orderSize).to.be.bignumber.equal(expectedOrderSize);
     });
 
     it('sets the correct orderRemaining', async () => {
       await subject();
 
       const twapState: any = await twapAuction.twapState.callAsync();
-      const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+      const { minimumBid } = twapState.chunkAuction.auction;
+      const chunkSize = await liquidatorHelper.calculateChunkSize(
         set1,
         set2,
         oracleWhiteList,
         subjectStartingCurrentSets,
         subjectLiquidatorData.chunkSizeValue,
       );
+      const expectedOrderSize = subjectStartingCurrentSets.div(minimumBid).round(0, 3).mul(minimumBid);
+      const expectedChunkSize = chunkSize.div(minimumBid).round(0, 3).mul(minimumBid);
 
-      expect(twapState.orderRemaining).to.be.bignumber.equal(subjectStartingCurrentSets.sub(expectedChunkSize));
+      expect(twapState.orderRemaining).to.be.bignumber.equal(expectedOrderSize.sub(expectedChunkSize));
     });
 
     it('sets the correct startingCurrentSets', async () => {
       await subject();
 
       const twapState: any = await twapAuction.twapState.callAsync();
-      const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+      const { minimumBid } = twapState.chunkAuction.auction;
+      const chunkSize = await liquidatorHelper.calculateChunkSize(
         set1,
         set2,
         oracleWhiteList,
         subjectStartingCurrentSets,
         subjectLiquidatorData.chunkSizeValue,
       );
+      const expectedChunkSize = chunkSize.div(minimumBid).round(0, 3).mul(minimumBid);
 
       expect(twapState.chunkAuction.auction.startingCurrentSets).to.be.bignumber.equal(
         expectedChunkSize
@@ -341,13 +348,15 @@ contract('TWAPAuction', accounts => {
       await subject();
 
       const twapState: any = await twapAuction.twapState.callAsync();
-      const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+      const { minimumBid } = twapState.chunkAuction.auction;
+      const chunkSize = await liquidatorHelper.calculateChunkSize(
         set1,
         set2,
         oracleWhiteList,
         subjectStartingCurrentSets,
         subjectLiquidatorData.chunkSizeValue,
       );
+      const expectedChunkSize = chunkSize.div(minimumBid).round(0, 3).mul(minimumBid);
 
       expect(twapState.chunkSize).to.be.bignumber.equal(expectedChunkSize);
     });

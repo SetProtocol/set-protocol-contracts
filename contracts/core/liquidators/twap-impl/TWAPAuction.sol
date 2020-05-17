@@ -142,7 +142,8 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     )
         internal
     {
-        // Initialize first chunk auction
+        // Initialize first chunk auction with the currentSetQuantity to populate LinearAuction struct
+        // This will be overwritten by the initial chunk auction quantity
         LinearAuction.initializeLinearAuction(
             _twapAuction.chunkAuction,
             _currentSet,
@@ -165,10 +166,13 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
             _liquidatorData.chunkSizeValue
         );
 
+        // Normalize the chunkSize and orderSize to ensure all values are a multiple of 
+        // the minimum bid
         uint256 minBid = _twapAuction.chunkAuction.auction.minimumBid;
         uint256 normalizedChunkSize = chunkSize.div(minBid).mul(minBid);
         uint256 totalOrderSize = _startingCurrentSetQuantity.div(minBid).mul(minBid);
 
+        // Initialize the first chunkAuction to the normalized chunk size
         _twapAuction.chunkAuction.auction.startingCurrentSets = normalizedChunkSize;
         _twapAuction.chunkAuction.auction.remainingCurrentSets = normalizedChunkSize;
 

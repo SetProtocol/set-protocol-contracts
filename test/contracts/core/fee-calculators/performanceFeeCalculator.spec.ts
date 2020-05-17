@@ -464,6 +464,8 @@ contract('PerformanceFeeCalculator', accounts => {
     let feeType: BigNumber;
     let newFeePercentage: BigNumber;
 
+    let customInitialFeePercentage: BigNumber;
+
     before(async () => {
       addValidSet = true;
 
@@ -506,7 +508,7 @@ contract('PerformanceFeeCalculator', accounts => {
 
       const profitFeePeriod = ONE_DAY_IN_SECONDS.mul(30);
       const highWatermarkResetPeriod = ONE_DAY_IN_SECONDS.mul(365);
-      const profitFeePercentage = ether(.2);
+      const profitFeePercentage = customInitialFeePercentage || ether(.2);
       const streamingFeePercentage = ether(.02);
 
       const feeCalculatorData = feeCalculatorHelper.generatePerformanceFeeCallData(
@@ -564,6 +566,56 @@ contract('PerformanceFeeCalculator', accounts => {
 
         const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
         expect(feeState.profitFeePercentage).to.be.bignumber.equal(newFeePercentage);
+      });
+
+      describe('when the profit fee is initially 0 and a profit is marked', async () => {
+        const updatedBTCPrice = ether(8000);
+        const updatedETHPrice = ether(140);
+
+        before(async () => {
+          customInitialFeePercentage = ether(0);
+        });
+
+        after(async () => {
+          customInitialFeePercentage = undefined;
+        });
+
+        beforeEach(async () => {
+          await usdWrappedBTCOracle.updatePrice.sendTransactionAsync(updatedBTCPrice);
+          await ethWrappedBTCOracle.updatePrice.sendTransactionAsync(
+            updatedBTCPrice.mul(ether(1)).div(updatedETHPrice).round(0, 3)
+          );
+
+          await usdWrappedETHOracle.updatePrice.sendTransactionAsync(updatedETHPrice);
+          await ethWrappedETHOracle.updatePrice.sendTransactionAsync(
+            updatedETHPrice.mul(ether(1)).div(updatedETHPrice).round(0, 3)
+          );
+
+          await blockchain.increaseTimeAsync(ONE_YEAR_IN_SECONDS);
+          await blockchain.mineBlockAsync();
+        });
+
+        it('properly resets the watermark', async () => {
+          await subject();
+
+          const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+            rebalancingSetToken,
+            usdOracleWhiteList,
+          );
+
+          const postFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+          expect(postFeeState.highWatermark).to.bignumber.equal(rebalancingSetValue);
+        });
+
+        it('sets the last profit fee timestamp correctly', async () => {
+          await subject();
+
+          const lastBlock = await web3.eth.getBlock('latest');
+
+          const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+          expect(feeState.lastProfitFeeTimestamp).to.be.bignumber.equal(lastBlock.timestamp);
+        });
       });
 
       describe('when the profit fee is greater than maximumProfitFeePercentage', async () => {

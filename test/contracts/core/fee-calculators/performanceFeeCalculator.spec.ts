@@ -569,8 +569,8 @@ contract('PerformanceFeeCalculator', accounts => {
       });
 
       describe('when the profit fee is initially 0 and a profit is marked', async () => {
-        const updatedBTCPrice = ether(8000);
-        const updatedETHPrice = ether(140);
+        let updatedBTCPrice: BigNumber;
+        let updatedETHPrice: BigNumber;
 
         before(async () => {
           customInitialFeePercentage = ether(0);
@@ -595,26 +595,60 @@ contract('PerformanceFeeCalculator', accounts => {
           await blockchain.mineBlockAsync();
         });
 
-        it('properly resets the watermark', async () => {
-          await subject();
+        describe('and there is a profit', async () => {
+          before(async () => {
+            updatedBTCPrice = ether(8000);
+            updatedETHPrice = ether(140);
+          });
 
-          const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
-            rebalancingSetToken,
-            usdOracleWhiteList,
-          );
+          after(async () => {
+            updatedBTCPrice = undefined;
+            updatedETHPrice = undefined;
+          });
 
-          const postFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+          it('properly resets the watermark', async () => {
+            await subject();
 
-          expect(postFeeState.highWatermark).to.bignumber.equal(rebalancingSetValue);
+            const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+              rebalancingSetToken,
+              usdOracleWhiteList,
+            );
+
+            const postFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+            expect(postFeeState.highWatermark).to.bignumber.equal(rebalancingSetValue);
+          });
+
+          it('sets the last profit fee timestamp correctly', async () => {
+            await subject();
+
+            const lastBlock = await web3.eth.getBlock('latest');
+
+            const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+            expect(feeState.lastProfitFeeTimestamp).to.be.bignumber.equal(lastBlock.timestamp);
+          });
         });
 
-        it('sets the last profit fee timestamp correctly', async () => {
-          await subject();
+        describe('when there is no profit', async () => {
+          before(async () => {
+            updatedBTCPrice = ether(7000);
+            updatedETHPrice = ether(100);
+          });
 
-          const lastBlock = await web3.eth.getBlock('latest');
+          after(async () => {
+            updatedBTCPrice = undefined;
+            updatedETHPrice = undefined;
+          });
 
-          const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
-          expect(feeState.lastProfitFeeTimestamp).to.be.bignumber.equal(lastBlock.timestamp);
+          it('does not reset the watermark', async () => {
+            const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+            await subject();
+
+            const postFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+            expect(postFeeState.highWatermark).to.bignumber.equal(preFeeState.highWatermark);
+          });
         });
       });
 

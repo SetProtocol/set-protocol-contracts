@@ -267,9 +267,13 @@ contract PerformanceFeeCalculator is IFeeCalculator {
             // Thus, we need to reset the high water mark here so that users do not pay for profit fees
             // since inception.
             uint256 rebalancingSetValue = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
+            uint256 existingHighwatermark = feeState[msg.sender].highWatermark;
 
-            feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
-            feeState[msg.sender].highWatermark = rebalancingSetValue;
+            if (rebalancingSetValue > existingHighwatermark) {
+                feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
+                feeState[msg.sender].highWatermark = rebalancingSetValue;
+            }
+
             feeState[msg.sender].profitFeePercentage = feePercentage;
         }
 

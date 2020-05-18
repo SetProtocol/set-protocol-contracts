@@ -707,7 +707,7 @@ contract('TWAPLiquidator', accounts => {
         );
       }
 
-      it('should update the orderRemaining', async () => {
+      it.only('should update the orderRemaining', async () => {
         const previousOrderRemaining = await liquidator.getOrderRemaining.callAsync(subjectSet);
         const postChunkSetsRemaining = await liquidator.remainingCurrentSets.callAsync(subjectSet);
         const updatedOrderRemaining = previousOrderRemaining.plus(postChunkSetsRemaining);

@@ -36,7 +36,7 @@ import { TwoAssetPriceBoundedLinearAuction } from "../impl/TwoAssetPriceBoundedL
  * @title TWAPAuction
  * @author Set Protocol
  *
- * Contract for executing TWAP Auctions fropm initializing to moving to the next chunk auction. Inherits from
+ * Contract for executing TWAP Auctions from initializing to moving to the next chunk auction. Inherits from
  * TwoAssetPriceBoundedLinearAuction
  */
 contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
@@ -61,6 +61,12 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         uint256 chunkAuctionPeriod;         // Time between chunk auctions
     }
 
+    struct AssetPairVolumeBounds {
+        address assetOne;                   // Address of first asset in pair
+        address assetTwo;                   // Address of second asset in pair
+        BoundsLibrary.Bounds bounds;        // Chunk size volume bounds for asset pair
+    }
+
     /* ============ Constants ============ */
 
     // Auction completion buffer assumes completion potentially 2% after fair value when auction started
@@ -68,8 +74,9 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
 
     /* ============ State Variables ============ */
 
-    // Mapping between an address pair's unique keccak256 hash and the min/max USD-chunk size
-    mapping(bytes32 => BoundsLibrary.Bounds) public chunkSizeWhiteList;
+    // Mapping between an address pair's addresses and the min/max USD-chunk size, each asset pair will
+    // have two entries, one for each ordering of the addresses
+    mapping(address => mapping(address => BoundsLibrary.Bounds)) public chunkSizeWhiteList;
     //Estimated length in seconds of a chunk auction
     uint256 public expectedChunkAuctionLength;
 
@@ -78,20 +85,18 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     /**
      * TWAPAuction constructor
      *
-     * @param _oracleWhiteList        OracleWhiteList used by liquidator
-     * @param _auctionPeriod          Length of auction in seconds
-     * @param _rangeStart             Percentage below FairValue to begin auction at
-     * @param _rangeEnd               Percentage above FairValue to end auction at
-     * @param _assetPairHashes        List of identifying hashes of asset pairs
-     * @param _assetPairBounds        List of chunk size bounds for each asset pair
+     * @param _oracleWhiteList          OracleWhiteList used by liquidator
+     * @param _auctionPeriod            Length of auction in seconds
+     * @param _rangeStart               Percentage below FairValue to begin auction at
+     * @param _rangeEnd                 Percentage above FairValue to end auction at
+     * @param _assetPairVolumeBounds    List of chunk size bounds for each asset pair
      */
     constructor(
         IOracleWhiteList _oracleWhiteList,
         uint256 _auctionPeriod,
         uint256 _rangeStart,
         uint256 _rangeEnd,
-        bytes32[] memory _assetPairHashes,
-        BoundsLibrary.Bounds[] memory _assetPairBounds
+        AssetPairVolumeBounds[] memory _assetPairVolumeBounds
     )
         public
         TwoAssetPriceBoundedLinearAuction(
@@ -101,18 +106,22 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
             _rangeEnd
         )
     {
-        require(
-            _assetPairHashes.length == _assetPairBounds.length,
-            "TWAPAuction: Must be equal amount of asset pair hashes and bounds."
-        );
-
-        for (uint256 i = 0; i < _assetPairHashes.length; i++) {
+        for (uint256 i = 0; i < _assetPairVolumeBounds.length; i++) {
             require(
-                _assetPairBounds[i].isValid(),
+                _assetPairVolumeBounds[i].bounds.isValid(),
                 "TWAPAuction.constructor: Passed asset pair bounds are invalid."
             );
 
-            chunkSizeWhiteList[_assetPairHashes[i]] = _assetPairBounds[i];
+            address assetOne = _assetPairVolumeBounds[i].assetOne;
+            address assetTwo = _assetPairVolumeBounds[i].assetTwo;
+
+            require(
+                chunkSizeWhiteList[assetOne][assetTwo].max == 0,
+                "TWAPAuction.constructor: Asset pair volume bounds must be unique."
+            );
+
+            chunkSizeWhiteList[assetOne][assetTwo] = _assetPairVolumeBounds[i].bounds;
+            chunkSizeWhiteList[assetTwo][assetOne] = _assetPairVolumeBounds[i].bounds;
         }
 
         // Expected length of a chunk auction, assuming the auction goes 2% beyond initial fair
@@ -185,8 +194,12 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     }
 
     /**
-     * Resets state for next chunk auction (except minimumBid and token flow arrays), and updates
-     * orderRemaining value for TWAP auction.
+     * Calculates size of next chunk auction and then starts then parameterizes the auction and overwrites
+     * the previous auction state. The orderRemaining is updated to take into account the currentSets included
+     * in the new chunk auction. Function can only be called provided the following conditions have been met:
+     *  - Last chunk auction is finished (remainingCurrentSets < minimumBid)
+     *  - There is still more collateral to auction off
+     *  - The chunkAuctionPeriod has elapsed
      *
      * @param _twapAuction                  TWAPAuction State object
      */
@@ -267,12 +280,12 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
             _startingCurrentSetQuantity
         );
 
-        bytes32 assetPairHash = getAssetPairHashFromCollateral(_currentSet, _nextSet);
+        BoundsLibrary.Bounds memory volumeBounds = getVolumeBoundsFromCollateral(_currentSet, _nextSet);
 
         validateTWAPParameters(
             _liquidatorData,
-            assetPairHash,
-            rebalanceVolume
+            rebalanceVolume,
+            volumeBounds
         );
     }
 
@@ -280,20 +293,20 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
      * Validates passed in parameters for TWAP auction
      *
      * @param _twapLiquidatorData       Struct of passed liquidator data
-     * @param _assetPairHash            Hash of asset pair being rebalanceds
      * @param _rebalanceVolume          Value of collateral being rebalanced
+     * @param _assetPairVolumeBounds    Volume bounds of asset pair
      */
     function validateTWAPParameters(
         TWAPLiquidatorData memory _twapLiquidatorData,
-        bytes32 _assetPairHash,
-        uint256 _rebalanceVolume
+        uint256 _rebalanceVolume,
+        BoundsLibrary.Bounds memory _assetPairVolumeBounds
     )
         internal
         view
     {
         // Bounds and chunkSizeValue denominated in currency value
         require(
-            chunkSizeWhiteList[_assetPairHash].isWithin(_twapLiquidatorData.chunkSizeValue),
+            _assetPairVolumeBounds.isWithin(_twapLiquidatorData.chunkSizeValue),
             "TWAPAuction.validateTWAPParameters: Passed chunk size must be between bounds."
         );
 
@@ -354,7 +367,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         uint256 totalRemainingSets = _twapAuction.orderRemaining.add(
             _twapAuction.chunkAuction.auction.remainingCurrentSets
         );
-        
+
         // Check that total remaining sets is greater than minimumBid
         return totalRemainingSets >= _twapAuction.chunkAuction.auction.minimumBid;
     }
@@ -385,18 +398,18 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     }
 
     /**
-     * Get asset pair hash from passed collateral.
+     * Returns asset pair volume bounds based on passed in collateral Sets.
      *
      * @param _currentSet                   The Set to rebalance from
      * @param _nextSet                      The Set to rebalance to
      */
-    function getAssetPairHashFromCollateral(
+    function getVolumeBoundsFromCollateral(
         ISetToken _currentSet,
         ISetToken _nextSet
     )
         internal
         view
-        returns (bytes32)
+        returns (BoundsLibrary.Bounds memory)
     {
         // Get set components
         address[] memory currentSetComponents = _currentSet.getComponents();
@@ -404,25 +417,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
 
         address[] memory assetPairComponents = currentSetComponents.union(nextSetComponents);
 
-        return getAssetPairHash(assetPairComponents[0], assetPairComponents[1]);
-    }
-
-    /**
-     * Returns hash of token pair where token address with lowest numerical value is hashed first.
-     *
-     * @param _assetOne                   First asset in pair
-     * @param _assetTwo                   Second asset in pair
-     */
-    function getAssetPairHash(
-        address _assetOne,
-        address _assetTwo
-    )
-        internal
-        pure
-        returns (bytes32)
-    {
-        return _assetOne < _assetTwo ? keccak256(abi.encodePacked(_assetOne, _assetTwo)) :
-            keccak256(abi.encodePacked(_assetTwo, _assetOne));
+        return chunkSizeWhiteList[assetPairComponents[0]][assetPairComponents[1]];
     }
 
     function parseLiquidatorData(

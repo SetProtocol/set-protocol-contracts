@@ -42,8 +42,9 @@ library LiquidatorUtils {
     /* ============ Internal Functions ============ */
 
     /**
-     * Calculate the rebalance volume as the difference in allocation percentages times market
-     * cap.
+     * Calculate the rebalance volume as the difference in allocation percentages between two, tw0-asset
+     * allocations times market cap. This function only works for Sets containing the two same assets,
+     * either explicitly or implicitly (one of the Sets has 0 allocation for one of the assets).
      *
      * rebalanceVolume = currentSetValue * currentSetQty * abs(currentSetAllocation-nextSetAllocation)
      *
@@ -77,7 +78,8 @@ library LiquidatorUtils {
             allocationAsset
         );
 
-        // Calculate allocationAsset's next set allocation in 18 decimal scaled percentage
+        // Calculate allocationAsset's next set allocation in 18 decimal scaled percentage. If asset is not
+        // in nextSet, returns 0.
         uint256 nextSetAllocation = calculateAssetAllocation(
             _nextSet,
             _oracleWhiteList,
@@ -120,7 +122,7 @@ library LiquidatorUtils {
         ) = AddressArrayUtils.indexOf(components, _asset);
 
         // Calculate allocation of asset or return 0 if not in Set
-        if (isInSet) {
+        if (isInSet && components.length > 1) {
             uint256 setNaturalUnit = _setToken.naturalUnit();
             uint256[] memory setUnits = _setToken.getUnits();
 
@@ -148,7 +150,7 @@ library LiquidatorUtils {
 
             return assetValue.scale().div(setValue);
         } else {
-            return 0;
+            return isInSet ? CommonMath.scaleFactor() : 0;
         }
     }
 }

@@ -7,6 +7,7 @@ import {
 } from 'set-protocol-oracles';
 import {
   CoreMockContract,
+  LinearAuctionLiquidatorContract,
   OracleWhiteListContract,
   RebalanceAuctionModuleContract,
   SetTokenContract,
@@ -20,11 +21,14 @@ import {
   FixedFeeCalculatorContract,
 } from '../contracts';
 import { ether } from '../units';
+import { ONE_HOUR_IN_SECONDS } from '@utils/constants';
 
 import { CoreHelper } from './coreHelper';
 import { ERC20Helper } from './erc20Helper';
 import { OracleHelper } from 'set-protocol-oracles';
 import { FeeCalculatorHelper } from './feeCalculatorHelper';
+import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { ValuationHelper } from '@utils/helpers/valuationHelper';
 
 export interface BaseSetConfig {
   set1Components?: Address[];
@@ -52,6 +56,8 @@ export class RebalanceTestSetup {
   private _coreHelper: CoreHelper;
   private _erc20Helper: ERC20Helper;
   private _oracleHelper: OracleHelper;
+  private _liquidatorHelper: LiquidatorHelper;
+  private _valuationHelper: ValuationHelper;
   private _feeCalculatorHelper: FeeCalculatorHelper;
 
   public core: CoreMockContract;
@@ -64,6 +70,7 @@ export class RebalanceTestSetup {
   public liquidatorWhitelist: WhiteListContract;
   public fixedFeeCalculator: FixedFeeCalculatorContract;
   public feeCalculatorWhitelist: WhiteListContract;
+  public linearAuctionLiquidator: LinearAuctionLiquidatorContract;
 
   public component1: StandardTokenMockContract;
   public component2: StandardTokenMockContract;
@@ -105,6 +112,14 @@ export class RebalanceTestSetup {
     this._erc20Helper = new ERC20Helper(this._contractOwnerAddress);
     this._oracleHelper = new OracleHelper(this._contractOwnerAddress);
     this._feeCalculatorHelper = new FeeCalculatorHelper(this._contractOwnerAddress);
+    this._valuationHelper = new ValuationHelper(
+      this._contractOwnerAddress, 
+      this._coreHelper, 
+      this._erc20Helper, 
+      this._oracleHelper
+    );
+    
+    this._liquidatorHelper = new LiquidatorHelper(this._contractOwnerAddress, this._erc20Helper, this._valuationHelper);
   }
 
   /* ============ Deployment ============ */
@@ -220,6 +235,22 @@ export class RebalanceTestSetup {
 
     this.fixedFeeCalculator = await this._feeCalculatorHelper.deployFixedFeeCalculatorAsync();
     await this._coreHelper.addAddressToWhiteList(this.fixedFeeCalculator.address, this.feeCalculatorWhitelist);
+
+    // Hardcoding values for now
+    const auctionPeriod = ONE_HOUR_IN_SECONDS.mul(4);
+    const rangeStart = new BigNumber(1); // 10% below fair value
+    const rangeEnd = new BigNumber(21); // 10% above fair value
+    const name = 'liquidator';
+
+    this.linearAuctionLiquidator = await this._liquidatorHelper.deployLinearAuctionLiquidatorAsync(
+      this.core.address,
+      this.oracleWhiteList.address,
+      auctionPeriod,
+      rangeStart,
+      rangeEnd,
+      name,
+    );
+    await this._coreHelper.addAddressToWhiteList(this.linearAuctionLiquidator.address, this.liquidatorWhitelist);
   }
 
   public setRebalancingSet(

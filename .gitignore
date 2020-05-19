@@ -2,6 +2,7 @@
 /artifacts/json
 /artifacts/ts
 /build
+/cache
 /dist
 /node_modules
 /transpiled

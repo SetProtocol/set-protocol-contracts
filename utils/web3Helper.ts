@@ -1,5 +1,6 @@
 const Web3 = require('web3'); // import web3 v1.0 constructor
 const BigNumber = require('bignumber.js');
+require('dotenv').config({ path: './.env'});
 import { version } from '../package.json';
 import { DEFAULT_GAS, NULL_ADDRESS } from './constants';
 import { Address } from 'set-protocol-utils';
@@ -54,7 +55,15 @@ export const linkLibrariesToDeploy = async (contract: any, libraries: any[], fro
       { from },
     );
 
-    await contract.link(library.contractName, truffleLibrary.address);
+    if (process.env.IS_BUIDLER === 'true') {
+      try {
+        await contract.link(truffleLibrary);
+      } finally {
+        return;
+      }
+    } else {
+      await contract.link(library.contractName, truffleLibrary.address);
+    }
   }));
 };
 

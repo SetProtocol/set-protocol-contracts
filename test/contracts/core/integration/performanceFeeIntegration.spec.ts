@@ -217,7 +217,7 @@ contract('PerformanceFeeCalculator', accounts => {
     let customProfitFeePercentage: BigNumber;
 
     before(async () => {
-      chainTimeIncrease = ONE_YEAR_IN_SECONDS;
+      chainTimeIncrease = ONE_YEAR_IN_SECONDS.div(2);
       updatedBTCPrice = ether(8000);
       updatedETHPrice = ether(140);
     });

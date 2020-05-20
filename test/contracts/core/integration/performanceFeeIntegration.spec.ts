@@ -215,14 +215,16 @@ contract('PerformanceFeeCalculator', accounts => {
     let subjectNewFeeData: string;
 
     let customProfitFeePercentage: BigNumber;
+    let customChainTimeIncrease: BigNumber;
 
     before(async () => {
-      chainTimeIncrease = ONE_YEAR_IN_SECONDS.div(2);
       updatedBTCPrice = ether(8000);
       updatedETHPrice = ether(140);
     });
 
     beforeEach(async () => {
+      chainTimeIncrease = customChainTimeIncrease || ONE_YEAR_IN_SECONDS;
+
       const calculatorData = feeCalculatorHelper.generatePerformanceFeeCallDataBuffer(
         ONE_DAY_IN_SECONDS.mul(30),
         ONE_YEAR_IN_SECONDS,
@@ -400,11 +402,11 @@ contract('PerformanceFeeCalculator', accounts => {
 
     describe('when time since last profit fee does not exceed fee frequency', async () => {
       before(async () => {
-        chainTimeIncrease = ONE_DAY_IN_SECONDS.mul(15);
+        customChainTimeIncrease = ONE_DAY_IN_SECONDS.mul(15);
       });
 
       after(async () => {
-        chainTimeIncrease = ONE_YEAR_IN_SECONDS;
+        customChainTimeIncrease = undefined;
       });
 
       it('mints the correct Rebalancing Set to the feeRecipient', async () => {
@@ -627,10 +629,12 @@ contract('PerformanceFeeCalculator', accounts => {
     describe('when the initial profit fee is 0, there is a profit, and the fees change', async () => {
       before(async () => {
         customProfitFeePercentage = ether(0);
+        customChainTimeIncrease = ONE_YEAR_IN_SECONDS.div(2);
       });
 
       after(async () => {
         customProfitFeePercentage = undefined;
+        customChainTimeIncrease = undefined;
       });
 
       beforeEach(async () => {

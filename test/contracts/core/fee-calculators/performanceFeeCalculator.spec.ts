@@ -464,6 +464,8 @@ contract('PerformanceFeeCalculator', accounts => {
     let feeType: BigNumber;
     let newFeePercentage: BigNumber;
 
+    let customInitialFeePercentage: BigNumber;
+
     before(async () => {
       addValidSet = true;
 
@@ -506,7 +508,7 @@ contract('PerformanceFeeCalculator', accounts => {
 
       const profitFeePeriod = ONE_DAY_IN_SECONDS.mul(30);
       const highWatermarkResetPeriod = ONE_DAY_IN_SECONDS.mul(365);
-      const profitFeePercentage = ether(.2);
+      const profitFeePercentage = customInitialFeePercentage || ether(.2);
       const streamingFeePercentage = ether(.02);
 
       const feeCalculatorData = feeCalculatorHelper.generatePerformanceFeeCallData(
@@ -564,6 +566,115 @@ contract('PerformanceFeeCalculator', accounts => {
 
         const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
         expect(feeState.profitFeePercentage).to.be.bignumber.equal(newFeePercentage);
+      });
+
+      describe('when profit fee is initially 0', async () => {
+        let updatedBTCPrice: BigNumber;
+        let updatedETHPrice: BigNumber;
+
+        let timeElapsed: BigNumber;
+        let customTimeElapsed: BigNumber;
+
+        before(async () => {
+          customInitialFeePercentage = ether(0);
+        });
+
+        after(async () => {
+          customInitialFeePercentage = undefined;
+        });
+
+        beforeEach(async () => {
+          await usdWrappedBTCOracle.updatePrice.sendTransactionAsync(updatedBTCPrice);
+          await ethWrappedBTCOracle.updatePrice.sendTransactionAsync(
+            updatedBTCPrice.mul(ether(1)).div(updatedETHPrice).round(0, 3)
+          );
+
+          await usdWrappedETHOracle.updatePrice.sendTransactionAsync(updatedETHPrice);
+          await ethWrappedETHOracle.updatePrice.sendTransactionAsync(
+            updatedETHPrice.mul(ether(1)).div(updatedETHPrice).round(0, 3)
+          );
+
+          timeElapsed = customTimeElapsed || ONE_YEAR_IN_SECONDS;
+
+          await blockchain.increaseTimeAsync(timeElapsed);
+          await blockchain.mineBlockAsync();
+        });
+
+        describe('and there is a profit', async () => {
+          before(async () => {
+            updatedBTCPrice = ether(8000);
+            updatedETHPrice = ether(140);
+          });
+
+          after(async () => {
+            updatedBTCPrice = undefined;
+            updatedETHPrice = undefined;
+          });
+
+          it('properly sets the fee', async () => {
+            await subject();
+            const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+            expect(feeState.profitFeePercentage).to.be.bignumber.equal(newFeePercentage);
+          });
+
+          it('properly resets the watermark', async () => {
+            await subject();
+
+            const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+              rebalancingSetToken,
+              usdOracleWhiteList,
+            );
+
+            const postFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+            expect(postFeeState.highWatermark).to.bignumber.equal(rebalancingSetValue);
+          });
+
+          it('sets the last profit fee timestamp correctly', async () => {
+            await subject();
+
+            const lastBlock = await web3.eth.getBlock('latest');
+
+            const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+            expect(feeState.lastProfitFeeTimestamp).to.be.bignumber.equal(lastBlock.timestamp);
+          });
+
+          describe('when the profitFeePeriod has not elapsed', async () => {
+            before(async () => {
+              customTimeElapsed = ONE_DAY_IN_SECONDS;
+            });
+
+            after(async () => {
+              customTimeElapsed = undefined;
+            });
+
+            it('should revert', async () => {
+              await expectRevertError(subject());
+            });
+          });
+        });
+
+        describe('when there is no profit', async () => {
+          before(async () => {
+            updatedBTCPrice = ether(7000);
+            updatedETHPrice = ether(100);
+          });
+
+          after(async () => {
+            updatedBTCPrice = undefined;
+            updatedETHPrice = undefined;
+          });
+
+          it('does not reset the watermark', async () => {
+            const preFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+            await subject();
+
+            const postFeeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+            expect(postFeeState.highWatermark).to.bignumber.equal(preFeeState.highWatermark);
+          });
+        });
       });
 
       describe('when the profit fee is greater than maximumProfitFeePercentage', async () => {

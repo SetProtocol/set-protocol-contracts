@@ -7,6 +7,7 @@ import {
 } from 'set-protocol-oracles';
 import {
   CoreMockContract,
+  LinearAuctionLiquidatorContract,
   OracleWhiteListContract,
   RebalanceAuctionModuleContract,
   SetTokenContract,
@@ -19,12 +20,18 @@ import {
   WhiteListContract,
   FixedFeeCalculatorContract,
 } from '../contracts';
+import { Blockchain } from '@utils/blockchain';
 import { ether } from '../units';
+import { ONE_HOUR_IN_SECONDS } from '@utils/constants';
 
 import { CoreHelper } from './coreHelper';
 import { ERC20Helper } from './erc20Helper';
 import { OracleHelper } from 'set-protocol-oracles';
 import { FeeCalculatorHelper } from './feeCalculatorHelper';
+import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { ValuationHelper } from '@utils/helpers/valuationHelper';
+
+const blockchain = new Blockchain(web3);
 
 export interface BaseSetConfig {
   set1Components?: Address[];
@@ -36,6 +43,12 @@ export interface BaseSetConfig {
   set1NaturalUnit?: BigNumber;
   set2NaturalUnit?: BigNumber;
   set3NaturalUnit?: BigNumber;
+}
+
+export interface PriceUpdate {
+  component1Price?: BigNumber;
+  component2Price?: BigNumber;
+  component3Price?: BigNumber;
 }
 
 export interface ComponentConfig {
@@ -52,6 +65,8 @@ export class RebalanceTestSetup {
   private _coreHelper: CoreHelper;
   private _erc20Helper: ERC20Helper;
   private _oracleHelper: OracleHelper;
+  private _liquidatorHelper: LiquidatorHelper;
+  private _valuationHelper: ValuationHelper;
   private _feeCalculatorHelper: FeeCalculatorHelper;
 
   public core: CoreMockContract;
@@ -64,6 +79,7 @@ export class RebalanceTestSetup {
   public liquidatorWhitelist: WhiteListContract;
   public fixedFeeCalculator: FixedFeeCalculatorContract;
   public feeCalculatorWhitelist: WhiteListContract;
+  public linearAuctionLiquidator: LinearAuctionLiquidatorContract;
 
   public component1: StandardTokenMockContract;
   public component2: StandardTokenMockContract;
@@ -105,6 +121,14 @@ export class RebalanceTestSetup {
     this._erc20Helper = new ERC20Helper(this._contractOwnerAddress);
     this._oracleHelper = new OracleHelper(this._contractOwnerAddress);
     this._feeCalculatorHelper = new FeeCalculatorHelper(this._contractOwnerAddress);
+    this._valuationHelper = new ValuationHelper(
+      this._contractOwnerAddress,
+      this._coreHelper,
+      this._erc20Helper,
+      this._oracleHelper
+    );
+
+    this._liquidatorHelper = new LiquidatorHelper(this._contractOwnerAddress, this._erc20Helper, this._valuationHelper);
   }
 
   /* ============ Deployment ============ */
@@ -173,9 +197,17 @@ export class RebalanceTestSetup {
     this.component2Oracle = await this._oracleHelper.deployUpdatableOracleMockAsync(this.component2Price);
     this.component3Oracle = await this._oracleHelper.deployUpdatableOracleMockAsync(this.component3Price);
 
-    this.oracleWhiteList = await this._coreHelper.deployOracleWhiteListAsync(
-      [this.component1.address, this.component2.address, this.component3.address],
-      [this.component1Oracle.address, this.component2Oracle.address, this.component3Oracle.address],
+    await this.oracleWhiteList.addTokenOraclePair.sendTransactionAsync(
+      this.component1.address,
+      this.component1Oracle.address,
+    );
+    await this.oracleWhiteList.addTokenOraclePair.sendTransactionAsync(
+      this.component2.address,
+      this.component2Oracle.address,
+    );
+    await this.oracleWhiteList.addTokenOraclePair.sendTransactionAsync(
+      this.component3.address,
+      this.component3Oracle.address,
     );
 
     await this._coreHelper.addTokensToWhiteList(
@@ -208,6 +240,7 @@ export class RebalanceTestSetup {
     await this._coreHelper.addModuleAsync(this.core, this.rebalanceAuctionModule.address);
 
     this.rebalancingComponentWhiteList = await this._coreHelper.deployWhiteListAsync();
+    this.oracleWhiteList = await this._coreHelper.deployOracleWhiteListAsync();
     this.liquidatorWhitelist = await this._coreHelper.deployWhiteListAsync();
     this.feeCalculatorWhitelist = await this._coreHelper.deployWhiteListAsync();
     this.rebalancingFactory = await this._coreHelper.deployRebalancingSetTokenV3FactoryAsync(
@@ -220,6 +253,22 @@ export class RebalanceTestSetup {
 
     this.fixedFeeCalculator = await this._feeCalculatorHelper.deployFixedFeeCalculatorAsync();
     await this._coreHelper.addAddressToWhiteList(this.fixedFeeCalculator.address, this.feeCalculatorWhitelist);
+
+    // Hardcoding values for now
+    const auctionPeriod = ONE_HOUR_IN_SECONDS.mul(4);
+    const rangeStart = new BigNumber(1); // 10% below fair value
+    const rangeEnd = new BigNumber(21); // 10% above fair value
+    const name = 'liquidator';
+
+    this.linearAuctionLiquidator = await this._liquidatorHelper.deployLinearAuctionLiquidatorAsync(
+      this.core.address,
+      this.oracleWhiteList.address,
+      auctionPeriod,
+      rangeStart,
+      rangeEnd,
+      name,
+    );
+    await this._coreHelper.addAddressToWhiteList(this.linearAuctionLiquidator.address, this.liquidatorWhitelist);
   }
 
   public setRebalancingSet(
@@ -254,5 +303,25 @@ export class RebalanceTestSetup {
 
       // Use issued currentSetToken to issue rebalancingSetToken
       await this.core.issue.sendTransactionAsync(this.rebalancingSetToken.address, rebalancingSetQuantity);
+  }
+
+  public async jumpTimeAndUpdateOracles(
+    timeIncrease: BigNumber,
+    newPrices: PriceUpdate,
+  ): Promise<void> {
+    await blockchain.increaseTimeAsync(timeIncrease);
+    await blockchain.mineBlockAsync();
+
+    if (newPrices.component1Price) {
+      await this.component1Oracle.updatePrice.sendTransactionAsync(newPrices.component1Price);
+    }
+
+    if (newPrices.component2Price) {
+      await this.component2Oracle.updatePrice.sendTransactionAsync(newPrices.component2Price);
+    }
+
+    if (newPrices.component3Price) {
+      await this.component3Oracle.updatePrice.sendTransactionAsync(newPrices.component3Price);
+    }
   }
 }

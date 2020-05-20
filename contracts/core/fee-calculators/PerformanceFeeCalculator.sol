@@ -37,6 +37,11 @@ import { SetUSDValuation } from "../liquidators/impl/SetUSDValuation.sol";
  * Smart contract that stores and returns fees (represented as scaled decimal values). Fees are
  * determined based on performance of the Set and a streaming fee. Set values can be denominated
  * in any any asset based on oracle white list used in deploy.
+ *
+ * CHANGELOG:
+ * - 5/17/2020: Update adjustFee function to update high watermark to prevent unexpected fee actualizations
+ *              when the profitFee was initially 0. We also disallow changing the profit fee if the the fee period
+ *              has not elapsed.
  */
 contract PerformanceFeeCalculator is IFeeCalculator {
 
@@ -258,6 +263,23 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         } else {
             validateProfitFeePercentage(feePercentage);
 
+            // IMPORTANT: In the case that a profit fee is initially 0 and is set to a non-zero number,
+            // the actualizeFee / updateFeeState function does not update the high watermark
+            // Thus, we need to reset the high water mark here so that users do not pay for profit fees
+            // since inception.
+            uint256 rebalancingSetValue = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
+            uint256 existingHighwatermark = feeState[msg.sender].highWatermark;
+            if (rebalancingSetValue > existingHighwatermark) {
+                // In the case the profit fee period hasn't elapsed, disallow changing fees
+                require(
+                    exceedsProfitFeePeriod(msg.sender),
+                    "PerformanceFeeCalculator.adjustFee: ProfitFeePeriod must have elapsed to update fee"
+                );
+
+                feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
+                feeState[msg.sender].highWatermark = rebalancingSetValue;
+            }
+
             feeState[msg.sender].profitFeePercentage = feePercentage;
         }
 
@@ -314,6 +336,9 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         validateStreamingFeePercentage(parameters.streamingFeePercentage);
         validateProfitFeePercentage(parameters.profitFeePercentage);
 
+        // WARNING: This require has downstream effects on security assumptions for updating and accruing fees.
+        // Removing it allows highWatermarks to be reset, potentially cancelling fee collections or allowing traders
+        // to apply higher profitFee to Set gains.
         require(
             parameters.highWatermarkResetPeriod >= parameters.profitFeePeriod,
             "PerformanceFeeCalculator.validateFeeParameters: Fee collection frequency must exceed highWatermark reset."

@@ -27,6 +27,7 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import { ether } from '@utils/units';
 import {
+  DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
   ONE_YEAR_IN_SECONDS,
   ZERO
@@ -47,7 +48,7 @@ const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
 const FixedFeeCalculator = artifacts.require('FixedFeeCalculator');
 
-contract('PerformanceFeeCalculator', accounts => {
+contract('PerformanceFeeCalculator Integration Test', accounts => {
   const [
     ownerAccount,
     feeAccount,
@@ -204,22 +205,30 @@ contract('PerformanceFeeCalculator', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#updateAndGetFee: USD Denominated', async () => {
+  describe('#updateAndGetFee and adjustFee: USD Denominated', async () => {
     let updatedBTCPrice: BigNumber;
     let updatedETHPrice: BigNumber;
     let chainTimeIncrease: BigNumber;
 
+    let feeType: BigNumber;
+    let newFeePercentage: BigNumber;
+    let subjectNewFeeData: string;
+
+    let customProfitFeePercentage: BigNumber;
+    let customChainTimeIncrease: BigNumber;
+
     before(async () => {
-      chainTimeIncrease = ONE_YEAR_IN_SECONDS;
       updatedBTCPrice = ether(8000);
       updatedETHPrice = ether(140);
     });
 
     beforeEach(async () => {
+      chainTimeIncrease = customChainTimeIncrease || ONE_YEAR_IN_SECONDS;
+
       const calculatorData = feeCalculatorHelper.generatePerformanceFeeCallDataBuffer(
         ONE_DAY_IN_SECONDS.mul(30),
         ONE_YEAR_IN_SECONDS,
-        ether(.2),
+        customProfitFeePercentage || ether(.2),
         ether(.02)
       );
 
@@ -269,6 +278,18 @@ contract('PerformanceFeeCalculator', accounts => {
 
     async function subject(): Promise<string> {
       return rebalancingSetToken.actualizeFee.sendTransactionAsync();
+    }
+
+    async function adjustFeeSubject(): Promise<string> {
+      subjectNewFeeData = feeCalculatorHelper.generateAdjustFeeCallData(
+        feeType,
+        newFeePercentage
+      );
+
+      return rebalancingSetToken.adjustFee.sendTransactionAsync(
+        subjectNewFeeData,
+        { from: ownerAccount, gas: DEFAULT_GAS }
+      );
     }
 
     it('mints the correct Rebalancing Set to the feeRecipient', async () => {
@@ -381,11 +402,11 @@ contract('PerformanceFeeCalculator', accounts => {
 
     describe('when time since last profit fee does not exceed fee frequency', async () => {
       before(async () => {
-        chainTimeIncrease = ONE_DAY_IN_SECONDS.mul(15);
+        customChainTimeIncrease = ONE_DAY_IN_SECONDS.mul(15);
       });
 
       after(async () => {
-        chainTimeIncrease = ONE_YEAR_IN_SECONDS;
+        customChainTimeIncrease = undefined;
       });
 
       it('mints the correct Rebalancing Set to the feeRecipient', async () => {
@@ -603,6 +624,45 @@ contract('PerformanceFeeCalculator', accounts => {
 
         expect(postFeeState.highWatermark).to.bignumber.equal(expectedHighWatermark);
       });
+    });
+
+    describe('when the initial profit fee is 0, there is a profit, and the fees change', async () => {
+      before(async () => {
+        customProfitFeePercentage = ether(0);
+        customChainTimeIncrease = ONE_YEAR_IN_SECONDS.div(2);
+      });
+
+      after(async () => {
+        customProfitFeePercentage = undefined;
+        customChainTimeIncrease = undefined;
+      });
+
+      beforeEach(async () => {
+        feeType = new BigNumber(1);
+        newFeePercentage = ether(0.1);
+      });
+
+      it('resets the highWatermark to the current RebalancingSet value', async () => {
+        await adjustFeeSubject();
+
+        const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+          rebalancingSetToken,
+          usdOracleWhiteList,
+        );
+
+        const postFeeState: any = await usdFeeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+        expect(postFeeState.highWatermark).to.bignumber.equal(rebalancingSetValue);
+      });
+
+      it('sets the correct fee', async () => {
+        await adjustFeeSubject();
+
+        const postFeeState: any = await usdFeeCalculator.feeState.callAsync(rebalancingSetToken.address);
+
+        expect(postFeeState.profitFeePercentage).to.bignumber.equal(newFeePercentage);
+      });
+
     });
   });
 

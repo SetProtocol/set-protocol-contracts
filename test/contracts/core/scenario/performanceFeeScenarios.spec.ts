@@ -360,18 +360,6 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
     it('should successfully complete 10', async () => {
         await runScenario(scenarios[10]);
     });
-    // it('should successfully complete 11', async () => {
-    //     await runScenario(scenarios[11]);
-    // });
-    // it('should successfully complete 12', async () => {
-    //     await runScenario(scenarios[12]);
-    // });
-    // it('should successfully complete 13', async () => {
-    //     await runScenario(scenarios[13]);
-    // });
-    // it('should successfully complete 14', async () => {
-    //     await runScenario(scenarios[14]);
-    // });
   });
 
   async function runScenario(scenario: PerfFeeScenarios): Promise<void> {

@@ -87,25 +87,32 @@ interface CheckPoint {
   feeRecipientShares: BigNumber;
 }
 
+// ETH/BTC 50%/50% Set
+const standardRebalancingSet: RebalancingSetDetails = {
+  unitShares: new BigNumber(800000),
+  naturalUnit: new BigNumber(100000000),
+  supply: new BigNumber('14256596210800000000000')
+};
+
+const standardCurrentSet: SetDetails = {
+  components: ['component1', 'component2'], // ETH and WBTC
+  units: [new BigNumber(500000000000000), new BigNumber(1000)],
+  naturalUnit: new BigNumber(10000000000000),
+};
+
+const standardComponentSetup: ComponentSettings = {
+  component1Price: ether(200),
+  component2Price: ether(10000),
+  component1Decimals: 18,
+  component2Decimals: 8,
+};
+
 const scenarios: PerfFeeScenarios[] = [
   {
-    name: 'ETH/BTC 50/50 Set USD-Watermark Scenario 1',
-    rebalancingSet: {
-      unitShares: new BigNumber(800000),
-      naturalUnit: new BigNumber(100000000),
-      supply: new BigNumber('14256596210800000000000')
-    },
-    currentSet: {
-      components: ['component1', 'component2'], // ETH and WBTC
-      units: [new BigNumber(500000000000000), new BigNumber(1000)],
-      naturalUnit: new BigNumber(10000000000000),
-    },
-    components: {
-      component1Price: ether(200),
-      component2Price: ether(10000),
-      component1Decimals: 18,
-      component2Decimals: 8,
-    },
+    name: 'Scenario 1',
+    rebalancingSet: standardRebalancingSet,
+    currentSet: standardCurrentSet,
+    components: standardComponentSetup,
     profitFee: ether(0.1),
     highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
     t1: {
@@ -117,38 +124,157 @@ const scenarios: PerfFeeScenarios[] = [
     }
   },
   {
-    name: 'ETH/BTC 50/50 Set USD-Watermark Scenario 13',
-    rebalancingSet: {
-      unitShares: new BigNumber(800000),
-      naturalUnit: new BigNumber(100000000),
-      supply: new BigNumber('14256596210800000000000')
-    },
-    currentSet: {
-      components: ['component1', 'component2'], // ETH and WBTC
-      units: [new BigNumber(500000000000000), new BigNumber(1000)],
-      naturalUnit: new BigNumber(10000000000000),
-    },
-    components: {
-      component1Price: ether(200),
-      component2Price: ether(10000),
-      component1Decimals: 18,
-      component2Decimals: 8,
-    },
-    profitFee: ether(0.1),
+    name: 'Scenario 2',
+    rebalancingSet: standardRebalancingSet,
+    currentSet: standardCurrentSet,
+    components: standardComponentSetup,
+    profitFee: ether(0.05),
     highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
     t1: {
       timeElapsed: ONE_YEAR_IN_SECONDS,
       prices: {
-        component2Price: ether(12000),
+        component2Price: ether(9000),
       },
-      newProfitFee: ether(0.2)
+      newProfitFee: ether(0.1)
+    }
+  },
+  {
+    name: 'Scenario 3',
+    rebalancingSet: standardRebalancingSet,
+    currentSet: standardCurrentSet,
+    components: standardComponentSetup,
+    profitFee: ether(0),
+    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
+    t1: {
+      timeElapsed: ONE_MONTH_IN_SECONDS.mul(2),
+      prices: {
+        component2Price: ether(9000),
+      },
+      newProfitFee: ether(0.1)
+    }
+  },
+  {
+    name: 'Scenario 4',
+    rebalancingSet: standardRebalancingSet,
+    currentSet: standardCurrentSet,
+    components: standardComponentSetup,
+    profitFee: ether(0.05),
+    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
+    t1: {
+      timeElapsed: ONE_MONTH_IN_SECONDS.mul(2),
+      prices: {
+        component2Price: ether(9000),
+      },
+      newProfitFee: ether(0.1)
+    }
+  },
+  {
+    name: 'Scenario 5',
+    rebalancingSet: standardRebalancingSet,
+    currentSet: standardCurrentSet,
+    components: standardComponentSetup,
+    profitFee: ether(0),
+    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
+    t1: {
+      timeElapsed: ONE_YEAR_IN_SECONDS,
+      prices: {
+        component2Price: ether(11000),
+      },
+      newProfitFee: ether(0.1)
+    }
+  },
+  {
+    name: 'Scenario 6',
+    rebalancingSet: standardRebalancingSet,
+    currentSet: standardCurrentSet,
+    components: standardComponentSetup,
+    profitFee: ether(0),
+    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
+    t1: {
+      timeElapsed: ONE_MONTH_IN_SECONDS.mul(2),
+      prices: {
+        component2Price: ether(11000),
+      },
+      newProfitFee: ether(0.1)
+    }
+  },
+  {
+    name: 'Scenario 7',
+    rebalancingSet: standardRebalancingSet,
+    currentSet: standardCurrentSet,
+    components: standardComponentSetup,
+    profitFee: ether(0.05),
+    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
+    t1: {
+      timeElapsed: ONE_MONTH_IN_SECONDS.mul(2),
+      prices: {
+        component2Price: ether(11000),
+      },
+      newProfitFee: ether(0.1)
+    }
+  },
+  {
+    name: 'Scenario 8',
+    rebalancingSet: standardRebalancingSet,
+    currentSet: standardCurrentSet,
+    components: standardComponentSetup,
+    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
+    profitFee: ether(0.00),
+    t1: {
+      timeElapsed: ZERO,
+      prices: {
+        component2Price: ether(9000),
+      },
+      newProfitFee: ether(0.1)
+    }
+  },
+  {
+    name: 'Scenario 9',
+    rebalancingSet: standardRebalancingSet,
+    currentSet: standardCurrentSet,
+    components: standardComponentSetup,
+    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
+    profitFee: ether(0.05),
+    t1: {
+      timeElapsed: ZERO,
+      prices: {
+        component2Price: ether(9000),
+      },
+      newProfitFee: ether(0.1)
+    }
+  },
+  {
+    name: 'Scenario 12',
+    rebalancingSet: standardRebalancingSet,
+    currentSet: standardCurrentSet,
+    components: standardComponentSetup,
+    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
+    profitFee: ether(0.00),
+    t1: {
+      timeElapsed: ZERO,
+      prices: {
+        component2Price: ether(11000),
+      },
+      newProfitFee: ether(0.1)
+    }
+  },
+  {
+    name: 'Scenario 13',
+    rebalancingSet: standardRebalancingSet,
+    currentSet: standardCurrentSet,
+    components: standardComponentSetup,
+    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
+    profitFee: ether(0.05),
+    t1: {
+      timeElapsed: ZERO,
+      prices: {
+        component2Price: ether(11000),
+      },
+      newProfitFee: ether(0.1)
     }
   },
 ];
 
-// IMPROVEMENTS TO MAKE
-  // Add concept of checkpointing of important values
-  // Add printer of final human-readable results and percentage changes of important key values
 contract('PerformanceFeeCalculator Scenarios', accounts => {
   const [
     deployerAccount,
@@ -200,19 +326,57 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
     blockchain.revertAsync();
   });
 
-  describe(`${scenarios[0].name}`, async () => {
-    it('should successfully complete', async () => {
-      await runScenario(scenarios[0]);
+  describe(`Running Scenarios`, async () => {
+    it('should successfully complete 0', async () => {
+        await runScenario(scenarios[0]);
     });
-  });
-
-  describe.only(`${scenarios[1].name}`, async () => {
-    it('should successfully complete', async () => {
-      await runScenario(scenarios[1]);
+    it('should successfully complete 1', async () => {
+        await runScenario(scenarios[1]);
     });
+    it('should successfully complete 2', async () => {
+        await runScenario(scenarios[2]);
+    });
+    it('should successfully complete 3', async () => {
+        await runScenario(scenarios[3]);
+    });
+    it('should successfully complete 4', async () => {
+        await runScenario(scenarios[4]);
+    });
+    it('should successfully complete 5', async () => {
+        await runScenario(scenarios[5]);
+    });
+    it('should successfully complete 6', async () => {
+        await runScenario(scenarios[6]);
+    });
+    it('should successfully complete 7', async () => {
+        await runScenario(scenarios[7]);
+    });
+    it('should successfully complete 8', async () => {
+        await runScenario(scenarios[8]);
+    });
+    it('should successfully complete 9', async () => {
+        await runScenario(scenarios[9]);
+    });
+    it('should successfully complete 10', async () => {
+        await runScenario(scenarios[10]);
+    });
+    // it('should successfully complete 11', async () => {
+    //     await runScenario(scenarios[11]);
+    // });
+    // it('should successfully complete 12', async () => {
+    //     await runScenario(scenarios[12]);
+    // });
+    // it('should successfully complete 13', async () => {
+    //     await runScenario(scenarios[13]);
+    // });
+    // it('should successfully complete 14', async () => {
+    //     await runScenario(scenarios[14]);
+    // });
   });
 
   async function runScenario(scenario: PerfFeeScenarios): Promise<void> {
+    console.log(`Running: ${scenario.name}`);
+
     await initialize(scenario);
 
     await checkPoint(0);
@@ -247,7 +411,7 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
       rebalancingSetValue, 
       highWatermark: new BigNumber(feeState['highWatermark']),
       profitFeePercentage: new BigNumber(feeState['profitFeePercentage']),
-      lastProfitFeeTimestamp: feeState['lastProfitFeeTimestamp'],
+      lastProfitFeeTimestamp: new BigNumber(feeState['lastProfitFeeTimestamp']),
       unitShares,
       totalSupply,
       feeRecipientShares,
@@ -278,6 +442,12 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
 
     console.log(`feeRecipientShares Before: ${deScale(t0.feeRecipientShares)}`);
     console.log(`feeRecipientShares After: ${deScale(tN.feeRecipientShares)}`);
+
+    console.log(`======================== Results ==========================`);
+    console.log("Profit Fee Delta: ", tN.profitFeePercentage.sub(t0.profitFeePercentage).toString());
+    console.log("High Watermark Delta: ", tN.highWatermark.sub(t0.highWatermark).toString());
+    console.log("lastProfitFeeTS Delta: ", tN.lastProfitFeeTimestamp.sub(t0.lastProfitFeeTimestamp).toString());
+    console.log(`==================================================`);
   }
 
   function deScale(v1: BigNumber): BigNumber {

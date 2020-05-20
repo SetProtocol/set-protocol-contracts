@@ -568,7 +568,7 @@ contract('PerformanceFeeCalculator', accounts => {
         expect(feeState.profitFeePercentage).to.be.bignumber.equal(newFeePercentage);
       });
 
-      describe('when the profit fee is initially 0 and a profit is marked', async () => {
+      describe('when profit fee is initially 0', async () => {
         let updatedBTCPrice: BigNumber;
         let updatedETHPrice: BigNumber;
 
@@ -609,6 +609,12 @@ contract('PerformanceFeeCalculator', accounts => {
           after(async () => {
             updatedBTCPrice = undefined;
             updatedETHPrice = undefined;
+          });
+
+          it('properly sets the fee', async () => {
+            await subject();
+            const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
+            expect(feeState.profitFeePercentage).to.be.bignumber.equal(newFeePercentage);
           });
 
           it('properly resets the watermark', async () => {

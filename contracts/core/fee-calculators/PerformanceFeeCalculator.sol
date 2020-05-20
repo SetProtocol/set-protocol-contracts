@@ -40,7 +40,8 @@ import { SetUSDValuation } from "../liquidators/impl/SetUSDValuation.sol";
  *
  * CHANGELOG:
  * - 5/17/2020: Update adjustFee function to update high watermark to prevent unexpected fee actualizations
- *              when the profitFee was initially 0
+ *              when the profitFee was initially 0. We also disallow changing the profit fee if the the fee period
+ *              has not elapsed.
  */
 contract PerformanceFeeCalculator is IFeeCalculator {
 
@@ -262,7 +263,7 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         } else {
             validateProfitFeePercentage(feePercentage);
 
-            // IMPORATNT: In the case that a profit fee is initially 0 and is set to a non-zero number,
+            // IMPORTANT: In the case that a profit fee is initially 0 and is set to a non-zero number,
             // the actualizeFee / updateFeeState function does not update the high watermark
             // Thus, we need to reset the high water mark here so that users do not pay for profit fees
             // since inception.
@@ -335,6 +336,9 @@ contract PerformanceFeeCalculator is IFeeCalculator {
         validateStreamingFeePercentage(parameters.streamingFeePercentage);
         validateProfitFeePercentage(parameters.profitFeePercentage);
 
+        // WARNING: This require has downstream effects on security assumptions for updating and accruing fees.
+        // Removing it allows highWatermarks to be reset, potentially cancelling fee collections or allowing traders
+        // to apply higher profitFee to Set gains.
         require(
             parameters.highWatermarkResetPeriod >= parameters.profitFeePeriod,
             "PerformanceFeeCalculator.validateFeeParameters: Fee collection frequency must exceed highWatermark reset."

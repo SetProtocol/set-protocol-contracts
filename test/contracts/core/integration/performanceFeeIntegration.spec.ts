@@ -48,7 +48,7 @@ const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
 const FixedFeeCalculator = artifacts.require('FixedFeeCalculator');
 
-contract('PerformanceFeeCalculator', accounts => {
+contract('PerformanceFeeCalculator Integration Test', accounts => {
   const [
     ownerAccount,
     feeAccount,

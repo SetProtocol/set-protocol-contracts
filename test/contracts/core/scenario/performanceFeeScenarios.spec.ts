@@ -10,7 +10,7 @@ import { BigNumber } from 'bignumber.js';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
-  TWAPLiquidatorContract,
+  PerformanceFeeCalculatorContract,
   SetTokenContract,
   RebalancingSetTokenV3Contract,
 } from '@utils/contracts';
@@ -21,6 +21,8 @@ import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
   ONE_HOUR_IN_SECONDS,
+  ONE_MONTH_IN_SECONDS,
+  ONE_YEAR_IN_SECONDS,
   ZERO,
 } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
@@ -32,7 +34,7 @@ import { OracleHelper } from 'set-protocol-oracles';
 import { RebalancingSetV3Helper } from '@utils/helpers/rebalancingSetV3Helper';
 import { FeeCalculatorHelper } from '@utils/helpers/feeCalculatorHelper';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
-import { RebalanceTestSetup } from '@utils/helpers/rebalanceTestSetup';
+import { RebalanceTestSetup, PriceUpdate } from '@utils/helpers/rebalanceTestSetup';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -61,55 +63,92 @@ interface ComponentSettings {
   component2Decimals: number;
 }
 
-interface TWAPScenario {
+interface PerfFeeScenarios {
   name: string;
   rebalancingSet: RebalancingSetDetails;
   currentSet: SetDetails;
-  nextSet: SetDetails;
   components: ComponentSettings;
+  highWatermarkResetPeriod: BigNumber;
   profitFee: BigNumber;
   t1: {
-    component1Price: BigNumber;
-    component2Price: BigNumber;
-    profitFee: BigNumber;
+    timeElapsed: BigNumber;
+    prices: PriceUpdate;
+    newProfitFee: BigNumber;
   }
 }
 
+interface CheckPoint {
+  rebalancingSetValue: BigNumber,
+  highWatermark: BigNumber;
+  profitFeePercentage: BigNumber;
+  lastProfitFeeTimestamp: BigNumber;
+  unitShares: BigNumber;
+  totalSupply: BigNumber;
+  feeRecipientShares: BigNumber;
+}
 
-const scenarios: TWAPScenario[] = [
+const scenarios: PerfFeeScenarios[] = [
   {
-    name: 'ETH 20 MA Set Rebalances 100% WETH to 100% USD',
+    name: 'ETH/BTC 50/50 Set USD-Watermark Scenario 1',
     rebalancingSet: {
-      unitShares: new BigNumber(2076796),
-      naturalUnit: new BigNumber(1000000),
-      supply: new BigNumber('20556237207015075000000')
+      unitShares: new BigNumber(800000),
+      naturalUnit: new BigNumber(100000000),
+      supply: new BigNumber('14256596210800000000000')
     },
     currentSet: {
-      components: ['component1'], // ETH
-      units: [new BigNumber(1000000)],
-      naturalUnit: new BigNumber(1000000),
-    },
-    nextSet: {
-      components: ['component2'], // USDC
-      units: [new BigNumber(307)],
-      naturalUnit: new BigNumber(1000000000000),
+      components: ['component1', 'component2'], // ETH and WBTC
+      units: [new BigNumber(500000000000000), new BigNumber(1000)],
+      naturalUnit: new BigNumber(10000000000000),
     },
     components: {
-      component1Price: ether(188),
-      component2Price: ether(1),
+      component1Price: ether(200),
+      component2Price: ether(10000),
       component1Decimals: 18,
-      component2Decimals: 6,
+      component2Decimals: 8,
     },
     profitFee: ether(0.1),
+    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
     t1: {
+      timeElapsed: ONE_YEAR_IN_SECONDS,
+      prices: {
+        component2Price: ether(9000),
+      },
+      newProfitFee: ether(0.2)
+    }
+  },
+  {
+    name: 'ETH/BTC 50/50 Set USD-Watermark Scenario 13',
+    rebalancingSet: {
+      unitShares: new BigNumber(800000),
+      naturalUnit: new BigNumber(100000000),
+      supply: new BigNumber('14256596210800000000000')
+    },
+    currentSet: {
+      components: ['component1', 'component2'], // ETH and WBTC
+      units: [new BigNumber(500000000000000), new BigNumber(1000)],
+      naturalUnit: new BigNumber(10000000000000),
+    },
+    components: {
       component1Price: ether(200),
-      component2Price: ether(1),
-      profitFee: ether(0.2)
+      component2Price: ether(10000),
+      component1Decimals: 18,
+      component2Decimals: 8,
+    },
+    profitFee: ether(0.1),
+    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
+    t1: {
+      timeElapsed: ONE_YEAR_IN_SECONDS,
+      prices: {
+        component2Price: ether(12000),
+      },
+      newProfitFee: ether(0.2)
     }
   },
 ];
 
-
+// IMPROVEMENTS TO MAKE
+  // Add concept of checkpointing of important values
+  // Add printer of final human-readable results and percentage changes of important key values
 contract('PerformanceFeeCalculator Scenarios', accounts => {
   const [
     deployerAccount,
@@ -120,14 +159,15 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
 
   let rebalancingSetToken: RebalancingSetTokenV3Contract;
 
-  let liquidator: TWAPLiquidatorContract;
+  let performanceFeeCalculator: PerformanceFeeCalculatorContract;
 
-  let name: string = 'liquidator';
-  let auctionPeriod: BigNumber = ONE_HOUR_IN_SECONDS.mul(4);
-  let rangeStart: BigNumber = new BigNumber(1);
-  let rangeEnd: BigNumber = new BigNumber(21);
+  const maxStreamingFee = ether(0.05); // 5%
+  const maxProfitFee = ether(0.4); // 40%
+  const defaultProfitFeePeriod = ONE_MONTH_IN_SECONDS;
+  const defaultStreamingFeePercentage = ZERO;
 
   let setup: RebalanceTestSetup;
+  let checkPoints: CheckPoint[];
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -153,39 +193,99 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
     blockchain.saveSnapshotAsync();
 
     setup = new RebalanceTestSetup(deployerAccount);
+    checkPoints = [];
   });
 
   afterEach(async () => {
     blockchain.revertAsync();
   });
 
-  // Things to test
-    // watermarks, unitShares, profitFee state
   describe(`${scenarios[0].name}`, async () => {
     it('should successfully complete', async () => {
       await runScenario(scenarios[0]);
-
-      const newRebalanceState = await setup.rebalancingSetToken.rebalanceState.callAsync();
-      expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
     });
   });
 
-  async function runScenario(scenario: TWAPScenario): Promise<void> {
-    await initializeScenario(scenario);
+  describe.only(`${scenarios[1].name}`, async () => {
+    it('should successfully complete', async () => {
+      await runScenario(scenarios[1]);
+    });
+  });
 
-    // Deploy Fee Calculator
+  async function runScenario(scenario: PerfFeeScenarios): Promise<void> {
+    await initialize(scenario);
 
-    // Adjust some timestamps
+    await checkPoint(0);
 
-    // Adjust some prices
+    await setup.jumpTimeAndUpdateOracles(
+      scenario.t1.timeElapsed,
+      scenario.t1.prices
+    );
 
     // Adjust some fees
+    await rebalancingSetToken.adjustFee.sendTransactionAsync(
+      feeCalculatorHelper.generateAdjustFeeCallData(new BigNumber(1), scenario.t1.newProfitFee),
+      { from: managerAccount, gas: DEFAULT_GAS }
+    );
 
-    // What are things we want to do / test?
+    await checkPoint(1);
+
+    await printResults();
+  }
+
+  async function checkPoint(num:number): Promise<void> {
+    const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+      setup.rebalancingSetToken,
+      setup.oracleWhiteList,
+    );
+    const feeState = await performanceFeeCalculator.feeState.callAsync(setup.rebalancingSetToken.address);
+    const unitShares = await setup.rebalancingSetToken.unitShares.callAsync();
+    const totalSupply = await setup.rebalancingSetToken.totalSupply.callAsync();
+    const feeRecipientShares = await setup.rebalancingSetToken.balanceOf.callAsync(feeRecipient);
+
+    checkPoints[num] = {
+      rebalancingSetValue, 
+      highWatermark: new BigNumber(feeState['highWatermark']),
+      profitFeePercentage: new BigNumber(feeState['profitFeePercentage']),
+      lastProfitFeeTimestamp: feeState['lastProfitFeeTimestamp'],
+      unitShares,
+      totalSupply,
+      feeRecipientShares,
+    }
+  }
+
+  async function printResults(): Promise<void> {
+    const t0 = checkPoints[0];
+    const tN = checkPoints[checkPoints.length - 1];
+
+    console.log(`RebalancingSet Value Before: ${deScale(t0.rebalancingSetValue).toString()}`);
+    console.log(`RebalancingSet Value After: ${deScale(tN.rebalancingSetValue).toString()}`);
+
+    console.log(`Watermark Before: ${deScale(t0.highWatermark)}`);
+    console.log(`Watermark After: ${deScale(tN.highWatermark)}`);
+
+    console.log(`profitFeePercentage Before: ${deScale(t0.profitFeePercentage)}`);
+    console.log(`profitFeePercentage After: ${deScale(tN.profitFeePercentage)}`);
+
+    console.log(`lastProfitFeeTimestamp Before: ${deScale(t0.lastProfitFeeTimestamp)}`);
+    console.log(`lastProfitFeeTimestamp After: ${deScale(tN.lastProfitFeeTimestamp)}`);
+
+    console.log(`unitShares Before: ${deScale(t0.unitShares)}`);
+    console.log(`unitShares After: ${deScale(tN.unitShares)}`);
+
+    console.log(`totalSupply Before: ${deScale(t0.totalSupply)}`);
+    console.log(`totalSupply After: ${deScale(tN.totalSupply)}`);
+
+    console.log(`feeRecipientShares Before: ${deScale(t0.feeRecipientShares)}`);
+    console.log(`feeRecipientShares After: ${deScale(tN.feeRecipientShares)}`);
+  }
+
+  function deScale(v1: BigNumber): BigNumber {
+    return new BigNumber(v1).div(ether(1)).round(0, 3);
   }
 
   // Sets up assets, creates and mints rebalancing set
-  async function initializeScenario(scenario: any): Promise<void> {
+  async function initialize(scenario: any): Promise<void> {
     await setup.initializeCore();
     await setup.initializeComponents(scenario.components);
     await setup.initializeBaseSets({
@@ -194,20 +294,42 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
       set1NaturalUnit: scenario.currentSet.naturalUnit,
     });
 
+    performanceFeeCalculator = await feeCalculatorHelper.deployPerformanceFeeCalculatorAsync(
+      setup.core.address,
+      setup.oracleWhiteList.address,
+      maxProfitFee,
+      maxStreamingFee,
+    );
+    await coreHelper.addAddressToWhiteList(performanceFeeCalculator.address, setup.feeCalculatorWhitelist);
+
     const failPeriod = ONE_DAY_IN_SECONDS;
     const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
-    rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
-      setup.core,
-      setup.rebalancingFactory.address,
+    const performanceFeeSettings = feeCalculatorHelper.generatePerformanceFeeCallDataBuffer(
+      defaultProfitFeePeriod,
+      scenario.highWatermarkResetPeriod,
+      scenario.profitFee,
+      defaultStreamingFeePercentage
+    );
+
+    const callData = rebalancingHelper.generateRebalancingSetTokenV3CallData(
       managerAccount,
       setup.linearAuctionLiquidator.address,
       feeRecipient,
-      setup.fixedFeeCalculator.address,
-      setup.set1.address,
+      performanceFeeCalculator.address,
+      ONE_DAY_IN_SECONDS,
       failPeriod,
       lastRebalanceTimestamp,
-      ZERO, // entry fee
-      ZERO, // rebalance fee
+      ZERO,
+      performanceFeeSettings,
+    );
+
+    rebalancingSetToken = await rebalancingHelper.createRebalancingTokenV3Async(
+      setup.core,
+      setup.rebalancingFactory.address,
+      [setup.set1.address],
+      [scenario.rebalancingSet.unitShares],
+      scenario.rebalancingSet.naturalUnit,
+      callData
     );
 
     await setup.setRebalancingSet(rebalancingSetToken);

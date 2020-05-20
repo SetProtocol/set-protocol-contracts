@@ -21,6 +21,7 @@ export const ONE: BigNumber = new BigNumber(1);
 export const ONE_HUNDRED = new BigNumber(100);
 export const ONE_DAY_IN_SECONDS = new BigNumber(86400);
 export const ONE_HOUR_IN_SECONDS = new BigNumber(3600);
+export const ONE_MONTH_IN_SECONDS = new BigNumber(86400).mul(30);
 export const ONE_YEAR_IN_SECONDS = ONE_DAY_IN_SECONDS.mul(365.25);
 export const SCALE_FACTOR = ether(1);
 export const STANDARD_COMPONENT_UNIT = ether(1);

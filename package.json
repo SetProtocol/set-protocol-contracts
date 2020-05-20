@@ -20,7 +20,7 @@
     "clean": "rm -rf build; rm -rf transpiled; rm -rf types/generated",
     "clean-chain": "rm -rf blockchain && cp -r snapshots/0x-Kyber-Compound blockchain",
     "buidler-new": "yarn buidler clean && yarn buidler-test",
-    "buidler-test": "yarn buidler-setup && buidler test  transpiled/test/contracts/core/liquidators/twapLiquidator.spec.js",
+    "buidler-test": "yarn buidler-setup && buidler test  transpiled/test/contracts/core/scenario/performanceFeeScenarios.spec.js",
     "buidler-setup": "buidler compile && bash scripts/buidler_deploy_dev.sh && yarn transformJson && yarn generate-typings && yarn transpile",
     "compile": "./node_modules/.bin/truffle compile --all",
     "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup",

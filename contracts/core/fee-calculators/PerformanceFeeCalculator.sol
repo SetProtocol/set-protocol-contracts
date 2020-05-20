@@ -268,8 +268,13 @@ contract PerformanceFeeCalculator is IFeeCalculator {
             // since inception.
             uint256 rebalancingSetValue = SetUSDValuation.calculateRebalancingSetValue(msg.sender, oracleWhiteList);
             uint256 existingHighwatermark = feeState[msg.sender].highWatermark;
-
             if (rebalancingSetValue > existingHighwatermark) {
+                // In the case the profit fee period hasn't elapsed, disallow changing fees
+                require(
+                    exceedsProfitFeePeriod(msg.sender),
+                    "PerformanceFeeCalculator.adjustFee: ProfitFeePeriod must have elapsed to update fee"
+                );
+
                 feeState[msg.sender].lastProfitFeeTimestamp = block.timestamp;
                 feeState[msg.sender].highWatermark = rebalancingSetValue;
             }

@@ -572,6 +572,9 @@ contract('PerformanceFeeCalculator', accounts => {
         let updatedBTCPrice: BigNumber;
         let updatedETHPrice: BigNumber;
 
+        let timeElapsed: BigNumber;
+        let customTimeElapsed: BigNumber;
+
         before(async () => {
           customInitialFeePercentage = ether(0);
         });
@@ -591,7 +594,9 @@ contract('PerformanceFeeCalculator', accounts => {
             updatedETHPrice.mul(ether(1)).div(updatedETHPrice).round(0, 3)
           );
 
-          await blockchain.increaseTimeAsync(ONE_YEAR_IN_SECONDS);
+          timeElapsed = customTimeElapsed || ONE_YEAR_IN_SECONDS;
+
+          await blockchain.increaseTimeAsync(timeElapsed);
           await blockchain.mineBlockAsync();
         });
 
@@ -626,6 +631,20 @@ contract('PerformanceFeeCalculator', accounts => {
 
             const feeState: any = await feeCalculator.feeState.callAsync(rebalancingSetToken.address);
             expect(feeState.lastProfitFeeTimestamp).to.be.bignumber.equal(lastBlock.timestamp);
+          });
+
+          describe('when the profitFeePeriod has not elapsed', async () => {
+            before(async () => {
+              customTimeElapsed = ONE_DAY_IN_SECONDS;
+            });
+
+            after(async () => {
+              customTimeElapsed = undefined;
+            });
+
+            it('should revert', async () => {
+              await expectRevertError(subject());
+            });
           });
         });
 

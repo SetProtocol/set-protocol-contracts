@@ -122,12 +122,12 @@ export class RebalanceTestSetup {
     this._oracleHelper = new OracleHelper(this._contractOwnerAddress);
     this._feeCalculatorHelper = new FeeCalculatorHelper(this._contractOwnerAddress);
     this._valuationHelper = new ValuationHelper(
-      this._contractOwnerAddress, 
-      this._coreHelper, 
-      this._erc20Helper, 
+      this._contractOwnerAddress,
+      this._coreHelper,
+      this._erc20Helper,
       this._oracleHelper
     );
-    
+
     this._liquidatorHelper = new LiquidatorHelper(this._contractOwnerAddress, this._erc20Helper, this._valuationHelper);
   }
 

@@ -4,28 +4,23 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   PerformanceFeeCalculatorContract,
-  SetTokenContract,
   RebalancingSetTokenV3Contract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
-import { ether, gWei } from '@utils/units';
-import { AssetChunkSizeBounds } from '@utils/auction';
+import { ether } from '@utils/units';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
-  ONE_HOUR_IN_SECONDS,
   ONE_MONTH_IN_SECONDS,
   ONE_YEAR_IN_SECONDS,
   ZERO,
 } from '@utils/constants';
-import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
@@ -74,11 +69,11 @@ interface PerfFeeScenarios {
     timeElapsed: BigNumber;
     prices: PriceUpdate;
     newProfitFee: BigNumber;
-  }
+  };
 }
 
 interface CheckPoint {
-  rebalancingSetValue: BigNumber,
+  rebalancingSetValue: BigNumber;
   highWatermark: BigNumber;
   profitFeePercentage: BigNumber;
   lastProfitFeeTimestamp: BigNumber;
@@ -91,7 +86,7 @@ interface CheckPoint {
 const standardRebalancingSet: RebalancingSetDetails = {
   unitShares: new BigNumber(800000),
   naturalUnit: new BigNumber(100000000),
-  supply: new BigNumber('14256596210800000000000')
+  supply: new BigNumber('14256596210800000000000'),
 };
 
 const standardCurrentSet: SetDetails = {
@@ -120,8 +115,8 @@ const scenarios: PerfFeeScenarios[] = [
       prices: {
         component2Price: ether(9000),
       },
-      newProfitFee: ether(0.2)
-    }
+      newProfitFee: ether(0.2),
+    },
   },
   {
     name: 'Scenario 2',
@@ -135,8 +130,8 @@ const scenarios: PerfFeeScenarios[] = [
       prices: {
         component2Price: ether(9000),
       },
-      newProfitFee: ether(0.1)
-    }
+      newProfitFee: ether(0.1),
+    },
   },
   {
     name: 'Scenario 3',
@@ -150,8 +145,8 @@ const scenarios: PerfFeeScenarios[] = [
       prices: {
         component2Price: ether(9000),
       },
-      newProfitFee: ether(0.1)
-    }
+      newProfitFee: ether(0.1),
+    },
   },
   {
     name: 'Scenario 4',
@@ -165,8 +160,8 @@ const scenarios: PerfFeeScenarios[] = [
       prices: {
         component2Price: ether(9000),
       },
-      newProfitFee: ether(0.1)
-    }
+      newProfitFee: ether(0.1),
+    },
   },
   {
     name: 'Scenario 5',
@@ -180,8 +175,8 @@ const scenarios: PerfFeeScenarios[] = [
       prices: {
         component2Price: ether(11000),
       },
-      newProfitFee: ether(0.1)
-    }
+      newProfitFee: ether(0.1),
+    },
   },
   {
     name: 'Scenario 6',
@@ -195,8 +190,8 @@ const scenarios: PerfFeeScenarios[] = [
       prices: {
         component2Price: ether(11000),
       },
-      newProfitFee: ether(0.1)
-    }
+      newProfitFee: ether(0.1),
+    },
   },
   {
     name: 'Scenario 7',
@@ -210,8 +205,8 @@ const scenarios: PerfFeeScenarios[] = [
       prices: {
         component2Price: ether(11000),
       },
-      newProfitFee: ether(0.1)
-    }
+      newProfitFee: ether(0.1),
+    },
   },
   {
     name: 'Scenario 8',
@@ -225,8 +220,8 @@ const scenarios: PerfFeeScenarios[] = [
       prices: {
         component2Price: ether(9000),
       },
-      newProfitFee: ether(0.1)
-    }
+      newProfitFee: ether(0.1),
+    },
   },
   {
     name: 'Scenario 9',
@@ -240,38 +235,8 @@ const scenarios: PerfFeeScenarios[] = [
       prices: {
         component2Price: ether(9000),
       },
-      newProfitFee: ether(0.1)
-    }
-  },
-  {
-    name: 'Scenario 12',
-    rebalancingSet: standardRebalancingSet,
-    currentSet: standardCurrentSet,
-    components: standardComponentSetup,
-    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
-    profitFee: ether(0.00),
-    t1: {
-      timeElapsed: ZERO,
-      prices: {
-        component2Price: ether(11000),
-      },
-      newProfitFee: ether(0.1)
-    }
-  },
-  {
-    name: 'Scenario 13',
-    rebalancingSet: standardRebalancingSet,
-    currentSet: standardCurrentSet,
-    components: standardComponentSetup,
-    highWatermarkResetPeriod: ONE_YEAR_IN_SECONDS,
-    profitFee: ether(0.05),
-    t1: {
-      timeElapsed: ZERO,
-      prices: {
-        component2Price: ether(11000),
-      },
-      newProfitFee: ether(0.1)
-    }
+      newProfitFee: ether(0.1),
+    },
   },
 ];
 
@@ -354,12 +319,6 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
     it('should successfully complete 8', async () => {
         await runScenario(scenarios[8]);
     });
-    it('should successfully complete 9', async () => {
-        await runScenario(scenarios[9]);
-    });
-    it('should successfully complete 10', async () => {
-        await runScenario(scenarios[10]);
-    });
   });
 
   async function runScenario(scenario: PerfFeeScenarios): Promise<void> {
@@ -385,7 +344,7 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
     await printResults();
   }
 
-  async function checkPoint(num:number): Promise<void> {
+  async function checkPoint(num: number): Promise<void> {
     const rebalancingSetValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
       setup.rebalancingSetToken,
       setup.oracleWhiteList,
@@ -396,14 +355,14 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
     const feeRecipientShares = await setup.rebalancingSetToken.balanceOf.callAsync(feeRecipient);
 
     checkPoints[num] = {
-      rebalancingSetValue, 
+      rebalancingSetValue,
       highWatermark: new BigNumber(feeState['highWatermark']),
       profitFeePercentage: new BigNumber(feeState['profitFeePercentage']),
       lastProfitFeeTimestamp: new BigNumber(feeState['lastProfitFeeTimestamp']),
       unitShares,
       totalSupply,
       feeRecipientShares,
-    }
+    };
   }
 
   async function printResults(): Promise<void> {
@@ -422,8 +381,8 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
     console.log(`lastProfitFeeTimestamp Before: ${deScale(t0.lastProfitFeeTimestamp)}`);
     console.log(`lastProfitFeeTimestamp After: ${deScale(tN.lastProfitFeeTimestamp)}`);
 
-    console.log(`unitShares Before: ${deScale(t0.unitShares)}`);
-    console.log(`unitShares After: ${deScale(tN.unitShares)}`);
+    console.log(`unitShares Before: ${t0.unitShares}`);
+    console.log(`unitShares After: ${tN.unitShares}`);
 
     console.log(`totalSupply Before: ${deScale(t0.totalSupply)}`);
     console.log(`totalSupply After: ${deScale(tN.totalSupply)}`);
@@ -432,14 +391,14 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
     console.log(`feeRecipientShares After: ${deScale(tN.feeRecipientShares)}`);
 
     console.log(`======================== Results ==========================`);
-    console.log("Profit Fee Delta: ", tN.profitFeePercentage.sub(t0.profitFeePercentage).toString());
-    console.log("High Watermark Delta: ", tN.highWatermark.sub(t0.highWatermark).toString());
-    console.log("lastProfitFeeTS Delta: ", tN.lastProfitFeeTimestamp.sub(t0.lastProfitFeeTimestamp).toString());
+    console.log('Profit Fee Delta: ', tN.profitFeePercentage.sub(t0.profitFeePercentage).toString());
+    console.log('High Watermark Delta: ', tN.highWatermark.sub(t0.highWatermark).toString());
+    console.log('lastProfitFeeTS Delta: ', tN.lastProfitFeeTimestamp.sub(t0.lastProfitFeeTimestamp).toString());
     console.log(`==================================================`);
   }
 
   function deScale(v1: BigNumber): BigNumber {
-    return new BigNumber(v1).div(ether(1)).round(0, 3);
+    return new BigNumber(v1).div(ether(1)).round(2, 3);
   }
 
   // Sets up assets, creates and mints rebalancing set
@@ -492,6 +451,6 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
 
     await setup.setRebalancingSet(rebalancingSetToken);
 
-    await setup.mintRebalancingSets(scenario.rebalancingSet.supply);    
+    await setup.mintRebalancingSets(scenario.rebalancingSet.supply);
   }
 });

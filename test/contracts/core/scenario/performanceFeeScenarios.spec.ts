@@ -58,6 +58,12 @@ interface ComponentSettings {
   component2Decimals: number;
 }
 
+interface ScenarioAssertions {
+  profitFeeHasChanged: boolean;
+  highWaterMarkHasChanged: boolean;
+  lastProfitFeeTimestampHasChanged: boolean;
+}
+
 interface PerfFeeScenarios {
   name: string;
   rebalancingSet: RebalancingSetDetails;
@@ -70,6 +76,7 @@ interface PerfFeeScenarios {
     prices: PriceUpdate;
     newProfitFee: BigNumber;
   };
+  asserts: ScenarioAssertions;
 }
 
 interface CheckPoint {
@@ -81,6 +88,7 @@ interface CheckPoint {
   totalSupply: BigNumber;
   feeRecipientShares: BigNumber;
 }
+
 
 // ETH/BTC 50%/50% Set
 const standardRebalancingSet: RebalancingSetDetails = {
@@ -117,6 +125,11 @@ const scenarios: PerfFeeScenarios[] = [
       },
       newProfitFee: ether(0.2),
     },
+    asserts: {
+      profitFeeHasChanged: true,
+      highWaterMarkHasChanged: true,
+      lastProfitFeeTimestampHasChanged: true,
+    }
   },
   {
     name: 'Scenario 2',
@@ -132,6 +145,11 @@ const scenarios: PerfFeeScenarios[] = [
       },
       newProfitFee: ether(0.1),
     },
+    asserts: {
+      profitFeeHasChanged: true,
+      highWaterMarkHasChanged: true,
+      lastProfitFeeTimestampHasChanged: true,
+    }
   },
   {
     name: 'Scenario 3',
@@ -147,6 +165,11 @@ const scenarios: PerfFeeScenarios[] = [
       },
       newProfitFee: ether(0.1),
     },
+    asserts: {
+      profitFeeHasChanged: true,
+      highWaterMarkHasChanged: false,
+      lastProfitFeeTimestampHasChanged: false,
+    }
   },
   {
     name: 'Scenario 4',
@@ -162,6 +185,11 @@ const scenarios: PerfFeeScenarios[] = [
       },
       newProfitFee: ether(0.1),
     },
+    asserts: {
+      profitFeeHasChanged: true,
+      highWaterMarkHasChanged: false,
+      lastProfitFeeTimestampHasChanged: false,
+    }
   },
   {
     name: 'Scenario 5',
@@ -177,6 +205,11 @@ const scenarios: PerfFeeScenarios[] = [
       },
       newProfitFee: ether(0.1),
     },
+    asserts: {
+      profitFeeHasChanged: true,
+      highWaterMarkHasChanged: true,
+      lastProfitFeeTimestampHasChanged: true,
+    }
   },
   {
     name: 'Scenario 6',
@@ -192,6 +225,11 @@ const scenarios: PerfFeeScenarios[] = [
       },
       newProfitFee: ether(0.1),
     },
+    asserts: {
+      profitFeeHasChanged: true,
+      highWaterMarkHasChanged: true,
+      lastProfitFeeTimestampHasChanged: true,
+    }
   },
   {
     name: 'Scenario 7',
@@ -207,6 +245,11 @@ const scenarios: PerfFeeScenarios[] = [
       },
       newProfitFee: ether(0.1),
     },
+    asserts: {
+      profitFeeHasChanged: true,
+      highWaterMarkHasChanged: true,
+      lastProfitFeeTimestampHasChanged: true,
+    }
   },
   {
     name: 'Scenario 8',
@@ -222,6 +265,11 @@ const scenarios: PerfFeeScenarios[] = [
       },
       newProfitFee: ether(0.1),
     },
+    asserts: {
+      profitFeeHasChanged: true,
+      highWaterMarkHasChanged: false,
+      lastProfitFeeTimestampHasChanged: false,
+    }
   },
   {
     name: 'Scenario 9',
@@ -237,6 +285,11 @@ const scenarios: PerfFeeScenarios[] = [
       },
       newProfitFee: ether(0.1),
     },
+    asserts: {
+      profitFeeHasChanged: true,
+      highWaterMarkHasChanged: false,
+      lastProfitFeeTimestampHasChanged: false,
+    }
   },
 ];
 
@@ -342,6 +395,8 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
     await checkPoint(1);
 
     await printResults();
+
+    await runAssertions(scenario);
   }
 
   async function checkPoint(num: number): Promise<void> {
@@ -378,8 +433,8 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
     console.log(`profitFeePercentage Before: ${deScale(t0.profitFeePercentage)}`);
     console.log(`profitFeePercentage After: ${deScale(tN.profitFeePercentage)}`);
 
-    console.log(`lastProfitFeeTimestamp Before: ${deScale(t0.lastProfitFeeTimestamp)}`);
-    console.log(`lastProfitFeeTimestamp After: ${deScale(tN.lastProfitFeeTimestamp)}`);
+    console.log(`lastProfitFeeTimestamp Before: ${t0.lastProfitFeeTimestamp}`);
+    console.log(`lastProfitFeeTimestamp After: ${tN.lastProfitFeeTimestamp}`);
 
     console.log(`unitShares Before: ${t0.unitShares}`);
     console.log(`unitShares After: ${tN.unitShares}`);
@@ -399,6 +454,30 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
 
   function deScale(v1: BigNumber): BigNumber {
     return new BigNumber(v1).div(ether(1)).round(2, 3);
+  }
+
+  async function runAssertions(scenario: PerfFeeScenarios): Promise<void> {
+    const t0 = checkPoints[0];
+    const tN = checkPoints[checkPoints.length - 1];
+
+    const {
+      profitFeeHasChanged,
+      highWaterMarkHasChanged,
+      lastProfitFeeTimestampHasChanged,
+    } = scenario.asserts;
+
+    expectDelta(profitFeeHasChanged, tN.profitFeePercentage, t0.profitFeePercentage);
+    expectDelta(highWaterMarkHasChanged, tN.highWatermark, t0.highWatermark);
+    expectDelta(lastProfitFeeTimestampHasChanged, tN.lastProfitFeeTimestamp, t0.lastProfitFeeTimestamp);
+  }
+
+  function expectDelta(expectDelta: boolean, end: BigNumber, begin: BigNumber): void {
+    const delta = end.sub(begin).absoluteValue();
+    if (expectDelta) {
+      expect(delta).to.bignumber.be.gt(0);
+    } else {
+      expect(delta).to.bignumber.equal(0);
+    }
   }
 
   // Sets up assets, creates and mints rebalancing set

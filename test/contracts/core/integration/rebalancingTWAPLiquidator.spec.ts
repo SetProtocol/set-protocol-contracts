@@ -16,7 +16,7 @@ import {
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { ether, gWei } from '@utils/units';
-import { AssetChunkSizeBounds } from '@utils/auction';
+import { AssetPairVolumeBounds } from '@utils/auction';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
@@ -60,8 +60,7 @@ contract('RebalancingSetV3 - TWAPLiquidator', accounts => {
   let rangeStart: BigNumber;
   let rangeEnd: BigNumber;
 
-  let assetPairHashes: string[];
-  let assetPairBounds: AssetChunkSizeBounds[];
+  let assetPairVolumeBounds: AssetPairVolumeBounds[];
 
   let currentSetToken: SetTokenContract;
   let nextSetToken: SetTokenContract;
@@ -131,13 +130,17 @@ contract('RebalancingSetV3 - TWAPLiquidator', accounts => {
     rangeEnd = new BigNumber(21); // 21% below fair value
     name = 'liquidator';
 
-    assetPairHashes = [
-      liquidatorHelper.generateAssetPairHashes(scenario.component1.address, scenario.component2.address),
-      liquidatorHelper.generateAssetPairHashes(scenario.component2.address, scenario.component3.address),
-    ];
-    assetPairBounds = [
-      {min: ZERO, max: ether(10 ** 10)},
-      {min: ZERO, max: ether(10 ** 10)},
+    assetPairVolumeBounds = [
+      {
+        assetOne: scenario.component1.address,
+        assetTwo: scenario.component2.address,
+        bounds: {min: ZERO, max: ether(10 ** 10)},
+      },
+      {
+        assetOne: scenario.component2.address,
+        assetTwo: scenario.component3.address,
+        bounds: {min: ZERO, max: ether(10 ** 10)},
+      },
     ];
 
     liquidator = await liquidatorHelper.deployTWAPLiquidatorAsync(
@@ -146,8 +149,7 @@ contract('RebalancingSetV3 - TWAPLiquidator', accounts => {
       auctionPeriod,
       rangeStart,
       rangeEnd,
-      assetPairHashes,
-      assetPairBounds,
+      assetPairVolumeBounds,
       name,
     );
     await coreHelper.addAddressToWhiteList(liquidator.address, scenario.liquidatorWhitelist);

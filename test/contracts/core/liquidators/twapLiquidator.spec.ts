@@ -16,7 +16,7 @@ import {
 import { getSubjectTimestamp, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
-import { AssetChunkSizeBounds } from '@utils/auction';
+import { AssetChunkSizeBounds, AssetPairVolumeBounds } from '@utils/auction';
 import {
   DEFAULT_GAS,
   ZERO,
@@ -73,8 +73,7 @@ contract('TWAPLiquidator', accounts => {
   let rangeStart: BigNumber;
   let rangeEnd: BigNumber;
   let oracleWhiteList: OracleWhiteListContract;
-  let assetPairHashes: string[];
-  let assetPairBounds: AssetChunkSizeBounds[];
+  let assetPairVolumeBounds: AssetPairVolumeBounds[];
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -87,13 +86,18 @@ contract('TWAPLiquidator', accounts => {
     rangeEnd = new BigNumber(21); // 21% above fair value
     name = 'liquidator';
     oracleWhiteList = scenario.oracleWhiteList;
-    assetPairHashes = [
-      liquidatorHelper.generateAssetPairHashes(scenario.component1.address, scenario.component2.address),
-      liquidatorHelper.generateAssetPairHashes(scenario.component2.address, scenario.component3.address),
-    ];
-    assetPairBounds = [
-      {min: ether(10 ** 4), max: ether(10 ** 6)},
-      {min: ZERO, max: ether(10 ** 6)},
+
+    assetPairVolumeBounds = [
+      {
+        assetOne: scenario.component1.address,
+        assetTwo: scenario.component2.address,
+        bounds: {min: ether(10 ** 4), max: ether(10 ** 6)},
+      },
+      {
+        assetOne: scenario.component2.address,
+        assetTwo: scenario.component3.address,
+        bounds: {min: ZERO, max: ether(10 ** 6)},
+      },
     ];
 
     liquidator = await liquidatorHelper.deployTWAPLiquidatorAsync(
@@ -102,8 +106,7 @@ contract('TWAPLiquidator', accounts => {
       auctionPeriod,
       rangeStart,
       rangeEnd,
-      assetPairHashes,
-      assetPairBounds,
+      assetPairVolumeBounds,
       name,
     );
 
@@ -164,14 +167,20 @@ contract('TWAPLiquidator', accounts => {
     });
 
     it('sets the correct chunk whitelist values', async () => {
-      const bounds1 = await liquidator.chunkSizeWhiteList.callAsync(assetPairHashes[0]);
-      const bounds2 = await liquidator.chunkSizeWhiteList.callAsync(assetPairHashes[1]);
+      const bounds1 = await liquidator.chunkSizeWhiteList.callAsync(
+        assetPairVolumeBounds[0].assetOne,
+        assetPairVolumeBounds[0].assetTwo,
+      );
+      const bounds2 = await liquidator.chunkSizeWhiteList.callAsync(
+        assetPairVolumeBounds[1].assetOne,
+        assetPairVolumeBounds[1].assetTwo,
+      );
 
-      expect(bounds1['min']).to.bignumber.equal(assetPairBounds[0]['min']);
-      expect(bounds1['max']).to.bignumber.equal(assetPairBounds[0]['max']);
+      expect(bounds1['min']).to.bignumber.equal(assetPairVolumeBounds[0]['min']);
+      expect(bounds1['max']).to.bignumber.equal(assetPairVolumeBounds[0]['max']);
 
-      expect(bounds2['min']).to.bignumber.equal(assetPairBounds[1]['min']);
-      expect(bounds2['max']).to.bignumber.equal(assetPairBounds[1]['max']);
+      expect(bounds2['min']).to.bignumber.equal(assetPairVolumeBounds[1]['min']);
+      expect(bounds2['max']).to.bignumber.equal(assetPairVolumeBounds[1]['max']);
     });
 
     it('sets the correct expected chunk auction length', async () => {
@@ -962,7 +971,6 @@ contract('TWAPLiquidator', accounts => {
     let subjectAsset2: Address;
     let subjectAssetPairBounds: AssetChunkSizeBounds;
 
-    let pairHash: string;
     beforeEach(async () => {
       subjectCaller = ownerAccount;
       subjectAsset1 = scenario.component1.address;
@@ -990,7 +998,10 @@ contract('TWAPLiquidator', accounts => {
     it('sets the correct chunkAuction parameters', async () => {
       await subject();
 
-      const bounds = await liquidator.chunkSizeWhiteList.callAsync(pairHash);
+      const bounds = await liquidator.chunkSizeWhiteList.callAsync(
+        subjectAsset1,
+        subjectAsset2,
+      );
 
       expect(bounds['min']).to.bignumber.equal(subjectAssetPairBounds['min']);
       expect(bounds['max']).to.bignumber.equal(subjectAssetPairBounds['max']);

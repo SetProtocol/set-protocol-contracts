@@ -107,10 +107,12 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         )
     {
         for (uint256 i = 0; i < _assetPairVolumeBounds.length; i++) {
-            require(
-                _assetPairVolumeBounds[i].bounds.isValid(),
-                "TWAPAuction.constructor: Passed asset pair bounds are invalid."
-            );
+            BoundsLibrary.Bounds memory bounds = _assetPairVolumeBounds[i].bounds;
+
+            // require(
+            //     bounds.isValid(),
+            //     "TWAPAuction.constructor: Passed asset pair bounds are invalid."
+            // );
 
             address assetOne = _assetPairVolumeBounds[i].assetOne;
             address assetTwo = _assetPairVolumeBounds[i].assetTwo;
@@ -120,15 +122,15 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
                 "TWAPAuction.constructor: Asset pair volume bounds must be unique."
             );
 
-            chunkSizeWhiteList[assetOne][assetTwo] = _assetPairVolumeBounds[i].bounds;
-            chunkSizeWhiteList[assetTwo][assetOne] = _assetPairVolumeBounds[i].bounds;
+            chunkSizeWhiteList[assetOne][assetTwo] = bounds;
+            chunkSizeWhiteList[assetTwo][assetOne] = bounds;
         }
 
         // Expected length of a chunk auction, assuming the auction goes 2% beyond initial fair
         // value. Used to validate TWAP Auction length won't exceed Set's rebalanceFailPeriod.
-        expectedChunkAuctionLength = _auctionPeriod
-            .mul(_rangeStart.add(AUCTION_COMPLETION_BUFFER))
-            .div(_rangeStart.add(_rangeEnd));
+        // expectedChunkAuctionLength = _auctionPeriod
+        //     .mul(_rangeStart.add(AUCTION_COMPLETION_BUFFER))
+        //     .div(_rangeStart.add(_rangeEnd));
     }
 
     /* ============ Internal Functions ============ */

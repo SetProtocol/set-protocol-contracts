@@ -35,7 +35,7 @@ import {
   ONE_DAY_IN_SECONDS,
 } from '../constants';
 import {
-  AssetChunkSizeBounds,
+  AssetPairVolumeBounds,
   LinearAuction,
   TokenFlow
 } from '../auction';
@@ -198,8 +198,7 @@ export class LiquidatorHelper {
     auctionPeriod: BigNumber,
     rangeStart: BigNumber,
     rangeEnd: BigNumber,
-    assetPairHashes: string[],
-    assetPairBounds: AssetChunkSizeBounds[],
+    assetPairBounds: AssetPairVolumeBounds[],
     name: string,
     from: Address = this._contractOwnerAddress
   ): Promise<TWAPLiquidatorContract> {
@@ -214,7 +213,6 @@ export class LiquidatorHelper {
       auctionPeriod,
       rangeStart,
       rangeEnd,
-      assetPairHashes,
       assetPairBoundsStr,
       name,
       txnFrom(from)
@@ -252,8 +250,7 @@ export class LiquidatorHelper {
     auctionPeriod: BigNumber,
     rangeStart: BigNumber,
     rangeEnd: BigNumber,
-    assetPairHashes: string[],
-    assetPairBounds: AssetChunkSizeBounds[],
+    assetPairBounds: AssetPairVolumeBounds[],
     from: Address = this._contractOwnerAddress
   ): Promise<TWAPAuctionMockContract> {
     const assetPairBoundsStr = [];
@@ -266,7 +263,6 @@ export class LiquidatorHelper {
       auctionPeriod,
       rangeStart,
       rangeEnd,
-      assetPairHashes,
       assetPairBoundsStr,
       txnFrom(from)
     );

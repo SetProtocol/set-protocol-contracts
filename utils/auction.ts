@@ -40,8 +40,8 @@ export interface AssetPairVolumeBounds {
 }
 
 export interface AssetChunkSizeBounds {
-  min: BigNumber;
-  max: BigNumber;
+  lower: BigNumber;
+  upper: BigNumber;
 }
 
 export function getLinearAuction(input: any): LinearAuction {

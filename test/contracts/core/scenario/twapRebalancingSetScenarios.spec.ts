@@ -11,19 +11,16 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   TWAPLiquidatorContract,
-  SetTokenContract,
   RebalancingSetTokenV3Contract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
-import { ether, gWei } from '@utils/units';
-import { AssetChunkSizeBounds } from '@utils/auction';
+import { ether } from '@utils/units';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
   ONE_HOUR_IN_SECONDS,
   ZERO,
 } from '@utils/constants';
-import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
@@ -85,7 +82,7 @@ const scenarios: TWAPScenario[] = [
     rebalancingSet: {
       unitShares: new BigNumber(2076796),
       naturalUnit: new BigNumber(1000000),
-      supply: new BigNumber('20556237207015075000000')
+      supply: new BigNumber('20556237207015075000000'),
     },
     currentSet: {
       components: ['component1'], // ETH
@@ -107,14 +104,14 @@ const scenarios: TWAPScenario[] = [
       chunkSize: ether(2000000),
       chunkAuctionPeriod: new BigNumber(0),
       expectedAuctions: 5,
-    }
+    },
   },
   {
     name: 'ETHBTC Set Rebalances 100% WETH to 50% WETH/WBTC',
     rebalancingSet: {
       unitShares: new BigNumber(799797),
       naturalUnit: new BigNumber(100000000),
-      supply: new BigNumber('14256596210800000000000')
+      supply: new BigNumber('14256596210800000000000'),
     },
     currentSet: {
       components: ['component1'], // WETH
@@ -136,14 +133,14 @@ const scenarios: TWAPScenario[] = [
       chunkSize: ether(1000000),
       chunkAuctionPeriod: new BigNumber(0),
       expectedAuctions: 2,
-    }
+    },
   },
   {
     name: 'ETH RSI Yield 100% ETH to 100% cUSDC $5M - 5/13/2020',
     rebalancingSet: {
       unitShares: new BigNumber(557211),
       naturalUnit: new BigNumber(1000000),
-      supply: new BigNumber('21753937919075000000000')
+      supply: new BigNumber('21753937919075000000000'),
     },
     currentSet: {
       components: ['component1'], // WETH
@@ -165,14 +162,14 @@ const scenarios: TWAPScenario[] = [
       chunkSize: ether(1000000),
       chunkAuctionPeriod: new BigNumber(0),
       expectedAuctions: 6,
-    }
+    },
   },
   {
     name: 'WBTC 100% WETH to 50/50% wBTC/cUSDC #706',
     rebalancingSet: {
       unitShares: new BigNumber(296562),
       naturalUnit: new BigNumber(100000000),
-      supply: new BigNumber('37566900000000000000')
+      supply: new BigNumber('37566900000000000000'),
     },
     currentSet: {
       components: ['component1'], // cUSDC
@@ -194,8 +191,8 @@ const scenarios: TWAPScenario[] = [
       chunkSize: ether(1000000),
       chunkAuctionPeriod: new BigNumber(0),
       expectedAuctions: 1,
-    }
-  }
+    },
+  },
 ];
 
 
@@ -203,7 +200,6 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   const [
     deployerAccount,
     managerAccount,
-    otherAccount,
     feeRecipient,
   ] = accounts;
 
@@ -211,10 +207,10 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
 
   let liquidator: TWAPLiquidatorContract;
 
-  let name: string = 'liquidator';
-  let auctionPeriod: BigNumber = ONE_HOUR_IN_SECONDS.mul(4);
-  let rangeStart: BigNumber = new BigNumber(1);
-  let rangeEnd: BigNumber = new BigNumber(21);
+  const name: string = 'liquidator';
+  const auctionPeriod: BigNumber = ONE_HOUR_IN_SECONDS.mul(4);
+  const rangeStart: BigNumber = new BigNumber(1);
+  const rangeEnd: BigNumber = new BigNumber(21);
 
   let setup: RebalanceTestSetup;
 
@@ -295,7 +291,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
 
     const currentSetQuantity = scenario.rebalancingSet.supply
                             .mul(unitShares)
-                            .div(naturalUnit)
+                            .div(naturalUnit);
 
     const volume = await liquidatorHelper.calculateRebalanceVolumeAsync(
       setup.set1,
@@ -309,9 +305,11 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
       setup.oracleWhiteList
     );
 
-    console.log("RB Set Market Cap ", setValue.mul(scenario.rebalancingSet.supply).div(10 ** 18).round(0, 3).toString());    
+    console.log(
+      'RB Set Market Cap ', setValue.mul(scenario.rebalancingSet.supply).div(10 ** 18).round(0, 3).toString()
+    );
 
-    console.log("Rebalance volume", volume.div(10 ** 18).round(0, 3).toString());
+    console.log('Rebalance volume', volume.div(10 ** 18).round(0, 3).toString());
 
     const liquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(chunkSize, chunkAuctionPeriod);
     await rebalancingHelper.transitionToRebalanceV2Async(
@@ -322,10 +320,10 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
       managerAccount,
       liquidatorData,
     );
-    
+
     // Loop through number of auctions
     for (let i = 0; i < expectedAuctions; i++) {
-      console.log("Auction ", i);
+      console.log('Auction ', i);
 
       const timeToFV = ONE_HOUR_IN_SECONDS.div(6);
       await blockchain.increaseTimeAsync(timeToFV);
@@ -368,11 +366,17 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
       set2NaturalUnit: scenario.nextSet.naturalUnit,
     });
 
-    const assetPairHashes: string[] = [
-      liquidatorHelper.generateAssetPairHashes(setup.component1.address, setup.component2.address),
-    ];
-    const assetPairBounds: AssetChunkSizeBounds[] = [
-      {min: ZERO, max: ether(10 ** 10)},
+    const assetPairVolumeBounds = [
+      {
+        assetOne: scenario.component1.address,
+        assetTwo: scenario.component2.address,
+        bounds: {lower: ether(10 ** 4), upper: ether(10 ** 6)},
+      },
+      {
+        assetOne: scenario.component2.address,
+        assetTwo: scenario.component3.address,
+        bounds: {lower: ZERO, upper: ether(10 ** 6)},
+      },
     ];
 
     liquidator = await liquidatorHelper.deployTWAPLiquidatorAsync(
@@ -381,8 +385,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
       auctionPeriod,
       rangeStart,
       rangeEnd,
-      assetPairHashes,
-      assetPairBounds,
+      assetPairVolumeBounds,
       name,
     );
     await coreHelper.addAddressToWhiteList(liquidator.address, setup.liquidatorWhitelist);
@@ -406,7 +409,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
 
     await setup.setRebalancingSet(rebalancingSetToken);
 
-    await setup.mintRebalancingSets(scenario.rebalancingSet.supply);    
+    await setup.mintRebalancingSets(scenario.rebalancingSet.supply);
   }
 
   async function getMaxBiddableQuantity(rebalancingSetTokenAddress: Address): Promise<BigNumber> {

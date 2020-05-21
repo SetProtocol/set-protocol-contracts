@@ -54,7 +54,8 @@ contract TWAPAuctionMock is TWAPAuction {
         ISetToken _currentSet,
         ISetToken _nextSet,
         uint256 _startingCurrentSetQuantity,
-        TWAPAuction.TWAPLiquidatorData calldata _liquidatorData
+        uint256 _chunkSizeValue,
+        uint256 _chunkAuctionPeriod
     )
         external
     {
@@ -63,7 +64,8 @@ contract TWAPAuctionMock is TWAPAuction {
             _currentSet,
             _nextSet,
             _startingCurrentSetQuantity,
-            _liquidatorData
+            _chunkSizeValue,
+            _chunkAuctionPeriod
         );
     }
 
@@ -78,7 +80,7 @@ contract TWAPAuctionMock is TWAPAuction {
     )
         external
         pure
-        returns (TWAPAuction.TWAPLiquidatorData memory)
+        returns (uint256, uint256)
     {
         return TWAPAuction.parseLiquidatorData(_liquidatorData);
     }
@@ -87,7 +89,8 @@ contract TWAPAuctionMock is TWAPAuction {
         ISetToken _currentSet,
         ISetToken _nextSet,
         uint256 _startingCurrentSetQuantity,
-        TWAPLiquidatorData calldata _liquidatorData
+        uint256 _chunkSizeValue,
+        uint256 _chunkAuctionPeriod
     )
         external
     {
@@ -95,7 +98,8 @@ contract TWAPAuctionMock is TWAPAuction {
             _currentSet,
             _nextSet,
             _startingCurrentSetQuantity,
-            _liquidatorData
+            _chunkSizeValue,
+            _chunkAuctionPeriod
         );
     }
 

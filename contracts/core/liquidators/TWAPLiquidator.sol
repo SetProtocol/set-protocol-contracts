@@ -49,6 +49,20 @@ contract TWAPLiquidator is
 {
     using SafeMath for uint256;
 
+    /* ============ Events ============ */
+    event ChunkAuctionIterated(
+        address indexed rebalancingSetToken,
+        uint256 orderRemaining,
+        uint256 startingCurrentSets
+    );
+
+    event ChunkSizeBoundUpdated(
+        address assetOne,
+        address assetTwo,
+        uint256 lowerBound,
+        uint256 upperBound
+    );
+
     ICore public core;
     string public name;
     // Maps RebalancingSetToken to it's auction state
@@ -69,8 +83,8 @@ contract TWAPLiquidator is
      * @param _core                     Core instance
      * @param _oracleWhiteList          Oracle WhiteList instance
      * @param _auctionPeriod            Length of auction in seconds
-     * @param _rangeStart               Percentage above FairValue to begin auction at
-     * @param _rangeEnd                 Percentage below FairValue to end auction at
+     * @param _rangeStart               Percentage above FairValue to begin auction at in 18 decimal value
+     * @param _rangeEnd                 Percentage below FairValue to end auction at in 18 decimal value
      * @param _assetPairVolumeBounds    List of asset pair USD-denominated chunk auction size bounds
      * @param _name                     Descriptive name of Liquidator
      */
@@ -122,14 +136,18 @@ contract TWAPLiquidator is
         );
 
         // Retrieve the chunk auction size and auction period from liquidator data.
-        TWAPAuction.TWAPLiquidatorData memory twapLiquidatorData = TWAPAuction.parseLiquidatorData(_liquidatorData);
+        (
+            uint256 chunkAuctionValue,
+            uint256 chunkAuctionPeriod
+        ) = TWAPAuction.parseLiquidatorData(_liquidatorData);
 
         // Chunk size must be within bounds and total rebalance length must be below fail auction time
         TWAPAuction.validateLiquidatorData(
             _currentSet,
             _nextSet,
             _startingCurrentSetQuantity,
-            twapLiquidatorData
+            chunkAuctionValue,
+            chunkAuctionPeriod
         );
 
         // Initializes TWAP Auction and commits to TWAP state
@@ -138,7 +156,8 @@ contract TWAPLiquidator is
             _currentSet,
             _nextSet,
             _startingCurrentSetQuantity,
-            twapLiquidatorData
+            chunkAuctionValue,
+            chunkAuctionPeriod
         );
     }
 
@@ -180,6 +199,12 @@ contract TWAPLiquidator is
         validateNextChunkAuction(twapAuction);
 
         auctionNextChunk(twapAuction);
+
+        emit ChunkAuctionIterated(
+            _set,
+            twapAuction.orderRemaining,
+            twapAuction.chunkAuction.auction.startingCurrentSets
+        );
     }
 
     /**
@@ -241,6 +266,13 @@ contract TWAPLiquidator is
 
         chunkSizeWhiteList[_assetOne][_assetTwo] = _assetPairVolumeBounds;
         chunkSizeWhiteList[_assetTwo][_assetOne] = _assetPairVolumeBounds;
+
+        emit ChunkSizeBoundUpdated(
+            _assetOne,
+            _assetTwo,
+            _assetPairVolumeBounds.lower,
+            _assetPairVolumeBounds.upper
+        );
     }
 
     /* ============ Getters Functions ============ */
@@ -264,7 +296,7 @@ contract TWAPLiquidator is
 
     /* ============ Private Functions ============ */
 
-    function clearAuctionState(address _set) private {
+    function clearAuctionState(address _set) internal {
         delete auctions[_set];
     }
 

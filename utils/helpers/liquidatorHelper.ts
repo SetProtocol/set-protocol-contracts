@@ -29,7 +29,6 @@ import {
 } from '../web3Helper';
 import {
   AUCTION_CURVE_DENOMINATOR,
-  ONE_HUNDRED,
   SCALE_FACTOR,
   ZERO,
   ONE_DAY_IN_SECONDS,
@@ -455,9 +454,9 @@ export class LiquidatorHelper {
 
     let startPairPrice: BigNumber;
     if (tokenFlowIncreasing) {
-      startPairPrice = assetPairPrice.mul(ONE_HUNDRED.sub(startBound)).div(ONE_HUNDRED);
+      startPairPrice = assetPairPrice.mul(ether(1).sub(startBound)).div(ether(1));
     } else {
-      startPairPrice = assetPairPrice.mul(ONE_HUNDRED.add(startBound)).div(ONE_HUNDRED);
+      startPairPrice = assetPairPrice.mul(ether(1).add(startBound)).div(ether(1));
     }
 
     const startValue = this.calculateAuctionBound(
@@ -491,9 +490,9 @@ export class LiquidatorHelper {
 
     let endPairPrice: BigNumber;
     if (tokenFlowIncreasing) {
-      endPairPrice = assetPairPrice.mul(ONE_HUNDRED.add(endBound)).div(ONE_HUNDRED);
+      endPairPrice = assetPairPrice.mul(ether(1).add(endBound)).div(ether(1));
     } else {
-      endPairPrice = assetPairPrice.mul(ONE_HUNDRED.sub(endBound)).div(ONE_HUNDRED);
+      endPairPrice = assetPairPrice.mul(ether(1).sub(endBound)).div(ether(1));
     }
 
     const endValue = this.calculateAuctionBound(

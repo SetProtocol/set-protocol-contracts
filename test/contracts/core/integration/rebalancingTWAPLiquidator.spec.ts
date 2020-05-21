@@ -134,12 +134,12 @@ contract('RebalancingSetV3 - TWAPLiquidator', accounts => {
       {
         assetOne: scenario.component1.address,
         assetTwo: scenario.component2.address,
-        bounds: {min: ZERO, max: ether(10 ** 10)},
+        bounds: {lower: ZERO, upper: ether(10 ** 10)},
       },
       {
         assetOne: scenario.component2.address,
         assetTwo: scenario.component3.address,
-        bounds: {min: ZERO, max: ether(10 ** 10)},
+        bounds: {lower: ZERO, upper: ether(10 ** 10)},
       },
     ];
 

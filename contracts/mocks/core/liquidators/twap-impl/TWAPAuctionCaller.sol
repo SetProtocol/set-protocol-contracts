@@ -24,7 +24,8 @@ contract TWAPAuctionCaller {
         ISetToken _currentSet,
         ISetToken _nextSet,
         uint256 _startingCurrentSetQuantity,
-        TWAPAuction.TWAPLiquidatorData memory _liquidatorData
+        uint256 _chunkSizeValue,
+        uint256 _chunkAuctionPeriod
     )
         public
     {
@@ -32,7 +33,8 @@ contract TWAPAuctionCaller {
             _currentSet,
             _nextSet,
             _startingCurrentSetQuantity,
-            _liquidatorData
+            _chunkSizeValue,
+            _chunkAuctionPeriod
         );
     }
 }
@@ -42,7 +44,8 @@ interface ITWAPAuction{
         ISetToken _currentSet,
         ISetToken _nextSet,
         uint256 _startingCurrentSetQuantity,
-        TWAPAuction.TWAPLiquidatorData calldata _liquidatorData
+        uint256 _chunkSizeValue,
+        uint256 _chunkAuctionPeriod
     )
         external;
 }

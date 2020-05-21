@@ -107,8 +107,8 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
     );
 
     auctionPeriod = new BigNumber(14400); // 4 hours
-    rangeStart = new BigNumber(3); // 3%
-    rangeEnd = new BigNumber(21); // 21%
+    rangeStart = ether(.03); // 3%
+    rangeEnd = ether(.21); // 21%
 
     boundsCalculator = await liquidatorHelper.deployTwoAssetPriceBoundedLinearAuctionMock(
       oracleWhiteList.address,
@@ -434,7 +434,7 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
         rangeEnd,
         oracleWhiteList,
       );
-
+      console.log(expectedResult, result);
       expect(result).to.bignumber.equal(expectedResult);
     });
 
@@ -447,7 +447,7 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
         rangeEnd,
         oracleWhiteList,
       );
-
+      console.log(expectedResult, result);
       expect(result).to.bignumber.equal(expectedResult);
     });
   });
@@ -502,7 +502,7 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
         rangeEnd,
         oracleWhiteList
       );
-
+      console.log(actualStartBound);
       expect(actualStartBound).to.bignumber.equal(expectedStartBound);
     });
 

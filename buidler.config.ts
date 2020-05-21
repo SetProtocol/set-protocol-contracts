@@ -14,7 +14,7 @@ const config: BuidlerConfig = {
   },
   paths: {
   	artifacts: './build/contracts',
-  	tests: './transpiled/test/contracts'
+  	tests: './test/contracts'
   },
   networks: {
 	  buidlerevm: {

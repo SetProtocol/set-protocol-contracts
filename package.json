@@ -21,6 +21,8 @@
     "clean-chain": "rm -rf blockchain && cp -r snapshots/0x-Kyber-Compound blockchain",
     "buidler-new": "yarn buidler clean && yarn buidler-test",
     "buidler-test": "yarn buidler-setup && buidler test  transpiled/test/contracts/core/[x].spec.js",
+    "buidler-test-ts": "yarn buidler-setup-ts && buidler test",
+    "buidler-setup-ts": "buidler compile && bash scripts/buidler_deploy_dev.sh && yarn transformJson && yarn generate-typings",
     "buidler-setup": "buidler compile && bash scripts/buidler_deploy_dev.sh && yarn transformJson && yarn generate-typings && yarn transpile",
     "compile": "./node_modules/.bin/truffle compile --all",
     "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup",
@@ -89,7 +91,7 @@
     "solc": "^0.5.4",
     "solidity-coverage": "^0.6.3",
     "truffle": "^5.1.12",
-    "tslint": "^5.8.0",
+    "tslint": "^5.11.0",
     "tslint-no-unused-expression-chai": "0.0.3",
     "types-ethereumjs-util": "^0.0.5",
     "typescript": "^3.3.1"

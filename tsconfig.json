@@ -4,7 +4,7 @@
     "sourceMap": true,
     "noImplicitAny": false,
     "resolveJsonModule": true,
-    "lib": ["dom", "es2015", "es2016", "es2017"],
+    "lib": ["dom", "es2015", "es2016", "es2017", "es2018"],
     "module": "commonjs",
     "baseUrl": ".",
     "moduleResolution": "node",
@@ -12,7 +12,7 @@
         "@utils/*": [ "utils/*" ]
     },
     "rootDir": ".",
-    "target": "es5",
+    "target": "es6",
     "allowJs": true,
     "typeRoots": [
       "node_modules/@0xproject/types",
@@ -26,7 +26,8 @@
     "artifacts/ts/*.ts",
     "types/*.ts",
     "utils/**/*.ts",
-    "test/**/*.ts"
+    "test/**/*.ts",
+    "**/*.spec.ts"
   ],
   "files": [
     "./buidler.config.ts",

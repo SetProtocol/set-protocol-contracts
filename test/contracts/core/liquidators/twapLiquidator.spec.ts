@@ -189,6 +189,7 @@ contract('TWAPLiquidator', accounts => {
   describe('#startRebalance', async () => {
     let usdChunkSize: BigNumber;
     let chunkAuctionPeriod: BigNumber;
+    let linearAuction: LinearAuction;
 
     let subjectCaller: Address;
     let subjectCurrentSet: Address;
@@ -213,6 +214,39 @@ contract('TWAPLiquidator', accounts => {
         usdChunkSize,
         chunkAuctionPeriod,
       );
+
+      const maxNaturalUnit = BigNumber.max(
+        await scenario.set1.naturalUnit.callAsync(),
+        await scenario.set2.naturalUnit.callAsync()
+      );
+
+      const combinedTokenArray: Address[] = _.union(scenario.set1Components, scenario.set2Components);
+      const combinedCurrentSetUnits = await liquidatorHelper.constructCombinedUnitArrayAsync(
+        scenario.set1,
+        combinedTokenArray,
+        maxNaturalUnit,
+      );
+      const combinedNextSetUnits = await liquidatorHelper.constructCombinedUnitArrayAsync(
+        scenario.set2,
+        combinedTokenArray,
+        maxNaturalUnit,
+      );
+
+      linearAuction = {
+        auction: {
+          maxNaturalUnit,
+          minimumBid: new BigNumber(0),
+          startTime: new BigNumber(0),
+          startingCurrentSets: new BigNumber(0),
+          remainingCurrentSets: new BigNumber(0),
+          combinedTokenArray,
+          combinedCurrentSetUnits,
+          combinedNextSetUnits,
+        },
+        endTime: new BigNumber(0),
+        startPrice: new BigNumber(0),
+        endPrice: new BigNumber(0),
+      };
     });
 
     async function subject(): Promise<string> {
@@ -238,40 +272,9 @@ contract('TWAPLiquidator', accounts => {
     it('sets the correct auction parameters', async () => {
       await subject();
 
-      const maxNaturalUnit = BigNumber.max(
-        await scenario.set1.naturalUnit.callAsync(),
-        await scenario.set2.naturalUnit.callAsync()
-      );
+      const { auction } = linearAuction;
 
-      const combinedTokenArray: Address[] = _.union(scenario.set1Components, scenario.set2Components);
-      const combinedCurrentSetUnits = await liquidatorHelper.constructCombinedUnitArrayAsync(
-        scenario.set1,
-        combinedTokenArray,
-        maxNaturalUnit,
-      );
-      const combinedNextSetUnits = await liquidatorHelper.constructCombinedUnitArrayAsync(
-        scenario.set2,
-        combinedTokenArray,
-        maxNaturalUnit,
-      );
-
-      const linearAuction: LinearAuction = {
-        auction: {
-          maxNaturalUnit,
-          minimumBid: new BigNumber(0),
-          startTime: new BigNumber(0),
-          startingCurrentSets: new BigNumber(0),
-          remainingCurrentSets: new BigNumber(0),
-          combinedTokenArray,
-          combinedCurrentSetUnits,
-          combinedNextSetUnits,
-        },
-        endTime: new BigNumber(0),
-        startPrice: new BigNumber(0),
-        endPrice: new BigNumber(0),
-      };
-
-      const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+      const chunkSize = await liquidatorHelper.calculateChunkSize(
         scenario.set1,
         scenario.set2,
         oracleWhiteList,
@@ -293,17 +296,19 @@ contract('TWAPLiquidator', accounts => {
         scenario.component1Price.div(scenario.component2Price)
       );
 
+      const expectedChunkSize = chunkSize.div(expectedMinimumBid).round(0, 3).mul(expectedMinimumBid);
+
       const minimumBid =  await liquidator.minimumBid.callAsync(liquidatorProxy.address);
       expect(minimumBid).to.be.bignumber.equal(expectedMinimumBid);
 
       const combinedArray =  await liquidator.getCombinedTokenArray.callAsync(liquidatorProxy.address);
-      expect(JSON.stringify(combinedArray)).to.equal(JSON.stringify(combinedTokenArray));
+      expect(JSON.stringify(combinedArray)).to.equal(JSON.stringify(auction.combinedTokenArray));
 
       const combinedCurrentUnits =  await liquidator.getCombinedCurrentSetUnits.callAsync(liquidatorProxy.address);
-      expect(JSON.stringify(combinedCurrentUnits)).to.equal(JSON.stringify(combinedCurrentSetUnits));
+      expect(JSON.stringify(combinedCurrentUnits)).to.equal(JSON.stringify(auction.combinedCurrentSetUnits));
 
       const combinedNextUnits =  await liquidator.getCombinedNextSetUnits.callAsync(liquidatorProxy.address);
-      expect(JSON.stringify(combinedNextUnits)).to.equal(JSON.stringify(combinedNextSetUnits));
+      expect(JSON.stringify(combinedNextUnits)).to.equal(JSON.stringify(auction.combinedNextSetUnits));
 
       const remainingCurrentSets =  await liquidator.remainingCurrentSets.callAsync(liquidatorProxy.address);
       expect(remainingCurrentSets).to.be.bignumber.equal(expectedChunkSize);
@@ -319,23 +324,39 @@ contract('TWAPLiquidator', accounts => {
     it('sets the correct orderSize', async () => {
       await subject();
 
+      const expectedMinimumBid = await liquidatorHelper.calculateMinimumBidAsync(
+        linearAuction,
+        scenario.set1,
+        scenario.set2,
+        scenario.component1Price.div(scenario.component2Price)
+      );
+      const orderSize = subjectStartingCurrentSets.div(expectedMinimumBid).round(0, 3).mul(expectedMinimumBid);
+
       const expectedOrderSize = await liquidator.getOrderSize.callAsync(liquidatorProxy.address);
-      expect(expectedOrderSize).to.be.bignumber.equal(subjectStartingCurrentSets);
+      expect(expectedOrderSize).to.be.bignumber.equal(orderSize);
     });
 
     it('sets the correct orderRemaining', async () => {
       await subject();
 
       const orderRemaining = await liquidator.getOrderRemaining.callAsync(liquidatorProxy.address);
-      const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+      const chunkSize = await liquidatorHelper.calculateChunkSize(
         scenario.set1,
         scenario.set2,
         oracleWhiteList,
         subjectStartingCurrentSets,
         usdChunkSize,
       );
+      const expectedMinimumBid = await liquidatorHelper.calculateMinimumBidAsync(
+        linearAuction,
+        scenario.set1,
+        scenario.set2,
+        scenario.component1Price.div(scenario.component2Price)
+      );
+      const orderSize = subjectStartingCurrentSets.div(expectedMinimumBid).round(0, 3).mul(expectedMinimumBid);
+      const expectedChunkSize = chunkSize.div(expectedMinimumBid).round(0, 3).mul(expectedMinimumBid);
 
-      expect(orderRemaining).to.be.bignumber.equal(subjectStartingCurrentSets.sub(expectedChunkSize));
+      expect(orderRemaining).to.be.bignumber.equal(orderSize.sub(expectedChunkSize));
     });
 
     it('sets the correct lastChunkAuctionEnd', async () => {
@@ -357,13 +378,20 @@ contract('TWAPLiquidator', accounts => {
       await subject();
 
       const chunkSize = await liquidator.getChunkSize.callAsync(liquidatorProxy.address);
-      const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+      const anticipatedChunkSize = await liquidatorHelper.calculateChunkSize(
         scenario.set1,
         scenario.set2,
         oracleWhiteList,
         subjectStartingCurrentSets,
         usdChunkSize,
       );
+      const expectedMinimumBid = await liquidatorHelper.calculateMinimumBidAsync(
+        linearAuction,
+        scenario.set1,
+        scenario.set2,
+        scenario.component1Price.div(scenario.component2Price)
+      );
+      const expectedChunkSize = anticipatedChunkSize.div(expectedMinimumBid).round(0, 3).mul(expectedMinimumBid);
       expect(chunkSize).to.be.bignumber.equal(expectedChunkSize);
     });
 
@@ -371,14 +399,22 @@ contract('TWAPLiquidator', accounts => {
       await subject();
 
       const orderRemaining = await liquidator.getOrderRemaining.callAsync(liquidatorProxy.address);
-      const expectedChunkSize = await liquidatorHelper.calculateChunkSize(
+      const expectedMinimumBid = await liquidatorHelper.calculateMinimumBidAsync(
+        linearAuction,
+        scenario.set1,
+        scenario.set2,
+        scenario.component1Price.div(scenario.component2Price)
+      );
+      const chunkSize = await liquidatorHelper.calculateChunkSize(
         scenario.set1,
         scenario.set2,
         oracleWhiteList,
         subjectStartingCurrentSets,
         usdChunkSize,
       );
-      const expectedOrderRemaining = subjectStartingCurrentSets.sub(expectedChunkSize);
+      const expectedChunkSize = chunkSize.div(expectedMinimumBid).round(0, 3).mul(expectedMinimumBid);
+      const orderSize = subjectStartingCurrentSets.div(expectedMinimumBid).round(0, 3).mul(expectedMinimumBid);
+      const expectedOrderRemaining = orderSize.sub(expectedChunkSize);
       expect(orderRemaining).to.bignumber.equal(expectedOrderRemaining);
     });
 

@@ -142,6 +142,15 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
     )
         internal
     {
+        // Initialize first chunk auction with the currentSetQuantity to populate LinearAuction struct
+        // This will be overwritten by the initial chunk auction quantity
+        LinearAuction.initializeLinearAuction(
+            _twapAuction.chunkAuction,
+            _currentSet,
+            _nextSet,
+            _startingCurrentSetQuantity
+        );
+
         // Calculate currency value of rebalance volume
         uint256 rebalanceVolume = LiquidatorUtils.calculateRebalanceVolume(
             _currentSet,
@@ -157,18 +166,20 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
             _liquidatorData.chunkSizeValue
         );
 
-        // Initialize first chunk auction
-        LinearAuction.initializeLinearAuction(
-            _twapAuction.chunkAuction,
-            _currentSet,
-            _nextSet,
-            chunkSize
-        );
+        // Normalize the chunkSize and orderSize to ensure all values are a multiple of 
+        // the minimum bid
+        uint256 minBid = _twapAuction.chunkAuction.auction.minimumBid;
+        uint256 normalizedChunkSize = chunkSize.div(minBid).mul(minBid);
+        uint256 totalOrderSize = _startingCurrentSetQuantity.div(minBid).mul(minBid);
+
+        // Initialize the first chunkAuction to the normalized chunk size
+        _twapAuction.chunkAuction.auction.startingCurrentSets = normalizedChunkSize;
+        _twapAuction.chunkAuction.auction.remainingCurrentSets = normalizedChunkSize;
 
         // Set TWAPState
-        _twapAuction.orderSize = _startingCurrentSetQuantity;
-        _twapAuction.orderRemaining = _startingCurrentSetQuantity.sub(chunkSize);
-        _twapAuction.chunkSize = chunkSize;
+        _twapAuction.orderSize = totalOrderSize;
+        _twapAuction.orderRemaining = totalOrderSize.sub(normalizedChunkSize);
+        _twapAuction.chunkSize = normalizedChunkSize;
         _twapAuction.lastChunkAuctionEnd = block.timestamp.sub(_liquidatorData.chunkAuctionPeriod);
         _twapAuction.chunkAuctionPeriod = _liquidatorData.chunkAuctionPeriod;
     }
@@ -345,7 +356,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         );
         
         // Check that total remaining sets is greater than minimumBid
-        return totalRemainingSets > _twapAuction.chunkAuction.auction.minimumBid;
+        return totalRemainingSets >= _twapAuction.chunkAuction.auction.minimumBid;
     }
 
     /**

@@ -141,6 +141,6 @@
     ]
   },
   "_moduleAliases": {
-    "@utils": "transpiled/utils"
+    "@utils": "utils"
   }
 }

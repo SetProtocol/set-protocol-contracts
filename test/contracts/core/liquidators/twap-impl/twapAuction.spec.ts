@@ -31,7 +31,12 @@ import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { OracleHelper } from 'set-protocol-oracles';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
-import { ZERO, ONE_HOUR_IN_SECONDS, ONE_DAY_IN_SECONDS } from '@utils/constants';
+import {
+  ONE_HOUR_IN_SECONDS,
+  ONE_DAY_IN_SECONDS,
+  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+  ZERO
+} from '@utils/constants';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -274,6 +279,26 @@ contract('TWAPAuction', accounts => {
     describe('when rangeStart exceeds 100%', async () => {
       beforeEach(async () => {
         subjectRangeStart = ether(1.01);
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when auctionPeriod too high', async () => {
+      beforeEach(async () => {
+        subjectAuctionPeriod = UNLIMITED_ALLOWANCE_IN_BASE_UNITS;
+      });
+
+      it('reverts', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when expectedAuctionLength is 0', async () => {
+      beforeEach(async () => {
+        subjectAuctionPeriod = new BigNumber(1);
       });
 
       it('reverts', async () => {

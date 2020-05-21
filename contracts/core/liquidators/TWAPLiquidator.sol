@@ -264,7 +264,8 @@ contract TWAPLiquidator is
             "TWAPLiquidator: Bounds invalid"
         );
 
-        setChunkSizeWhiteList(_assetOne, _assetTwo, _assetPairVolumeBounds);
+        chunkSizeWhiteList[_assetOne][_assetTwo] = _assetPairVolumeBounds;
+        chunkSizeWhiteList[_assetTwo][_assetOne] = _assetPairVolumeBounds;
 
         emit ChunkSizeBoundUpdated(
             _assetOne,

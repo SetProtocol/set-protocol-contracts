@@ -76,7 +76,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
 
     // Mapping between an address pair's addresses and the min/max USD-chunk size, each asset pair will
     // have two entries, one for each ordering of the addresses
-    mapping(address => mapping(address => BoundsLibrary.Bounds)) private chunkSizeWhiteList;
+    mapping(address => mapping(address => BoundsLibrary.Bounds)) public chunkSizeWhiteList;
     //Estimated length in seconds of a chunk auction
     uint256 public expectedChunkAuctionLength;
 
@@ -111,18 +111,20 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
             "TWAPAuction.constructor: Passed range end must exceed completion buffer."
         );
 
-        // require(
-        //     _rangeEnd <= CommonMath.scaleFactor() && _rangeStart <= CommonMath.scaleFactor(),
-        //     "TWAPAuction.constructor: Range bounds must be less than 100%."
-        // );
+        // Not using CommonMath.scaleFactoor() due to compilation issues related to constructor size
+        require(
+            _rangeEnd <= 1e18 && _rangeStart <= 1e18,
+            "TWAPAuction.constructor: Range bounds must be less than 100%."
+        );
 
         for (uint256 i = 0; i < _assetPairVolumeBounds.length; i++) {
             BoundsLibrary.Bounds memory bounds = _assetPairVolumeBounds[i].bounds;
 
-            // require(
-            //     bounds.isValid(),
-            //     "TWAPAuction.constructor: Passed asset pair bounds are invalid."
-            // );
+            // Not using native library due to compilation issues related to constructor size
+            require(
+                bounds.lower <= bounds.upper,
+                "TWAPAuction.constructor: Passed asset pair bounds are invalid."
+            );
 
             address assetOne = _assetPairVolumeBounds[i].assetOne;
             address assetTwo = _assetPairVolumeBounds[i].assetTwo;
@@ -138,34 +140,19 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
 
         // Expected length of a chunk auction, assuming the auction goes 2% beyond initial fair
         // value. Used to validate TWAP Auction length won't exceed Set's rebalanceFailPeriod.
-        expectedChunkAuctionLength = _auctionPeriod
-            .mul(_rangeStart.add(AUCTION_COMPLETION_BUFFER))
-            .div(_rangeStart.add(_rangeEnd));
-    }
+        // Not using SafeMath due to compilation issues related to constructor size
+        require(
+            _auctionPeriod < -uint256(1) / (_rangeStart + AUCTION_COMPLETION_BUFFER),
+            "TWAPAuction.constructor: Auction period too long."
+        );
 
-    /* ============ External Getters ============ */
+        expectedChunkAuctionLength = _auctionPeriod * (_rangeStart + AUCTION_COMPLETION_BUFFER) /
+            (_rangeStart + _rangeEnd);
 
-    function setChunkSizeWhiteList(
-        address _assetOne,
-        address _assetTwo,
-        BoundsLibrary.Bounds memory _bounds
-    )
-        internal
-        returns (BoundsLibrary.Bounds memory)
-    {
-        chunkSizeWhiteList[_assetOne][_assetTwo] = _bounds;
-        chunkSizeWhiteList[_assetTwo][_assetOne] = _bounds;
-    }
-
-    function getChunkSizeWhiteList(
-        address assetOne,
-        address assetTwo
-    )
-        external
-        view
-        returns (BoundsLibrary.Bounds memory)
-    {
-        return chunkSizeWhiteList[assetOne][assetTwo];
+        require(
+            expectedChunkAuctionLength > 0,
+            "TWAPAuction.constructor: Expected auction length must exceed 0."
+        );
     }
 
     /* ============ Internal Functions ============ */
@@ -215,7 +202,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
             _chunkSizeValue
         );
 
-        // Normalize the chunkSize and orderSize to ensure all values are a multiple of 
+        // Normalize the chunkSize and orderSize to ensure all values are a multiple of
         // the minimum bid
         uint256 minBid = _twapAuction.chunkAuction.auction.minimumBid;
         uint256 normalizedChunkSize = chunkSize.div(minBid).mul(minBid);
@@ -229,8 +216,8 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         _twapAuction.orderSize = totalOrderSize;
         _twapAuction.orderRemaining = totalOrderSize.sub(normalizedChunkSize);
         _twapAuction.chunkSize = normalizedChunkSize;
-        _twapAuction.lastChunkAuctionEnd = block.timestamp.sub(_liquidatorData.chunkAuctionPeriod);
-        _twapAuction.chunkAuctionPeriod = _liquidatorData.chunkAuctionPeriod;
+        _twapAuction.lastChunkAuctionEnd = 0;
+        _twapAuction.chunkAuctionPeriod = _chunkAuctionPeriod;
     }
 
     /**

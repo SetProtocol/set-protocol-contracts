@@ -126,8 +126,8 @@ contract('RebalancingSetV3 - TWAPLiquidator', accounts => {
     await scenario.initialize();
 
     auctionPeriod = ONE_HOUR_IN_SECONDS;
-    rangeStart = new BigNumber(3); // 3% above fair value
-    rangeEnd = new BigNumber(21); // 21% below fair value
+    rangeStart = ether(.03); // 3% above fair value
+    rangeEnd = ether(.21); // 21% below fair value
     name = 'liquidator';
 
     assetPairVolumeBounds = [

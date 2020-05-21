@@ -179,20 +179,20 @@ contract('TWAPLiquidator', accounts => {
     });
 
     it('sets the correct chunk whitelist values', async () => {
-      const bounds1 = await liquidator.chunkSizeWhiteList.callAsync(
+      const bounds1: any = await liquidator.chunkSizeWhiteList.callAsync(
         assetPairVolumeBounds[0].assetOne,
         assetPairVolumeBounds[0].assetTwo,
       );
-      const bounds2 = await liquidator.chunkSizeWhiteList.callAsync(
+      const bounds2: any = await liquidator.chunkSizeWhiteList.callAsync(
         assetPairVolumeBounds[1].assetOne,
         assetPairVolumeBounds[1].assetTwo,
       );
 
-      expect(bounds1['lower']).to.bignumber.equal(assetPairVolumeBounds[0]['lower']);
-      expect(bounds1['upper']).to.bignumber.equal(assetPairVolumeBounds[0]['upper']);
+      expect(bounds1.lower).to.bignumber.equal(assetPairVolumeBounds[0].bounds.lower);
+      expect(bounds1.upper).to.bignumber.equal(assetPairVolumeBounds[0].bounds.upper);
 
-      expect(bounds2['lower']).to.bignumber.equal(assetPairVolumeBounds[1]['lower']);
-      expect(bounds2['upper']).to.bignumber.equal(assetPairVolumeBounds[1]['upper']);
+      expect(bounds2.lower).to.bignumber.equal(assetPairVolumeBounds[1].bounds.lower);
+      expect(bounds2.upper).to.bignumber.equal(assetPairVolumeBounds[1].bounds.upper);
     });
 
     it('sets the correct expected chunk auction length', async () => {
@@ -1017,13 +1017,13 @@ contract('TWAPLiquidator', accounts => {
     it('sets the correct chunkAuction parameters', async () => {
       await subject();
 
-      const bounds = await liquidator.chunkSizeWhiteList.callAsync(
+      const bounds: any = await liquidator.chunkSizeWhiteList.callAsync(
         subjectAsset1,
         subjectAsset2,
       );
 
-      expect(bounds['lower']).to.bignumber.equal(subjectAssetPairBounds['lower']);
-      expect(bounds['upper']).to.bignumber.equal(subjectAssetPairBounds['upper']);
+      expect(bounds.lower).to.bignumber.equal(subjectAssetPairBounds.lower);
+      expect(bounds.upper).to.bignumber.equal(subjectAssetPairBounds.upper);
     });
 
     it('emits ChunkSizeBoundUpdated log', async () => {

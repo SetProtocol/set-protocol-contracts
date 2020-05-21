@@ -73,8 +73,12 @@ interface TWAPScenario {
   auction: AuctionSettings;
 }
 
-// Cases to add
-  // cUSDc case to/from WBTC
+interface CheckPoint {
+  totalSetMarketValue: BigNumber;
+  rebalancingSetValue: BigNumber;
+  unitShares: BigNumber;
+}
+
 
 const scenarios: TWAPScenario[] = [
   {
@@ -106,93 +110,93 @@ const scenarios: TWAPScenario[] = [
       expectedAuctions: 5,
     },
   },
-  {
-    name: 'ETHBTC Set Rebalances 100% WETH to 50% WETH/WBTC',
-    rebalancingSet: {
-      unitShares: new BigNumber(799797),
-      naturalUnit: new BigNumber(100000000),
-      supply: new BigNumber('14256596210800000000000'),
-    },
-    currentSet: {
-      components: ['component1'], // WETH
-      units: [new BigNumber(1000000)],
-      naturalUnit: new BigNumber(1000000),
-    },
-    nextSet: {
-      components: ['component1', 'component2'], // WETH, WBTC
-      units: [new BigNumber(484880000000000), new BigNumber(1000)],
-      naturalUnit: new BigNumber(10000000000000),
-    },
-    components: {
-      component1Price: ether(188),
-      component2Price: ether(9000),
-      component1Decimals: 18,
-      component2Decimals: 8,
-    },
-    auction: {
-      chunkSize: ether(1000000),
-      chunkAuctionPeriod: new BigNumber(0),
-      expectedAuctions: 2,
-    },
-  },
-  {
-    name: 'ETH RSI Yield 100% ETH to 100% cUSDC $5M - 5/13/2020',
-    rebalancingSet: {
-      unitShares: new BigNumber(557211),
-      naturalUnit: new BigNumber(1000000),
-      supply: new BigNumber('21753937919075000000000'),
-    },
-    currentSet: {
-      components: ['component1'], // WETH
-      units: [new BigNumber(2097152)],
-      naturalUnit: new BigNumber(1000000),
-    },
-    nextSet: {
-      components: ['component2'], // cUSDc
-      units: [new BigNumber(16384)],
-      naturalUnit: new BigNumber(10000000000),
-    },
-    components: {
-      component1Price: ether(200),
-      component2Price: ether(0.021),
-      component1Decimals: 18,
-      component2Decimals: 8,
-    },
-    auction: {
-      chunkSize: ether(1000000),
-      chunkAuctionPeriod: new BigNumber(0),
-      expectedAuctions: 6,
-    },
-  },
-  {
-    name: 'WBTC 100% WETH to 50/50% wBTC/cUSDC #706',
-    rebalancingSet: {
-      unitShares: new BigNumber(296562),
-      naturalUnit: new BigNumber(100000000),
-      supply: new BigNumber('37566900000000000000'),
-    },
-    currentSet: {
-      components: ['component1'], // cUSDC
-      units: [new BigNumber(166187652)],
-      naturalUnit: new BigNumber(1000000000000),
-    },
-    nextSet: {
-      components: ['component1', 'component2'], // cUSDC, WBTC
-      units: [new BigNumber(41946670), new BigNumber(100)],
-      naturalUnit: new BigNumber(1000000000000),
-    },
-    components: {
-      component1Price: ether(0.021),
-      component2Price: ether(9000),
-      component1Decimals: 8,
-      component2Decimals: 8,
-    },
-    auction: {
-      chunkSize: ether(1000000),
-      chunkAuctionPeriod: new BigNumber(0),
-      expectedAuctions: 1,
-    },
-  },
+  // {
+  //   name: 'ETHBTC Set Rebalances 100% WETH to 50% WETH/WBTC',
+  //   rebalancingSet: {
+  //     unitShares: new BigNumber(799797),
+  //     naturalUnit: new BigNumber(100000000),
+  //     supply: new BigNumber('14256596210800000000000')
+  //   },
+  //   currentSet: {
+  //     components: ['component1'], // WETH
+  //     units: [new BigNumber(1000000)],
+  //     naturalUnit: new BigNumber(1000000),
+  //   },
+  //   nextSet: {
+  //     components: ['component1', 'component2'], // WETH, WBTC
+  //     units: [new BigNumber(484880000000000), new BigNumber(1000)],
+  //     naturalUnit: new BigNumber(10000000000000),
+  //   },
+  //   components: {
+  //     component1Price: ether(188),
+  //     component2Price: ether(9000),
+  //     component1Decimals: 18,
+  //     component2Decimals: 8,
+  //   },
+  //   auction: {
+  //     chunkSize: ether(1000000),
+  //     chunkAuctionPeriod: new BigNumber(0),
+  //     expectedAuctions: 2,
+  //   }
+  // },
+  // {
+  //   name: 'ETH RSI Yield 100% ETH to 100% cUSDC $5M - 5/13/2020',
+  //   rebalancingSet: {
+  //     unitShares: new BigNumber(557211),
+  //     naturalUnit: new BigNumber(1000000),
+  //     supply: new BigNumber('21753937919075000000000')
+  //   },
+  //   currentSet: {
+  //     components: ['component1'], // WETH
+  //     units: [new BigNumber(2097152)],
+  //     naturalUnit: new BigNumber(1000000),
+  //   },
+  //   nextSet: {
+  //     components: ['component2'], // cUSDc
+  //     units: [new BigNumber(16384)],
+  //     naturalUnit: new BigNumber(10000000000),
+  //   },
+  //   components: {
+  //     component1Price: ether(200),
+  //     component2Price: ether(0.021),
+  //     component1Decimals: 18,
+  //     component2Decimals: 8,
+  //   },
+  //   auction: {
+  //     chunkSize: ether(1000000),
+  //     chunkAuctionPeriod: new BigNumber(0),
+  //     expectedAuctions: 6,
+  //   }
+  // },
+  // {
+  //   name: 'WBTC 100% WETH to 50/50% wBTC/cUSDC #706',
+  //   rebalancingSet: {
+  //     unitShares: new BigNumber(296562),
+  //     naturalUnit: new BigNumber(100000000),
+  //     supply: new BigNumber('37566900000000000000')
+  //   },
+  //   currentSet: {
+  //     components: ['component1'], // cUSDC
+  //     units: [new BigNumber(166187652)],
+  //     naturalUnit: new BigNumber(1000000000000),
+  //   },
+  //   nextSet: {
+  //     components: ['component1', 'component2'], // cUSDC, WBTC
+  //     units: [new BigNumber(41946670), new BigNumber(100)],
+  //     naturalUnit: new BigNumber(1000000000000),
+  //   },
+  //   components: {
+  //     component1Price: ether(0.021),
+  //     component2Price: ether(9000),
+  //     component1Decimals: 8,
+  //     component2Decimals: 8,
+  //   },
+  //   auction: {
+  //     chunkSize: ether(1000000),
+  //     chunkAuctionPeriod: new BigNumber(0),
+  //     expectedAuctions: 1,
+  //   }
+  // }
 ];
 
 
@@ -213,6 +217,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   const rangeEnd: BigNumber = ether(.21);
 
   let setup: RebalanceTestSetup;
+  let checkPoints: CheckPoint[];
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
@@ -238,6 +243,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
     blockchain.saveSnapshotAsync();
 
     setup = new RebalanceTestSetup(deployerAccount);
+    checkPoints = [];
   });
 
   afterEach(async () => {
@@ -253,42 +259,34 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
     });
   });
 
-  describe(`${scenarios[1].name}`, async () => {
+  // describe(`${scenarios[1].name}`, async () => {
 
-    it('should successfully complete', async () => {
-      await runScenario(scenarios[1]);
+  //   it('should successfully complete', async () => {
+  //     await runScenario(scenarios[1]);
+  //   });
+  // });
 
-      const newRebalanceState = await setup.rebalancingSetToken.rebalanceState.callAsync();
-      expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
-    });
-  });
+  // describe(`${scenarios[2].name}`, async () => {
 
-  describe(`${scenarios[2].name}`, async () => {
+  //   it('should successfully complete', async () => {
+  //     await runScenario(scenarios[2]);
+  //   });
+  // });
 
-    it('should successfully complete', async () => {
-      await runScenario(scenarios[2]);
+  // describe(`${scenarios[3].name}`, async () => {
 
-      const newRebalanceState = await setup.rebalancingSetToken.rebalanceState.callAsync();
-      expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
-    });
-  });
-
-  describe(`${scenarios[3].name}`, async () => {
-
-    it('should successfully complete', async () => {
-      await runScenario(scenarios[3]);
-
-      const newRebalanceState = await setup.rebalancingSetToken.rebalanceState.callAsync();
-      expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
-    });
-  });
+  //   it('should successfully complete', async () => {
+  //     await runScenario(scenarios[3]);
+  //   });
+  // });
 
   async function runScenario(scenario: TWAPScenario): Promise<void> {
-    await initializeScenario(scenario);
+    await initialize(scenario);
 
     const { chunkSize, expectedAuctions, chunkAuctionPeriod } = scenario.auction;
     const { unitShares, naturalUnit } = scenario.rebalancingSet;
 
+<<<<<<< HEAD
     const currentSetQuantity = scenario.rebalancingSet.supply
                             .mul(unitShares)
                             .div(naturalUnit);
@@ -310,6 +308,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
     );
 
     console.log('Rebalance volume', volume.div(10 ** 18).round(0, 3).toString());
+
 
     const liquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(chunkSize, chunkAuctionPeriod);
     await rebalancingHelper.transitionToRebalanceV2Async(
@@ -336,6 +335,8 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
         bidQuantity,
       );
 
+      // TODO - note the dollar amounts transacted in bid
+
       // If not the last auction, then iterate to next auction
       if (i + 1 < expectedAuctions) {
         await blockchain.increaseTimeAsync(chunkAuctionPeriod);
@@ -353,8 +354,59 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
     );
   }
 
+  async function initialAndTerminalState(scenario: TWAPScenario): Promise<void> {
+    const { chunkSize } = scenario.auction;
+    const { unitShares, naturalUnit } = scenario.rebalancingSet;
+
+    const currentSetQuantity = scenario.rebalancingSet.supply
+                            .mul(unitShares)
+                            .div(naturalUnit)
+
+    const volume = await liquidatorHelper.calculateRebalanceVolumeAsync(
+      setup.set1,
+      setup.set2,
+      setup.oracleWhiteList,
+      currentSetQuantity,
+    );
+
+    const setValue = await valuationHelper.calculateRebalancingSetTokenValueAsync(
+      setup.rebalancingSetToken,
+      setup.oracleWhiteList
+    );
+
+    console.log("RB Set Market Cap ", setValue.mul(scenario.rebalancingSet.supply).div(10 ** 18).round(0, 3).toString());    
+
+    console.log("Rebalance volume", volume.div(10 ** 18).round(0, 3).toString());
+  }
+
+  async function checkPoint(num: number): Promise<void> {
+    // checkPoints[num] = {
+    // };
+  }
+
+  async function printResults(): Promise<void> {
+    const t0 = checkPoints[0];
+    const tN = checkPoints[checkPoints.length - 1];
+
+    console.log(`RebalancingSet Value Before: ${deScale(t0.rebalancingSetValue).toString()}`);
+    console.log(`RebalancingSet Value After: ${deScale(tN.rebalancingSetValue).toString()}`);
+
+    console.log(`unitShares Before: ${t0.unitShares}`);
+    console.log(`unitShares After: ${tN.unitShares}`);
+
+    console.log(`======================== Results ==========================`);
+    console.log(`==================================================`);
+  }
+
+  function deScale(v1: BigNumber): BigNumber {
+    return new BigNumber(v1).div(ether(1)).round(2, 3);
+  }
+
+  async function runAssertions(scenario: TWAPScenario): Promise<void> {
+  }
+
   // Sets up assets, creates and mints rebalancing set
-  async function initializeScenario(scenario: any): Promise<void> {
+  async function initialize(scenario: TWAPScenario): Promise<void> {
     await setup.initializeCore();
     await setup.initializeComponents(scenario.components);
     await setup.initializeBaseSets({

@@ -233,7 +233,7 @@ contract('TWAPAuction', accounts => {
         ];
       });
 
-      it('sets the correct chunkSize', async () => {
+      it('reverts', async () => {
         await expectRevertError(subject());
       });
     });
@@ -246,7 +246,7 @@ contract('TWAPAuction', accounts => {
         ];
       });
 
-      it('sets the correct chunkSize', async () => {
+      it('reverts', async () => {
         await expectRevertError(subject());
       });
     });
@@ -256,7 +256,7 @@ contract('TWAPAuction', accounts => {
         subjectRangeEnd = ether(.01);
       });
 
-      it('sets the correct chunkSize', async () => {
+      it('reverts', async () => {
         await expectRevertError(subject());
       });
     });
@@ -266,7 +266,7 @@ contract('TWAPAuction', accounts => {
         subjectRangeEnd = ether(1.01);
       });
 
-      it('sets the correct chunkSize', async () => {
+      it('reverts', async () => {
         await expectRevertError(subject());
       });
     });
@@ -276,7 +276,7 @@ contract('TWAPAuction', accounts => {
         subjectRangeStart = ether(1.01);
       });
 
-      it('sets the correct chunkSize', async () => {
+      it('reverts', async () => {
         await expectRevertError(subject());
       });
     });

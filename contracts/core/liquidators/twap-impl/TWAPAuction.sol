@@ -76,7 +76,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
 
     // Mapping between an address pair's addresses and the min/max USD-chunk size, each asset pair will
     // have two entries, one for each ordering of the addresses
-    mapping(address => mapping(address => BoundsLibrary.Bounds)) public chunkSizeWhiteList;
+    mapping(address => mapping(address => BoundsLibrary.Bounds)) private chunkSizeWhiteList;
     //Estimated length in seconds of a chunk auction
     uint256 public expectedChunkAuctionLength;
 
@@ -138,9 +138,34 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
 
         // Expected length of a chunk auction, assuming the auction goes 2% beyond initial fair
         // value. Used to validate TWAP Auction length won't exceed Set's rebalanceFailPeriod.
-        // expectedChunkAuctionLength = _auctionPeriod
-        //     .mul(_rangeStart.add(AUCTION_COMPLETION_BUFFER))
-        //     .div(_rangeStart.add(_rangeEnd));
+        expectedChunkAuctionLength = _auctionPeriod
+            .mul(_rangeStart.add(AUCTION_COMPLETION_BUFFER))
+            .div(_rangeStart.add(_rangeEnd));
+    }
+
+    /* ============ External Getters ============ */
+
+    function setChunkSizeWhiteList(
+        address _assetOne,
+        address _assetTwo,
+        BoundsLibrary.Bounds memory _bounds
+    )
+        internal
+        returns (BoundsLibrary.Bounds memory)
+    {
+        chunkSizeWhiteList[_assetOne][_assetTwo] = _bounds;
+        chunkSizeWhiteList[_assetTwo][_assetOne] = _bounds;
+    }
+
+    function getChunkSizeWhiteList(
+        address assetOne,
+        address assetTwo
+    )
+        external
+        view
+        returns (BoundsLibrary.Bounds memory)
+    {
+        return chunkSizeWhiteList[assetOne][assetTwo];
     }
 
     /* ============ Internal Functions ============ */

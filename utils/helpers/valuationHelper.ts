@@ -119,7 +119,7 @@ export class ValuationHelper {
     }
   }
 
-  private computeTokenDollarAmount(
+  public computeTokenDollarAmount(
     tokenPrice: BigNumber,
     unitsInFullSet: BigNumber,
     tokenDecimals: BigNumber,

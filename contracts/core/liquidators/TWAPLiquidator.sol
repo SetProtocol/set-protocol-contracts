@@ -295,7 +295,7 @@ contract TWAPLiquidator is
     }
 
     function getTotalSetsRemaining(address _set) external view returns (uint256) {
-        return calculateTotalSetsRemaining(twapAuction(_set));
+        return TWAPAuction.calculateTotalSetsRemaining(twapAuction(_set));
     }
 
     /* ============ Private Functions ============ */

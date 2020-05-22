@@ -15,10 +15,3 @@ import {
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
-import {
-  DEFAULT_GAS,
-  ONE_DAY_IN_SECONDS,
-  ONE_HOUR_IN_SECONDS,
-  ZERO,
-} from '@utils/constants';
-import { getWeb3 } from '@utils/web3Helper';

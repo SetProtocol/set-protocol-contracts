@@ -499,6 +499,21 @@ export class RebalancingHelper {
     );
   }
 
+  public async bidAndWithdrawAsync(
+    rebalanceAuctionModule: RebalanceAuctionModuleContract,
+    rebalancingSetTokenAddress: Address,
+    bidQuantity: BigNumber,
+    allowPartialFill: boolean = false,
+    caller: Address = this._tokenOwnerAddress,
+  ): Promise<void> {
+    await rebalanceAuctionModule.bidAndWithdraw.sendTransactionAsync(
+      rebalancingSetTokenAddress,
+      bidQuantity,
+      allowPartialFill,
+      { from: caller, gas: DEFAULT_GAS }
+    );
+  }
+
   public async endFailedRebalanceAsync(
     rebalancingSetToken: RebalancingSetTokenContract,
     caller: Address = this._tokenOwnerAddress,

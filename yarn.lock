@@ -8335,18 +8335,19 @@ solc@0.5.15:
     semver "^5.5.0"
     tmp "0.0.33"
 
-solc@^0.5.4:
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/solc/-/solc-0.5.4.tgz#e91bbea93d607eb0f934b8bc9b3c9a0d999ef768"
+solc@^0.5.7:
+  version "0.5.17"
+  resolved "https://registry.yarnpkg.com/solc/-/solc-0.5.17.tgz#8a76c50e98d49ca7610cca2fdc78ff3016540c67"
+  integrity sha512-qpX+PGaU0Q3c6lh2vDzMoIbhv6bIrecI4bYsx+xUs01xsGFnY6Nr0L8y/QMyutTnrHN6Lb/Yl672ZVRqxka96w==
   dependencies:
     command-exists "^1.2.8"
+    commander "3.0.2"
     fs-extra "^0.30.0"
-    keccak "^1.0.2"
+    js-sha3 "0.8.0"
     memorystream "^0.3.1"
     require-from-string "^2.0.0"
     semver "^5.5.0"
     tmp "0.0.33"
-    yargs "^11.0.0"
 
 solidity-coverage@^0.6.3:
   version "0.6.7"
@@ -10917,12 +10918,6 @@ yargs-parser@^8.1.0:
   dependencies:
     camelcase "^4.1.0"
 
-yargs-parser@^9.0.2:
-  version "9.0.2"
-  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-9.0.2.tgz#9ccf6a43460fe4ed40a9bb68f48d43b8a68cc077"
-  dependencies:
-    camelcase "^4.1.0"
-
 yargs-unparser@1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/yargs-unparser/-/yargs-unparser-1.6.0.tgz#ef25c2c769ff6bd09e4b0f9d7c605fb27846ea9f"
@@ -10981,24 +10976,6 @@ yargs@^10.0.3:
     which-module "^2.0.0"
     y18n "^3.2.1"
     yargs-parser "^8.1.0"
-
-yargs@^11.0.0:
-  version "11.1.0"
-  resolved "https://registry.yarnpkg.com/yargs/-/yargs-11.1.0.tgz#90b869934ed6e871115ea2ff58b03f4724ed2d77"
-  integrity sha512-NwW69J42EsCSanF8kyn5upxvjp5ds+t3+udGBeTbFnERA+lF541DDpMawzo4z6W/QrzNM18D+BPMiOBibnFV5A==
-  dependencies:
-    cliui "^4.0.0"
-    decamelize "^1.1.1"
-    find-up "^2.1.0"
-    get-caller-file "^1.0.1"
-    os-locale "^2.0.0"
-    require-directory "^2.1.1"
-    require-main-filename "^1.0.1"
-    set-blocking "^2.0.0"
-    string-width "^2.0.0"
-    which-module "^2.0.0"
-    y18n "^3.2.1"
-    yargs-parser "^9.0.2"
 
 yargs@^8.0.2:
   version "8.0.2"

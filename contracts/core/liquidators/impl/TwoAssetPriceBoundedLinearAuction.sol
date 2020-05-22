@@ -61,8 +61,8 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
      * TwoAssetPriceBoundedLinearAuction constructor
      *
      * @param _auctionPeriod          Length of auction
-     * @param _rangeStart             Percentage below FairValue to begin auction at
-     * @param _rangeEnd               Percentage above FairValue to end auction at
+     * @param _rangeStart             Percentage below FairValue to begin auction at in 18 decimal value
+     * @param _rangeEnd               Percentage above FairValue to end auction at in 18 decimal value
      */
     constructor(
         IOracleWhiteList _oracleWhiteList,

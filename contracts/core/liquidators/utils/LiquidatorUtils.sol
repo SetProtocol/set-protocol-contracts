@@ -121,7 +121,7 @@ library LiquidatorUtils {
             bool isInSet
         ) = AddressArrayUtils.indexOf(components, _asset);
 
-        // Calculate allocation of asset or return 0 if not in Set
+        // Calculate allocation of asset if multiple assets and asset is in Set
         if (isInSet && components.length > 1) {
             uint256 setNaturalUnit = _setToken.naturalUnit();
             uint256[] memory setUnits = _setToken.getUnits();
@@ -150,6 +150,7 @@ library LiquidatorUtils {
 
             return assetValue.scale().div(setValue);
         } else {
+            // Since Set only has one asset, if its included then must be 100% else 0%
             return isInSet ? CommonMath.scaleFactor() : 0;
         }
     }

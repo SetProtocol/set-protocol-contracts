@@ -398,9 +398,7 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         returns (bool)
     {
         // Sum of remaining Sets in current chunk auction and order remaining
-        uint256 totalRemainingSets = _twapAuction.orderRemaining.add(
-            _twapAuction.chunkAuction.auction.remainingCurrentSets
-        );
+        uint256 totalRemainingSets = calculateTotalSetsRemaining(_twapAuction);
 
         // Check that total remaining sets is greater than minimumBid
         return totalRemainingSets >= _twapAuction.chunkAuction.auction.minimumBid;
@@ -429,6 +427,20 @@ contract TWAPAuction is TwoAssetPriceBoundedLinearAuction {
         } else {
             return _totalSetAmount;
         }
+    }
+
+    /**
+     * Calculates the total remaining sets in the auction between the currently underway chunk auction and
+     * the Sets that have yet to be included in a chunk auction.
+     *
+     * @param _twapAuction                  TWAPAuction State object
+     */
+    function calculateTotalSetsRemaining(TWAPAuction.TWAPState storage _twapAuction)
+        internal
+        view
+        returns (uint256)
+    {
+        return _twapAuction.orderRemaining.add(_twapAuction.chunkAuction.auction.remainingCurrentSets);
     }
 
     /**

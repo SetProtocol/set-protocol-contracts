@@ -41,10 +41,6 @@ contract TWAPAuctionGetters is AuctionGetters {
         return twapAuction(_set).orderRemaining;
     }
 
-    function getTotalSetsRemaining(address _set) external view returns (uint256) {
-        return twapAuction(_set).orderRemaining.add(auction(_set).remainingCurrentSets);
-    }
-
     function getChunkSize(address _set) external view returns (uint256) {
         return twapAuction(_set).chunkSize;
     }

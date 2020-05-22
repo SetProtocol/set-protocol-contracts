@@ -986,6 +986,31 @@ contract('TWAPLiquidator', accounts => {
         expect(auctionPivotPrice).to.bignumber.equal(linearAuction.endPrice);
       });
     });
+
+    describe('#getTotalSetsRemaining', async () => {
+      let subjectSet: Address;
+
+      beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+      });
+
+
+      async function subject(): Promise<BigNumber> {
+        return liquidator.getTotalSetsRemaining.callAsync(
+          subjectSet,
+        );
+      }
+
+      it('returns the correct total sets remaining', async () => {
+        const actualTotalSetsRemaining = await subject();
+
+        const twapAuction: any = await liquidator.auctions.callAsync(subjectSet);
+        const expectedTotalSetsRemaining = new BigNumber(twapAuction.orderRemaining)
+          .add(twapAuction.chunkAuction.auction.remainingCurrentSets);
+
+        expect(actualTotalSetsRemaining).to.be.bignumber.equal(expectedTotalSetsRemaining);
+      });
+    });
   });
 
   describe('#setChunkSizeBounds', async () => {

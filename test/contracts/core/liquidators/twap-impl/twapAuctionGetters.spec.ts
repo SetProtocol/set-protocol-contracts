@@ -80,25 +80,6 @@ contract('TWAPAuctionGetters', accounts => {
     });
   });
 
-  describe('#getTotalSetsRemaining', async () => {
-    const subjectSet: Address = dummyTradingPool;
-    const subjectCaller: Address = ownerAccount;
-
-    async function subject(): Promise<BigNumber> {
-      return auctionGetters.getTotalSetsRemaining.callAsync(
-        subjectSet,
-        { from: subjectCaller },
-      );
-    }
-
-    it('returns the correct total sets remaining', async () => {
-      const actualTotalSetsRemaining = await subject();
-
-      const expectedTotalSetsRemaining = twapAuctionState.orderRemaining.add(twapAuctionState.remainingCurrentSets);
-      expect(actualTotalSetsRemaining).to.be.bignumber.equal(expectedTotalSetsRemaining);
-    });
-  });
-
   describe('#getChunkSize', async () => {
     const subjectSet: Address = dummyTradingPool;
     const subjectCaller: Address = ownerAccount;

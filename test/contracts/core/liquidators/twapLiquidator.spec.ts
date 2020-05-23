@@ -3,6 +3,7 @@ require('module-alias/register');
 import * as ABIDecoder from 'abi-decoder';
 import * as _ from 'lodash';
 import * as chai from 'chai';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
 
@@ -16,7 +17,6 @@ import {
 import { getSubjectTimestamp, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
-import { AssetChunkSizeBounds } from '@utils/auction';
 import {
   DEFAULT_GAS,
   ZERO,
@@ -24,7 +24,17 @@ import {
   ONE_HOUR_IN_SECONDS,
 } from '@utils/constants';
 import { ether } from '@utils/units';
-import { getLinearAuction, LinearAuction, TokenFlow } from '@utils/auction';
+import {
+  AssetChunkSizeBounds,
+  AssetPairVolumeBounds,
+  getLinearAuction,
+  LinearAuction,
+  TokenFlow
+} from '@utils/auction';
+import {
+  getExpectedChunkAuctionIteratedLog,
+  getExpectedChunkSizeBoundUpdatedLog
+} from '@utils/contract_logs/twapLiquidator';
 
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
@@ -38,6 +48,8 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
+const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
+const setTestUtils = new SetTestUtils(web3);
 const Core = artifacts.require('Core');
 const TWAPLiquidator = artifacts.require('TWAPLiquidator');
 
@@ -73,8 +85,7 @@ contract('TWAPLiquidator', accounts => {
   let rangeStart: BigNumber;
   let rangeEnd: BigNumber;
   let oracleWhiteList: OracleWhiteListContract;
-  let assetPairHashes: string[];
-  let assetPairBounds: AssetChunkSizeBounds[];
+  let assetPairVolumeBounds: AssetPairVolumeBounds[];
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -83,17 +94,22 @@ contract('TWAPLiquidator', accounts => {
     await scenario.initialize();
 
     auctionPeriod = new BigNumber(14400); // 4 hours
-    rangeStart = new BigNumber(3); // 3% below fair value
-    rangeEnd = new BigNumber(21); // 21% above fair value
+    rangeStart = ether(.03); // 3% below fair value
+    rangeEnd = ether(.21); // 21% above fair value
     name = 'liquidator';
     oracleWhiteList = scenario.oracleWhiteList;
-    assetPairHashes = [
-      liquidatorHelper.generateAssetPairHashes(scenario.component1.address, scenario.component2.address),
-      liquidatorHelper.generateAssetPairHashes(scenario.component2.address, scenario.component3.address),
-    ];
-    assetPairBounds = [
-      {min: ether(10 ** 4), max: ether(10 ** 6)},
-      {min: ZERO, max: ether(10 ** 6)},
+
+    assetPairVolumeBounds = [
+      {
+        assetOne: scenario.component1.address,
+        assetTwo: scenario.component2.address,
+        bounds: {lower: ether(10 ** 4), upper: ether(10 ** 6)},
+      },
+      {
+        assetOne: scenario.component2.address,
+        assetTwo: scenario.component3.address,
+        bounds: {lower: ZERO, upper: ether(10 ** 6)},
+      },
     ];
 
     liquidator = await liquidatorHelper.deployTWAPLiquidatorAsync(
@@ -102,8 +118,7 @@ contract('TWAPLiquidator', accounts => {
       auctionPeriod,
       rangeStart,
       rangeEnd,
-      assetPairHashes,
-      assetPairBounds,
+      assetPairVolumeBounds,
       name,
     );
 
@@ -164,19 +179,28 @@ contract('TWAPLiquidator', accounts => {
     });
 
     it('sets the correct chunk whitelist values', async () => {
-      const bounds1 = await liquidator.chunkSizeWhiteList.callAsync(assetPairHashes[0]);
-      const bounds2 = await liquidator.chunkSizeWhiteList.callAsync(assetPairHashes[1]);
+      const bounds1: any = await liquidator.chunkSizeWhiteList.callAsync(
+        assetPairVolumeBounds[0].assetOne,
+        assetPairVolumeBounds[0].assetTwo,
+      );
+      const bounds2: any = await liquidator.chunkSizeWhiteList.callAsync(
+        assetPairVolumeBounds[1].assetOne,
+        assetPairVolumeBounds[1].assetTwo,
+      );
 
-      expect(bounds1['min']).to.bignumber.equal(assetPairBounds[0]['min']);
-      expect(bounds1['max']).to.bignumber.equal(assetPairBounds[0]['max']);
+      expect(bounds1.lower).to.bignumber.equal(assetPairVolumeBounds[0].bounds.lower);
+      expect(bounds1.upper).to.bignumber.equal(assetPairVolumeBounds[0].bounds.upper);
 
-      expect(bounds2['min']).to.bignumber.equal(assetPairBounds[1]['min']);
-      expect(bounds2['max']).to.bignumber.equal(assetPairBounds[1]['max']);
+      expect(bounds2.lower).to.bignumber.equal(assetPairVolumeBounds[1].bounds.lower);
+      expect(bounds2.upper).to.bignumber.equal(assetPairVolumeBounds[1].bounds.upper);
     });
 
     it('sets the correct expected chunk auction length', async () => {
       const actualExpectedAuctionLength = await liquidator.expectedChunkAuctionLength.callAsync();
-      const expectedAuctionLength = auctionPeriod.mul(rangeStart.add(2)).div(rangeStart.add(rangeEnd));
+      const expectedAuctionLength = auctionPeriod
+                                      .mul(rangeStart.add(ether(.02)))
+                                      .div(rangeStart.add(rangeEnd))
+                                      .round(0, 3);
       expect(actualExpectedAuctionLength).to.be.bignumber.equal(expectedAuctionLength);
     });
 
@@ -360,11 +384,10 @@ contract('TWAPLiquidator', accounts => {
     });
 
     it('sets the correct lastChunkAuctionEnd', async () => {
-      const subjectTimestamp = await getSubjectTimestamp(subject());
+      subject();
 
       const auctionEndTime = await liquidator.getLastChunkAuctionEnd.callAsync(liquidatorProxy.address);
-      const expectedLastChunkAuctionEnd = subjectTimestamp.sub(chunkAuctionPeriod);
-      expect(auctionEndTime).to.be.bignumber.equal(expectedLastChunkAuctionEnd);
+      expect(auctionEndTime).to.be.bignumber.equal(ZERO);
     });
 
     it('sets the correct chunkAuctionPeriod', async () => {
@@ -423,14 +446,6 @@ contract('TWAPLiquidator', accounts => {
 
       const totalSetsRemaining = await liquidator.getTotalSetsRemaining.callAsync(liquidatorProxy.address);
       expect(totalSetsRemaining).to.bignumber.equal(subjectStartingCurrentSets);
-    });
-
-    it('gets the correct getLastChunkAuctionEnd', async () => {
-      const subjectTimestamp = await getSubjectTimestamp(subject());
-
-      const lastChunkAuctionEnd = await liquidator.getLastChunkAuctionEnd.callAsync(liquidatorProxy.address);
-      const expectedLastChunkAuctionEnd = subjectTimestamp.sub(chunkAuctionPeriod);
-      expect(lastChunkAuctionEnd).to.be.bignumber.equal(expectedLastChunkAuctionEnd);
     });
 
     describe('when the caller is not a valid Set', async () => {
@@ -721,6 +736,23 @@ contract('TWAPLiquidator', accounts => {
         expect(newOrderRemaining).to.bignumber.equal(expectedOrderRemaining);
       });
 
+      it('emits ChunkAuctionIterated log', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+        const orderRemaining = await liquidator.getOrderRemaining.callAsync(subjectSet);
+        const startingCurrentSets = await liquidator.startingCurrentSets.callAsync(subjectSet);
+        const expectedLogs = getExpectedChunkAuctionIteratedLog(
+          subjectSet,
+          orderRemaining,
+          startingCurrentSets,
+          liquidator.address
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
       describe('when the auction has not been complete', async () => {
         before(async () => {
           const minimumBid =  await liquidator.minimumBid.callAsync(liquidatorProxy.address);
@@ -954,6 +986,31 @@ contract('TWAPLiquidator', accounts => {
         expect(auctionPivotPrice).to.bignumber.equal(linearAuction.endPrice);
       });
     });
+
+    describe('#getTotalSetsRemaining', async () => {
+      let subjectSet: Address;
+
+      beforeEach(async () => {
+        subjectSet = liquidatorProxy.address;
+      });
+
+
+      async function subject(): Promise<BigNumber> {
+        return liquidator.getTotalSetsRemaining.callAsync(
+          subjectSet,
+        );
+      }
+
+      it('returns the correct total sets remaining', async () => {
+        const actualTotalSetsRemaining = await subject();
+
+        const twapAuction: any = await liquidator.auctions.callAsync(subjectSet);
+        const expectedTotalSetsRemaining = new BigNumber(twapAuction.orderRemaining)
+          .add(twapAuction.chunkAuction.auction.remainingCurrentSets);
+
+        expect(actualTotalSetsRemaining).to.be.bignumber.equal(expectedTotalSetsRemaining);
+      });
+    });
   });
 
   describe('#setChunkSizeBounds', async () => {
@@ -962,19 +1019,14 @@ contract('TWAPLiquidator', accounts => {
     let subjectAsset2: Address;
     let subjectAssetPairBounds: AssetChunkSizeBounds;
 
-    let pairHash: string;
     beforeEach(async () => {
       subjectCaller = ownerAccount;
       subjectAsset1 = scenario.component1.address;
       subjectAsset2 = scenario.component2.address;
-      pairHash = liquidatorHelper.generateAssetPairHashes(
-        scenario.component1.address,
-        scenario.component2.address,
-      );
 
       subjectAssetPairBounds = {
-        min: ether(10 ** 8),
-        max: ether(10 ** 9),
+        lower: ether(10 ** 8),
+        upper: ether(10 ** 9),
       };
     });
 
@@ -990,11 +1042,30 @@ contract('TWAPLiquidator', accounts => {
     it('sets the correct chunkAuction parameters', async () => {
       await subject();
 
-      const bounds = await liquidator.chunkSizeWhiteList.callAsync(pairHash);
+      const bounds: any = await liquidator.chunkSizeWhiteList.callAsync(
+        subjectAsset1,
+        subjectAsset2,
+      );
 
-      expect(bounds['min']).to.bignumber.equal(subjectAssetPairBounds['min']);
-      expect(bounds['max']).to.bignumber.equal(subjectAssetPairBounds['max']);
+      expect(bounds.lower).to.bignumber.equal(subjectAssetPairBounds.lower);
+      expect(bounds.upper).to.bignumber.equal(subjectAssetPairBounds.upper);
     });
+
+    it('emits ChunkSizeBoundUpdated log', async () => {
+      const txHash = await subject();
+
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+      const expectedLogs = getExpectedChunkSizeBoundUpdatedLog(
+        subjectAsset1,
+        subjectAsset2,
+        subjectAssetPairBounds.lower,
+        subjectAssetPairBounds.upper,
+        liquidator.address
+      );
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+  });
 
     describe('when the caller is not the owner', async () => {
       beforeEach(async () => {
@@ -1009,8 +1080,8 @@ contract('TWAPLiquidator', accounts => {
     describe('when the min is greater than the max bound', async () => {
       beforeEach(async () => {
         subjectAssetPairBounds = {
-          min: ether(10 ** 9),
-          max: ether(10 ** 8),
+          lower: ether(10 ** 9),
+          upper: ether(10 ** 8),
         };
       });
 

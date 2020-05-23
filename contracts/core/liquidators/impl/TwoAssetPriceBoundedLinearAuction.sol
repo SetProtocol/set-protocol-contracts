@@ -34,7 +34,7 @@ import { LinearAuction } from "./LinearAuction.sol";
  * @author Set Protocol
  *
  * Contract to calculate minimumBid and auction start bounds for auctions containing only
- * an asset pair. 
+ * an asset pair.
  */
 contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     using SafeMath for uint256;
@@ -51,7 +51,6 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     uint256 constant private ONE = 1;
     // Minimum token flow allowed at spot price in auction
     uint256 constant private MIN_SPOT_TOKEN_FLOW_SCALED = 10 ** 21;
-    uint256 constant private ONE_HUNDRED = 100;
 
     /* ============ State Variables ============ */
     IOracleWhiteList public oracleWhiteList;
@@ -62,8 +61,8 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
      * TwoAssetPriceBoundedLinearAuction constructor
      *
      * @param _auctionPeriod          Length of auction
-     * @param _rangeStart             Percentage below FairValue to begin auction at
-     * @param _rangeEnd               Percentage above FairValue to end auction at
+     * @param _rangeStart             Percentage below FairValue to begin auction at in 18 decimal value
+     * @param _rangeEnd               Percentage above FairValue to end auction at in 18 decimal value
      */
     constructor(
         IOracleWhiteList _oracleWhiteList,
@@ -83,7 +82,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
 
     /**
      * Validates that the auction only includes two components and the components are valid.
-     */ 
+     */
     function validateTwoAssetPriceBoundedAuction(
         ISetToken _currentSet,
         ISetToken _nextSet
@@ -162,7 +161,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
             // update minimumBidMultiplier
             uint256 currentMinBidMultiplier = MIN_SPOT_TOKEN_FLOW_SCALED.divCeil(tokenFlowScaled);
             minimumBidMultiplier = currentMinBidMultiplier > minimumBidMultiplier ?
-                currentMinBidMultiplier : 
+                currentMinBidMultiplier :
                 minimumBidMultiplier;
         }
 
@@ -194,21 +193,21 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         // Calculate current asset pair spot price as assetOne/assetTwo
         uint256 spotPrice = calculateSpotPrice(assetOne.price, assetTwo.price);
 
-        // Check to see if asset pair price is increasing or decreasing as time passes 
+        // Check to see if asset pair price is increasing or decreasing as time passes
         bool isTokenFlowIncreasing = isTokenFlowIncreasing(
             _auction,
             spotPrice,
             assetOne.fullUnit,
-            assetTwo.fullUnit 
+            assetTwo.fullUnit
         );
 
         // If price implied by token flows is increasing then target price we are using for lower bound
         // is below current spot price, if flows decreasing set target price above spotPrice
         uint256 startPairPrice;
         if (isTokenFlowIncreasing) {
-            startPairPrice = spotPrice.mul(ONE_HUNDRED.sub(rangeStart)).div(ONE_HUNDRED);
+            startPairPrice = spotPrice.mul(CommonMath.scaleFactor().sub(rangeStart)).deScale();
         } else {
-            startPairPrice = spotPrice.mul(ONE_HUNDRED.add(rangeStart)).div(ONE_HUNDRED);  
+            startPairPrice = spotPrice.mul(CommonMath.scaleFactor().add(rangeStart)).deScale();
         }
 
         // Convert start asset pair price to equivalent auction price
@@ -249,16 +248,16 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
             _auction,
             spotPrice,
             assetOne.fullUnit,
-            assetTwo.fullUnit 
+            assetTwo.fullUnit
         );
 
         // If price implied by token flows is increasing then target price we are using for upper bound
         // is above current spot price, if flows decreasing set target price below spotPrice
         uint256 endPairPrice;
         if (isTokenFlowIncreasing) {
-            endPairPrice = spotPrice.mul(ONE_HUNDRED.add(rangeEnd)).div(ONE_HUNDRED);
+            endPairPrice = spotPrice.mul(CommonMath.scaleFactor().add(rangeEnd)).deScale();
         } else {
-            endPairPrice = spotPrice.mul(ONE_HUNDRED.sub(rangeEnd)).div(ONE_HUNDRED);  
+            endPairPrice = spotPrice.mul(CommonMath.scaleFactor().sub(rangeEnd)).deScale();
         }
 
         // Convert end asset pair price to equivalent auction price
@@ -274,7 +273,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
 
     /**
      * Determines if asset pair price is increasing or decreasing as time passed in auction. Used to set the
-     * auction price bounds. Below a refers to any asset and subscripts c, n, d mean currentSetUnit, nextSetUnit 
+     * auction price bounds. Below a refers to any asset and subscripts c, n, d mean currentSetUnit, nextSetUnit
      * and fullUnit amount, respectively. pP and pD refer to auction price and auction denominator. Asset pair
      * price is defined as such:
      *
@@ -285,7 +284,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
      * amount signifies an inflow) it can be determined whether the asset pair price is increasing or decreasing.
      *
      * For example, if assetOneOutflow is negative it means that the denominator is getting smaller as time passes
-     * and thus the assetPrice is increasing during the auction. 
+     * and thus the assetPrice is increasing during the auction.
      *
      * @param _auction              Auction object
      * @param _spotPrice            Current spot price provided by asset oracles
@@ -307,7 +306,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
             _auction,
             _spotPrice,
             _assetOneFullUnit,
-            _assetTwoFullUnit        
+            _assetTwoFullUnit
         );
 
         // Determine whether outflow for assetOne is positive or negative, if positive then asset pair price is
@@ -357,7 +356,7 @@ contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
         // price. Furthermore since we are not guaranteed that targetPrice * a1_c > a1_d we have to scale the second term and
         // thus also the first term in order to match (hence the two scale() in the first term)
         uint256 calcDenominator = _auction.combinedCurrentSetUnits[1].scale().scale().div(_assetTwoFullUnit).add(
-           _targetPrice.mul(_auction.combinedCurrentSetUnits[0]).scale().div(_assetOneFullUnit) 
+           _targetPrice.mul(_auction.combinedCurrentSetUnits[0]).scale().div(_assetOneFullUnit)
         );
 
         // Here the scale required to account for the 18 decimal price cancels out since it was applied to both the numerator

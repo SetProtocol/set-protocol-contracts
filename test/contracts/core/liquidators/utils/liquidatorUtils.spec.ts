@@ -30,6 +30,7 @@ import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
 import { OracleHelper } from 'set-protocol-oracles';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
+import { SCALE_FACTOR, ZERO } from '@utils/constants';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -257,6 +258,37 @@ contract('LiquidatorUtils', accounts => {
         );
 
         expect(allocationPercentage).to.be.bignumber.equal(expectedAllocationPercentage);
+      });
+    });
+
+    describe('for Sets with one asset', async () => {
+
+      beforeEach(async () => {
+        subjectCurrentSet = set3.address;
+      });
+
+      describe('when asset is in Set', async () => {
+        beforeEach(async () => {
+          subjectAsset = component2.address;
+        });
+
+        it('returns the asset allocation', async () => {
+          const allocationPercentage = await subject();
+
+          expect(allocationPercentage).to.be.bignumber.equal(SCALE_FACTOR);
+        });
+      });
+
+      describe('when asset is not in Set', async () => {
+        beforeEach(async () => {
+          subjectAsset = component1.address;
+        });
+
+        it('returns the asset allocation', async () => {
+          const allocationPercentage = await subject();
+
+          expect(allocationPercentage).to.be.bignumber.equal(ZERO);
+        });
       });
     });
   });

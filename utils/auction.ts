@@ -33,9 +33,15 @@ export interface Auction {
   combinedNextSetUnits: BigNumber[];
 }
 
+export interface AssetPairVolumeBounds {
+  assetOne: Address;
+  assetTwo: Address;
+  bounds: AssetChunkSizeBounds;
+}
+
 export interface AssetChunkSizeBounds {
-  min: BigNumber;
-  max: BigNumber;
+  lower: BigNumber;
+  upper: BigNumber;
 }
 
 export function getLinearAuction(input: any): LinearAuction {

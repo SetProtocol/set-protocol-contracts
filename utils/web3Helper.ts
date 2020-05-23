@@ -74,6 +74,13 @@ export const coerceStructBNValuesToString = (struct: any) => {
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
     newObject[key] = struct[key] instanceof BigNumber ? struct[key].toString() : struct[key];
+    if (struct[key] instanceof BigNumber) {
+      newObject[key] = struct[key].toString();
+    } else if (struct[key] instanceof Object) {
+      newObject[key] = coerceStructBNValuesToString(struct[key]);
+    } else {
+      newObject[key] = struct[key];
+    }
   }
 
   return newObject;

@@ -38,8 +38,7 @@ contract TWAPAuctionMock is TWAPAuction {
         uint256 _auctionPeriod,
         uint256 _rangeStart,
         uint256 _rangeEnd,
-        bytes32[] memory _assetPairHashes,
-        BoundsLibrary.Bounds[] memory _assetPairBounds
+        TWAPAuction.AssetPairVolumeBounds[] memory _assetPairVolumeBounds
     )
         public
         TWAPAuction(
@@ -47,8 +46,7 @@ contract TWAPAuctionMock is TWAPAuction {
             _auctionPeriod,
             _rangeStart,
             _rangeEnd,
-            _assetPairHashes,
-            _assetPairBounds
+            _assetPairVolumeBounds
         )
     {}
 
@@ -56,7 +54,8 @@ contract TWAPAuctionMock is TWAPAuction {
         ISetToken _currentSet,
         ISetToken _nextSet,
         uint256 _startingCurrentSetQuantity,
-        TWAPAuction.TWAPLiquidatorData calldata _liquidatorData
+        uint256 _chunkSizeValue,
+        uint256 _chunkAuctionPeriod
     )
         external
     {
@@ -65,7 +64,8 @@ contract TWAPAuctionMock is TWAPAuction {
             _currentSet,
             _nextSet,
             _startingCurrentSetQuantity,
-            _liquidatorData
+            _chunkSizeValue,
+            _chunkAuctionPeriod
         );
     }
 
@@ -80,7 +80,7 @@ contract TWAPAuctionMock is TWAPAuction {
     )
         external
         pure
-        returns (TWAPAuction.TWAPLiquidatorData memory)
+        returns (uint256, uint256)
     {
         return TWAPAuction.parseLiquidatorData(_liquidatorData);
     }
@@ -89,7 +89,8 @@ contract TWAPAuctionMock is TWAPAuction {
         ISetToken _currentSet,
         ISetToken _nextSet,
         uint256 _startingCurrentSetQuantity,
-        TWAPLiquidatorData calldata _liquidatorData
+        uint256 _chunkSizeValue,
+        uint256 _chunkAuctionPeriod
     )
         external
     {
@@ -97,7 +98,8 @@ contract TWAPAuctionMock is TWAPAuction {
             _currentSet,
             _nextSet,
             _startingCurrentSetQuantity,
-            _liquidatorData
+            _chunkSizeValue,
+            _chunkAuctionPeriod
         );
     }
 
@@ -107,26 +109,15 @@ contract TWAPAuctionMock is TWAPAuction {
         TWAPAuction.validateNextChunkAuction(twapState);
     }
 
-    function testGetAssetPairHashFromCollateral(
+    function testGetVolumeBoundsFromCollateral(
         ISetToken _currentSet,
         ISetToken _nextSet
     )
         external
         view
-        returns (bytes32)
+        returns (BoundsLibrary.Bounds memory)
     {
-        return TWAPAuction.getAssetPairHashFromCollateral(_currentSet, _nextSet);
-    }
-
-    function testGetAssetPairHash(
-        address _assetOne,
-        address _assetTwo
-    )
-        external
-        view
-        returns (bytes32)
-    {
-        return TWAPAuction.getAssetPairHash(_assetOne, _assetTwo);
+        return TWAPAuction.getVolumeBoundsFromCollateral(_currentSet, _nextSet);
     }
 
     /* ============ Setters ============ */

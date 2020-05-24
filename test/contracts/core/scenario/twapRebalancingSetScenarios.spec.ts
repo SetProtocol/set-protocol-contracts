@@ -244,8 +244,8 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
 
   const name: string = 'liquidator';
   const auctionPeriod: BigNumber = ONE_HOUR_IN_SECONDS.mul(4);
-  const rangeStart: BigNumber = new BigNumber(1);
-  const rangeEnd: BigNumber = new BigNumber(23);
+  const rangeStart: BigNumber = ether(.01);
+  const rangeEnd: BigNumber = ether(.21);
 
   let setup: RebalanceTestSetup;
   let scenario: TWAPScenario;
@@ -484,11 +484,17 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
       set2NaturalUnit: scenario.nextSet.naturalUnit,
     });
 
-    const assetPairHashes: string[] = [
-      liquidatorHelper.generateAssetPairHashes(setup.component1.address, setup.component2.address),
-    ];
-    const assetPairBounds: AssetChunkSizeBounds[] = [
-      {min: ZERO, max: ether(10 ** 10)},
+    const assetPairVolumeBounds = [
+      {
+        assetOne: setup.component1.address,
+        assetTwo: setup.component2.address,
+        bounds: {lower: ether(10 ** 4), upper: ether(10 ** 7)},
+      },
+      {
+        assetOne: setup.component2.address,
+        assetTwo: setup.component3.address,
+        bounds: {lower: ZERO, upper: ether(10 ** 6)},
+      },
     ];
 
     liquidator = await liquidatorHelper.deployTWAPLiquidatorAsync(

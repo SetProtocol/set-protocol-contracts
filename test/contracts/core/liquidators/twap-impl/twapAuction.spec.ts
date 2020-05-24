@@ -828,59 +828,6 @@ contract('TWAPAuction', accounts => {
     });
   });
 
-  // describe('#getAssetPairHashFromCollateral', async () => {
-  //   let subjectCurrentSet: Address;
-  //   let subjectNextSet: Address;
-
-  //   beforeEach(async () => {
-  //     twapAuction = await liquidatorHelper.deployTWAPAuctionMock(
-  //       oracleWhiteList.address,
-  //       auctionPeriod,
-  //       rangeStart,
-  //       rangeEnd,
-  //       assetPairVolumeBounds
-  //     );
-
-  //     subjectCurrentSet = set1.address;
-  //     subjectNextSet = set2.address;
-  //   });
-
-  //   async function subject(): Promise<string> {
-  //     return twapAuction.testGetAssetPairHashFromCollateral.callAsync(
-  //       subjectCurrentSet,
-  //       subjectNextSet
-  //     );
-  //   }
-
-  //   it('sets creates the correct asset pair hash', async () => {
-  //     const assetPairHash = await subject();
-
-  //     const expectedAssetPairHash = await liquidatorHelper.generateAssetPairHashes(
-  //       wrappedETH.address,
-  //       usdc.address
-  //     );
-
-  //     expect(assetPairHash).to.be.bignumber.equal(expectedAssetPairHash);
-  //   });
-
-  //   describe('when one Set has one component', async () => {
-  //     beforeEach(async () => {
-  //       subjectCurrentSet = set3.address;
-  //     });
-
-  //     it('sets creates the correct asset pair hash', async () => {
-  //       const assetPairHash = await subject();
-
-  //       const expectedAssetPairHash = await liquidatorHelper.generateAssetPairHashes(
-  //         wrappedETH.address,
-  //         usdc.address
-  //       );
-
-  //       expect(assetPairHash).to.be.bignumber.equal(expectedAssetPairHash);
-  //     });
-  //   });
-  // });
-
   describe('#parseLiquidatorData', async () => {
     let chunkSizeValue: BigNumber;
     let chunkAuctionPeriod: BigNumber;

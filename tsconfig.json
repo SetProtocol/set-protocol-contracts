@@ -19,7 +19,8 @@
       "node_modules/set-protocol-utils/types",
       "node_modules/@types"
     ],
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "include": [
     "artifacts/*.ts",
@@ -32,8 +33,5 @@
     "./buidler.config.ts",
     "./node_modules/@nomiclabs/buidler-web3/src/type-extensions.d.ts",
     "./node_modules/@nomiclabs/buidler-truffle5/src/type-extensions.d.ts"
-  ],
-  "compilerOptions": {
-    "skipLibCheck": true
-  }
+  ]
 }

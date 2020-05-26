@@ -1,11 +1,9 @@
 require('dotenv').config();
 
-const moduleAlias = require('module-alias')
-require('dotenv').config({ path: './.env'});
-
 //
 // Register alias
 //
+const moduleAlias = require('module-alias')
 moduleAlias.addAlias('@utils', __dirname + '/transpiled/utils')
 
 module.exports = {

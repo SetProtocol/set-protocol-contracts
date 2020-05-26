@@ -68,7 +68,6 @@ interface AuctionSettings {
 
 interface ScenarioAssertions {
   expectedAuctions: number;
-  // slippageIsLessThan: BigNumber;
 }
 
 interface TWAPScenario {
@@ -89,10 +88,6 @@ interface CheckPoint {
   timestamp: BigNumber;
 }
 
-
-// Cases to address
-  // Crazy increase of prices across AuctionS
-  // Crazy decrease in prices across auctions
 const scenarios: TWAPScenario[] = [
   {
     name: 'ETH 20 MA Set Rebalances 100% WETH to 100% USD',
@@ -284,7 +279,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
     blockchain.revertAsync();
   });
 
-  describe.only(`${scenarios[0].name}`, async () => {
+  describe(`${scenarios[0].name}`, async () => {
     it('should successfully complete', async () => {
       await runScenario(scenarios[0]);
 
@@ -459,7 +454,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   async function runAssertions(): Promise<void> {
     const rebalanceState = await setup.rebalancingSetToken.rebalanceState.callAsync();
 
-    expect(rebalanceState).to.bignumber.equal(0);
+    expect(rebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
     expect(auctionCounter).to.equal(scenario.asserts.expectedAuctions);
   }
 

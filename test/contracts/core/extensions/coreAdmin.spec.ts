@@ -22,7 +22,6 @@ import {
   PriceLibraryRemoved,
 } from '@utils/contract_logs/core';
 import {
-  LinearAuctionPriceCurveContract,
   CoreContract,
   SetTokenContract,
   SetTokenFactoryContract,
@@ -46,7 +45,7 @@ const { expect } = chai;
 const setTestUtils = new SetTestUtils(web3);
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
- const { NULL_ADDRESS } = SetUtils.CONSTANTS;
+const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
 contract('CoreAdmin', accounts => {
@@ -55,10 +54,10 @@ contract('CoreAdmin', accounts => {
     otherAccount,
     zeroExWrapperAddress,
     moduleAccount,
+    priceLibrary,
   ] = accounts;
 
   let core: CoreContract;
-  let priceLibrary: LinearAuctionPriceCurveContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
@@ -712,13 +711,9 @@ contract('CoreAdmin', accounts => {
 
     beforeEach(async () => {
       const usesStartPrice = false;
-      priceLibrary = await rebalancingHelper.deployLinearAuctionPriceCurveAsync(
-        DEFAULT_AUCTION_PRICE_DIVISOR,
-        usesStartPrice
-      );
 
       subjectCaller = ownerAccount;
-      subjectPriceLibrary = priceLibrary.address;
+      subjectPriceLibrary = priceLibrary;
     });
 
     async function subject(): Promise<string> {
@@ -785,13 +780,9 @@ contract('CoreAdmin', accounts => {
 
     beforeEach(async () => {
       const usesStartPrice = false;
-      priceLibrary = await rebalancingHelper.deployLinearAuctionPriceCurveAsync(
-        DEFAULT_AUCTION_PRICE_DIVISOR,
-        usesStartPrice
-      );
 
       subjectCaller = ownerAccount;
-      subjectPriceLibrary = priceLibrary.address;
+      subjectPriceLibrary = priceLibrary;
 
       await core.addPriceLibrary.sendTransactionAsync(
         subjectPriceLibrary,

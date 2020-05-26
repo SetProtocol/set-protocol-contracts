@@ -11,8 +11,8 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   RebalancingSetIssuanceModuleContract,
-  RebalancingSetTokenContract,
-  RebalancingSetTokenFactoryContract,
+  RebalancingSetTokenV3Contract,
+  RebalancingSetTokenV3FactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
@@ -54,7 +54,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
+  let rebalancingSetTokenFactory: RebalancingSetTokenV3FactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let rebalancingTokenIssuanceModule: RebalancingSetIssuanceModuleContract;
   let wethMock: WethMockContract;
@@ -81,7 +81,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
 
     await coreHelper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
-    rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(core.address, whitelist);
+    rebalancingSetTokenFactory = await coreHelper.deployRebalancingSetTokenV3FactoryAsync(core.address, whitelist);
     await coreHelper.addFactoryAsync(core, rebalancingSetTokenFactory);
 
     rebalancingTokenIssuanceModule = await coreHelper.deployRebalancingSetIssuanceModuleAsync(
@@ -117,7 +117,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
     let baseSetWethComponent: WethMockContract;
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
-    let rebalancingSetToken: RebalancingSetTokenContract;
+    let rebalancingSetToken: RebalancingSetTokenV3Contract;
     let rebalancingUnitShares: BigNumber;
     let baseSetComponentUnit: BigNumber;
     let baseSetIssueQuantity: BigNumber;
@@ -142,7 +142,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
 
       // Create the Rebalancing Set
       rebalancingUnitShares = new BigNumber(10 ** 6);
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
         core,
         rebalancingSetTokenFactory.address,
         ownerAccount,
@@ -208,7 +208,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
     let usdcComponent: StandardTokenMockContract;
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
-    let rebalancingSetToken: RebalancingSetTokenContract;
+    let rebalancingSetToken: RebalancingSetTokenV3Contract;
     let rebalancingUnitShares: BigNumber;
     let usdcComponentUnit: BigNumber;
     let baseSetIssueQuantity: BigNumber;
@@ -234,7 +234,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
 
       // Create the Rebalancing Set
       rebalancingUnitShares = new BigNumber(10 ** 6);
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
         core,
         rebalancingSetTokenFactory.address,
         ownerAccount,
@@ -300,7 +300,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
     let baseSetWethComponent: WethMockContract;
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
-    let rebalancingSetToken: RebalancingSetTokenContract;
+    let rebalancingSetToken: RebalancingSetTokenV3Contract;
     let rebalancingUnitShares: BigNumber;
 
     let wethRequiredToMintSet: BigNumber;
@@ -327,7 +327,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
 
       // Create the Rebalancing Set
       rebalancingUnitShares = new BigNumber(10 ** 6);
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
         core,
         rebalancingSetTokenFactory.address,
         ownerAccount,
@@ -414,7 +414,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
     let usdc: StandardTokenMockContract;
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
-    let rebalancingSetToken: RebalancingSetTokenContract;
+    let rebalancingSetToken: RebalancingSetTokenV3Contract;
     let rebalancingUnitShares: BigNumber;
 
     beforeEach(async () => {
@@ -439,7 +439,7 @@ contract('RebalancingSetIssuanceModule:Scenarios', accounts => {
 
       // Create the Rebalancing Set
       rebalancingUnitShares = new BigNumber(10 ** 6);
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
         core,
         rebalancingSetTokenFactory.address,
         ownerAccount,

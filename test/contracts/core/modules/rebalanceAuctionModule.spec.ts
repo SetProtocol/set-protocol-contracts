@@ -13,8 +13,8 @@ import {
   ConstantAuctionPriceCurveContract,
   CoreMockContract,
   RebalanceAuctionModuleMockContract,
-  RebalancingSetTokenContract,
-  RebalancingSetTokenFactoryContract,
+  RebalancingSetTokenV3Contract,
+  RebalancingSetTokenV3FactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   TransferProxyContract,
@@ -57,7 +57,7 @@ contract('RebalanceAuctionModule', accounts => {
     nonTrackedSetToken,
   ] = accounts;
 
-  let rebalancingSetToken: RebalancingSetTokenContract;
+  let rebalancingSetToken: RebalancingSetTokenV3Contract;
 
   let coreMock: CoreMockContract;
   let transferProxy: TransferProxyContract;
@@ -65,7 +65,7 @@ contract('RebalanceAuctionModule', accounts => {
   let rebalanceAuctionModuleMock: RebalanceAuctionModuleMockContract;
   let factory: SetTokenFactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
-  let rebalancingFactory: RebalancingSetTokenFactoryContract;
+  let rebalancingFactory: RebalancingSetTokenV3FactoryContract;
   let constantAuctionPriceCurve: ConstantAuctionPriceCurveContract;
 
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
@@ -98,7 +98,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     factory = await coreHelper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
-    rebalancingFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(
+    rebalancingFactory = await coreHelper.deployRebalancingSetTokenV3FactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
     );
@@ -117,7 +117,7 @@ contract('RebalanceAuctionModule', accounts => {
   });
 
   describe('#bid', async () => {
-    let subjectRebalancingSetToken: Address;
+    let subjectRebalancingSetTokenV3: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
     let subjectExecutePartialQuantity: boolean;
@@ -143,7 +143,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -166,13 +166,13 @@ contract('RebalanceAuctionModule', accounts => {
 
       subjectCaller = deployerAccount;
       subjectQuantity = minBid;
-      subjectRebalancingSetToken = rebalancingSetToken.address;
+      subjectRebalancingSetTokenV3 = rebalancingSetToken.address;
       subjectExecutePartialQuantity = false;
     });
 
     async function subject(): Promise<string> {
       return rebalanceAuctionModuleMock.bid.sendTransactionAsync(
-        subjectRebalancingSetToken,
+        subjectRebalancingSetTokenV3,
         subjectQuantity,
         subjectExecutePartialQuantity,
         { from: subjectCaller, gas: DEFAULT_GAS}
@@ -181,7 +181,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when bid is called by an invalid Set Token', async () => {
       beforeEach(async () => {
-        subjectRebalancingSetToken = nonTrackedSetToken;
+        subjectRebalancingSetTokenV3 = nonTrackedSetToken;
       });
 
       it('should revert', async () => {
@@ -478,7 +478,7 @@ contract('RebalanceAuctionModule', accounts => {
   });
 
   describe('#bidAndWithdraw', async () => {
-    let subjectRebalancingSetToken: Address;
+    let subjectRebalancingSetTokenV3: Address;
     let subjectQuantity: BigNumber;
     let subjectExecutePartialQuantity: boolean;
     let subjectCaller: Address;
@@ -504,7 +504,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -527,13 +527,13 @@ contract('RebalanceAuctionModule', accounts => {
 
       subjectCaller = deployerAccount;
       subjectQuantity = minBid;
-      subjectRebalancingSetToken = rebalancingSetToken.address;
+      subjectRebalancingSetTokenV3 = rebalancingSetToken.address;
       subjectExecutePartialQuantity = false;
     });
 
     async function subject(): Promise<string> {
       return rebalanceAuctionModuleMock.bidAndWithdraw.sendTransactionAsync(
-        subjectRebalancingSetToken,
+        subjectRebalancingSetTokenV3,
         subjectQuantity,
         subjectExecutePartialQuantity,
         { from: subjectCaller, gas: DEFAULT_GAS}
@@ -542,7 +542,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when bid is called by an invalid Set Token', async () => {
       beforeEach(async () => {
-        subjectRebalancingSetToken = nonTrackedSetToken;
+        subjectRebalancingSetTokenV3 = nonTrackedSetToken;
       });
 
       it('should revert', async () => {
@@ -856,7 +856,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -951,7 +951,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -1071,7 +1071,7 @@ contract('RebalanceAuctionModule', accounts => {
     });
   });
 
-  describe('#placeBid: Called on RebalancingSetToken', async () => {
+  describe('#placeBid: Called on RebalancingSetTokenV3', async () => {
     let subjectCaller: Address;
     let subjectQuantity: BigNumber;
 
@@ -1089,7 +1089,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -1134,7 +1134,7 @@ contract('RebalanceAuctionModule', accounts => {
   });
 
   describe('#redeemFromFailedRebalance', async () => {
-    let subjectRebalancingSetToken: Address;
+    let subjectRebalancingSetTokenV3: Address;
     let subjectCaller: Address;
     let proposalPeriod: BigNumber;
 
@@ -1157,7 +1157,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -1174,19 +1174,19 @@ contract('RebalanceAuctionModule', accounts => {
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetTokenQuantityToIssue);
 
       subjectCaller = deployerAccount;
-      subjectRebalancingSetToken = rebalancingSetToken.address;
+      subjectRebalancingSetTokenV3 = rebalancingSetToken.address;
     });
 
     async function subject(): Promise<string> {
       return rebalanceAuctionModuleMock.redeemFromFailedRebalance.sendTransactionAsync(
-        subjectRebalancingSetToken,
+        subjectRebalancingSetTokenV3,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
 
     describe('when redeemFromFailedRebalance is called by an invalid Set Token', async () => {
       beforeEach(async () => {
-        subjectRebalancingSetToken = nonTrackedSetToken;
+        subjectRebalancingSetTokenV3 = nonTrackedSetToken;
       });
 
       it('should revert', async () => {
@@ -1339,7 +1339,7 @@ contract('RebalanceAuctionModule', accounts => {
       nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
         coreMock,
         rebalancingFactory.address,
         managerAccount,

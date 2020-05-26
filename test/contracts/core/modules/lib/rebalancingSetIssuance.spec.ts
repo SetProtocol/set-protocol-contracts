@@ -10,8 +10,8 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   RebalancingSetIssuanceMockContract,
-  RebalancingSetTokenContract,
-  RebalancingSetTokenFactoryContract,
+  RebalancingSetTokenV3Contract,
+  RebalancingSetTokenV3FactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
@@ -52,7 +52,7 @@ contract('RebalancingSetIssuance', accounts => {
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
+  let rebalancingSetTokenFactory: RebalancingSetTokenV3FactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
   let rebalancingTokenIssuanceMock: RebalancingSetIssuanceMockContract;
 
@@ -174,7 +174,7 @@ contract('RebalancingSetIssuance', accounts => {
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
     let baseSetComponentUnit: BigNumber;
-    let rebalancingSetToken: RebalancingSetTokenContract;
+    let rebalancingSetToken: RebalancingSetTokenV3Contract;
     let rebalancingUnitShares: BigNumber;
 
     beforeEach(async () => {
@@ -256,7 +256,7 @@ contract('RebalancingSetIssuance', accounts => {
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
     let baseSetComponentUnit: BigNumber;
-    let rebalancingSetToken: RebalancingSetTokenContract;
+    let rebalancingSetToken: RebalancingSetTokenV3Contract;
     let rebalancingUnitShares: BigNumber;
 
     beforeEach(async () => {

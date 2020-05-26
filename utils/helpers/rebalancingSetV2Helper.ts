@@ -8,7 +8,6 @@ import {
   LiquidatorMockContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
-  RebalancingSetTokenContract,
   RebalancingSetTokenV2Contract,
   RebalancingSetTokenV3Contract,
   VaultContract,
@@ -280,7 +279,7 @@ export class RebalancingSetV2Helper extends RebalancingHelper {
   }
 
   public async endFailedRebalanceAsync(
-    rebalancingSetToken: RebalancingSetTokenContract,
+    rebalancingSetToken: RebalancingV2LikeContract,
     caller: Address = this._tokenOwnerAddress,
   ): Promise<void> {
     await rebalancingSetToken.endFailedAuction.sendTransactionAsync(

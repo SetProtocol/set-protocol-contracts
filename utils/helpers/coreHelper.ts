@@ -14,8 +14,6 @@ import {
   RebalancingSetIssuanceModuleContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
-  RebalancingSetTokenContract,
-  RebalancingSetTokenFactoryContract,
   RebalancingSetTokenV2FactoryContract,
   RebalancingSetTokenV3FactoryContract,
   SetTokenContract,
@@ -55,17 +53,11 @@ const RebalancingSetExchangeIssuanceModule = importArtifactsFromSource('Rebalanc
 const RebalancingSetIssuanceModule = importArtifactsFromSource('RebalancingSetIssuanceModule');
 const RebalanceAuctionModule = importArtifactsFromSource('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = importArtifactsFromSource('RebalanceAuctionModuleMock');
-const RebalancingSetTokenFactory = importArtifactsFromSource('RebalancingSetTokenFactory');
 const RebalancingSetTokenV2Factory = importArtifactsFromSource('RebalancingSetTokenV2Factory');
 const RebalancingSetTokenV3Factory = importArtifactsFromSource('RebalancingSetTokenV3Factory');
 const SetToken = importArtifactsFromSource('SetToken');
 const SetTokenFactory = importArtifactsFromSource('SetTokenFactory');
 const SetTokenLibrary = importArtifactsFromSource('SetTokenLibrary');
-const FailAuctionLibrary = importArtifactsFromSource('FailAuctionLibrary');
-const PlaceBidLibrary = importArtifactsFromSource('PlaceBidLibrary');
-const ProposeLibrary = importArtifactsFromSource('ProposeLibrary');
-const SettleRebalanceLibrary = importArtifactsFromSource('SettleRebalanceLibrary');
-const StartRebalanceLibrary = importArtifactsFromSource('StartRebalanceLibrary');
 const TransferProxy = importArtifactsFromSource('TransferProxy');
 const Vault = importArtifactsFromSource('Vault');
 const WhiteList = importArtifactsFromSource('WhiteList');
@@ -133,37 +125,6 @@ export class CoreHelper {
     );
   }
 
-  public async deployRebalancingSetTokenFactoryAsync(
-    coreAddress: Address,
-    componentWhitelistAddress: Address,
-    minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
-    minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
-    minimumTimeToPivot: BigNumber = ONE_DAY_IN_SECONDS.div(4),
-    maximumTimeToPivot: BigNumber = ONE_DAY_IN_SECONDS.mul(3),
-    minimumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MINIMUM_NATURAL_UNIT,
-    maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
-    from: Address = this._tokenOwnerAddress
-  ): Promise<RebalancingSetTokenFactoryContract> {
-    await this.linkRebalancingLibrariesAsync(RebalancingSetTokenFactory);
-
-    const truffleTokenFactory = await RebalancingSetTokenFactory.new(
-      coreAddress,
-      componentWhitelistAddress,
-      minimumRebalanceInterval,
-      minimumProposalPeriod,
-      minimumTimeToPivot,
-      maximumTimeToPivot,
-      minimumNaturalUnit,
-      maximumNaturalUnit,
-      { from },
-    );
-
-    return new RebalancingSetTokenFactoryContract(
-      getContractInstance(truffleTokenFactory),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
   public async deployRebalancingSetTokenV2FactoryAsync(
     coreAddress: Address,
     componentWhitelistAddress: Address,
@@ -176,8 +137,6 @@ export class CoreHelper {
     maximumNaturalUnit: BigNumber = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenV2FactoryContract> {
-    await this.linkRebalancingLibrariesAsync(RebalancingSetTokenV2Factory);
-
     const truffleTokenFactory = await RebalancingSetTokenV2Factory.new(
       coreAddress,
       componentWhitelistAddress,
@@ -525,26 +484,11 @@ export class CoreHelper {
     );
   }
 
-  public async linkRebalancingLibrariesAsync(
-    contract: any,
-  ): Promise<void> {
-    const libraries = [
-      ProposeLibrary,
-      StartRebalanceLibrary,
-      PlaceBidLibrary,
-      SettleRebalanceLibrary,
-      FailAuctionLibrary,
-      Bytes32Library,
-    ];
-    await linkLibrariesToDeploy(contract, libraries, this._tokenOwnerAddress);
-  }
-
-
   /* ============ CoreAdmin Extension ============ */
 
   public async addFactoryAsync(
     core: CoreLikeContract,
-    setTokenFactory: SetTokenFactoryContract | RebalancingSetTokenFactoryContract,
+    setTokenFactory: SetTokenFactoryContract | RebalancingSetTokenV3FactoryContract,
     from: Address = this._contractOwnerAddress,
   ) {
     await core.addFactory.sendTransactionAsync(
@@ -735,19 +679,6 @@ export class CoreHelper {
       token,
       to,
       quantity,
-      { from },
-    );
-  }
-
-  /* ============ RebalancingToken Factory ============ */
-
-  public async getRebalancingInstanceFromAddress(
-    rebalancingTokenAddress: Address,
-    from: Address = this._contractOwnerAddress,
-  ): Promise<RebalancingSetTokenContract> {
-    return await RebalancingSetTokenContract.at(
-      rebalancingTokenAddress,
-      web3,
       { from },
     );
   }

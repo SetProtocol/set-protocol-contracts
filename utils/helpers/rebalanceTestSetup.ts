@@ -29,6 +29,7 @@ import { ERC20Helper } from './erc20Helper';
 import { OracleHelper } from 'set-protocol-oracles';
 import { FeeCalculatorHelper } from './feeCalculatorHelper';
 import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { RebalancingSetV3Helper } from '@utils/helpers/rebalancingSetV3Helper';
 import { ValuationHelper } from '@utils/helpers/valuationHelper';
 
 const blockchain = new Blockchain(web3);
@@ -126,6 +127,12 @@ export class RebalanceTestSetup {
       this._coreHelper,
       this._erc20Helper,
       this._oracleHelper
+    );
+    this._rebalancingHelper = new RebalancingSetV3Helper(
+      deployerAccount,
+      this._coreHelper,
+      this._erc20Helper,
+      blockchain
     );
 
     this._liquidatorHelper = new LiquidatorHelper(this._contractOwnerAddress, this._erc20Helper, this._valuationHelper);
@@ -269,6 +276,30 @@ export class RebalanceTestSetup {
       name,
     );
     await this._coreHelper.addAddressToWhiteList(this.linearAuctionLiquidator.address, this.liquidatorWhitelist);
+  }
+
+  public createAndSetDefaultRebalancingSet(
+    setToken: SetTokenContract,
+    liquidatorAddress: Address,
+  ): Promise<void> {
+    const failPeriod = ONE_DAY_IN_SECONDS;
+    const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
+    const newSet = await this._rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
+      this.core,
+      this.rebalancingFactory.address,
+      managerAccount,
+      liquidatorAddress,
+      feeRecipient,
+      this.fixedFeeCalculator.address,
+      setToken,
+      failPeriod,
+      lastRebalanceTimestamp,
+      ZERO, // entry fee
+      ZERO, // rebalance fee
+      unitShares,
+    );
+
+    this.setRebalancingSet(newSet);
   }
 
   public setRebalancingSet(

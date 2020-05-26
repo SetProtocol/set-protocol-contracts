@@ -11,8 +11,8 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  RebalancingSetTokenContract,
-  RebalancingSetTokenFactoryContract,
+  RebalancingSetTokenV3Contract,
+  RebalancingSetTokenV3FactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
@@ -40,6 +40,7 @@ import { getWeb3 } from '@utils/web3Helper';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
 import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
+import { RebalanceTestSetup } from '@utils/helpers/rebalanceTestSetup';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -57,6 +58,7 @@ contract('CoreIssuance', accounts => {
     ownerAccount,
     otherAccount,
     managerAccount,
+    liquidatorAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -373,7 +375,7 @@ contract('CoreIssuance', accounts => {
     let subjectQuantityToIssue: BigNumber;
     let subjectSetToIssue: Address;
 
-    let rebalancingTokenFactory: RebalancingSetTokenFactoryContract;
+    let rebalancingTokenFactory: RebalancingSetTokenV3FactoryContract;
 
     let vanillaQuantityToIssue: BigNumber;
     let vanillaSetToIssue: Address;
@@ -382,16 +384,14 @@ contract('CoreIssuance', accounts => {
     let rebalancingNaturalUnit: BigNumber;
 
     let setToken: SetTokenContract;
-    let rebalancingSetToken: RebalancingSetTokenContract;
+    let rebalancingSetToken: RebalancingSetTokenV3Contract;
+
+    let setup: RebalanceTestSetup;
 
     beforeEach(async () => {
-      const rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
-      rebalancingTokenFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(
-        core.address,
-        rebalancingComponentWhiteList.address
-      );
-      await coreHelper.addFactoryAsync(core, rebalancingTokenFactory);
-
+      setup = new RebalanceTestSetup(ownerAccount);
+      await setup.initialize();
+      
       const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         core,
         setTokenFactory.address,
@@ -400,15 +400,12 @@ contract('CoreIssuance', accounts => {
       );
       setToken = setTokens[0];
 
-      rebalancingNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-      initialShareRatio = DEFAULT_UNIT_SHARES;
-      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
-        core,
-        rebalancingTokenFactory.address,
-        managerAccount,
-        setToken.address,
-        ONE_DAY_IN_SECONDS,
+      await setup.createAndSetDefaultRebalancingSet(        
+        setToken,
+        liquidatorAccount,
       );
+
+      rebalancingSetToken = setup.rebalancingSetToken;
 
       vanillaQuantityToIssue = ether(2);
       vanillaSetToIssue = setToken.address;
@@ -1022,7 +1019,7 @@ contract('CoreIssuance', accounts => {
     let subjectQuantityToRedeem: BigNumber;
     let subjectSetToRedeem: Address;
 
-    let rebalancingTokenFactory: RebalancingSetTokenFactoryContract;
+    let rebalancingTokenFactory: RebalancingSetTokenV3FactoryContract;
 
     let vanillaQuantityToIssue: BigNumber;
     let vanillaSetToIssue: Address;
@@ -1035,11 +1032,11 @@ contract('CoreIssuance', accounts => {
     let rebalancingTokenToIssue: Address;
 
     let setToken: SetTokenContract;
-    let rebalancingToken: RebalancingSetTokenContract;
+    let rebalancingToken: RebalancingSetTokenV3Contract;
 
     beforeEach(async () => {
       const rebalancingComponentWhiteList = await coreHelper.deployWhiteListAsync();
-      rebalancingTokenFactory = await coreHelper.deployRebalancingSetTokenFactoryAsync(
+      rebalancingTokenFactory = await coreHelper.deployRebalancingSetTokenV3FactoryAsync(
         core.address,
         rebalancingComponentWhiteList.address
       );
@@ -1056,7 +1053,7 @@ contract('CoreIssuance', accounts => {
 
       rebalancingNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       initialShareRatio = DEFAULT_UNIT_SHARES;
-      rebalancingToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenV3Async(
         core,
         rebalancingTokenFactory.address,
         managerAccount,

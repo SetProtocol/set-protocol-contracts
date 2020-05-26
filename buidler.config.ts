@@ -5,6 +5,13 @@ import { execSync } from "child_process";
 usePlugin("@nomiclabs/buidler-truffle5");
 usePlugin("@nomiclabs/buidler-web3");
 
+
+//
+// Register alias
+//
+const moduleAlias = require('module-alias');
+moduleAlias.addAlias('@utils', __dirname + '/utils');
+
 internalTask(TASK_COMPILE_RUN_COMPILER).setAction(async ({ input }, { config }, runSuper) => {
   let solcVersionOutput = "";
   try {

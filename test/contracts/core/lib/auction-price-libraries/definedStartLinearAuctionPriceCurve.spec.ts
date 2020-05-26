@@ -11,7 +11,6 @@ import { Blockchain } from '@utils/blockchain';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import ChaiSetup from '@utils/chaiSetup';
 import {
-  DEFAULT_GAS,
   DEFAULT_AUCTION_PRICE_DIVISOR,
   ZERO,
 } from '@utils/constants';
@@ -85,7 +84,6 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
     async function subject(): Promise<void> {
       return auctionCurve.validateAuctionPriceParameters.callAsync(
         subjectAuctionPriceParameters,
-        { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
 
@@ -159,7 +157,6 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
     async function subject(): Promise<BigNumber[]> {
       return auctionCurve.getCurrentPrice.callAsync(
         subjectAuctionPriceParameters,
-        { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
 

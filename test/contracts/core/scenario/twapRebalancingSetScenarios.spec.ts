@@ -4,7 +4,6 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
@@ -15,7 +14,6 @@ import {
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
-import { AssetChunkSizeBounds } from '@utils/auction';
 import {
   DEFAULT_GAS,
   ONE,
@@ -503,8 +501,7 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
       auctionPeriod,
       rangeStart,
       rangeEnd,
-      assetPairHashes,
-      assetPairBounds,
+      assetPairVolumeBounds,
       name,
     );
     await coreHelper.addAddressToWhiteList(liquidator.address, setup.liquidatorWhitelist);
@@ -573,9 +570,9 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
       // If not the last auction, then iterate to next auction
       if (await hasNextAuction()) {
         await blockchain.increaseTimeAsync(chunkAuctionPeriod);
-        
+
         await updatePrices();
-        
+
         await blockchain.mineBlockAsync();
 
         await liquidator.iterateChunkAuction.sendTransactionAsync(

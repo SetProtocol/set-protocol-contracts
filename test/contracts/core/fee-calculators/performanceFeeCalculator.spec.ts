@@ -48,8 +48,6 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const Core = artifacts.require('Core');
-const PerformanceFeeCalculator = artifacts.require('PerformanceFeeCalculator');
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 
@@ -94,8 +92,8 @@ contract('PerformanceFeeCalculator', accounts => {
   let feeCalculator: PerformanceFeeCalculatorContract;
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(PerformanceFeeCalculator.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
+    ABIDecoder.addABI(PerformanceFeeCalculatorContract.getAbi());
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -107,8 +105,8 @@ contract('PerformanceFeeCalculator', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(PerformanceFeeCalculator.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
+    ABIDecoder.removeABI(PerformanceFeeCalculatorContract.getAbi());
   });
 
   beforeEach(async () => {

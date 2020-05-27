@@ -34,8 +34,6 @@ import { expectRevertError } from '@utils/tokenAssertions';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
-const Core = artifacts.require('Core');
-const TwoAssetPriceBoundedLinearAuction = artifacts.require('TwoAssetPriceBoundedLinearAuction');
 
 contract('TwoAssetPriceBoundedLinearAuction', accounts => {
   const [
@@ -76,8 +74,8 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
   let rangeEnd: BigNumber;
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(TwoAssetPriceBoundedLinearAuction.abi);
+    ABIDecoder.addABI(CoreMockContract.getAbi());
+    ABIDecoder.addABI(TwoAssetPriceBoundedLinearAuctionMockContract.getAbi());
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -119,8 +117,8 @@ contract('TwoAssetPriceBoundedLinearAuction', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(TwoAssetPriceBoundedLinearAuction.abi);
+    ABIDecoder.removeABI(CoreMockContract.getAbi());
+    ABIDecoder.removeABI(TwoAssetPriceBoundedLinearAuctionMockContract.getAbi());
   });
 
   describe('#constructor', async () => {

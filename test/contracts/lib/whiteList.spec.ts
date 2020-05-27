@@ -19,7 +19,6 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
-const WhiteList = artifacts.require('WhiteList');
 const { expect } = chai;
 const setTestUtils = new SetTestUtils(web3);
 const blockchain = new Blockchain(web3);
@@ -39,11 +38,11 @@ contract('WhiteList', accounts => {
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(WhiteList.abi);
+    ABIDecoder.addABI(WhiteListContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(WhiteList.abi);
+    ABIDecoder.removeABI(WhiteListContract.getAbi());
   });
 
   beforeEach(async () => {
@@ -74,8 +73,9 @@ contract('WhiteList', accounts => {
       );
     }
 
-    it('creates a whitelist with the correct addresses', async () => {
+    it.only('creates a whitelist with the correct addresses', async () => {
       const whiteList = await subject();
+      // console.log("Whitelist", whiteList);
 
       const addresses = await whiteList.validAddresses.callAsync();
       expect(addresses).to.deep.equal(subjectInitialAddresses);

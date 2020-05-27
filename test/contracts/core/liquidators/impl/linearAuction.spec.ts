@@ -42,8 +42,6 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const Core = artifacts.require('Core');
-const LinearAuctionMock = artifacts.require('LinearAuctionMock');
 
 contract('LinearAuction', accounts => {
   const [
@@ -93,8 +91,8 @@ contract('LinearAuction', accounts => {
   let component3Oracle: UpdatableOracleMockContract;
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(LinearAuctionMock.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
+    ABIDecoder.addABI(LinearAuctionMockContract.getAbi());
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -156,8 +154,8 @@ contract('LinearAuction', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(LinearAuctionMock.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
+    ABIDecoder.removeABI(LinearAuctionMockContract.getAbi());
   });
 
   beforeEach(async () => {

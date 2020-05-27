@@ -42,9 +42,6 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 
-const Core = artifacts.require('Core');
-const TwoAssetPriceBoundedLinearAuction = artifacts.require('TwoAssetPriceBoundedLinearAuction');
-
 contract('TWAPAuction', accounts => {
   const [
     deployerAccount,
@@ -89,8 +86,8 @@ contract('TWAPAuction', accounts => {
   let assetPairVolumeBounds: AssetPairVolumeBounds[];
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(TwoAssetPriceBoundedLinearAuction.abi);
+    ABIDecoder.addABI(CoreMockContract.getAbi());
+    ABIDecoder.addABI(TWAPAuctionMockContract.getAbi());
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -162,8 +159,8 @@ contract('TWAPAuction', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(TwoAssetPriceBoundedLinearAuction.abi);
+    ABIDecoder.removeABI(CoreMockContract.getAbi());
+    ABIDecoder.removeABI(TWAPAuctionMockContract.getAbi());
   });
 
   describe('#constructor', async () => {

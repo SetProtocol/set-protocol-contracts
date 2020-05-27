@@ -40,8 +40,6 @@ import { KyberNetworkHelper } from '@utils/helpers/kyberNetworkHelper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const Core = artifacts.require('Core');
-const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const blockchain = new Blockchain(web3);
 const setTestUtils = new SetTestUtils(web3);
@@ -70,13 +68,13 @@ contract('ExchangeIssuanceModule', accounts => {
   const kyberNetworkHelper = new KyberNetworkHelper();
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(ExchangeIssuanceModule.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
+    ABIDecoder.addABI(ExchangeIssuanceModuleContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(ExchangeIssuanceModule.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
+    ABIDecoder.removeABI(ExchangeIssuanceModuleContract.getAbi());
   });
 
   beforeEach(async () => {

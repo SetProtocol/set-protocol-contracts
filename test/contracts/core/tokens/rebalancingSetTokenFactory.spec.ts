@@ -38,7 +38,6 @@ import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const Core = artifacts.require('Core');
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
@@ -66,11 +65,11 @@ contract('RebalancingSetTokenFactory', accounts => {
   const rebalanceHelper = new RebalancingHelper(deployerAccount, coreHelper, erc20Helper, blockchain);
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
   });
 
   beforeEach(async () => {

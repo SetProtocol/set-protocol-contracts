@@ -23,7 +23,6 @@ import { ERC20Helper } from '@utils/helpers/erc20Helper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const SetToken = artifacts.require('SetToken');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
@@ -46,11 +45,11 @@ contract('SetToken', accounts => {
   const erc20Helper = new ERC20Helper(deployerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(SetToken.abi);
+    ABIDecoder.addABI(SetTokenContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(SetToken.abi);
+    ABIDecoder.removeABI(SetTokenContract.getAbi());
   });
 
   beforeEach(async () => {

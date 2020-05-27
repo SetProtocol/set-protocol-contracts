@@ -22,7 +22,6 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
-const AddressToAddressWhiteList = artifacts.require('AddressToAddressWhiteList');
 const { expect } = chai;
 const setTestUtils = new SetTestUtils(web3);
 const blockchain = new Blockchain(web3);
@@ -45,11 +44,11 @@ contract('AddressToAddressWhiteList', accounts => {
   const utilsHelper = new UtilsHelper(ownerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(AddressToAddressWhiteList.abi);
+    ABIDecoder.addABI(AddressToAddressWhiteList.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(AddressToAddressWhiteList.abi);
+    ABIDecoder.removeABI(AddressToAddressWhiteList.getAbi());
   });
 
   beforeEach(async () => {

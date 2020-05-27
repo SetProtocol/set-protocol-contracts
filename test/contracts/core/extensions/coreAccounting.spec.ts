@@ -28,7 +28,6 @@ import { ERC20Helper } from '@utils/helpers/erc20Helper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const StandardTokenMock = artifacts.require('StandardTokenMock');
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
@@ -52,11 +51,11 @@ contract('CoreAccounting', accounts => {
   const erc20Helper = new ERC20Helper(ownerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(StandardTokenMock.abi);
+    ABIDecoder.addABI(StandardTokenMockContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(StandardTokenMock.abi);
+    ABIDecoder.removeABI(StandardTokenMockContract.getAbi());
   });
 
   beforeEach(async () => {

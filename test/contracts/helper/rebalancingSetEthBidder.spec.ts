@@ -46,9 +46,6 @@ import { RebalancingSetBidderHelper } from '@utils/helpers/rebalancingSetBidderH
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const CoreMock = artifacts.require('CoreMock');
-const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
-const RebalancingSetEthBidder = artifacts.require('RebalancingSetEthBidder');
 const blockchain = new Blockchain(web3);
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
@@ -83,9 +80,9 @@ contract('RebalancingSetEthBidder', accounts => {
   const rebalancingSetBidderHelper = new RebalancingSetBidderHelper(deployerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(CoreMock.abi);
-    ABIDecoder.addABI(RebalanceAuctionModuleMock.abi);
-    ABIDecoder.addABI(RebalancingSetEthBidder.abi);
+    ABIDecoder.addABI(CoreMockContract.getAbi());
+    ABIDecoder.addABI(RebalanceAuctionModuleMockContract.getAbi());
+    ABIDecoder.addABI(RebalancingSetEthBidderContract.getAbi());
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -118,9 +115,9 @@ contract('RebalancingSetEthBidder', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(CoreMock.abi);
-    ABIDecoder.removeABI(RebalanceAuctionModuleMock.abi);
-    ABIDecoder.removeABI(RebalancingSetEthBidder.abi);
+    ABIDecoder.removeABI(CoreMockContract.getAbi());
+    ABIDecoder.removeABI(RebalanceAuctionModuleMockContract.getAbi());
+    ABIDecoder.removeABI(RebalancingSetEthBidderContract.getAbi());
   });
 
   beforeEach(async () => {

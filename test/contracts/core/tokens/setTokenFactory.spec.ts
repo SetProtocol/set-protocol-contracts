@@ -29,8 +29,6 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const Core = artifacts.require('Core');
-const SetTokenFactory = artifacts.require('SetTokenFactory');
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 
 contract('SetTokenFactory', accounts => {
@@ -50,13 +48,13 @@ contract('SetTokenFactory', accounts => {
   const erc20Helper = new ERC20Helper(deployerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(SetTokenFactory.abi);
-    ABIDecoder.addABI(Core.abi);
+    ABIDecoder.addABI(SetTokenFactoryContract.getAbi());
+    ABIDecoder.addABI(CoreContract.getAbi());
   });
 
   after(async () => {
     ABIDecoder.removeABI(SetTokenFactory.abi);
-    ABIDecoder.removeABI(Core.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
   });
 
   beforeEach(async () => {

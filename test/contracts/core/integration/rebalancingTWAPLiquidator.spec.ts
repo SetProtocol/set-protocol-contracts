@@ -10,6 +10,7 @@ import { BigNumber } from 'bignumber.js';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  CoreMockContract,
   TWAPLiquidatorContract,
   SetTokenContract,
   RebalancingSetTokenV3Contract,
@@ -37,7 +38,6 @@ import { RebalanceTestSetup } from '@utils/helpers/rebalanceTestSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const CoreMock = artifacts.require('CoreMock');
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
@@ -83,11 +83,11 @@ contract('RebalancingSetV3 - TWAPLiquidator', accounts => {
   const scenario = new RebalanceTestSetup(deployerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(CoreMock.abi);
+    ABIDecoder.addABI(CoreMockContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(CoreMock.abi);
+    ABIDecoder.removeABI(CoreMockContract.getAbi());
   });
 
   async function createSetAndMint(): Promise<void> {

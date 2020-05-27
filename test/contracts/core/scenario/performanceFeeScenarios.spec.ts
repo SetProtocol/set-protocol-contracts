@@ -34,7 +34,6 @@ import { RebalanceTestSetup, PriceUpdate } from '@utils/helpers/rebalanceTestSet
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const CoreMock = artifacts.require('CoreMock');
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
@@ -326,11 +325,11 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
   const feeCalculatorHelper = new FeeCalculatorHelper(deployerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(CoreMock.abi);
+    ABIDecoder.addABI(CoreMockContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(CoreMock.abi);
+    ABIDecoder.removeABI(CoreMockContract.getAbi());
   });
 
   beforeEach(async () => {

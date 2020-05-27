@@ -33,7 +33,6 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const TransferProxy = artifacts.require('TransferProxy');
 
 
 contract('TransferProxy', accounts => {
@@ -53,11 +52,11 @@ contract('TransferProxy', accounts => {
   const erc20Helper = new ERC20Helper(ownerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(TransferProxy.abi);
+    ABIDecoder.addABI(TransferProxyContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(TransferProxy.abi);
+    ABIDecoder.removeABI(TransferProxyContract.getAbi());
   });
 
   beforeEach(async () => {

@@ -19,7 +19,6 @@ import { getWeb3 } from '@utils/web3Helper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
@@ -36,11 +35,11 @@ contract('CoreOperationState', accounts => {
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
   });
 
   beforeEach(async () => {

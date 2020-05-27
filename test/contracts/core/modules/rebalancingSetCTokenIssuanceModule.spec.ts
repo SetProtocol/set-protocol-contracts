@@ -85,12 +85,12 @@ contract('RebalancingSetIssuanceModule', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(CoreContract.getAbi());
-    ABIDecoder.addABI(RebalancingSetIssuanceModuleContract.getAbi());
+    ABIDecoder.addABI(RebalancingSetCTokenIssuanceModuleContract.getAbi());
   });
 
   after(async () => {
     ABIDecoder.removeABI(CoreContract.getAbi());
-    ABIDecoder.removeABI(RebalancingSetIssuanceModuleContract.getAbi());
+    ABIDecoder.removeABI(RebalancingSetCTokenIssuanceModuleContract.getAbi());
   });
 
   beforeEach(async () => {

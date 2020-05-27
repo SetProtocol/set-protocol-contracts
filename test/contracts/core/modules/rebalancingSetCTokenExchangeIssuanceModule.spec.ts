@@ -97,7 +97,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(CoreContract.getAbi());
-    ABIDecoder.addABI(RebalancingSetExchangeIssuanceModuleContract.getAbi());
+    ABIDecoder.addABI(RebalancingSetCTokenExchangeIssuanceModuleContract.getAbi());
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -173,7 +173,7 @@ contract('RebalancingSetExchangeIssuanceModule', accounts => {
 
   after(async () => {
     ABIDecoder.removeABI(CoreContract.getAbi());
-    ABIDecoder.removeABI(RebalancingSetExchangeIssuanceModuleContract.getAbi());
+    ABIDecoder.removeABI(RebalancingSetCTokenExchangeIssuanceModuleContract.getAbi());
   });
 
   beforeEach(async () => {

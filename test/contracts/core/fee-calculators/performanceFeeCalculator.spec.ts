@@ -92,7 +92,7 @@ contract('PerformanceFeeCalculator', accounts => {
   let feeCalculator: PerformanceFeeCalculatorContract;
 
   before(async () => {
-    ABIDecoder.addABI(CoreContract.getAbi());
+    ABIDecoder.addABI(CoreMockContract.getAbi());
     ABIDecoder.addABI(PerformanceFeeCalculatorContract.getAbi());
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
@@ -105,7 +105,7 @@ contract('PerformanceFeeCalculator', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(CoreContract.getAbi());
+    ABIDecoder.removeABI(CoreMockContract.getAbi());
     ABIDecoder.removeABI(PerformanceFeeCalculatorContract.getAbi());
   });
 

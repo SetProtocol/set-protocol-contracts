@@ -8,6 +8,7 @@ import { BigNumber } from 'bignumber.js';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  CoreContract,
   CoreIssuanceLibraryMockContract
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';

@@ -2,7 +2,6 @@ require('module-alias/register');
 
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import { LinearAuctionPriceCurveContract } from '@utils/contracts';
@@ -64,7 +63,6 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
     let auctionPivotPrice: BigNumber;
 
     let subjectAuctionPriceParameters: any;
-    let subjectCaller: Address;
 
     beforeEach(async () => {
       auctionStartPrice = new BigNumber(500);
@@ -78,7 +76,6 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
         auctionStartPrice,
         auctionPivotPrice,
       };
-      subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<void> {
@@ -137,7 +134,6 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
     let auctionPivotPrice: BigNumber;
 
     let subjectAuctionPriceParameters: any;
-    let subjectCaller: Address;
 
     beforeEach(async () => {
       auctionStartPrice = new BigNumber(500);
@@ -151,7 +147,6 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
         auctionStartTime,
         auctionPivotPrice,
       };
-      subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<BigNumber[]> {

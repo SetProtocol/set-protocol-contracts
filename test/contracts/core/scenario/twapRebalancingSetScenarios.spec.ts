@@ -9,6 +9,8 @@ import { BigNumber } from 'bignumber.js';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  CoreMockContract,
+  RebalanceAuctionModuleContract,
   TWAPLiquidatorContract,
   RebalancingSetTokenV3Contract,
 } from '@utils/contracts';

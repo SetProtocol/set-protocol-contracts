@@ -73,7 +73,7 @@ contract('WhiteList', accounts => {
       );
     }
 
-    it.only('creates a whitelist with the correct addresses', async () => {
+    it('creates a whitelist with the correct addresses', async () => {
       const whiteList = await subject();
       // console.log("Whitelist", whiteList);
 

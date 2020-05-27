@@ -44,11 +44,11 @@ contract('AddressToAddressWhiteList', accounts => {
   const utilsHelper = new UtilsHelper(ownerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(AddressToAddressWhiteList.getAbi());
+    ABIDecoder.addABI(AddressToAddressWhiteListContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(AddressToAddressWhiteList.getAbi());
+    ABIDecoder.removeABI(AddressToAddressWhiteListContract.getAbi());
   });
 
   beforeEach(async () => {

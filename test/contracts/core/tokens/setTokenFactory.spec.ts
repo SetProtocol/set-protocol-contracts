@@ -53,7 +53,7 @@ contract('SetTokenFactory', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(SetTokenFactory.abi);
+    ABIDecoder.removeABI(SetTokenFactoryContract.getAbi());
     ABIDecoder.removeABI(CoreContract.getAbi());
   });
 

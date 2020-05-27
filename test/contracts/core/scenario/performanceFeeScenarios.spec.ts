@@ -3,12 +3,12 @@ require('module-alias/register');
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
-import * as setProtocolUtils from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  CoreMockContract,
   PerformanceFeeCalculatorContract,
   RebalancingSetTokenV3Contract,
 } from '@utils/contracts';
@@ -34,7 +34,6 @@ import { RebalanceTestSetup, PriceUpdate } from '@utils/helpers/rebalanceTestSet
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
@@ -128,7 +127,7 @@ const scenarios: PerfFeeScenarios[] = [
       profitFeeHasChanged: true,
       highWaterMarkHasChanged: true,
       lastProfitFeeTimestampHasChanged: true,
-    }
+    },
   },
   {
     name: 'Scenario 2',
@@ -148,7 +147,7 @@ const scenarios: PerfFeeScenarios[] = [
       profitFeeHasChanged: true,
       highWaterMarkHasChanged: true,
       lastProfitFeeTimestampHasChanged: true,
-    }
+    },
   },
   {
     name: 'Scenario 3',
@@ -168,7 +167,7 @@ const scenarios: PerfFeeScenarios[] = [
       profitFeeHasChanged: true,
       highWaterMarkHasChanged: false,
       lastProfitFeeTimestampHasChanged: false,
-    }
+    },
   },
   {
     name: 'Scenario 4',
@@ -188,7 +187,7 @@ const scenarios: PerfFeeScenarios[] = [
       profitFeeHasChanged: true,
       highWaterMarkHasChanged: false,
       lastProfitFeeTimestampHasChanged: false,
-    }
+    },
   },
   {
     name: 'Scenario 5',
@@ -208,7 +207,7 @@ const scenarios: PerfFeeScenarios[] = [
       profitFeeHasChanged: true,
       highWaterMarkHasChanged: true,
       lastProfitFeeTimestampHasChanged: true,
-    }
+    },
   },
   {
     name: 'Scenario 6',
@@ -228,7 +227,7 @@ const scenarios: PerfFeeScenarios[] = [
       profitFeeHasChanged: true,
       highWaterMarkHasChanged: true,
       lastProfitFeeTimestampHasChanged: true,
-    }
+    },
   },
   {
     name: 'Scenario 7',
@@ -248,7 +247,7 @@ const scenarios: PerfFeeScenarios[] = [
       profitFeeHasChanged: true,
       highWaterMarkHasChanged: true,
       lastProfitFeeTimestampHasChanged: true,
-    }
+    },
   },
   {
     name: 'Scenario 8',
@@ -268,7 +267,7 @@ const scenarios: PerfFeeScenarios[] = [
       profitFeeHasChanged: true,
       highWaterMarkHasChanged: false,
       lastProfitFeeTimestampHasChanged: false,
-    }
+    },
   },
   {
     name: 'Scenario 9',
@@ -288,7 +287,7 @@ const scenarios: PerfFeeScenarios[] = [
       profitFeeHasChanged: true,
       highWaterMarkHasChanged: false,
       lastProfitFeeTimestampHasChanged: false,
-    }
+    },
   },
 ];
 
@@ -296,7 +295,6 @@ contract('PerformanceFeeCalculator Scenarios', accounts => {
   const [
     deployerAccount,
     managerAccount,
-    otherAccount,
     feeRecipient,
   ] = accounts;
 

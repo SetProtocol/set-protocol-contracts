@@ -47,7 +47,7 @@
     "transformJson": "node scripts/transform_contract_json.js",
     "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name '*.spec.js'`",
     "prepublishOnly": "yarn dist",
-    "flatten": "truffle-flattener contracts/core/[XX]/[XX].sol",
+    "flatten": "truffle-flattener contracts/core/[xxx]/[xxx].sol",
     "minify-artifacts": "yarn run minify-all dist/artifacts/ts/"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",

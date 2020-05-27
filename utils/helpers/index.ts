@@ -7,4 +7,5 @@ export { LiquidatorHelper } from './liquidatorHelper';
 export { RebalancingHelper } from './rebalancingHelper';
 export { RebalancingSetV2Helper } from './rebalancingSetV2Helper';
 export { RebalancingSetV3Helper } from './rebalancingSetV3Helper';
+export { RebalanceTestSetup } from './rebalanceTestSetup';
 export { ValuationHelper } from './valuationHelper';

@@ -22,7 +22,6 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
-const OracleWhiteList = artifacts.require('OracleWhiteList');
 const { expect } = chai;
 const setTestUtils = new SetTestUtils(web3);
 const blockchain = new Blockchain(web3);
@@ -45,11 +44,11 @@ contract('OracleWhiteList', accounts => {
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(OracleWhiteList.abi);
+    ABIDecoder.addABI(OracleWhiteListContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(OracleWhiteList.abi);
+    ABIDecoder.removeABI(OracleWhiteListContract.getAbi());
   });
 
   beforeEach(async () => {

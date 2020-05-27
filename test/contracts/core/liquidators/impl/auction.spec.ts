@@ -36,8 +36,6 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const Core = artifacts.require('Core');
-const AuctionMock = artifacts.require('AuctionMock');
 
 contract('Auction', accounts => {
   const [
@@ -74,8 +72,8 @@ contract('Auction', accounts => {
   let set2NaturalUnit: BigNumber;
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(AuctionMock.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
+    ABIDecoder.addABI(AuctionMockContract.getAbi());
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -113,8 +111,8 @@ contract('Auction', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(AuctionMock.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
+    ABIDecoder.removeABI(AuctionMockContract.getAbi());
   });
 
   beforeEach(async () => {

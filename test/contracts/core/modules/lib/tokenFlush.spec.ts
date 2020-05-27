@@ -34,8 +34,6 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const Core = artifacts.require('Core');
-const TokenFlushMock = artifacts.require('TokenFlushMock');
 
 contract('TokenFlush', accounts => {
   const [
@@ -56,8 +54,8 @@ contract('TokenFlush', accounts => {
   const libraryHelper = new LibraryMockHelper(ownerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(TokenFlushMock.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
+    ABIDecoder.addABI(TokenFlushMockContract.getAbi());
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -80,8 +78,8 @@ contract('TokenFlush', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(TokenFlushMock.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
+    ABIDecoder.removeABI(TokenFlushMockContract.getAbi());
   });
 
   beforeEach(async () => {

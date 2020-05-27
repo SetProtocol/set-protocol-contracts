@@ -45,7 +45,6 @@ const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setPr
 const { expect } = chai;
 const setTestUtils = new SetTestUtils(web3);
 const blockchain = new Blockchain(web3);
-const Core = artifacts.require('Core');
  const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
@@ -68,11 +67,11 @@ contract('CoreAdmin', accounts => {
   const rebalancingHelper = new RebalancingHelper(ownerAccount, coreHelper, erc20Helper, blockchain);
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
   });
 
   beforeEach(async () => {

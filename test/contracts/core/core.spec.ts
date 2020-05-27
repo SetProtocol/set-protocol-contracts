@@ -17,8 +17,6 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const Core = artifacts.require('Core');
-
 
 contract('Core', accounts => {
   const [
@@ -31,11 +29,11 @@ contract('Core', accounts => {
   const coreHelper = new CoreHelper(ownerAccount, ownerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
   });
 
   beforeEach(async () => {

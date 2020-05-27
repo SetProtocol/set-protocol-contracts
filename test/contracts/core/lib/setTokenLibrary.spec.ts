@@ -30,7 +30,6 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
-const Core = artifacts.require('Core');
 const blockchain = new Blockchain(web3);
 
 
@@ -53,11 +52,11 @@ const [
   const libraryMockHelper = new LibraryMockHelper(contractDeployer);
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
   });
 
   beforeEach(async () => {

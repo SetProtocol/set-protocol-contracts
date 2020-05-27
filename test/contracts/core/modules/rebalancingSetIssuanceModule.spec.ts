@@ -40,8 +40,6 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const Core = artifacts.require('Core');
-const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
 
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { ZERO } = SetUtils.CONSTANTS;
@@ -72,8 +70,8 @@ contract('RebalancingSetIssuanceModule', accounts => {
   );
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(RebalancingSetIssuanceModule.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
+    ABIDecoder.addABI(RebalancingSetIssuanceModuleContract.getAbi());
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -97,8 +95,8 @@ contract('RebalancingSetIssuanceModule', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(RebalancingSetIssuanceModule.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
+    ABIDecoder.removeABI(RebalancingSetIssuanceModuleContract.getAbi());
   });
 
   beforeEach(async () => {

@@ -41,8 +41,6 @@ import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const CoreMock = artifacts.require('CoreMock');
-const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
@@ -78,13 +76,13 @@ contract('RebalanceAuctionModule', accounts => {
   );
 
   before(async () => {
-    ABIDecoder.addABI(CoreMock.abi);
-    ABIDecoder.addABI(RebalanceAuctionModuleMock.abi);
+    ABIDecoder.addABI(CoreMockContract.getAbi());
+    ABIDecoder.addABI(RebalanceAuctionModuleMockContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(CoreMock.abi);
-    ABIDecoder.removeABI(RebalanceAuctionModuleMock.abi);
+    ABIDecoder.removeABI(CoreMockContract.getAbi());
+    ABIDecoder.removeABI(RebalanceAuctionModuleMockContract.getAbi());
   });
 
   beforeEach(async () => {

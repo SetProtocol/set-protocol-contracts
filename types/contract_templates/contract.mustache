@@ -84,4 +84,9 @@ export class {{contractName}}Contract extends BaseContract {
     super(web3ContractInstance, defaults);
     classUtils.bindAll(this, ['web3ContractInstance', 'defaults']);
   }
+
+  static getAbi(): ABIDefinition[] {
+    const { abi }: { abi: any[] } = require('../../artifacts/ts/{{contractName}}').{{contractName}};
+    return abi;
+  }
 } // tslint:disable:max-file-line-count

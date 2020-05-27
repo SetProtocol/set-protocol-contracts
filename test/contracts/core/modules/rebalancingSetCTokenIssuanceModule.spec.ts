@@ -46,8 +46,6 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const Core = artifacts.require('Core');
-const RebalancingSetIssuanceModule = artifacts.require('RebalancingSetIssuanceModule');
 
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { ZERO } = SetUtils.CONSTANTS;
@@ -86,13 +84,13 @@ contract('RebalancingSetIssuanceModule', accounts => {
   const utilsHelper = new UtilsHelper(ownerAccount);
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(RebalancingSetIssuanceModule.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
+    ABIDecoder.addABI(RebalancingSetCTokenIssuanceModuleContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(RebalancingSetIssuanceModule.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
+    ABIDecoder.removeABI(RebalancingSetCTokenIssuanceModuleContract.getAbi());
   });
 
   beforeEach(async () => {

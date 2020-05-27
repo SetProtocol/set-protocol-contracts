@@ -10,6 +10,7 @@ import { Address } from 'set-protocol-utils';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  CoreMockContract,
   LiquidatorProxyContract,
   OracleWhiteListContract,
   TWAPLiquidatorContract,
@@ -50,8 +51,6 @@ const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
-const Core = artifacts.require('Core');
-const TWAPLiquidator = artifacts.require('TWAPLiquidator');
 
 export interface TWAPAuction {
   chunkAuction: LinearAuction;
@@ -88,8 +87,8 @@ contract('TWAPLiquidator', accounts => {
   let assetPairVolumeBounds: AssetPairVolumeBounds[];
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(TWAPLiquidator.abi);
+    ABIDecoder.addABI(CoreMockContract.getAbi());
+    ABIDecoder.addABI(TWAPLiquidatorContract.getAbi());
 
     await scenario.initialize();
 
@@ -140,8 +139,8 @@ contract('TWAPLiquidator', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(TWAPLiquidator.abi);
+    ABIDecoder.removeABI(CoreMockContract.getAbi());
+    ABIDecoder.removeABI(TWAPLiquidatorContract.getAbi());
   });
 
   beforeEach(async () => {

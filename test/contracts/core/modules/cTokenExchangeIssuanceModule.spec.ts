@@ -47,8 +47,6 @@ import { UtilsHelper } from '@utils/helpers/utilsHelper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const Core = artifacts.require('Core');
-const CTokenExchangeIssuanceModule = artifacts.require('CTokenExchangeIssuanceModule');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const blockchain = new Blockchain(web3);
 const setTestUtils = new SetTestUtils(web3);
@@ -86,13 +84,13 @@ contract('CTokenExchangeIssuanceModule', accounts => {
   const utilsHelper = new UtilsHelper(contractDeployer);
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(CTokenExchangeIssuanceModule.abi);
+    ABIDecoder.addABI(CoreContract.getAbi());
+    ABIDecoder.addABI(CTokenExchangeIssuanceModuleContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(CTokenExchangeIssuanceModule.abi);
+    ABIDecoder.removeABI(CoreContract.getAbi());
+    ABIDecoder.removeABI(CTokenExchangeIssuanceModuleContract.getAbi());
   });
 
   beforeEach(async () => {

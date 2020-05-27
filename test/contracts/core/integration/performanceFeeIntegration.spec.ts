@@ -45,8 +45,6 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
-const Core = artifacts.require('Core');
-const FixedFeeCalculator = artifacts.require('FixedFeeCalculator');
 
 contract('PerformanceFeeCalculator Integration Test', accounts => {
   const [
@@ -98,8 +96,8 @@ contract('PerformanceFeeCalculator Integration Test', accounts => {
   const rebalancingSetV3Helper = new RebalancingSetV3Helper(ownerAccount, coreHelper, erc20Helper, blockchain);
 
   before(async () => {
-    ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(FixedFeeCalculator.abi);
+    ABIDecoder.addABI(CoreMockContract.getAbi());
+    ABIDecoder.addABI(PerformanceFeeCalculatorContract.getAbi());
 
     transferProxy = await coreHelper.deployTransferProxyAsync();
     vault = await coreHelper.deployVaultAsync();
@@ -124,8 +122,8 @@ contract('PerformanceFeeCalculator Integration Test', accounts => {
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(FixedFeeCalculator.abi);
+    ABIDecoder.removeABI(CoreMockContract.getAbi());
+    ABIDecoder.removeABI(PerformanceFeeCalculatorContract.getAbi());
   });
 
   beforeEach(async () => {

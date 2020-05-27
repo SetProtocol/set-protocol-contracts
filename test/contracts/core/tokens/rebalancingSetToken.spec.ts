@@ -49,8 +49,6 @@ import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const CoreMock = artifacts.require('CoreMock');
-const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
@@ -90,13 +88,13 @@ contract('RebalancingSetToken', accounts => {
   );
 
   before(async () => {
-    ABIDecoder.addABI(CoreMock.abi);
-    ABIDecoder.addABI(RebalancingSetToken.abi);
+    ABIDecoder.addABI(CoreMockContract.getAbi());
+    ABIDecoder.addABI(RebalancingSetTokenContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(CoreMock.abi);
-    ABIDecoder.removeABI(RebalancingSetToken.abi);
+    ABIDecoder.removeABI(CoreMockContract.getAbi());
+    ABIDecoder.removeABI(RebalancingSetTokenContract.getAbi());
   });
 
   beforeEach(async () => {

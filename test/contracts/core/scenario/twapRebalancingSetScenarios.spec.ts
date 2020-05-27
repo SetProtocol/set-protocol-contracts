@@ -9,6 +9,8 @@ import { BigNumber } from 'bignumber.js';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  CoreMockContract,
+  RebalanceAuctionModuleContract,
   TWAPLiquidatorContract,
   RebalancingSetTokenV3Contract,
 } from '@utils/contracts';
@@ -34,8 +36,6 @@ import { RebalanceTestSetup, PriceUpdate } from '@utils/helpers/rebalanceTestSet
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const CoreMock = artifacts.require('CoreMock');
-const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
@@ -258,13 +258,13 @@ contract('RebalancingSetV3 - TWAPLiquidator Scenarios', accounts => {
   const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, valuationHelper);
 
   before(async () => {
-    ABIDecoder.addABI(CoreMock.abi);
-    ABIDecoder.addABI(RebalanceAuctionModule.abi);
+    ABIDecoder.addABI(CoreMockContract.getAbi());
+    ABIDecoder.addABI(RebalanceAuctionModuleContract.getAbi());
   });
 
   after(async () => {
-    ABIDecoder.removeABI(CoreMock.abi);
-    ABIDecoder.addABI(RebalanceAuctionModule.abi);
+    ABIDecoder.removeABI(CoreMockContract.getAbi());
+    ABIDecoder.removeABI(RebalanceAuctionModuleContract.getAbi());
   });
 
   beforeEach(async () => {

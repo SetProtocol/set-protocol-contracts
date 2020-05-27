@@ -2,22 +2,17 @@ require('module-alias/register');
 
 import * as _ from 'lodash';
 import * as chai from 'chai';
-import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
-import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { SetMathMockContract } from '@utils/contracts';
-import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
-import { getWeb3 } from '@utils/web3Helper';
 
 import { LibraryMockHelper } from '@utils/helpers/libraryMockHelper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const web3 = getWeb3();
 const { expect } = chai;
 
 

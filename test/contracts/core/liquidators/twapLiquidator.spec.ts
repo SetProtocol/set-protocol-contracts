@@ -1065,7 +1065,7 @@ contract('TWAPLiquidator', accounts => {
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-  });
+    });
 
     describe('when the caller is not the owner', async () => {
       beforeEach(async () => {
@@ -1088,6 +1088,29 @@ contract('TWAPLiquidator', accounts => {
       it('should revert', async () => {
         await expectRevertError(subject());
       });
+    });
+  });
+
+  describe('#getLiquidatorData', async () => {
+    let subjectChunkSize: BigNumber;
+    let subjectChunkAuctionPeriod: BigNumber;
+
+    beforeEach(async () => {
+      subjectChunkSize = ether(100);
+      subjectChunkAuctionPeriod = ONE_HOUR_IN_SECONDS;
+    });
+
+    async function subject(): Promise<string> {
+      return liquidator.getLiquidatorData.callAsync(
+        subjectChunkSize,
+        subjectChunkAuctionPeriod,
+      );
+    }
+
+    it('should return the correct result', async () => {
+      const result = await subject();
+      const expected = liquidatorHelper.generateTWAPLiquidatorCalldata(subjectChunkSize, subjectChunkAuctionPeriod);
+      expect(result).to.equal(expected);
     });
   });
 });

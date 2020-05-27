@@ -298,6 +298,24 @@ contract TWAPLiquidator is
         return TWAPAuction.calculateTotalSetsRemaining(twapAuction(_set));
     }
 
+    /**
+     * Converts the chunkSize and chunkAuctionPeriod into liquidator data.
+     *
+     * _chunkSizeValue            Currency value of rebalance volume in each chunk (18 decimal)
+     * _chunkAuctionPeriod        Time between chunk auctions
+     * @return bytes              Bytes encoded liquidator data
+     */
+    function getLiquidatorData(
+        uint256 _chunkSize,
+        uint256 _chunkAuctionPeriod
+    )
+        external
+        view
+        returns(bytes memory)
+    {
+        return abi.encode(_chunkSize, _chunkAuctionPeriod);
+    }
+
     /* ============ Private Functions ============ */
 
     function clearAuctionState(address _set) internal {

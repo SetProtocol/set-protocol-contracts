@@ -1059,12 +1059,12 @@ contract('RebalancingSetCTokenBidder', accounts => {
   });
 
   describe.only('#bidAndWithdrawTWAP', async () => {
-    let setup: RebalanceTestSetup = new RebalanceTestSetup(deployerAccount);
+    const setup: RebalanceTestSetup = new RebalanceTestSetup(deployerAccount);
     let rebalancingSetToken: RebalancingSetTokenV3Contract;
     let rebalancingSetCTokenBidder: RebalancingSetCTokenBidderContract;
     let liquidator: TWAPLiquidatorContract;
 
-    let scenario: any = {
+    const scenario: any = {
       name: 'ETH 20 MA Set Rebalances 100% WETH to 100% USD',
       rebalancingSet: {
         unitShares: new BigNumber(2076796),
@@ -1181,6 +1181,8 @@ contract('RebalancingSetCTokenBidder', accounts => {
         dataDescription,
       );
 
+      await setup.approveComponentsToAddress(rebalancingSetCTokenBidder.address);
+
       const remainingBids = await liquidator.remainingCurrentSets.callAsync(setup.rebalancingSetToken.address);
 
       subjectRebalancingSetToken = rebalancingSetToken.address;
@@ -1189,7 +1191,7 @@ contract('RebalancingSetCTokenBidder', accounts => {
       subjectExecutePartialQuantity = false;
       subjectCaller = deployerAccount;
 
-      console.log("This got run");
+      console.log('This got run');
     });
 
     async function subject(): Promise<string> {
@@ -1202,13 +1204,13 @@ contract('RebalancingSetCTokenBidder', accounts => {
       );
     }
 
-    describe("when the last chunk auction timestamp is the same", async () => {
+    describe('when the last chunk auction timestamp is the same', async () => {
       it('should XXX', async () => {
         await subject();
       });
     });
 
-    describe("when the last chunk auction timestamp is different", async () => {
+    describe('when the last chunk auction timestamp is different', async () => {
 
       // Bids and iterates to the next auction
       beforeEach(async () => {

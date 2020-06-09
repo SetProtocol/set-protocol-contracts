@@ -35,6 +35,8 @@ import { LinearAuction } from "./LinearAuction.sol";
  *
  * Contract to calculate minimumBid and auction start bounds for auctions containing only
  * an asset pair.
+ *
+ * CHANGELOG: 5/20/2020 - Edited rangeStart and rangeEnd values to be scaled figures.
  */
 contract TwoAssetPriceBoundedLinearAuction is LinearAuction {
     using SafeMath for uint256;

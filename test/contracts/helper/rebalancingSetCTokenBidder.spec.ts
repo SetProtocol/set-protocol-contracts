@@ -16,10 +16,12 @@ import {
   RebalancingSetCTokenBidderContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
+  RebalancingSetTokenV3Contract,
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
+  TWAPLiquidatorContract,
   VaultContract,
   WhiteListContract,
 } from '@utils/contracts';
@@ -30,6 +32,7 @@ import {
   DEFAULT_AUCTION_PRICE_NUMERATOR,
   DEFAULT_AUCTION_PRICE_DIVISOR,
   DEFAULT_REBALANCING_NATURAL_UNIT,
+  ONE_HOUR_IN_SECONDS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO,
 } from '@utils/constants';
@@ -41,7 +44,11 @@ import { BidPlacedCToken } from '@utils/contract_logs/rebalancingSetCTokenBidder
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { CompoundHelper } from '@utils/helpers/compoundHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
-import { RebalancingHelper } from '@utils/helpers/rebalancingHelper';
+import { OracleHelper } from 'set-protocol-oracles';
+import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
+import { RebalancingSetV3Helper } from '@utils/helpers/rebalancingSetV3Helper';
+import { RebalanceTestSetup } from '@utils/helpers/rebalanceTestSetup';
+import { ValuationHelper } from '@utils/helpers/valuationHelper';
 import { RebalancingSetBidderHelper } from '@utils/helpers/rebalancingSetBidderHelper';
 
 BigNumberSetup.configure();
@@ -55,6 +62,7 @@ contract('RebalancingSetCTokenBidder', accounts => {
   const [
     deployerAccount,
     managerAccount,
+    feeRecipient,
   ] = accounts;
 
   let coreMock: CoreMockContract;
@@ -69,13 +77,16 @@ contract('RebalancingSetCTokenBidder', accounts => {
   const coreHelper = new CoreHelper(deployerAccount, deployerAccount);
   const compoundHelper = new CompoundHelper(deployerAccount);
   const erc20Helper = new ERC20Helper(deployerAccount);
-  const rebalancingHelper = new RebalancingHelper(
+  const rebalancingHelper = new RebalancingSetV3Helper(
     deployerAccount,
     coreHelper,
     erc20Helper,
     blockchain
   );
   const rebalancingSetBidderHelper = new RebalancingSetBidderHelper(deployerAccount);
+  const oracleHelper = new OracleHelper(deployerAccount);
+  const valuationHelper = new ValuationHelper(deployerAccount, coreHelper, erc20Helper, oracleHelper);
+  const liquidatorHelper = new LiquidatorHelper(deployerAccount, erc20Helper, valuationHelper);
 
   before(async () => {
     ABIDecoder.addABI(CoreMockContract.getAbi());
@@ -1045,6 +1056,191 @@ contract('RebalancingSetCTokenBidder', accounts => {
         expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
       });
     });
+  });
+
+  describe.only('#bidAndWithdrawTWAP', async () => {
+    let setup: RebalanceTestSetup = new RebalanceTestSetup(deployerAccount);
+    let rebalancingSetToken: RebalancingSetTokenV3Contract;
+    let rebalancingSetCTokenBidder: RebalancingSetCTokenBidderContract;
+    let liquidator: TWAPLiquidatorContract;
+
+    let scenario: any = {
+      name: 'ETH 20 MA Set Rebalances 100% WETH to 100% USD',
+      rebalancingSet: {
+        unitShares: new BigNumber(2076796),
+        naturalUnit: new BigNumber(1000000),
+        supply: new BigNumber('20556237207015075000000'),
+      },
+      currentSet: {
+        components: ['component1'], // ETH
+        units: [new BigNumber(1000000)],
+        naturalUnit: new BigNumber(1000000),
+      },
+      nextSet: {
+        components: ['component2'], // USDC
+        units: [new BigNumber(307)],
+        naturalUnit: new BigNumber(1000000000000),
+      },
+      components: {
+        component1Price: ether(188),
+        component2Price: ether(1),
+        component1Decimals: 18,
+        component2Decimals: 6,
+      },
+      auction: {
+        chunkSize: ether(2000000),
+        chunkAuctionPeriod: new BigNumber(3600), // 1 hour
+      },
+    };
+
+    const name: string = 'liquidator';
+    const auctionPeriod: BigNumber = ONE_HOUR_IN_SECONDS.mul(4);
+    const rangeStart: BigNumber = ether(.01);
+    const rangeEnd: BigNumber = ether(.21);
+
+    let subjectRebalancingSetToken: Address;
+    let subjectQuantity: BigNumber;
+    let subjectLastChunkTimestamp: BigNumber;
+    let subjectExecutePartialQuantity: boolean;
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      await setup.initializeCore();
+      await setup.initializeComponents(scenario.components);
+      await setup.initializeBaseSets({
+        set1Components: _.map(scenario.currentSet.components, component => setup[component].address),
+        set2Components: _.map(scenario.nextSet.components, component => setup[component].address),
+        set1Units: scenario.currentSet.units,
+        set2Units: scenario.nextSet.units,
+        set1NaturalUnit: scenario.currentSet.naturalUnit,
+        set2NaturalUnit: scenario.nextSet.naturalUnit,
+      });
+
+      const assetPairVolumeBounds = [
+        {
+          assetOne: setup.component1.address,
+          assetTwo: setup.component2.address,
+          bounds: {lower: ether(10 ** 4), upper: ether(10 ** 7)},
+        },
+        {
+          assetOne: setup.component2.address,
+          assetTwo: setup.component3.address,
+          bounds: {lower: ZERO, upper: ether(10 ** 6)},
+        },
+      ];
+
+      liquidator = await liquidatorHelper.deployTWAPLiquidatorAsync(
+        setup.core.address,
+        setup.oracleWhiteList.address,
+        auctionPeriod,
+        rangeStart,
+        rangeEnd,
+        assetPairVolumeBounds,
+        name,
+      );
+      await coreHelper.addAddressToWhiteList(liquidator.address, setup.liquidatorWhitelist);
+
+      const failPeriod = ONE_DAY_IN_SECONDS;
+      const { timestamp: lastRebalanceTimestamp } = await web3.eth.getBlock('latest');
+      rebalancingSetToken = await rebalancingHelper.createDefaultRebalancingSetTokenV3Async(
+        setup.core,
+        setup.rebalancingFactory.address,
+        managerAccount,
+        liquidator.address,
+        feeRecipient,
+        setup.fixedFeeCalculator.address,
+        setup.set1.address,
+        failPeriod,
+        lastRebalanceTimestamp,
+        ZERO, // entry fee
+        ZERO, // rebalance fee
+        scenario.rebalancingSet.unitShares
+      );
+
+      await setup.setRebalancingSet(rebalancingSetToken);
+
+      await setup.mintRebalancingSets(scenario.rebalancingSet.supply);
+
+      const { chunkSize, chunkAuctionPeriod } = scenario.auction;
+      const liquidatorData = liquidatorHelper.generateTWAPLiquidatorCalldata(chunkSize, chunkAuctionPeriod);
+      await rebalancingHelper.transitionToRebalanceV2Async(
+        setup.core,
+        setup.rebalancingComponentWhiteList,
+        setup.rebalancingSetToken,
+        setup.set2,
+        managerAccount,
+        liquidatorData,
+      );
+
+      const dataDescription = 'TWAP CToken Bidder Contract';
+      rebalancingSetCTokenBidder = await rebalancingSetBidderHelper.deployRebalancingSetCTokenBidderAsync(
+        setup.rebalanceAuctionModule.address,
+        setup.transferProxy.address,
+        [],
+        [],
+        dataDescription,
+      );
+
+      const remainingBids = await liquidator.remainingCurrentSets.callAsync(setup.rebalancingSetToken.address);
+
+      subjectRebalancingSetToken = rebalancingSetToken.address;
+      subjectQuantity = remainingBids;
+      subjectLastChunkTimestamp = ZERO; // CHANGE ME FOR NON-FIRST AUCTIONS
+      subjectExecutePartialQuantity = false;
+      subjectCaller = deployerAccount;
+
+      console.log("This got run");
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingSetCTokenBidder.bidAndWithdrawTWAP.sendTransactionAsync(
+        subjectRebalancingSetToken,
+        subjectQuantity,
+        subjectLastChunkTimestamp,
+        subjectExecutePartialQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS }
+      );
+    }
+
+    describe("when the last chunk auction timestamp is the same", async () => {
+      it('should XXX', async () => {
+        await subject();
+      });
+    });
+
+    describe("when the last chunk auction timestamp is different", async () => {
+
+      // Bids and iterates to the next auction
+      beforeEach(async () => {
+        const timeToFV = ONE_HOUR_IN_SECONDS.div(6);
+        await blockchain.increaseTimeAsync(timeToFV);
+        await blockchain.mineBlockAsync();
+
+        const deployerComponent1 = await setup.component1.balanceOf.callAsync(deployerAccount);
+        const deployerComponent2 = await setup.component2.balanceOf.callAsync(deployerAccount);
+
+        // Bid the entire quantity
+        const remainingBids = await liquidator.remainingCurrentSets.callAsync(setup.rebalancingSetToken.address);
+        await rebalancingHelper.bidAndWithdrawAsync(
+          setup.rebalanceAuctionModule,
+          setup.rebalancingSetToken.address,
+          remainingBids,
+        );
+
+        await blockchain.increaseTimeAsync(scenario.auction.chunkAuctionPeriod);
+
+        await liquidator.iterateChunkAuction.sendTransactionAsync(
+          setup.rebalancingSetToken.address,
+          { from: deployerAccount, gas: DEFAULT_GAS }
+        );
+      });
+
+      it('should XXX', async () => {
+        await subject();
+      });
+
+    });
+
   });
 
   describe('#getAddressAndBidPriceArray', async () => {

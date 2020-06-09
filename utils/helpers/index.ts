@@ -5,6 +5,7 @@ export { FeeCalculatorHelper } from './feeCalculatorHelper';
 export { LibraryMockHelper } from './libraryMockHelper';
 export { LiquidatorHelper } from './liquidatorHelper';
 export { RebalancingHelper } from './rebalancingHelper';
+export { RebalancingSetBidderHelper } from './rebalancingSetBidderHelper';
 export { RebalancingSetV2Helper } from './rebalancingSetV2Helper';
 export { RebalancingSetV3Helper } from './rebalancingSetV3Helper';
 export { RebalanceTestSetup } from './rebalanceTestSetup';

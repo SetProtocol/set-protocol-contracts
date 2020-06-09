@@ -39,10 +39,9 @@ import { Rebalance } from "../core/lib/Rebalance.sol";
  * A helper contract that mints a cToken from its underlying or redeems a cToken into 
  * its underlying used for bidding in the RebalanceAuctionModule.
  * 
- * CHANGELOG:
+ * CHANGELOG 6/8/2020:
  * - Remove reentrant modifier on bidAndWithdraw. This modifier is already used in RebalanceAuctionModule
  * - Add bidAndWithdrawTWAP function to check that bids can only succeed for the current auction chunk
- * - 
  */
 contract RebalancingSetCTokenBidder is
     ReentrancyGuard
@@ -179,6 +178,13 @@ contract RebalancingSetCTokenBidder is
      * a target cToken involved. The tokens are returned to the user. This function is only compatible with
      * Rebalancing Set Tokens that use TWAP liquidators
      *
+     * During a TWAP chunk auction, there is an adverse scenario where a bidder submits a chunk auction bid
+     * with a low gas price and iterateChunkAuction is called before that transaction is mined. When the bidder’s
+     * transaction gets mined, it may execute at an unintended price. To combat this, he BidAndWithdrawTWAP
+     * function checks that a new chunk auction has not been initiated from the point of bidding. 
+     * The intended use case is that the bidder would retrieve the Rebalancing SetToken’s lastChunkAuctionEnd
+     * variable off-chain and submit it as part of the bid.
+     *
      * @param  _rebalancingSetToken    Instance of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance
      * @param  _lastChunkTimestamp     Timestamp of end of previous chunk auction used to identify which
@@ -197,7 +203,7 @@ contract RebalancingSetCTokenBidder is
     {
         address liquidatorAddress = address(_rebalancingSetToken.liquidator());
         address rebalancingSetTokenAddress = address(_rebalancingSetToken);
-        
+
         uint256 lastChunkAuctionEnd = ITWAPAuctionGetters(liquidatorAddress).getLastChunkAuctionEnd(rebalancingSetTokenAddress);
 
         require(

@@ -41,6 +41,10 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 import { BidPlacedCToken } from '@utils/contract_logs/rebalancingSetCTokenBidder';
 
+import {
+  getLinearAuction,
+  LinearAuction
+} from '@utils/auction';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { CompoundHelper } from '@utils/helpers/compoundHelper';
 import { ERC20Helper } from '@utils/helpers/erc20Helper';
@@ -1205,8 +1209,50 @@ contract('RebalancingSetCTokenBidder', accounts => {
     }
 
     describe('when the last chunk auction timestamp is the same', async () => {
-      it('should XXX', async () => {
+      let linearAuction: LinearAuction;
+      let currentPrice: BigNumber;
+
+      beforeEach(async () => {
+        const auction = await liquidator.auctions.callAsync(subjectRebalancingSetToken);
+        const chunkAuction = auction[0];
+
+        linearAuction = getLinearAuction(chunkAuction);
+        const { timestamp } = await web3.eth.getBlock('latest');
+
+        currentPrice = await liquidatorHelper.calculateCurrentPrice(
+          linearAuction,
+          new BigNumber(timestamp),
+          auctionPeriod,
+        );
+      });
+
+      it("transfers the correct amount of tokens to the bidder's wallet", async () => {
+
+        const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+        const tokenInstances = await erc20Helper.retrieveTokenInstancesAsync(combinedTokenArray);
+
+        const oldReceiverBalances = await erc20Helper.getTokenBalances(
+          tokenInstances,
+          subjectCaller
+        );
+
+        const expectedTokenFlow = liquidatorHelper.constructTokenFlow(
+          linearAuction,
+          subjectQuantity,
+          currentPrice,
+        );
+
         await subject();
+
+        const newReceiverBalances = await erc20Helper.getTokenBalances(
+          tokenInstances,
+          subjectCaller
+        );
+        const expectedReceiverBalances = _.map(oldReceiverBalances, (balance, index) =>
+          balance.add(expectedTokenFlow['outflow'][index]).sub(expectedTokenFlow['inflow'][index])
+        );
+
+        expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
       });
     });
 
@@ -1218,8 +1264,8 @@ contract('RebalancingSetCTokenBidder', accounts => {
         await blockchain.increaseTimeAsync(timeToFV);
         await blockchain.mineBlockAsync();
 
-        const deployerComponent1 = await setup.component1.balanceOf.callAsync(deployerAccount);
-        const deployerComponent2 = await setup.component2.balanceOf.callAsync(deployerAccount);
+        // const deployerComponent1 = await setup.component1.balanceOf.callAsync(deployerAccount);
+        // const deployerComponent2 = await setup.component2.balanceOf.callAsync(deployerAccount);
 
         // Bid the entire quantity
         const remainingBids = await liquidator.remainingCurrentSets.callAsync(setup.rebalancingSetToken.address);
@@ -1237,12 +1283,10 @@ contract('RebalancingSetCTokenBidder', accounts => {
         );
       });
 
-      it('should XXX', async () => {
-        await subject();
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
-
     });
-
   });
 
   describe('#getAddressAndBidPriceArray', async () => {

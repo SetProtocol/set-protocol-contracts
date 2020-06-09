@@ -23,6 +23,7 @@ import {
 import { Blockchain } from '../blockchain';
 import { ether } from '../units';
 import { ONE_HOUR_IN_SECONDS } from '../constants';
+import { getWeb3 } from '../web3Helper';
 
 import { CoreHelper } from './coreHelper';
 import { ERC20Helper } from './erc20Helper';
@@ -31,6 +32,7 @@ import { FeeCalculatorHelper } from './feeCalculatorHelper';
 import { LiquidatorHelper } from './liquidatorHelper';
 import { ValuationHelper } from './valuationHelper';
 
+const web3 = getWeb3();
 const blockchain = new Blockchain(web3);
 
 export interface BaseSetConfig {

@@ -42,8 +42,7 @@ import { getWeb3 } from '@utils/web3Helper';
 import { BidPlacedCToken } from '@utils/contract_logs/rebalancingSetCTokenBidder';
 
 import {
-  getLinearAuction,
-  LinearAuction
+  getLinearAuction
 } from '@utils/auction';
 import { CoreHelper } from '@utils/helpers/coreHelper';
 import { CompoundHelper } from '@utils/helpers/compoundHelper';
@@ -1062,7 +1061,7 @@ contract('RebalancingSetCTokenBidder', accounts => {
     });
   });
 
-  describe.only('#bidAndWithdrawTWAP', async () => {
+  describe('#bidAndWithdrawTWAP', async () => {
     const setup: RebalanceTestSetup = new RebalanceTestSetup(deployerAccount);
     let rebalancingSetToken: RebalancingSetTokenV3Contract;
     let rebalancingSetCTokenBidder: RebalancingSetCTokenBidderContract;
@@ -1191,11 +1190,9 @@ contract('RebalancingSetCTokenBidder', accounts => {
 
       subjectRebalancingSetToken = rebalancingSetToken.address;
       subjectQuantity = remainingBids;
-      subjectLastChunkTimestamp = ZERO; // CHANGE ME FOR NON-FIRST AUCTIONS
+      subjectLastChunkTimestamp = ZERO;
       subjectExecutePartialQuantity = false;
       subjectCaller = deployerAccount;
-
-      console.log('This got run');
     });
 
     async function subject(): Promise<string> {
@@ -1208,23 +1205,7 @@ contract('RebalancingSetCTokenBidder', accounts => {
       );
     }
 
-    describe('when the last chunk auction timestamp is the same', async () => {
-      let linearAuction: LinearAuction;
-      let currentPrice: BigNumber;
-
-      beforeEach(async () => {
-        const auction = await liquidator.auctions.callAsync(subjectRebalancingSetToken);
-        const chunkAuction = auction[0];
-
-        linearAuction = getLinearAuction(chunkAuction);
-        const { timestamp } = await web3.eth.getBlock('latest');
-
-        currentPrice = await liquidatorHelper.calculateCurrentPrice(
-          linearAuction,
-          new BigNumber(timestamp),
-          auctionPeriod,
-        );
-      });
+    describe('when auction is in first chunk and last chunk timestamp is the same', async () => {
 
       it("transfers the correct amount of tokens to the bidder's wallet", async () => {
 
@@ -1236,13 +1217,24 @@ contract('RebalancingSetCTokenBidder', accounts => {
           subjectCaller
         );
 
+        await subject();
+
+        const auction = await liquidator.auctions.callAsync(subjectRebalancingSetToken);
+        const chunkAuction = auction[0];
+
+        const linearAuction = getLinearAuction(chunkAuction);
+        const { timestamp } = await web3.eth.getBlock('latest');
+
+        const currentPrice = await liquidatorHelper.calculateCurrentPrice(
+          linearAuction,
+          new BigNumber(timestamp),
+          auctionPeriod,
+        );
         const expectedTokenFlow = liquidatorHelper.constructTokenFlow(
           linearAuction,
           subjectQuantity,
           currentPrice,
         );
-
-        await subject();
 
         const newReceiverBalances = await erc20Helper.getTokenBalances(
           tokenInstances,
@@ -1256,16 +1248,13 @@ contract('RebalancingSetCTokenBidder', accounts => {
       });
     });
 
-    describe('when the last chunk auction timestamp is different', async () => {
+    describe('when auction is iterated to the next chunk', async () => {
 
       // Bids and iterates to the next auction
       beforeEach(async () => {
         const timeToFV = ONE_HOUR_IN_SECONDS.div(6);
         await blockchain.increaseTimeAsync(timeToFV);
         await blockchain.mineBlockAsync();
-
-        // const deployerComponent1 = await setup.component1.balanceOf.callAsync(deployerAccount);
-        // const deployerComponent2 = await setup.component2.balanceOf.callAsync(deployerAccount);
 
         // Bid the entire quantity
         const remainingBids = await liquidator.remainingCurrentSets.callAsync(setup.rebalancingSetToken.address);
@@ -1283,8 +1272,58 @@ contract('RebalancingSetCTokenBidder', accounts => {
         );
       });
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
+      describe('when timestamp is the same', async () => {
+        beforeEach(async () => {
+          const timestamp = await liquidator.getLastChunkAuctionEnd.callAsync(rebalancingSetToken.address);
+          subjectLastChunkTimestamp = timestamp;
+        });
+
+        it("transfers the correct amount of tokens to the bidder's wallet", async () => {
+
+          const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+          const tokenInstances = await erc20Helper.retrieveTokenInstancesAsync(combinedTokenArray);
+
+          const oldReceiverBalances = await erc20Helper.getTokenBalances(
+            tokenInstances,
+            subjectCaller
+          );
+
+          await subject();
+
+          const auction = await liquidator.auctions.callAsync(subjectRebalancingSetToken);
+          const chunkAuction = auction[0];
+
+          const linearAuction = getLinearAuction(chunkAuction);
+          const { timestamp } = await web3.eth.getBlock('latest');
+
+          const currentPrice = await liquidatorHelper.calculateCurrentPrice(
+            linearAuction,
+            new BigNumber(timestamp),
+            auctionPeriod,
+          );
+          const expectedTokenFlow = liquidatorHelper.constructTokenFlow(
+            linearAuction,
+            subjectQuantity,
+            currentPrice,
+          );
+
+          const newReceiverBalances = await erc20Helper.getTokenBalances(
+            tokenInstances,
+            subjectCaller
+          );
+          const expectedReceiverBalances = _.map(oldReceiverBalances, (balance, index) =>
+            balance.add(expectedTokenFlow['outflow'][index]).sub(expectedTokenFlow['inflow'][index])
+          );
+
+          expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
+        });
+
+      });
+
+      describe('when timestamp is different', async () => {
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
     });
   });

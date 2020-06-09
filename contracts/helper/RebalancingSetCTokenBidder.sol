@@ -208,7 +208,7 @@ contract RebalancingSetCTokenBidder is
 
         require(
             lastChunkAuctionEnd == _lastChunkTimestamp,
-            "RebalancingSetCTokenBidder.bidAndWithdrawTWAP: Bid must be for current chunk"
+            "RebalancingSetCTokenBidder.bidAndWithdrawTWAP: Bid must be for intended chunk"
         );
 
         bidAndWithdraw(

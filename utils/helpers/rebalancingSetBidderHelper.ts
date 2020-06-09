@@ -5,11 +5,11 @@ import {
   RebalancingSetEthBidderContract,
   RebalancingSetCTokenBidderContract,
 } from '../contracts';
-import { getContractInstance, linkLibrariesToDeploy, txnFrom } from '../web3Helper';
+import { getContractInstance, importArtifactsFromSource, linkLibrariesToDeploy, txnFrom } from '../web3Helper';
 
-const ERC20Wrapper = artifacts.require('ERC20Wrapper');
-const RebalancingSetEthBidder = artifacts.require('RebalancingSetEthBidder');
-const RebalancingSetCTokenBidder = artifacts.require('RebalancingSetCTokenBidder');
+const ERC20Wrapper = importArtifactsFromSource('ERC20Wrapper');
+const RebalancingSetEthBidder = importArtifactsFromSource('RebalancingSetEthBidder');
+const RebalancingSetCTokenBidder = importArtifactsFromSource('RebalancingSetCTokenBidder');
 
 
 export class RebalancingSetBidderHelper {

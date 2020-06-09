@@ -20,17 +20,19 @@ import {
   WhiteListContract,
   FixedFeeCalculatorContract,
 } from '../contracts';
-import { Blockchain } from '@utils/blockchain';
+import { Blockchain } from '../blockchain';
 import { ether } from '../units';
-import { ONE_HOUR_IN_SECONDS } from '@utils/constants';
+import { ONE_HOUR_IN_SECONDS } from '../constants';
+import { getWeb3 } from '../web3Helper';
 
 import { CoreHelper } from './coreHelper';
 import { ERC20Helper } from './erc20Helper';
 import { OracleHelper } from 'set-protocol-oracles';
 import { FeeCalculatorHelper } from './feeCalculatorHelper';
-import { LiquidatorHelper } from '@utils/helpers/liquidatorHelper';
-import { ValuationHelper } from '@utils/helpers/valuationHelper';
+import { LiquidatorHelper } from './liquidatorHelper';
+import { ValuationHelper } from './valuationHelper';
 
+const web3 = getWeb3();
 const blockchain = new Blockchain(web3);
 
 export interface BaseSetConfig {

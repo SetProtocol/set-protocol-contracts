@@ -305,6 +305,13 @@ export class RebalanceTestSetup {
       await this.core.issue.sendTransactionAsync(this.rebalancingSetToken.address, rebalancingSetQuantity);
   }
 
+  public async approveComponentsToAddress(toApprove: Address): Promise<void> {
+    await this._erc20Helper.approveTransfersAsync(
+      [this.component1, this.component2, this.component3],
+      toApprove
+    );
+  }
+
   public async jumpTimeAndUpdateOracles(
     timeIncrease: BigNumber,
     newPrices: PriceUpdate,

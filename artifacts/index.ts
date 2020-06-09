@@ -257,8 +257,10 @@ export {
   LibraryMockHelper,
   LiquidatorHelper,
   RebalancingHelper,
+  RebalancingSetBidderHelper,
   RebalancingSetV2Helper,
   RebalancingSetV3Helper,
+  RebalanceTestSetup,
   ValuationHelper
 } from '../utils/helpers';
 

@@ -226,7 +226,7 @@ export class RebalanceTestSetup {
   public async initializeCore(
     from: Address = this._contractOwnerAddress
   ): Promise<void> {
-        this.transferProxy = await this._coreHelper.deployTransferProxyAsync();
+    this.transferProxy = await this._coreHelper.deployTransferProxyAsync();
     this.vault = await this._coreHelper.deployVaultAsync();
     this.core = await this._coreHelper.deployCoreMockAsync(this.transferProxy, this.vault);
 
@@ -271,6 +271,20 @@ export class RebalanceTestSetup {
       name,
     );
     await this._coreHelper.addAddressToWhiteList(this.linearAuctionLiquidator.address, this.liquidatorWhitelist);
+    console.log(
+      'Core: ' + this.core.address,
+      'TransferProxy: ' + this.transferProxy.address,
+      'Vault: ' + this.vault.address,
+      'SetTokenFactory: ' + this.setTokenFactory.address,
+      'RebalanceAuctionModule: ' + this.rebalanceAuctionModule.address,
+      'RebalancingComponentWhiteList: ' + this.rebalancingComponentWhiteList.address,
+      'OracleWhiteList: ' + this.oracleWhiteList.address,
+      'LiquidatorWhiteList: ' + this.liquidatorWhitelist.address,
+      'FeeCalculatorWhiteList: ' + this.feeCalculatorWhitelist.address,
+      'RebalancingFactory: ' + this.rebalancingFactory.address,
+      'FixedFeeCalculator: ' + this.fixedFeeCalculator.address,
+      'LinearAuctionLiquidator: ' + this.linearAuctionLiquidator.address
+    );
   }
 
   public setRebalancingSet(

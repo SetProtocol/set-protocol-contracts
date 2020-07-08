@@ -205,6 +205,14 @@ interface IRebalancingSetTokenV3 {
         external;
 
     /*
+     * Set new manager address
+     */
+    function setManager(
+        address _newManager
+    )
+        external;
+
+    /*
      * Set new fee recipient address.
      */
     function setFeeRecipient(

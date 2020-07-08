@@ -159,7 +159,7 @@ contract('RebalancingSetV3 - TWAPLiquidator', accounts => {
     blockchain.revertAsync();
   });
 
-  describe.only('#startRebalance', async () => {
+  describe('#startRebalance', async () => {
     let usdChunkSize: BigNumber;
     let chunkAuctionPeriod: BigNumber;
 

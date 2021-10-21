@@ -23,10 +23,10 @@
 More details about our contract architecture and deployed contracts can also be found in our [wiki](https://docs.setprotocol.com/contracts).
 
 ## Contributing
-We highly encourage participation from the community to help shape the development of Set. If you are interested in developing on top of Set Protocol or have any questions, please ping us on [Telegram](https://t.me/joinchat/Fx8D6wyprLUlM1jMVnaRdg).
+We highly encourage participation from the community to help shape the development of Set. If you are interested in developing on top of Set Protocol or have any questions, please ping us on [Discord](https://discord.gg/ZWY66aR).
 
 ## Legacy
-For legacy users, our audited V1 contracts which can be found [here](https://github.com/SetProtocol/set-protocol-contracts/releases/tag/0.2.5).
+For legacy users, our audited V1 contracts can be found [here](https://github.com/SetProtocol/set-protocol-contracts/releases/tag/0.2.5).
 
 
 

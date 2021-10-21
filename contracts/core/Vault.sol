@@ -126,7 +126,7 @@ contract Vault is
      *
      * @param  _token           The address of the ERC20 token
      * @param  _owner           The address of the token owner
-     * @param  _quantity        The number of tokens to deattribute to owner
+     * @param  _quantity        The number of tokens to distribute to owner
      */
     function decrementTokenOwner(
         address _token,

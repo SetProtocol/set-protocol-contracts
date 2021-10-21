@@ -20,7 +20,7 @@
 ## Contracts
 [Set Protocol](https://setprotocol.com/) is a specification for abstraction of higher order tokens on the ethereum blockchain written in the Solidity programming language. We use [Truffle](https://github.com/trufflesuite/truffle) as a development environment for compiling, testing, and deploying our contracts. See the [whitepaper](https://whitepaper.setprotocol.com) for more details about Set Protocol.
 
-More details about our contract architecture and deployed contracts can also be found in our [wiki](https://docs.setprotocol.com/contracts).
+More details about our contract architecture and deployed contracts can also be found on our [docs](https://docs.tokensets.com/contracts).
 
 ## Contributing
 We highly encourage participation from the community to help shape the development of Set. If you are interested in developing on top of Set Protocol or have any questions, please ping us on [Telegram](https://t.me/joinchat/Fx8D6wyprLUlM1jMVnaRdg).

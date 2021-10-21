@@ -20,7 +20,7 @@
 ## Contracts
 [Set Protocol](https://setprotocol.com/) is a specification for abstraction of higher order tokens on the ethereum blockchain written in the Solidity programming language. We use [Truffle](https://github.com/trufflesuite/truffle) as a development environment for compiling, testing, and deploying our contracts. See the [whitepaper](https://whitepaper.setprotocol.com) for more details about Set Protocol.
 
-More details about our contract architecture and deployed contracts can also be found in our [wiki](https://docs.setprotocol.com/contracts).
+More details about our contract architecture and deployed contracts can also be found in our [docs](https://docs.tokensets.com/contracts).
 
 ## Contributing
 We highly encourage participation from the community to help shape the development of Set. If you are interested in developing on top of Set Protocol or have any questions, please ping us on [Discord](https://discord.gg/ZWY66aR).
@@ -28,21 +28,18 @@ We highly encourage participation from the community to help shape the developme
 ## Legacy
 For legacy users, our audited V1 contracts can be found [here](https://github.com/SetProtocol/set-protocol-contracts/releases/tag/0.2.5).
 
-
-
-
 ## Testing
-0. Docker Set up
+1. Docker set up
 
-    Firstly, you need to install Docker. The easiest way is to follow the Instructions on https://docs.docker.com/install/#supported-platforms
+    Firstly, you need to install Docker. The easiest way is to follow the instructions on https://docs.docker.com/install/#supported-platforms
 
-    You need to pull the docker image that you want to use by using the following command:
+    Pull the docker image that you want to use by running:
 
     ```
     docker pull ethereum/solc:0.5.7
     ```
 
-    If you wish not to set up docker, you can turn off the `docker: true` flag in truffle.js
+    If you don't want to set up docker, you can turn off the `docker: true` flag in truffle.js [here](https://github.com/SetProtocol/set-protocol-contracts/blob/master/truffle.js#L29)
 
 1. Run yarn install
 
@@ -50,13 +47,13 @@ For legacy users, our audited V1 contracts can be found [here](https://github.co
     yarn install
     ```
 
-2. Run an ethereum chain on a separate terminal window
+1. Run an Ethereum chain on a separate terminal window
 
     ```
     yarn chain
     ```
 
-3. Run unit tests
+1. Run unit tests
 
     ```
     yarn test
